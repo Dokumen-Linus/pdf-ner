@@ -1,4 +1,3 @@
-import { useRef } from "react"
 import { createPluginRegistration } from "@embedpdf/core"
 import { EmbedPDF } from "@embedpdf/core/react"
 import { usePdfiumEngine } from "@embedpdf/engines/react"
@@ -11,6 +10,7 @@ import { ThumbnailPluginPackage } from "@embedpdf/plugin-thumbnail/react"
 import { TilingLayer, TilingPluginPackage } from "@embedpdf/plugin-tiling/react"
 import { Viewport, ViewportPluginPackage } from "@embedpdf/plugin-viewport/react"
 import { PinchWrapper, ZoomMode, ZoomPluginPackage } from "@embedpdf/plugin-zoom/react"
+import { useRef } from "react"
 import PluginStoreSync from "../plugin-store/components/plugin-store-sync"
 import { Spinner } from "../shadcn-ui/spinner"
 import { AnnotationLayer, AnnotationPluginPackage } from "./plugin-annotation-2"
@@ -23,7 +23,7 @@ import { LoaderPluginPackage } from "./plugin-loader-2"
 import { Scroller, ScrollPluginPackage, ScrollStrategy } from "./plugin-scroll-2"
 import { SelectionLayer, SelectionPluginPackage } from "./plugin-selection-2"
 import RotateWrapper from "./rotate-wrapper"
-import Toolbar from "./toolbar"
+import Toolbar from "./toolbar-dev"
 
 const logger = new NoopLogger() // ConsoleLogger()
 
