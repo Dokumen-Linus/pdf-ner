@@ -149,3 +149,18 @@ powershell -c "irm bun.sh/install.ps1 | iex"
 ### Other components
 
 - Check [billout](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components) for a list of some praised React packages
+
+## Database
+
+I have created a PostgreSQL db by executing the following commands:
+
+```cmd
+scoop install postgres
+initdb -D .\pgdata
+pg_ctrl -D .\pgdata -l logfile start
+createdb dokumenlocal
+$env:DATABASE_URL = "postgres://localhost/dokumenlocal?sslmode=disable"
+dbmate up
+```
+
+now i want to define the tables for typescript and export the confidured drizzle db instance. how should i implement this in my .\db\drizzle dir?
