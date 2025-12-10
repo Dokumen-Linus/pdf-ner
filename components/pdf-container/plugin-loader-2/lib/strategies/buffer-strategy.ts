@@ -1,11 +1,11 @@
-import { PdfDocumentObject } from '@embedpdf/models';
-import { PDFBufferLoadingOptions, PDFLoadingStrategy } from './loading-strategy';
+import { PdfDocumentObject } from "@embedpdf/models"
+import { PDFBufferLoadingOptions, PDFLoadingStrategy } from "./loading-strategy"
 
 export class BufferStrategy implements PDFLoadingStrategy {
   async load(loadingOptions: PDFBufferLoadingOptions): Promise<PdfDocumentObject> {
-    const { pdfFile, options, engine } = loadingOptions;
+    const { pdfFile, options, engine } = loadingOptions
 
-    const task = engine.openDocumentBuffer(pdfFile, options);
+    const task = engine.openDocumentBuffer(pdfFile, options)
 
     return new Promise<PdfDocumentObject>((resolve, reject) => {
       task.wait(
@@ -13,13 +13,13 @@ export class BufferStrategy implements PDFLoadingStrategy {
         (result) => resolve(result),
         // Error callback
         (error) => {
-          if (error.type === 'abort') {
-            reject(new Error(`PDF loading aborted: ${error.reason}`));
+          if (error.type === "abort") {
+            reject(new Error(`PDF loading aborted: ${error.reason}`))
           } else {
-            reject(new Error(`PDF loading failed: ${error.reason}`));
+            reject(new Error(`PDF loading failed: ${error.reason}`))
           }
         },
-      );
-    });
+      )
+    })
   }
 }

@@ -1,2 +1,2 @@
-export * from './global-pointer-provider';
-export * from './page-pointer-provider';
+export * from "./global-pointer-provider"
+export * from "./page-pointer-provider"
