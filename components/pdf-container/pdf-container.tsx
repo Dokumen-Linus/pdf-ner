@@ -1,3 +1,4 @@
+import { useRef } from "react"
 import { createPluginRegistration } from "@embedpdf/core"
 import { EmbedPDF } from "@embedpdf/core/react"
 import { usePdfiumEngine } from "@embedpdf/engines/react"
@@ -10,7 +11,6 @@ import { ThumbnailPluginPackage } from "@embedpdf/plugin-thumbnail/react"
 import { TilingLayer, TilingPluginPackage } from "@embedpdf/plugin-tiling/react"
 import { Viewport, ViewportPluginPackage } from "@embedpdf/plugin-viewport/react"
 import { PinchWrapper, ZoomMode, ZoomPluginPackage } from "@embedpdf/plugin-zoom/react"
-import { useRef } from "react"
 import PluginStoreSync from "../plugin-store/components/plugin-store-sync"
 import { Spinner } from "../shadcn-ui/spinner"
 import { AnnotationLayer, AnnotationPluginPackage } from "./plugin-annotation-2"
@@ -97,7 +97,9 @@ export default function PDFContainer({
             // register Annotation after InteractionManager, Seletion
             createPluginRegistration(AnnotationPluginPackage, { author }),
             // register Export after Annotation
-            createPluginRegistration(ExportPluginPackage, { defaultFileName: exportName }),
+            createPluginRegistration(ExportPluginPackage, {
+              defaultFileName: exportName,
+            }),
             // register Zoom after InteractionManager, Viewport, Scroll
             createPluginRegistration(ZoomPluginPackage, {
               defaultZoomLevel: ZoomMode.Automatic,
