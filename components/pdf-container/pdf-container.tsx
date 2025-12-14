@@ -23,7 +23,7 @@ import { LoaderPluginPackage } from "./plugin-loader-2"
 import { Scroller, ScrollPluginPackage, ScrollStrategy } from "./plugin-scroll-2"
 import { SelectionLayer, SelectionPluginPackage } from "./plugin-selection-2"
 import RotateWrapper from "./rotate-wrapper"
-import Toolbar from "./toolbar-dev"
+import Toolbar from "./toolbar"
 
 const logger = new NoopLogger() // ConsoleLogger()
 

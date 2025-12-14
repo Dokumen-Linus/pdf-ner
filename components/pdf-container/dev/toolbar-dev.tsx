@@ -14,8 +14,8 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react"
-import usePluginStore from "../plugin-store/hooks/use-plugin-store"
-import type { PdfTextMarkupAnnotationObject, Subtype } from "./plugin-annotation-2"
+import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
+import type { PdfTextMarkupAnnotationObject, Subtype } from "../plugin-annotation-2"
 
 const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
   const { provides: exportCapability } = useExportCapability()
