@@ -26,6 +26,7 @@
 - [mui/material-ui](https://github.com/mui/material-ui)
 - [headlessui/react/menu](https://headlessui.com/react/menu)
 - [square-ui](https://github.com/ln-dev7/square-ui)
+- [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
 - [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
 
 ### Icons
@@ -56,7 +57,7 @@
 - [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - [AG Grid special table](https://www.ag-grid.com/react-data-grid/getting-started/)
 
-### Boilerplates
+### Next.js Boilerplates
 
 - [odoo/odoo](https://github.com/odoo/odoo)
 - [vercel/next-forge](https://github.com/vercel/next-forge)
@@ -65,7 +66,11 @@
 - [ln-dev7/square-ui](https://github.com/ln-dev7/square-ui)
 - [arhamkhnz/next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard)
 - [cruip/open-react-template](https://github.com/cruip/open-react-template)
-- *Tanstack* [jackytea/tanstack-starter](https://github.com/jackytea/tanstack-starter)
+
+### Tanstack Start Boilerplates
+
+- [jackytea/tanstack-starter](https://github.com/jackytea/tanstack-starter)
+- [TanStack Router Examples](https://github.com/TanStack/router/tree/main/examples/react)
 
 ### Auth
 
@@ -89,6 +94,10 @@
 - LLM checking trad OCR [Dicklesworthstone/llm_aided_ocr](https://github.com/Dicklesworthstone/llm_aided_ocr)
 - **[deepseek-ai/DeepSeek-OCR](https://github.com/deepseek-ai/DeepSeek-OCR)**
 - **[allenai/olmocr](https://github.com/allenai/olmocr)**
+
+### Convert to PDF
+
+- [cyanfish/naps2](https://github.com/cyanfish/naps2)
 
 ### LLMs for NER
 
