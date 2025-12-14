@@ -1,20 +1,8 @@
 # PDF Entity Labeling
 
-## Idea
-
-### Core functionality
-
-In-browser PDF labeling to enable NER (named entity recognition) model training. The page will display a PDF on the left and a two-column table of entities on the right. The list of entity types are defined by the user on a previous page (so for now, assume the entity type list is hardcoded). The values for the entities are dynamically filled based on what the user highlights. The user can choose the color and whether highlight/underline/squiggly for each entity type in the table, as well as delete annotations from the table and use search capability by typing in the table boxes.
-
-### Enhancements
-
-- Page 1: the user can decide whether each entity type is required (each PDF must have that entity), unique (each PDF has at most one of that entity), and single-word (whether the entity value can have spaces).
-- highlighting to only select full words
-- a search button and input field using plugin-search
-
 ## Quickstart
 
-1. Install [Node.js v22](https://nodejs.org/en/download/), [Git](https://git-scm.com/downloads), and [VS Code](https://code.visualstudio.com/download)
+1. Install [Node.js v22](https://nodejs.org/en/download/), [Git](https://git-scm.com/downloads), and [VS Code](https://code.visualstudio.com/download) or [Google Antigravity](https://antigravity.google/download)
 2. Clone repo and install dependencies:
 
 ```cmd
@@ -25,7 +13,7 @@ git clone https://github.com/optimalcharb/pdf-entity-labeling.git
 npm install
 ```
 
-3. Install the recommended VS Code Extensions
+3. Install the recommended Extensions
 4. To setup playwright:
 
 ```cmd
@@ -55,11 +43,12 @@ powershell -c "irm bun.sh/install.ps1 | iex"
 ### Backend for Frontend (BFF)
 
 - Storage: must get PDF from local storage or URL
-- Database and API: avoid creating database tables or API routes, except for plugin-annotation. don't rely heavily on some db or api framework, keep it simple. Try to do everything else with React and in-memory or possibly Zustand. Do not add authentication, authorization, Lambda functions, HTTP, caching, observability, security, etc.
+- ORM: Typescript schemas defined by [Drizzle](https://orm.drizzle.team/docs/overview) to match the SQL db
+- Database: defined in SQL for easy migration to standalone and integration with Python/Java
 
 ### Core Backend
 
-- None
+- Backend framework: REST APIs external to this repo
 
 ### Scripts
 
@@ -121,14 +110,11 @@ powershell -c "irm bun.sh/install.ps1 | iex"
 ### UI Libraries
 
 - Current site uses [shadcn/ui](https://ui.shadcn.com/) stored in components/shadcn-ui and config by components.json
-- Avoid using other UI libraries as the PDF container functionality should be locally coded
 
 ### PDF Rendering
 
-- EmbedPDF: [GitHub](https://github.com/embedpdf/embed-pdf-viewer), [docs for @embedpdf/pdfium](https://www.embedpdf.com/docs/pdfium/introduction) the JS library to wrap the C++ engine, [docs for @embedpdf/core](https://www.embedpdf.com/docs/react/introduction) which I have modified
-- Currently PDFs are rendered by URL only, later I want to fix the BufferStrategy in plugin-loader to load PDFs from local storage
-- Plugins are built in consitent style defined by core (not using standard Redux style) and must have commented sections following plugin-template/
-- Refer to GitHub Issues for ideas
+- EmbedPDF: [GitHub](https://github.com/embedpdf/embed-pdf-viewer), [docs for @embedpdf/pdfium](https://www.embedpdf.com/docs/pdfium/introduction) the JS library to wrap the C++ engine, [docs for @embedpdf/core/react](https://www.embedpdf.com/docs/react/introduction) which I have modified
+- Plugins are built in consitent style defined by core (not using standard Redux style) and must have commented sections and same subfolders and filenames as existing local plugins
 
 ### Forms
 
@@ -138,17 +124,10 @@ powershell -c "irm bun.sh/install.ps1 | iex"
 
 - Try to stick to [Lucide Icons](https://lucide.dev/icons/), icons are not necessary at first since functionality needs to be built before appearance
 
-### Colors
+### Color Pickers
 
-- You can pick TailwindCSS colors on [tailcolors](https://tailcolors.com/)
-
-### In-site tables
-
-- Maybe try [x-spreadsheet](https://github.com/myliang/x-spreadsheet) or other packages on npm
-
-### Other components
-
-- Check [billout](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components) for a list of some praised React packages
+- TailwindCSS: [tailcolors](https://tailcolors.com/)
+- Hex color codes: [HTML Color Codes](https://html-color.codes/)
 
 ## Database
 
@@ -162,5 +141,3 @@ createdb dokumenlocal
 $env:DATABASE_URL = "postgres://localhost/dokumenlocal?sslmode=disable"
 dbmate up
 ```
-
-now i want to define the tables for typescript and export the confidured drizzle db instance. how should i implement this in my .\db\drizzle dir?
