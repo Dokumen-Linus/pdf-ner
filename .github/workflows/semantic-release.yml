@@ -13,10 +13,6 @@ jobs:
       issues: write
       pull-requests: write
 
-    if: startsWith(github.event.head_commit.message, 'feat') ||
-      startsWith(github.event.head_commit.message, 'fix') ||
-      startsWith(github.event.head_commit.message, 'perf')
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
