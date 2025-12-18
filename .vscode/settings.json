@@ -1,15 +1,15 @@
 {
   "[javascript]": {
-    "editor.defaultFormatter": "prettier.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[javascriptreact]": {
-    "editor.defaultFormatter": "prettier.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "prettier.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "prettier.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
@@ -21,8 +21,8 @@
   "editor.insertSpaces": true,
   "files.autoSave": "onFocusChange",
   "javascript.updateImportsOnFileMove.enabled": "always",
-  // "prettier.configPath": ".prettierrc",
-  // "prettier.ignorePath": ".prettierignore",
+  "prettier.configPath": ".prettierrc",
+  "prettier.ignorePath": ".prettierignore",
   "tailwindCSS.experimental.configFile": "app/globals.css",
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.updateImportsOnFileMove.enabled": "always"
