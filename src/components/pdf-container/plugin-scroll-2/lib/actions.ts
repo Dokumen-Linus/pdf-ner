@@ -26,7 +26,7 @@ export interface SetPageChangeStateAction extends Action {
   payload: PageChangeState
 }
 
-// ***ACTION TYPES***
+// ***ACTION UNION***
 export type ScrollAction =
   | UpdateScrollStateAction
   | SetDesiredScrollPositionAction

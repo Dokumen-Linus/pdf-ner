@@ -1,7 +1,7 @@
 import { action } from "@storybook/addon-actions"
 import type { Meta, StoryObj } from "@storybook/react"
 import { addDays } from "date-fns"
-import { Calendar } from "@/src/components/shadcn-ui/calendar"
+import { Calendar } from "@/components/shadcn-ui/calendar"
 
 /**
  * A date field component that allows users to enter and edit date.

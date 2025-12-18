@@ -1,6 +1,6 @@
 import * as React from "react"
 import * as SeparatorPrimitive from "@radix-ui/react-separator"
-import { cn } from "@/src/lib/shadcn-ui/utils"
+import { cn } from "@/lib/shadcn-ui/utils"
 
 function Separator({
   className,

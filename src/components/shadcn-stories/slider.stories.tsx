@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Slider } from "@/src/components/shadcn-ui/slider"
+import { Slider } from "@/components/shadcn-ui/slider"
 
 /**
  * An input where the user selects a value from within a given range.

@@ -8,7 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/src/components/shadcn-ui/sheet"
+} from "@/components/shadcn-ui/sheet"
 
 /**
  * Extends the Dialog component to display content that complements the main

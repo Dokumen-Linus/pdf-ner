@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Switch } from "@/src/components/shadcn-ui/switch"
+import { Switch } from "@/components/shadcn-ui/switch"
 
 /**
  * A control that allows the user to toggle between checked and not checked.

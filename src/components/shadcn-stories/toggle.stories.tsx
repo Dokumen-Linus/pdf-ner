@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { Bold, Italic } from "lucide-react"
-import { Toggle } from "@/src/components/shadcn-ui/toggle"
+import { Toggle } from "@/components/shadcn-ui/toggle"
 
 /**
  * A two-state button that can be either on or off.

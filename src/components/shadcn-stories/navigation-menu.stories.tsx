@@ -7,7 +7,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
-} from "@/src/components/shadcn-ui/navigation-menu"
+} from "@/components/shadcn-ui/navigation-menu"
 
 /**
  * A collection of links for navigating websites.

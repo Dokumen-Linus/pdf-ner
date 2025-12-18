@@ -5,7 +5,7 @@ import {
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
-} from "@/src/components/shadcn-ui/input-otp"
+} from "@/components/shadcn-ui/input-otp"
 
 /**
  * Accessible one-time password component with copy paste functionality.

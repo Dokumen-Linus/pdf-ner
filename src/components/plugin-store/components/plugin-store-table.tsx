@@ -1,5 +1,3 @@
-"use client"
-
 import {
   Table,
   TableBody,
@@ -10,6 +8,7 @@ import {
 } from "../../shadcn-ui/table"
 import usePluginStore from "../hooks/use-plugin-store"
 
+// table to view store values in testing
 export default function PluginStoreTable() {
   const {
     annoCapability,

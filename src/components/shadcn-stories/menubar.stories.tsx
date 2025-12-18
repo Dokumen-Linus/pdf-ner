@@ -15,7 +15,7 @@ import {
   MenubarSubContent,
   MenubarSubTrigger,
   MenubarTrigger,
-} from "@/src/components/shadcn-ui/menubar"
+} from "@/components/shadcn-ui/menubar"
 
 /**
  * A visually persistent menu common in desktop applications that provides

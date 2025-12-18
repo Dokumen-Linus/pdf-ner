@@ -15,7 +15,7 @@ import {
   PdfTaskHelper,
   Task,
 } from "@embedpdf/models"
-import { uuidV4 } from "@/src/lib/misc/uuid"
+import { uuidV4 } from "@/lib/misc/uuid"
 import {
   InteractionManagerCapability,
   InteractionManagerPlugin,

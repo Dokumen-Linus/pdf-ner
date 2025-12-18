@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Separator } from "@/src/components/shadcn-ui/separator"
+import { Separator } from "@/components/shadcn-ui/separator"
 
 /**
  * Visually or semantically separates content.

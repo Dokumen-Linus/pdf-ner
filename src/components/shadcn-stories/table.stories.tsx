@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/src/components/shadcn-ui/table"
+} from "@/components/shadcn-ui/table"
 
 const invoices = [
   {

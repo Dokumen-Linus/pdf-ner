@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { ScrollArea } from "@/src/components/shadcn-ui/scroll-area"
+import { ScrollArea } from "@/components/shadcn-ui/scroll-area"
 
 /**
  * Augments native scroll functionality for custom, cross-browser styling.

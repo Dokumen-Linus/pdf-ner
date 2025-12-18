@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/shadcn-ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar"
 
 /**
  * An image element with a fallback for representing the user.

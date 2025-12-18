@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/src/components/shadcn-ui/alert-dialog"
+} from "@/components/shadcn-ui/alert-dialog"
 
 /**
  * A modal dialog that interrupts the user with important content and expects

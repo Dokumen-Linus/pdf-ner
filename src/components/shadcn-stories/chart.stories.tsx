@@ -14,11 +14,11 @@ import {
   XAxis,
 } from "recharts"
 import {
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
-} from "@/src/components/shadcn-ui/chart"
+} from "@/components/shadcn-ui/chart"
 
 const multiSeriesData = [
   { month: "January", desktop: 186, mobile: 80 },

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Badge } from "@/src/components/shadcn-ui/badge"
+import { Badge } from "@/components/shadcn-ui/badge"
 
 /**
  * Displays a badge or a component that looks like a badge.

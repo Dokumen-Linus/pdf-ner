@@ -8,7 +8,7 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from "@/src/components/shadcn-ui/select"
+} from "@/components/shadcn-ui/select"
 
 /**
  * Displays a list of options for the user to pick from—triggered by a button.

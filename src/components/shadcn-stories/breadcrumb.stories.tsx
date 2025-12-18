@@ -7,7 +7,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/src/components/shadcn-ui/breadcrumb"
+} from "@/components/shadcn-ui/breadcrumb"
 
 /**
  * Displays the path to the current resource using a hierarchy of links.

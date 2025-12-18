@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Progress } from "@/src/components/shadcn-ui/progress"
+import { Progress } from "@/components/shadcn-ui/progress"
 
 /**
  * Displays an indicator showing the completion progress of a task, typically

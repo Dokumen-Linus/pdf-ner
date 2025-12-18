@@ -66,9 +66,7 @@ export function uuidV4(): string {
   const bytes = getRandomBytes(16)
 
   // Per RFC 4122 §4.4: set version (0100) and variant (10xx)
-  // @ts-expect-error bytes[6] may be undefined
   bytes[6] = (bytes[6] & 0x0f) | 0x40 // version 4
-  // @ts-expect-error bytes[8] may be undefined
   bytes[8] = (bytes[8] & 0x3f) | 0x80 // variant 10xx
 
   const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/shadcn-ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn-ui/tabs"
 
 /**
  * A set of layered sections of content—known as tab panels—that are displayed

@@ -1,6 +1,6 @@
 import * as React from "react"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
-import { cn } from "@/src/lib/shadcn-ui/utils"
+import { cn } from "@/lib/shadcn-ui/utils"
 
 function TooltipProvider({
   delayDuration = 0,
