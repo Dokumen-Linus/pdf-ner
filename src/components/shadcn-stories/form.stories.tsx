@@ -11,7 +11,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/src/components/shadcn-ui/form"
+} from "@/components/shadcn-ui/form"
 
 /**
  * Building forms with React Hook Form and Zod.

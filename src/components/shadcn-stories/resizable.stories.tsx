@@ -3,7 +3,7 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/src/components/shadcn-ui/resizable"
+} from "@/components/shadcn-ui/resizable"
 
 /**
  * Accessible resizable panel groups and layouts with keyboard support.

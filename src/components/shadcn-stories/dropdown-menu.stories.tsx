@@ -16,7 +16,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/src/components/shadcn-ui/dropdown-menu"
+} from "@/components/shadcn-ui/dropdown-menu"
 
 /**
  * Displays a menu to the user — such as a set of actions or functions —

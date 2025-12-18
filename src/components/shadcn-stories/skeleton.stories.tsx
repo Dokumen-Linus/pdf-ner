@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Skeleton } from "@/src/components/shadcn-ui/skeleton"
+import { Skeleton } from "@/components/shadcn-ui/skeleton"
 
 /**
  * Use to show a placeholder while content is loading.

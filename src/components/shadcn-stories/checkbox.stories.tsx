@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Checkbox } from "@/src/components/shadcn-ui/checkbox"
+import { Checkbox } from "@/components/shadcn-ui/checkbox"
 
 /**
  * A control that allows the user to toggle between checked and not checked.

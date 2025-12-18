@@ -1,13 +1,13 @@
 import { useEffect } from "react"
 import { Highlighter, LineSquiggle, Strikethrough, Underline } from "lucide-react"
-import { Subtype } from "@/src/components/pdf-container/plugin-annotation-2"
+import { Subtype } from "@/components/pdf-container/plugin-annotation-2"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/src/components/shadcn-ui/select"
+} from "@/components/shadcn-ui/select"
 import {
   Table,
   TableBody,
@@ -15,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/src/components/shadcn-ui/table"
+} from "@/components/shadcn-ui/table"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import useEntityTypeStore from "../hooks/use-entity-type-store"
 import initialEntityTypes from "../initial-entity-types"

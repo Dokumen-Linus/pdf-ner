@@ -1,9 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/src/components/shadcn-ui/hover-card"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/shadcn-ui/hover-card"
 
 /**
  * For sighted users to preview content available behind a link.

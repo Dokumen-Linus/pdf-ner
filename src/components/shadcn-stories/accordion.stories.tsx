@@ -4,7 +4,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/src/components/shadcn-ui/accordion"
+} from "@/components/shadcn-ui/accordion"
 
 /**
  * A vertically stacked set of interactive headings that each reveal a section

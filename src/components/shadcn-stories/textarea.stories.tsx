@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Textarea } from "@/src/components/shadcn-ui/textarea"
+import { Textarea } from "@/components/shadcn-ui/textarea"
 
 /**
  * Displays a form textarea or a component that looks like a textarea.

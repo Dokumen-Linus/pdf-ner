@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Label } from "@/src/components/shadcn-ui/label"
+import { Label } from "@/components/shadcn-ui/label"
 
 /**
  * Renders an accessible label associated with controls.

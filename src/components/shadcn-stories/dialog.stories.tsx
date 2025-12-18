@@ -1,3 +1,4 @@
+import type { Meta, StoryObj } from "@storybook/react"
 import {
   Dialog,
   DialogClose,
@@ -7,8 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/shadcn-ui/dialog";
-import type { Meta, StoryObj } from "@storybook/react";
+} from "@/components/shadcn-ui/dialog"
 
 /**
  * A window overlaid on either the primary window or another dialog window,
@@ -26,8 +26,8 @@ const meta = {
         <DialogHeader>
           <DialogTitle>Are you absolutely sure?</DialogTitle>
           <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            This action cannot be undone. This will permanently delete your account and remove your
+            data from our servers.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-4">
@@ -35,10 +35,7 @@ const meta = {
             Cancel
           </button>
           <DialogClose>
-            <button
-              className="rounded bg-primary px-4 py-2 text-primary-foreground"
-              type="button"
-            >
+            <button className="rounded bg-primary px-4 py-2 text-primary-foreground" type="button">
               Continue
             </button>
           </DialogClose>
@@ -49,13 +46,13 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Dialog>;
+} satisfies Meta<typeof Dialog>
 
-export default meta;
+export default meta
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof meta>
 
 /**
  * The default form of the dialog.
  */
-export const Default: Story = {};
+export const Default: Story = {}

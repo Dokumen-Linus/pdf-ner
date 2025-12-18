@@ -7,7 +7,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/src/components/shadcn-ui/card"
+} from "@/components/shadcn-ui/card"
 
 const notifications = [
   {

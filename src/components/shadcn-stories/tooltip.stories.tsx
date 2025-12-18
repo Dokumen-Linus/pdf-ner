@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/src/components/shadcn-ui/tooltip"
+} from "@/components/shadcn-ui/tooltip"
 
 /**
  * A popup that displays information related to an element when the element

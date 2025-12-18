@@ -7,7 +7,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/src/components/shadcn-ui/pagination"
+} from "@/components/shadcn-ui/pagination"
 
 /**
  * Pagination with page navigation, next and previous links.

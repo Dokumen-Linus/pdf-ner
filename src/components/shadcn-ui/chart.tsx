@@ -1,6 +1,6 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
-import { cn } from "@/src/lib/shadcn-ui/utils"
+import { cn } from "@/lib/shadcn-ui/utils"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const

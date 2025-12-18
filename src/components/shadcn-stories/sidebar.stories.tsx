@@ -25,7 +25,7 @@ import {
   SquareTerminal,
   Trash2,
 } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/shadcn-ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -33,12 +33,12 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/src/components/shadcn-ui/breadcrumb"
+} from "@/components/shadcn-ui/breadcrumb"
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/src/components/shadcn-ui/collapsible"
+} from "@/components/shadcn-ui/collapsible"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,8 +48,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/src/components/shadcn-ui/dropdown-menu"
-import { Separator } from "@/src/components/shadcn-ui/separator"
+} from "@/components/shadcn-ui/dropdown-menu"
+import { Separator } from "@/components/shadcn-ui/separator"
 import {
   Sidebar,
   SidebarContent,
@@ -68,7 +68,7 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
-} from "@/src/components/shadcn-ui/sidebar"
+} from "@/components/shadcn-ui/sidebar"
 
 const meta: Meta<typeof Sidebar> = {
   title: "ui/Sidebar",

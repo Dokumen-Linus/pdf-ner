@@ -1,3 +1,5 @@
+import type { Meta, StoryObj } from "@storybook/react"
+import { CommandSeparator } from "cmdk"
 import {
   Command,
   CommandEmpty,
@@ -5,9 +7,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/shadcn-ui/command";
-import type { Meta, StoryObj } from "@storybook/react";
-import { CommandSeparator } from "cmdk";
+} from "@/components/shadcn-ui/command"
 
 /**
  * Fast, composable, unstyled command menu for React.
@@ -42,13 +42,13 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-} satisfies Meta<typeof Command>;
+} satisfies Meta<typeof Command>
 
-export default meta;
+export default meta
 
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof meta>
 
 /**
  * The default form of the command.
  */
-export const Default: Story = {};
+export const Default: Story = {}

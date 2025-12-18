@@ -5,7 +5,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/src/components/shadcn-ui/carousel"
+} from "@/components/shadcn-ui/carousel"
 
 /**
  * A carousel with motion and swipe built using Embla.

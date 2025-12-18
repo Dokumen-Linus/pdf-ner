@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/src/components/shadcn-ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn-ui/popover"
 
 /**
  * Displays rich content in a portal, triggered by a button.

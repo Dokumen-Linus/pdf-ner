@@ -7,7 +7,15 @@ import reactHooksPlugin from "eslint-plugin-react-hooks"
 
 export default [
   {
-    ignores: ["node_modules/**", "storybook-static/**", "dist/**", "build/**", "*/shadcn-ui/**"],
+    ignores: [
+      "node_modules/**",
+      "storybook-static/**",
+      "dist/**",
+      "build/**",
+      "*/shadcn-ui/**",
+      "*/shadcn-stories/**",
+      "src/routes/routeTree.gen.ts",
+    ],
   },
   {
     files: ["**/*.ts", "**/*.tsx"],

@@ -13,7 +13,7 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
-} from "@/src/components/shadcn-ui/context-menu"
+} from "@/components/shadcn-ui/context-menu"
 
 /**
  * Displays a menu to the user — such as a set of actions or functions —

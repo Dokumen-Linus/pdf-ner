@@ -4,7 +4,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/src/components/shadcn-ui/collapsible"
+} from "@/components/shadcn-ui/collapsible"
 
 /**
  * An interactive component which expands/collapses a panel.
