@@ -29,7 +29,6 @@
     "@embedpdf/plugin-loader": "1.5.0",
     "@embedpdf/plugin-render": "1.5.0",
     "@embedpdf/plugin-rotate": "1.5.0",
-    "@embedpdf/plugin-search": "1.5.0",
     "@embedpdf/plugin-thumbnail": "1.5.0",
     "@embedpdf/plugin-tiling": "1.5.0",
     "@embedpdf/plugin-viewport": "1.5.0",

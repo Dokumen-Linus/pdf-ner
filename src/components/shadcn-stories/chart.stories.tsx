@@ -14,10 +14,10 @@ import {
   XAxis,
 } from "recharts"
 import {
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  type ChartConfig,
 } from "@/components/shadcn-ui/chart"
 
 const multiSeriesData = [
