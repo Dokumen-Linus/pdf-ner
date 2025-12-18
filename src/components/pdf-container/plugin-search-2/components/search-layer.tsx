@@ -1,41 +1,40 @@
-import { useEffect, useState, HTMLAttributes, CSSProperties } from '@framework';
-import { SearchResultState } from '@embedpdf/plugin-search';
+import { CSSProperties, HTMLAttributes, useEffect, useState } from "react"
+import { useSearchCapability } from "../hooks"
+import { SearchResultState } from "../lib"
 
-import { useSearchCapability } from '../hooks';
-
-type SearchLayoutProps = Omit<HTMLAttributes<HTMLDivElement>, 'style'> & {
-  pageIndex: number;
-  scale: number;
-  highlightColor?: string;
-  activeHighlightColor?: string;
-  style?: CSSProperties;
-};
+type SearchLayoutProps = Omit<HTMLAttributes<HTMLDivElement>, "style"> & {
+  pageIndex: number
+  scale: number
+  highlightColor?: string
+  activeHighlightColor?: string
+  style?: CSSProperties
+}
 
 export function SearchLayer({
   pageIndex,
   scale,
   style,
-  highlightColor = '#FFFF00',
-  activeHighlightColor = '#FFBF00',
+  highlightColor = "#FFFF00",
+  activeHighlightColor = "#FFBF00",
   ...props
 }: SearchLayoutProps) {
-  const { provides: searchProvides } = useSearchCapability();
-  const [searchResultState, setSearchResultState] = useState<SearchResultState | null>(null);
+  const { provides: searchProvides } = useSearchCapability()
+  const [searchResultState, setSearchResultState] = useState<SearchResultState | null>(null)
 
   useEffect(() => {
     return searchProvides?.onSearchResultStateChange((state) => {
-      setSearchResultState(state);
-    });
-  }, [searchProvides]);
+      setSearchResultState(state)
+    })
+  }, [searchProvides])
 
   if (!searchResultState) {
-    return null;
+    return null
   }
 
   // Filter results for current page while preserving original indices
   const pageResults = searchResultState.results
     .map((result, originalIndex) => ({ result, originalIndex }))
-    .filter(({ result }) => result.pageIndex === pageIndex);
+    .filter(({ result }) => result.pageIndex === pageIndex)
 
   return (
     <div
@@ -49,7 +48,7 @@ export function SearchLayer({
           <div
             key={`${originalIndex}-${rectIndex}`}
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: rect.origin.y * scale,
               left: rect.origin.x * scale,
               width: rect.size.width * scale,
@@ -58,15 +57,15 @@ export function SearchLayer({
                 originalIndex === searchResultState.activeResultIndex
                   ? activeHighlightColor
                   : highlightColor,
-              mixBlendMode: 'multiply',
-              transform: 'scale(1.02)',
-              transformOrigin: 'center',
-              transition: 'opacity .3s ease-in-out',
+              mixBlendMode: "multiply",
+              transform: "scale(1.02)",
+              transformOrigin: "center",
+              transition: "opacity .3s ease-in-out",
               opacity: 1,
             }}
           ></div>
         )),
       )}
     </div>
-  );
+  )
 }
