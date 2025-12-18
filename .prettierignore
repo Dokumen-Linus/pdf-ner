@@ -8,10 +8,12 @@ count.txt
 .nitro
 .tanstack
 .output
+src/routeTree.gen.ts
 
 # outputs
 storybook-static/
 test-results/
 
 # shadcn
-*/shadcn-ui/
+**/shadcn-ui/**
+**/shadcn-stories/**

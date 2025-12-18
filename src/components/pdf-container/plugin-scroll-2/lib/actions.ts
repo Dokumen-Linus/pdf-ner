@@ -1,7 +1,6 @@
-import { Action, Reducer, SET_SCALE, SetScaleAction } from "@embedpdf/core";
-import type { PageChangeState } from "./custom-types";
-import type { ScrollState } from "./state";
-
+import { Action, Reducer, SET_SCALE, SetScaleAction } from "@embedpdf/core"
+import type { PageChangeState } from "./custom-types"
+import type { ScrollState } from "./state"
 
 // ***ACTION CONSTANTS***
 export const UPDATE_SCROLL_STATE = "UPDATE_SCROLL_STATE"

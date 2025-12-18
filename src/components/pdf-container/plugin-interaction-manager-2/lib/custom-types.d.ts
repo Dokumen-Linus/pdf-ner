@@ -52,8 +52,9 @@ export interface PointerEventHandlers<T = EmbedPdfPointerEvent> {
   onDoubleClick?(pos: Position, evt: T, modeId: string): void
 }
 
-export interface PointerEventHandlersWithLifecycle<T = EmbedPdfPointerEvent>
-  extends PointerEventHandlers<T> {
+export interface PointerEventHandlersWithLifecycle<
+  T = EmbedPdfPointerEvent,
+> extends PointerEventHandlers<T> {
   onHandlerActiveStart?(modeId: string): void
   onHandlerActiveEnd?(modeId: string): void
 }
