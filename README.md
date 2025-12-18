@@ -111,6 +111,10 @@ powershell -c "irm bun.sh/install.ps1 | iex"
 
 - Current site uses [shadcn/ui](https://ui.shadcn.com/) stored in components/shadcn-ui and config by components.json
 
+```cmd
+npx shadcn@latest add --overwrite accordion alert-dialog alert aspect-ratio avatar badge breadcrumb button-group button calendar card carousel chart checkbox collapsible context-menu dropdown-menu empty field form hover-card input-group input-otp input item kbd label menubar navigation-menu pagination popover progress radio-group resizable scroll-area select separator sheet sidebar skeleton slider sonner spinner switch table tabs textarea toggle-group toggle tooltip
+```
+
 ### PDF Rendering
 
 - EmbedPDF: [GitHub](https://github.com/embedpdf/embed-pdf-viewer), [docs for @embedpdf/pdfium](https://www.embedpdf.com/docs/pdfium/introduction) the JS library to wrap the C++ engine, [docs for @embedpdf/core/react](https://www.embedpdf.com/docs/react/introduction) which I have modified

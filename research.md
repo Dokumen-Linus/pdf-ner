@@ -69,8 +69,18 @@
 
 ### Tanstack Start Boilerplates
 
-- [jackytea/tanstack-starter](https://github.com/jackytea/tanstack-starter)
 - [TanStack Router Examples](https://github.com/TanStack/router/tree/main/examples/react)
+- [Example using Bun.js runtime with Tnastack Start + Vite instead of Node.js](https://github.com/TanStack/router/tree/main/examples/react/start-bun)
+- Biome, Drizzle, Query [Vijayabaskar56/tanstack-start-faster](https://github.com/Vijayabaskar56/tanstack-start-faster)
+- Example app [specfy/getstack](https://github.com/specfy/getstack)
+- [TanStack Dashboard Demo](https://github.com/themeselection/tanstack-dashboard-demo)
+- not great [jackytea/tanstack-starter](https://github.com/jackytea/tanstack-starter)
+- not great [abdullahelmetwali/tanstack-starter](https://github.com/abdullahelmetwali/tanstack-starter)
+
+### Tanstack Start Integrations
+
+- [File upload](https://docs.uploadthing.com/getting-started/tanstack-start)
+- [Sitemap creation](https://github.com/Ryanjso/tanstack-router-sitemap)
 
 ### Auth
 
@@ -170,6 +180,10 @@
 - [Recoil](https://recoiljs.org/)
 - Guide [HichemTab-tech/react-shared-states](https://github.com/HichemTab-tech/react-shared-states)
 
+### Fetching
+
+- [axios/axios](https://github.com/axios/axios)
+
 ### Messaging, API telemetry, Caching, Containerization
 
 - Kafka Boilerplate [StefanoFrusone/kafka-zero-to-production](https://github.com/StefanoFrusone/kafka-zero-to-production)
@@ -249,9 +263,3 @@
 - Perplexity
 - Google Scholar (IEEE papers or others)
 - [search IEEE journal names](https://ieeexplore.ieee.org/browse/periodicals/title?contentType=periodicals&refinements=ContentType:Journals&refinements=Publisher:IEEE)
-
-## shadncn update cmd
-
-```cmd
-npx shadcn@latest add --overwrite accordion alert-dialog alert aspect-ratio avatar badge breadcrumb button-group button calendar card carousel chart checkbox collapsible context-menu dropdown-menu empty field form hover-card input-group input-otp input item kbd label menubar navigation-menu pagination popover progress radio-group resizable scroll-area select separator sheet sidebar skeleton slider sonner spinner switch table tabs textarea toggle-group toggle tooltip
-```

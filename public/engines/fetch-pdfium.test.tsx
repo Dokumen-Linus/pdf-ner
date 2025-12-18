@@ -3,8 +3,7 @@ import fs from "fs/promises"
 import path from "path"
 import { describe, expect, test } from "bun:test"
 
-// Mock the env import for tests - in a real app this would come from env.mjs
-const mockBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+const baseUrl = import.meta.env.VITE_BASE_URL || window.location.origin || "http://localhost:3000"
 
 // Compute a SHA-256 hash of an ArrayBuffer or Buffer
 async function hashBuffer(buffer: ArrayBuffer | Buffer): Promise<string> {
@@ -20,7 +19,6 @@ async function hashBuffer(buffer: ArrayBuffer | Buffer): Promise<string> {
 describe("PDFium WASM", () => {
   // Skip this test unless npm run dev is running
   test.skip("fetch pdfium.wasm from dev server", async () => {
-    const baseUrl = mockBaseUrl
     const response = await fetch(`${baseUrl}/engines/pdfium.wasm`)
 
     expect(response.ok).toBe(true)

@@ -5,7 +5,7 @@
   "importOrder": [
     "^react$",
     "^react-dom$",
-    "^next$",
+    "^tanstack$",
     "<THIRD_PARTY_MODULES>",
     "^@/",
     "^[../]",

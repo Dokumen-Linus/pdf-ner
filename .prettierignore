@@ -1,8 +1,17 @@
-.next/
 node_modules/
+
+# tanstack
+dist
+dist-ssr
+count.txt
+*.local
+.nitro
+.tanstack
+.output
+
+# outputs
 storybook-static/
-components/shadcn-ui/
-hooks/shadcn-ui/
-lib/shadcn-ui/
-lib/hammer/
-next-env.d.ts
+test-results/
+
+# shadcn
+*/shadcn-ui/

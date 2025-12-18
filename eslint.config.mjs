@@ -1,4 +1,3 @@
-import nextPlugin from "@next/eslint-plugin-next"
 import typescriptEslintPlugin from "@typescript-eslint/eslint-plugin"
 import typescriptEslintParser from "@typescript-eslint/parser"
 import prettierConfig from "eslint-config-prettier"
@@ -8,18 +7,7 @@ import reactHooksPlugin from "eslint-plugin-react-hooks"
 
 export default [
   {
-    ignores: [
-      ".next/**",
-      "node_modules/**",
-      "storybook-static/**",
-      "dist/**",
-      "build/**",
-      "next-env.d.ts",
-      "lib/hammer/hammer.js",
-      "components/shadcn-ui/**",
-      "hooks/shadcn-ui/**",
-      "lib/shadcn-ui/**",
-    ],
+    ignores: ["node_modules/**", "storybook-static/**", "dist/**", "build/**", "*/shadcn-ui/**"],
   },
   {
     files: ["**/*.ts", "**/*.tsx"],
@@ -28,7 +16,6 @@ export default [
       react: reactPlugin,
       "react-hooks": reactHooksPlugin,
       "@typescript-eslint": typescriptEslintPlugin,
-      "@next/next": nextPlugin,
     },
     languageOptions: {
       parser: typescriptEslintParser,
@@ -43,8 +30,6 @@ export default [
     rules: {
       ...reactPlugin.configs.flat.recommended.rules,
       ...reactHooksPlugin.configs.recommended.rules,
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs["core-web-vitals"].rules,
       ...typescriptEslintPlugin.configs.recommended.rules,
       ...importPlugin.configs.recommended.rules,
       ...prettierConfig.rules,
