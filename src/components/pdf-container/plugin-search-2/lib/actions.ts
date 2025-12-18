@@ -1,62 +1,56 @@
-import { Action } from '@embedpdf/core';
-import { MatchFlag, SearchResult } from '@embedpdf/models';
+import { Action, Reducer } from "@embedpdf/core"
+import { MatchFlag, SearchResult } from "@embedpdf/models"
+import { SearchState } from "./state"
 
-// Action Types
-export const START_SEARCH_SESSION = 'START_SEARCH_SESSION';
-export const STOP_SEARCH_SESSION = 'STOP_SEARCH_SESSION';
-export const SET_SEARCH_FLAGS = 'SET_SEARCH_FLAGS';
-export const SET_SHOW_ALL_RESULTS = 'SET_SHOW_ALL_RESULTS';
-export const START_SEARCH = 'START_SEARCH';
-export const SET_SEARCH_RESULTS = 'SET_SEARCH_RESULTS';
-export const APPEND_SEARCH_RESULTS = 'APPEND_SEARCH_RESULTS';
-export const SET_ACTIVE_RESULT_INDEX = 'SET_ACTIVE_RESULT_INDEX';
+// ***ACTION CONSTANTS***
+export const START_SEARCH_SESSION = "START_SEARCH_SESSION"
+export const STOP_SEARCH_SESSION = "STOP_SEARCH_SESSION"
+export const SET_SEARCH_FLAGS = "SET_SEARCH_FLAGS"
+export const SET_SHOW_ALL_RESULTS = "SET_SHOW_ALL_RESULTS"
+export const START_SEARCH = "START_SEARCH"
+export const SET_SEARCH_RESULTS = "SET_SEARCH_RESULTS"
+export const APPEND_SEARCH_RESULTS = "APPEND_SEARCH_RESULTS"
+export const SET_ACTIVE_RESULT_INDEX = "SET_ACTIVE_RESULT_INDEX"
 
-// Action Interfaces
+// ***ACTION INTERFACES***
 export interface StartSearchSessionAction extends Action {
-  type: typeof START_SEARCH_SESSION;
+  type: typeof START_SEARCH_SESSION
 }
-
 export interface StopSearchSessionAction extends Action {
-  type: typeof STOP_SEARCH_SESSION;
+  type: typeof STOP_SEARCH_SESSION
 }
-
 export interface SetSearchFlagsAction extends Action {
-  type: typeof SET_SEARCH_FLAGS;
-  payload: MatchFlag[];
+  type: typeof SET_SEARCH_FLAGS
+  payload: MatchFlag[]
 }
-
 export interface SetShowAllResultsAction extends Action {
-  type: typeof SET_SHOW_ALL_RESULTS;
-  payload: boolean;
+  type: typeof SET_SHOW_ALL_RESULTS
+  payload: boolean
 }
-
 export interface StartSearchAction extends Action {
-  type: typeof START_SEARCH;
-  payload: string;
+  type: typeof START_SEARCH
+  payload: string
 }
-
 export interface SetSearchResultsAction extends Action {
-  type: typeof SET_SEARCH_RESULTS;
+  type: typeof SET_SEARCH_RESULTS
   payload: {
-    results: SearchResult[];
-    total: number;
-    activeResultIndex: number;
-  };
+    results: SearchResult[]
+    total: number
+    activeResultIndex: number
+  }
 }
-
 export interface AppendSearchResultsAction extends Action {
-  type: typeof APPEND_SEARCH_RESULTS;
+  type: typeof APPEND_SEARCH_RESULTS
   payload: {
-    results: SearchResult[];
-  };
+    results: SearchResult[]
+  }
 }
-
 export interface SetActiveResultIndexAction extends Action {
-  type: typeof SET_ACTIVE_RESULT_INDEX;
-  payload: number;
+  type: typeof SET_ACTIVE_RESULT_INDEX
+  payload: number
 }
 
-// Union Type for All Actions
+// ***ACTION UNION***
 export type SearchAction =
   | StartSearchSessionAction
   | StopSearchSessionAction
@@ -65,41 +59,99 @@ export type SearchAction =
   | StartSearchAction
   | SetSearchResultsAction
   | AppendSearchResultsAction
-  | SetActiveResultIndexAction;
+  | SetActiveResultIndexAction
 
-// Action Creators
+// ***ACTION CREATORS***
 export function startSearchSession(): StartSearchSessionAction {
-  return { type: START_SEARCH_SESSION };
+  return { type: START_SEARCH_SESSION }
 }
-
 export function stopSearchSession(): StopSearchSessionAction {
-  return { type: STOP_SEARCH_SESSION };
+  return { type: STOP_SEARCH_SESSION }
 }
-
 export function setSearchFlags(flags: MatchFlag[]): SetSearchFlagsAction {
-  return { type: SET_SEARCH_FLAGS, payload: flags };
+  return { type: SET_SEARCH_FLAGS, payload: flags }
 }
-
 export function setShowAllResults(showAll: boolean): SetShowAllResultsAction {
-  return { type: SET_SHOW_ALL_RESULTS, payload: showAll };
+  return { type: SET_SHOW_ALL_RESULTS, payload: showAll }
 }
-
 export function startSearch(query: string): StartSearchAction {
-  return { type: START_SEARCH, payload: query };
+  return { type: START_SEARCH, payload: query }
 }
-
 export function setSearchResults(
   results: SearchResult[],
   total: number,
   activeResultIndex: number,
 ): SetSearchResultsAction {
-  return { type: SET_SEARCH_RESULTS, payload: { results, total, activeResultIndex } };
+  return { type: SET_SEARCH_RESULTS, payload: { results, total, activeResultIndex } }
 }
-
 export function appendSearchResults(results: SearchResult[]): AppendSearchResultsAction {
-  return { type: APPEND_SEARCH_RESULTS, payload: { results } };
+  return { type: APPEND_SEARCH_RESULTS, payload: { results } }
+}
+export function setActiveResultIndex(index: number): SetActiveResultIndexAction {
+  return { type: SET_ACTIVE_RESULT_INDEX, payload: index }
 }
 
-export function setActiveResultIndex(index: number): SetActiveResultIndexAction {
-  return { type: SET_ACTIVE_RESULT_INDEX, payload: index };
+// ***ACTION REDUCER***
+export const reducer: Reducer<SearchState, SearchAction> = (state, action) => {
+  switch (action.type) {
+    case START_SEARCH_SESSION:
+      return { ...state, active: true }
+
+    case STOP_SEARCH_SESSION:
+      return {
+        ...state,
+        results: [],
+        total: 0,
+        activeResultIndex: -1,
+        query: "",
+        loading: false,
+        active: false,
+      }
+
+    case SET_SEARCH_FLAGS:
+      return { ...state, flags: action.payload }
+
+    case SET_SHOW_ALL_RESULTS:
+      return { ...state, showAllResults: action.payload }
+
+    case START_SEARCH:
+      return {
+        ...state,
+        loading: true,
+        query: action.payload,
+        // clear old results on new search start
+        results: [],
+        total: 0,
+        activeResultIndex: -1,
+      }
+
+    case APPEND_SEARCH_RESULTS: {
+      const newResults = [...state.results, ...action.payload.results]
+      const firstHitIndex =
+        state.activeResultIndex === -1 && newResults.length > 0 ? 0 : state.activeResultIndex
+      return {
+        ...state,
+        results: newResults,
+        total: newResults.length, // total-so-far
+        activeResultIndex: firstHitIndex,
+        // keep loading true until final SET_SEARCH_RESULTS
+        loading: true,
+      }
+    }
+
+    case SET_SEARCH_RESULTS:
+      return {
+        ...state,
+        results: action.payload.results,
+        total: action.payload.total,
+        activeResultIndex: action.payload.activeResultIndex,
+        loading: false,
+      }
+
+    case SET_ACTIVE_RESULT_INDEX:
+      return { ...state, activeResultIndex: action.payload }
+
+    default:
+      return state
+  }
 }
