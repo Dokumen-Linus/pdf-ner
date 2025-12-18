@@ -19,7 +19,7 @@ import {
   InteractionManagerPluginPackage,
   PagePointerProvider,
 } from "./plugin-interaction-manager-2"
-import { LoaderPluginPackage } from "./plugin-loader-2"
+import { LoaderPluginPackage } from "@embedpdf/plugin-loader/react"
 import { Scroller, ScrollPluginPackage, ScrollStrategy } from "./plugin-scroll-2"
 import { SelectionLayer, SelectionPluginPackage } from "./plugin-selection-2"
 import RotateWrapper from "./rotate-wrapper"

@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { Highlighter, LineSquiggle, Strikethrough, Underline } from "lucide-react"
-import { Subtype } from "@/components/pdf-container/plugin-annotation-2"
+import { Subtype } from "@/src/components/pdf-container/plugin-annotation-2"
 import {
   Select,
   SelectContent,
