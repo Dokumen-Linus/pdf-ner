@@ -54,8 +54,9 @@ Using PdfTextMarkupAnnotationObject type allows consumers to write patches that 
 // Example patch
 import { PdfAnnotationSubtype } from "@embedpdf/models"
 import { PdfTextMarkupAnnotationObject } from "pdf-text-markup-annotation-object"
+import { subtypeToEnum } from "state"
 const patch: Partial<PdfTextMarkupAnnotationObject> = {
-  type: PdfAnnotationSubtype.UNDERLINE,
+  type: subtypeToEnum("highlight"),
   color: "#FF0000",
   opacity: 0.9
 }

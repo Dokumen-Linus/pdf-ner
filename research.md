@@ -18,6 +18,8 @@
 ### Generic Components
 
 - [shadcn/ui Components](https://ui.shadcn.com/docs/components)
+- [Mantine UI](https://mantine.dev/components/)
+- [Ant Design](<https://ant.design/components/overview/>
 - [Hexta UI](https://pro.hextaui.com/)
 - [Untitled UI React Components](https://www.untitledui.com/react/components)
 - [FlyonUI Components](https://flyonui.com/docs/component/)
@@ -34,6 +36,8 @@
 - Currently: [Lucide Icons](https://lucide.dev/icons/)
 - Possibly: [Ant Design Icons](https://ant.design/components/icon)
 - Others: [React Icons](https://react-icons.github.io/react-icons/)
+- Download SVGs: [Iconstack](https://ossian-icons-60.lovable.app/)
+- AI generate SVGs: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
 
 ### Colors
 
@@ -46,7 +50,6 @@
 - [kozakdenys/qr-code-styling](https://github.com/kozakdenys/qr-code-styling)
 - [masroorejaz/react-simple-captcha](https://github.com/masroorejaz/react-simple-captcha)
 - [Home page scroll animation](https://www.builder.io/blog/3d-gsap)
-- [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
 - [Python terminal inside browser](https://github.com/pyscript/pyscript)
 - [Kanaries/graphic-walker](https://github.com/Kanaries/graphic-walker)
 - [vercel/avatar](https://github.com/vercel/avatar)
@@ -77,6 +80,11 @@
 - not great [jackytea/tanstack-starter](https://github.com/jackytea/tanstack-starter)
 - not great [abdullahelmetwali/tanstack-starter](https://github.com/abdullahelmetwali/tanstack-starter)
 
+### React Router Boilerplates
+
+- [condorheroblog/react-antd-admin](https://github.com/condorheroblog/react-antd-admin)
+- Everything boilerplate? [refinedev/refine](https://github.com/refinedev/refine)
+
 ### Tanstack Start Integrations
 
 - [File upload](https://docs.uploadthing.com/getting-started/tanstack-start)
@@ -101,6 +109,7 @@
 - Custom LM [Yuliang-Liu/MonkeyOCR](https://github.com/Yuliang-Liu/MonkeyOCR)
 - Pytorch [mindee/doctr](https://github.com/mindee/doctr)
 - Pytorch [JaidedAI/EasyOCR](https://github.com/JaidedAI/EasyOCR)
+- Other [docling](https://github.com/docling-project/docling)
 - LLM checking trad OCR [Dicklesworthstone/llm_aided_ocr](https://github.com/Dicklesworthstone/llm_aided_ocr)
 - **[deepseek-ai/DeepSeek-OCR](https://github.com/deepseek-ai/DeepSeek-OCR)**
 - **[allenai/olmocr](https://github.com/allenai/olmocr)**
@@ -205,6 +214,7 @@
 - [OpenTelemetry docs](https://opentelemetry.io/docs/)
 - [umami-software/umami](https://github.com/umami-software/umami)
 - [Sentry docs](https://docs.sentry.io/platforms/javascript/guides/nextjs/)
+- [tracetest](https://github.com/kubeshop/tracetest/)
 
 ### Public Data Sources
 

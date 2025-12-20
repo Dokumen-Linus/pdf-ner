@@ -3,3 +3,4 @@ export type { PdfTextMarkupAnnotationObject } from "./pdf-text-markup-annotation
 export * from "./plugin"
 export * from "./plugin-package"
 export type { AnnotationState, Subtype } from "./state"
+export { subtypeToEnum } from "./state"

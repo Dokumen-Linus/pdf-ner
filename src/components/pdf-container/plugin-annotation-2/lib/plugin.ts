@@ -285,6 +285,7 @@ export class AnnotationPlugin extends BasePlugin<
 
   // consumer capability to batch add annotations
   private createAnnotations(items: PdfTextMarkupAnnotationObject[]) {
+    if (!items.length) return
     if (!this.isInitialLoadComplete) {
       this.loadingQueue.push(...items)
       return
@@ -296,6 +297,7 @@ export class AnnotationPlugin extends BasePlugin<
   private updateAnnotations(
     items: { id: string; patch: Partial<PdfTextMarkupAnnotationObject> }[],
   ) {
+    if (!items.length) return
     for (const { id, patch } of items) {
       patch.modified = new Date()
       patch.author = patch.author ?? this.config.author
@@ -306,6 +308,7 @@ export class AnnotationPlugin extends BasePlugin<
 
   // consumer capability to batch delete annotations
   private deleteAnnotations(annotationIds: string[]) {
+    if (!annotationIds.length) return
     for (const id of annotationIds) {
       this.dispatch(deleteAnnotation(id))
     }
