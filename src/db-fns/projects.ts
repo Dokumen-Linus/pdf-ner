@@ -5,7 +5,7 @@ import { db } from "@/db/client"
 import { projects } from "@/db/schema/projects"
 
 // ** CREATE **
-const CreateProjectSchema = z.object({
+export const CreateProjectSchema = z.object({
   name: z.string(),
   ownerId: z.string(),
   colorPresets: z.array(z.string()).optional(),
@@ -49,7 +49,7 @@ export const getProjectsByOwnerId = createServerFn({ method: "GET" })
 
 // ** UPDATE **
 // partial create schema with id still required
-const UpdateProjectSchema = CreateProjectSchema.partial().extend({
+export const UpdateProjectSchema = CreateProjectSchema.partial().extend({
   id: z.string(),
 })
 
