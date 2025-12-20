@@ -7,6 +7,7 @@
     "^react-dom$",
     "^tanstack$",
     "<THIRD_PARTY_MODULES>",
+    "^~/",
     "^@/",
     "^[../]",
     "^[./]"
