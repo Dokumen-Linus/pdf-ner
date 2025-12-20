@@ -6,6 +6,7 @@
     "dev": "vite dev --port 3000",
     "build": "vite build",
     "preview": "vite preview",
+    "start": "vite start",
     "tsc": "npx tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
@@ -16,7 +17,8 @@
     "depcheck": "npx depcheck",
     "storybook": "storybook dev -p 6006",
     "test": "bun test",
-    "e2e": "playwright test"
+    "test:db": "cross-env TEST_DB=true bun test",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.49.0",

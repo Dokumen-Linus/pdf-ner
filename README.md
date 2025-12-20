@@ -52,24 +52,25 @@ powershell -c "irm bun.sh/install.ps1 | iex"
 
 ### Scripts
 
-| Script       | Description                                                |
-| ------------ | ---------------------------------------------------------- |
-| dev          | run site locally                                           |
-| build        | build for prod                                             |
-| start        | start prod server                                          |
-| tsc          | compile types without generating files                     |
-| lint         | check for linting errors                                   |
-| lint:fix     | fix some linting errors automatically                      |
-| prettier     | check format                                               |
-| prettier:fix | fix format (.vscode/settings.json does this on every save) |
-| prepare      | automatically called by install                            |
-| postinstall  | automatically called by install                            |
-| depcheck     | check for unused dependencies                              |
-| storybook    | view storybook workshop                                    |
-| test         | run tests using Bun Test Runner                            |
-| e2e          | run playwright end-to-end tests                            |
-| madge        | to be added to package.json to run madge                   |
-| others       | other scripts can be added to package.json                 |
+| Script       | Description                                                   |
+| ------------ | ------------------------------------------------------------- |
+| dev          | run site locally                                              |
+| build        | build for prod                                                |
+| preview      | preview prod build                                            |
+| start        | start prod server                                             |
+| tsc          | compile types without generating files                        |
+| lint         | check for linting errors                                      |
+| lint:fix     | fix some linting errors automatically                         |
+| prettier     | check format                                                  |
+| prettier:fix | fix format (.vscode/settings.json does this on every save)    |
+| prepare      | auto-called by install, enforces Conventional Commits         |
+| postinstall  | auto-called by install, patches packages                      |
+| depcheck     | check for unused dependencies                                 |
+| storybook    | view storybook workshop                                       |
+| test         | run tests using Bun Test Runner, React Testing Library DOM    |
+| test:db      | run database functions tests using Bun Test Runner            |
+| test:e2e     | run playwright end-to-end tests                               |
+| madge        | to be added to package.json to run madge                      |
 
 ### Version Control
 
@@ -103,7 +104,7 @@ powershell -c "irm bun.sh/install.ps1 | iex"
 
 - State management: currently React only
 - Component workshop: [Storybook](https://storybook.js.org/) using .stories.tsx files
-- Component dependency grapher: [Madge](https://github.com/pahen/madge) - not yet setup, can fix later, here is my draft cmd: npx madge --extensions=js,jsx,ts,tsx ./ --exclude ".\*\.config\.(ts|js|mjs)|.next/|.storybook/|node_modules/|storybook-static/|reset\.d\.ts|next-env\.d\.ts" --image graph.svg (need to install gvpr graphviz)
+- Component dependency grapher: [Madge](https://github.com/pahen/madge) - not yet setup, can fix later, here is my draft cmd: npx madge --extensions=ts,tsx ./ --exclude ".\*\.config\.(ts|js|mjs)|.next/|.storybook/|node_modules/|storybook-static/|reset\.d\.ts|next-env\.d\.ts" --image graph.svg (need to install gvpr graphviz)
 
 ## Features
 
