@@ -114,7 +114,6 @@ CREATE TABLE public.schema_migrations (
 CREATE TABLE public.users (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     email text NOT NULL,
-    password text NOT NULL,
     first_name text,
     last_name text,
     employer text,

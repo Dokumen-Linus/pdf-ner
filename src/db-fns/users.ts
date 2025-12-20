@@ -1,25 +1,12 @@
 import { createServerFn } from "@tanstack/react-start"
-import * as bcrypt from "bcrypt"
 import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
 import { db } from "@/db/client"
 import { users } from "@/db/schema/users"
 
-const SALT_ROUNDS = 12
-const MIN_PW_LEN = 8
-
-async function hashPassword(password: string) {
-  return await bcrypt.hash(password, SALT_ROUNDS)
-}
-
-async function verifyPassword(password: string, hash: string) {
-  return await bcrypt.compare(password, hash)
-}
-
 // ** CREATE **
 export const CreateUserSchema = z.object({
   email: z.email(),
-  password: z.string().min(MIN_PW_LEN, `Password must be at least ${MIN_PW_LEN} characters long`),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   employer: z.string().optional(),
@@ -29,8 +16,7 @@ export const CreateUserSchema = z.object({
 export const createUser = createServerFn({ method: "POST" })
   .inputValidator(CreateUserSchema)
   .handler(async ({ data }) => {
-    const hash = await hashPassword(data.password)
-    await db.insert(users).values({ ...data, password: hash })
+    await db.insert(users).values(data)
     return { success: true }
   })
 
@@ -55,24 +41,9 @@ export const getUserByEmail = createServerFn({ method: "GET" })
     return user
   })
 
-export const verifyUserPassword = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ email: z.email(), password: z.string() }))
-  .handler(async ({ data }) => {
-    try {
-      const user = await getUserByEmail({ data: { email: data.email } })
-      const isValid = await verifyPassword(data.password, user.password)
-      return { success: isValid }
-    } catch (_e) {
-      // add a small random delay to prevent timing attacks
-      await new Promise((resolve) => setTimeout(resolve, Math.random() * 10))
-      // return false genericly to prevent username enumeration attacks
-      return { success: false }
-    }
-  })
-
 // ** UPDATE **
-// partial create schema with id required and no password
-export const UpdateUserSchema = CreateUserSchema.omit({ password: true }).partial().extend({
+// partial create schema with id required
+export const UpdateUserSchema = CreateUserSchema.partial().extend({
   id: z.string(),
 })
 
