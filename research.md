@@ -18,15 +18,18 @@
 ### Generic Components
 
 - [shadcn/ui Components](https://ui.shadcn.com/docs/components)
-- [Mantine UI](https://mantine.dev/components/)
-- [Ant Design](<https://ant.design/components/overview/>
+- Examples of using shadcn/ui [Hexta UI](https://www.hextaui.com/)
+- Examples of using shadcn/ui [preetsuthar17/HextaUI](https://github.com/preetsuthar17/HextaUI)
+- [Ant Design](https://ant.design/components/overview/)
 - [Hexta UI](https://pro.hextaui.com/)
-- [Untitled UI React Components](https://www.untitledui.com/react/components)
-- [FlyonUI Components](https://flyonui.com/docs/component/)
-- [HeroUI docs](https://www.heroui.com/docs/guide/introduction)
-- [Coss = Origin UI](https://coss.com/origin)
-- [mui/material-ui](https://github.com/mui/material-ui)
-- [headlessui/react/menu](https://headlessui.com/react/menu)
+- [Untitled UI](https://www.untitledui.com/react/components)
+- [FlyonUI](https://flyonui.com/docs/component/)
+- [Mantine UI](https://ui.mantine.dev/)
+- headless [Coss = Origin UI](https://coss.com/origin)
+- [mui/material-ui](https://mui.com/material-ui/getting-started/)
+- css styling [MUI System](https://mui.com/system/getting-started/)
+- [Joy UI](https://mui.com/joy-ui/getting-started/)
+- headless [headlessui](https://headlessui.com/react/menu)
 - [square-ui](https://github.com/ln-dev7/square-ui)
 - [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
 - [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
@@ -55,10 +58,11 @@
 - [vercel/avatar](https://github.com/vercel/avatar)
 - [vercel/react-tweet](https://github.com/vercel/react-tweet)
 - [vercel/platforms](https://github.com/vercel/platforms)
-- [enszrlu/NextStep](https://github.com/enszrlu/NextStep/)
 - [chatbot assistant](https://ai-sdk.dev/elements/examples/chatbot)
 - [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - [AG Grid special table](https://www.ag-grid.com/react-data-grid/getting-started/)
+- charts [MUI X](https://v6.mui.com/x/react-charts/)
+- charts [Recharts](https://recharts.org/en-US/)
 
 ### Next.js Boilerplates
 
