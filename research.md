@@ -5,7 +5,7 @@
 - [what is react]( https://www.theodinproject.com/paths/full-stack-javascript/courses/react)
 - **[what are llms](https://arxiv.org/pdf/2501.09223)**
 
-## Links
+## Frontend links
 
 ### PDF Web rendering
 
@@ -63,6 +63,7 @@
 - [AG Grid special table](https://www.ag-grid.com/react-data-grid/getting-started/)
 - charts [MUI X](https://v6.mui.com/x/react-charts/)
 - charts [Recharts](https://recharts.org/en-US/)
+- Component dependency grapher [Madge](https://github.com/pahen/madge)
 
 ### Next.js Boilerplates
 
@@ -96,17 +97,42 @@
 
 ### Auth
 
-- **Lucia auth** for SSO with Microsoft, Google, Okta
-- [lucia-auth/example-nextjs-email-password-webauthn](https://github.com/lucia-auth/example-nextjs-email-password-webauthn/)
-- [better-auth docs](https://www.better-auth.com/docs/introduction)
-- [next-auth docs](https://next-auth.js.org/getting-started/introduction)
+- Better Auth setup using [Installation](https://www.better-auth.com/docs/installation) and [Tanstack Integration](https://www.better-auth.com/docs/integrations/tanstack) docs
+- Pre-built Tanstack Query hooks for Better Auth [daveyplate/better-auth-tanstack](https://github.com/daveyplate/better-auth-tanstack)
+- Pre-built components [better-auth-ui/better-auth-ui](https://github.com/better-auth-ui/better-auth-ui)
+
+### State management (besides react, zustand, tanstack store)
+
+- Guide [HichemTab-tech/react-shared-states](https://github.com/HichemTab-tech/react-shared-states)
+
+### Fetching
+
+- [axios/axios](https://github.com/axios/axios)
+
+### Cloud Sec
+
+- [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
+- [AWS security checks](https://cloudsploit.com/)
+- Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
+
+### Frontend Testing (besides Bun, Playwright)
+
+- [appium/appium](https://github.com/appium/appium)
+- [Applitools](https://applitools.com/)
+- [Checkbot](https://www.checkbot.io/)
+
+### Billing
+
+- [Stripe](https://stripe.com/)
+- self-hosted alternative [Lago](https://getlago.com/docs/welcome)
+
+## Backend links
 
 ### OCR
 
 - [tesseract-ocr/tesseract](https://github.com/tesseract-ocr/tesseract)
 - [madmaze/pytesseract](https://github.com/madmaze/pytesseract)
 - [naptha/tesseract.js](https://github.com/naptha/tesseract.js)
-- [Chrome OCR Issues thread](https://github.com/madmaze/pytesseract)
 - Tesseract python cli [ocrmypdf/OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF)
 - Custom LM [NanoNets/docext](https://github.com/NanoNets/docext)
 - Custom LM  [chatdoc-com/OCRFlux](https://github.com/chatdoc-com/OCRFlux)
@@ -164,12 +190,6 @@
 
 - [Trusted-AI/adversarial-robustness-toolbox](https://github.com/Trusted-AI/adversarial-robustness-toolbox)
 
-### Cloud Sec
-
-- [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
-- [AWS security checks](https://cloudsploit.com/)
-- Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
-
 ### PII Redaction
 
 - [microsoft/presidio](https://github.com/microsoft/presidio)
@@ -187,16 +207,6 @@
 - Tips [Kludex/fastapi-tips](https://github.com/Kludex/fastapi-tips)
 - [AWS Lambda](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-create-api-as-simple-proxy-for-lambda.html)
 
-### State management (besides react, zustand, tanstack)
-
-- [Rivet AWS ECS](https://www.rivet.dev/docs/deploy/aws-ecs)
-- [Recoil](https://recoiljs.org/)
-- Guide [HichemTab-tech/react-shared-states](https://github.com/HichemTab-tech/react-shared-states)
-
-### Fetching
-
-- [axios/axios](https://github.com/axios/axios)
-
 ### Messaging, API telemetry, Caching, Containerization
 
 - Kafka Boilerplate [StefanoFrusone/kafka-zero-to-production](https://github.com/StefanoFrusone/kafka-zero-to-production)
@@ -206,12 +216,6 @@
 - FastAPI Alternative [MotiaDev/motia](https://github.com/MotiaDev/motia/)
 - Monitoring [API Toolkit](https://apitoolkit.io/)
 - [healthchecks/healthchecks](https://github.com/healthchecks/healthchecks)
-
-### Frontend Testing (besides Bun, Playwright)
-
-- [appium/appium](https://github.com/appium/appium)
-- [Applitools](https://applitools.com/)
-- [Checkbot](https://www.checkbot.io/)
 
 ### Observability
 
@@ -223,16 +227,6 @@
 ### Public Data Sources
 
 - [public-apis/public-apis](https://github.com/public-apis/public-apis)
-
-## Billing
-
-- [Stripe](https://stripe.com/)
-- self-hosted alternative [Lago](https://getlago.com/docs/welcome)
-
-### AWS
-
-- Cloudwatch [aws-samples/aws-real-user-monitoring-amplifyapps](https://github.com/aws-samples/aws-real-user-monitoring-amplifyapps)
-- Amplify Auth [willagaroon/amplify-gen2-auth-boilerplate](https://github.com/willagaroon/amplify-gen2-auth-boilerplate)
 
 ### Automated Emails
 
