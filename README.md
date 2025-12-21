@@ -38,7 +38,7 @@ bunx playwright install
 | depcheck     | check for unused dependencies                                 |
 | storybook    | view storybook workshop                                       |
 | test         | run tests using Bun Test Runner, React Testing Library DOM    |
-| test:db      | run database functions tests using Bun Test Runner            |
+| test:db      | run database functions tests, must have database on           |
 | test:e2e     | run playwright end-to-end tests                               |
 
 ## Version Control
@@ -80,7 +80,7 @@ bunx playwright install
 
 ### Backend for Frontend (BFF)
 
-- API: [Tanstack Router](https://tanstack.com/router/latest/docs/overview) in src/routes/api/
+- API: [Tanstack Router](https://tanstack.com/router/latest/docs/overview) in src/routes/api/ which utilizes [Tanstack Query](https://tanstack.com/query/latest/docs/overview) and [Axios](https://axios-http.com/docs/intro) for communication with the external backend REST API
 - Database Server Functions (db-fns): must interact with the database using functions in src/db-fns/ built with [Tanstack Start Server Functions](https://tanstack.com/start/latest/docs/framework/react/guide/server-functions), Zod validation, Drizzle ORM client, and PostgreSQL database connection
 - ORM: [Drizzle](https://orm.drizzle.team/docs/overview) client in src/db/client.ts handles interaction between TS and SQL, Typescript schemas defined in src/db/schema
 - Database: defined in SQL for easy migration to standalone and integration with Python/Java, can be generated using [Drizzle-kit](https://orm.drizzle.team/docs/drizzle-kit)

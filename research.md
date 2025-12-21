@@ -75,20 +75,19 @@
 - [arhamkhnz/next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard)
 - [cruip/open-react-template](https://github.com/cruip/open-react-template)
 
-### Tanstack Start Boilerplates
+### Tanstack Start/Router Boilerplates
 
-- [TanStack Router Examples](https://github.com/TanStack/router/tree/main/examples/react)
-- [Example using Bun.js runtime with Tnastack Start + Vite instead of Node.js](https://github.com/TanStack/router/tree/main/examples/react/start-bun)
 - Biome, Drizzle, Query [Vijayabaskar56/tanstack-start-faster](https://github.com/Vijayabaskar56/tanstack-start-faster)
-- Example app [specfy/getstack](https://github.com/specfy/getstack)
+- Example Router app [specfy/getstack](https://github.com/specfy/getstack)
 - [TanStack Dashboard Demo](https://github.com/themeselection/tanstack-dashboard-demo)
 - not great [jackytea/tanstack-starter](https://github.com/jackytea/tanstack-starter)
 - not great [abdullahelmetwali/tanstack-starter](https://github.com/abdullahelmetwali/tanstack-starter)
 
-### React Router Boilerplates
+### Tanstack Start/Router Official Examples
 
-- [condorheroblog/react-antd-admin](https://github.com/condorheroblog/react-antd-admin)
-- Everything boilerplate? [refinedev/refine](https://github.com/refinedev/refine)
+- [All Examples](https://github.com/TanStack/router/tree/main/examples/react)
+- Bun.js runtime [start-bun](https://github.com/TanStack/router/tree/main/examples/react/start-bun)
+- Translation [start-i18n-paraglide](https://github.com/TanStack/router/tree/main/examples/react/start-i18n-paraglide)
 
 ### Tanstack Start Integrations
 
@@ -101,7 +100,7 @@
 - Pre-built Tanstack Query hooks for Better Auth [daveyplate/better-auth-tanstack](https://github.com/daveyplate/better-auth-tanstack)
 - Pre-built components [better-auth-ui/better-auth-ui](https://github.com/better-auth-ui/better-auth-ui)
 
-### State management (besides react, zustand, tanstack store)
+### State management (besides React and Zustand)
 
 - Guide [HichemTab-tech/react-shared-states](https://github.com/HichemTab-tech/react-shared-states)
 
