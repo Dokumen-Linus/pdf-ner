@@ -5,7 +5,7 @@
 - [what is react]( https://www.theodinproject.com/paths/full-stack-javascript/courses/react)
 - **[what are llms](https://arxiv.org/pdf/2501.09223)**
 
-## Links
+## Frontend links
 
 ### PDF Web rendering
 
@@ -18,15 +18,18 @@
 ### Generic Components
 
 - [shadcn/ui Components](https://ui.shadcn.com/docs/components)
-- [Mantine UI](https://mantine.dev/components/)
-- [Ant Design](<https://ant.design/components/overview/>
+- Examples of using shadcn/ui [Hexta UI](https://www.hextaui.com/)
+- Examples of using shadcn/ui [preetsuthar17/HextaUI](https://github.com/preetsuthar17/HextaUI)
+- [Ant Design](https://ant.design/components/overview/)
 - [Hexta UI](https://pro.hextaui.com/)
-- [Untitled UI React Components](https://www.untitledui.com/react/components)
-- [FlyonUI Components](https://flyonui.com/docs/component/)
-- [HeroUI docs](https://www.heroui.com/docs/guide/introduction)
-- [Coss = Origin UI](https://coss.com/origin)
-- [mui/material-ui](https://github.com/mui/material-ui)
-- [headlessui/react/menu](https://headlessui.com/react/menu)
+- [Untitled UI](https://www.untitledui.com/react/components)
+- [FlyonUI](https://flyonui.com/docs/component/)
+- [Mantine UI](https://ui.mantine.dev/)
+- headless [Coss = Origin UI](https://coss.com/origin)
+- [mui/material-ui](https://mui.com/material-ui/getting-started/)
+- css styling [MUI System](https://mui.com/system/getting-started/)
+- [Joy UI](https://mui.com/joy-ui/getting-started/)
+- headless [headlessui](https://headlessui.com/react/menu)
 - [square-ui](https://github.com/ln-dev7/square-ui)
 - [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
 - [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
@@ -55,10 +58,12 @@
 - [vercel/avatar](https://github.com/vercel/avatar)
 - [vercel/react-tweet](https://github.com/vercel/react-tweet)
 - [vercel/platforms](https://github.com/vercel/platforms)
-- [enszrlu/NextStep](https://github.com/enszrlu/NextStep/)
 - [chatbot assistant](https://ai-sdk.dev/elements/examples/chatbot)
 - [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - [AG Grid special table](https://www.ag-grid.com/react-data-grid/getting-started/)
+- charts [MUI X](https://v6.mui.com/x/react-charts/)
+- charts [Recharts](https://recharts.org/en-US/)
+- Component dependency grapher [Madge](https://github.com/pahen/madge)
 
 ### Next.js Boilerplates
 
@@ -70,20 +75,19 @@
 - [arhamkhnz/next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard)
 - [cruip/open-react-template](https://github.com/cruip/open-react-template)
 
-### Tanstack Start Boilerplates
+### Tanstack Start/Router Boilerplates
 
-- [TanStack Router Examples](https://github.com/TanStack/router/tree/main/examples/react)
-- [Example using Bun.js runtime with Tnastack Start + Vite instead of Node.js](https://github.com/TanStack/router/tree/main/examples/react/start-bun)
 - Biome, Drizzle, Query [Vijayabaskar56/tanstack-start-faster](https://github.com/Vijayabaskar56/tanstack-start-faster)
-- Example app [specfy/getstack](https://github.com/specfy/getstack)
+- Example Router app [specfy/getstack](https://github.com/specfy/getstack)
 - [TanStack Dashboard Demo](https://github.com/themeselection/tanstack-dashboard-demo)
 - not great [jackytea/tanstack-starter](https://github.com/jackytea/tanstack-starter)
 - not great [abdullahelmetwali/tanstack-starter](https://github.com/abdullahelmetwali/tanstack-starter)
 
-### React Router Boilerplates
+### Tanstack Start/Router Official Examples
 
-- [condorheroblog/react-antd-admin](https://github.com/condorheroblog/react-antd-admin)
-- Everything boilerplate? [refinedev/refine](https://github.com/refinedev/refine)
+- [All Examples](https://github.com/TanStack/router/tree/main/examples/react)
+- Bun.js runtime [start-bun](https://github.com/TanStack/router/tree/main/examples/react/start-bun)
+- Translation [start-i18n-paraglide](https://github.com/TanStack/router/tree/main/examples/react/start-i18n-paraglide)
 
 ### Tanstack Start Integrations
 
@@ -92,17 +96,42 @@
 
 ### Auth
 
-- **Lucia auth** for SSO with Microsoft, Google, Okta
-- [lucia-auth/example-nextjs-email-password-webauthn](https://github.com/lucia-auth/example-nextjs-email-password-webauthn/)
-- [better-auth docs](https://www.better-auth.com/docs/introduction)
-- [next-auth docs](https://next-auth.js.org/getting-started/introduction)
+- Better Auth setup using [Installation](https://www.better-auth.com/docs/installation) and [Tanstack Integration](https://www.better-auth.com/docs/integrations/tanstack) docs
+- Pre-built Tanstack Query hooks for Better Auth [daveyplate/better-auth-tanstack](https://github.com/daveyplate/better-auth-tanstack)
+- Pre-built components [better-auth-ui/better-auth-ui](https://github.com/better-auth-ui/better-auth-ui)
+
+### State management (besides React and Zustand)
+
+- Guide [HichemTab-tech/react-shared-states](https://github.com/HichemTab-tech/react-shared-states)
+
+### Fetching
+
+- [axios/axios](https://github.com/axios/axios)
+
+### Cloud Sec
+
+- [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
+- [AWS security checks](https://cloudsploit.com/)
+- Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
+
+### Frontend Testing (besides Bun, Playwright)
+
+- [appium/appium](https://github.com/appium/appium)
+- [Applitools](https://applitools.com/)
+- [Checkbot](https://www.checkbot.io/)
+
+### Billing
+
+- [Stripe](https://stripe.com/)
+- self-hosted alternative [Lago](https://getlago.com/docs/welcome)
+
+## Backend links
 
 ### OCR
 
 - [tesseract-ocr/tesseract](https://github.com/tesseract-ocr/tesseract)
 - [madmaze/pytesseract](https://github.com/madmaze/pytesseract)
 - [naptha/tesseract.js](https://github.com/naptha/tesseract.js)
-- [Chrome OCR Issues thread](https://github.com/madmaze/pytesseract)
 - Tesseract python cli [ocrmypdf/OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF)
 - Custom LM [NanoNets/docext](https://github.com/NanoNets/docext)
 - Custom LM  [chatdoc-com/OCRFlux](https://github.com/chatdoc-com/OCRFlux)
@@ -142,6 +171,10 @@
 - [Hunyuan-PromptEnhancer/PromptEnhancer](https://github.com/Hunyuan-PromptEnhancer/PromptEnhancer)
 - **[promptslab/Promptify](https://github.com/promptslab/Promptify)**
 
+### LLM Memory
+
+- [MemoriLabs/Memori](https://github.com/MemoriLabs/Memori)
+
 ### Local hosting LLMs
 
 - [Mega4alik/ollm](https://github.com/Mega4alik/ollm)
@@ -160,12 +193,6 @@
 
 - [Trusted-AI/adversarial-robustness-toolbox](https://github.com/Trusted-AI/adversarial-robustness-toolbox)
 
-### Cloud Sec
-
-- [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
-- [AWS security checks](https://cloudsploit.com/)
-- Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
-
 ### PII Redaction
 
 - [microsoft/presidio](https://github.com/microsoft/presidio)
@@ -183,16 +210,6 @@
 - Tips [Kludex/fastapi-tips](https://github.com/Kludex/fastapi-tips)
 - [AWS Lambda](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-create-api-as-simple-proxy-for-lambda.html)
 
-### State management (besides react, zustand, tanstack)
-
-- [Rivet AWS ECS](https://www.rivet.dev/docs/deploy/aws-ecs)
-- [Recoil](https://recoiljs.org/)
-- Guide [HichemTab-tech/react-shared-states](https://github.com/HichemTab-tech/react-shared-states)
-
-### Fetching
-
-- [axios/axios](https://github.com/axios/axios)
-
 ### Messaging, API telemetry, Caching, Containerization
 
 - Kafka Boilerplate [StefanoFrusone/kafka-zero-to-production](https://github.com/StefanoFrusone/kafka-zero-to-production)
@@ -202,12 +219,6 @@
 - FastAPI Alternative [MotiaDev/motia](https://github.com/MotiaDev/motia/)
 - Monitoring [API Toolkit](https://apitoolkit.io/)
 - [healthchecks/healthchecks](https://github.com/healthchecks/healthchecks)
-
-### Frontend Testing (besides Bun, Playwright)
-
-- [appium/appium](https://github.com/appium/appium)
-- [Applitools](https://applitools.com/)
-- [Checkbot](https://www.checkbot.io/)
 
 ### Observability
 
@@ -219,16 +230,6 @@
 ### Public Data Sources
 
 - [public-apis/public-apis](https://github.com/public-apis/public-apis)
-
-## Billing
-
-- [Stripe](https://stripe.com/)
-- self-hosted alternative [Lago](https://getlago.com/docs/welcome)
-
-### AWS
-
-- Cloudwatch [aws-samples/aws-real-user-monitoring-amplifyapps](https://github.com/aws-samples/aws-real-user-monitoring-amplifyapps)
-- Amplify Auth [willagaroon/amplify-gen2-auth-boilerplate](https://github.com/willagaroon/amplify-gen2-auth-boilerplate)
 
 ### Automated Emails
 

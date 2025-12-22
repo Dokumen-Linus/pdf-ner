@@ -1,8 +1,7 @@
 -- migrate:up
-CREATE TABLE users (
+CREATE TABLE app.users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL,
-  "password" TEXT NOT NULL,
   first_name TEXT,
   last_name TEXT,
   employer TEXT,
@@ -12,4 +11,4 @@ CREATE TABLE users (
 );
 
 -- migrate:down
-DROP TABLE users;
+DROP TABLE app.users;

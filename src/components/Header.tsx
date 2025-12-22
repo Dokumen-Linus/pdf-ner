@@ -1,25 +1,57 @@
 import { useState } from "react"
 import { Link } from "@tanstack/react-router"
 import { Home, Menu, SquareFunction, X } from "lucide-react"
+import { authClient } from "@/lib/auth-client"
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const { data: session } = authClient.useSession()
 
   return (
     <>
-      <header className="p-4 flex items-center bg-gray-800 text-white shadow-lg">
-        <button
-          onClick={() => setIsOpen(true)}
-          className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-          aria-label="Open menu"
-        >
-          <Menu size={24} />
-        </button>
-        <h1 className="ml-4 text-xl font-semibold">
-          <Link to="/">
-            <img src="/tanstack-word-logo-white.svg" alt="TanStack Logo" className="h-10" />
-          </Link>
-        </h1>
+      <header className="p-4 flex items-center bg-gray-800 text-white shadow-lg justify-between">
+        <div className="flex items-center">
+          <button
+            onClick={() => setIsOpen(true)}
+            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu size={24} />
+          </button>
+          <h1 className="ml-4 text-xl font-semibold">
+            <Link to="/">
+              <img src="/tanstack-word-logo-white.svg" alt="TanStack Logo" className="h-10" />
+            </Link>
+          </h1>
+        </div>
+
+        <div className="flex items-center gap-4">
+          {session ? (
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-300 hidden sm:inline-block">
+                {session.user.email}
+              </span>
+              <Link
+                to="/signout"
+                className="text-sm bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-md transition-colors"
+              >
+                Sign Out
+              </Link>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link to="/signin" className="text-sm hover:text-cyan-400 transition-colors">
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                className="text-sm bg-cyan-600 hover:bg-cyan-700 px-3 py-2 rounded-md transition-colors"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
+        </div>
       </header>
 
       <aside

@@ -1,8 +1,10 @@
-import { ScrollCapability } from "@embedpdf/plugin-scroll"
 import { create } from "zustand"
 import { useShallow } from "zustand/react/shallow"
-import { AnnotationCapability } from "@/components/pdf-container/plugin-annotation-2/lib/plugin"
-import { AnnotationState } from "@/components/pdf-container/plugin-annotation-2/lib/state"
+import {
+  AnnotationCapability,
+  AnnotationState,
+} from "@/components/pdf-container/plugin-annotation-2"
+import { ScrollCapability } from "@/components/pdf-container/plugin-scroll-2"
 import { SelectionCapability } from "@/components/pdf-container/plugin-selection-2"
 
 interface PluginStore {
