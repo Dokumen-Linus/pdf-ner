@@ -60,3 +60,4 @@ prompts.txt
 
 # postgresql
 pgdata/
+logfile
