@@ -1,11 +1,14 @@
 -- migrate:up
-CREATE TABLE pdfs (
+CREATE TABLE app.users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  "filename" TEXT NOT NULL,
+  email TEXT NOT NULL,
+  first_name TEXT,
+  last_name TEXT,
+  employer TEXT,
+  job_title TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
 -- migrate:down
-DROP TABLE pdfs;
+DROP TABLE app.users;

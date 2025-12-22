@@ -1,0 +1,350 @@
+2025-12-21 19:44:52.452 EST [28128] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 19:44:52.456 EST [28128] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 19:44:52.456 EST [28128] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 19:44:52.505 EST [13380] LOG:  database system was shut down at 2025-12-21 19:42:52 EST
+2025-12-21 19:44:52.511 EST [28128] LOG:  database system is ready to accept connections
+2025-12-21 19:46:35.914 EST [13904] ERROR:  CREATE DATABASE cannot run inside a transaction block
+2025-12-21 19:46:35.914 EST [13904] STATEMENT:  -- migrate:up
+	CREATE DATABASE dokumen;
+	
+	
+2025-12-21 19:47:59.021 EST [31164] ERROR:  relation "users" does not exist
+2025-12-21 19:47:59.021 EST [31164] STATEMENT:  -- migrate:up
+	CREATE TABLE app.projects (
+	  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	  owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	  "name" TEXT NOT NULL,
+	  color_presets TEXT[], -- list of hex color code strings
+	  orientation TEXT NOT NULL DEFAULT 'any' CHECK (orientation IN ('any', 'portrait', 'landscape')),
+	  created_at TIMESTAMP DEFAULT NOW(),
+	  updated_at TIMESTAMP DEFAULT NOW()
+	);
+	
+	
+2025-12-21 19:49:52.508 EST [41220] LOG:  checkpoint starting: time
+2025-12-21 19:53:34.402 EST [41220] LOG:  checkpoint complete: wrote 2055 buffers (12.5%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 1 recycled; write=221.621 s, sync=0.256 s, total=221.895 s; sync files=645, longest=0.002 s, average=0.001 s; distance=9919 kB, estimate=9919 kB; lsn=0/21A13B8, redo lsn=0/21A1328
+2025-12-21 19:59:52.425 EST [41220] LOG:  checkpoint starting: time
+2025-12-21 19:59:52.988 EST [41220] LOG:  checkpoint complete: wrote 5 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.551 s, sync=0.008 s, total=0.564 s; sync files=5, longest=0.006 s, average=0.002 s; distance=1 kB, estimate=8928 kB; lsn=0/21A1970, redo lsn=0/21A1918
+2025-12-21 22:15:09.842 EST [42420] ERROR:  relation "user" does not exist at character 40
+2025-12-21 22:15:09.842 EST [42420] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 22:15:25.275 EST [41220] LOG:  shutting down
+2025-12-21 22:15:25.278 EST [17432] ERROR:  canceling statement due to user request
+2025-12-21 22:15:25.278 EST [28128] LOG:  received fast shutdown request
+2025-12-21 22:15:25.279 EST [41220] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 22:15:25.279 EST [28128] LOG:  aborting any active transactions
+2025-12-21 22:15:25.297 EST [41220] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.003 s, sync=0.002 s, total=0.022 s; sync files=1, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=8035 kB; lsn=0/21A1B50, redo lsn=0/21A1B50
+2025-12-21 22:15:25.304 EST [28128] LOG:  background worker "logical replication launcher" (PID 17432) exited with exit code 1
+2025-12-21 22:15:25.360 EST [28128] LOG:  database system is shut down
+2025-12-21 22:27:00.393 EST [32064] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 22:27:00.397 EST [32064] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 22:27:00.397 EST [32064] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 22:27:00.445 EST [19800] LOG:  database system was shut down at 2025-12-21 22:15:25 EST
+2025-12-21 22:27:00.453 EST [32064] LOG:  database system is ready to accept connections
+2025-12-21 22:28:21.088 EST [1444] ERROR:  relation "user" does not exist at character 40
+2025-12-21 22:28:21.088 EST [1444] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 22:31:19.971 EST [7580] ERROR:  canceling statement due to user request
+2025-12-21 22:31:19.974 EST [30836] LOG:  shutting down
+2025-12-21 22:31:19.974 EST [32064] LOG:  received fast shutdown request
+2025-12-21 22:31:19.980 EST [30836] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 22:31:19.982 EST [32064] LOG:  aborting any active transactions
+2025-12-21 22:31:19.983 EST [32064] LOG:  background worker "logical replication launcher" (PID 7580) exited with exit code 1
+2025-12-21 22:31:19.998 EST [30836] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.005 s, total=0.025 s; sync files=3, longest=0.003 s, average=0.002 s; distance=8 kB, estimate=8 kB; lsn=0/21A3C58, redo lsn=0/21A3C58
+2025-12-21 22:31:20.053 EST [32064] LOG:  database system is shut down
+2025-12-21 22:38:24.622 EST [38720] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 22:38:24.626 EST [38720] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 22:38:24.626 EST [38720] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 22:38:24.680 EST [9548] LOG:  database system was shut down at 2025-12-21 22:31:19 EST
+2025-12-21 22:38:24.687 EST [38720] LOG:  database system is ready to accept connections
+2025-12-21 22:38:56.816 EST [7100] ERROR:  relation "user" does not exist at character 40
+2025-12-21 22:38:56.816 EST [7100] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 22:40:44.882 EST [41400] ERROR:  canceling statement due to user request
+2025-12-21 22:40:44.882 EST [14696] LOG:  shutting down
+2025-12-21 22:40:44.882 EST [38720] LOG:  received fast shutdown request
+2025-12-21 22:40:44.883 EST [14696] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 22:40:44.883 EST [38720] LOG:  aborting any active transactions
+2025-12-21 22:40:44.900 EST [14696] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.003 s, total=0.018 s; sync files=2, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=0 kB; lsn=0/21A3D08, redo lsn=0/21A3D08
+2025-12-21 22:40:44.908 EST [38720] LOG:  background worker "logical replication launcher" (PID 41400) exited with exit code 1
+2025-12-21 22:40:44.956 EST [38720] LOG:  database system is shut down
+2025-12-21 22:43:22.205 EST [20788] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 22:43:22.209 EST [20788] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 22:43:22.209 EST [20788] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 22:43:22.256 EST [16032] LOG:  database system was shut down at 2025-12-21 22:40:44 EST
+2025-12-21 22:43:22.262 EST [20788] LOG:  database system is ready to accept connections
+2025-12-21 22:43:26.661 EST [37444] FATAL:  database "zchar" does not exist
+2025-12-21 22:44:03.249 EST [6340] FATAL:  database ".\pgdata" does not exist
+2025-12-21 22:44:59.861 EST [28360] ERROR:  relation "user" does not exist at character 40
+2025-12-21 22:44:59.861 EST [28360] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 22:46:49.840 EST [42508] ERROR:  canceling statement due to user request
+2025-12-21 22:46:49.841 EST [34780] LOG:  shutting down
+2025-12-21 22:46:49.841 EST [20788] LOG:  received fast shutdown request
+2025-12-21 22:46:49.842 EST [34780] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 22:46:49.842 EST [20788] LOG:  aborting any active transactions
+2025-12-21 22:46:49.890 EST [20788] LOG:  background worker "logical replication launcher" (PID 42508) exited with exit code 1
+2025-12-21 22:46:49.916 EST [34780] LOG:  checkpoint complete: wrote 61 buffers (0.4%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.020 s, sync=0.031 s, total=0.076 s; sync files=61, longest=0.001 s, average=0.001 s; distance=327 kB, estimate=327 kB; lsn=0/21F5B18, redo lsn=0/21F5B18
+2025-12-21 22:46:49.940 EST [20788] LOG:  database system is shut down
+2025-12-21 22:49:42.543 EST [35144] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 22:49:42.547 EST [35144] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 22:49:42.547 EST [35144] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 22:49:42.596 EST [5856] LOG:  database system was shut down at 2025-12-21 22:46:49 EST
+2025-12-21 22:49:42.603 EST [35144] LOG:  database system is ready to accept connections
+2025-12-21 22:49:59.344 EST [27524] ERROR:  relation "user" does not exist at character 40
+2025-12-21 22:49:59.344 EST [27524] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 22:51:43.367 EST [41648] ERROR:  canceling statement due to user request
+2025-12-21 22:51:43.367 EST [24220] LOG:  shutting down
+2025-12-21 22:51:43.367 EST [35144] LOG:  received fast shutdown request
+2025-12-21 22:51:43.373 EST [24220] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 22:51:43.375 EST [35144] LOG:  aborting any active transactions
+2025-12-21 22:51:43.397 EST [35144] LOG:  background worker "logical replication launcher" (PID 41648) exited with exit code 1
+2025-12-21 22:51:43.398 EST [24220] LOG:  checkpoint complete: wrote 3 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.005 s, total=0.031 s; sync files=3, longest=0.003 s, average=0.002 s; distance=23 kB, estimate=23 kB; lsn=0/21FB920, redo lsn=0/21FB920
+2025-12-21 22:51:43.456 EST [35144] LOG:  database system is shut down
+2025-12-21 22:51:45.794 EST [32460] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 22:51:45.798 EST [32460] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 22:51:45.798 EST [32460] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 22:51:45.858 EST [11712] LOG:  database system was shut down at 2025-12-21 22:51:43 EST
+2025-12-21 22:51:45.865 EST [32460] LOG:  database system is ready to accept connections
+2025-12-21 22:52:06.619 EST [41008] ERROR:  relation "user" does not exist at character 40
+2025-12-21 22:52:06.619 EST [41008] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 22:52:52.263 EST [35800] ERROR:  canceling statement due to user request
+2025-12-21 22:52:52.263 EST [39552] LOG:  shutting down
+2025-12-21 22:52:52.264 EST [32460] LOG:  received fast shutdown request
+2025-12-21 22:52:52.266 EST [39552] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 22:52:52.266 EST [32460] LOG:  aborting any active transactions
+2025-12-21 22:52:52.270 EST [32460] LOG:  background worker "logical replication launcher" (PID 35800) exited with exit code 1
+2025-12-21 22:52:52.279 EST [39552] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.004 s, sync=0.003 s, total=0.016 s; sync files=2, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=0 kB; lsn=0/21FB9D0, redo lsn=0/21FB9D0
+2025-12-21 22:52:52.339 EST [32460] LOG:  database system is shut down
+2025-12-21 22:52:54.989 EST [2340] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 22:52:54.993 EST [2340] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 22:52:54.993 EST [2340] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 22:52:55.041 EST [18624] LOG:  database system was shut down at 2025-12-21 22:52:52 EST
+2025-12-21 22:52:55.049 EST [2340] LOG:  database system is ready to accept connections
+2025-12-21 22:52:59.421 EST [35444] FATAL:  database "zchar" does not exist
+2025-12-21 22:53:36.471 EST [3000] ERROR:  relation "auth.user" does not exist at character 15
+2025-12-21 22:53:36.471 EST [3000] STATEMENT:  select * from auth.user;
+2025-12-21 22:54:03.083 EST [3000] ERROR:  relation "app.pdfs" does not exist at character 15
+2025-12-21 22:54:03.083 EST [3000] STATEMENT:  select * from app.pdfs;
+2025-12-21 22:54:36.439 EST [3000] ERROR:  relation "pdfs" does not exist at character 15
+2025-12-21 22:54:36.439 EST [3000] STATEMENT:  select * from pdfs;
+2025-12-21 22:55:56.100 EST [39048] FATAL:  database "\dn" does not exist
+2025-12-21 22:56:08.922 EST [42556] FATAL:  role "\dn" does not exist
+2025-12-21 22:57:55.045 EST [31016] LOG:  checkpoint starting: time
+2025-12-21 22:57:55.060 EST [31016] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.002 s, total=0.016 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/21FBAD8, redo lsn=0/21FBA80
+2025-12-21 22:59:31.281 EST [37088] ERROR:  canceling statement due to user request
+2025-12-21 22:59:31.281 EST [31016] LOG:  shutting down
+2025-12-21 22:59:31.282 EST [2340] LOG:  received fast shutdown request
+2025-12-21 22:59:31.289 EST [31016] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 22:59:31.290 EST [2340] LOG:  aborting any active transactions
+2025-12-21 22:59:31.301 EST [2340] LOG:  background worker "logical replication launcher" (PID 37088) exited with exit code 1
+2025-12-21 22:59:31.305 EST [31016] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.024 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=0 kB; lsn=0/21FBB88, redo lsn=0/21FBB88
+2025-12-21 22:59:31.362 EST [2340] LOG:  database system is shut down
+2025-12-21 23:00:26.266 EST [34560] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:00:26.271 EST [34560] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:00:26.271 EST [34560] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:00:26.326 EST [39912] LOG:  database system was shut down at 2025-12-21 22:59:31 EST
+2025-12-21 23:00:26.333 EST [34560] LOG:  database system is ready to accept connections
+2025-12-21 23:05:00.489 EST [36956] ERROR:  role "auth_role" already exists
+2025-12-21 23:05:00.489 EST [36956] STATEMENT:  -- migrate:up
+	CREATE ROLE auth_role LOGIN PASSWORD '...';
+	CREATE ROLE app_user LOGIN PASSWORD '...';
+	CREATE ROLE app_owner LOGIN PASSWORD '...';
+	
+	CREATE SCHEMA auth AUTHORIZATION auth_role;
+	CREATE SCHEMA app AUTHORIZATION app_owner;
+	
+	GRANT USAGE ON SCHEMA app TO app_user;
+	
+	
+2025-12-21 23:05:26.332 EST [19544] LOG:  checkpoint starting: time
+2025-12-21 23:05:29.533 EST [19544] LOG:  checkpoint complete: wrote 29 buffers (0.2%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=3.147 s, sync=0.043 s, total=3.202 s; sync files=29, longest=0.003 s, average=0.002 s; distance=164 kB, estimate=164 kB; lsn=0/2224D58, redo lsn=0/2224D00
+2025-12-21 23:10:18.441 EST [41380] ERROR:  role "auth_role" already exists
+2025-12-21 23:10:18.441 EST [41380] STATEMENT:  -- migrate:up
+	CREATE ROLE auth_role LOGIN PASSWORD '...';
+	CREATE ROLE app_user LOGIN PASSWORD '...';
+	CREATE ROLE app_owner LOGIN PASSWORD '...';
+	
+	CREATE SCHEMA auth AUTHORIZATION auth_role;
+	CREATE SCHEMA app AUTHORIZATION app_owner;
+	
+	GRANT USAGE ON SCHEMA app TO app_user;
+	
+	
+2025-12-21 23:10:26.540 EST [19544] LOG:  checkpoint starting: time
+2025-12-21 23:10:26.911 EST [19544] LOG:  checkpoint complete: wrote 3 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.336 s, sync=0.009 s, total=0.372 s; sync files=3, longest=0.007 s, average=0.003 s; distance=15 kB, estimate=149 kB; lsn=0/2228B70, redo lsn=0/2228B18
+2025-12-21 23:11:03.970 EST [34560] LOG:  received fast shutdown request
+2025-12-21 23:11:03.971 EST [34560] LOG:  aborting any active transactions
+2025-12-21 23:11:03.977 EST [34560] LOG:  background worker "logical replication launcher" (PID 25192) exited with exit code 1
+2025-12-21 23:11:03.977 EST [19544] LOG:  shutting down
+2025-12-21 23:11:03.978 EST [19544] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 23:11:03.983 EST [19544] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.006 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=134 kB; lsn=0/2228C20, redo lsn=0/2228C20
+2025-12-21 23:11:04.004 EST [34560] LOG:  database system is shut down
+2025-12-21 23:12:08.593 EST [33200] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:12:08.597 EST [33200] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:12:08.597 EST [33200] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:12:08.650 EST [7416] LOG:  database system was shut down at 2025-12-21 23:11:49 EST
+2025-12-21 23:12:08.655 EST [33200] LOG:  database system is ready to accept connections
+2025-12-21 23:13:24.764 EST [37796] ERROR:  relation "user" does not exist at character 40
+2025-12-21 23:13:24.764 EST [37796] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 23:13:51.379 EST [12292] ERROR:  canceling statement due to user request
+2025-12-21 23:13:51.379 EST [14344] LOG:  shutting down
+2025-12-21 23:13:51.379 EST [33200] LOG:  received fast shutdown request
+2025-12-21 23:13:51.386 EST [14344] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 23:13:51.386 EST [33200] LOG:  aborting any active transactions
+2025-12-21 23:13:51.390 EST [33200] LOG:  background worker "logical replication launcher" (PID 12292) exited with exit code 1
+2025-12-21 23:13:51.545 EST [14344] LOG:  checkpoint complete: wrote 1062 buffers (6.5%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.039 s, sync=0.111 s, total=0.166 s; sync files=366, longest=0.001 s, average=0.001 s; distance=5255 kB, estimate=5255 kB; lsn=0/1D13278, redo lsn=0/1D13278
+2025-12-21 23:13:51.568 EST [33200] LOG:  database system is shut down
+2025-12-21 23:14:07.086 EST [15856] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:14:07.090 EST [15856] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:14:07.090 EST [15856] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:14:07.140 EST [25272] LOG:  database system was shut down at 2025-12-21 23:13:51 EST
+2025-12-21 23:14:07.200 EST [15856] LOG:  database system is ready to accept connections
+2025-12-21 23:14:25.689 EST [39908] ERROR:  relation "user" does not exist at character 40
+2025-12-21 23:14:25.689 EST [39908] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 23:16:21.899 EST [35888] ERROR:  canceling statement due to user request
+2025-12-21 23:16:21.899 EST [39780] LOG:  shutting down
+2025-12-21 23:16:21.899 EST [15856] LOG:  received fast shutdown request
+2025-12-21 23:16:21.901 EST [39780] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 23:16:21.901 EST [15856] LOG:  aborting any active transactions
+2025-12-21 23:16:21.906 EST [15856] LOG:  background worker "logical replication launcher" (PID 35888) exited with exit code 1
+2025-12-21 23:16:21.916 EST [39780] LOG:  checkpoint complete: wrote 33 buffers (0.2%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.003 s, sync=0.007 s, total=0.017 s; sync files=10, longest=0.002 s, average=0.001 s; distance=225 kB, estimate=225 kB; lsn=0/1D4B6D0, redo lsn=0/1D4B6D0
+2025-12-21 23:16:21.967 EST [15856] LOG:  database system is shut down
+2025-12-21 23:16:24.103 EST [32012] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:16:24.107 EST [32012] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:16:24.107 EST [32012] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:16:24.155 EST [41132] LOG:  database system was shut down at 2025-12-21 23:16:21 EST
+2025-12-21 23:16:24.162 EST [32012] LOG:  database system is ready to accept connections
+2025-12-21 23:16:44.765 EST [42808] ERROR:  relation "user" does not exist at character 40
+2025-12-21 23:16:44.765 EST [42808] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 23:17:03.955 EST [32012] LOG:  received fast shutdown request
+2025-12-21 23:17:03.956 EST [36156] ERROR:  canceling statement due to user request
+2025-12-21 23:17:03.956 EST [20432] LOG:  shutting down
+2025-12-21 23:17:03.962 EST [20432] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 23:17:03.962 EST [32012] LOG:  aborting any active transactions
+2025-12-21 23:17:03.970 EST [20432] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.002 s, total=0.015 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1D4B780, redo lsn=0/1D4B780
+2025-12-21 23:17:03.979 EST [32012] LOG:  background worker "logical replication launcher" (PID 36156) exited with exit code 1
+2025-12-21 23:17:04.024 EST [32012] LOG:  database system is shut down
+2025-12-21 23:17:05.654 EST [23308] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:17:05.657 EST [23308] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:17:05.658 EST [23308] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:17:05.705 EST [21632] LOG:  database system was shut down at 2025-12-21 23:17:03 EST
+2025-12-21 23:17:05.712 EST [23308] LOG:  database system is ready to accept connections
+2025-12-21 23:17:25.818 EST [27644] ERROR:  relation "user" does not exist at character 40
+2025-12-21 23:17:25.818 EST [27644] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 23:20:12.541 EST [39960] ERROR:  canceling statement due to user request
+2025-12-21 23:20:12.543 EST [5868] LOG:  shutting down
+2025-12-21 23:20:12.543 EST [23308] LOG:  received fast shutdown request
+2025-12-21 23:20:12.549 EST [5868] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 23:20:12.550 EST [23308] LOG:  aborting any active transactions
+2025-12-21 23:20:12.556 EST [23308] LOG:  background worker "logical replication launcher" (PID 39960) exited with exit code 1
+2025-12-21 23:20:12.562 EST [5868] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.002 s, total=0.020 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1D4B830, redo lsn=0/1D4B830
+2025-12-21 23:20:12.604 EST [23308] LOG:  database system is shut down
+2025-12-21 23:20:48.025 EST [39188] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:20:48.029 EST [39188] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:20:48.029 EST [39188] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:20:48.080 EST [35176] LOG:  database system was shut down at 2025-12-21 23:20:12 EST
+2025-12-21 23:20:48.087 EST [39188] LOG:  database system is ready to accept connections
+2025-12-21 23:21:04.205 EST [20560] ERROR:  canceling statement due to user request
+2025-12-21 23:21:04.206 EST [39188] LOG:  received fast shutdown request
+2025-12-21 23:21:04.208 EST [11680] LOG:  shutting down
+2025-12-21 23:21:04.214 EST [11680] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 23:21:04.217 EST [39188] LOG:  aborting any active transactions
+2025-12-21 23:21:04.246 EST [11680] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.007 s, sync=0.003 s, total=0.038 s; sync files=2, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=0 kB; lsn=0/1D4B8E0, redo lsn=0/1D4B8E0
+2025-12-21 23:21:04.249 EST [39188] LOG:  background worker "logical replication launcher" (PID 20560) exited with exit code 1
+2025-12-21 23:21:04.302 EST [39188] LOG:  database system is shut down
+2025-12-21 23:25:44.754 EST [42260] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:25:44.757 EST [42260] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:25:44.757 EST [42260] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:25:44.805 EST [40040] LOG:  database system was shut down at 2025-12-21 23:25:36 EST
+2025-12-21 23:25:44.811 EST [42260] LOG:  database system is ready to accept connections
+2025-12-21 23:26:34.183 EST [25648] ERROR:  relation "auth.user" does not exist at character 15
+2025-12-21 23:26:34.183 EST [25648] STATEMENT:  select * from auth.user;
+2025-12-21 23:27:22.893 EST [15024] ERROR:  relation "auth.user" does not exist at character 15
+2025-12-21 23:27:22.893 EST [15024] STATEMENT:  select * from auth.user;
+2025-12-21 23:29:19.503 EST [18784] ERROR:  canceling statement due to user request
+2025-12-21 23:29:19.503 EST [42260] LOG:  received fast shutdown request
+2025-12-21 23:29:19.503 EST [33808] LOG:  shutting down
+2025-12-21 23:29:19.509 EST [33808] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 23:29:19.510 EST [42260] LOG:  aborting any active transactions
+2025-12-21 23:29:19.520 EST [42260] LOG:  background worker "logical replication launcher" (PID 18784) exited with exit code 1
+2025-12-21 23:29:19.665 EST [33808] LOG:  checkpoint complete: wrote 1064 buffers (6.5%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.036 s, sync=0.115 s, total=0.163 s; sync files=366, longest=0.001 s, average=0.001 s; distance=5278 kB, estimate=5278 kB; lsn=0/1D18B58, redo lsn=0/1D18B58
+2025-12-21 23:29:19.689 EST [42260] LOG:  database system is shut down
+2025-12-21 23:30:13.280 EST [42824] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:30:13.284 EST [42824] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:30:13.285 EST [42824] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:30:13.336 EST [38608] LOG:  database system was shut down at 2025-12-21 23:30:08 EST
+2025-12-21 23:30:13.342 EST [42824] LOG:  database system is ready to accept connections
+2025-12-21 23:30:39.470 EST [11608] FATAL:  database "zchar" does not exist
+2025-12-21 23:31:13.522 EST [29192] ERROR:  canceling statement due to user request
+2025-12-21 23:31:13.524 EST [42824] LOG:  received fast shutdown request
+2025-12-21 23:31:13.525 EST [33924] LOG:  shutting down
+2025-12-21 23:31:13.530 EST [33924] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 23:31:13.532 EST [42824] LOG:  aborting any active transactions
+2025-12-21 23:31:13.577 EST [42824] LOG:  background worker "logical replication launcher" (PID 29192) exited with exit code 1
+2025-12-21 23:31:13.702 EST [33924] LOG:  checkpoint complete: wrote 1021 buffers (6.2%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.050 s, sync=0.104 s, total=0.177 s; sync files=357, longest=0.002 s, average=0.001 s; distance=4944 kB, estimate=4944 kB; lsn=0/1CC5480, redo lsn=0/1CC5480
+2025-12-21 23:31:13.725 EST [42824] LOG:  database system is shut down
+2025-12-21 23:32:01.099 EST [23308] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:32:01.102 EST [23308] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:32:01.103 EST [23308] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:32:01.153 EST [576] LOG:  database system was shut down at 2025-12-21 23:31:13 EST
+2025-12-21 23:32:01.200 EST [23308] LOG:  database system is ready to accept connections
+2025-12-21 23:32:22.101 EST [41484] ERROR:  permission denied for table user
+2025-12-21 23:32:22.101 EST [41484] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 23:33:04.056 EST [41800] ERROR:  permission denied for table user
+2025-12-21 23:33:04.056 EST [41800] STATEMENT:  select "primary".* from (select * from "user" where "user"."email" = $1) as "primary"
+2025-12-21 23:34:53.506 EST [14088] ERROR:  canceling statement due to user request
+2025-12-21 23:34:53.509 EST [22336] LOG:  shutting down
+2025-12-21 23:34:53.509 EST [23308] LOG:  received fast shutdown request
+2025-12-21 23:34:53.515 EST [22336] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 23:34:53.516 EST [23308] LOG:  aborting any active transactions
+2025-12-21 23:34:53.517 EST [23308] LOG:  background worker "logical replication launcher" (PID 14088) exited with exit code 1
+2025-12-21 23:34:53.542 EST [22336] LOG:  checkpoint complete: wrote 47 buffers (0.3%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.007 s, sync=0.013 s, total=0.033 s; sync files=15, longest=0.002 s, average=0.001 s; distance=357 kB, estimate=357 kB; lsn=0/1D1E930, redo lsn=0/1D1E930
+2025-12-21 23:34:53.582 EST [23308] LOG:  database system is shut down
+2025-12-21 23:35:43.844 EST [21040] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:35:43.848 EST [21040] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:35:43.848 EST [21040] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:35:43.895 EST [9504] LOG:  database system was shut down at 2025-12-21 23:34:53 EST
+2025-12-21 23:35:43.901 EST [21040] LOG:  database system is ready to accept connections
+2025-12-21 23:36:27.167 EST [18316] ERROR:  canceling statement due to user request
+2025-12-21 23:36:27.168 EST [7268] LOG:  shutting down
+2025-12-21 23:36:27.168 EST [21040] LOG:  received fast shutdown request
+2025-12-21 23:36:27.174 EST [7268] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 23:36:27.175 EST [21040] LOG:  aborting any active transactions
+2025-12-21 23:36:27.176 EST [10052] FATAL:  terminating connection due to administrator command
+2025-12-21 23:36:27.191 EST [21040] LOG:  background worker "logical replication launcher" (PID 18316) exited with exit code 1
+2025-12-21 23:36:27.213 EST [7268] LOG:  checkpoint complete: wrote 34 buffers (0.2%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.011 s, sync=0.019 s, total=0.046 s; sync files=25, longest=0.002 s, average=0.001 s; distance=52 kB, estimate=52 kB; lsn=0/1D2B930, redo lsn=0/1D2B930
+2025-12-21 23:36:27.252 EST [21040] LOG:  database system is shut down
+2025-12-21 23:38:11.878 EST [32544] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:38:11.881 EST [32544] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:38:11.882 EST [32544] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:38:11.934 EST [42380] LOG:  database system was shut down at 2025-12-21 23:36:27 EST
+2025-12-21 23:38:11.940 EST [32544] LOG:  database system is ready to accept connections
+2025-12-21 23:38:28.962 EST [14180] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-12-21 23:40:27.077 EST [34780] FATAL:  database "zchar" does not exist
+2025-12-21 23:43:11.935 EST [31828] LOG:  checkpoint starting: time
+2025-12-21 23:43:12.517 EST [31828] LOG:  checkpoint complete: wrote 5 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.560 s, sync=0.012 s, total=0.583 s; sync files=7, longest=0.008 s, average=0.002 s; distance=2 kB, estimate=2 kB; lsn=0/1D2C300, redo lsn=0/1D2C2A8
+2025-12-21 23:44:33.257 EST [20424] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2025-12-21 23:46:48.262 EST [31828] LOG:  shutting down
+2025-12-21 23:46:48.262 EST [32544] LOG:  received fast shutdown request
+2025-12-21 23:46:48.264 EST [29684] ERROR:  canceling statement due to user request
+2025-12-21 23:46:48.273 EST [31828] LOG:  checkpoint starting: shutdown immediate
+2025-12-21 23:46:48.274 EST [32544] LOG:  aborting any active transactions
+2025-12-21 23:46:48.276 EST [41692] FATAL:  terminating connection due to administrator command
+2025-12-21 23:46:48.297 EST [31828] LOG:  checkpoint complete: wrote 3 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.004 s, total=0.035 s; sync files=2, longest=0.003 s, average=0.002 s; distance=14 kB, estimate=14 kB; lsn=0/1D2FAD0, redo lsn=0/1D2FAD0
+2025-12-21 23:46:48.305 EST [32544] LOG:  background worker "logical replication launcher" (PID 29684) exited with exit code 1
+2025-12-21 23:46:48.356 EST [32544] LOG:  database system is shut down
+2025-12-21 23:47:56.202 EST [3188] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-21 23:47:56.206 EST [3188] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-21 23:47:56.206 EST [3188] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-21 23:47:56.254 EST [18784] LOG:  database system was shut down at 2025-12-21 23:46:48 EST
+2025-12-21 23:47:56.262 EST [3188] LOG:  database system is ready to accept connections
+2025-12-21 23:48:00.644 EST [22296] ERROR:  relation "user" already exists
+2025-12-21 23:48:00.644 EST [22296] STATEMENT:  create table "auth"."user" ("id" text not null primary key, "name" text not null, "email" text not null unique, "emailVerified" boolean not null, "image" text, "createdAt" timestamptz default CURRENT_TIMESTAMP not null, "updatedAt" timestamptz default CURRENT_TIMESTAMP not null);
+2025-12-21 23:48:00.647 EST [22296] ERROR:  relation "session" already exists
+2025-12-21 23:48:00.647 EST [22296] STATEMENT:  create table "auth"."session" ("id" text not null primary key, "expiresAt" timestamptz not null, "token" text not null unique, "createdAt" timestamptz default CURRENT_TIMESTAMP not null, "updatedAt" timestamptz not null, "ipAddress" text, "userAgent" text, "userId" text not null references "auth"."user" ("id") on delete cascade);
+2025-12-21 23:48:00.650 EST [22296] ERROR:  relation "account" already exists
+2025-12-21 23:48:00.650 EST [22296] STATEMENT:  create table "auth"."account" ("id" text not null primary key, "accountId" text not null, "providerId" text not null, "userId" text not null references "auth"."user" ("id") on delete cascade, "accessToken" text, "refreshToken" text, "idToken" text, "accessTokenExpiresAt" timestamptz, "refreshTokenExpiresAt" timestamptz, "scope" text, "password" text, "createdAt" timestamptz default CURRENT_TIMESTAMP not null, "updatedAt" timestamptz not null);
+2025-12-21 23:48:00.652 EST [22296] ERROR:  relation "verification" already exists
+2025-12-21 23:48:00.652 EST [22296] STATEMENT:  create table "auth"."verification" ("id" text not null primary key, "identifier" text not null, "value" text not null, "expiresAt" timestamptz not null, "createdAt" timestamptz default CURRENT_TIMESTAMP not null, "updatedAt" timestamptz default CURRENT_TIMESTAMP not null);
+2025-12-21 23:52:56.107 EST [31328] LOG:  checkpoint starting: time
+2025-12-21 23:52:58.511 EST [31328] LOG:  checkpoint complete: wrote 22 buffers (0.1%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=2.377 s, sync=0.015 s, total=2.406 s; sync files=23, longest=0.003 s, average=0.001 s; distance=79 kB, estimate=79 kB; lsn=0/1D439F8, redo lsn=0/1D439A0
+2025-12-22 00:40:19.238 EST [25084] FATAL:  role "SELECT * FROM auth.user;" does not exist

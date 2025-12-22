@@ -1,7 +1,7 @@
 -- migrate:up
-CREATE TABLE entity_types (
+CREATE TABLE app.entity_types (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  project_id UUID NOT NULL REFERENCES app.projects(id) ON DELETE CASCADE,
   "name" TEXT NOT NULL,
   page1_definition TEXT,
   page1_examples TEXT[],
@@ -16,4 +16,4 @@ CREATE TABLE entity_types (
 );
 
 -- migrate:down
-DROP TABLE entity_types;
+DROP TABLE app.entity_types;

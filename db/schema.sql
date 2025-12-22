@@ -1,4 +1,4 @@
-\restrict 35tPESLU7lTLe6X9msDTEYOh5aTKT3UnYUzjyP0YAalYHiIphKmUFEzvFbvoARE
+\restrict 52ciw2fFSlJwj7UM5c7DFjyCwNvuDd8LElEl8fG2aIUIwBelicO6gbVZXtWP4TL
 
 -- Dumped from database version 18.1
 -- Dumped by pg_dump version 18.1
@@ -15,15 +15,29 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: app; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA app;
+
+
+--
+-- Name: auth; Type: SCHEMA; Schema: -; Owner: -
+--
+
+CREATE SCHEMA auth;
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: annotations; Type: TABLE; Schema: public; Owner: -
+-- Name: annotations; Type: TABLE; Schema: app; Owner: -
 --
 
-CREATE TABLE public.annotations (
+CREATE TABLE app.annotations (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     pdf_id uuid NOT NULL,
     subtype text NOT NULL,
@@ -46,10 +60,10 @@ CREATE TABLE public.annotations (
 
 
 --
--- Name: entity_types; Type: TABLE; Schema: public; Owner: -
+-- Name: entity_types; Type: TABLE; Schema: app; Owner: -
 --
 
-CREATE TABLE public.entity_types (
+CREATE TABLE app.entity_types (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     project_id uuid NOT NULL,
     name text NOT NULL,
@@ -70,10 +84,10 @@ CREATE TABLE public.entity_types (
 
 
 --
--- Name: pdfs; Type: TABLE; Schema: public; Owner: -
+-- Name: pdfs; Type: TABLE; Schema: app; Owner: -
 --
 
-CREATE TABLE public.pdfs (
+CREATE TABLE app.pdfs (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     project_id uuid NOT NULL,
     filename text NOT NULL,
@@ -83,10 +97,10 @@ CREATE TABLE public.pdfs (
 
 
 --
--- Name: projects; Type: TABLE; Schema: public; Owner: -
+-- Name: projects; Type: TABLE; Schema: app; Owner: -
 --
 
-CREATE TABLE public.projects (
+CREATE TABLE app.projects (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     owner_id uuid NOT NULL,
     name text NOT NULL,
@@ -95,6 +109,22 @@ CREATE TABLE public.projects (
     created_at timestamp without time zone DEFAULT now(),
     updated_at timestamp without time zone DEFAULT now(),
     CONSTRAINT projects_orientation_check CHECK ((orientation = ANY (ARRAY['any'::text, 'portrait'::text, 'landscape'::text])))
+);
+
+
+--
+-- Name: users; Type: TABLE; Schema: app; Owner: -
+--
+
+CREATE TABLE app.users (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    email text NOT NULL,
+    first_name text,
+    last_name text,
+    employer text,
+    job_title text,
+    created_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT now()
 );
 
 
@@ -108,51 +138,43 @@ CREATE TABLE public.schema_migrations (
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: -
+-- Name: annotations annotations_pkey; Type: CONSTRAINT; Schema: app; Owner: -
 --
 
-CREATE TABLE public.users (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    email text NOT NULL,
-    first_name text,
-    last_name text,
-    employer text,
-    job_title text,
-    created_at timestamp without time zone DEFAULT now(),
-    updated_at timestamp without time zone DEFAULT now()
-);
-
-
---
--- Name: annotations annotations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.annotations
+ALTER TABLE ONLY app.annotations
     ADD CONSTRAINT annotations_pkey PRIMARY KEY (id);
 
 
 --
--- Name: entity_types entity_types_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: entity_types entity_types_pkey; Type: CONSTRAINT; Schema: app; Owner: -
 --
 
-ALTER TABLE ONLY public.entity_types
+ALTER TABLE ONLY app.entity_types
     ADD CONSTRAINT entity_types_pkey PRIMARY KEY (id);
 
 
 --
--- Name: pdfs pdfs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: pdfs pdfs_pkey; Type: CONSTRAINT; Schema: app; Owner: -
 --
 
-ALTER TABLE ONLY public.pdfs
+ALTER TABLE ONLY app.pdfs
     ADD CONSTRAINT pdfs_pkey PRIMARY KEY (id);
 
 
 --
--- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: projects projects_pkey; Type: CONSTRAINT; Schema: app; Owner: -
 --
 
-ALTER TABLE ONLY public.projects
+ALTER TABLE ONLY app.projects
     ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: app; Owner: -
+--
+
+ALTER TABLE ONLY app.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
 
 --
@@ -164,50 +186,42 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: annotations annotations_pdf_id_fkey; Type: FK CONSTRAINT; Schema: app; Owner: -
 --
 
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
-
-
---
--- Name: annotations annotations_pdf_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.annotations
-    ADD CONSTRAINT annotations_pdf_id_fkey FOREIGN KEY (pdf_id) REFERENCES public.pdfs(id) ON DELETE CASCADE;
+ALTER TABLE ONLY app.annotations
+    ADD CONSTRAINT annotations_pdf_id_fkey FOREIGN KEY (pdf_id) REFERENCES app.pdfs(id) ON DELETE CASCADE;
 
 
 --
--- Name: entity_types entity_types_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: entity_types entity_types_project_id_fkey; Type: FK CONSTRAINT; Schema: app; Owner: -
 --
 
-ALTER TABLE ONLY public.entity_types
-    ADD CONSTRAINT entity_types_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
-
-
---
--- Name: pdfs pdfs_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.pdfs
-    ADD CONSTRAINT pdfs_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+ALTER TABLE ONLY app.entity_types
+    ADD CONSTRAINT entity_types_project_id_fkey FOREIGN KEY (project_id) REFERENCES app.projects(id) ON DELETE CASCADE;
 
 
 --
--- Name: projects projects_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: pdfs pdfs_project_id_fkey; Type: FK CONSTRAINT; Schema: app; Owner: -
 --
 
-ALTER TABLE ONLY public.projects
-    ADD CONSTRAINT projects_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.users(id) ON DELETE CASCADE;
+ALTER TABLE ONLY app.pdfs
+    ADD CONSTRAINT pdfs_project_id_fkey FOREIGN KEY (project_id) REFERENCES app.projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: projects projects_owner_id_fkey; Type: FK CONSTRAINT; Schema: app; Owner: -
+--
+
+ALTER TABLE ONLY app.projects
+    ADD CONSTRAINT projects_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES app.users(id) ON DELETE CASCADE;
 
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 35tPESLU7lTLe6X9msDTEYOh5aTKT3UnYUzjyP0YAalYHiIphKmUFEzvFbvoARE
+\unrestrict 52ciw2fFSlJwj7UM5c7DFjyCwNvuDd8LElEl8fG2aIUIwBelicO6gbVZXtWP4TL
 
 
 --
@@ -215,8 +229,11 @@ ALTER TABLE ONLY public.projects
 --
 
 INSERT INTO public.schema_migrations (version) VALUES
-    ('20251205081600'),
-    ('20251205081630'),
-    ('20251205081700'),
-    ('20251205081730'),
-    ('20251205081800');
+    ('0000010'),
+    ('0000011'),
+    ('0000100'),
+    ('0000110'),
+    ('0000120'),
+    ('0000130'),
+    ('0000140'),
+    ('0000200');
