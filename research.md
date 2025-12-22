@@ -171,6 +171,10 @@
 - [Hunyuan-PromptEnhancer/PromptEnhancer](https://github.com/Hunyuan-PromptEnhancer/PromptEnhancer)
 - **[promptslab/Promptify](https://github.com/promptslab/Promptify)**
 
+### LLM Memory
+
+- [MemoriLabs/Memori](https://github.com/MemoriLabs/Memori)
+
 ### Local hosting LLMs
 
 - [Mega4alik/ollm](https://github.com/Mega4alik/ollm)

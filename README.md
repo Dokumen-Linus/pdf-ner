@@ -116,13 +116,58 @@ npx shadcn@latest add --overwrite accordion alert-dialog alert aspect-ratio avat
 
 ## Database
 
-I have created a PostgreSQL db by executing the following commands:
+### Start Instructions
+
+Must start the database server before running test:db or dev. Should run dev in a separate terminal so that terminating dev does not terminate the database and you can run dev again without running pg_ctl start again.
 
 ```cmd
-scoop install postgres
-initdb -D .\pgdata
-pg_ctrl -D .\pgdata -l logfile start
-createdb dokumenlocal
-$env:DATABASE_URL = "postgres://localhost/dokumenlocal?sslmode=disable"
-dbmate up
+pg_ctl -D .\pgdata -l logfile start
 ```
+
+### Creation/Migration Instructions
+
+For Windows Command Prompt:
+
+```cmd
+initdb -D .\pgdata
+pg_ctl -D .\pgdata -l logfile start
+createdb dokumen
+set DATABASE_URL=postgres://localhost/dokumen?sslmode=disable
+dbmate up
+psql -f .\db\better-auth_migrations\2025-12-22T03-27-15.344Z.sql -d dokumen
+```
+
+### Database Contents
+
+Name: dokumen
+DATABASE_URL=postgres://localhost/dokumen?sslmode=disable
+
+#### Public Schema
+
+Only used for migration scripts.
+
+#### Auth Schema
+
+Contains all tables for Better Auth. Created by "bun x @better-auth/cli@latest generate" and modifying to use shema auth and user auth_role. This way Better Auth can only edit auth schema and other users can't edit auth schema.
+
+#### App Schema
+
+Contains all tables for the app defined in ./db/migrations/. Role app_owner owns the schema so it can be used in migrations. Role app_user can only edit tables so that Drizzle can't create or delete tables etc.
+
+### How Database is Exposed to App
+
+The database schemas are defined in:
+
+1. ./db/migrations/ SQL scripts
+2. ./src/db/schema/ Drizzle Typescript schemas
+3. ./src/db-fns/ Zod validation schemas
+
+Any changes to the database schema must be made in all three locations
+
+Test ./src/db-fns/match-schemas.test.ts ensures that [2] Drizzle schemas equal the [3] Zod validation schemas
+
+There's no test to ensure that [1] SQL schemas equal the [2] Drizzle schemas
+
+## Restriction on App Interactions with Database
+
+App can only interact with database through db-fns to ensure that all database interactions are validated and consistent.
