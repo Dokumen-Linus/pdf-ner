@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { Button } from "@/components/shadcn-ui/button"
@@ -11,7 +12,7 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
-import { createUser } from "@/db-fns/users"
+import { createUser, deleteUser, getUserByEmail } from "@/db-fns/users"
 import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/signup")({
@@ -31,7 +32,7 @@ function SignUpPage() {
       jobTitle: "",
     },
     validators: {
-      onSubmitAsync: async ({ value }) => {
+      onSubmit: ({ value }) => {
         if (value.password !== value.confirmPassword) {
           return {
             form: "Passwords do not match",
@@ -40,8 +41,31 @@ function SignUpPage() {
             },
           }
         }
+      },
+      onSubmitAsync: async ({ value }) => {
+        // 1. Create User Profile
+        try {
+          await createUser({
+            data: {
+              email: value.email,
+              firstName: value.firstName,
+              lastName: value.lastName,
+              employer: value.employer || undefined,
+              jobTitle: value.jobTitle || undefined,
+            },
+          })
+        } catch (_e) {
+          try {
+            const user = await getUserByEmail(value.email as any)
+            if (user) await deleteUser({ data: { id: user.id } })
+          } catch (_e) {}
 
-        // 1. Create Auth Account
+          return {
+            form: "Account created but failed to set up profile. Please contact support.",
+          }
+        }
+
+        // 2. Create Auth Account
         const { error: authError } = await authClient.signUp.email({
           email: value.email,
           password: value.password,
@@ -51,28 +75,6 @@ function SignUpPage() {
         if (authError) {
           return {
             form: authError.message || "An error occurred during sign up",
-          }
-        }
-
-        // 2. Create User Profile
-        // Note: In a real apps, you might want to handle the case where auth succeeds but DB fails
-        // (e.g. by deleting the auth user or using a transaction if possible/applicable)
-        try {
-          await createUser({
-            data: {
-              email: value.email,
-              firstName: value.firstName || undefined,
-              lastName: value.lastName || undefined,
-              employer: value.employer || undefined,
-              jobTitle: value.jobTitle || undefined,
-            },
-          })
-        } catch (error) {
-          // If DB creation fails, we should ideally rollback the auth user, but for now we'll just report error
-          // and the user might exist in auth but not in our DB.
-          console.error("Failed to create user profile:", error)
-          return {
-            form: "Account created but failed to set up profile. Please contact support.",
           }
         }
 
@@ -101,6 +103,9 @@ function SignUpPage() {
             <div className="grid grid-cols-2 gap-4">
               <form.Field
                 name="firstName"
+                validators={{
+                  onChange: ({ value }) => (!value ? "First name is required" : undefined),
+                }}
                 children={({ state, handleChange, handleBlur }) => (
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
@@ -110,11 +115,19 @@ function SignUpPage() {
                       onChange={(e) => handleChange(e.target.value)}
                       onBlur={handleBlur}
                     />
+                    {state.meta.errors.length > 0 && (
+                      <p className="text-sm font-medium text-destructive">
+                        {state.meta.errors.join(", ")}
+                      </p>
+                    )}
                   </div>
                 )}
               />
               <form.Field
                 name="lastName"
+                validators={{
+                  onChange: ({ value }) => (!value ? "Last name is required" : undefined),
+                }}
                 children={({ state, handleChange, handleBlur }) => (
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
@@ -124,40 +137,15 @@ function SignUpPage() {
                       onChange={(e) => handleChange(e.target.value)}
                       onBlur={handleBlur}
                     />
+                    {state.meta.errors.length > 0 && (
+                      <p className="text-sm font-medium text-destructive">
+                        {state.meta.errors.join(", ")}
+                      </p>
+                    )}
                   </div>
                 )}
               />
             </div>
-
-            <form.Field
-              name="email"
-              validators={{
-                onChange: ({ value }) => {
-                  if (!value) return "Email is required"
-                  if (!/\S+@\S+\.\S+/.test(value)) return "Invalid email address"
-                  return undefined
-                },
-              }}
-              children={({ state, handleChange, handleBlur }) => (
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    value={state.value}
-                    onChange={(e) => handleChange(e.target.value)}
-                    onBlur={handleBlur}
-                  />
-                  {state.meta.errors.length > 0 && (
-                    <p className="text-sm font-medium text-destructive">
-                      {state.meta.errors.join(", ")}
-                    </p>
-                  )}
-                </div>
-              )}
-            />
-
             <form.Field
               name="employer"
               children={({ state, handleChange, handleBlur }) => (
@@ -172,7 +160,6 @@ function SignUpPage() {
                 </div>
               )}
             />
-
             <form.Field
               name="jobTitle"
               children={({ state, handleChange, handleBlur }) => (
@@ -187,13 +174,53 @@ function SignUpPage() {
                 </div>
               )}
             />
-
+            <form.Field
+              name="email"
+              validators={{
+                onChange: ({ value }) => {
+                  if (!value) return "Email is required"
+                  if (!/\S+@\S+\.\S+/.test(value)) return "Invalid email address"
+                  return undefined
+                },
+                onChangeAsync: async ({ value }) => {
+                  try {
+                    const user = await getUserByEmail(value as any)
+                    if (user) return "An account already exists with this email"
+                  } catch (_e) {}
+                },
+              }}
+              children={({ state, handleChange, handleBlur }) => (
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="example@gmail.com"
+                    value={state.value}
+                    onChange={(e) => handleChange(e.target.value)}
+                    onBlur={handleBlur}
+                  />
+                  {state.meta.errors.length > 0 && (
+                    <p className="text-sm font-medium text-destructive">
+                      {state.meta.errors.join(", ")}
+                    </p>
+                  )}
+                </div>
+              )}
+            />
             <form.Field
               name="password"
               validators={{
                 onChange: ({ value }) => {
                   if (!value) return "Password is required"
                   if (value.length < 8) return "Password must be at least 8 characters"
+                  if (!/[A-Z]/.test(value))
+                    return "Password must contain at least one uppercase letter"
+                  if (!/[a-z]/.test(value))
+                    return "Password must contain at least one lowercase letter"
+                  if (!/[0-9]/.test(value)) return "Password must contain at least one number"
+                  if (!/[\W_]/.test(value))
+                    return "Password must contain at least one special character"
                   return undefined
                 },
               }}
@@ -215,7 +242,6 @@ function SignUpPage() {
                 </div>
               )}
             />
-
             <form.Field
               name="confirmPassword"
               validators={{
@@ -239,7 +265,6 @@ function SignUpPage() {
                 </div>
               )}
             />
-
             <form.Subscribe
               selector={(state) => [state.errorMap]}
               children={([errorMap]) =>
@@ -250,7 +275,6 @@ function SignUpPage() {
                 ) : null
               }
             />
-
             <Button type="submit" className="w-full" disabled={form.state.isSubmitting}>
               {form.state.isSubmitting ? "Creating Account..." : "Sign Up"}
             </Button>

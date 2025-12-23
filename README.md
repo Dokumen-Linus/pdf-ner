@@ -84,8 +84,8 @@ bunx playwright install
 - Database Server Functions (db-fns): must interact with the database using functions in src/db-fns/ built with [Tanstack Start Server Functions](https://tanstack.com/start/latest/docs/framework/react/guide/server-functions), Zod validation, Drizzle ORM client, and PostgreSQL database connection
 - ORM: [Drizzle](https://orm.drizzle.team/docs/overview) client in src/db/client.ts handles interaction between TS and SQL, Typescript schemas defined in src/db/schema
 - Database: defined in SQL for easy migration to standalone and integration with Python/Java
-- ORM-created Scripts: SQL generated using [Drizzle-kit](https://orm.drizzle.team/docs/drizzle-kit) should only be used for testing to compare wuth ./db/schema.sql and should not be used for migration
-- Better Auth tables: in addition to the custom tables that consumer programs must use via db-fns, Better Auth has its own tables 
+- ORM-created Scripts: SQL generated using [Drizzle-kit](https://orm.drizzle.team/docs/drizzle-kit) should only be used for testing to compare with ./db/schema.sql and should not be used for migration
+- Better Auth tables: in addition to the custom tables that consumer programs must use via db-fns, Better Auth has its own tables
 
 ### Component Development
 

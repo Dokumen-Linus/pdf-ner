@@ -64,6 +64,7 @@
 - charts [MUI X](https://v6.mui.com/x/react-charts/)
 - charts [Recharts](https://recharts.org/en-US/)
 - Component dependency grapher [Madge](https://github.com/pahen/madge)
+- Wrapper for OpenAI API to enable react component creation [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
 
 ### Next.js Boilerplates
 
