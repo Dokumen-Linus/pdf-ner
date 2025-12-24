@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth"
+import { haveIBeenPwned } from "better-auth/plugins"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { Pool } from "pg"
 import { env } from "../env.server"
@@ -26,5 +27,11 @@ export const auth = betterAuth({
       console.log("Verification URL:", url)
     },
   },
-  plugins: [tanstackStartCookies()], // tanstackStartCookies must be the last plugin in the array
+  plugins: [
+    haveIBeenPwned({
+      customPasswordCompromisedMessage:
+        "Password likely has been compromised. Please choose a different password.",
+    }),
+    tanstackStartCookies(), // tanstackStartCookies must be the last plugin in the array
+  ],
 })
