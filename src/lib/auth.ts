@@ -1,10 +1,11 @@
 import { betterAuth } from "better-auth"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { Pool } from "pg"
+import { env } from "../env.server"
 
 export const auth = betterAuth({
   database: new Pool({
-    connectionString: process.env.AUTH_DATABASE_URL,
+    connectionString: env.AUTH_DATABASE_URL,
   }),
   advancedOptions: {
     modelName: {
@@ -16,6 +17,14 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      console.log("Sending verification email to", user.email)
+      console.log("Verification URL:", url)
+    },
   },
   plugins: [tanstackStartCookies()], // tanstackStartCookies must be the last plugin in the array
 })

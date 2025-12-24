@@ -348,3 +348,18 @@
 2025-12-21 23:52:56.107 EST [31328] LOG:  checkpoint starting: time
 2025-12-21 23:52:58.511 EST [31328] LOG:  checkpoint complete: wrote 22 buffers (0.1%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=2.377 s, sync=0.015 s, total=2.406 s; sync files=23, longest=0.003 s, average=0.001 s; distance=79 kB, estimate=79 kB; lsn=0/1D439F8, redo lsn=0/1D439A0
 2025-12-22 00:40:19.238 EST [25084] FATAL:  role "SELECT * FROM auth.user;" does not exist
+2025-12-23 17:34:56.538 EST [32776] LOG:  starting PostgreSQL 18.1 on x86_64-windows, compiled by msvc-19.44.35219, 64-bit
+2025-12-23 17:34:56.542 EST [32776] LOG:  listening on IPv6 address "::1", port 5432
+2025-12-23 17:34:56.542 EST [32776] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-12-23 17:34:56.594 EST [19120] LOG:  database system was interrupted; last known up at 2025-12-21 23:52:58 EST
+2025-12-23 17:34:56.685 EST [19120] LOG:  database system was not properly shut down; automatic recovery in progress
+2025-12-23 17:34:56.689 EST [19120] LOG:  redo starts at 0/1D439A0
+2025-12-23 17:34:56.689 EST [19120] LOG:  invalid record length at 0/1D43AA8: expected at least 24, got 0
+2025-12-23 17:34:56.689 EST [19120] LOG:  redo done at 0/1D43A70 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2025-12-23 17:34:56.692 EST [41780] LOG:  checkpoint starting: end-of-recovery immediate wait
+2025-12-23 17:34:56.697 EST [41780] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.007 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1D43AA8, redo lsn=0/1D43AA8
+2025-12-23 17:34:56.702 EST [32776] LOG:  database system is ready to accept connections
+2025-12-23 17:39:56.702 EST [41780] LOG:  checkpoint starting: time
+2025-12-23 17:39:59.165 EST [41780] LOG:  checkpoint complete: wrote 23 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=2.439 s, sync=0.019 s, total=2.464 s; sync files=21, longest=0.005 s, average=0.001 s; distance=13 kB, estimate=13 kB; lsn=0/1D47028, redo lsn=0/1D46FD0
+2025-12-23 17:40:11.894 EST [40260] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	

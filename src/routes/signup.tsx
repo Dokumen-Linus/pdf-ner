@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { Button } from "@/components/shadcn-ui/button"
@@ -12,7 +13,7 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
-import { createUser, deleteUser, getUserByEmail } from "@/db-fns/users"
+import { createUser, deleteUserByEmail, getUserByEmail } from "@/db-fns/users"
 import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/signup")({
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/signup")({
 
 function SignUpPage() {
   const navigate = useNavigate()
+  const [isSuccess, setIsSuccess] = useState(false)
   const form = useForm({
     defaultValues: {
       email: "",
@@ -56,8 +58,7 @@ function SignUpPage() {
           })
         } catch (_e) {
           try {
-            const user = await getUserByEmail(value.email as any)
-            if (user) await deleteUser({ data: { id: user.id } })
+            await deleteUserByEmail({ data: { email: value.email } })
           } catch (_e) {}
 
           return {
@@ -73,16 +74,43 @@ function SignUpPage() {
         })
 
         if (authError) {
+          // If auth fails, we probably should delete the user profile created above to keep data clean?
+          // But maybe the user exists in auth but not in profile?
+          // For now let's just return error.
           return {
             form: authError.message || "An error occurred during sign up",
           }
         }
 
-        await navigate({ to: "/" })
+        setIsSuccess(true)
         return null
       },
     },
   })
+
+  if (isSuccess) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4 my-8">
+        <Card className="w-full max-w-xl">
+          <CardHeader>
+            <CardTitle className="text-2xl">Check your email</CardTitle>
+            <CardDescription>
+              We've sent a verification link to your email address. Please click the link to verify
+              your account.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Once you have verified your email, you can sign in.
+            </p>
+            <Link to="/signin">
+              <Button className="w-full">Go to Sign In</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4 my-8">

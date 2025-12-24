@@ -67,3 +67,13 @@ export const deleteUser = createServerFn({ method: "POST" })
     }
     return { success: true }
   })
+
+export const deleteUserByEmail = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ email: z.email() }))
+  .handler(async ({ data }) => {
+    const user = await db.delete(users).where(eq(users.email, data.email))
+    if (user.rowCount === 0) {
+      throw new Error("User not found")
+    }
+    return { success: true }
+  })
