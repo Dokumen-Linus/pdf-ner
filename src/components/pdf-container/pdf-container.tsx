@@ -11,6 +11,7 @@ import { ThumbnailPluginPackage } from "@embedpdf/plugin-thumbnail/react"
 import { TilingLayer, TilingPluginPackage } from "@embedpdf/plugin-tiling/react"
 import { Viewport, ViewportPluginPackage } from "@embedpdf/plugin-viewport/react"
 import { PinchWrapper, ZoomMode, ZoomPluginPackage } from "@embedpdf/plugin-zoom/react"
+import { env } from "../../env.client"
 import PluginStoreSync from "../plugin-store/components/plugin-store-sync"
 import { Spinner } from "../shadcn-ui/spinner"
 import { AnnotationLayer, AnnotationPluginPackage } from "./plugin-annotation-2"
@@ -42,7 +43,7 @@ export default function PDFContainer({
 }: PDFContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const { engine, isLoading, error } = usePdfiumEngine({
-    wasmUrl: `${import.meta.env.VITE_BASE_URL || window.location.origin}/engines/pdfium.wasm`,
+    wasmUrl: `${env.VITE_BASE_URL || window.location.origin}/engines/pdfium.wasm`,
     worker: true,
     logger: logger,
   })

@@ -70,11 +70,11 @@ bunx playwright install
 - Language: [TypeScript](https://www.typescriptlang.org/) config by tsconfig.json
 - Package manager: [Bun](https://bun.sh/docs/pm/cli/install) with [Patch-package](https://www.npmjs.com/package/patch-package) for extra fixes
 - Build tool: [Vite](https://vite.dev/)
-- Runtime: [Node.js v22](https://nodejs.org/en/download/), not Bun
-- Environment variable management: [t3-env](https://github.com/t3-oss/t3-env) defined in src/env.ts
+- Runtime: [Node.js v22](https://nodejs.org/en/download/), not Bun.js
+- Environment variable management: [t3-env](https://github.com/t3-oss/t3-env), env variables loaded from .env (not from cross-env) **must** be imported from src/env.server.ts or src/env.client.ts
 - Styles: [Tailwind CSS v4](https://tailwindcss.com/) and CSS defined in src/styles.css
 - Linting: [ESlint 9](https://eslint.org/), config by eslint.config.mjs
-- Formatting: [Prettier](https://prettier.io/), config by .prettierignore, .prettierrc
+- Formatting: [Prettier](https://prettier.io/), config by .prettierignore, .prettierrc (VSCode extension and settings.json does this on every save)
 - Testing: [React Testing Library](https://testing-library.com/react) + [Bun Test Runner](https://bun.sh/docs/test/writing) which is based on Jest, name files as ".{spec,test}.{ts,tsx}"
 - End-to-End Testing: [Playwright](https://playwright.dev/) inside test/e2e/ with files named as "*.e2e.ts"
 
@@ -83,7 +83,7 @@ bunx playwright install
 - API: [Tanstack Router](https://tanstack.com/router/latest/docs/overview) in src/routes/api/ which utilizes [Tanstack Query](https://tanstack.com/query/latest/docs/overview) and [Axios](https://axios-http.com/docs/intro) for communication with the external backend REST API
 - Database Server Functions (db-fns): must interact with the database using functions in src/db-fns/ built with [Tanstack Start Server Functions](https://tanstack.com/start/latest/docs/framework/react/guide/server-functions), Zod validation, Drizzle ORM client, and PostgreSQL database connection
 - ORM: [Drizzle](https://orm.drizzle.team/docs/overview) client in src/db/client.ts handles interaction between TS and SQL, Typescript schemas defined in src/db/schema
-- Database: defined in SQL for easy migration to standalone and integration with Python/Java
+- Database: defined in SQL for easy migration to standalone instance and integration with Python/Java
 - ORM-created Scripts: SQL generated using [Drizzle-kit](https://orm.drizzle.team/docs/drizzle-kit) should only be used for testing to compare with ./db/schema.sql and should not be used for migration
 - Better Auth tables: in addition to the custom tables that consumer programs must use via db-fns, Better Auth has its own tables
 
