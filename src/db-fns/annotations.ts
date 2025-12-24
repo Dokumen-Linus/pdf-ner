@@ -61,7 +61,7 @@ export const getAnnotationsBySubtype = createServerFn({ method: "GET" })
   })
 
 // ** UPDATE **
-// partial create schema with id still required
+// partial create schema with id required
 export const UpdateAnnotationSchema = CreateAnnotationSchema.partial().extend({
   id: z.string(),
 })

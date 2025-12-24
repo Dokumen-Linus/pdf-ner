@@ -46,7 +46,7 @@ export const getPdfsByProjectId = createServerFn({ method: "GET" })
   })
 
 // ** UPDATE **
-// partial create schema with id still required
+// partial create schema with id required
 export const UpdatePdfSchema = CreatePdfSchema.partial().extend({
   id: z.string(),
 })

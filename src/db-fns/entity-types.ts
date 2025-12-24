@@ -47,7 +47,7 @@ export const getEntityTypesByProjectId = createServerFn({ method: "GET" })
   })
 
 // ** UPDATE **
-// partial create schema with id still required
+// partial create schema with id required
 export const UpdateEntityTypeSchema = CreateEntityTypeSchema.partial().extend({
   id: z.string(),
 })

@@ -37,7 +37,7 @@ describe.if(runTests)("Entity Type Table Server Functions", () => {
     expect(entityTypesForLookup).toBeDefined()
     expect(entityTypesForLookup.length).toBeGreaterThan(0)
 
-    const createdEntityType = entityTypesForLookup.find((et: any) => et.name === testName)
+    const createdEntityType = entityTypesForLookup.find((et) => et.name === testName)
     expect(createdEntityType).toBeDefined()
     expect(createdEntityType!.projectId).toBe(testProjectId)
     expect(createdEntityType!.name).toBe(testName)
