@@ -15,8 +15,8 @@ export const CreateProjectSchema = z.object({
 export const createProject = createServerFn({ method: "POST" })
   .inputValidator(CreateProjectSchema)
   .handler(async ({ data }) => {
-    await db.insert(projects).values(data)
-    return { success: true }
+    const [project] = await db.insert(projects).values(data).returning({id: projects.id})
+    return { id: project.id }
   })
 
 // ** READ **

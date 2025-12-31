@@ -7,6 +7,7 @@ import {
   getAnnotationsBySubtype,
   updateAnnotation,
 } from "./annotations"
+import { isUuidV4 } from "@/lib/misc/uuid"
 
 const runTests = process.env.TEST_DB === "true"
 
@@ -30,7 +31,7 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
       author: "Test Author",
     }
     const createOutput = await createAnnotation({ data: createInput })
-    expect(createOutput.success).toBe(true)
+    expect(isUuidV4(createOutput.id)).toBe(true)
 
     // --- READ (by pdfId and subtype to get the created annotation) ---
     const annotationsForLookup = await getAnnotationsByPdfId({ data: { pdfId: testPdfId } })

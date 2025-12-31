@@ -25,8 +25,8 @@ export const CreateAnnotationSchema = z.object({
 export const createAnnotation = createServerFn({ method: "POST" })
   .inputValidator(CreateAnnotationSchema)
   .handler(async ({ data }) => {
-    await db.insert(annotations).values(data)
-    return { success: true }
+    const [annotation] = await db.insert(annotations).values(data).returning({id: annotations.id})
+    return { id: annotation.id }
   })
 
 // ** READ **

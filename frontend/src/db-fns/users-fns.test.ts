@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { createUser, deleteUser, getUserByEmail, getUserById, updateUser } from "./users"
+import { isUuidV4 } from "@/lib/misc/uuid"
 
 const runTests = process.env.TEST_DB === "true"
 
@@ -16,7 +17,7 @@ describe.if(runTests)("User Table Server Functions", () => {
       lastName: "User",
     }
     const createOutput = await createUser({ data: createInput })
-    expect(createOutput.success).toBe(true)
+    expect(isUuidV4(createOutput.id)).toBe(true)
 
     // --- READ (by email) ---
     const userByEmail = await getUserByEmail({ data: { email: testEmail } })

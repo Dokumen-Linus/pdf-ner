@@ -13,8 +13,8 @@ export const CreatePdfSchema = z.object({
 export const createPdf = createServerFn({ method: "POST" })
   .inputValidator(CreatePdfSchema)
   .handler(async ({ data }) => {
-    await db.insert(pdfs).values(data)
-    return { success: true }
+    const [pdf] = await db.insert(pdfs).values(data).returning({id: pdfs.id})
+    return { id: pdf.id }
   })
 
 // ** READ **

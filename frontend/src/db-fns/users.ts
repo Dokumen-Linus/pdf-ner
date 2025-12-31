@@ -16,8 +16,8 @@ export const CreateUserSchema = z.object({
 export const createUser = createServerFn({ method: "POST" })
   .inputValidator(CreateUserSchema)
   .handler(async ({ data }) => {
-    await db.insert(users).values(data)
-    return { success: true }
+    const [user] = await db.insert(users).values(data).returning({id: users.id})
+    return { id: user.id }
   })
 
 // ** READ **

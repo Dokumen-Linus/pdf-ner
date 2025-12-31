@@ -21,8 +21,8 @@ export const CreateEntityTypeSchema = z.object({
 export const createEntityType = createServerFn({ method: "POST" })
   .inputValidator(CreateEntityTypeSchema)
   .handler(async ({ data }) => {
-    await db.insert(entityTypes).values(data)
-    return { success: true }
+    const [entityType] = await db.insert(entityTypes).values(data).returning({id: entityTypes.id})
+    return { id: entityType.id }
   })
 
 // ** READ **
