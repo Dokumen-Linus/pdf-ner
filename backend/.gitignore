@@ -1,1 +1,6 @@
+# python env libraries
 conda_env
+
+# local env files
+.env
+*.local

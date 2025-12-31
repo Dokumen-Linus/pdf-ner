@@ -1,5 +1,11 @@
 # Database Directory
 
+## **Access Control**
+
+- Frontend should use ROLE APP_USER that can read/write SCHEMA APP and read SCHEMA API.
+- Backend should use ROLE API_USER that can read/write SCHEMA API and read SCHEMA APP.
+- Better Auth in the frontend should use ROLE AUTH_USER and only Better Auth should read/write to SCHEMA AUTH.
+
 ## migrations
 
 SQL scripts that should be created following ./migrations/rules.md. Existing scripts should not be modified.

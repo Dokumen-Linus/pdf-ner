@@ -1,4 +1,5 @@
 asyncpg
 fastapi
 uvicorn
-
+pydantic-settings
+pymupdf4llm

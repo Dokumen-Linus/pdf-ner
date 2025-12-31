@@ -1,13 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException
-from db.client import get_connection
-import asyncpg
+from fastapi import FastAPI
+from .api import api_router
 
 app = FastAPI()
 
-@app.get("/items")
-async def get_all_items(conn: asyncpg.Connection = Depends(get_connection)):
-    try:
-        rows = await conn.fetch("SELECT * FROM table1;")
-        return [dict(row) for row in rows]
-    except asyncpg.PostgresError as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+app.include_router(api_router)
