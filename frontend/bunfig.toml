@@ -8,10 +8,9 @@ NODE_ENV = "test"
 timout = 10000 # 10 seconds (default is 5000ms)
 invalidOption = true
 
-preload = ["./tests/bun-test-setup.ts"]
+preload = ["./tests/bun-test-setup/main.ts"]
 
-coverage = true
-cpverageReporter = ["text"]
+coverageReporter = ["text"]
 coverageDir = "./coverage"
 coverageSkipTestFiles = true
 coveragePathIgnorePatterns = [

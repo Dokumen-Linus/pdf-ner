@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm"
 import { db } from "./client"
 
 // only run if TEST_DB is true
+// despite this, the test errors instead of skipping when the db is off, so ignore this
 describe.if(process.env.TEST_DB === "true")("Test Drizzle Client", () => {
   test("DB connection test", async () => {
     const result = await db.execute(sql`SELECT NOW()`)
@@ -13,9 +14,4 @@ describe.if(process.env.TEST_DB === "true")("Test Drizzle Client", () => {
     const users = await db.query.users.findMany({ limit: 1 })
     expect(Array.isArray(users)).toBe(true)
   })
-})
-
-// if TEST_DB is false, show this message once (not in other db test files)
-describe.if(process.env.TEST_DB !== "true")("Test Database Functions", () => {
-  test.skip("DB tests skipped because TEST_DB is not true", () => {})
 })

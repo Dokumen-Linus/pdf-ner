@@ -7,7 +7,6 @@ import {
   getProjectsByOwnerId,
   updateProject,
 } from "./projects"
-import { isUuidV4 } from "@/lib/misc/uuid"
 
 const runTests = process.env.TEST_DB === "true"
 
@@ -24,7 +23,7 @@ describe.if(runTests)("Project Table Server Functions", () => {
       orientation: "portrait" as const,
     }
     const createOutput = await createProject({ data: createInput })
-    expect(isUuidV4(createOutput.id)).toBe(true)
+    expect(createOutput.id).toBeUuid()
 
     // --- READ (by name to get the created project) ---
     const projectsByName = await getProjectByName({ data: { name: testName } })

@@ -6,7 +6,6 @@ import {
   getEntityTypesByProjectId,
   updateEntityType,
 } from "./entity-types"
-import { isUuidV4 } from "@/lib/misc/uuid"
 
 const runTests = process.env.TEST_DB === "true"
 
@@ -29,7 +28,7 @@ describe.if(runTests)("Entity Type Table Server Functions", () => {
       opacity: 0.8,
     }
     const createOutput = await createEntityType({ data: createInput })
-    expect(isUuidV4(createOutput.id)).toBe(true)
+    expect(createOutput.id).toBeUuid()
 
     // --- READ (by projectId to get the created entity type) ---
     const entityTypesForLookup = await getEntityTypesByProjectId({

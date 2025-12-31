@@ -21,7 +21,7 @@ describe.if(runTests)("PDF Table Server Functions", () => {
       filename: testFilename,
     }
     const createOutput = await createPdf({ data: createInput })
-    expect(isUuidV4(createOutput.id)).toBe(true)
+    expect(createOutput.id).toBeUuid()
 
     // --- READ (by filename to get the created PDF) ---
     const pdfByFilename = await getPdfByFilename({ data: { filename: testFilename } })
