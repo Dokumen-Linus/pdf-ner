@@ -1,0 +1,282 @@
+# Research
+
+## Learning
+
+- [what is react]( https://www.theodinproject.com/paths/full-stack-javascript/courses/react)
+- **[what are llms](https://arxiv.org/pdf/2501.09223)**
+
+## Frontend links
+
+### PDF Web rendering
+
+- [embedpdf/embed-pdf-viewer](https://github.com/embedpdf/embed-pdf-viewer)
+- [@embedpdf/models pdf.ts](https://github.com/embedpdf/embed-pdf-viewer/blob/feature/multi-view/packages/models/src/pdf.ts#L1992)
+- [@embedpdf/snippet example component](https://github.com/embedpdf/embed-pdf-viewer/blob/main/snippet/src/components/app.tsx)
+- [EmbedPDF React Docs](https://www.embedpdf.com/docs/react/understanding-plugins)
+- [PDFium JS docs](https://www.embedpdf.com/docs/pdfium/introduction)
+
+### Generic Components
+
+- [shadcn/ui Components](https://ui.shadcn.com/docs/components)
+- Examples of using shadcn/ui [Hexta UI](https://www.hextaui.com/)
+- Examples of using shadcn/ui [preetsuthar17/HextaUI](https://github.com/preetsuthar17/HextaUI)
+- [Ant Design](https://ant.design/components/overview/)
+- [Untitled UI](https://www.untitledui.com/react/components)
+- [FlyonUI](https://flyonui.com/docs/component/)
+- [Mantine UI](https://ui.mantine.dev/)
+- headless [Coss = Origin UI](https://coss.com/origin)
+- [mui/material-ui](https://mui.com/material-ui/getting-started/)
+- css styling [MUI System](https://mui.com/system/getting-started/)
+- [Joy UI](https://mui.com/joy-ui/getting-started/)
+- headless [headlessui](https://headlessui.com/react/menu)
+- [square-ui](https://github.com/ln-dev7/square-ui)
+- [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
+- [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
+
+### Shadcn ui blocks
+
+- [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
+
+### Icons
+
+- Currently: [Lucide Icons](https://lucide.dev/icons/)
+- Others: [React Icons](https://react-icons.github.io/react-icons/)
+- Download SVGs: [Iconstack](https://ossian-icons-60.lovable.app/)
+- AI generate SVGs: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
+
+### Colors
+
+- [TailColors](https://tailcolors.com/)
+- [Hex Color Codes](https://html-color.codes/)
+
+### Frontend specials
+
+- [Untitled UI Video Player](https://www.untitledui.com/react/components/video-players)
+- [kozakdenys/qr-code-styling](https://github.com/kozakdenys/qr-code-styling)
+- [masroorejaz/react-simple-captcha](https://github.com/masroorejaz/react-simple-captcha)
+- [Home page scroll animation](https://www.builder.io/blog/3d-gsap)
+- [Python terminal inside browser](https://github.com/pyscript/pyscript)
+- [Kanaries/graphic-walker](https://github.com/Kanaries/graphic-walker)
+- [vercel/avatar](https://github.com/vercel/avatar)
+- [vercel/react-tweet](https://github.com/vercel/react-tweet)
+- [chatbot assistant](https://ai-sdk.dev/elements/examples/chatbot)
+- [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
+- [AG Grid special table](https://www.ag-grid.com/react-data-grid/getting-started/)
+- charts [MUI X](https://v6.mui.com/x/react-charts/)
+- charts [Recharts](https://recharts.org/en-US/)
+- charts [ant-design/ant-design-charts](https://github.com/ant-design/ant-design-charts)
+- Component dependency grapher [Madge](https://github.com/pahen/madge)
+- Wrapper for OpenAI API to enable react component creation [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
+
+### Next.js Boilerplates
+
+- [odoo/odoo](https://github.com/odoo/odoo)
+- [vercel/next-forge](https://github.com/vercel/next-forge)
+- [Next.js SaaS Starter](https://vercel.com/templates/authentication/next-js-saas-starter)
+- [Blazity/next-enterprise](https://github.com/Blazity/next-enterprise/tree/main)
+- [ln-dev7/square-ui](https://github.com/ln-dev7/square-ui)
+- [arhamkhnz/next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard)
+- [cruip/open-react-template](https://github.com/cruip/open-react-template)
+
+### Tanstack Start/Router Boilerplates
+
+- Biome, Drizzle, Query [Vijayabaskar56/tanstack-start-faster](https://github.com/Vijayabaskar56/tanstack-start-faster)
+- Example Router app [specfy/getstack](https://github.com/specfy/getstack)
+- [TanStack Dashboard Demo](https://github.com/themeselection/tanstack-dashboard-demo)
+- not great [jackytea/tanstack-starter](https://github.com/jackytea/tanstack-starter)
+- not great [abdullahelmetwali/tanstack-starter](https://github.com/abdullahelmetwali/tanstack-starter)
+
+### Tanstack Start/Router Official Examples
+
+- [All Examples](https://github.com/TanStack/router/tree/main/examples/react)
+- Bun.js runtime [start-bun](https://github.com/TanStack/router/tree/main/examples/react/start-bun)
+- Translation [start-i18n-paraglide](https://github.com/TanStack/router/tree/main/examples/react/start-i18n-paraglide)
+
+### Tanstack Start Integrations
+
+- [File upload](https://docs.uploadthing.com/getting-started/tanstack-start)
+- [Sitemap creation](https://github.com/Ryanjso/tanstack-router-sitemap)
+
+### Auth
+
+- Better Auth setup using [Installation](https://www.better-auth.com/docs/installation) and [Tanstack Integration](https://www.better-auth.com/docs/integrations/tanstack) docs
+- Pre-built Tanstack Query hooks for Better Auth [daveyplate/better-auth-tanstack](https://github.com/daveyplate/better-auth-tanstack)
+- Pre-built components [better-auth-ui/better-auth-ui](https://github.com/better-auth-ui/better-auth-ui)
+
+### State management (besides React and Zustand)
+
+- Guide [HichemTab-tech/react-shared-states](https://github.com/HichemTab-tech/react-shared-states)
+
+### Fetching
+
+- [axios/axios](https://github.com/axios/axios)
+
+### Cloud Sec
+
+- [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
+- [AWS security checks](https://cloudsploit.com/)
+- Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
+
+### Frontend Testing (besides Bun, Playwright)
+
+- [appium/appium](https://github.com/appium/appium)
+- [Applitools](https://applitools.com/)
+- [Checkbot](https://www.checkbot.io/)
+
+### Billing
+
+- [Stripe](https://stripe.com/)
+- self-hosted alternative [Lago](https://getlago.com/docs/welcome)
+
+## Backend links
+
+### OCR
+
+- [tesseract-ocr/tesseract](https://github.com/tesseract-ocr/tesseract)
+- [madmaze/pytesseract](https://github.com/madmaze/pytesseract)
+- [naptha/tesseract.js](https://github.com/naptha/tesseract.js)
+- Tesseract python cli [ocrmypdf/OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF)
+- Custom LM [NanoNets/docext](https://github.com/NanoNets/docext)
+- Custom LM  [chatdoc-com/OCRFlux](https://github.com/chatdoc-com/OCRFlux)
+- Custom LM [Yuliang-Liu/MonkeyOCR](https://github.com/Yuliang-Liu/MonkeyOCR)
+- Pytorch [mindee/doctr](https://github.com/mindee/doctr)
+- Pytorch [JaidedAI/EasyOCR](https://github.com/JaidedAI/EasyOCR)
+- Other [docling](https://github.com/docling-project/docling)
+- LLM checking trad OCR [Dicklesworthstone/llm_aided_ocr](https://github.com/Dicklesworthstone/llm_aided_ocr)
+- **[deepseek-ai/DeepSeek-OCR](https://github.com/deepseek-ai/DeepSeek-OCR)**
+- **[allenai/olmocr](https://github.com/allenai/olmocr)**
+
+### Convert to PDF
+
+- [cyanfish/naps2](https://github.com/cyanfish/naps2)
+
+### PDF encryption and signatures
+
+- [flamecorcloud/signature-one](https://github.com/flamecorecloud/signature-one/)
+
+### LLMs for NER
+
+- [google/langextract](https://github.com/google/langextract)
+
+### SLMs for NER
+
+- [explosion/spaCy](https://github.com/explosion/spaCy)
+- [deepset-ai/haystack](https://github.com/deepset-ai/haystack)
+- [huggingface/transformers](https://github.com/huggingface/transformers)
+- [huggingface/trl](https://github.com/huggingface/trl)
+- [Boilerplate huggingface/inference-providers-starter-app](https://github.com/huggingface/inference-providers-starter-app)
+- [NuNER](https://aclanthology.org/2024.emnlp-main.660.pdf)
+- [ACM Digital Library](https://dl.acm.org/doi/pdf/10.1145/3701716.3717818)
+- [Literal patterns/regex](https://openreview.net/pdf?id=N3WB7LFhDb)
+- [Ensembles](https://arxiv.org/pdf/2505.23038)
+- [Ner4All Case Study](https://drezil.de/Writing/ner4all-case-study.html)
+- [LLM assisted SLM training](https://aclanthology.org/2025.alp-1.21.pdf)
+
+### Prompt Eng
+
+- [Matt Pocock X](https://x.com/mattpocockuk/status/1958179930262356032)
+- [Hunyuan-PromptEnhancer/PromptEnhancer](https://github.com/Hunyuan-PromptEnhancer/PromptEnhancer)
+- [promptslab/Promptify](https://github.com/promptslab/Promptify)
+
+### LLM Memory
+
+- [MemoriLabs/Memori](https://github.com/MemoriLabs/Memori)
+
+### Local hosting LLMs
+
+- [Mega4alik/ollm](https://github.com/Mega4alik/ollm)
+- [triton-inference-server/server](https://github.com/triton-inference-server/server)
+- **[huggingface/gpt-oss-recipes](https://github.com/huggingface/gpt-oss-recipes)**
+- [exo-explore/exo](https://github.com/exo-explore/exo)
+- **[Bogdanovich77/DeekSeek-OCR---Dockerized-API](https://github.com/Bogdanovich77/DeekSeek-OCR---Dockerized-API/)**
+- **[GPT-OSS AWS Bedrock](https://cloudsploit.com/)**
+
+### LLM Fine tuning
+
+- [stanfordnlp/dspy](https://github.com/stanfordnlp/dspy)
+- [huggingface/peft](https://github.com/huggingface/peft)
+
+### LLM Security
+
+- [Trusted-AI/adversarial-robustness-toolbox](https://github.com/Trusted-AI/adversarial-robustness-toolbox)
+
+### PII Redaction
+
+- [microsoft/presidio](https://github.com/microsoft/presidio)
+
+### FastAPI
+
+- Monitoring [apitally/apitally-py](https://github.com/apitally/apitally-py)
+- Redis [long2ice/fastapi-cache](https://github.com/long2ice/fastapi-cache)
+- Redis [madkote/fastapi-plugins](https://github.com/madkote/fastapi-plugins)
+- Boilerplate [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template)
+- SQL [fastapi/sqlmodel](https://github.com/fastapi/sqlmodel)
+- MCP Servers [tadata-org/fastapi_mcp](https://github.com/tadata-org/fastapi_mcp)
+- spaCy Boilerplate **[microsoft/cookiecutter-spacy-fastapi](https://github.com/microsoft/cookiecutter-spacy-fastapi)**
+- Boilerplate [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template/tree/master)
+- Tips [Kludex/fastapi-tips](https://github.com/Kludex/fastapi-tips)
+- [AWS Lambda](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-create-api-as-simple-proxy-for-lambda.html)
+
+### Messaging, API telemetry, Caching, Containerization
+
+- Kafka Boilerplate [StefanoFrusone/kafka-zero-to-production](https://github.com/StefanoFrusone/kafka-zero-to-production)
+- Audits [caido/caido](https://github.com/caido/caido)
+- Cache [Redis docs](https://redis.io/docs/latest/)
+- K8s boilerplate [kubernetes-sigs/kubespray](https://github.com/kubernetes-sigs/kubespray)
+- FastAPI Alternative [MotiaDev/motia](https://github.com/MotiaDev/motia/)
+- Monitoring [API Toolkit](https://apitoolkit.io/)
+- [healthchecks/healthchecks](https://github.com/healthchecks/healthchecks)
+
+### Observability
+
+- [OpenTelemetry docs](https://opentelemetry.io/docs/)
+- [umami-software/umami](https://github.com/umami-software/umami)
+- [Sentry docs](https://docs.sentry.io/platforms/javascript/guides/nextjs/)
+- [tracetest](https://github.com/kubeshop/tracetest/)
+
+### Public Data Sources
+
+- [public-apis/public-apis](https://github.com/public-apis/public-apis)
+
+### Automated Emails
+
+- [React Email AWS SES](https://react-email.mintlify.dev/docs/integrations/aws-ses)
+- [Resend](https://resend.com/docs/send-with-nextjs)
+- dashboard [freeresend](https://github.com/eibrahim/freeresend)
+
+### PDF pre-saved text extraction
+
+- [pypdfium2-team/pypdfium2](https://github.com/pypdfium2-team/pypdfium2/tree/main)
+- [PyPDFium2 docs](https://pypdfium2.readthedocs.io/en/stable/index.html)
+- [pymupdf/PyMuPDF4LLM](https://github.com/pymupdf/PyMuPDF4LLM)
+- [PyMuPDF4LLM docs](https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/index.html)
+- [PyMuPDF4LLM API](https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/api.html#pymupdf4llm-api)
+- [pdfplumber](https://github.com/jsvine/pdfplumber)
+- [Pymupdf](https://github.com/pymupdf/PyMuPDF)
+- [PyPDF2](https://github.com/mstamy2/PyPDF2)
+
+### Private Data Sources
+
+- Microsoft email
+- Google email
+- OneDrive
+- Google Drive
+- Azure Blob
+- S3
+- GCS
+
+### Need to research
+
+- TIF to PDF conversion in Python
+- Private data sources - how to intake pdfs from them in Python, preferably using their SSO authorization
+- Node.js server on EC2 VM with nginx, bun, + Next.js or Tanstack Start
+- Cloudflare or AWS WAF
+- AWS Artifact report generation for HIPPA, PCI, and others (first US and India only)
+- Which API to access many LLM providers: HuggingFace, OpenRouter, others
+
+### Research tools
+
+- [Tom Doerr](https://tom-doerr.github.io/repo_posts/archive.html)
+- Perplexity
+- Google Scholar (IEEE papers or others)
+- [search IEEE journal names](https://ieeexplore.ieee.org/browse/periodicals/title?contentType=periodicals&refinements=ContentType:Journals&refinements=Publisher:IEEE)

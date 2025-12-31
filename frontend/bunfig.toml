@@ -1,0 +1,37 @@
+[package]
+name = "dokumen"
+
+[env]
+NODE_ENV = "test"
+
+[test]
+timout = 10000 # 10 seconds (default is 5000ms)
+invalidOption = true
+
+preload = ["./tests/bun-test-setup/main.ts"]
+
+coverageReporter = ["text"]
+coverageDir = "./coverage"
+coverageSkipTestFiles = true
+coveragePathIgnorePatterns = [
+  "bun-test-setup.ts",
+  "**/*.d.ts",
+  "**/*.e2e.ts",
+  "**/*.stories.tsx",
+  "env.mjs",
+  "*.config.*",
+  "**/shadcn-ui/*",
+  ".github/",
+  ".husky/",
+  ".next/",
+  ".storybook/",
+  ".vscode/",
+  "amplify/",
+  "e2e/",
+  "node_modules/",
+  "pgdata/",
+  "playwright-report/",
+  "public/",
+  "storybook-static/",
+  "test-results/"
+]
