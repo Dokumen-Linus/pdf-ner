@@ -1,0 +1,8 @@
+{
+  "editor.bracketPairColorization.enabled": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.insertSpaces": true,
+  "files.autoSave": "onFocusChange"
+}
