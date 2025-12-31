@@ -4,9 +4,9 @@
     "christian-kohler.npm-intellisense",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "ms-ossdata.vscode-pgsql",
     "ms-vscode.vscode-typescript-next",
     "pmneo.tsimporter",
     "tomoki1207.pdf"
   ]
 }
+

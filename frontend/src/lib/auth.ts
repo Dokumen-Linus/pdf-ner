@@ -23,8 +23,8 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url }) => {
+      const _url = url // for linting
       console.log("Sending verification email to", user.email)
-      console.log("Verification URL:", url)
     },
   },
   plugins: [

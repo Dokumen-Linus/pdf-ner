@@ -21,7 +21,6 @@
 - Examples of using shadcn/ui [Hexta UI](https://www.hextaui.com/)
 - Examples of using shadcn/ui [preetsuthar17/HextaUI](https://github.com/preetsuthar17/HextaUI)
 - [Ant Design](https://ant.design/components/overview/)
-- [Hexta UI](https://pro.hextaui.com/)
 - [Untitled UI](https://www.untitledui.com/react/components)
 - [FlyonUI](https://flyonui.com/docs/component/)
 - [Mantine UI](https://ui.mantine.dev/)
@@ -34,10 +33,13 @@
 - [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
 - [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
 
+### Shadcn ui blocks
+
+- [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
+
 ### Icons
 
 - Currently: [Lucide Icons](https://lucide.dev/icons/)
-- Possibly: [Ant Design Icons](https://ant.design/components/icon)
 - Others: [React Icons](https://react-icons.github.io/react-icons/)
 - Download SVGs: [Iconstack](https://ossian-icons-60.lovable.app/)
 - AI generate SVGs: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
@@ -49,7 +51,7 @@
 
 ### Frontend specials
 
-- [myliang/x-spreadsheet](https://github.com/myliang/x-spreadsheet)
+- [Untitled UI Video Player](https://www.untitledui.com/react/components/video-players)
 - [kozakdenys/qr-code-styling](https://github.com/kozakdenys/qr-code-styling)
 - [masroorejaz/react-simple-captcha](https://github.com/masroorejaz/react-simple-captcha)
 - [Home page scroll animation](https://www.builder.io/blog/3d-gsap)
@@ -57,12 +59,12 @@
 - [Kanaries/graphic-walker](https://github.com/Kanaries/graphic-walker)
 - [vercel/avatar](https://github.com/vercel/avatar)
 - [vercel/react-tweet](https://github.com/vercel/react-tweet)
-- [vercel/platforms](https://github.com/vercel/platforms)
 - [chatbot assistant](https://ai-sdk.dev/elements/examples/chatbot)
 - [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - [AG Grid special table](https://www.ag-grid.com/react-data-grid/getting-started/)
 - charts [MUI X](https://v6.mui.com/x/react-charts/)
 - charts [Recharts](https://recharts.org/en-US/)
+- charts [ant-design/ant-design-charts](https://github.com/ant-design/ant-design-charts)
 - Component dependency grapher [Madge](https://github.com/pahen/madge)
 - Wrapper for OpenAI API to enable react component creation [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
 
@@ -148,6 +150,10 @@
 
 - [cyanfish/naps2](https://github.com/cyanfish/naps2)
 
+### PDF encryption and signatures
+
+- [flamecorcloud/signature-one](https://github.com/flamecorecloud/signature-one/)
+
 ### LLMs for NER
 
 - [google/langextract](https://github.com/google/langextract)
@@ -170,7 +176,7 @@
 
 - [Matt Pocock X](https://x.com/mattpocockuk/status/1958179930262356032)
 - [Hunyuan-PromptEnhancer/PromptEnhancer](https://github.com/Hunyuan-PromptEnhancer/PromptEnhancer)
-- **[promptslab/Promptify](https://github.com/promptslab/Promptify)**
+- [promptslab/Promptify](https://github.com/promptslab/Promptify)
 
 ### LLM Memory
 
@@ -267,7 +273,6 @@
 - Cloudflare or AWS WAF
 - AWS Artifact report generation for HIPPA, PCI, and others (first US and India only)
 - Which API to access many LLM providers: HuggingFace, OpenRouter, others
-- does grok4 fast have a CoNLL-2003 benchmark accuracy %?
 
 ### Research tools
 
