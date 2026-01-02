@@ -1,7 +1,6 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException
-
 from backend.db.client import get_pool
+from fastapi import APIRouter, Depends, HTTPException
 
 from .repository import TemplateRepository
 from .schemas import TemplateTextResponse
@@ -25,5 +24,5 @@ async def get_name(
 ):
     try:
         return await service.get_name(id)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="template not found")
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail="template not found") from e

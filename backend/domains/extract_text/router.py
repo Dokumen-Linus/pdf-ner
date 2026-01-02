@@ -1,8 +1,7 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException
-
 from backend.core.config import settings
 from backend.db.client import get_pool
+from fastapi import APIRouter, Depends, HTTPException
 
 from .repository import PDFRepository
 from .schemas import PDFTextResponse
@@ -26,5 +25,5 @@ async def extract_pdf_text(
 ):
     try:
         return await service.extract_text(pdf_id)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="PDF not found")
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail="PDF not found") from e

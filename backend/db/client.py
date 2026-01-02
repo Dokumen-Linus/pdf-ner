@@ -1,7 +1,6 @@
 import asyncpg
-from fastapi import Depends
-
 from backend.core.config import settings
+from fastapi import Depends
 
 pool: asyncpg.Pool | None = None
 
@@ -13,6 +12,6 @@ async def get_pool():
     return pool
 
 
-async def get_connection(pool: asyncpg.Pool = Depends(get_pool)):  # noqa 5008
+async def get_connection(pool: asyncpg.Pool = Depends(get_pool)):
     async with pool.acquire() as conn:
         yield conn
