@@ -1,0 +1,15 @@
+{  
+  // all
+  "editor.bracketPairColorization.enabled": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.insertSpaces": true,
+  "files.autoSave": "onFocusChange",
+  "git.branchProtection": ["master"],
+  "git.confirmNoVerifyCommit": true,
+  "git.enableSmartCommit": true,
+  "git.fetchOnPull": true,
+
+  // db
+}

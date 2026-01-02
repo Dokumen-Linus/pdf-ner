@@ -1,20 +1,19 @@
-# PDF Entity Labeling
+# Dokumen AI Frontend
 
 ## Quickstart
 
-1. Install [Node.js v22](https://nodejs.org/en/download/), [Git](https://git-scm.com/downloads), [Bun](https://bun.sh/), and [Microsoft VS Code](https://code.visualstudio.com/download) or [Google Antigravity](https://antigravity.google/download)
-2. Clone repo and install dependencies:
+1 Install [Node.js v22](https://nodejs.org/en/download/) and [Bun.js](https://bun.sh/)
+2 Clone repo and install dependencies:
 
 ```cmd
 git clone https://github.com/optimalcharb/pdf-entity-labeling.git
 ```
 
 ```cmd
-bun install
+bun i
 ```
 
-3. Install the recommended Extensions
-4. To setup playwright:
+3 To setup playwright:
 
 ```cmd
 bunx playwright install
@@ -125,23 +124,7 @@ Must start the database server before running test:db or dev. Should run dev in 
 pg_ctl -D .\pgdata -l logfile start
 ```
 
-### Creation/Migration Instructions
-
-For Windows Command Prompt:
-
-```cmd
-initdb -D .\pgdata
-pg_ctl -D .\pgdata -l logfile start
-createdb dokumen
-set DATABASE_URL=postgres://localhost/dokumen?sslmode=disable
-dbmate up
-psql -f .\db\better-auth_migrations\2025-12-22T03-27-15.344Z.sql -d dokumen
-```
-
-### Database Contents
-
-Name: dokumen
-DATABASE_URL=postgres://localhost/dokumen?sslmode=disable
+### Schemas
 
 #### Public Schema
 
@@ -155,6 +138,10 @@ Contains all tables for Better Auth. Created by "bun x @better-auth/cli@latest g
 
 Contains all tables for the app defined in ./db/migrations/. Role app_owner owns the schema so it can be used in migrations. Role app_user can only edit tables so that Drizzle can't create or delete tables etc.
 
+#### Api Schema
+
+Contains all tables for the backend defined in ./db/migrations/. Role app_user has read-only access.
+
 ### How Database is Exposed to App
 
 The database schemas are defined in:
@@ -163,12 +150,10 @@ The database schemas are defined in:
 2. ./src/db/schema/ Drizzle Typescript schemas
 3. ./src/db-fns/ Zod validation schemas
 
-Any changes to the database schema must be made in all three locations
+- Any changes to the database schema must be made in all three locations
+- Test ./src/db-fns/match-schemas.test.ts ensures that [2] Drizzle schemas equal the [3] Zod validation schemas
+- There's no test to ensure that [1] SQL schemas equal the [2] Drizzle schemas
 
-Test ./src/db-fns/match-schemas.test.ts ensures that [2] Drizzle schemas equal the [3] Zod validation schemas
+### **Restriction on App Interactions with Database**
 
-There's no test to ensure that [1] SQL schemas equal the [2] Drizzle schemas
-
-## Restriction on App Interactions with Database
-
-App can only interact with database through db-fns to ensure that all database interactions are validated and consistent.
+The frontend can only interact with database through db-fns to ensure that all database interactions are validated and consistent.

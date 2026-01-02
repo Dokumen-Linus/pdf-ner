@@ -6,8 +6,8 @@ CREATE TABLE app.users (
   last_name TEXT,
   employer TEXT,
   job_title TEXT,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  created_at TIMESTAMP DEFAULT now(),
+  updated_at TIMESTAMP DEFAULT now()
 );
 
 -- migrate:down

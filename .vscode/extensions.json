@@ -1,17 +1,24 @@
 {
   "recommendations": [
+    // all
+    "tomoki1207.pdf",
+
+    // backend
+    "charliermarsh.ruff",
+    "ms-python.debugpy",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-toolsai.jupyter",
+    "onegang2.fastapi-endpoint",
+    
+    // db
+    "ms-ossdata.vscode-pgsql",
+
+    // frontend
     "bradlc.vscode-tailwindcss",
     "christian-kohler.npm-intellisense",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "ms-ossdata.vscode-pgsql",
-    "ms-python.debugpy",
-    "ms-python.isort",
-    "ms-python.python",
-    "ms-python.vscode-pylance",
-    "ms-toolsai.jupyter",
-    "ms-vscode.vscode-typescript-next",
-    "pmneo.tsimporter",
-    "tomoki1207.pdf"
+    "ms-vscode.vscode-typescript-next"
   ]
 }

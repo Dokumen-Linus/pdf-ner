@@ -1,8 +1,9 @@
-import boto3
-import pymupdf4llm
 import tempfile
 from uuid import UUID
+import boto3
+import pymupdf4llm
 from fastapi.concurrency import run_in_threadpool
+
 from .repository import PDFRepository
 from .schemas import PDFTextResponse
 

@@ -1,5 +1,6 @@
 from uuid import UUID
 from fastapi.concurrency import run_in_threadpool
+
 from .repository import TemplateRepository
 from .schemas import TemplateTextResponse
 

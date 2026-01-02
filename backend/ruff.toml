@@ -1,0 +1,34 @@
+line-length = 100
+target-version = "py313"
+
+include = ["**/*.py"]
+exclude = ["**/conda_env/**/*.*", ".venv", ".mypy_cache", "__pycache__"]
+
+[lint]
+select = [
+  "E",   # pycodestyle
+  "F",   # Pyflakes
+  "W",   # pycodestyle warnings
+  "I",   # isort
+  "UP",  # pyupgrade
+  "B",   # flake8-bugbear
+]
+ignore = [
+  "E501",  # let the formatter handle line length
+  "B008"
+]
+
+[lint.isort]
+lines-between-types = 0
+lines-after-imports = 1
+no-lines-before = ["future", "standard-library"]
+
+[lint.flake8-unused-arguments]
+ignore-variadic-names = true
+
+[lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[format]
+quote-style = "double"
+indent-style = "space"

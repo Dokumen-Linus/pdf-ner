@@ -1,9 +1,11 @@
 {
   "recommendations": [
+    "charliermarsh.ruff",
     "ms-python.debugpy",
-    "ms-python.isort",
     "ms-python.python",
     "ms-python.vscode-pylance",
-    "ms-toolsai.jupyter"
+    "ms-toolsai.jupyter",
+    "onegang2.fastapi-endpoint",
+    "tomoki1207.pdf"
   ]
 }
