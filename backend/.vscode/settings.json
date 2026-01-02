@@ -1,8 +1,26 @@
 {
+  // all
   "editor.bracketPairColorization.enabled": true,
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
   "editor.guides.bracketPairs": "active",
   "editor.insertSpaces": true,
-  "files.autoSave": "onFocusChange"
+  "files.autoSave": "onFocusChange",
+  "git.branchProtection": ["master"],
+  "git.confirmNoVerifyCommit": true,
+  "git.enableSmartCommit": true,
+  "git.fetchOnPull": true,
+
+  // backend
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
+        "source.fixAll.ruff": "explicit"
+    },
+  },
+  "fastapi-endpoint.files.include": "**/*.py",
+  "fastapi-endpoint.files.exclude": "**/conda_env/**/*.*",
+  "ruff.configuration": "../ruff.toml",
+  "ruff.lineLength": 100,
 }

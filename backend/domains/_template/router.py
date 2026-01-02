@@ -1,10 +1,11 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
+
+from backend.db.client import get_pool
+
+from .repository import TemplateRepository
 from .schemas import TemplateTextResponse
 from .service import TemplateService
-from .repository import TemplateRepository
-from backend.db.client import get_pool  # your asyncpg pool dependency
-from backend.core.config import settings
 
 router = APIRouter(prefix="/templates", tags=["templates"])
 

@@ -1,10 +1,12 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
+
+from backend.core.config import settings
+from backend.db.client import get_pool
+
+from .repository import PDFRepository
 from .schemas import PDFTextResponse
 from .service import PDFService
-from .repository import PDFRepository
-from backend.db.client import get_pool  # your asyncpg pool dependency
-from backend.core.config import settings
 
 router = APIRouter(prefix="/pdfs", tags=["pdfs"])
 

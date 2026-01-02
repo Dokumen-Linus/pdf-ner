@@ -1,0 +1,25 @@
+{  
+  // all
+  "editor.bracketPairColorization.enabled": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.insertSpaces": true,
+  "files.autoSave": "onFocusChange",
+  "git.branchProtection": ["master"],
+  "git.confirmNoVerifyCommit": true,
+  "git.enableSmartCommit": true,
+  "git.fetchOnPull": true,
+
+  // db
+  "[sql]": {
+    "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc",
+  },
+  "SQL-Formatter-VSCode.dialect": "postgresql",
+  "SQL-Formatter-VSCode.keywordCase": "upper",
+  "SQL-Formatter-VSCode.dataTypeCase": "upper",
+  "SQL-Formatter-VSCode.functionCase": "lower",
+  "SQL-Formatter-VSCode.identifierCase": "lower",
+  "SQL-Formatter-VSCode.expressionWidth": 100,
+  "SQL-Formatter-VSCode.linesBetweenQueries": 0
+}
