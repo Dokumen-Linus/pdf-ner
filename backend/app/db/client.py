@@ -1,6 +1,6 @@
 import asyncpg
-from backend.core.config import settings
 from fastapi import Depends
+from app.core.config import settings
 
 pool: asyncpg.Pool | None = None
 

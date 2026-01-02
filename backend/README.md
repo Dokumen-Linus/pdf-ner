@@ -13,6 +13,8 @@ conda install -c conda-forge --file requirements.txt
 pip install -r requirements.txt
 ```
 
+Using v3.13 until most libraries have upgraded to 3.14
+
 ### Running the backend app
 
 1 Start the database server
@@ -24,13 +26,15 @@ pg_ctl -D .\pgdata -l logfile start
 2 Activate the Python environment
 
 ```cmd
-conda activate .\ conda_env
+conda activate .\conda_env
 ```
 
-3 Run the app
+3 Ensure .env is created following to .env.local.example
+
+4 Run the app as a module (not a script)
 
 ```cmd
-python main.py
+uvicorn app.main:app --reload
 ```
 
 ### Fast API Endpoint VSCode Extension
@@ -38,6 +42,8 @@ python main.py
 Visualizes the endpoints exposed by the api and what file defines them
 
 ## Fast API Framework
+
+### Root files
 
 - main.py: builds the Fast API app from the router in api.py, should rarely be updated
 - api.py: imports all endpoints from the various domains/**/router.py, should be updated when creating a new domain

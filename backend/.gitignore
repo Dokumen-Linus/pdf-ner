@@ -1,6 +1,10 @@
 # python env libraries
 conda_env
 
+# outputs
+__pycache__
+**/__pycache__
+
 # local env files
 .env
 *.local

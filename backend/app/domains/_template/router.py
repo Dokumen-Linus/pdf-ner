@@ -1,6 +1,6 @@
 from uuid import UUID
-from backend.db.client import get_pool
 from fastapi import APIRouter, Depends, HTTPException
+from app.db.client import get_pool
 
 from .repository import TemplateRepository
 from .schemas import TemplateTextResponse
@@ -8,14 +8,16 @@ from .service import TemplateService
 
 router = APIRouter(prefix="/templates", tags=["templates"])
 
+
 def get_template_service(
-    pool = Depends(get_pool),
+    pool=Depends(get_pool),
 ) -> TemplateService:
     repo = TemplateRepository(pool)
     return TemplateService(
         repo=repo,
         _props={},
     )
+
 
 @router.get("/{id}/name", response_model=TemplateTextResponse)
 async def get_name(
