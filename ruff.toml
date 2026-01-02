@@ -21,7 +21,7 @@ ignore = [
 [lint.isort]
 lines-between-types = 0
 lines-after-imports = 1
-no-lines-before = ["future", "standard-library", "third-party"]
+no-lines-before = ["future", "standard-library", "third-party", "first-party"]
 
 [lint.flake8-unused-arguments]
 ignore-variadic-names = true

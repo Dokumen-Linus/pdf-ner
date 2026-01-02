@@ -1,0 +1,15 @@
+{
+  "plugins": ["prettier-plugin-tailwindcss", "@ianvs/prettier-plugin-sort-imports"],
+  "printWidth": 100,
+  "semi": false,
+  "importOrder": [
+    "^react$",
+    "^react-dom$",
+    "^tanstack$",
+    "<THIRD_PARTY_MODULES>",
+    "^~/",
+    "^@/",
+    "^[../]",
+    "^[./]"
+  ]
+}

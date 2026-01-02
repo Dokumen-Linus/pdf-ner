@@ -1,0 +1,19 @@
+node_modules/
+
+# tanstack
+dist
+dist-ssr
+count.txt
+*.local
+.nitro
+.tanstack
+.output
+src/routes/routeTree.gen.ts
+
+# outputs
+storybook-static/
+test-results/
+
+# shadcn
+# **/shadcn-ui/**
+# **/shadcn-stories/**
