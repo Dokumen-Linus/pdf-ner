@@ -13,7 +13,6 @@
     
     // db
     "ms-ossdata.vscode-pgsql",
-    "ReneSaarsoo.sql-formatter-vsc",
 
     // frontend
     "bradlc.vscode-tailwindcss",

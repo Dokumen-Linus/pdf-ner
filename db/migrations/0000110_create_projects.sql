@@ -8,5 +8,6 @@ CREATE TABLE app.projects (
   created_at TIMESTAMP DEFAULT now(),
   updated_at TIMESTAMP DEFAULT now()
 );
+
 -- migrate:down
 DROP TABLE app.projects;

@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "ms-ossdata.vscode-pgsql",
-    "ReneSaarsoo.sql-formatter-vsc"
+    "ms-ossdata.vscode-pgsql"
   ]
 }

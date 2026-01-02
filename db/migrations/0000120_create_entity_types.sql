@@ -19,5 +19,6 @@ CREATE TABLE app.entity_types (
   created_at TIMESTAMP DEFAULT nosw (),
   updated_at TIMESTAMP DEFAULT now()
 );
+
 -- migrate:down
 DROP TABLE app.entity_types;

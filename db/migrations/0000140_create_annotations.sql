@@ -36,5 +36,6 @@ CREATE TABLE app.annotations (
   created_at TIMESTAMP DEFAULT now(),
   updated_at TIMESTAMP DEFAULT now()
 );
+
 -- migrate:down
 DROP TABLE app.annotations;

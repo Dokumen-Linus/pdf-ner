@@ -9,5 +9,6 @@ CREATE TABLE app.users (
   created_at TIMESTAMP DEFAULT now(),
   updated_at TIMESTAMP DEFAULT now()
 );
+
 -- migrate:down
 DROP TABLE app.users;

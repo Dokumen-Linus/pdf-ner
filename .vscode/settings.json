@@ -14,6 +14,8 @@
   // backend  
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
         "source.fixAll.ruff": "explicit"
     },
@@ -23,38 +25,54 @@
   "ruff.configuration": "ruff.toml",
 
   // db
-  "[sql]": {
-    "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc",
-  },
-  "SQL-Formatter-VSCode.dialect": "postgresql",
-  "SQL-Formatter-VSCode.keywordCase": "upper",
-  "SQL-Formatter-VSCode.dataTypeCase": "upper",
-  "SQL-Formatter-VSCode.functionCase": "lower",
-  "SQL-Formatter-VSCode.identifierCase": "lower",
-  "SQL-Formatter-VSCode.expressionWidth": 100,
-  "SQL-Formatter-VSCode.linesBetweenQueries": 0,
+  // "[sql]": {
+  //   "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc",
+  // },
+  // "SQL-Formatter-VSCode.dialect": "postgresql",
+  // "SQL-Formatter-VSCode.keywordCase": "upper",
+  // "SQL-Formatter-VSCode.dataTypeCase": "upper",
+  // "SQL-Formatter-VSCode.functionCase": "upper",
+  // "SQL-Formatter-VSCode.identifierCase": "lower",
+  // "SQL-Formatter-VSCode.expressionWidth": 100,
+  // "SQL-Formatter-VSCode.linesBetweenQueries": 0,
+  // "[sql]": {
+  //   "editor.defaultFormatter": "bradymholt.pgformatter",
+  //   "editor.formatOnSave": true
+  // },
+  // "pgFormatter.functionCase": "lowercase",
+  // "pgFormatter.noExtraLine": true,
+  // "pgFormatter.wrapLimit": 100,
+  // "pgFormatter.wrapComment": true,
 
   // frontend
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     },
   },
   "[javascriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     },
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     },
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     },

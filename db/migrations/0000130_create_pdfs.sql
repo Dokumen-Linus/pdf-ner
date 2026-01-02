@@ -6,5 +6,6 @@ CREATE TABLE app.pdfs (
   created_at TIMESTAMP DEFAULT now(),
   updated_at TIMESTAMP DEFAULT now()
 );
+
 -- migrate:down
 DROP TABLE app.pdfs;

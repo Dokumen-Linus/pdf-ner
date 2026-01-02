@@ -12,14 +12,4 @@
   "git.fetchOnPull": true,
 
   // db
-  "[sql]": {
-    "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc",
-  },
-  "SQL-Formatter-VSCode.dialect": "postgresql",
-  "SQL-Formatter-VSCode.keywordCase": "upper",
-  "SQL-Formatter-VSCode.dataTypeCase": "upper",
-  "SQL-Formatter-VSCode.functionCase": "lower",
-  "SQL-Formatter-VSCode.identifierCase": "lower",
-  "SQL-Formatter-VSCode.expressionWidth": 100,
-  "SQL-Formatter-VSCode.linesBetweenQueries": 0
 }
