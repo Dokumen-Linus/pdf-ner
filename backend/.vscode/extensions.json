@@ -1,11 +1,15 @@
 {
   "recommendations": [
+    // all    
+    "DavidAnson.vscode-markdownlint",
+    "tomoki1207.pdf",
+
+    // backend
     "charliermarsh.ruff",
     "ms-python.debugpy",
     "ms-python.python",
     "ms-python.vscode-pylance",
     "ms-toolsai.jupyter",
-    "onegang2.fastapi-endpoint",
-    "tomoki1207.pdf"
+    "onegang2.fastapi-endpoint"
   ]
 }

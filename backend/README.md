@@ -2,7 +2,7 @@
 
 ## Quickstart
 
-1 Install [Anaconda Python distribution](https://www.anaconda.com/download)
+1 Install [Python 3.13](https://www.python.org/downloads/release/python-31311/) without Conda/MiniConda/AnaConda distributions and set PATH environment variable (Windows)
 
 2 Create Python environment and install libraries
 
@@ -41,7 +41,20 @@ uvicorn app.main:app --reload
 
 Visualizes the endpoints exposed by the api and what file defines them
 
-## Fast API Framework
+## API
+
+- Framework: [FastAPI docs](https://fastapi.tiangolo.com/), [repo](https://github.com/fastapi/fastapi) with auto-generated MKDocs and concurrent programming
+- Typing: [Pydantic docs](https://docs.pydantic.dev/), [repo](https://github.com/pydantic/pydantic) with pydantic_settings
+- Package manager: uvicorn [uv](https://docs.astral.sh/uv/)
+- Dependency checker: [deptry](https://github.com/fpgmaas/deptry)
+
+### Concurrent Programming Packages
+
+- [asyncio docs](https://docs.python.org/3/library/asyncio.html), [repo](https://github.com/python/cpython/tree/3.14/Lib/asyncio)
+- [anyio docs](https://anyio.readthedocs.io/), [repo](https://github.com/anyio/anyio)
+- [httpx](https://www.python-httpx.org/), [repo](https://github.com/encode/httpx)
+- AsyncIterator from collections.abc
+- asynccontextmanager from contextlib
 
 ### Root files
 
@@ -62,7 +75,7 @@ Each domain must have the following files:
 
 1. router.py - defines what endpoints are exposed
 1. schema.py - defines types for endpoint responses
-1. service.py - creates class functions to perform the main business logic/purpose of the endpoint
+1. service.py - creates functions to perform the main business logic/purpose of the endpoint
 1. repository.py - executes SQL queries to handle necessary database interaction
 
 Each domain should follow the template domains/_template. Only router.py exposes functions, the other three expose classes.
@@ -101,4 +114,4 @@ The SQL queries may need to change if the database schema is modified
 
 ### **Restriction on API Interactions with Database**
 
-The backend can only interact with database through queries in repository.py files. No other files may interact with the database. No ORM or Python schema for the SQL database is allowed.
+The backend can only interact with database through queries in repository.py files using [asyncpg](https://github.com/MagicStack/asyncpg) library. No other files may interact with the database. No ORM or Python schema for the SQL database is allowed.

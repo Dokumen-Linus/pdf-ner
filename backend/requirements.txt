@@ -1,5 +1,4 @@
 asyncpg
-fastapi
-uvicorn
+fastapi[standard]
 pydantic-settings
 pymupdf4llm

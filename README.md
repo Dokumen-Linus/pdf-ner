@@ -16,6 +16,10 @@ The web app is hosted in its own directory. Your terminal should be in this dire
 
 The core [REST API](https://restfulapi.net/) is hosted in its own directory. Your terminal should be in this directory to run Python commands, including uvicorn and conda. Python libraries must be saved in ./backend/conda_env/.
 
+## Containerization
+
+- [Docker](https://www.docker.com/)
+
 ## Quickstart
 
 1 Install [Git](https://git-scm.com/downloads) and [Microsoft VS Code](https://code.visualstudio.com/download) or fork
