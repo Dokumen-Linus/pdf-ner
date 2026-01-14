@@ -43,6 +43,7 @@ export default [
       ...importPlugin.configs.recommended.rules,
       ...prettierConfig.rules,
       "react/react-in-jsx-scope": "off", // Not needed with new JSX transform
+      "react/no-children-prop": ["error", { allowFunctions: true }],
       "sort-imports": [
         "error",
         {
