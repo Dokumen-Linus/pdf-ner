@@ -13,7 +13,7 @@ import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { authClient } from "@/lib/auth-client"
 
-export const Route = createFileRoute("/signin")({
+export const Route = createFileRoute("/_auth/signin")({
   component: SignInPage,
 })
 

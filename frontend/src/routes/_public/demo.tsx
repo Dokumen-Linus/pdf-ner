@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
-import EntityTable from "../components/entity-table/components/entity-table"
-import PDFContainer from "../components/pdf-container/pdf-container"
+import EntityTable from "../../components/entity-table/components/entity-table"
+import PDFContainer from "../../components/pdf-container/pdf-container"
 
-export const Route = createFileRoute("/demo")({
+export const Route = createFileRoute("/_public/demo")({
   component: DemoPage,
 })
 
