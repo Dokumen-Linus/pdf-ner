@@ -42,11 +42,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         property: "og:image",
-        content: "https://dokumen.ai/og.png",
+        content: process.env.BASE_URL + "/og.png",
       },
       {
         property: "og:url",
-        content: "https://dokumen.ai",
+        content: process.env.BASE_URL, // avoid using import.meta.env.VITE_BASE_URL so it's SSR
       },
       {
         name: "twitter:title",
@@ -58,11 +58,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         name: "twitter:image",
-        content: "https://dokumen.ai/og.png",
+        content: process.env.BASE_URL + "/og.png",
       },
       {
         name: "twitter:url",
-        content: "https://dokumen.ai",
+        content: process.env.BASE_URL,
       },
     ],
     links: [
@@ -72,7 +72,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
-
   shellComponent: RootDocument,
 })
 
