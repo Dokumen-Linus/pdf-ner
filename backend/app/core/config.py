@@ -1,13 +1,29 @@
+from enum import Enum
 from functools import lru_cache
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Environment(str, Enum):
+    DEVELOPMENT = "development"
+    STAGING = "staging"
+    PRODUCTION = "production"
 
 
 class Settings(BaseSettings):
+    ENV: Environment = Environment.DEVELOPMENT
+
     API_DATABASE_URL: str
     S3_BUCKET: str
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(
+        frozen=True,
+        env_file=".env",
+        extra="ignore",
+    )
+
+    @property
+    def is_production(self) -> bool:
+        return self.ENV is Environment.PRODUCTION
 
 
 @lru_cache

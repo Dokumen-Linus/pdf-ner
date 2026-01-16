@@ -1,10 +1,11 @@
-# python env libraries
-conda_env
+# uvicorn
+.venv
+build
+*.egg-info
 
-# outputs
+# python
 __pycache__
 **/__pycache__
 
 # local env files
 .env
-*.local

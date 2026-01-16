@@ -1,9 +1,17 @@
 [project]
-name = "awesomeapp"
+name = "dokumen-api"
 version = "0.1.0"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 dependencies = [
-    "fastapi[standard]>=0.128.0",
+  "fastapi[standard]",
+  "asyncpg",
+  "pydantic-settings"
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff",
+  "deptry"
 ]
 
 [tool.ruff]
