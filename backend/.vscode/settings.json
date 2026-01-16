@@ -21,6 +21,6 @@
   },
   "fastapi-endpoint.files.include": "**/*.py",
   "fastapi-endpoint.files.exclude": "**/conda_env/**/*.*",
-  "ruff.configuration": "ruff.toml",
+  "ruff.configuration": "pyproject.toml",
   "ruff.lineLength": 100,
 }

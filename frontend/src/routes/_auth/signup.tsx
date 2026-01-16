@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
@@ -16,7 +15,7 @@ import { Label } from "@/components/shadcn-ui/label"
 import { createUser, deleteUserByEmail, getUserByEmail } from "@/db-fns/users"
 import { authClient } from "@/lib/auth-client"
 
-export const Route = createFileRoute("/signup")({
+export const Route = createFileRoute("/_auth/signup")({
   component: SignUpPage,
 })
 

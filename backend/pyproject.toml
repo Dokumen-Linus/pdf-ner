@@ -1,0 +1,55 @@
+[project]
+name = "dokumen-api"
+version = "0.1.0"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "fastapi[standard]",
+  "asyncpg",
+  "pydantic-settings"
+]
+
+[project.optional-dependencies]
+dev = [
+  "ruff",
+  "deptry"
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+include = ["**/*.py"]
+exclude = [
+  "**/conda_env/**/*.*",
+  ".venv",
+  ".mypy_cache",
+  "__pycache__",
+]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle
+  "F",   # Pyflakes
+  "W",   # pycodestyle warnings
+  "I",   # isort
+  "UP",  # pyupgrade
+  "B",   # flake8-bugbear
+]
+ignore = [
+  "E501",  # let the formatter handle line length
+]
+
+[tool.ruff.lint.isort]
+lines-between-types = 0
+lines-after-imports = 1
+no-lines-before = ["future", "standard-library"]
+
+[tool.ruff.lint.flake8-unused-arguments]
+ignore-variadic-names = true
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

@@ -3,7 +3,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Loader2 } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 
-export const Route = createFileRoute("/signout")({
+export const Route = createFileRoute("/_auth/signout")({
   component: SignOutPage,
 })
 

@@ -1,5 +1,10 @@
 {
   "recommendations": [
+    // all    
+    "DavidAnson.vscode-markdownlint",
+    "tomoki1207.pdf",
+
+    // db
     "ms-ossdata.vscode-pgsql"
   ]
 }

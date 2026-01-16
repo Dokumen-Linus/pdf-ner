@@ -62,11 +62,15 @@
 - [chatbot assistant](https://ai-sdk.dev/elements/examples/chatbot)
 - [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - [AG Grid special table](https://www.ag-grid.com/react-data-grid/getting-started/)
-- charts [MUI X](https://v6.mui.com/x/react-charts/)
-- charts [Recharts](https://recharts.org/en-US/)
-- charts [ant-design/ant-design-charts](https://github.com/ant-design/ant-design-charts)
+- videos [mifi/reactive-video](https://github.com/mifi/reactive-video/)
 - Component dependency grapher [Madge](https://github.com/pahen/madge)
 - Wrapper for OpenAI API to enable react component creation [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
+- dashboard template 
+
+### React Dashboard Examples
+
+- [0wczar/airframe-react](https://github.com/0wczar/airframe-react)
+- [creativetimofficial/notus-react](https://github.com/creativetimofficial/notus-react), [demo](https://demos.creative-tim.com/notus-react/#/admin/dashboard)
 
 ### Next.js Boilerplates
 
@@ -96,6 +100,13 @@
 
 - [File upload](https://docs.uploadthing.com/getting-started/tanstack-start)
 - [Sitemap creation](https://github.com/Ryanjso/tanstack-router-sitemap)
+
+### Charts
+
+- [ApexCharts](https://github.com/apexcharts/react-apexcharts/)
+- [Recharts](https://github.com/recharts/recharts)
+- [Ant Design Charts](https://github.com/ant-design/ant-design-charts)
+- [MUI X](https://mui.com/x/react-charts/)
 
 ### Auth
 
@@ -128,7 +139,23 @@
 - [Stripe](https://stripe.com/)
 - self-hosted alternative [Lago](https://getlago.com/docs/welcome)
 
+### Automated Emails
+
+- [React Email AWS SES](https://react-email.mintlify.dev/docs/integrations/aws-ses)
+- [Resend](https://resend.com/docs/send-with-nextjs)
+- dashboard [freeresend](https://github.com/eibrahim/freeresend)
+
 ## Backend links
+
+### PDF pre-saved text extraction
+
+- [pypdfium2-team/pypdfium2](https://github.com/pypdfium2-team/pypdfium2/tree/main), [PyPDFium2 docs](https://pypdfium2.readthedocs.io/en/stable/index.html)
+- [pymupdf/PyMuPDF4LLM](https://github.com/pymupdf/PyMuPDF4LLM), [PyMuPDF4LLM docs](https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/index.html), [PyMuPDF4LLM API](https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/api.html#pymupdf4llm-api)
+- [jsvine/pdfplumber](https://github.com/jsvine/pdfplumber)
+- [Immutablemike/pypdf2](https://github.com/Immutablemike/pypdf2), [docs](https://pypdf.readthedocs.io/en/latest/)
+- [microsoft/markitdown](https://github.com/microsoft/markitdown)
+- [Pymupdf](https://github.com/pymupdf/PyMuPDF)
+- [marker](https://github.com/vikparuchuri/marker)
 
 ### OCR
 
@@ -165,6 +192,7 @@
 - [huggingface/transformers](https://github.com/huggingface/transformers)
 - [huggingface/trl](https://github.com/huggingface/trl)
 - [Boilerplate huggingface/inference-providers-starter-app](https://github.com/huggingface/inference-providers-starter-app)
+- [allenai/allennlp](https://github.com/allenai/allennlp)
 - [NuNER](https://aclanthology.org/2024.emnlp-main.660.pdf)
 - [ACM Digital Library](https://dl.acm.org/doi/pdf/10.1145/3701716.3717818)
 - [Literal patterns/regex](https://openreview.net/pdf?id=N3WB7LFhDb)
@@ -204,56 +232,74 @@
 
 - [microsoft/presidio](https://github.com/microsoft/presidio)
 
-### FastAPI
+### **FastAPI**
 
-- Monitoring [apitally/apitally-py](https://github.com/apitally/apitally-py)
-- Redis [long2ice/fastapi-cache](https://github.com/long2ice/fastapi-cache)
-- Redis [madkote/fastapi-plugins](https://github.com/madkote/fastapi-plugins)
-- Boilerplate [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template)
-- SQL [fastapi/sqlmodel](https://github.com/fastapi/sqlmodel)
-- MCP Servers [tadata-org/fastapi_mcp](https://github.com/tadata-org/fastapi_mcp)
-- spaCy Boilerplate **[microsoft/cookiecutter-spacy-fastapi](https://github.com/microsoft/cookiecutter-spacy-fastapi)**
-- Boilerplate [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template/tree/master)
-- Tips [Kludex/fastapi-tips](https://github.com/Kludex/fastapi-tips)
-- [AWS Lambda](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-create-api-as-simple-proxy-for-lambda.html)
+- Using Uvicorn
+- [FastAPI docs](https://fastapi.tiangolo.com/)
+- FastAPI quickstart [fastapi/fastapi-new](https://github.com/fastapi/fastapi-new)
+- FastAPI boilerplate [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template)
+- [agronholm/anyio](https://github.com/agronholm/anyio), [docs AnyIO](https://anyio.readthedocs.io/en/stable/threads.html#adjusting-the-default-maximum-worker-thread-count)
+- [encode/httpx](https://github.com/encode/httpx), [docs](https://www.python-httpx.org/), examples [Kludex/fastapi-tips](https://github.com/Kludex/fastapi-tips)
+- [APIs on AWS Lambda](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-create-api-as-simple-proxy-for-lambda.html)
+- Best practices [Kludex/fastapi-tips](https://github.com/Kludex/fastapi-tips)
+- Useful videos [15 FastAPI Best Practices For Production](https://www.youtube.com/watch?v=kmJz8w5ij8Y), [Best Way to Deploy FastAPI in Production](https://www.youtube.com/watch?v=zIFqjwuK7Yg), [How FastAPI Handles Requests Behind the Scenes](https://www.youtube.com/watch?v=tGD3653BrZ8&t=50s)
 
-### Messaging, API telemetry, Caching, Containerization
+### Unfiltered
 
+Links to repos and tools that might be helpful in API dev, but I haven't checled that these are directly relevant. They may cover Messaging, telemetry, Caching, Containerization. LLMs should ignore.
+
+- AnyIO add-on [fastapi/asyncer](https://github.com/fastapi/asyncer), [docs](https://asyncer.tiangolo.com/)
+- Cache [Redis docs](https://redis.io/docs/latest/)
+- Redis + FastAPI [long2ice/fastapi-cache](https://github.com/long2ice/fastapi-cache)
+- Redis + FastAPI [madkote/fastapi-plugins](https://github.com/madkote/fastapi-plugins)
+- Redis + FastAPI [aio-libs/aiocache](https://github.com/aio-libs/aiocache)
+- spaCy [microsoft/cookiecutter-spacy-fastapi](https://github.com/microsoft/cookiecutter-spacy-fastapi)
+- Observability [apitally/apitally-py](https://github.com/apitally/apitally-py)
+- Monitoring [API Toolkit](https://apitoolkit.io/)
+- [OpenTelemetry docs](https://opentelemetry.io/docs/)
+- Telemetry [umami-software/umami](https://github.com/umami-software/umami)
+- Debugging [tracetest](https://github.com/kubeshop/tracetest/)
+- Testing [healthchecks/healthchecks](https://github.com/healthchecks/healthchecks)
+
+### Not Relevant
+
+Links to repos that aren't relevant to my current project but could give me brainstorming ideas. LLMs should ignore.
+
+- FastAPI + MCP Servers [tadata-org/fastapi_mcp](https://github.com/tadata-org/fastapi_mcp)
+- K8s boilerplate [kubernetes-sigs/kubespray](https://github.com/kubernetes-sigs/kubespray)
 - Kafka Boilerplate [StefanoFrusone/kafka-zero-to-production](https://github.com/StefanoFrusone/kafka-zero-to-production)
 - Audits [caido/caido](https://github.com/caido/caido)
-- Cache [Redis docs](https://redis.io/docs/latest/)
-- K8s boilerplate [kubernetes-sigs/kubespray](https://github.com/kubernetes-sigs/kubespray)
-- FastAPI Alternative [MotiaDev/motia](https://github.com/MotiaDev/motia/)
-- Monitoring [API Toolkit](https://apitoolkit.io/)
-- [healthchecks/healthchecks](https://github.com/healthchecks/healthchecks)
-
-### Observability
-
-- [OpenTelemetry docs](https://opentelemetry.io/docs/)
-- [umami-software/umami](https://github.com/umami-software/umami)
-- [Sentry docs](https://docs.sentry.io/platforms/javascript/guides/nextjs/)
-- [tracetest](https://github.com/kubeshop/tracetest/)
-
-### Public Data Sources
-
 - [public-apis/public-apis](https://github.com/public-apis/public-apis)
 
-### Automated Emails
+### Examples of other FastAPIs
 
-- [React Email AWS SES](https://react-email.mintlify.dev/docs/integrations/aws-ses)
-- [Resend](https://resend.com/docs/send-with-nextjs)
-- dashboard [freeresend](https://github.com/eibrahim/freeresend)
+- [lm-sys/FastChat](https://github.com/lm-sys/FastChat)
+- [Lightning-AI/pytorch-lightning](https://github.com/Lightning-AI/pytorch-lightning)
+- [QuivrHQ/quivr](https://github.com/QuivrHQ/quivr)
+- [langflow-ai/langflow](https://github.com/langflow-ai/langflow)
+- [buuntu/fastapi-react](https://github.com/buuntu/fastapi-react)
 
-### PDF pre-saved text extraction
+### Pydantic Types
 
-- [pypdfium2-team/pypdfium2](https://github.com/pypdfium2-team/pypdfium2/tree/main)
-- [PyPDFium2 docs](https://pypdfium2.readthedocs.io/en/stable/index.html)
-- [pymupdf/PyMuPDF4LLM](https://github.com/pymupdf/PyMuPDF4LLM)
-- [PyMuPDF4LLM docs](https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/index.html)
-- [PyMuPDF4LLM API](https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/api.html#pymupdf4llm-api)
-- [pdfplumber](https://github.com/jsvine/pdfplumber)
-- [Pymupdf](https://github.com/pymupdf/PyMuPDF)
-- [PyPDF2](https://github.com/mstamy2/PyPDF2)
+- [caniko/pydantic-numpy](https://github.com/caniko/pydantic-numpy)
+- [redis/redis-om-python](https://github.com/redis/redis-om-python)
+- Dependencies [Lancetnik/FastDepends](https://github.com/Lancetnik/FastDepends)
+- LLMs [567-labs/instructor](https://github.com/567-labs/instructor)
+- Pydantic Settings + AWS Secrets [okube-ai/settus](https://github.com/okube-ai/settus)
+- Visualization [drivendataorg/erdantic](https://github.com/drivendataorg/erdantic)
+
+### Task Queues
+
+- [celery/celery](https://github.com/celery/celery), [docs](https://docs.celeryq.dev/)
+- [dask/dask](https://github.com/dask/dask)
+
+### Memory Serializaiton
+
+- [google/flatbuffers](https://github.com/google/flatbuffers)
+
+### Ops
+
+- [apache/airflow](https://github.com/apache/airflow)
 
 ### Private Data Sources
 
@@ -267,11 +313,11 @@
 
 ### Need to research
 
-- TIF to PDF conversion in Python
 - Private data sources - how to intake pdfs from them in Python, preferably using their SSO authorization
-- Node.js server on EC2 VM with nginx, bun, + Next.js or Tanstack Start
+- Node.js server on EC2 VM with nginx, bun, + Tanstack Start
 - Cloudflare or AWS WAF
 - AWS Artifact report generation for HIPPA, PCI, and others (first US and India only)
+- TIF to PDF conversion in Python
 - Which API to access many LLM providers: HuggingFace, OpenRouter, others
 
 ### Research tools
