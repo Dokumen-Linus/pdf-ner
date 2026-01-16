@@ -170,6 +170,4 @@ The database schemas are defined in:
 - Test ./src/db-fns/match-schemas.test.ts ensures that [2] Drizzle schemas equal the [3] Zod validation schemas
 - There's no test to ensure that [1] SQL schemas equal the [2] Drizzle schemas
 
-### **Restriction on App Interactions with Database**
-
-The frontend can only interact with database through db-fns to ensure that all database interactions are validated and consistent.
+**Restriction on App Interactions with Database**: The frontend can only interact with database through db-fns to ensure that all database interactions are validated and consistent.
