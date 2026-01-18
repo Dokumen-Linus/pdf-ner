@@ -15,11 +15,15 @@
 - [EmbedPDF React Docs](https://www.embedpdf.com/docs/react/understanding-plugins)
 - [PDFium JS docs](https://www.embedpdf.com/docs/pdfium/introduction)
 
+### Colors
+
+- [TailColors](https://tailcolors.com/)
+- [Hex Color Codes](https://html-color.codes/)
+
 ### Generic Components
 
 - [shadcn/ui Components](https://ui.shadcn.com/docs/components)
-- Examples of using shadcn/ui [Hexta UI](https://www.hextaui.com/)
-- Examples of using shadcn/ui [preetsuthar17/HextaUI](https://github.com/preetsuthar17/HextaUI)
+- Examples of using shadcn/ui: Hexta UI [docs](https://www.hextaui.com/), [repo](https://github.com/preetsuthar17/HextaUI)
 - [Ant Design](https://ant.design/components/overview/)
 - [Untitled UI](https://www.untitledui.com/react/components)
 - [FlyonUI](https://flyonui.com/docs/component/)
@@ -31,11 +35,9 @@
 - headless [headlessui](https://headlessui.com/react/menu)
 - [square-ui](https://github.com/ln-dev7/square-ui)
 - [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
-- [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
-
-### Shadcn ui blocks
-
-- [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
+- [lmsqueezy/wedges](https://lemonsqueezy.com/wedges)
+- Shadcn ui blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
+- long list [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
 
 ### Icons
 
@@ -43,11 +45,6 @@
 - Others: [React Icons](https://react-icons.github.io/react-icons/)
 - Download SVGs: [Iconstack](https://ossian-icons-60.lovable.app/)
 - AI generate SVGs: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
-
-### Colors
-
-- [TailColors](https://tailcolors.com/)
-- [Hex Color Codes](https://html-color.codes/)
 
 ### Frontend specials
 
@@ -64,8 +61,8 @@
 - [AG Grid special table](https://www.ag-grid.com/react-data-grid/getting-started/)
 - videos [mifi/reactive-video](https://github.com/mifi/reactive-video/)
 - Component dependency grapher [Madge](https://github.com/pahen/madge)
+- [Alibaba ChatUI](https://chatui.io/)
 - Wrapper for OpenAI API to enable react component creation [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
-- dashboard template 
 
 ### React Dashboard Examples
 
@@ -125,8 +122,9 @@
 ### Cloud Sec
 
 - [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
-- [AWS security checks](https://cloudsploit.com/)
+- AWS security checks [cloudsploit](https://cloudsploit.com/)
 - Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
+- [evertramos/nginx-proxy-automation](https://github.com/evertramos/nginx-proxy-automation)
 
 ### Frontend Testing (besides Bun, Playwright)
 
@@ -144,6 +142,7 @@
 - [React Email AWS SES](https://react-email.mintlify.dev/docs/integrations/aws-ses)
 - [Resend](https://resend.com/docs/send-with-nextjs)
 - dashboard [freeresend](https://github.com/eibrahim/freeresend)
+- proxy for Cloudflare worker emails [Sh4yy/cloudflare-email](https://github.com/Sh4yy/cloudflare-email)
 
 ## Backend links
 
@@ -320,7 +319,7 @@ Links to repos that aren't relevant to my current project but could give me brai
 - TIF to PDF conversion in Python
 - Which API to access many LLM providers: HuggingFace, OpenRouter, others
 
-### Research tools
+## Research tools
 
 - [Tom Doerr](https://tom-doerr.github.io/repo_posts/archive.html)
 - Perplexity
