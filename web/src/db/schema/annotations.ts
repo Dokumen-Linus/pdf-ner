@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm"
 import { integer, jsonb, pgTable, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
 import { pdfs } from "./pdfs"
 
-export const annotations = pgTable("annotations", {
+export const annotations = pgTable("web.annotations", {
   id: uuid("id").primaryKey().defaultRandom(), // created by consumer
   pdfId: uuid("pdf_id")
     .notNull()

@@ -15,3 +15,5 @@ app = FastAPI(
 )
 
 app.include_router(api_router)
+
+# do i need another line to set settings?

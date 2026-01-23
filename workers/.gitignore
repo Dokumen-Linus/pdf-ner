@@ -1,0 +1,11 @@
+# uvicorn
+.venv
+build
+*.egg-info
+
+# python
+__pycache__
+**/__pycache__
+
+# local env files
+.env

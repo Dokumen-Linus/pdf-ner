@@ -4,7 +4,7 @@ import { entityTypes } from "./entity_types"
 import { pdfs } from "./pdfs"
 import { users } from "./users"
 
-export const projects = pgTable("projects", {
+export const projects = pgTable("web.projects", {
   id: uuid("id").primaryKey().defaultRandom(),
   ownerId: uuid("owner_id")
     .notNull()

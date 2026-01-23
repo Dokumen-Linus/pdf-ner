@@ -1,7 +1,7 @@
 -- migrate:up
-CREATE TABLE app.annotations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- created by consumer
-  pdf_id UUID NOT NULL REFERENCES app.pdfs (id) ON DELETE CASCADE,
+CREATE TABLE web.annotations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- avoid default, should be created by PDFContainer
+  pdf_id UUID NOT NULL REFERENCES web.pdfs (id) ON DELETE CASCADE,
   subtype TEXT NOT NULL CHECK (subtype IN ('highlight', 'underline', 'squiggly', 'strikeout')),
   rect JSONB NOT NULL,
   segment_rects JSONB NOT NULL,
@@ -38,4 +38,4 @@ CREATE TABLE app.annotations (
 );
 
 -- migrate:down
-DROP TABLE app.annotations;
+DROP TABLE web.annotations;

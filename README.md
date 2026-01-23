@@ -8,11 +8,11 @@ The [PostgreSQL](https://www.postgresql.org/) database is defined by SQL scripts
 pg_ctl -D .\pgdata -l logfile start
 ```
 
-## frontend
+## app
 
 The web app is hosted in its own directory. Your terminal should be in this directory to run package.json scripts or any Node.js/Bun.js commands. Javascript libraries must be saved in ./frontend/node_modules/.
 
-## backend
+## api
 
 The core [REST API](https://restfulapi.net/) is hosted in its own directory. Your terminal should be in this directory to run Python commands, including uvicorn and conda. Python libraries must be saved in ./backend/conda_env/.
 

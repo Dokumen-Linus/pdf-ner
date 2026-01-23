@@ -3,7 +3,7 @@
     // all
     "tomoki1207.pdf",
 
-    // backend
+    // api
     "charliermarsh.ruff",
     "ms-python.debugpy",
     "ms-python.python",
@@ -14,7 +14,10 @@
     // db
     "ms-ossdata.vscode-pgsql",
 
-    // frontend
+    // infra
+    "Redis.redis-for-vscode",
+
+    // web
     "bradlc.vscode-tailwindcss",
     "christian-kohler.npm-intellisense",
     "dbaeumer.vscode-eslint",

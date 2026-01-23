@@ -3,7 +3,7 @@ import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 import { annotations } from "./annotations"
 import { projects } from "./projects"
 
-export const pdfs = pgTable("pdfs", {
+export const pdfs = pgTable("web.pdfs", {
   id: uuid("id").primaryKey().defaultRandom(),
   projectId: uuid("project_id")
     .notNull()

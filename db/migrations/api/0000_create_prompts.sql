@@ -1,14 +1,11 @@
 -- migrate:up
-CREATE TABLE app.users (
+CREATE TABLE api.prompts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email TEXT NOT NULL,
-  first_name TEXT,
-  last_name TEXT,
-  employer TEXT,
-  job_title TEXT,
+  project_id UUID NOT NULL REFERENCES web.projects (id) ON DELETE CASCADE,
+  full_text TEXT,
   created_at TIMESTAMP DEFAULT now(),
   updated_at TIMESTAMP DEFAULT now()
 );
 
 -- migrate:down
-DROP TABLE app.users;
+DROP TABLE web.entity_types;

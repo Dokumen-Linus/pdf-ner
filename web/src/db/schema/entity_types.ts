@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm"
 import { boolean, pgTable, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
 import { projects } from "./projects"
 
-export const entityTypes = pgTable("entity_types", {
+export const entityTypes = pgTable("web.entity_types", {
   id: uuid("id").primaryKey().defaultRandom(),
   projectId: uuid("project_id")
     .notNull()

@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm"
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
 import { projects } from "./projects"
 
-export const users = pgTable("users", {
+export const users = pgTable("web.users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull(),
   firstName: text("first_name"),

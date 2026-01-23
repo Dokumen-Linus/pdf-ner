@@ -1,4 +1,4 @@
-# Dokumen AI Backend FastAPI
+# Dokumen AI API
 
 ## Quickstart
 
@@ -23,6 +23,8 @@ source .venv/bin/activate
 uv pip install .
 uv pip install -e ".[dev]"
 ```
+
+Later, activate your existing environment with just the second command.
 
 Pre-prod:
 
@@ -76,8 +78,8 @@ Visualizes the endpoints exposed by the api and what file defines them
 
 ## Tech Stack
 
-- Framework: [FastAPI docs](https://fastapi.tiangolo.com/), [repo](https://github.com/fastapi/fastapi) with auto-generated MKDocs and concurrent programming
-- Typing: [Pydantic docs](https://docs.pydantic.dev/), [repo](https://github.com/pydantic/pydantic)
+- Framework: FastAPI [docs](https://fastapi.tiangolo.com/), [repo](https://github.com/fastapi/fastapi) with auto-generated MKDocs and concurrent programming
+- Typing: Pydantic [docs](https://docs.pydantic.dev/), [repo](https://github.com/pydantic/pydantic)
 - Environment variables: imported from .env in ./core/config.py, validated and accessed using [pydantic_settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
 - Package manager: uvicorn [uv](https://docs.astral.sh/uv/) to install dependencies in pyproject.toml
 - Dependency checker: [deptry](https://github.com/fpgmaas/deptry)
