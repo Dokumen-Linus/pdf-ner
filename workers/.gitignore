@@ -9,3 +9,9 @@ __pycache__
 
 # local env files
 .env
+
+# coding LLMs
+.kilocode/
+.cursor/
+.claude/
+CLAUDE.md

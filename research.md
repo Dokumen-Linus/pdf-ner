@@ -3,7 +3,7 @@
 ## Learning
 
 - [what is react]( https://www.theodinproject.com/paths/full-stack-javascript/courses/react)
-- **[what are llms](https://arxiv.org/pdf/2501.09223)**
+- [what are llms](https://arxiv.org/pdf/2501.09223)
 
 ## Frontend links
 
@@ -176,6 +176,7 @@
 - LLM checking trad OCR [Dicklesworthstone/llm_aided_ocr](https://github.com/Dicklesworthstone/llm_aided_ocr)
 - **[deepseek-ai/DeepSeek-OCR](https://github.com/deepseek-ai/DeepSeek-OCR)**
 - **[allenai/olmocr](https://github.com/allenai/olmocr)**
+- **[NanoNets/docstrange](https://github.com/NanoNets/docstrange)**
 
 ### Convert to PDF
 
@@ -184,10 +185,12 @@
 ### PDF encryption and signatures
 
 - [flamecorcloud/signature-one](https://github.com/flamecorecloud/signature-one/)
+- [documenso](https://github.com/documenso/documenso)
 
 ### LLMs for NER
 
-- [google/langextract](https://github.com/google/langextract)
+- **[google/langextract](https://github.com/google/langextract)**
+- **[NanoNets/docstrange](https://github.com/NanoNets/docstrange)**
 
 ### SLMs for NER
 
@@ -317,12 +320,10 @@ Links to repos that aren't relevant to my current project but could give me brai
 
 ### Need to research
 
-- Private data sources - how to intake pdfs from them in Python, preferably using their SSO authorization
 - Node.js server on EC2 VM with nginx, bun, + Tanstack Start
 - Cloudflare or AWS WAF
 - AWS Artifact report generation for HIPPA, PCI, and others (first US and India only)
 - TIF to PDF conversion in Python
-- Which API to access many LLM providers: HuggingFace, OpenRouter, others
 
 ## Research tools
 
