@@ -2,6 +2,9 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 import asyncpg
 from fastapi import FastAPI
+from openai import AsyncOpenAI
+from anthropic import AsyncAnthropic
+from google import genai
 import anyio
 
 from .config import get_settings
@@ -21,6 +24,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         min_size=1,
         max_size=10,
     )
+
+    app.state.anthropic_client = AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+    app.state.openai_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+    app.state.google_ai_client = genai.Client(api_key=settings.GOOGLE_AI_API_KEY)
 
     try:
         yield
