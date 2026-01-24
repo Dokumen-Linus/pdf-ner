@@ -3,13 +3,3 @@
 ## Naming Conventions
 
 Since Dokumen is in development (no staging, UAT, pre-prod, prod environments currently run), the script names have numerical prefices. The scripts, order, and table columns may still be changed. On the first release of Dokumen AI, the numerical prefices will be replaced with datetime. Migration is performed by dbmate which runs scripts in alphanumeric order.
-
-## Commands
-
-```cmd
-createdb -U postgres dokumen
-psql -U postgres -d dokumen -f db/init.sql
-dbmate --url "postgres://worker_owner:...@localhost:5432/dokumen" --migrations-dir=db/migrations/worker_schema up
-dbmate --url "postgres://api_owner:...@localhost:5432/dokumen" --migrations-dir=db/migrations/api_schema up
-dbmate --url "postgres://web_owner:...@localhost:5432/dokumen" --migrations-dir=db/migrations/web_schema up
-```
