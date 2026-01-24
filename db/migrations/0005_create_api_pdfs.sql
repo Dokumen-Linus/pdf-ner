@@ -19,10 +19,15 @@ CREATE TABLE api.pdfs (
   model TEXT,
   prompt_id UUID REFERENCES api.prompts (id) ON DELETE CASCADE,
 
-
-  created_at TIMESTAMP DEFAULT now(),
-  updated_at TIMESTAMP DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TRIGGER pdfs_updated_at
+BEFORE UPDATE ON api.pdfs
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
 -- migrate:down
+DROP TRIGGER pdfs_updated_at;
 DROP TABLE api.tabl;

@@ -10,9 +10,9 @@
 initdb -D .\pgdata
 pg_ctl -D .\pgdata -l logfile start
 createdb dokumen
-set DATABASE_URL=postgres://localhost/dokumen?sslmode=disable
-dbmate up
-psql -f .\db\better-auth_migrations\2025-12-22T03-27-15.344Z.sql -d dokumen
+psql -d dokumen -f db\migrations\init.sql
+dbmate --url "postgres://owner_role:...@localhost:5432/dokumen?sslmode=disable" --migrations-dir=db\migrations up
+psql -f .\db\migrations\better-auth\2025-12-22T03-27-15.344Z.sql -d dokumen
 ```
 
 ### PostgreSQL VSCode Extension by Microsoft
@@ -34,7 +34,7 @@ Do this by right-clicking on localconn under CONNECTIONS > Servers and pressing 
 
 ### migrations
 
-SQL scripts that should be created following ./migrations/rules.md. Existing scripts should not be modified.
+SQL scripts that should be created following ./migrations/rules.md.
 
 ### better-auth_migrations
 

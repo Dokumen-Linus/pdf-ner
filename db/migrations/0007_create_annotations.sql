@@ -1,6 +1,6 @@
 -- migrate:up
 CREATE TABLE web.annotations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- avoid default, should be created by PDFContainer
+  id UUID PRIMARY KEY, -- set in web app PDFContainer
   pdf_id UUID NOT NULL REFERENCES web.pdfs (id) ON DELETE CASCADE,
   subtype TEXT NOT NULL CHECK (subtype IN ('highlight', 'underline', 'squiggly', 'strikeout')),
   rect JSONB NOT NULL,
@@ -11,8 +11,8 @@ CREATE TABLE web.annotations (
   contents TEXT,
   custom_entity_type TEXT,
   author TEXT,
-  created TIMESTAMP,
-  modified TIMESTAMP,
+  created TIMESTAMP, -- set in web app PDFContainer
+  modified TIMESTAMP, -- set in web app PDFContainer
   blend_mode TEXT CHECK (
     blend_mode IN (
       'Normal',
@@ -32,9 +32,7 @@ CREATE TABLE web.annotations (
       'Color',
       'Luminosity'
     )
-  ),
-  created_at TIMESTAMP DEFAULT now(),
-  updated_at TIMESTAMP DEFAULT now()
+  )
 );
 
 -- migrate:down

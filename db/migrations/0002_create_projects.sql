@@ -5,9 +5,15 @@ CREATE TABLE web.projects (
   "name" TEXT NOT NULL,
   color_presets TEXT[], -- list of hex color code strings
   orientation TEXT NOT NULL DEFAULT 'any' CHECK (orientation IN ('any', 'portrait', 'landscape')),
-  created_at TIMESTAMP DEFAULT now(),
-  updated_at TIMESTAMP DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TRIGGER projects_updated_at
+BEFORE UPDATE ON web.projects
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
 -- migrate:down
+DROP TRIGGER projects_updated_at;
 DROP TABLE web.projects;

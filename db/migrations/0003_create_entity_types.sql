@@ -16,9 +16,15 @@ CREATE TABLE web.entity_types (
     opacity >= 0
     AND opacity <= 1
   ),
-  created_at TIMESTAMP DEFAULT nosw (),
-  updated_at TIMESTAMP DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TRIGGER entity_types_updated_at
+BEFORE UPDATE ON web.entity_types
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
 -- migrate:down
+DROP TRIGGER entity_types_updated_at;
 DROP TABLE web.entity_types;
