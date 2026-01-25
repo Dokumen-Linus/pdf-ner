@@ -1,7 +1,9 @@
 -- migrate:up
 CREATE TABLE api.templates (
-  id BIGINT GENERATED ALWAYS AS IDENTITY,
+  id BIGINT GENERATED ALWAYS AS IDENTITY (START WITH 1),
   txt TEXT NOT NULL,
+  inserts TEXT[] NOT NULL,
+  document_at_end BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
