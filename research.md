@@ -5,6 +5,12 @@
 - [what is react]( https://www.theodinproject.com/paths/full-stack-javascript/courses/react)
 - [what are llms](https://arxiv.org/pdf/2501.09223)
 
+## Coding Agents
+
+### Skills
+
+- [skillsmp](https://skillsmp.com/categories/productivity-tools)
+
 ## Frontend links
 
 ### PDF Web rendering

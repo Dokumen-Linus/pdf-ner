@@ -1,4 +1,4 @@
-\restrict FTRl1jmm4bHQ7DdWPuMWOyfzuig9awOxCBZGy62XAaFGcRzN5LBl8K5uIit5Erm
+\restrict ZUTPtNGGhRHny3xw0fHlj7yw4a1ruRxuoRKyNt789tApUvxfhaQmmbohq19EcbS
 
 -- Dumped from database version 18.1
 -- Dumped by pg_dump version 18.1
@@ -92,9 +92,38 @@ CREATE TABLE api.pdfs (
 CREATE TABLE api.prompts (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     project_id uuid NOT NULL,
+    template_id bigint,
     full_text text,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: templates; Type: TABLE; Schema: api; Owner: -
+--
+
+CREATE TABLE api.templates (
+    id bigint NOT NULL,
+    txt text NOT NULL,
+    inserts text[] NOT NULL,
+    document_at_end boolean DEFAULT true NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: templates_id_seq; Type: SEQUENCE; Schema: api; Owner: -
+--
+
+ALTER TABLE api.templates ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME api.templates_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
 
@@ -112,7 +141,7 @@ CREATE TABLE public.schema_migrations (
 --
 
 CREATE TABLE web.annotations (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    id uuid NOT NULL,
     pdf_id uuid NOT NULL,
     subtype text NOT NULL,
     rect jsonb NOT NULL,
@@ -173,6 +202,7 @@ CREATE TABLE web.projects (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     owner_id uuid NOT NULL,
     name text NOT NULL,
+    description text,
     color_presets text[],
     orientation text DEFAULT 'any'::text NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
@@ -211,6 +241,14 @@ ALTER TABLE ONLY api.pdfs
 
 ALTER TABLE ONLY api.prompts
     ADD CONSTRAINT prompts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: templates templates_pkey; Type: CONSTRAINT; Schema: api; Owner: -
+--
+
+ALTER TABLE ONLY api.templates
+    ADD CONSTRAINT templates_pkey PRIMARY KEY (id);
 
 
 --
@@ -276,6 +314,13 @@ CREATE TRIGGER prompts_updated_at BEFORE UPDATE ON api.prompts FOR EACH ROW EXEC
 
 
 --
+-- Name: templates templates_updated_at; Type: TRIGGER; Schema: api; Owner: -
+--
+
+CREATE TRIGGER templates_updated_at BEFORE UPDATE ON api.templates FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
 -- Name: entity_types entity_types_updated_at; Type: TRIGGER; Schema: web; Owner: -
 --
 
@@ -321,6 +366,14 @@ ALTER TABLE ONLY api.prompts
 
 
 --
+-- Name: prompts prompts_template_id_fkey; Type: FK CONSTRAINT; Schema: api; Owner: -
+--
+
+ALTER TABLE ONLY api.prompts
+    ADD CONSTRAINT prompts_template_id_fkey FOREIGN KEY (template_id) REFERENCES api.templates(id) ON DELETE CASCADE;
+
+
+--
 -- Name: annotations annotations_pdf_id_fkey; Type: FK CONSTRAINT; Schema: web; Owner: -
 --
 
@@ -356,7 +409,7 @@ ALTER TABLE ONLY web.projects
 -- PostgreSQL database dump complete
 --
 
-\unrestrict FTRl1jmm4bHQ7DdWPuMWOyfzuig9awOxCBZGy62XAaFGcRzN5LBl8K5uIit5Erm
+\unrestrict ZUTPtNGGhRHny3xw0fHlj7yw4a1ruRxuoRKyNt789tApUvxfhaQmmbohq19EcbS
 
 
 --
@@ -364,11 +417,12 @@ ALTER TABLE ONLY web.projects
 --
 
 INSERT INTO public.schema_migrations (version) VALUES
-    ('0000'),
-    ('0001'),
-    ('0002'),
-    ('0003'),
-    ('0004'),
-    ('0005'),
-    ('0006'),
-    ('0007');
+    ('00002'),
+    ('00010'),
+    ('00020'),
+    ('00030'),
+    ('00040'),
+    ('00041'),
+    ('00050'),
+    ('00060'),
+    ('00070');
