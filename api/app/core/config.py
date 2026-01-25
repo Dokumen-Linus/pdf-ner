@@ -2,7 +2,6 @@ from enum import Enum
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 class Environment(str, Enum):
     DEVELOPMENT = "development"
     STAGING = "staging"

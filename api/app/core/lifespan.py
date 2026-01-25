@@ -1,16 +1,15 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-import asyncpg
-from fastapi import FastAPI
-from openai import AsyncOpenAI
-from anthropic import AsyncAnthropic
-from google import genai
-from redis.asyncio import Redis
 import anyio
+import asyncpg
+from anthropic import AsyncAnthropic
+from fastapi import FastAPI
+from google import genai
+from openai import AsyncOpenAI
+from redis.asyncio import Redis
 
 from .config import settings
 from .logging import configure_logging
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -31,9 +30,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # use app.state.redis for cahing, locks, KV, etc. don't use for messaging. use celery client for messaging
     app.state.redis = Redis.from_url(
-    settings.REDIS_URL,
-    decode_responses=True,
-)   
+        settings.REDIS_URL,
+        decode_responses=True,
+    )
     # celery client is not async so it is not stored in app.state??
 
     try:
