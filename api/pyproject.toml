@@ -8,7 +8,9 @@ dependencies = [
   "pydantic-settings",
   "anthropic",
   "openai",
-  "google-genai"
+  "google-genai",
+  "redis",
+  "celery"
 ]
 
 [project.optional-dependencies]

@@ -12,12 +12,12 @@ class Environment(str, Enum):
 class Settings(BaseSettings):
     ENV: Environment = Environment.DEVELOPMENT
 
+    API_DATABASE_URL: str
+    REDIS_URL: str
+
     ANTHROPIC_API_KEY: str
     OPENAI_API_KEY: str
     GOOGLE_AI_API_KEY: str
-
-    API_DATABASE_URL: str
-    S3_BUCKET: str
 
     model_config = SettingsConfigDict(
         frozen=True,

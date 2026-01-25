@@ -86,8 +86,8 @@ Visualizes the endpoints exposed by the api and what file defines them
 
 ### Concurrent Programming Packages
 
-- [asyncio docs](https://docs.python.org/3/library/asyncio.html), [repo](https://github.com/python/cpython/tree/3.14/Lib/asyncio)
-- [anyio docs](https://anyio.readthedocs.io/), [repo](https://github.com/anyio/anyio)
+- **AnyIO** [docs](https://anyio.readthedocs.io/), [repo](https://github.com/anyio/anyio)
+- **AsyncIO** [docs](https://docs.python.org/3/library/asyncio.html), [repo](https://github.com/python/cpython/tree/3.14/Lib/asyncio)
 - [httpx](https://www.python-httpx.org/), [repo](https://github.com/encode/httpx)
 - AsyncIterator from collections.abc
 - asynccontextmanager from contextlib
@@ -101,18 +101,18 @@ Visualizes the endpoints exposed by the api and what file defines them
 
 - core: global functionalities like config, logging, db connection, connection to external APIs
 - domains: contains different domains, which are groups of endpoints to acheive a business purpose
-- tests: test files
 - utils: generic code not specific to a business purpose that could be re-used in a hypothetical new domain
 
 ### Domains
 
 Each domain may have the following files:
 
-- router.py (wiring layer) - defines what endpoints are exposed and provides the wiring layer
+- router.py (wiring layer) - defines what endpoints are exposed and provides the wiring layer, creates connection using core.db.get_conn()
 - schema.py (typing) - defines pydantic validation schemas for endpoint inputs (never responses, never set response_model)
 - service.py (business logic) - creates functions to perform the main business logic/purpose of the endpoint ()
 - repository.py (db queries) - executes SQL queries to handle necessary database interaction using the connection passed from service.py and router.py
 - tasks.py (side processes) - creates FastAPI background tasks that router.py should call when code can be executed indepndently of/after the response
+- events.py (messaging to workers) - sends tasks to Redis broker using Celery client from core.messaging.celery
 
 ### FastAPI Best Practices
 

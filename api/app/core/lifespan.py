@@ -5,15 +5,15 @@ from fastapi import FastAPI
 from openai import AsyncOpenAI
 from anthropic import AsyncAnthropic
 from google import genai
+from redis.asyncio import Redis
 import anyio
 
-from .config import get_settings
+from .config import settings
 from .logging import configure_logging
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    settings = get_settings()
     configure_logging()
 
     limiter = anyio.to_thread.current_default_thread_limiter()
@@ -29,7 +29,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.openai_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
     app.state.google_ai_client = genai.Client(api_key=settings.GOOGLE_AI_API_KEY)
 
+    # use app.state.redis for cahing, locks, KV, etc. don't use for messaging. use celery client for messaging
+    app.state.redis = Redis.from_url(
+    settings.REDIS_URL,
+    decode_responses=True,
+)   
+    # celery client is not async so it is not stored in app.state??
+
     try:
         yield
     finally:
         await app.state.pool.close()
+        await app.state.redis.close()
