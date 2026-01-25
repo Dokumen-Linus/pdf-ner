@@ -30,4 +30,4 @@ EXECUTE FUNCTION set_updated_at();
 
 -- migrate:down
 DROP TRIGGER pdfs_updated_at;
-DROP TABLE api.tabl;
+DROP TABLE api.pdfs;

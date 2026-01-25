@@ -2,6 +2,7 @@
 CREATE TABLE api.prompts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES web.projects (id) ON DELETE CASCADE,
+  template_id BIGINT REFERENCES api.templates (id) ON DELETE CASCADE,
   full_text TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
@@ -14,4 +15,4 @@ EXECUTE FUNCTION set_updated_at();
 
 -- migrate:down
 DROP TRIGGER prompts_updated_at;
-DROP TABLE web.entity_types;
+DROP TABLE api.prompts;
