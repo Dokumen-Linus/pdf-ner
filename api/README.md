@@ -112,19 +112,31 @@ Each domain may have the following files:
 - service.py (business logic) - creates functions to perform the main business logic/purpose of the endpoint ()
 - repository.py (db queries) - executes SQL queries to handle necessary database interaction using the connection passed from service.py and router.py
 - tasks.py (side processes) - creates FastAPI background tasks that router.py should call when code can be executed indepndently of/after the response
-- events.py (messaging to workers) - sends tasks to Redis broker using Celery client from core.messaging.celery
+- events.py (messaging to workers) - sends tasks to Redis broker using Celery client from core.messaging.celery, messsaging is sync but fast
 
-### FastAPI Best Practices
+### Required Best Practices
 
-- avoid blocking code and do not put it inside async fncts\
-- do not create global variables, add them to app.state and initialize in lifespan.py
-- use anyio instead of asyncio whenever possible [anyio docs](https://anyio.readthedocs.io/), [repo](https://github.com/anyio/anyio)
+- avoid blocking code and do not put it inside async fncts
+- use anyio instead of asyncio whenever possible. attempt to replace every use of asyncio with anyio
 - perform all http requests with [httpx](https://www.python-httpx.org/), [repo](https://github.com/encode/httpx)
+- never create a class, create functions
+- import settings, never get_settings() from core.settings.py
+- do not create global variables, add them to app.state and initialize in lifespan.py
+- only functions in a repository.py may execute SQL scripts
+- schemas should never be defined in Python for the db, the only validation is whether SQL statements by asyncpg execute
 - requirements.txt installs `fastapi[standard]` to ensure uvloop and httptools are used in prod (uvloop is not installable on Windows)
 
 ## Tests
 
 - to be setup
+
+### Directory Stucture
+
+- main.py: called to run tests
+- conftest.py: pytest config
+- api: testing api endpoints
+- core: testing files in app\core
+- unit: unit tests for specific python functions in utils and possibly some domain functions
 
 ### Best Practices
 
