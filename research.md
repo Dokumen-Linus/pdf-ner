@@ -3,7 +3,13 @@
 ## Learning
 
 - [what is react]( https://www.theodinproject.com/paths/full-stack-javascript/courses/react)
-- **[what are llms](https://arxiv.org/pdf/2501.09223)**
+- [what are llms](https://arxiv.org/pdf/2501.09223)
+
+## Coding Agents
+
+### Skills
+
+- [skillsmp](https://skillsmp.com/categories/productivity-tools)
 
 ## Frontend links
 
@@ -15,27 +21,31 @@
 - [EmbedPDF React Docs](https://www.embedpdf.com/docs/react/understanding-plugins)
 - [PDFium JS docs](https://www.embedpdf.com/docs/pdfium/introduction)
 
-### Generic Components
+### Colors
+
+- [TailColors](https://tailcolors.com/)
+- [Hex Color Codes](  https://html-color.codes/)
+- generators for complimentary hex codes [Coolors](https://coolors.co/) (no acct required), [Atmos](https://atmos.style/) (requires free acct)
+
+### Generic React Components
 
 - [shadcn/ui Components](https://ui.shadcn.com/docs/components)
-- Examples of using shadcn/ui [Hexta UI](https://www.hextaui.com/)
-- Examples of using shadcn/ui [preetsuthar17/HextaUI](https://github.com/preetsuthar17/HextaUI)
+- Examples of using shadcn/ui: Hexta UI [docs](https://www.hextaui.com/), [repo](https://github.com/preetsuthar17/HextaUI)
+- **based on shadcn-ui and radix-ui [ln-dev7/square-ui](https://github.com/ln-dev7/square-ui)**
+- [mui/material-ui](https://mui.com/material-ui/getting-started/), css styling [MUI System](https://mui.com/system/getting-started/)
 - [Ant Design](https://ant.design/components/overview/)
 - [Untitled UI](https://www.untitledui.com/react/components)
 - [FlyonUI](https://flyonui.com/docs/component/)
 - [Mantine UI](https://ui.mantine.dev/)
-- headless [Coss = Origin UI](https://coss.com/origin)
-- [mui/material-ui](https://mui.com/material-ui/getting-started/)
-- css styling [MUI System](https://mui.com/system/getting-started/)
 - [Joy UI](https://mui.com/joy-ui/getting-started/)
+- headless [Coss = Origin UI](https://coss.com/origin)
 - headless [headlessui](https://headlessui.com/react/menu)
-- [square-ui](https://github.com/ln-dev7/square-ui)
 - [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
-- [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
-
-### Shadcn ui blocks
-
-- [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
+- [lmsqueezy/wedges](https://lemonsqueezy.com/wedges)
+- animated [Eldora UI](https://eldoraui.site/docs)
+- [Pure UI](https://pure.kam-ui.com/)
+- [Evergeen](https://github.com/segmentio/evergreen)
+- **Shadcn ui blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)**
 
 ### Icons
 
@@ -44,14 +54,9 @@
 - Download SVGs: [Iconstack](https://ossian-icons-60.lovable.app/)
 - AI generate SVGs: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
 
-### Colors
+### Special Components
 
-- [TailColors](https://tailcolors.com/)
-- [Hex Color Codes](https://html-color.codes/)
-
-### Frontend specials
-
-- [Untitled UI Video Player](https://www.untitledui.com/react/components/video-players)
+- videos [Untitled UI](https://www.untitledui.com/react/components/video-players)
 - [kozakdenys/qr-code-styling](https://github.com/kozakdenys/qr-code-styling)
 - [masroorejaz/react-simple-captcha](https://github.com/masroorejaz/react-simple-captcha)
 - [Home page scroll animation](https://www.builder.io/blog/3d-gsap)
@@ -60,17 +65,27 @@
 - [vercel/avatar](https://github.com/vercel/avatar)
 - [vercel/react-tweet](https://github.com/vercel/react-tweet)
 - [chatbot assistant](https://ai-sdk.dev/elements/examples/chatbot)
-- [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
-- [AG Grid special table](https://www.ag-grid.com/react-data-grid/getting-started/)
+- [Ant chat](https://github.com/ant-design/pro-chat)
+- tables [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
+- tables [AG Grid](https://www.ag-grid.com/react-data-grid/getting-started/)
 - videos [mifi/reactive-video](https://github.com/mifi/reactive-video/)
 - Component dependency grapher [Madge](https://github.com/pahen/madge)
+- [Alibaba ChatUI](https://chatui.io/)
 - Wrapper for OpenAI API to enable react component creation [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
-- dashboard template 
+- long list [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
+
+### Charts
+
+- [ApexCharts](https://github.com/apexcharts/react-apexcharts/)
+- [Recharts](https://github.com/recharts/recharts)
+- [Ant Design Charts](https://github.com/ant-design/ant-design-charts)
+- [MUI X](https://mui.com/x/react-charts/)
 
 ### React Dashboard Examples
 
 - [0wczar/airframe-react](https://github.com/0wczar/airframe-react)
 - [creativetimofficial/notus-react](https://github.com/creativetimofficial/notus-react), [demo](https://demos.creative-tim.com/notus-react/#/admin/dashboard)
+- [tailadmin](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
 
 ### Next.js Boilerplates
 
@@ -78,7 +93,6 @@
 - [vercel/next-forge](https://github.com/vercel/next-forge)
 - [Next.js SaaS Starter](https://vercel.com/templates/authentication/next-js-saas-starter)
 - [Blazity/next-enterprise](https://github.com/Blazity/next-enterprise/tree/main)
-- [ln-dev7/square-ui](https://github.com/ln-dev7/square-ui)
 - [arhamkhnz/next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard)
 - [cruip/open-react-template](https://github.com/cruip/open-react-template)
 
@@ -101,13 +115,6 @@
 - [File upload](https://docs.uploadthing.com/getting-started/tanstack-start)
 - [Sitemap creation](https://github.com/Ryanjso/tanstack-router-sitemap)
 
-### Charts
-
-- [ApexCharts](https://github.com/apexcharts/react-apexcharts/)
-- [Recharts](https://github.com/recharts/recharts)
-- [Ant Design Charts](https://github.com/ant-design/ant-design-charts)
-- [MUI X](https://mui.com/x/react-charts/)
-
 ### Auth
 
 - Better Auth setup using [Installation](https://www.better-auth.com/docs/installation) and [Tanstack Integration](https://www.better-auth.com/docs/integrations/tanstack) docs
@@ -125,8 +132,10 @@
 ### Cloud Sec
 
 - [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
-- [AWS security checks](https://cloudsploit.com/)
+- AWS security checks [cloudsploit](https://cloudsploit.com/)
 - Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
+- [evertramos/nginx-proxy-automation](https://github.com/evertramos/nginx-proxy-automation)
+- scan for vulernabilities [Sirius](https://github.com/SiriusScan/Sirius)
 
 ### Frontend Testing (besides Bun, Playwright)
 
@@ -144,6 +153,7 @@
 - [React Email AWS SES](https://react-email.mintlify.dev/docs/integrations/aws-ses)
 - [Resend](https://resend.com/docs/send-with-nextjs)
 - dashboard [freeresend](https://github.com/eibrahim/freeresend)
+- proxy for Cloudflare worker emails [Sh4yy/cloudflare-email](https://github.com/Sh4yy/cloudflare-email)
 
 ## Backend links
 
@@ -172,6 +182,7 @@
 - LLM checking trad OCR [Dicklesworthstone/llm_aided_ocr](https://github.com/Dicklesworthstone/llm_aided_ocr)
 - **[deepseek-ai/DeepSeek-OCR](https://github.com/deepseek-ai/DeepSeek-OCR)**
 - **[allenai/olmocr](https://github.com/allenai/olmocr)**
+- **[NanoNets/docstrange](https://github.com/NanoNets/docstrange)**
 
 ### Convert to PDF
 
@@ -180,10 +191,12 @@
 ### PDF encryption and signatures
 
 - [flamecorcloud/signature-one](https://github.com/flamecorecloud/signature-one/)
+- [documenso](https://github.com/documenso/documenso)
 
 ### LLMs for NER
 
-- [google/langextract](https://github.com/google/langextract)
+- **[google/langextract](https://github.com/google/langextract)**
+- **[NanoNets/docstrange](https://github.com/NanoNets/docstrange)**
 
 ### SLMs for NER
 
@@ -313,14 +326,12 @@ Links to repos that aren't relevant to my current project but could give me brai
 
 ### Need to research
 
-- Private data sources - how to intake pdfs from them in Python, preferably using their SSO authorization
 - Node.js server on EC2 VM with nginx, bun, + Tanstack Start
 - Cloudflare or AWS WAF
 - AWS Artifact report generation for HIPPA, PCI, and others (first US and India only)
 - TIF to PDF conversion in Python
-- Which API to access many LLM providers: HuggingFace, OpenRouter, others
 
-### Research tools
+## Research tools
 
 - [Tom Doerr](https://tom-doerr.github.io/repo_posts/archive.html)
 - Perplexity
