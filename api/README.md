@@ -119,29 +119,95 @@ Each domain may have the following files:
 - avoid blocking code and do not put it inside async fncts
 - use anyio instead of asyncio whenever possible. attempt to replace every use of asyncio with anyio
 - perform all http requests with [httpx](https://www.python-httpx.org/), [repo](https://github.com/encode/httpx)
-- never create a class, create functions
+- never pass app.state to service.py, define specific dependencies in a function in core.dependencites.py
+- never create a class in service.py, repository.py, tasks.py, events.py - create functions
 - import settings, never get_settings() from core.settings.py
 - do not create global variables, add them to app.state and initialize in lifespan.py
 - only functions in a repository.py may execute SQL scripts
 - schemas should never be defined in Python for the db, the only validation is whether SQL statements by asyncpg execute
-- requirements.txt installs `fastapi[standard]` to ensure uvloop and httptools are used in prod (uvloop is not installable on Windows)
+- pyproject.toml installs `fastapi[standard]` to ensure uvloop and httptools are used in prod (uvloop is not installable on Windows)
 
 ## Tests
 
-- to be setup
+### Setup
 
-### Directory Stucture
+Test dependencies are installed with the dev extras:
 
-- main.py: called to run tests
-- conftest.py: pytest config
-- api: testing api endpoints
-- core: testing files in app\core
-- unit: unit tests for specific python functions in utils and possibly some domain functions
+```cmd
+uv pip install -e ".[dev]"
+```
+
+This installs pytest, pytest-anyio, and httpx for testing.
+
+### Directory Structure
+
+```text
+tests/
+├── __init__.py
+├── conftest.py          # shared fixtures
+├── main.py              # (reserved for future use)
+└── domains/
+    ├── __init__.py
+    └── test_llm_ner.py  # tests for domains/llm_ner
+```
+
+Test files mirror the `app/domains/` structure. Each domain's tests go in `tests/domains/test_{domain_name}.py`.
+
+### Naming Convention
+
+Test files must be named `test_*.py` (not `*_test.py`). This is configured in pyproject.toml:
+
+```toml
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+```
+
+### Running Tests
+
+From the `api/` directory with the virtual environment activated:
+
+```cmd
+pytest
+```
+
+Run with verbose output:
+
+```cmd
+pytest -v
+```
+
+Run a specific test file:
+
+```cmd
+pytest tests/domains/test_llm_ner.py
+```
+
+Run a specific test class or function:
+
+```cmd
+pytest tests/domains/test_llm_ner.py::TestBuildPrompt
+pytest tests/domains/test_llm_ner.py::TestBuildPrompt::test_interpolates_all_placeholders
+```
+
+### Fixtures
+
+Shared fixtures are defined in `tests/conftest.py`. These include:
+
+- `mock_anthropic_client` - mocked Anthropic client
+- `mock_openai_client` - mocked OpenAI client
+- `mock_google_client` - mocked Google AI client
+- `mock_clients` - dict containing all three mocked clients
+- `sample_entity_types` - sample entity type records
+- `sample_template` - sample template record
 
 ### Best Practices
 
-- Use pytest.mark.anyio for testing, examples [Kludex/fastapi-tips](https://github.com/Kludex/fastapi-tips)
-- Use Async Client instead of starlette.testclient whenver possible: from httpx import Async Client, repo [encode/httpx](https://github.com/encode/httpx), [docs](https://www.python-httpx.org/), examples [Kludex/fastapi-tips](https://github.com/Kludex/fastapi-tips)
+- Use `@pytest.mark.anyio` for async tests (not asyncio.run or pytest-asyncio)
+- Use `AsyncMock` and `MagicMock` from unittest.mock for mocking
+- Use httpx AsyncClient instead of starlette.testclient for integration tests
+- Mock database connections with `AsyncMock()` and set `fetchrow`, `fetch`, `fetchval` as needed
+- Test service functions directly rather than going through the router when testing business logic
 
 ## Database
 

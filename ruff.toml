@@ -27,6 +27,7 @@ ignore-variadic-names = true
 
 [lint.per-file-ignores]
 "tests/**" = ["S101"]
+"**/router.py" = ["B008"]  # FastAPI Depends() in function defaults
 
 [format]
 quote-style = "double"
