@@ -1,9 +1,3 @@
 # postgresql
 pgdata/
 logfile
-
-# coding LLMs
-.kilocode/
-.cursor/
-.claude/
-CLAUDE.md

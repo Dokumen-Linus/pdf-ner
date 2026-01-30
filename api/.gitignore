@@ -6,6 +6,8 @@ build
 # python
 __pycache__
 **/__pycache__
+.pytest_cache
+.ruff_cache
 
 # local env files
 .env
