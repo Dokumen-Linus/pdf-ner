@@ -4,7 +4,30 @@
 
 1 Install [PostrgreSQL v18](https://www.postgresql.org/download/) including CLI tools psql, pg_ctl, pg_dump
 
-2 Follow Creation/Migration Instructions for Windows Command Prompt:
+2 Install dbmate
+
+Windows
+
+```cmd
+powershell Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+irm get.scoop.sh | iex
+scoop install dbmate
+```
+
+Mac
+
+```cmd
+brew install dbmate
+```
+
+Linux (prod)
+
+```cmd
+sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+sudo chmod +x /usr/local/bin/dbmate
+```
+
+3 Follow Creation/Migration Instructions for Windows Command Prompt:
 
 ```cmd
 initdb -D .\pgdata
@@ -13,6 +36,17 @@ createdb dokumen
 psql -d dokumen -f db\migrations\init.sql
 dbmate --url "postgres://owner_role:...@localhost:5432/dokumen?sslmode=disable" --migrations-dir=db\migrations up
 psql -f .\db\migrations\better-auth\2025-12-22T03-27-15.344Z.sql -d dokumen
+```
+
+Mac:
+
+```cmd
+initdb -D ./pgdata
+pg_ctl -D ./pgdata -l logfile start
+createdb dokumen
+psql -d dokumen -f db/migrations/init.sql
+dbmate --url "postgres://owner_role:...@localhost:5432/dokumen?sslmode=disable" --migrations-dir=db/migrations up
+psql -f ./db/migrations/better-auth/2025-12-22T03-27-15.344Z.sql -d dokumen
 ```
 
 ### PostgreSQL VSCode Extension by Microsoft
