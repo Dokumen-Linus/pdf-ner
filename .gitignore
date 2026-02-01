@@ -1,3 +1,6 @@
 # postgresql
 pgdata/
 logfile
+
+# commitlint
+node_modules/
