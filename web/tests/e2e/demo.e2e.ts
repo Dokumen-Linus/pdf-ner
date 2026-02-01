@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test"
 
 test.describe("PDF entity labeling site", () => {
   test("Check that PDFContainer loads and has Annotations", async ({ page }) => {
-    await page.goto("/")
+    await page.goto("/demo")
 
     await expect(page.getByRole("heading", { name: "PDF Container" })).toBeVisible()
 
