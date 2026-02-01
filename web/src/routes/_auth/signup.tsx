@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,
@@ -20,7 +20,6 @@ export const Route = createFileRoute("/_auth/signup")({
 })
 
 function SignUpPage() {
-  const navigate = useNavigate()
   const [isSuccess, setIsSuccess] = useState(false)
   const form = useForm({
     defaultValues: {
@@ -73,9 +72,9 @@ function SignUpPage() {
         })
 
         if (authError) {
-          // If auth fails, we probably should delete the user profile created above to keep data clean?
-          // But maybe the user exists in auth but not in profile?
-          // For now let's just return error.
+          try {
+            await deleteUserByEmail({ data: { email: value.email } })
+          } catch (_e) {}
           return {
             form: authError.message || "An error occurred during sign up",
           }

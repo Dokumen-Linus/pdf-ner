@@ -1,7 +1,8 @@
-import { useEffect } from "react"
-import { createFileRoute, redirect } from "@tanstack/react-router"
-import { Loader2 } from "lucide-react"
-import { authClient } from "@/lib/auth-client"
+import { useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router"
+import { Loader2 } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+
 
 export const Route = createFileRoute("/_auth/signout")({
   component: SignOutPage,
