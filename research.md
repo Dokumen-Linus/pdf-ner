@@ -43,6 +43,7 @@
 - [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
 - [lmsqueezy/wedges](https://lemonsqueezy.com/wedges)
 - animated [Eldora UI](https://eldoraui.site/docs)
+- animated **[Animate UI](https://animate-ui.com/docs/components)**
 - [Pure UI](https://pure.kam-ui.com/)
 - [Evergeen](https://github.com/segmentio/evergreen)
 - **Shadcn ui blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)**

@@ -1,12 +1,12 @@
-import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm/sql"
-import { z } from "zod"
+import { createServerFn } from "@tanstack/react-start";
+import { eq } from "drizzle-orm/sql";
+import { z } from "zod";
 import { db } from "@/db/client"
-import { annotations } from "@/db/schema/annotations"
+import { annotations } from "@/db/schemas/web/annotations"
 
 // ** CREATE **
 export const CreateAnnotationSchema = z.object({
-  id: z.string().optional(),
+  id: z.string(),
   pdfId: z.string(),
   subtype: z.string().min(1, "Subtype is required"),
   rect: z.any(),

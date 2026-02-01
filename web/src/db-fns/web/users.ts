@@ -1,8 +1,8 @@
-import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm/sql"
-import { z } from "zod"
+import { createServerFn } from "@tanstack/react-start";
+import { eq } from "drizzle-orm/sql";
+import { z } from "zod";
 import { db } from "@/db/client"
-import { users } from "@/db/schema/users"
+import { users } from "@/db/schemas/web/users"
 
 // ** CREATE **
 export const CreateUserSchema = z.object({
@@ -16,7 +16,7 @@ export const CreateUserSchema = z.object({
 export const createUser = createServerFn({ method: "POST" })
   .inputValidator(CreateUserSchema)
   .handler(async ({ data }) => {
-    const [user] = await db.insert(users).values(data).returning({id: users.id})
+    const [user] = await db.insert(users).values(data).returning({ id: users.id })
     return { id: user.id }
   })
 

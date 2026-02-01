@@ -33,7 +33,7 @@ sudo chmod +x /usr/local/bin/dbmate
 initdb -D .\pgdata
 pg_ctl -D .\pgdata -l logfile start
 createdb dokumen
-psql -d dokumen -f db\migrations\init.sql
+psql -d dokumen -f db\migrations\_init.sql
 dbmate --url "postgres://owner_role:...@localhost:5432/dokumen?sslmode=disable" --migrations-dir=db\migrations up
 psql -f .\db\migrations\better-auth\2025-12-22T03-27-15.344Z.sql -d dokumen
 ```
@@ -44,7 +44,7 @@ Mac:
 initdb -D ./pgdata
 pg_ctl -D ./pgdata -l logfile start
 createdb dokumen
-psql -d dokumen -f db/migrations/init.sql
+psql -d dokumen -f db/migrations/_init.sql
 dbmate --url "postgres://owner_role:...@localhost:5432/dokumen?sslmode=disable" --migrations-dir=db/migrations up
 psql -f ./db/migrations/better-auth/2025-12-22T03-27-15.344Z.sql -d dokumen
 ```

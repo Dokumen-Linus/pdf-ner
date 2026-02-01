@@ -14,5 +14,5 @@ FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
 -- migrate:down
-DROP TRIGGER prompts_updated_at;
+DROP TRIGGER prompts_updated_at ON api.prompts;
 DROP TABLE api.prompts;

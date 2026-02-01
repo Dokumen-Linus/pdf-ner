@@ -1,8 +1,9 @@
 import { relations } from "drizzle-orm"
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { text, timestamp, uuid } from "drizzle-orm/pg-core"
 import { projects } from "./projects"
+import { webSchema } from "./schema"
 
-export const users = pgTable("web.users", {
+export const users = webSchema.table("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull(),
   firstName: text("first_name"),

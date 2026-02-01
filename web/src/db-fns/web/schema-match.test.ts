@@ -11,7 +11,7 @@ import type {
   NewUser,
   ProjectUpdate,
   UserUpdate,
-} from "../db/types"
+} from "../../db/types"
 import { CreateAnnotationSchema, UpdateAnnotationSchema } from "./annotations"
 import { CreateEntityTypeSchema, UpdateEntityTypeSchema } from "./entity-types"
 import { CreatePdfSchema, UpdatePdfSchema } from "./pdfs"

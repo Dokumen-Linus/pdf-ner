@@ -14,5 +14,5 @@ FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
 -- migrate:down
-DROP TRIGGER templates_updated_at;
+DROP TRIGGER templates_updated_at ON api.templates;
 DROP TABLE api.templates;

@@ -1,18 +1,23 @@
 import { relations } from "drizzle-orm"
-import { boolean, pgTable, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { bigint, boolean, integer, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
 import { projects } from "./projects"
+import { webSchema } from "./schema"
 
-export const entityTypes = pgTable("web.entity_types", {
+export const entityTypes = webSchema.table("entity_types", {
   id: uuid("id").primaryKey().defaultRandom(),
   projectId: uuid("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  page1Definition: text("page1_definition"),
-  page1Examples: text("page1_examples").array(),
-  page1Datatype: text("page1_datatype"),
-  unique: boolean("unique").notNull().default(true),
-  required: boolean("required").notNull().default(true),
+  standardEntityTypeId: bigint("standard_entity_type_id", { mode: "number" }),
+  userDefinition: text("user_definition"),
+  userExamples: text("user_examples").array(),
+  userFormatDescription: text("user_format_description"),
+  datatype: text("datatype"),
+  singleWord: boolean("single_word"),
+  exactLength: integer("exact_length"),
+  unique: boolean("unique").notNull(),
+  required: boolean("required").notNull(),
   subtype: text("subtype"), // CHECK constraint handled in DB
   color: text("color"), // CHECK constraint handled in DB
   opacity: real("opacity"), // CHECK constraint handled in DB

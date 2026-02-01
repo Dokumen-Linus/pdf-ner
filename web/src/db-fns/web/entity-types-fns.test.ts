@@ -60,7 +60,7 @@ describe.if(runTests)("Entity Type Table Server Functions", () => {
     expect(updateOutput.success).toBe(true)
 
     const updatedEntityType = await getEntityTypeById({ data: { id: entityTypeId } })
-    expect(updatedEntityType.page1Definition).toBe("Updated definition")
+    expect(updatedEntityType.userDefinition).toBe("Updated definition")
     expect(updatedEntityType.color).toBe("#00ff00")
     expect(updatedEntityType.opacity).toBe(0.9)
 
@@ -79,6 +79,8 @@ describe.if(runTests)("Entity Type Table Server Functions", () => {
       const input = {
         projectId: testProjectId,
         name: "", // empty name should fail
+        unique: true,
+        required: false,
       }
       await expect(createEntityType({ data: input })).rejects.toThrow()
     })

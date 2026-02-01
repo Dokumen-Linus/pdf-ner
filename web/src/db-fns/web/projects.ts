@@ -2,12 +2,13 @@ import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
 import { db } from "@/db/client"
-import { projects } from "@/db/schema/projects"
+import { projects } from "@/db/schemas/web/projects"
 
 // ** CREATE **
 export const CreateProjectSchema = z.object({
   name: z.string(),
   ownerId: z.string(),
+  description: z.string().optional(),
   colorPresets: z.array(z.string()).optional(),
   orientation: z.enum(["any", "portrait", "landscape"]).optional(),
 })
@@ -15,7 +16,7 @@ export const CreateProjectSchema = z.object({
 export const createProject = createServerFn({ method: "POST" })
   .inputValidator(CreateProjectSchema)
   .handler(async ({ data }) => {
-    const [project] = await db.insert(projects).values(data).returning({id: projects.id})
+    const [project] = await db.insert(projects).values(data).returning({ id: projects.id })
     return { id: project.id }
   })
 

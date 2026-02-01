@@ -2,18 +2,18 @@ import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
 import { db } from "@/db/client"
-import { pdfs } from "@/db/schema/pdfs"
+import { pdfs } from "@/db/schemas/web/pdfs"
 
 // ** CREATE **
 export const CreatePdfSchema = z.object({
-  projectId: z.string(),
-  filename: z.string(),
+  id: z.string(),
+  firstViewedAt: z.date().optional(),
 })
 
 export const createPdf = createServerFn({ method: "POST" })
   .inputValidator(CreatePdfSchema)
   .handler(async ({ data }) => {
-    const [pdf] = await db.insert(pdfs).values(data).returning({id: pdfs.id})
+    const [pdf] = await db.insert(pdfs).values(data).returning({ id: pdfs.id })
     return { id: pdf.id }
   })
 
@@ -26,23 +26,6 @@ export const getPdfById = createServerFn({ method: "GET" })
       throw new Error("PDF not found")
     }
     return pdf[0]
-  })
-
-export const getPdfByFilename = createServerFn({ method: "GET" })
-  .inputValidator((data: { filename: string }) => data)
-  .handler(async ({ data }) => {
-    const pdf = await db.select().from(pdfs).where(eq(pdfs.filename, data.filename))
-    if (pdf.length === 0) {
-      throw new Error("PDF not found")
-    }
-    return pdf[0]
-  })
-
-export const getPdfsByProjectId = createServerFn({ method: "GET" })
-  .inputValidator((data: { projectId: string }) => data)
-  .handler(async ({ data }) => {
-    const pdfsList = await db.select().from(pdfs).where(eq(pdfs.projectId, data.projectId))
-    return pdfsList
   })
 
 // ** UPDATE **

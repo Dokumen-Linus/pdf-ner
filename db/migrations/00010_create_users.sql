@@ -16,6 +16,5 @@ FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
 -- migrate:down
-DROP TRIGGER users_updated_at;
-
+DROP TRIGGER users_updated_at ON web.users;
 DROP TABLE web.users;

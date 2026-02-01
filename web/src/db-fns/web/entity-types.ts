@@ -1,18 +1,22 @@
-import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm/sql"
-import { z } from "zod"
+import { createServerFn } from "@tanstack/react-start";
+import { eq } from "drizzle-orm/sql";
+import { z } from "zod";
 import { db } from "@/db/client"
-import { entityTypes } from "@/db/schema/entity_types"
+import { entityTypes } from "@/db/schemas/web/entity_types"
 
 // ** CREATE **
 export const CreateEntityTypeSchema = z.object({
   projectId: z.string(),
   name: z.string(),
-  page1Definition: z.string().optional(),
-  page1Examples: z.array(z.string()).optional(),
-  page1Datatype: z.string().optional(),
-  unique: z.boolean().optional(),
-  required: z.boolean().optional(),
+  standardEntityTypeId: z.number().optional(),
+  userDefinition: z.string().optional(),
+  userExamples: z.array(z.string()).optional(),
+  userFormatDescription: z.string().optional(),
+  datatype: z.string().optional(),
+  singleWord: z.boolean().optional(),
+  exactLength: z.number().int().optional(),
+  unique: z.boolean(),
+  required: z.boolean(),
   subtype: z.string().optional(),
   color: z.string().optional(),
   opacity: z.number().optional(),

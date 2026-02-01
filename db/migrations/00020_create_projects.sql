@@ -16,5 +16,5 @@ FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
 -- migrate:down
-DROP TRIGGER projects_updated_at;
+DROP TRIGGER projects_updated_at ON web.projects;
 DROP TABLE web.projects;

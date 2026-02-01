@@ -91,6 +91,7 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
   describe("Validation and Error Handling", () => {
     it("throws error for invalid subtype in createAnnotation", async () => {
       const input = {
+        id: "0",
         pdfId: testPdfId,
         subtype: "", // empty subtype should fail
         rect: testRect,
@@ -102,6 +103,7 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
 
     it("throws error for negative page index", async () => {
       const input = {
+        id: "0",
         pdfId: testPdfId,
         subtype: testSubtype,
         rect: testRect,
