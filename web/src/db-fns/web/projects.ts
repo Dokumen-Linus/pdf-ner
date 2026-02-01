@@ -57,7 +57,8 @@ export const UpdateProjectSchema = CreateProjectSchema.partial().extend({
 export const updateProject = createServerFn({ method: "POST" })
   .inputValidator(UpdateProjectSchema)
   .handler(async ({ data }) => {
-    const updatedProject = await db.update(projects).set(data).where(eq(projects.id, data.id))
+    const { id, ...updateData } = data
+    const updatedProject = await db.update(projects).set(updateData).where(eq(projects.id, id))
     if (updatedProject.rowCount === 0) {
       throw new Error("Project not found")
     }

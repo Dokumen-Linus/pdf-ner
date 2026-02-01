@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm/sql";
 import { z } from "zod";
-import { db } from "@/db/client"
-import { entityTypes } from "@/db/schemas/web/entity_types"
+import { db } from "@/db/client";
+import { entityTypes } from "@/db/schemas/web/entity-types"
+
 
 // ** CREATE **
 export const CreateEntityTypeSchema = z.object({

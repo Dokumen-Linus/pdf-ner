@@ -1,5 +1,5 @@
 export { apiPdfs, apiPdfsRelations } from "./pdfs"
 export { prompts, promptsRelations } from "./prompts"
 export { apiSchema } from "./schema"
-export { stdEntityTypes } from "./std_entity_types"
+export { stdEntityTypes } from "./std-entity-types"
 export { templates } from "./templates"

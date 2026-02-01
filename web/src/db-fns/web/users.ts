@@ -11,6 +11,7 @@ export const CreateUserSchema = z.object({
   lastName: z.string().optional(),
   employer: z.string().optional(),
   jobTitle: z.string().optional(),
+  avatarUrl: z.string().optional(),
 })
 
 export const createUser = createServerFn({ method: "POST" })
@@ -50,7 +51,8 @@ export const UpdateUserSchema = CreateUserSchema.partial().extend({
 export const updateUser = createServerFn({ method: "POST" })
   .inputValidator(UpdateUserSchema)
   .handler(async ({ data }) => {
-    const updatedUser = await db.update(users).set(data).where(eq(users.id, data.id))
+    const { id, ...updateData } = data
+    const updatedUser = await db.update(users).set(updateData).where(eq(users.id, id))
     if (updatedUser.rowCount === 0) {
       throw new Error("User not found")
     }

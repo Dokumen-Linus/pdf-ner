@@ -6,6 +6,7 @@ CREATE TABLE web.users (
   last_name TEXT,
   employer TEXT,
   job_title TEXT,
+  avatar_url TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

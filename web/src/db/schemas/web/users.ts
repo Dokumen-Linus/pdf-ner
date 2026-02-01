@@ -10,6 +10,7 @@ export const users = webSchema.table("users", {
   lastName: text("last_name"),
   employer: text("employer"),
   jobTitle: text("job_title"),
+  avatarUrl: text("avatar_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 })

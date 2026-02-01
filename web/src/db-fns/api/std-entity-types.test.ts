@@ -1,10 +1,10 @@
-import { describe, expect, it } from "bun:test"
+import { describe, expect, it } from "bun:test";
 import {
   getAllStdEntityTypes,
   getStdEntityTypeById,
   getStdEntityTypeByShortName,
   getStdEntityTypesByDatatype,
-} from "./std_entity_types"
+} from "./std-entity-types"
 
 const runTests = process.env.TEST_DB === "true"
 
