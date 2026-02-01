@@ -3,7 +3,7 @@ import type { QueryClient } from "@tanstack/react-query"
 import { createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { NotFound } from "../components/not-found"
-import TanStackQueryDevtools from "../integrations/tanstack-query/devtools"
+import TanStackQueryDevtools from "../server/tanstack-query/devtools"
 import appCss from "../styles.css?url"
 
 interface MyRouterContext {
@@ -42,11 +42,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         property: "og:image",
-        content: process.env.BASE_URL + "/og.png",
+        content: (process.env.BASE_URL || "http://localhost:3000") + "/og.png",
       },
       {
         property: "og:url",
-        content: process.env.BASE_URL, // avoid using import.meta.env.VITE_BASE_URL so it's SSR
+        content: process.env.BASE_URL || "http://localhost:3000", // avoid using import.meta.env.VITE_BASE_URL so it's SSR
       },
       {
         name: "twitter:title",
@@ -58,11 +58,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         name: "twitter:image",
-        content: process.env.BASE_URL + "/og.png",
+        content: (process.env.BASE_URL || "http://localhost:3000") + "/og.png",
       },
       {
         name: "twitter:url",
-        content: process.env.BASE_URL,
+        content: process.env.BASE_URL || "http://localhost:3000",
       },
     ],
     links: [

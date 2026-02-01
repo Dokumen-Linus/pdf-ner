@@ -12,7 +12,7 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
-import { createUser, deleteUserByEmail, getUserByEmail } from "@/db-fns/users"
+import { createUser, deleteUserByEmail, getUserByEmail } from "@/db-fns/web/users"
 import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/_auth/signup")({
@@ -105,6 +105,9 @@ function SignUpPage() {
             <Link to="/signin">
               <Button className="w-full">Go to Sign In</Button>
             </Link>
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              After verifying your email and signing in, you'll be redirected to your profile.
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -297,7 +300,7 @@ function SignUpPage() {
               children={([errorMap]) =>
                 errorMap.onSubmit ? (
                   <p className="text-sm font-medium text-destructive">
-                    {errorMap.onSubmit.toString()}
+                    {(errorMap.onSubmit as { form?: string })?.form ?? String(errorMap.onSubmit)}
                   </p>
                 ) : null
               }

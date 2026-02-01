@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { z } from "zod"
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,
@@ -14,11 +15,15 @@ import { Label } from "@/components/shadcn-ui/label"
 import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/_auth/signin")({
+  validateSearch: z.object({
+    redirect: z.string().optional(),
+  }),
   component: SignInPage,
 })
 
 function SignInPage() {
   const navigate = useNavigate()
+  const { redirect } = Route.useSearch()
   const form = useForm({
     defaultValues: {
       email: "",
@@ -37,7 +42,7 @@ function SignInPage() {
           }
         }
 
-        await navigate({ to: "/" })
+        await navigate({ to: redirect ?? "/profile" })
         return null
       },
     },
@@ -113,7 +118,7 @@ function SignInPage() {
               children={([errorMap]) =>
                 errorMap.onSubmit ? (
                   <p className="text-sm font-medium text-destructive">
-                    {errorMap.onSubmit.toString()}
+                    {(errorMap.onSubmit as { form?: string })?.form ?? String(errorMap.onSubmit)}
                   </p>
                 ) : null
               }

@@ -11,7 +11,7 @@ function SignOutPage() {
   useEffect(() => {
     const signOut = async () => {
       await authClient.signOut()
-      window.location.href = "/signin"
+      window.location.href = "/"
     }
     signOut()
   }, [])

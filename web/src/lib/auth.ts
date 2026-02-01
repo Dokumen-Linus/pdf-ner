@@ -18,13 +18,12 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false,
   },
   emailVerification: {
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url }) => {
-      const _url = url // for linting
-      console.log("Sending verification email to", user.email)
+      // TODO: Implement actual email sending (Resend, SendGrid, Nodemailer, etc.)
     },
   },
   plugins: [
