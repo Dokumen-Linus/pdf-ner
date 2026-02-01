@@ -29,7 +29,7 @@ playwright/.cache/
 # typescript
 *.tsbuildinfo
 
-# coding LLMs
+# coding LLM config should be in root dir
 .kilocode/
 .cursor/
 .claude/

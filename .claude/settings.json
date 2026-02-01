@@ -1,7 +1,19 @@
 {
+  "mcpServers": {
+    "tanstack": {
+      "command": "npx",
+      "args": ["@tanstack/cli", "mcp"]
+    }
+  },
   "permissions": {
     "allow": [
-      "Bash(.venv/Scripts/python.exe*)"
+      "Bash(.venv/Scripts/python.exe*)",
+      "Bash(bun tsc:*)",
+      "Bash(bun run:*)",
+      "Bash(npm run:*)",
+      "Bash(curl:*)",
+      "Bash(npx @tanstack/router-cli:*)",
+      "WebFetch(domain:github.com)",
     ],
     "deny": [],
     "ask": []

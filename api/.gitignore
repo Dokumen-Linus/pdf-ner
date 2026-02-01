@@ -12,7 +12,7 @@ __pycache__
 # local env files
 .env
 
-# coding LLMs
+# coding LLM config should be in root dir
 .kilocode/
 .cursor/
 .claude/
