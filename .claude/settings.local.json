@@ -9,7 +9,6 @@
       "Bash(bun add:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:docs.uploadthing.com)",
-      "Bash(bun tsc:*)",
       "Bash(timeout:*)",
       "Bash(bun pm:*)",
       "Bash(findstr:*)"
