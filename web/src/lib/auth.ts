@@ -3,6 +3,7 @@ import { haveIBeenPwned } from "better-auth/plugins"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { Pool } from "pg"
 import { env } from "../env.server"
+import { resendClient } from "../server/resend"
 
 export const auth = betterAuth({
   database: new Pool({
@@ -18,12 +19,35 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
+    requireEmailVerification: true,
   },
   emailVerification: {
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url }) => {
-      // TODO: Implement actual email sending (Resend, SendGrid, Nodemailer, etc.)
+      await resendClient.emails.send({
+        from: env.FROM_EMAIL,
+        to: user.email,
+        subject: "Verify your email address",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Welcome to Dokumen AI!</h2>
+            <p>Hi ${user.name || "there"},</p>
+            <p>Thank you for signing up! Please click the link below to verify your email address:</p>
+            <div style="margin: 30px 0;">
+              <a href="${url}" style="background-color: #007cba; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                Verify Email Address
+              </a>
+            </div>
+            <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; color: #666;">${url}</p>
+            <p>This link will expire in 24 hours.</p>
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+            <p style="color: #666; font-size: 12px;">
+              If you didn't create an account, you can safely ignore this email.
+            </p>
+          </div>
+        `,
+      })
     },
   },
   plugins: [
