@@ -35,31 +35,9 @@ bunx playwright install
 | prepare      | auto-called by install, enforces Conventional Commits         |
 | postinstall  | auto-called by install, patches packages                      |
 | depcheck     | check for unused dependencies                                 |
-| storybook    | view storybook workshop                                       |
 | test         | run tests using Bun Test Runner, React Testing Library DOM    |
 | test:db      | run database functions tests, must have database on           |
 | test:e2e     | run playwright end-to-end tests                               |
-
-## Version Control
-
-- DevOps CI/CD: [GitHub Actions](https://github.com/features/actions) with workflows for check - currently disabled
-- Changelog generation: [Semantic Release](https://github.com/semantic-release/semantic-release) config by .releaserc and ran by .github/workflows/semantic-release.yml
-- [Conventional Commits](https://www.conventionalcommits.org/) enforced by [husky](https://github.com/typicode/husky) config by .commitlintrc.json, commit messages must start with a prefix in the table below, the workflow edits CHANGELOG.md on any version bump
-
-| commit prefix | version bump           | definition                                 |
-| ------------- | ---------------------- | ------------------------------------------ |
-| type!:        | major (0.0.0 -> 1.0.0) | breaking changes (`feat!:`, `perf!:`, ...) |
-| feat:         | minor (0.0.0 -> 0.1.0) | new feature                                |
-| perf:         | patch (0.0.0 -> 0.0.1) | performance improvement                    |
-| fix:          | patch (0.0.0 -> 0.0.1) | bug fix                                    |
-| docs:         | none                   | documentation changes                      |
-| test:         | none                   | adding or updating tests                   |
-| ci:           | none                   | CI/CD configuration changes                |
-| revert:       | none                   | reverting previous commits                 |
-| style:        | none                   | formatting without code changes            |
-| refactor:     | none                   | reorganizing code without changes          |
-| chore:        | none                   | maintenance tasks                          |
-| build:        | none                   | build system or dependencies               |
 
 ## Tech Stack
 
@@ -106,7 +84,6 @@ bunx playwright install
 
 - Local state management: React useState
 - Global state management: [Zustand](https://zustand.docs.pmnd.rs/guides/beginner-typescript)
-- Component workshop: [Storybook](https://storybook.js.org/) using *.stories.tsx files inside src/components
 - Generic components: [shadcn/ui](https://ui.shadcn.com/) stored in components/shadcn-ui and config by components.json
 
 ```cmd
