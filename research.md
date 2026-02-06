@@ -27,26 +27,54 @@
 - [Hex Color Codes](  https://html-color.codes/)
 - generators for complimentary hex codes [Coolors](https://coolors.co/) (no acct required), [Atmos](https://atmos.style/) (requires free acct)
 
-### Generic React Components
+### Shadcn UI
 
 - [shadcn/ui Components](https://ui.shadcn.com/docs/components)
-- Examples of using shadcn/ui: Hexta UI [docs](https://www.hextaui.com/), [repo](https://github.com/preetsuthar17/HextaUI)
-- **based on shadcn-ui and radix-ui [ln-dev7/square-ui](https://github.com/ln-dev7/square-ui)**
-- [mui/material-ui](https://mui.com/material-ui/getting-started/), css styling [MUI System](https://mui.com/system/getting-started/)
+- **Shadcn ui blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)**
+- Example landing page [shadcn-landing-page](https://shadcn-landing-page.vercel.app/)
+- Search for example sites [shadcnui-templates](https://shadcnui-templates.com/all-templates)
+
+### Generic React Components
+
+- [Hexta UI](https://www.hextaui.com/)
+- [Square UI](https://github.com/ln-dev7/square-ui)
+- [Material UI (MUI)](https://mui.com/material-ui/getting-started/), css styling [MUI System](https://mui.com/system/getting-started/)
 - [Ant Design](https://ant.design/components/overview/)
 - [Untitled UI](https://www.untitledui.com/react/components)
-- [FlyonUI](https://flyonui.com/docs/component/)
+- [Flyon UI](https://flyonui.com/docs/component/)
 - [Mantine UI](https://ui.mantine.dev/)
-- [Joy UI](https://mui.com/joy-ui/getting-started/)
-- headless [Coss = Origin UI](https://coss.com/origin)
-- headless [headlessui](https://headlessui.com/react/menu)
-- [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
 - [lmsqueezy/wedges](https://lemonsqueezy.com/wedges)
-- animated [Eldora UI](https://eldoraui.site/docs)
-- animated **[Animate UI](https://animate-ui.com/docs/components)**
+- [Aceternity UI](https://ui.aceternity.com/components)
 - [Pure UI](https://pure.kam-ui.com/)
 - [Evergeen](https://github.com/segmentio/evergreen)
-- **Shadcn ui blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)**
+- [Joy UI](https://mui.com/joy-ui/getting-started/)
+- [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
+- [Magic UI](https://github.com/magicuidesign/magicui)
+- [Cult UI](https://github.com/nolly-studio/cult-ui)
+- [Page UI](https://github.com/danmindru/page-ui)
+- [Syntax UI](https://github.com/SyntaxUI/syntaxui)
+- [Jolly UI](https://github.com/jolbol1/jolly-ui)
+- [Lukacho UI](https://ui.lukacho.com/components)
+- [Bund UI](https://github.com/bundui/components)
+- [Farm UI](https://github.com/kinfe123/farm-ui)
+- Generate custom components Vercel AI [v0.app](https://v0.app/)
+
+### Headless Components
+
+- [Headless UI](https://headlessui.com/react/menu)
+- [Coss = Origin UI](https://coss.com/origin)
+
+### Animated Components
+
+- [Animate UI](https://animate-ui.com/docs/components)
+- [Eldora UI](https://eldoraui.site/docs)
+- [Mixcn UI](https://github.com/taqui-786/mixcnui)
+- [Framer Motion](https://www.framer.com/motion/)
+- [react-use-gesture](https://github.com/pmndrs/use-gesture)
+- [react-spring](https://github.com/pmndrs/react-spring)
+- [react-three-fiber](https://github.com/pmndrs/react-three-fiber)
+- [codse/animata](https://github.com/codse/animata)
+- [chrisabdo/motionvariants](https://github.com/chrisabdo/motionvariants)
 
 ### Icons
 
@@ -67,6 +95,11 @@
 - [vercel/react-tweet](https://github.com/vercel/react-tweet)
 - [chatbot assistant](https://ai-sdk.dev/elements/examples/chatbot)
 - [Ant chat](https://github.com/ant-design/pro-chat)
+- [shadcn-image-cropper](https://github.com/sujjeee/shadcn-image-cropper)
+- scheduling [planner](https://github.com/UretzkyZvi/planner)
+- address autocomplete [shadcn-address-autocomplete](https://github.com/NiazMorshed2007/shadcn-address-autocomplete)
+- timeline [shadcn-timeline](https://github.com/timDeHof/shadcn-timeline)
+
 - tables [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - tables [AG Grid](https://www.ag-grid.com/react-data-grid/getting-started/)
 - videos [mifi/reactive-video](https://github.com/mifi/reactive-video/)
@@ -87,15 +120,24 @@
 - [0wczar/airframe-react](https://github.com/0wczar/airframe-react)
 - [creativetimofficial/notus-react](https://github.com/creativetimofficial/notus-react), [demo](https://demos.creative-tim.com/notus-react/#/admin/dashboard)
 - [tailadmin](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
+- [satnaing/shadcn-admin](https://github.com/satnaing/shadcn-admin)
 
 ### Next.js Boilerplates
 
 - [odoo/odoo](https://github.com/odoo/odoo)
 - [vercel/next-forge](https://github.com/vercel/next-forge)
-- [Next.js SaaS Starter](https://vercel.com/templates/authentication/next-js-saas-starter)
+- Vercel [Next.js SaaS Starter](https://vercel.com/templates/authentication/next-js-saas-starter)
 - [Blazity/next-enterprise](https://github.com/Blazity/next-enterprise/tree/main)
 - [arhamkhnz/next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard)
 - [cruip/open-react-template](https://github.com/cruip/open-react-template)
+- [ixartz/SaaS-Boilerplate](https://github.com/ixartz/SaaS-Boilerplate)
+- [nextify-limited/saasfly](https://github.com/nextify-limited/saasfly)
+- [mickasmt/next-saas-stripe-starter](https://github.com/mickasmt/next-saas-stripe-starter)
+- [reliverse/relivator](https://github.com/reliverse/relivator)
+- [michaelshimeles/nextjs-starter-kit](https://github.com/michaelshimeles/nextjs-starter-kit)
+- [alifarooq9/launchmvpfast](https://github.com/alifarooq9/launchmvpfast)
+- [cellajs/cella](https://github.com/cellajs/cella)
+- [get-convex/convex-saas](https://github.com/get-convex/convex-saas)
 
 ### Tanstack Start/Router Boilerplates
 

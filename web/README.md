@@ -121,11 +121,11 @@ pg_ctl -D .\pgdata -l logfile start
 
 #### Auth Schema
 
-Contains all tables for Better Auth. Created by "bun x @better-auth/cli@latest generate" and modifying to use shema auth and user auth_role. This way Better Auth can only edit auth schema and other users can't edit auth schema.
+Contains all tables for Better Auth. Created by "bunx @better-auth/cli@latest generate" and modifying to use shema auth and user auth_role. This way Better Auth can only edit auth schema and other users can't edit auth schema.
 
 #### Web Schema
 
-Contains all tables for the app defined in ./db/migrations/web. Role web_owner owns the schema so it can be used in migrations. Role web_user can only edit tables so that Drizzle can't create or delete tables etc.
+Contains all tables for the app defined in ./db/migrations/web. Role owner_role owns the schema so it can be used in migrations. Role web_user can only edit tables so that Drizzle can't create or delete tables etc.
 
 #### Api Schema
 
