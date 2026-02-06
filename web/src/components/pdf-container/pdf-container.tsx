@@ -3,14 +3,20 @@ import { createPluginRegistration } from "@embedpdf/core"
 import { EmbedPDF } from "@embedpdf/core/react"
 import { usePdfiumEngine } from "@embedpdf/engines/react"
 import { NoopLogger } from "@embedpdf/models"
+import {
+  DocumentContent,
+  DocumentManagerPluginPackage,
+  InitialDocumentOptions,
+} from "@embedpdf/plugin-document-manager/react"
 import { ExportPluginPackage } from "@embedpdf/plugin-export/react"
-import { LoaderPluginPackage } from "@embedpdf/plugin-loader/react"
 import { RenderLayer, RenderPluginPackage } from "@embedpdf/plugin-render/react"
 import { RotatePluginPackage } from "@embedpdf/plugin-rotate/react"
+import { Scroller, ScrollPluginPackage, ScrollStrategy } from "@embedpdf/plugin-scroll/react"
+import { SearchLayer, SearchPluginPackage } from "@embedpdf/plugin-search/react"
 import { ThumbnailPluginPackage } from "@embedpdf/plugin-thumbnail/react"
 import { TilingLayer, TilingPluginPackage } from "@embedpdf/plugin-tiling/react"
 import { Viewport, ViewportPluginPackage } from "@embedpdf/plugin-viewport/react"
-import { PinchWrapper, ZoomMode, ZoomPluginPackage } from "@embedpdf/plugin-zoom/react"
+import { ZoomGestureWrapper, ZoomMode, ZoomPluginPackage } from "@embedpdf/plugin-zoom/react"
 import { env } from "../../env.client"
 import PluginStoreSync from "../plugin-store/components/plugin-store-sync"
 import { Spinner } from "../shadcn-ui/spinner"
@@ -20,23 +26,22 @@ import {
   InteractionManagerPluginPackage,
   PagePointerProvider,
 } from "./plugin-interaction-manager-2"
-import { Scroller, ScrollPluginPackage, ScrollStrategy } from "./plugin-scroll-2"
-import { SearchLayer, SearchPluginPackage } from "./plugin-search-2"
+// import { MarqueeSelection } from "@embedpdf/plugin-selection/react"
 import { SelectionLayer, SelectionPluginPackage } from "./plugin-selection-2"
 import RotateWrapper from "./rotate-wrapper"
 import Toolbar from "./toolbar"
 
-const logger = new NoopLogger() // ConsoleLogger()
-
 interface PDFContainerProps {
-  url: string
+  initalDocuments: InitialDocumentOptions[]
   author?: string
   exportName?: string
   canRotate?: boolean
 }
 
+const logger = new NoopLogger()
+
 export default function PDFContainer({
-  url,
+  initalDocuments,
   author = "anonymous",
   exportName = "labeled.pdf",
   canRotate = true,
@@ -61,28 +66,22 @@ export default function PDFContainer({
     <div className="flex h-screen flex-1 flex-col overflow-hidden" ref={containerRef}>
       <div className="flex flex-1 overflow-hidden" data-testid="embedpdf">
         <EmbedPDF
-          logger={logger}
+          config={{
+            logger: logger,
+            permissions: { enforceDocumentPermissions: false }, // disable permissions set in PDF metadata
+          }}
           engine={engine}
           plugins={[
-            // register Loader first
-            createPluginRegistration(LoaderPluginPackage, {
-              loadingOptions: {
-                type: "url",
-                pdfFile: {
-                  id: "1",
-                  url: url,
-                },
-                options: {
-                  mode: "full-fetch",
-                },
-              },
+            // register DocumentManager first
+            createPluginRegistration(DocumentManagerPluginPackage, {
+              initialDocuments: initalDocuments,
             }),
             createPluginRegistration(ViewportPluginPackage, {
               viewportGap: 5,
             }),
-            // register Scroll after Loader, Viewport
+            // register Scroll after DocumentManager, Viewport
             createPluginRegistration(ScrollPluginPackage, {
-              strategy: ScrollStrategy.Vertical,
+              defaultStrategy: ScrollStrategy.Vertical,
             }),
             createPluginRegistration(RenderPluginPackage),
             ...(canRotate ? [createPluginRegistration(RotatePluginPackage)] : []),
@@ -94,9 +93,9 @@ export default function PDFContainer({
             }),
             // register Thumbnail after Scroll, Render
             createPluginRegistration(ThumbnailPluginPackage, { width: 100 }),
-            createPluginRegistration(SelectionPluginPackage),
+            // createPluginRegistration(SelectionPluginPackage),
             // register Annotation after InteractionManager, Seletion
-            createPluginRegistration(AnnotationPluginPackage, { author }),
+            // createPluginRegistration(AnnotationPluginPackage, { author }),
             // register Export after Annotation
             createPluginRegistration(ExportPluginPackage, {
               defaultFileName: exportName,
@@ -109,62 +108,82 @@ export default function PDFContainer({
             createPluginRegistration(SearchPluginPackage),
           ]}
         >
-          {({ pluginsReady }) => {
-            return (
-              <GlobalPointerProvider>
-                <PluginStoreSync />
-                <Toolbar canRotate={canRotate} data-testid="annotation-toolbar" />
-                <Viewport className="h-full w-full flex-1 overflow-hidden bg-gray-100 select-none">
-                  {!pluginsReady && (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <Spinner data-testid="spinner1" />
-                    </div>
-                  )}
-                  {pluginsReady && (
-                    <PinchWrapper>
-                      <Scroller
-                        renderPage={({ pageIndex, scale, rotation, width, height }) => (
-                          <RotateWrapper enabled={canRotate} pageSize={{ width, height }}>
-                            <PagePointerProvider
-                              pageIndex={pageIndex}
-                              scale={scale}
-                              pageWidth={width}
-                              pageHeight={height}
-                              rotation={rotation}
-                            >
-                              {/* RenderLayer must go first */}
-                              <RenderLayer pageIndex={pageIndex} className="pointer-events-none" />
-                              <TilingLayer
+          {({ pluginsReady, activeDocumentId }) =>
+            pluginsReady && activeDocumentId ? (
+              <DocumentContent documentId={activeDocumentId}>
+                {({ isLoaded }) =>
+                  isLoaded ? (
+                    // <GlobalPointerProvider documentId={activeDocumentId}>
+                    <>
+                      <PluginStoreSync />
+                      <Toolbar canRotate={canRotate} data-testid="annotation-toolbar" />
+                      <Viewport
+                        documentId={activeDocumentId}
+                        className="h-full w-full flex-1 overflow-hidden bg-gray-100 select-none"
+                      >
+                        <ZoomGestureWrapper documentId={activeDocumentId}>
+                          <Scroller
+                            documentId={activeDocumentId}
+                            renderPage={({ pageIndex, width, height }) => (
+                              <RotateWrapper
+                                enabled={canRotate}
+                                documentId={activeDocumentId}
                                 pageIndex={pageIndex}
-                                scale={scale}
-                                className="pointer-events-none"
-                              />
-                              <AnnotationLayer
-                                pageIndex={pageIndex}
-                                scale={scale}
-                                pageWidth={width}
-                                pageHeight={height}
-                                rotation={rotation}
-                                data-testid="annotation-layer"
-                              />
-                              <SearchLayer
-                                pageIndex={pageIndex}
-                                scale={scale}
-                                highlightColor={"#FFFF00"}
-                                activeHighlightColor={"#FFFF00"}
-                              />
-                              {/* SelectionLayer must go last */}
-                              <SelectionLayer pageIndex={pageIndex} scale={scale} />
-                            </PagePointerProvider>
-                          </RotateWrapper>
-                        )}
-                      />
-                    </PinchWrapper>
-                  )}
-                </Viewport>
-              </GlobalPointerProvider>
+                              >
+                                {/* <PagePointerProvider
+                                  documentId={activeDocumentId}
+                                  pageIndex={pageIndex}
+                                > */}
+                                {/* RenderLayer must go first */}
+                                <RenderLayer
+                                  documentId={activeDocumentId}
+                                  pageIndex={pageIndex}
+                                  className="pointer-events-none"
+                                />
+                                <TilingLayer
+                                  documentId={activeDocumentId}
+                                  pageIndex={pageIndex}
+                                  style={{ pointerEvents: "none" }}
+                                />
+                                {/* <AnnotationLayer
+                                    documentId={activeDocumentId}
+                                    pageIndex={pageIndex}
+                                    pageWidth={width}
+                                    pageHeight={height}
+                                    data-testid="annotation-layer"
+                                  /> */}
+                                <SearchLayer
+                                  documentId={activeDocumentId}
+                                  pageIndex={pageIndex}
+                                  highlightColor={"#FFFF00"}
+                                  activeHighlightColor={"#FFFF00"}
+                                />
+                                {/* SelectionLayer must go last */}
+                                {/* <SelectionLayer
+                                    documentId={activeDocumentId}
+                                    pageIndex={pageIndex}
+                                  /> */}
+                                {/* <MarqueeSelection
+                                    documentId={activeDocumentId}
+                                    pageIndex={pageIndex}
+                                  /> */}
+                                {/* </PagePointerProvider> */}
+                              </RotateWrapper>
+                            )}
+                          />
+                        </ZoomGestureWrapper>
+                      </Viewport>
+                      {/* </GlobalPointerProvider> */}
+                    </>
+                  ) : (
+                    <Spinner data-testid="spinner4" />
+                  )
+                }
+              </DocumentContent>
+            ) : (
+              <Spinner data-testid="spinner3" />
             )
-          }}
+          }
         </EmbedPDF>
       </div>
     </div>

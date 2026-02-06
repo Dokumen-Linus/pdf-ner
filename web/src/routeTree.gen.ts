@@ -10,9 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublicRouteImport } from './routes/_public'
+import { Route as PrivateRouteImport } from './routes/_private'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as PublicDemoRouteImport } from './routes/_public/demo'
+import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
+import { Route as PrivateCreateProjectRouteImport } from './routes/_private/create-project'
 import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as AuthSignoutRouteImport } from './routes/_auth/signout'
 import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
@@ -20,6 +23,10 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivateRoute = PrivateRouteImport.update({
+  id: '/_private',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -35,6 +42,16 @@ const PublicDemoRoute = PublicDemoRouteImport.update({
   id: '/demo',
   path: '/demo',
   getParentRoute: () => PublicRoute,
+} as any)
+const PrivateProfileRoute = PrivateProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => PrivateRoute,
+} as any)
+const PrivateCreateProjectRoute = PrivateCreateProjectRouteImport.update({
+  id: '/create-project',
+  path: '/create-project',
+  getParentRoute: () => PrivateRoute,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
   id: '/signup',
@@ -58,44 +75,70 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof PublicIndexRoute
   '/signin': typeof AuthSigninRoute
   '/signout': typeof AuthSignoutRoute
   '/signup': typeof AuthSignupRoute
+  '/create-project': typeof PrivateCreateProjectRoute
+  '/profile': typeof PrivateProfileRoute
   '/demo': typeof PublicDemoRoute
-  '/': typeof PublicIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof PublicIndexRoute
   '/signin': typeof AuthSigninRoute
   '/signout': typeof AuthSignoutRoute
   '/signup': typeof AuthSignupRoute
+  '/create-project': typeof PrivateCreateProjectRoute
+  '/profile': typeof PrivateProfileRoute
   '/demo': typeof PublicDemoRoute
-  '/': typeof PublicIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
+  '/_private': typeof PrivateRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/_auth/signin': typeof AuthSigninRoute
   '/_auth/signout': typeof AuthSignoutRoute
   '/_auth/signup': typeof AuthSignupRoute
+  '/_private/create-project': typeof PrivateCreateProjectRoute
+  '/_private/profile': typeof PrivateProfileRoute
   '/_public/demo': typeof PublicDemoRoute
   '/_public/': typeof PublicIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/signin' | '/signout' | '/signup' | '/demo' | '/' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/signin'
+    | '/signout'
+    | '/signup'
+    | '/create-project'
+    | '/profile'
+    | '/demo'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/signin' | '/signout' | '/signup' | '/demo' | '/' | '/api/auth/$'
+  to:
+    | '/'
+    | '/signin'
+    | '/signout'
+    | '/signup'
+    | '/create-project'
+    | '/profile'
+    | '/demo'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/_auth'
+    | '/_private'
     | '/_public'
     | '/_auth/signin'
     | '/_auth/signout'
     | '/_auth/signup'
+    | '/_private/create-project'
+    | '/_private/profile'
     | '/_public/demo'
     | '/_public/'
     | '/api/auth/$'
@@ -103,6 +146,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
+  PrivateRoute: typeof PrivateRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -112,14 +156,21 @@ declare module '@tanstack/react-router' {
     '/_public': {
       id: '/_public'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof PublicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_private': {
+      id: '/_private'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PrivateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth': {
       id: '/_auth'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -136,6 +187,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/demo'
       preLoaderRoute: typeof PublicDemoRouteImport
       parentRoute: typeof PublicRoute
+    }
+    '/_private/profile': {
+      id: '/_private/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof PrivateProfileRouteImport
+      parentRoute: typeof PrivateRoute
+    }
+    '/_private/create-project': {
+      id: '/_private/create-project'
+      path: '/create-project'
+      fullPath: '/create-project'
+      preLoaderRoute: typeof PrivateCreateProjectRouteImport
+      parentRoute: typeof PrivateRoute
     }
     '/_auth/signup': {
       id: '/_auth/signup'
@@ -182,6 +247,19 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface PrivateRouteChildren {
+  PrivateCreateProjectRoute: typeof PrivateCreateProjectRoute
+  PrivateProfileRoute: typeof PrivateProfileRoute
+}
+
+const PrivateRouteChildren: PrivateRouteChildren = {
+  PrivateCreateProjectRoute: PrivateCreateProjectRoute,
+  PrivateProfileRoute: PrivateProfileRoute,
+}
+
+const PrivateRouteWithChildren =
+  PrivateRoute._addFileChildren(PrivateRouteChildren)
+
 interface PublicRouteChildren {
   PublicDemoRoute: typeof PublicDemoRoute
   PublicIndexRoute: typeof PublicIndexRoute
@@ -197,6 +275,7 @@ const PublicRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
+  PrivateRoute: PrivateRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

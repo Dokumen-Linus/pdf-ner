@@ -1,4 +1,4 @@
-\restrict ZUTPtNGGhRHny3xw0fHlj7yw4a1ruRxuoRKyNt789tApUvxfhaQmmbohq19EcbS
+\restrict 4rQzZ3clxP3HtI09p7rhAtJNARLkQgGaQ14DHfupsAQW84nD5rJS1cYV0Y0gFNz
 
 -- Dumped from database version 18.1
 -- Dumped by pg_dump version 18.1
@@ -100,6 +100,41 @@ CREATE TABLE api.prompts (
 
 
 --
+-- Name: std_entity_types; Type: TABLE; Schema: api; Owner: -
+--
+
+CREATE TABLE api.std_entity_types (
+    id bigint NOT NULL,
+    short_name text NOT NULL,
+    long_name text,
+    definition text,
+    examples text[],
+    format_description text,
+    datatype text,
+    regex text,
+    exact_length integer,
+    single_word boolean,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT std_entity_types_datatype_check CHECK ((datatype = ANY (ARRAY['int'::text, 'float'::text, 'alphanumeric'::text, 'alpha'::text])))
+);
+
+
+--
+-- Name: std_entity_types_id_seq; Type: SEQUENCE; Schema: api; Owner: -
+--
+
+ALTER TABLE api.std_entity_types ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME api.std_entity_types_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: templates; Type: TABLE; Schema: api; Owner: -
 --
 
@@ -168,17 +203,22 @@ CREATE TABLE web.entity_types (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     project_id uuid NOT NULL,
     name text NOT NULL,
-    page1_definition text,
-    page1_examples text[],
-    page1_datatype text,
-    "unique" boolean DEFAULT true NOT NULL,
-    required boolean DEFAULT true NOT NULL,
+    standard_entity_type_id bigint,
+    user_definition text,
+    user_examples text[],
+    user_format_description text,
+    datatype text,
+    single_word boolean,
+    exact_length integer,
+    "unique" boolean NOT NULL,
+    required boolean NOT NULL,
     subtype text,
     color text,
     opacity real,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
     CONSTRAINT entity_types_color_check CHECK ((color ~ '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'::text)),
+    CONSTRAINT entity_types_datatype_check CHECK ((datatype = ANY (ARRAY['int'::text, 'float'::text, 'alphanumeric'::text, 'alpha'::text]))),
     CONSTRAINT entity_types_opacity_check CHECK (((opacity >= (0)::double precision) AND (opacity <= (1)::double precision))),
     CONSTRAINT entity_types_subtype_check CHECK ((subtype = ANY (ARRAY['highlight'::text, 'underline'::text, 'squiggly'::text, 'strikeout'::text])))
 );
@@ -241,6 +281,14 @@ ALTER TABLE ONLY api.pdfs
 
 ALTER TABLE ONLY api.prompts
     ADD CONSTRAINT prompts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: std_entity_types std_entity_types_pkey; Type: CONSTRAINT; Schema: api; Owner: -
+--
+
+ALTER TABLE ONLY api.std_entity_types
+    ADD CONSTRAINT std_entity_types_pkey PRIMARY KEY (id);
 
 
 --
@@ -311,6 +359,13 @@ CREATE TRIGGER pdfs_updated_at BEFORE UPDATE ON api.pdfs FOR EACH ROW EXECUTE FU
 --
 
 CREATE TRIGGER prompts_updated_at BEFORE UPDATE ON api.prompts FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: std_entity_types std_entity_types_updated_at; Type: TRIGGER; Schema: api; Owner: -
+--
+
+CREATE TRIGGER std_entity_types_updated_at BEFORE UPDATE ON api.std_entity_types FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
@@ -390,6 +445,14 @@ ALTER TABLE ONLY web.entity_types
 
 
 --
+-- Name: entity_types entity_types_standard_entity_type_id_fkey; Type: FK CONSTRAINT; Schema: web; Owner: -
+--
+
+ALTER TABLE ONLY web.entity_types
+    ADD CONSTRAINT entity_types_standard_entity_type_id_fkey FOREIGN KEY (standard_entity_type_id) REFERENCES api.std_entity_types(id) ON DELETE CASCADE;
+
+
+--
 -- Name: pdfs pdfs_id_fkey; Type: FK CONSTRAINT; Schema: web; Owner: -
 --
 
@@ -409,7 +472,7 @@ ALTER TABLE ONLY web.projects
 -- PostgreSQL database dump complete
 --
 
-\unrestrict ZUTPtNGGhRHny3xw0fHlj7yw4a1ruRxuoRKyNt789tApUvxfhaQmmbohq19EcbS
+\unrestrict 4rQzZ3clxP3HtI09p7rhAtJNARLkQgGaQ14DHfupsAQW84nD5rJS1cYV0Y0gFNz
 
 
 --
@@ -421,6 +484,7 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('00010'),
     ('00020'),
     ('00030'),
+    ('00031'),
     ('00040'),
     ('00041'),
     ('00050'),

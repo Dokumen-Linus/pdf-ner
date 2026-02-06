@@ -6,11 +6,13 @@ build
 # python
 __pycache__
 **/__pycache__
+.pytest_cache
+.ruff_cache
 
 # local env files
 .env
 
-# coding LLMs
+# coding LLM config should be in root dir
 .kilocode/
 .cursor/
 .claude/

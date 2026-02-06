@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,
@@ -12,7 +12,7 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
-import { createUser, deleteUserByEmail, getUserByEmail } from "@/db-fns/users"
+import { createUser, deleteUserByEmail, getUserByEmail } from "@/db-fns/web/users"
 import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/_auth/signup")({
@@ -20,7 +20,6 @@ export const Route = createFileRoute("/_auth/signup")({
 })
 
 function SignUpPage() {
-  const navigate = useNavigate()
   const [isSuccess, setIsSuccess] = useState(false)
   const form = useForm({
     defaultValues: {
@@ -73,9 +72,9 @@ function SignUpPage() {
         })
 
         if (authError) {
-          // If auth fails, we probably should delete the user profile created above to keep data clean?
-          // But maybe the user exists in auth but not in profile?
-          // For now let's just return error.
+          try {
+            await deleteUserByEmail({ data: { email: value.email } })
+          } catch (_e) {}
           return {
             form: authError.message || "An error occurred during sign up",
           }
@@ -105,6 +104,9 @@ function SignUpPage() {
             <Link to="/signin">
               <Button className="w-full">Go to Sign In</Button>
             </Link>
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              After verifying your email and signing in, you'll be redirected to your profile.
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -297,7 +299,7 @@ function SignUpPage() {
               children={([errorMap]) =>
                 errorMap.onSubmit ? (
                   <p className="text-sm font-medium text-destructive">
-                    {errorMap.onSubmit.toString()}
+                    {(errorMap.onSubmit as { form?: string })?.form ?? String(errorMap.onSubmit)}
                   </p>
                 ) : null
               }

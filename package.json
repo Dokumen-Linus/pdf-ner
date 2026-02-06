@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "pdf-ner",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
+    "commitlint": "^20.2.0",
+    "husky": "^9.1.7"
+  }
+}

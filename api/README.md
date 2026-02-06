@@ -15,7 +15,7 @@ uv pip install .
 uv pip install -e ".[dev]"
 ```
 
-On Mac:
+On Mac (dev):
 
 ```cmd
 uv venv .venv
@@ -42,7 +42,7 @@ uv pip sync uv.lock
 
 Using v3.13 until most libraries have upgraded to 3.14 (currently I have "python" PATH set to 3.13.11 and "py" set to 3.14.2)
 
-### Running the backend app
+### Running the api
 
 1 Start the database server
 
@@ -92,6 +92,8 @@ Visualizes the endpoints exposed by the api and what file defines them
 - AsyncIterator from collections.abc
 - asynccontextmanager from contextlib
 
+## API Layout
+
 ### Root files
 
 - main.py: builds the Fast API app from the router in api.py, should rarely be updated
@@ -101,6 +103,7 @@ Visualizes the endpoints exposed by the api and what file defines them
 
 - core: global functionalities like config, logging, db connection, connection to external APIs
 - domains: contains different domains, which are groups of endpoints to acheive a business purpose
+- integration:  code not specific to a business purpose that defines use of an external service
 - utils: generic code not specific to a business purpose that could be re-used in a hypothetical new domain
 
 ### Domains
@@ -126,6 +129,42 @@ Each domain may have the following files:
 - only functions in a repository.py may execute SQL scripts
 - schemas should never be defined in Python for the db, the only validation is whether SQL statements by asyncpg execute
 - pyproject.toml installs `fastapi[standard]` to ensure uvloop and httptools are used in prod (uvloop is not installable on Windows)
+
+## Database
+
+### How Database is Exposed to API
+
+1. The database schemas are defined in ./db/migrations/ SQL scripts
+1. ./backend/core/db.py defines the PostgreSQL pool that can execute read-write queries to api schema and read queries to app schema
+1. ./backend/domains/**/router.py files import ./backend/core/db in order to start a single connection per endpoint call
+
+**Restriction on API Interactions with Database**: The backend only can execute SQL scripts in functions in repository.py files using the [asyncpg](https://github.com/MagicStack/asyncpg) connection created in router.py. No ORM, Pydantic, or other Python schemas for the SQL database are allowed. Validation of the query is solely whether SQL can execute it. Connection is passed from router.py to service.py functions to repository.py functions.
+
+### Start Instructions
+
+Must start the database server before running the FastAPI app. Should run the app and db start commands in separate terminals so that terminating one does not terminate the other.
+
+```cmd
+pg_ctl -D .\pgdata -l logfile start
+```
+
+### Schemas
+
+#### Auth Schema
+
+API does not touch authentication.
+
+#### Web Schema
+
+Contains all tables for the web app defined in ./db/migrations/web. Role api_user has read-only access.
+
+#### Api Schema
+
+Contains all tables for the backend API defined in ./db/migrations/api. Role owner_role owns the schema so it can be used in migrations. Role api_user can edit tables (not create or delete tables).
+
+#### Workers Schema
+
+Contains all tables for the backend workers defined in ./db/migrations/workers. Role api_user has read-only access.
 
 ## Tests
 
@@ -208,37 +247,3 @@ Shared fixtures are defined in `tests/conftest.py`. These include:
 - Use httpx AsyncClient instead of starlette.testclient for integration tests
 - Mock database connections with `AsyncMock()` and set `fetchrow`, `fetch`, `fetchval` as needed
 - Test service functions directly rather than going through the router when testing business logic
-
-## Database
-
-### How Database is Exposed to API
-
-1. The database schemas are defined in ./db/migrations/ SQL scripts
-1. ./backend/core/db.py defines the PostgreSQL pool that can execute read-write queries to api schema and read queries to app schema
-1. ./backend/domains/**/router.py files import ./backend/core/db in order to start a single connection per endpoint call
-1. connection is passed from router.py to service.py functions to repository.py functions
-1. only functions in repository.py may execute SQL scripts
-
-**Restriction on API Interactions with Database**: The backend can only interact with database in repository.py files using the [asyncpg](https://github.com/MagicStack/asyncpg) connection created in router.py. No ORM, Pydantic, or other Python schemas for the SQL database are allowed. Validation of the query is solely whether SQL can execute it.
-
-### Start Instructions
-
-Must start the database server before running the FastAPI app. Should run the app and db start commands in separate terminals so that terminating one does not terminate the other.
-
-### Schemas
-
-#### Public Schema
-
-Only used for migration scripts.
-
-#### Auth Schema
-
-Contains all tables for authentication (not authorization). Role api_user has no access.
-
-#### App Schema
-
-Contains all tables for the frontend defined in ./db/migrations/. Role api_user has read-only access.
-
-#### Api Schema
-
-Contains all tables for the backend defined in ./db/migrations/. Role api_owner owns the schema so it can be used in migrations. Role api_user can only edit tables so that asyncpg can't create or delete tables etc.

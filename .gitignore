@@ -2,8 +2,8 @@
 pgdata/
 logfile
 
-# coding LLMs
-.kilocode/
-.cursor/
-.claude/
-CLAUDE.md
+# commitlint
+node_modules/
+
+# coding LLM settings
+**/settings.local.json

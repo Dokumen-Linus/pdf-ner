@@ -20,10 +20,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcn-ui/table"
+import ColorPicker from "../../custom/color-picker"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import useEntityTypeStore from "../hooks/use-entity-type-store"
 import initialEntityTypes from "../initial-entity-types"
-import ColorPicker from "./color-picker"
 
 const EntityTable = () => {
   // **IMPORTANT**

@@ -22,7 +22,7 @@
   },
   "fastapi-endpoint.files.include": "**/*.py",
   "fastapi-endpoint.files.exclude": "**/conda_env/**/*.*",
-  "ruff.configuration": "ruff.toml",
+  "ruff.configuration": "api/ruff.toml",
 
   // db
 
@@ -60,9 +60,9 @@
     },
   },
   "javascript.updateImportsOnFileMove.enabled": "always",
-  "prettier.configPath": ".prettierrc",
-  "prettier.ignorePath": ".prettierignore",
-  "tailwindCSS.experimental.configFile": "app/globals.css",
+  "prettier.configPath": "web/.prettierrc",
+  "prettier.ignorePath": "web/.prettierignore",
+  "tailwindCSS.experimental.configFile": "web/src/styles.css",
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.updateImportsOnFileMove.enabled": "always"
 }
