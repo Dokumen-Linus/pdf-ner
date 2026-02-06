@@ -3,7 +3,7 @@ import {
   generateUploadButton,
   generateUploadDropzone,
 } from "@uploadthing/react"
-import type { UploadRouter } from "@/server/uploadthing/upload-router"
+import type { UploadRouter } from "@/integrations/uploadthing/upload-router"
 
 export const UploadButton = generateUploadButton<UploadRouter>()
 export const UploadDropzone = generateUploadDropzone<UploadRouter>()
