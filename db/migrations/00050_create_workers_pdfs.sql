@@ -1,7 +1,8 @@
 -- migrate:up
-CREATE TABLE api.pdfs (
+CREATE TABLE workers.pdfs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  "name" TEXT NOT NULL,
+  "name" TEXT,
+  "location" TEXT NOT NULL,
 
   -- info from web sent to api via request
   project_id UUID NOT NULL REFERENCES web.projects (id) ON DELETE CASCADE,
@@ -11,7 +12,7 @@ CREATE TABLE api.pdfs (
   full_text TEXT,
   extract_method TEXT CHECK (extract_method IN ('pdfium', 'tesseract', 'olm', 'deepseek')),
   text_by_page JSONB,
-  bookmarks JSONB,
+  text_by_bookmarks JSONB,
 
   -- info from predict_entities
   predicted_entities JSONB,
@@ -24,10 +25,10 @@ CREATE TABLE api.pdfs (
 );
 
 CREATE TRIGGER pdfs_updated_at
-BEFORE UPDATE ON api.pdfs
+BEFORE UPDATE ON workers.pdfs
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
 -- migrate:down
-DROP TRIGGER pdfs_updated_at ON api.pdfs;
-DROP TABLE api.pdfs;
+DROP TRIGGER pdfs_updated_at ON workers.pdfs;
+DROP TABLE workers.pdfs;
