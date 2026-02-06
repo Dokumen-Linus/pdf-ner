@@ -1,6 +1,5 @@
 from google.genai import Client, types
 
-
 async def call_google_ai_async(
     client: Client,
     model: str,
