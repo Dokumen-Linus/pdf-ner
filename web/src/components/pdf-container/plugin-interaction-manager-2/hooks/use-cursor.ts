@@ -1,13 +1,17 @@
 import { useInteractionManagerCapability } from "./use-interaction-manager"
 
-export function useCursor() {
+export function useCursor(documentId: string) {
   const { provides } = useInteractionManagerCapability()
   return {
     setCursor: (token: string, cursor: string, prio = 0) => {
-      provides?.setCursor(token, cursor, prio)
+      if (!provides) return
+      const scope = provides.forDocument(documentId)
+      scope.setCursor(token, cursor, prio)
     },
     removeCursor: (token: string) => {
-      provides?.removeCursor(token)
+      if (!provides) return
+      const scope = provides.forDocument(documentId)
+      scope.removeCursor(token)
     },
   }
 }

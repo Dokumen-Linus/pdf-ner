@@ -1,22 +1,26 @@
 import { useEffect, useState } from "react"
 import { useInteractionManagerCapability } from "./use-interaction-manager"
 
-export function useIsPageExclusive() {
+export function useIsPageExclusive(documentId: string) {
   const { provides: cap } = useInteractionManagerCapability()
 
   const [isPageExclusive, setIsPageExclusive] = useState<boolean>(() => {
-    const m = cap?.getActiveInteractionMode()
+    if (!cap) return false
+    const scope = cap.forDocument(documentId)
+    const m = scope.getActiveInteractionMode()
     return m?.scope === "page" && !!m.exclusive
   })
 
   useEffect(() => {
     if (!cap) return
 
-    return cap.onModeChange(() => {
-      const mode = cap.getActiveInteractionMode()
+    const scope = cap.forDocument(documentId)
+
+    return scope.onModeChange(() => {
+      const mode = scope.getActiveInteractionMode()
       setIsPageExclusive(mode?.scope === "page" && !!mode?.exclusive)
     })
-  }, [cap])
+  }, [cap, documentId])
 
   return isPageExclusive
 }

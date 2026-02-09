@@ -1,5 +1,5 @@
 import { PdfPageGeometry, Position, Rect } from "@embedpdf/models"
-import type { SelectionRangeX } from "./custom-types"
+import { SelectionRangeX } from "./types"
 
 /**
  * Hit-test helper using runs
@@ -47,7 +47,6 @@ export function sliceBounds(
   const from = page === sel.start.page ? sel.start.index : 0
 
   const lastRun = geo.runs[geo.runs.length - 1]
-  if (!lastRun) return null
   const lastCharOnPage = lastRun.charStart + lastRun.glyphs.length - 1
 
   const to = page === sel.end.page ? sel.end.index : lastCharOnPage
@@ -87,7 +86,7 @@ export function rectsWithinSlice(
 
     for (let i = sIdx; i <= eIdx; i++) {
       const g = run.glyphs[i]
-      if (!g || g.flags === 2) continue // empty glyph
+      if (g.flags === 2) continue // empty glyph
 
       minX = Math.min(minX, g.x)
       maxX = Math.max(maxX, g.x + g.width)

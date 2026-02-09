@@ -1,7 +1,8 @@
-import { PdfPageObjectWithRotatedSize } from "@embedpdf/models"
-import type { ViewportMetrics } from "@embedpdf/plugin-viewport"
-import type { PageLayout, VirtualItem } from "../custom-types"
-import { BaseScrollStrategy, ScrollStrategyConfig } from "./base-strategy"
+import { PdfPageObjectWithRotatedSize } from "@embedpdf/models";
+import { ViewportMetrics } from "@embedpdf/plugin-viewport"
+import { PageLayout, VirtualItem } from "../types/virtual-item"
+import { BaseScrollStrategy, ScrollStrategyConfig } from "./base-strategy";
+
 
 export class VerticalScrollStrategy extends BaseScrollStrategy {
   constructor(config: ScrollStrategyConfig) {

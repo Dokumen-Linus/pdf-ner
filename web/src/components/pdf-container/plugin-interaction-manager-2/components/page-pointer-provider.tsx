@@ -1,35 +1,48 @@
 import { CSSProperties, HTMLAttributes, ReactNode, useCallback, useEffect, useRef } from "react"
-import { Position, restorePosition, Size, transformSize } from "@embedpdf/models"
+import { useDocumentState } from "@embedpdf/core/react"
+import { Position, restorePosition, transformSize } from "@embedpdf/models"
 import { useInteractionManagerCapability, useIsPageExclusive } from "../hooks"
 import { createPointerProvider } from "./utils"
 
 interface PagePointerProviderProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode
+  documentId: string
   pageIndex: number
-  pageWidth: number
-  pageHeight: number
-  rotation: number
-  scale: number
+  rotation?: number
+  scale?: number
   style?: CSSProperties
   convertEventToPoint?: (event: PointerEvent, element: HTMLElement) => Position
 }
 
 export const PagePointerProvider = ({
+  documentId,
   pageIndex,
   children,
-  pageWidth,
-  pageHeight,
-  rotation,
-  scale,
+  rotation: rotationOverride,
+  scale: scaleOverride,
   convertEventToPoint,
   style,
   ...props
 }: PagePointerProviderProps) => {
   const ref = useRef<HTMLDivElement>(null)
   const { provides: cap } = useInteractionManagerCapability()
-  const isPageExclusive = useIsPageExclusive()
+  const isPageExclusive = useIsPageExclusive(documentId)
+  const documentState = useDocumentState(documentId)
 
-  // Memoize the default conversion function
+  // Get page dimensions and transformations from document state
+  // Calculate inline - this is cheap and memoization isn't necessary
+  const page = documentState?.document?.pages?.[pageIndex]
+  const naturalPageSize = page?.size ?? { width: 0, height: 0 }
+  // If override is provided, use it directly (consistent with other layer components)
+  // Otherwise, combine page intrinsic rotation with document rotation
+  const pageRotation = page?.rotation ?? 0
+  const docRotation = documentState?.rotation ?? 0
+  const rotation =
+    rotationOverride !== undefined ? rotationOverride : (pageRotation + docRotation) % 4
+  const scale = scaleOverride ?? documentState?.scale ?? 1
+  const displaySize = transformSize(naturalPageSize, 0, scale)
+
+  // Simplified conversion function
   const defaultConvertEventToPoint = useCallback(
     (event: PointerEvent, element: HTMLElement): Position => {
       const rect = element.getBoundingClientRect()
@@ -38,11 +51,19 @@ export const PagePointerProvider = ({
         y: event.clientY - rect.top,
       }
 
-      const displaySize: Size = transformSize({ width: pageWidth, height: pageHeight }, rotation, 1)
+      // Get the rotated natural size (width/height may be swapped, but not scaled)
+      const rotatedNaturalSize = transformSize(
+        {
+          width: displaySize.width,
+          height: displaySize.height,
+        },
+        rotation,
+        1,
+      )
 
-      return restorePosition(displaySize, displayPoint, rotation, scale)
+      return restorePosition(rotatedNaturalSize, displayPoint, rotation, scale)
     },
-    [pageWidth, pageHeight, rotation, scale],
+    [naturalPageSize, rotation, scale],
   )
 
   useEffect(() => {
@@ -50,19 +71,19 @@ export const PagePointerProvider = ({
 
     return createPointerProvider(
       cap,
-      { type: "page", pageIndex },
+      { type: "page", documentId, pageIndex },
       ref.current,
       convertEventToPoint || defaultConvertEventToPoint,
     )
-  }, [cap, pageIndex, convertEventToPoint, defaultConvertEventToPoint])
+  }, [cap, documentId, pageIndex, convertEventToPoint, defaultConvertEventToPoint])
 
   return (
     <div
       ref={ref}
       style={{
         position: "relative",
-        width: pageWidth,
-        height: pageHeight,
+        width: displaySize.width,
+        height: displaySize.height,
         ...style,
       }}
       {...props}

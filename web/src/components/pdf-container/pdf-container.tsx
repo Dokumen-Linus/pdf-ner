@@ -11,23 +11,22 @@ import {
 import { ExportPluginPackage } from "@embedpdf/plugin-export/react"
 import { RenderLayer, RenderPluginPackage } from "@embedpdf/plugin-render/react"
 import { RotatePluginPackage } from "@embedpdf/plugin-rotate/react"
-import { Scroller, ScrollPluginPackage, ScrollStrategy } from "@embedpdf/plugin-scroll/react"
-import { SearchLayer, SearchPluginPackage } from "@embedpdf/plugin-search/react"
 import { ThumbnailPluginPackage } from "@embedpdf/plugin-thumbnail/react"
 import { TilingLayer, TilingPluginPackage } from "@embedpdf/plugin-tiling/react"
 import { Viewport, ViewportPluginPackage } from "@embedpdf/plugin-viewport/react"
-import { ZoomGestureWrapper, ZoomMode, ZoomPluginPackage } from "@embedpdf/plugin-zoom/react"
 import { env } from "../../env.client"
 import PluginStoreSync from "../plugin-store/components/plugin-store-sync"
 import { Spinner } from "../shadcn-ui/spinner"
-import { AnnotationLayer, AnnotationPluginPackage } from "./plugin-annotation-2"
+// import { AnnotationLayer, AnnotationPluginPackage } from "./plugin-annotation-2"
 import {
   GlobalPointerProvider,
   InteractionManagerPluginPackage,
   PagePointerProvider,
 } from "./plugin-interaction-manager-2"
-// import { MarqueeSelection } from "@embedpdf/plugin-selection/react"
-import { SelectionLayer, SelectionPluginPackage } from "./plugin-selection-2"
+import { Scroller, ScrollPluginPackage, ScrollStrategy } from "./plugin-scroll-2"
+import { SearchLayer, SearchPluginPackage } from "./plugin-search-2"
+import { MarqueeSelection, SelectionLayer, SelectionPluginPackage } from "./plugin-selection-2"
+import { ZoomGestureWrapper, ZoomMode, ZoomPluginPackage } from "./plugin-zoom-2"
 import RotateWrapper from "./rotate-wrapper"
 import Toolbar from "./toolbar"
 
@@ -93,7 +92,7 @@ export default function PDFContainer({
             }),
             // register Thumbnail after Scroll, Render
             createPluginRegistration(ThumbnailPluginPackage, { width: 100 }),
-            // createPluginRegistration(SelectionPluginPackage),
+            createPluginRegistration(SelectionPluginPackage),
             // register Annotation after InteractionManager, Seletion
             // createPluginRegistration(AnnotationPluginPackage, { author }),
             // register Export after Annotation
@@ -113,8 +112,7 @@ export default function PDFContainer({
               <DocumentContent documentId={activeDocumentId}>
                 {({ isLoaded }) =>
                   isLoaded ? (
-                    // <GlobalPointerProvider documentId={activeDocumentId}>
-                    <>
+                    <GlobalPointerProvider documentId={activeDocumentId}>
                       <PluginStoreSync />
                       <Toolbar canRotate={canRotate} data-testid="annotation-toolbar" />
                       <Viewport
@@ -124,57 +122,56 @@ export default function PDFContainer({
                         <ZoomGestureWrapper documentId={activeDocumentId}>
                           <Scroller
                             documentId={activeDocumentId}
-                            renderPage={({ pageIndex, width, height }) => (
+                            renderPage={({ pageIndex }) => (
                               <RotateWrapper
                                 enabled={canRotate}
                                 documentId={activeDocumentId}
                                 pageIndex={pageIndex}
                               >
-                                {/* <PagePointerProvider
+                                <PagePointerProvider
                                   documentId={activeDocumentId}
                                   pageIndex={pageIndex}
-                                > */}
-                                {/* RenderLayer must go first */}
-                                <RenderLayer
-                                  documentId={activeDocumentId}
-                                  pageIndex={pageIndex}
-                                  className="pointer-events-none"
-                                />
-                                <TilingLayer
-                                  documentId={activeDocumentId}
-                                  pageIndex={pageIndex}
-                                  style={{ pointerEvents: "none" }}
-                                />
-                                {/* <AnnotationLayer
+                                >
+                                  {/* RenderLayer must go first */}
+                                  <RenderLayer
+                                    documentId={activeDocumentId}
+                                    pageIndex={pageIndex}
+                                    style={{ pointerEvents: "none" }}
+                                  />
+                                  <TilingLayer
+                                    documentId={activeDocumentId}
+                                    pageIndex={pageIndex}
+                                    style={{ pointerEvents: "none" }}
+                                  />
+                                  {/* <AnnotationLayer
                                     documentId={activeDocumentId}
                                     pageIndex={pageIndex}
                                     pageWidth={width}
                                     pageHeight={height}
                                     data-testid="annotation-layer"
                                   /> */}
-                                <SearchLayer
-                                  documentId={activeDocumentId}
-                                  pageIndex={pageIndex}
-                                  highlightColor={"#FFFF00"}
-                                  activeHighlightColor={"#FFFF00"}
-                                />
-                                {/* SelectionLayer must go last */}
-                                {/* <SelectionLayer
+                                  <SearchLayer
                                     documentId={activeDocumentId}
                                     pageIndex={pageIndex}
-                                  /> */}
-                                {/* <MarqueeSelection
+                                    highlightColor={"#FFFF00"}
+                                    activeHighlightColor={"#FFFF00"}
+                                  />
+                                  {/* SelectionLayer must go last */}
+                                  <SelectionLayer
                                     documentId={activeDocumentId}
                                     pageIndex={pageIndex}
-                                  /> */}
-                                {/* </PagePointerProvider> */}
+                                  />
+                                  <MarqueeSelection
+                                    documentId={activeDocumentId}
+                                    pageIndex={pageIndex}
+                                  />
+                                </PagePointerProvider>
                               </RotateWrapper>
                             )}
                           />
                         </ZoomGestureWrapper>
                       </Viewport>
-                      {/* </GlobalPointerProvider> */}
-                    </>
+                    </GlobalPointerProvider>
                   ) : (
                     <Spinner data-testid="spinner4" />
                   )

@@ -1,57 +1,82 @@
-import { Action, Reducer } from "@embedpdf/core"
+import { Action } from "@embedpdf/core"
 import { MatchFlag, SearchResult } from "@embedpdf/models"
-import { SearchState } from "./state"
+import { SearchDocumentState } from "./types"
 
-// ***ACTION CONSTANTS***
-export const START_SEARCH_SESSION = "START_SEARCH_SESSION"
-export const STOP_SEARCH_SESSION = "STOP_SEARCH_SESSION"
-export const SET_SEARCH_FLAGS = "SET_SEARCH_FLAGS"
-export const SET_SHOW_ALL_RESULTS = "SET_SHOW_ALL_RESULTS"
-export const START_SEARCH = "START_SEARCH"
-export const SET_SEARCH_RESULTS = "SET_SEARCH_RESULTS"
-export const APPEND_SEARCH_RESULTS = "APPEND_SEARCH_RESULTS"
-export const SET_ACTIVE_RESULT_INDEX = "SET_ACTIVE_RESULT_INDEX"
+// Action Types
+export const INIT_SEARCH_STATE = "SEARCH/INIT_STATE"
+export const CLEANUP_SEARCH_STATE = "SEARCH/CLEANUP_STATE"
+export const START_SEARCH_SESSION = "SEARCH/START_SEARCH_SESSION"
+export const STOP_SEARCH_SESSION = "SEARCH/STOP_SEARCH_SESSION"
+export const SET_SEARCH_FLAGS = "SEARCH/SET_SEARCH_FLAGS"
+export const SET_SHOW_ALL_RESULTS = "SEARCH/SET_SHOW_ALL_RESULTS"
+export const START_SEARCH = "SEARCH/START_SEARCH"
+export const SET_SEARCH_RESULTS = "SEARCH/SET_SEARCH_RESULTS"
+export const APPEND_SEARCH_RESULTS = "SEARCH/APPEND_SEARCH_RESULTS"
+export const SET_ACTIVE_RESULT_INDEX = "SEARCH/SET_ACTIVE_RESULT_INDEX"
 
-// ***ACTION INTERFACES***
+// Action Interfaces
+export interface InitSearchStateAction extends Action {
+  type: typeof INIT_SEARCH_STATE
+  payload: { documentId: string; state: SearchDocumentState }
+}
+
+export interface CleanupSearchStateAction extends Action {
+  type: typeof CLEANUP_SEARCH_STATE
+  payload: string // documentId
+}
+
 export interface StartSearchSessionAction extends Action {
   type: typeof START_SEARCH_SESSION
+  payload: { documentId: string }
 }
+
 export interface StopSearchSessionAction extends Action {
   type: typeof STOP_SEARCH_SESSION
+  payload: { documentId: string }
 }
+
 export interface SetSearchFlagsAction extends Action {
   type: typeof SET_SEARCH_FLAGS
-  payload: MatchFlag[]
+  payload: { documentId: string; flags: MatchFlag[] }
 }
+
 export interface SetShowAllResultsAction extends Action {
   type: typeof SET_SHOW_ALL_RESULTS
-  payload: boolean
+  payload: { documentId: string; showAll: boolean }
 }
+
 export interface StartSearchAction extends Action {
   type: typeof START_SEARCH
-  payload: string
+  payload: { documentId: string; query: string }
 }
+
 export interface SetSearchResultsAction extends Action {
   type: typeof SET_SEARCH_RESULTS
   payload: {
+    documentId: string
     results: SearchResult[]
     total: number
     activeResultIndex: number
   }
 }
+
 export interface AppendSearchResultsAction extends Action {
   type: typeof APPEND_SEARCH_RESULTS
   payload: {
+    documentId: string
     results: SearchResult[]
   }
 }
+
 export interface SetActiveResultIndexAction extends Action {
   type: typeof SET_ACTIVE_RESULT_INDEX
-  payload: number
+  payload: { documentId: string; index: number }
 }
 
-// ***ACTION UNION***
+// Union Type for All Actions
 export type SearchAction =
+  | InitSearchStateAction
+  | CleanupSearchStateAction
   | StartSearchSessionAction
   | StopSearchSessionAction
   | SetSearchFlagsAction
@@ -61,97 +86,57 @@ export type SearchAction =
   | AppendSearchResultsAction
   | SetActiveResultIndexAction
 
-// ***ACTION CREATORS***
-export function startSearchSession(): StartSearchSessionAction {
-  return { type: START_SEARCH_SESSION }
+// Action Creators
+export function initSearchState(
+  documentId: string,
+  state: SearchDocumentState,
+): InitSearchStateAction {
+  return { type: INIT_SEARCH_STATE, payload: { documentId, state } }
 }
-export function stopSearchSession(): StopSearchSessionAction {
-  return { type: STOP_SEARCH_SESSION }
+
+export function cleanupSearchState(documentId: string): CleanupSearchStateAction {
+  return { type: CLEANUP_SEARCH_STATE, payload: documentId }
 }
-export function setSearchFlags(flags: MatchFlag[]): SetSearchFlagsAction {
-  return { type: SET_SEARCH_FLAGS, payload: flags }
+
+export function startSearchSession(documentId: string): StartSearchSessionAction {
+  return { type: START_SEARCH_SESSION, payload: { documentId } }
 }
-export function setShowAllResults(showAll: boolean): SetShowAllResultsAction {
-  return { type: SET_SHOW_ALL_RESULTS, payload: showAll }
+
+export function stopSearchSession(documentId: string): StopSearchSessionAction {
+  return { type: STOP_SEARCH_SESSION, payload: { documentId } }
 }
-export function startSearch(query: string): StartSearchAction {
-  return { type: START_SEARCH, payload: query }
+
+export function setSearchFlags(documentId: string, flags: MatchFlag[]): SetSearchFlagsAction {
+  return { type: SET_SEARCH_FLAGS, payload: { documentId, flags } }
 }
+
+export function setShowAllResults(documentId: string, showAll: boolean): SetShowAllResultsAction {
+  return { type: SET_SHOW_ALL_RESULTS, payload: { documentId, showAll } }
+}
+
+export function startSearch(documentId: string, query: string): StartSearchAction {
+  return { type: START_SEARCH, payload: { documentId, query } }
+}
+
 export function setSearchResults(
+  documentId: string,
   results: SearchResult[],
   total: number,
   activeResultIndex: number,
 ): SetSearchResultsAction {
-  return { type: SET_SEARCH_RESULTS, payload: { results, total, activeResultIndex } }
-}
-export function appendSearchResults(results: SearchResult[]): AppendSearchResultsAction {
-  return { type: APPEND_SEARCH_RESULTS, payload: { results } }
-}
-export function setActiveResultIndex(index: number): SetActiveResultIndexAction {
-  return { type: SET_ACTIVE_RESULT_INDEX, payload: index }
+  return { type: SET_SEARCH_RESULTS, payload: { documentId, results, total, activeResultIndex } }
 }
 
-// ***ACTION REDUCER***
-export const reducer: Reducer<SearchState, SearchAction> = (state, action) => {
-  switch (action.type) {
-    case START_SEARCH_SESSION:
-      return { ...state, active: true }
+export function appendSearchResults(
+  documentId: string,
+  results: SearchResult[],
+): AppendSearchResultsAction {
+  return { type: APPEND_SEARCH_RESULTS, payload: { documentId, results } }
+}
 
-    case STOP_SEARCH_SESSION:
-      return {
-        ...state,
-        results: [],
-        total: 0,
-        activeResultIndex: -1,
-        query: "",
-        loading: false,
-        active: false,
-      }
-
-    case SET_SEARCH_FLAGS:
-      return { ...state, flags: action.payload }
-
-    case SET_SHOW_ALL_RESULTS:
-      return { ...state, showAllResults: action.payload }
-
-    case START_SEARCH:
-      return {
-        ...state,
-        loading: true,
-        query: action.payload,
-        // clear old results on new search start
-        results: [],
-        total: 0,
-        activeResultIndex: -1,
-      }
-
-    case APPEND_SEARCH_RESULTS: {
-      const newResults = [...state.results, ...action.payload.results]
-      const firstHitIndex =
-        state.activeResultIndex === -1 && newResults.length > 0 ? 0 : state.activeResultIndex
-      return {
-        ...state,
-        results: newResults,
-        total: newResults.length, // total-so-far
-        activeResultIndex: firstHitIndex,
-        // keep loading true until final SET_SEARCH_RESULTS
-        loading: true,
-      }
-    }
-
-    case SET_SEARCH_RESULTS:
-      return {
-        ...state,
-        results: action.payload.results,
-        total: action.payload.total,
-        activeResultIndex: action.payload.activeResultIndex,
-        loading: false,
-      }
-
-    case SET_ACTIVE_RESULT_INDEX:
-      return { ...state, activeResultIndex: action.payload }
-
-    default:
-      return state
-  }
+export function setActiveResultIndex(
+  documentId: string,
+  index: number,
+): SetActiveResultIndexAction {
+  return { type: SET_ACTIVE_RESULT_INDEX, payload: { documentId, index } }
 }

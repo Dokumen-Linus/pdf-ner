@@ -1,21 +1,34 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useCapability, usePlugin } from "@embedpdf/core/react"
-import { SearchPlugin, SearchState } from "../lib"
-import { initialState } from "../lib/state"
+import { initialSearchDocumentState, SearchDocumentState, SearchPlugin, SearchScope } from "../lib"
 
 export const useSearchPlugin = () => usePlugin<SearchPlugin>(SearchPlugin.id)
 export const useSearchCapability = () => useCapability<SearchPlugin>(SearchPlugin.id)
 
-export const useSearch = () => {
+export const useSearch = (
+  documentId: string,
+): {
+  state: SearchDocumentState
+  provides: SearchScope | null
+} => {
   const { provides } = useSearchCapability()
-  const [searchState, setSearchState] = useState<SearchState>(initialState)
+  const [searchState, setSearchState] = useState<SearchDocumentState>(initialSearchDocumentState)
+
+  const scope = useMemo(() => provides?.forDocument(documentId), [provides, documentId])
 
   useEffect(() => {
-    return provides?.onStateChange((state) => setSearchState(state))
-  }, [provides])
+    if (!scope) {
+      setSearchState(initialSearchDocumentState)
+      return
+    }
+    // Set initial state
+    setSearchState(scope.getState())
+    // Subscribe to changes
+    return scope.onStateChange((state) => setSearchState(state))
+  }, [scope])
 
   return {
     state: searchState,
-    provides,
+    provides: scope ?? null,
   }
 }
