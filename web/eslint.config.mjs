@@ -1,10 +1,9 @@
-import typescriptEslintPlugin from "@typescript-eslint/eslint-plugin";
-import typescriptEslintParser from "@typescript-eslint/parser";
-import prettierConfig from "eslint-config-prettier";
-import importPlugin from "eslint-plugin-import";
-import reactPlugin from "eslint-plugin-react";
-import reactHooksPlugin from "eslint-plugin-react-hooks";
-
+import typescriptEslintPlugin from "@typescript-eslint/eslint-plugin"
+import typescriptEslintParser from "@typescript-eslint/parser"
+import prettierConfig from "eslint-config-prettier"
+import importPlugin from "eslint-plugin-import"
+import reactPlugin from "eslint-plugin-react"
+import reactHooksPlugin from "eslint-plugin-react-hooks"
 
 export default [
   {
