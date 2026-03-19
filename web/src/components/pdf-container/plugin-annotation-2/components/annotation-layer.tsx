@@ -1,27 +1,45 @@
-import { CSSProperties, HTMLAttributes } from "react"
+import { CSSProperties, HTMLAttributes, useMemo } from "react"
+import { useDocumentState } from "@embedpdf/core/react"
+import { Rotation } from "@embedpdf/models"
 import { Annotations } from "./annotations"
 import { TextMarkupPreview } from "./text-markup/preview"
+import type { SelectionOutline } from "./annotation-container/annotation-container"
 
 type AnnotationLayerProps = Omit<HTMLAttributes<HTMLDivElement>, "style"> & {
+  documentId: string
   pageIndex: number
-  scale: number
-  pageWidth: number
-  pageHeight: number
-  rotation: number
+  scale?: number;
+  rotation?: number
+  selectionOutline?: SelectionOutline
   style?: CSSProperties
-  selectionOutlineColor?: string
 }
 
 export function AnnotationLayer({
-  style,
+  documentId,
   pageIndex,
-  scale,
-  pageWidth,
-  pageHeight,
-  rotation,
-  selectionOutlineColor,
+  scale: overrideScale,
+  rotation: overrideRotation,
+  selectionOutline,
+  style,
   ...props
 }: AnnotationLayerProps) {
+  const documentState = useDocumentState(documentId)
+  const page = documentState?.document?.pages?.[pageIndex]
+
+  const actualScale = useMemo(() => {
+    if (overrideScale !== undefined) return overrideScale
+    return documentState?.scale ?? 1
+  }, [overrideScale, documentState?.scale])
+
+  const actualRotation = useMemo(() => {
+    if (overrideRotation !== undefined) return overrideRotation
+    // Combine page intrinsic rotation with document rotation
+    const pageRotation = page?.rotation ?? 0
+    const docRotation = documentState?.rotation ?? 0
+    return ((pageRotation + docRotation) % 4) as Rotation
+  }, [overrideRotation, page?.rotation, documentState?.rotation])
+
+
   return (
     <div
       style={{
@@ -30,15 +48,13 @@ export function AnnotationLayer({
       {...props}
     >
       <Annotations
+        documentId={documentId}
         pageIndex={pageIndex}
-        scale={scale}
-        rotation={rotation}
-        pageWidth={pageWidth}
-        pageHeight={pageHeight}
-        selectionOutlineColor={selectionOutlineColor}
-        data-testid="annotations"
+        scale={actualScale}
+        rotation={actualRotation}
+        selectionOutline={selectionOutline}
       />
-      <TextMarkupPreview pageIndex={pageIndex} scale={scale} data-testid="text-markup" />
+      <TextMarkupPreview documentId={documentId} pageIndex={pageIndex} scale={actualScale} />
     </div>
   )
 }

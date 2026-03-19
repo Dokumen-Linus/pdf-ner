@@ -7,15 +7,26 @@
   },
   "permissions": {
     "allow": [
-      "Bash(.venv/Scripts/python.exe*)",
-      "Bash(bun tsc:*)",
-      "Bash(bun run:*)",
-      "Bash(npm run:*)",
-      "Bash(curl:*)",
-      "Bash(npx @tanstack/router-cli:*)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "MultiEdit(*)",
+
+      "Bash(*)",
+
       "WebFetch(domain:github.com)",
+      "WebFetch(domain:bun.com)",
+      "WebFetch(domain:tanstack.com)",
+      "WebFetch(domain:docs.uploadthing.com)"
     ],
-    "deny": [],
+    "deny": [
+      "Bash(sudo:*)",
+      "Bash(rm -rf:*)",
+      "Bash(rm -fr:*)",
+
+      "Bash(git push)",
+      "Bash(git push:*)"
+    ],
     "ask": []
   }
 }
