@@ -1,33 +1,11 @@
-import { PdfAnnotationSubtype } from "@embedpdf/models"
-import type { TrackedAnnotation } from "./custom-types"
-
-// so consumers can use string instead of PdfAnnotationSubtype enum
-export type Subtype = "highlight" | "underline" | "squiggly" | "strikeout"
-
-// so plugin code can use the enum
-export function subtypeToEnum(subtype: Subtype): PdfAnnotationSubtype {
-  switch (subtype) {
-    case "highlight":
-      return PdfAnnotationSubtype.HIGHLIGHT
-    case "underline":
-      return PdfAnnotationSubtype.UNDERLINE
-    case "squiggly":
-      return PdfAnnotationSubtype.SQUIGGLY
-    case "strikeout":
-      return PdfAnnotationSubtype.STRIKEOUT
-  }
-}
+import type { Commit, PdfTextMarkupAnnotationObject, Subtype } from "./types"
 
 // ***PLUGIN STATE***
 export interface AnnotationState {
-  // page index -> annotation uids
-  byPage: Record<number, string[]>
-  // annotation uid -> tracked annotation object
-  byUid: Record<string, TrackedAnnotation>
-  // entity type -> annotation uids
-  byEntityType: Record<string, string[]>
+  documents: Record<string, AnnotationDocumentState>
+  activeDocumentId: string | null
+
   selectedUid: string | null
-  hasPendingChanges: boolean
   activeColor: string
   activeOpacity: number
   activeSubtype: Subtype | null
@@ -36,17 +14,33 @@ export interface AnnotationState {
   canRedo: boolean
 }
 
+export interface AnnotationDocumentState {
+  // annotation uid -> annotation object
+  byUid: Record<string, PdfTextMarkupAnnotationObject>
+  // page index -> annotation uids
+  byPage: Record<number, string[]>
+  // entity type -> annotation uids
+  byEntityType: Record<string, string[]>
+
+  pendingCommits: Commit[]
+}
+
 // ***INITIAL STATE***
 export const initialState: AnnotationState = {
-  byPage: {},
-  byUid: {},
-  byEntityType: {},
+  documents: {},
+  activeDocumentId: null,
   selectedUid: null,
-  hasPendingChanges: false,
   activeColor: "#FFCD45",
   activeOpacity: 0.5,
   activeSubtype: null,
   activeEntityType: "",
   canUndo: false,
   canRedo: false,
+}
+
+export const initialDocumentState: AnnotationDocumentState = {
+  byUid: {},
+  byPage: {},
+  byEntityType: {},
+  pendingCommits: [],
 }

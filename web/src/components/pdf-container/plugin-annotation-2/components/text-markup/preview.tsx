@@ -1,19 +1,20 @@
-import { useEffect, useState } from "react"
+import { type ReactElement, useEffect, useState } from "react"
 import { blendModeToCss, PdfAnnotationSubtype, PdfBlendMode, Rect } from "@embedpdf/models"
 import { useSelectionCapability } from "../../../plugin-selection-2"
 import { useAnnotationCapability } from "../../hooks"
-import { Subtype, subtypeToEnum } from "../../lib/state"
+import { Subtype, subtypeToEnum } from "../../lib/types"
 import { Highlight } from "./highlight"
 import { Squiggly } from "./squiggly"
 import { Strikeout } from "./strikeout"
 import { Underline } from "./underline"
 
 interface TextMarkupPreviewProps {
+  documentId: string
   pageIndex: number
   scale: number
 }
 
-export function TextMarkupPreview({ pageIndex, scale }: TextMarkupPreviewProps) {
+export function TextMarkupPreview({ documentId, pageIndex, scale }: TextMarkupPreviewProps) {
   const { provides: selectionProvides } = useSelectionCapability()
   const { provides: annotationProvides } = useAnnotationCapability()
   const [rects, setRects] = useState<Array<Rect>>([])
@@ -25,12 +26,12 @@ export function TextMarkupPreview({ pageIndex, scale }: TextMarkupPreviewProps) 
   useEffect(() => {
     if (!selectionProvides) return
 
-    const off = selectionProvides.onSelectionChange(() => {
-      setRects(selectionProvides.getHighlightRectsForPage(pageIndex))
-      setBoundingRect(selectionProvides.getBoundingRectForPage(pageIndex))
+    const off = selectionProvides.forDocument(documentId).onSelectionChange(() => {
+      setRects(selectionProvides.forDocument(documentId).getHighlightRectsForPage(pageIndex))
+      setBoundingRect(selectionProvides.forDocument(documentId).getBoundingRectForPage(pageIndex))
     })
     return off
-  }, [selectionProvides, pageIndex])
+  }, [selectionProvides, documentId, pageIndex])
 
   useEffect(() => {
     if (!annotationProvides) return
@@ -46,80 +47,36 @@ export function TextMarkupPreview({ pageIndex, scale }: TextMarkupPreviewProps) 
   if (!boundingRect) return null
   if (!activeSubtype) return null
 
-  switch (subtypeToEnum(activeSubtype)) {
+  const subtype = subtypeToEnum(activeSubtype)
+
+  let inner: ReactElement | null = null
+  switch (subtype) {
     case PdfAnnotationSubtype.UNDERLINE:
-      return (
-        <div
-          style={{
-            mixBlendMode: blendModeToCss(PdfBlendMode.Normal),
-            pointerEvents: "none",
-            position: "absolute",
-            inset: 0,
-          }}
-        >
-          <Underline
-            color={activeColor}
-            opacity={activeOpacity}
-            segmentRects={rects}
-            scale={scale}
-          />
-        </div>
-      )
+      inner = <Underline color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      break
     case PdfAnnotationSubtype.HIGHLIGHT:
-      return (
-        <div
-          style={{
-            mixBlendMode: blendModeToCss(PdfBlendMode.Multiply),
-            pointerEvents: "none",
-            position: "absolute",
-            inset: 0,
-          }}
-        >
-          <Highlight
-            color={activeColor}
-            opacity={activeOpacity}
-            segmentRects={rects}
-            scale={scale}
-          />
-        </div>
-      )
+      inner = <Highlight color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      break
     case PdfAnnotationSubtype.STRIKEOUT:
-      return (
-        <div
-          style={{
-            mixBlendMode: blendModeToCss(PdfBlendMode.Normal),
-            pointerEvents: "none",
-            position: "absolute",
-            inset: 0,
-          }}
-        >
-          <Strikeout
-            color={activeColor}
-            opacity={activeOpacity}
-            segmentRects={rects}
-            scale={scale}
-          />
-        </div>
-      )
+      inner = <Strikeout color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      break
     case PdfAnnotationSubtype.SQUIGGLY:
-      return (
-        <div
-          style={{
-            mixBlendMode: blendModeToCss(PdfBlendMode.Normal),
-            pointerEvents: "none",
-            position: "absolute",
-            inset: 0,
-          }}
-        >
-          <Squiggly
-            color={activeColor}
-            opacity={activeOpacity}
-            segmentRects={rects}
-            scale={scale}
-          />
-        </div>
-      )
+      inner = <Squiggly color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      break
     default:
       return null
   }
+
+  return (
+    <div
+      style={{
+        mixBlendMode: blendModeToCss(subtype === PdfAnnotationSubtype.HIGHLIGHT ? PdfBlendMode.Multiply : PdfBlendMode.Normal),
+        pointerEvents: "none",
+        position: "absolute",
+        inset: 0,
+      }}
+    >
+      {inner}
+    </div>
+  )
 }

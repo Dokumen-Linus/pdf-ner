@@ -14,7 +14,7 @@ interface CounterTransformResult {
  * transform-origin is expected to be "0 0".
  * left/top DO NOT change, apply them as-is.
  */
-export function getCounterRotation(rect: Rect, rotation: Rotation): CounterTransformResult {
+function getCounterRotation(rect: Rect, rotation: Rotation): CounterTransformResult {
   const { width: w, height: h } = rect.size
 
   switch (rotation % 4) {

@@ -1,4 +1,4 @@
-import { HTMLAttributes, ReactNode } from "react"
+import { CSSProperties, HTMLAttributes, ReactNode } from "react"
 import { Rotate } from "@embedpdf/plugin-rotate/react"
 
 type RotateWrapperProps = Omit<HTMLAttributes<HTMLDivElement>, "style"> & {
@@ -6,15 +6,16 @@ type RotateWrapperProps = Omit<HTMLAttributes<HTMLDivElement>, "style"> & {
   children: ReactNode
   documentId: string
   pageIndex: number
+  style?: CSSProperties
 }
 
-const RotateWrapper = ({ enabled, children, documentId, pageIndex }: RotateWrapperProps) => {
+const RotateWrapper = ({ enabled, children, documentId, pageIndex, style }: RotateWrapperProps) => {
   if (!enabled) {
     return <>{children}</>
   }
 
   return (
-    <Rotate documentId={documentId} pageIndex={pageIndex}>
+    <Rotate documentId={documentId} pageIndex={pageIndex} style={style}>
       {children}
     </Rotate>
   )

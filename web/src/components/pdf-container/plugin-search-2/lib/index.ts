@@ -17,7 +17,7 @@ export const SearchPluginPackage: PluginPackage<
   initialState,
 }
 
-export * from "./search-plugin"
+export { SearchPlugin } from "./search-plugin"
 export * from "./types"
 export * from "./manifest"
 export { initialState, initialSearchDocumentState }

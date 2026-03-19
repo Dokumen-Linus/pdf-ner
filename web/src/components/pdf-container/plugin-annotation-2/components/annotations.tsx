@@ -1,63 +1,48 @@
 import { MouseEvent, TouchEvent, useCallback, useEffect, useMemo, useState } from "react"
-import { blendModeToCss, PdfBlendMode } from "@embedpdf/models"
-import { PointerEventHandlers, usePointerHandlers } from "../../plugin-interaction-manager-2"
+import { blendModeToCss, PdfAnnotationSubtype, PdfBlendMode } from "@embedpdf/models"
+import { EmbedPdfPointerEvent, PointerEventHandlers, usePointerHandlers } from "../../plugin-interaction-manager-2"
 import { useSelectionCapability } from "../../plugin-selection-2"
 import { useAnnotationCapability } from "../hooks"
-import type { AnnotationState, TrackedAnnotation } from "../lib"
-import type { PdfTextMarkupAnnotationObject } from "../lib/pdf-text-markup-annotation-object"
-import { isHighlight, isSquiggly, isStrikeout, isUnderline } from "../lib/subtype-predicates"
-import { AnnotationContainter } from "./annotation-container"
+import type { AnnotationDocumentState } from "../lib/state"
+import type { PdfTextMarkupAnnotationObject } from "../lib/types"
+import { AnnotationContainer, SelectionOutline } from "./annotation-container/annotation-container"
 import { Highlight } from "./text-markup/highlight"
 import { Squiggly } from "./text-markup/squiggly"
 import { Strikeout } from "./text-markup/strikeout"
 import { Underline } from "./text-markup/underline"
 
-const getAnnotationsByPageIndex = (s: AnnotationState, page: number) =>
-  (s.byPage[page] ?? []).map(
-    (uid) => s.byUid[uid],
-  ) as TrackedAnnotation<PdfTextMarkupAnnotationObject>[]
-
-const getSelectedAnnotationByPageIndex = (
-  s: AnnotationState,
-  pageIndex: number,
-): TrackedAnnotation<PdfTextMarkupAnnotationObject> | null => {
-  if (!s.selectedUid) return null
-  const pageUids = s.byPage[pageIndex] ?? []
-  if (pageUids.includes(s.selectedUid)) {
-    return s.byUid[s.selectedUid] as TrackedAnnotation<PdfTextMarkupAnnotationObject>
-  }
-  return null
+function getAnnotationsByPageIndex(s: AnnotationDocumentState, page: number): PdfTextMarkupAnnotationObject[] {
+  return (s.byPage[page] ?? []).map((uid) => s.byUid[uid])
 }
 
 interface AnnotationsProps {
+  documentId: string
   pageIndex: number
   scale: number
   rotation: number
-  pageWidth: number
-  pageHeight: number
-  selectionOutlineColor?: string
+  selectionOutline?: SelectionOutline
 }
 
 export function Annotations(annotationsProps: AnnotationsProps) {
-  const { pageIndex, scale } = annotationsProps
+  const { documentId, pageIndex, scale, rotation, selectionOutline } = annotationsProps
   const { provides: annotationProvides } = useAnnotationCapability()
   const { provides: selectionProvides } = useSelectionCapability()
-  const [annotations, setAnnotations] = useState<TrackedAnnotation[]>([])
-  const { register } = usePointerHandlers({ pageIndex })
-  const [selectionState, setSelectionState] = useState<TrackedAnnotation | null>(null)
+  const [annotations, setAnnotations] = useState<PdfTextMarkupAnnotationObject[]>([])
+  const { register } = usePointerHandlers({ documentId, pageIndex })
+  const [selectedUid, setSelectedUid] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (annotationProvides) {
       annotationProvides.onStateChange((state) => {
-        setAnnotations(getAnnotationsByPageIndex(state, pageIndex))
-        setSelectionState(getSelectedAnnotationByPageIndex(state, pageIndex))
+        setAnnotations(getAnnotationsByPageIndex(state.documents[documentId], pageIndex))
+        setSelectedUid(state.selectedUid)
       })
     }
-  }, [annotationProvides, pageIndex])
+  }, [annotationProvides, documentId, pageIndex])
 
   const handlers = useMemo(
-    (): PointerEventHandlers<MouseEvent> => ({
+    (): PointerEventHandlers<EmbedPdfPointerEvent<MouseEvent>> => ({
       onPointerDown: (_, pe) => {
         // Only deselect if clicking directly on the layer (not on an annotation)
         if (pe.target === pe.currentTarget && annotationProvides) {
@@ -70,17 +55,17 @@ export function Annotations(annotationsProps: AnnotationsProps) {
   )
 
   const handleClick = useCallback(
-    (e: MouseEvent | TouchEvent, annotation: TrackedAnnotation) => {
+    (e: MouseEvent | TouchEvent, annotation: PdfTextMarkupAnnotationObject) => {
       e.stopPropagation()
       if (annotationProvides && selectionProvides) {
-        annotationProvides.selectAnnotation(annotation.object.id)
+        annotationProvides.selectAnnotation(annotation.id)
         selectionProvides.clear()
-        if (annotation.object.id !== editingId) {
+        if (annotation.id !== editingId) {
           setEditingId(null)
         }
       }
     },
-    [annotationProvides, selectionProvides, editingId, pageIndex],
+    [annotationProvides, selectionProvides, editingId],
   )
 
   useEffect(() => {
@@ -90,89 +75,36 @@ export function Annotations(annotationsProps: AnnotationsProps) {
   return (
     <>
       {annotations.map((annotation) => {
-        const isSelected = selectionState?.object.id === annotation.object.id
-
-        if (isUnderline(annotation)) {
-          return (
-            <AnnotationContainter
-              key={annotation.object.id}
-              trackedAnnotation={annotation}
-              isSelected={isSelected}
-              onSelect={(e) => handleClick(e, annotation)}
-              zIndex={0}
-              style={{
-                mixBlendMode: blendModeToCss(annotation.object.blendMode ?? PdfBlendMode.Normal),
-              }}
-              {...annotationsProps}
-            >
-              {(obj) => (
-                <Underline {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
-              )}
-            </AnnotationContainter>
-          )
-        }
-
-        if (isStrikeout(annotation)) {
-          return (
-            <AnnotationContainter
-              key={annotation.object.id}
-              trackedAnnotation={annotation}
-              isSelected={isSelected}
-              onSelect={(e) => handleClick(e, annotation)}
-              zIndex={0}
-              style={{
-                mixBlendMode: blendModeToCss(annotation.object.blendMode ?? PdfBlendMode.Normal),
-              }}
-              {...annotationsProps}
-            >
-              {(obj) => (
-                <Strikeout {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
-              )}
-            </AnnotationContainter>
-          )
-        }
-
-        if (isSquiggly(annotation)) {
-          return (
-            <AnnotationContainter
-              key={annotation.object.id}
-              trackedAnnotation={annotation}
-              isSelected={isSelected}
-              onSelect={(e) => handleClick(e, annotation)}
-              zIndex={0}
-              style={{
-                mixBlendMode: blendModeToCss(annotation.object.blendMode ?? PdfBlendMode.Normal),
-              }}
-              {...annotationsProps}
-            >
-              {(obj) => (
-                <Squiggly {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
-              )}
-            </AnnotationContainter>
-          )
-        }
-
-        if (isHighlight(annotation)) {
-          return (
-            <AnnotationContainter
-              key={annotation.object.id}
-              trackedAnnotation={annotation}
-              isSelected={isSelected}
-              onSelect={(e) => handleClick(e, annotation)}
-              zIndex={0}
-              style={{
-                mixBlendMode: blendModeToCss(annotation.object.blendMode ?? PdfBlendMode.Multiply),
-              }}
-              {...annotationsProps}
-            >
-              {(obj) => (
-                <Highlight {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
-              )}
-            </AnnotationContainter>
-          )
-        }
-
-        return null
+        return (
+          <AnnotationContainer
+            key={annotation.id}
+            annotation={annotation}
+            isSelected={selectedUid === annotation.id}
+            onSelect={(e) => handleClick(e, annotation)}
+            style={{
+              mixBlendMode: blendModeToCss(annotation.blendMode ?? (annotation.type === PdfAnnotationSubtype.HIGHLIGHT ? PdfBlendMode.Multiply : PdfBlendMode.Normal)),
+            }}
+            documentId={documentId}
+            scale={scale}
+            rotation={rotation}
+            selectionOutline={selectionOutline}
+          >
+            {(obj) => {
+              switch (obj.type) {
+                case PdfAnnotationSubtype.HIGHLIGHT:
+                  return <Highlight {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                case PdfAnnotationSubtype.SQUIGGLY:
+                  return <Squiggly {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                case PdfAnnotationSubtype.STRIKEOUT:
+                  return <Strikeout {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                case PdfAnnotationSubtype.UNDERLINE:
+                  return <Underline {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                default:
+                  return null
+              }
+            }}
+          </AnnotationContainer>
+        )
       })}
     </>
   )

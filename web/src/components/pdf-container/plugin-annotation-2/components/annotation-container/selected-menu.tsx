@@ -1,17 +1,19 @@
 import { Rect } from "@embedpdf/models"
-import type { MenuWrapperProps } from "@embedpdf/utils/react"
+import type { MenuWrapperProps } from "./counter-rotate"
 import { Trash2 } from "lucide-react"
 import { useAnnotationCapability } from "../../hooks"
-import type { TrackedAnnotation } from "../../lib"
+import type { PdfTextMarkupAnnotationObject } from "../../lib/types"
 
 interface SelectedMenuProps {
-  annotation: TrackedAnnotation
+  documentId: string
+  annotation: PdfTextMarkupAnnotationObject
   selected: boolean
   rect: Rect
   menuWrapperProps: MenuWrapperProps
 }
 
-export const AnnotationMenu = ({
+export const SelectedMenu = ({
+  documentId,
   annotation,
   menuWrapperProps,
   selected,
@@ -19,14 +21,10 @@ export const AnnotationMenu = ({
 }: SelectedMenuProps) => {
   const { provides: annotationCapability } = useAnnotationCapability()
 
-  const handleDeleteClick = () => {
-    annotationCapability?.deleteAnnotation(annotation.object.id)
-  }
-
   if (!selected) return null
 
   return (
-    <div {...menuWrapperProps} data-testid="annotation-menu">
+    <div {...menuWrapperProps}>
       <div
         className="flex flex-row gap-1 rounded-md border border-[#cfd4da] bg-[#f8f9fa] p-1 shadow-sm"
         style={{
@@ -36,10 +34,13 @@ export const AnnotationMenu = ({
           left: rect.size.width / 2,
           transform: "translateX(-50%)",
           marginTop: "3px",
+          zIndex: 2,
         }}
       >
         <button
-          onClick={handleDeleteClick}
+          onClick={() => {
+            annotationCapability?.deleteAnnotation(annotation.id, documentId)
+          }}
           className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-gray-200"
           title="Delete"
         >

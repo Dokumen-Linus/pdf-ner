@@ -136,13 +136,6 @@ const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
         </>
       )}
       <button
-        onClick={() => annoCapability?.exportAnnotationsToJSON?.()}
-        className="rounded-md bg-blue-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-blue-600"
-        title="Export Annotations to JSON"
-      >
-        Export JSON
-      </button>
-      <button
         onClick={() => exportCapability?.download()}
         disabled={!exportCapability}
         className="rounded-md bg-green-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-300"
@@ -157,13 +150,6 @@ const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
         title="Delete Selected Annotation"
       >
         <Trash2 size={18} />
-      </button>
-      <button
-        onClick={() => annoCapability?.clearAnnotations()}
-        className="rounded-md bg-red-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-red-600"
-        title="Clear All Annotations"
-      >
-        Clear All
       </button>
       <button
         onClick={() => {

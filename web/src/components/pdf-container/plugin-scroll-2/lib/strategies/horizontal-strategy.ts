@@ -22,6 +22,7 @@ export class HorizontalScrollStrategy extends BaseScrollStrategy {
           height: page.size.height,
           rotatedWidth: page.rotatedSize.width,
           rotatedHeight: page.rotatedSize.height,
+          elevated: false,
         }
         pageX += page.rotatedSize.width + this.pageGap
         return layout

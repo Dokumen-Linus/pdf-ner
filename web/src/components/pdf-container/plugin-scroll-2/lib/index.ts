@@ -17,7 +17,7 @@ export const ScrollPluginPackage: PluginPackage<
   initialState: (coreState, config) => initialState(coreState, config),
 }
 
-export * from "./scroll-plugin"
+export { ScrollPlugin } from "./scroll-plugin"
 export * from "./types"
 export * from "./manifest"
 export * from "./types/virtual-item"

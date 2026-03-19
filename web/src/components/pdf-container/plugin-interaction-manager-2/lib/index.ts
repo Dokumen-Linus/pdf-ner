@@ -18,7 +18,7 @@ export const InteractionManagerPluginPackage: PluginPackage<
   initialState,
 }
 
-export * from "./interaction-manager-plugin"
+export { InteractionManagerPlugin } from "./interaction-manager-plugin"
 export * from "./types"
 export * from "./manifest"
 export * from "./reducer"

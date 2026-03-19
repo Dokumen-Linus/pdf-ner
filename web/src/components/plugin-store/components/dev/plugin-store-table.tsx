@@ -5,15 +5,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../shadcn-ui/table"
-import usePluginStore from "../hooks/use-plugin-store"
+} from "../../../shadcn-ui/table"
+import usePluginStore from "../../hooks/use-plugin-store"
 
 // table to view store values in testing
 export default function PluginStoreTable() {
-  const {
-    annoCapability,
-    annoState, // selectCapability, scrollCapability
-  } = usePluginStore()
+  const { annoCapability, annoState, selectCapability, scrollCapability } = usePluginStore()
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
@@ -38,7 +35,7 @@ export default function PluginStoreTable() {
               </span>
             </TableCell>
           </TableRow>
-          {/* <TableRow>
+          <TableRow>
             <TableCell className="font-medium">selectCapability Active</TableCell>
             <TableCell>
               <span
@@ -61,7 +58,7 @@ export default function PluginStoreTable() {
                 {scrollCapability ? "Yes" : "No"}
               </span>
             </TableCell>
-          </TableRow> */}
+          </TableRow>
           <TableRow>
             <TableCell className="font-medium">Active Subtype</TableCell>
             <TableCell>

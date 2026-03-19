@@ -17,7 +17,7 @@ export const SelectionPluginPackage: PluginPackage<
   initialState,
 }
 
-export * from "./selection-plugin"
+export { SelectionPlugin } from "./selection-plugin"
 export * from "./types"
 export * from "./manifest"
 export * from "./utils"

@@ -1,7 +1,6 @@
 import { BasePlugin, createBehaviorEmitter, DocumentState, Listener, PluginRegistry, SET_PAGES, Unsubscribe } from '@embedpdf/core';
 import { PdfPageObjectWithRotatedSize, Rect, Rotation, transformSize } from '@embedpdf/models';
 import { InteractionManagerPlugin } from '@embedpdf/plugin-interaction-manager';
-import { SpreadCapability, SpreadPlugin } from '@embedpdf/plugin-spread';
 import { ViewportCapability, ViewportMetrics, ViewportPlugin } from '@embedpdf/plugin-viewport';
 import { cleanupScrollState, initScrollState, ScrollAction, setScrollStrategy, updateDocumentScrollState } from './actions';
 import { defaultPageChangeState } from './reducer';
@@ -22,7 +21,6 @@ export class ScrollPlugin extends BasePlugin<
   static readonly id = 'scroll' as const;
 
   private viewport: ViewportCapability;
-  private spread: SpreadCapability | null;
 
   // Elevated pages per document (derived from InteractionManager page activity)
   private elevatedPages = new Map<string, Set<number>>();
@@ -58,7 +56,6 @@ export class ScrollPlugin extends BasePlugin<
     super(id, registry);
 
     this.viewport = this.registry.getPlugin<ViewportPlugin>('viewport')!.provides();
-    this.spread = this.registry.getPlugin<SpreadPlugin>('spread')?.provides() ?? null;
 
     // Subscribe to viewport scroll activity (per document)
     this.viewport.onScrollActivity((event) => {
@@ -68,14 +65,10 @@ export class ScrollPlugin extends BasePlugin<
       }
     });
 
-    this.spread?.onSpreadChange((event) => {
-      this.refreshDocumentLayout(event.documentId);
-    });
-
     // Subscribe to page activity changes from the interaction manager (optional)
     const im = this.registry.getPlugin<InteractionManagerPlugin>('interaction-manager')?.provides();
-    if (im) {
-      im.onPageActivityChange((event) => {
+    if (im && 'onPageActivityChange' in im && typeof im.onPageActivityChange === 'function') {
+      (im.onPageActivityChange as (listener: (event: { documentId: string; pageIndex: number; hasActivity: boolean }) => void) => void)((event: { documentId: string; pageIndex: number; hasActivity: boolean }) => {
         let pages = this.elevatedPages.get(event.documentId);
         if (event.hasActivity) {
           if (!pages) {
@@ -524,10 +517,7 @@ export class ScrollPlugin extends BasePlugin<
     const coreDoc = this.coreState.core.documents[id];
     if (!coreDoc) throw new Error(`Document ${id} not loaded`);
 
-    const spreadPages =
-      this.spread?.forDocument(id).getSpreadPages() ||
-      coreDoc.document?.pages.map((page) => [page]) ||
-      [];
+    const spreadPages = coreDoc.document?.pages.map((page) => [page]) || [];
 
     return spreadPages.map((spread) =>
       spread.map((page) => {

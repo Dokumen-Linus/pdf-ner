@@ -5,7 +5,7 @@ import type {
   InteractionManagerCapability,
   InteractionScope,
   PointerEventHandlers,
-} from "@embedpdf/plugin-interaction-manager"
+} from "../lib"
 
 /* -------------------------------------------------- */
 /* event → handler key lookup                         */

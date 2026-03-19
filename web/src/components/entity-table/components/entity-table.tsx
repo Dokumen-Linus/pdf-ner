@@ -29,7 +29,7 @@ const EntityTable = () => {
   // **IMPORTANT**
   // annoState contains the whole AnnotationState
   // annoState?.byEntityType gives ET name -> array of UIDs of annotations
-  // annoState?.byUid[uid].object.contents - text of annotation
+  // annoState?.byUid[uid].contents - text of annotation
   const { annoState, annoCapability } = usePluginStore()
 
   // entityTypesByName is a record of name -> EntityType
@@ -70,10 +70,11 @@ const EntityTable = () => {
       </TableHeader>
       <TableBody>
         {Object.entries(entityTypesByName).map(([name, entityType]) => {
-          const annotationUids = annoState?.byEntityType?.[name] || []
+          const activeDoc = annoState?.activeDocumentId ? annoState.documents[annoState.activeDocumentId] : null
+          const annotationUids = activeDoc?.byEntityType?.[name] || []
           const firstUid = annotationUids[0]
-          const annotation = firstUid ? annoState?.byUid?.[firstUid] : null
-          const annotationText = annotation?.object.contents || ""
+          const annotation = firstUid ? activeDoc?.byUid?.[firstUid] : null
+          const annotationText = annotation?.contents || ""
           const isActive = annoState?.activeEntityType === name
 
           return (
@@ -93,7 +94,8 @@ const EntityTable = () => {
                       })
                     }
                     // use PluginStore to change existing annotations of this ET
-                    const annoIds = annoState?.byEntityType?.[name] || []
+                    const activeDoc = annoState?.activeDocumentId ? annoState.documents[annoState.activeDocumentId] : null
+                    const annoIds = activeDoc?.byEntityType?.[name] || []
                     annoCapability?.updateAnnotations(
                       annoIds.map((id) => ({
                         id,
@@ -138,7 +140,8 @@ const EntityTable = () => {
                       })
                     }
                     // use PluginStore to change existing annotations of this ET
-                    const annoIds = annoState?.byEntityType?.[name] || []
+                    const activeDoc = annoState?.activeDocumentId ? annoState.documents[annoState.activeDocumentId] : null
+                    const annoIds = activeDoc?.byEntityType?.[name] || []
                     annoCapability?.updateAnnotations(
                       annoIds.map((id) => ({
                         id,
