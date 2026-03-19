@@ -7,18 +7,27 @@ import { users } from "@/db/schemas/web/users"
 // ** CREATE **
 export const CreateUserSchema = z.object({
   email: z.email(),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  employer: z.string().optional(),
-  jobTitle: z.string().optional(),
-  avatarUrl: z.string().optional(),
+  displayName: z.string().nullable().optional(),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  employer: z.string().nullable().optional(),
+  jobTitle: z.string().nullable().optional(),
+  avatarUrl: z.string().nullable().optional(),
 })
 
 export const createUser = createServerFn({ method: "POST" })
   .inputValidator(CreateUserSchema)
   .handler(async ({ data }) => {
-    const [user] = await db.insert(users).values(data).returning({ id: users.id })
-    return { id: user.id }
+    try {
+      const [user] = await db.insert(users).values(data).returning({ id: users.id })
+      return { id: user.id }
+    } catch (error) {
+      console.error("createUser failed", {
+        email: data.email,
+        error,
+      })
+      throw new Error("Failed to create user profile")
+    }
   })
 
 // ** READ **

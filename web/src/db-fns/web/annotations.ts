@@ -37,7 +37,7 @@ export const getAnnotationById = createServerFn({ method: "GET" })
     if (annotation.length === 0) {
       throw new Error("Annotation not found")
     }
-    return annotation[0] as any
+    return annotation[0]
   })
 
 export const getAnnotationsByPdfId = createServerFn({ method: "GET" })
@@ -47,7 +47,7 @@ export const getAnnotationsByPdfId = createServerFn({ method: "GET" })
       .select()
       .from(annotations)
       .where(eq(annotations.pdfId, data.pdfId))
-    return pdfAnnotations as any
+    return pdfAnnotations
   })
 
 export const getAnnotationsBySubtype = createServerFn({ method: "GET" })
@@ -57,7 +57,7 @@ export const getAnnotationsBySubtype = createServerFn({ method: "GET" })
       .select()
       .from(annotations)
       .where(eq(annotations.subtype, data.subtype))
-    return subtypeAnnotations as any
+    return subtypeAnnotations
   })
 
 // ** UPDATE **

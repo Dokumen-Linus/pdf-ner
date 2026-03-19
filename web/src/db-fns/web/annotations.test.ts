@@ -10,6 +10,16 @@ import {
 
 const runTests = process.env.TEST_DB === "true"
 
+type AnnotationRecord = {
+  id: string
+  pdfId: string
+  subtype: string
+  pageIndex: number
+  color: string | null
+  opacity: number | null
+  contents: string | null
+}
+
 describe.if(runTests)("Annotation Table Server Functions", () => {
   const testPdfId = "00000000-0000-0000-0000-000000000001"
   const testSubtype = "highlight"
@@ -19,6 +29,7 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
   it("should handle the full annotation lifecycle (CRUD)", async () => {
     // --- CREATE ---
     const createInput = {
+      id: crypto.randomUUID(),
       pdfId: testPdfId,
       subtype: testSubtype,
       rect: testRect,
@@ -33,12 +44,14 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
     expect(createOutput.id).toBeUuid()
 
     // --- READ (by pdfId and subtype to get the created annotation) ---
-    const annotationsForLookup = await getAnnotationsByPdfId({ data: { pdfId: testPdfId } })
+    const annotationsForLookup = (await getAnnotationsByPdfId({
+      data: { pdfId: testPdfId },
+    })) as AnnotationRecord[]
     expect(annotationsForLookup).toBeDefined()
     expect(annotationsForLookup.length).toBeGreaterThan(0)
 
     const createdAnnotation = annotationsForLookup.find(
-      (ann: any) => ann.subtype === testSubtype && ann.contents === "Test annotation",
+      (ann) => ann.subtype === testSubtype && ann.contents === "Test annotation",
     )
     expect(createdAnnotation).toBeDefined()
     expect(createdAnnotation!.pdfId).toBe(testPdfId)
@@ -46,19 +59,23 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
     const annotationId = createdAnnotation!.id
 
     // --- READ (by id) ---
-    const annotationById = await getAnnotationById({ data: { id: annotationId } })
+    const annotationById = (await getAnnotationById({ data: { id: annotationId } })) as AnnotationRecord
     expect(annotationById).toBeDefined()
     expect(annotationById.pdfId).toBe(testPdfId)
     expect(annotationById.subtype).toBe(testSubtype)
 
     // --- READ (by pdfId) ---
-    const annotationsByPdfId = await getAnnotationsByPdfId({ data: { pdfId: testPdfId } })
+    const annotationsByPdfId = (await getAnnotationsByPdfId({
+      data: { pdfId: testPdfId },
+    })) as AnnotationRecord[]
     expect(annotationsByPdfId).toBeDefined()
     expect(annotationsByPdfId.length).toBeGreaterThan(0)
     expect(annotationsByPdfId[0].pdfId).toBe(testPdfId)
 
     // --- READ (by subtype) ---
-    const annotationsBySubtype = await getAnnotationsBySubtype({ data: { subtype: testSubtype } })
+    const annotationsBySubtype = (await getAnnotationsBySubtype({
+      data: { subtype: testSubtype },
+    })) as AnnotationRecord[]
     expect(annotationsBySubtype).toBeDefined()
     expect(annotationsBySubtype.length).toBeGreaterThan(0)
     expect(annotationsBySubtype[0].subtype).toBe(testSubtype)
@@ -73,7 +90,9 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
     const updateOutput = await updateAnnotation({ data: updateInput })
     expect(updateOutput.success).toBe(true)
 
-    const updatedAnnotation = await getAnnotationById({ data: { id: annotationId } })
+    const updatedAnnotation = (await getAnnotationById({
+      data: { id: annotationId },
+    })) as AnnotationRecord
     expect(updatedAnnotation.color).toBe("#ff0000")
     expect(updatedAnnotation.opacity).toBe(0.8)
     expect(updatedAnnotation.contents).toBe("Updated annotation")

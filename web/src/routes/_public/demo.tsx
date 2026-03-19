@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
-import EntityTable from "../../components/entity-table/components/entity-table"
-import PDFContainer from "../../components/pdf-container/pdf-container"
+import EntityTable from "@/components/entity-table/components/entity-table"
+import PDFContainer from "@/components/pdf-container/pdf-container"
 
 export const Route = createFileRoute("/_public/demo")({
   component: DemoPage,
@@ -9,8 +9,6 @@ export const Route = createFileRoute("/_public/demo")({
 function DemoPage() {
   return (
     <div className="flex flex-row h-screen w-full gap-4 p-4">
-      {/* <PluginStoreTable /> */}
-      {/* <SaveLabelsButton /> */}
       <div className="flex-1 h-full">
         <PDFContainer
           initalDocuments={[
@@ -20,6 +18,7 @@ function DemoPage() {
           ]}
           exportName="labeled_2025-19982_first_page.pdf"
           author="anonymous"
+          canRotate={false}
         />
       </div>
       <div className="w-1/3 min-w-75 h-full overflow-auto">

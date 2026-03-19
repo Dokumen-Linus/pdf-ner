@@ -5,11 +5,18 @@ import { Pool } from "pg";
 import { env } from "../env.server"
 import { resendClient } from "../integrations/resend"
 
+const trustedOrigins = [
+  env.BETTER_AUTH_URL,
+  process.env.BASE_URL,
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+].filter((origin): origin is string => Boolean(origin))
 
 export const auth = betterAuth({
   database: new Pool({
     connectionString: env.AUTH_DATABASE_URL,
   }),
+  trustedOrigins,
   advancedOptions: {
     modelName: {
       user: "auth.user",

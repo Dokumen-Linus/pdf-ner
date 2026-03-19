@@ -54,13 +54,9 @@ function SignUpPage() {
               jobTitle: value.jobTitle || undefined,
             },
           })
-        } catch (_e) {
-          try {
-            await deleteUserByEmail({ data: { email: value.email } })
-          } catch (_e) {}
-
+        } catch (_error) {
           return {
-            form: "Account created but failed to set up profile. Please contact support.",
+            form: "We couldn't complete sign up right now. Please try again.",
           }
         }
 
@@ -93,8 +89,8 @@ function SignUpPage() {
           <CardHeader>
             <CardTitle className="text-2xl">Check your email</CardTitle>
             <CardDescription>
-              We've sent a verification link to your email address. Please click the link to verify
-              your account.
+              We&apos;ve sent a verification link to your email address. Please click the link to
+              verify your account.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -105,7 +101,7 @@ function SignUpPage() {
               <Button className="w-full">Go to Sign In</Button>
             </Link>
             <p className="text-xs text-muted-foreground text-center mt-2">
-              After verifying your email and signing in, you'll be redirected to your profile.
+              After verifying your email and signing in, you&apos;ll be redirected to your profile.
             </p>
           </CardContent>
         </Card>
@@ -213,7 +209,7 @@ function SignUpPage() {
                 },
                 onChangeAsync: async ({ value }) => {
                   try {
-                    const user = await getUserByEmail(value as any)
+                    const user = await getUserByEmail({ data: { email: value } })
                     if (user) return "An account already exists with this email"
                   } catch (_e) {}
                 },

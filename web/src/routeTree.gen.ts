@@ -13,6 +13,7 @@ import { Route as PublicRouteImport } from './routes/_public'
 import { Route as PrivateRouteImport } from './routes/_private'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
 import { Route as PublicDemoRouteImport } from './routes/_public/demo'
 import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
 import { Route as PrivateCreateProjectRouteImport } from './routes/_private/create-project'
@@ -37,6 +38,11 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PublicRoute,
+} as any)
+const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
+  id: '/api/uploadthing',
+  path: '/api/uploadthing',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PublicDemoRoute = PublicDemoRouteImport.update({
   id: '/demo',
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/create-project': typeof PrivateCreateProjectRoute
   '/profile': typeof PrivateProfileRoute
   '/demo': typeof PublicDemoRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/create-project': typeof PrivateCreateProjectRoute
   '/profile': typeof PrivateProfileRoute
   '/demo': typeof PublicDemoRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/_private/create-project': typeof PrivateCreateProjectRoute
   '/_private/profile': typeof PrivateProfileRoute
   '/_public/demo': typeof PublicDemoRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
   '/_public/': typeof PublicIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/create-project'
     | '/profile'
     | '/demo'
+    | '/api/uploadthing'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/create-project'
     | '/profile'
     | '/demo'
+    | '/api/uploadthing'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/_private/create-project'
     | '/_private/profile'
     | '/_public/demo'
+    | '/api/uploadthing'
     | '/_public/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -148,6 +160,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   PrivateRoute: typeof PrivateRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
+  ApiUploadthingRoute: typeof ApiUploadthingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
+    }
+    '/api/uploadthing': {
+      id: '/api/uploadthing'
+      path: '/api/uploadthing'
+      fullPath: '/api/uploadthing'
+      preLoaderRoute: typeof ApiUploadthingRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_public/demo': {
       id: '/_public/demo'
@@ -277,6 +297,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   PrivateRoute: PrivateRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
+  ApiUploadthingRoute: ApiUploadthingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

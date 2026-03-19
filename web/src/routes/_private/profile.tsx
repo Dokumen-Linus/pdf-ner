@@ -1,265 +1,693 @@
-import { useEffect, useRef, useState } from "react"
-import { createFileRoute } from "@tanstack/react-router"
-import { EditIcon, RefreshCwIcon, SaveIcon, XIcon } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useForm } from "@tanstack/react-form"
+import { createFileRoute, useRouter } from "@tanstack/react-router"
+import { EditIcon, LoaderCircleIcon, SaveIcon, Trash2Icon, XIcon } from "lucide-react"
+import { z } from "zod"
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/shadcn-ui/alert-dialog"
 import { Button } from "@/components/shadcn-ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn-ui/card"
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
+import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { getUserByEmail, updateUser } from "@/db-fns/web/users"
-import { authClient } from "@/lib/auth-client"
+import { UploadButton } from "@/integrations/uploadthing/components-hooks"
+
+type ProfileUser = Awaited<ReturnType<typeof getUserByEmail>>
+
+type ProfileFormValues = {
+  displayName: string
+  firstName: string
+  lastName: string
+  employer: string
+  jobTitle: string
+  avatarUrl: string
+}
+
+const ProfileFormSchema = z.object({
+  displayName: z.string().trim().max(120, "Display name must be 120 characters or fewer"),
+  firstName: z.string().trim().max(120, "First name must be 120 characters or fewer"),
+  lastName: z.string().trim().max(120, "Last name must be 120 characters or fewer"),
+  employer: z.string().trim().max(160, "Company must be 160 characters or fewer"),
+  jobTitle: z.string().trim().max(160, "Title must be 160 characters or fewer"),
+  avatarUrl: z
+    .string()
+    .trim()
+    .max(2048, "Avatar URL is too long")
+    .refine((value) => value.length === 0 || URL.canParse(value), "Avatar URL must be a valid URL"),
+})
+
+const EMPTY_PROFILE_FORM_VALUES: ProfileFormValues = {
+  displayName: "",
+  firstName: "",
+  lastName: "",
+  employer: "",
+  jobTitle: "",
+  avatarUrl: "",
+}
+
+const toFormValues = (user: ProfileUser): ProfileFormValues => ({
+  displayName: user.displayName ?? "",
+  firstName: user.firstName ?? "",
+  lastName: user.lastName ?? "",
+  employer: user.employer ?? "",
+  jobTitle: user.jobTitle ?? "",
+  avatarUrl: user.avatarUrl ?? "",
+})
+
+const toNullable = (value: string) => {
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : null
+}
+
+const getEmailPrefix = (email: string) => {
+  const prefix = email.split("@")[0] ?? ""
+  return prefix.trim()
+}
+
+const getLegacyName = (user: ProfileUser) => {
+  if (user.displayName?.trim()) return user.displayName.trim()
+  const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+  if (fullName) return fullName
+  const emailPrefix = getEmailPrefix(user.email)
+  if (emailPrefix) return emailPrefix
+  return "User"
+}
+
+const getInitials = (label: string) => {
+  const words = label.trim().split(/\s+/).filter(Boolean)
+  if (words.length === 0) return "U"
+  if (words.length === 1) return words[0]?.charAt(0).toUpperCase() || "U"
+  return `${words[0]?.charAt(0) ?? ""}${words[1]?.charAt(0) ?? ""}`.toUpperCase()
+}
+
+const getGeneratedAvatarUrl = (seed: string) =>
+  `https://avatar.vercel.sh/${encodeURIComponent(seed)}?size=192`
+
+const toUserLoadErrorMessage = (error: unknown) => {
+  const rawMessage = error instanceof Error ? error.message : String(error ?? "")
+  const message = rawMessage.toLowerCase()
+
+  if (message.includes("failed query")) {
+    return "We couldn't load your profile due to a temporary server issue. Please try again in a moment."
+  }
+
+  if (message.includes("user not found")) {
+    return "We couldn't find your profile yet. If you just signed up, refresh and try again."
+  }
+
+  return "We couldn't load your profile right now. Please try again."
+}
+
+const toUserSaveErrorMessage = (error: unknown) => {
+  const rawMessage = error instanceof Error ? error.message : String(error ?? "")
+  const message = rawMessage.toLowerCase()
+
+  if (message.includes("failed query")) {
+    return "We couldn't save your profile due to a temporary server issue. Please try again."
+  }
+
+  if (message.includes("user not found")) {
+    return "Your account could not be found while saving. Please sign out and sign back in."
+  }
+
+  return "We couldn't save your changes. Please review your inputs and try again."
+}
+
+const toUserUploadErrorMessage = (error: { message?: string } | unknown) => {
+  const rawMessage =
+    typeof error === "object" && error && "message" in error && typeof error.message === "string"
+      ? error.message
+      : String(error ?? "")
+  const message = rawMessage.toLowerCase()
+
+  if (message.includes("filesizemismatch") || message.includes("2mb")) {
+    return "That file is too large. Please upload an image smaller than 2MB."
+  }
+
+  if (message.includes("file count") || message.includes("maxfilecount")) {
+    return "Please upload only one image file."
+  }
+
+  if (message.includes("file type") || message.includes("invalid type")) {
+    return "That file type is not supported. Please upload a JPG, PNG, GIF, WEBP, or similar image."
+  }
+
+  if (message.includes("network") || message.includes("fetch")) {
+    return "Upload failed due to a network issue. Please check your connection and try again."
+  }
+
+  return "We couldn't upload that file. Please choose a valid image under 2MB and try again."
+}
+
+function ProfilePageSkeleton() {
+  return (
+    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="space-y-2">
+        <Skeleton className="h-9 w-40" />
+        <Skeleton className="h-5 w-72" />
+      </div>
+      <Card>
+        <CardContent className="grid gap-0 p-0 lg:grid-cols-[280px_1fr]">
+          <div className="space-y-6 border-b p-6 lg:border-b-0 lg:border-r">
+            <Skeleton className="h-24 w-24 rounded-full" />
+            <div className="space-y-3">
+              <Skeleton className="h-6 w-40" />
+              <Skeleton className="h-4 w-52" />
+            </div>
+          </div>
+          <div className="space-y-4 p-6">
+            <Skeleton className="h-9 w-28" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full sm:col-span-2" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
 export const Route = createFileRoute("/_private/profile")({
+  loader: async ({ context }) => {
+    try {
+      const email = context.session?.user?.email
+      if (!email) {
+        return { user: null, loadError: "No authenticated session was found." }
+      }
+      const user = await getUserByEmail({ data: { email } })
+      return { user, loadError: null as string | null }
+    } catch (error) {
+      const message = toUserLoadErrorMessage(error)
+      return { user: null, loadError: message }
+    }
+  },
+  pendingComponent: ProfilePageSkeleton,
   component: ProfilePage,
 })
 
 function ProfilePage() {
-  const { data: session, isPending: isSessionLoading } = authClient.useSession()
-  const [user, setUser] = useState<{
-    id: string
-    email: string
-    firstName: string | null
-    lastName: string | null
-    employer: string | null
-    jobTitle: string | null
-  } | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+  const { user: loadedUser, loadError } = Route.useLoaderData()
+  const [profile, setProfile] = useState<ProfileUser | null>(loadedUser)
   const [isEditing, setIsEditing] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const initialSeed = useRef(Math.random())
-  const [avatarSeed, setAvatarSeed] = useState(initialSeed.current)
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    employer: "",
-    jobTitle: "",
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false)
+  const [uploadFailure, setUploadFailure] = useState<string | null>(null)
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
+
+  useEffect(() => {
+    setProfile(loadedUser)
+  }, [loadedUser])
+
+  const form = useForm({
+    defaultValues: profile ? toFormValues(profile) : EMPTY_PROFILE_FORM_VALUES,
+    validators: {
+      onSubmit: ({ value }) => {
+        const result = ProfileFormSchema.safeParse(value)
+        if (result.success) return undefined
+        const flat = result.error.flatten()
+        return {
+          form: flat.formErrors[0] ?? "Please review the form values.",
+          fields: {
+            displayName: flat.fieldErrors.displayName?.[0],
+            firstName: flat.fieldErrors.firstName?.[0],
+            lastName: flat.fieldErrors.lastName?.[0],
+            employer: flat.fieldErrors.employer?.[0],
+            jobTitle: flat.fieldErrors.jobTitle?.[0],
+            avatarUrl: flat.fieldErrors.avatarUrl?.[0],
+          },
+        }
+      },
+      onSubmitAsync: async ({ value }) => {
+        if (!profile) {
+          return { form: "Unable to save because the profile is unavailable." }
+        }
+
+        const validated = ProfileFormSchema.safeParse(value)
+        if (!validated.success) {
+          return { form: "Please fix the highlighted fields." }
+        }
+
+        try {
+          await updateUser({
+            data: {
+              id: profile.id,
+              displayName: toNullable(validated.data.displayName),
+              firstName: toNullable(validated.data.firstName),
+              lastName: toNullable(validated.data.lastName),
+              employer: toNullable(validated.data.employer),
+              jobTitle: toNullable(validated.data.jobTitle),
+              avatarUrl: toNullable(validated.data.avatarUrl),
+            },
+          })
+
+          setProfile({
+            ...profile,
+            displayName: toNullable(validated.data.displayName),
+            firstName: toNullable(validated.data.firstName),
+            lastName: toNullable(validated.data.lastName),
+            employer: toNullable(validated.data.employer),
+            jobTitle: toNullable(validated.data.jobTitle),
+            avatarUrl: toNullable(validated.data.avatarUrl),
+          })
+          setSaveError(null)
+          setIsEditing(false)
+          return null
+        } catch (error) {
+          return {
+            form: toUserSaveErrorMessage(error),
+          }
+        }
+      },
+    },
   })
 
   useEffect(() => {
-    async function fetchUser() {
-      if (isSessionLoading || !session?.user?.email) return
+    if (!profile) return
+    form.reset(toFormValues(profile))
+    setSaveError(null)
+    setAvatarLoadFailed(false)
+    setUploadFailure(null)
+  }, [form, profile])
 
-      setIsLoading(true)
-      setError(null)
-
-      try {
-        const userData = await getUserByEmail({ data: { email: session.user.email } })
-        setUser(userData)
-        setFormData({
-          firstName: userData.firstName || "",
-          lastName: userData.lastName || "",
-          employer: userData.employer || "",
-          jobTitle: userData.jobTitle || "",
-        })
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load user data")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    void fetchUser()
-  }, [session?.user?.email, isSessionLoading])
-
-  const getInitials = () => {
-    const first = formData.firstName?.charAt(0) || ""
-    const last = formData.lastName?.charAt(0) || ""
-    return (first + last).toUpperCase() || "U"
-  }
-
-  const getAvatarUrl = () => {
-    const seed = `${formData.firstName}-${formData.lastName}-${avatarSeed}`
-    return `https://avatar.vercel.sh/${encodeURIComponent(seed)}?size=80`
-  }
-
-  const regenerateAvatar = () => {
-    setAvatarSeed(Math.random())
-  }
-
-  const handleSave = async () => {
-    if (!user) return
-
-    setIsSaving(true)
-    try {
-      await updateUser({
-        data: {
-          id: user.id,
-          firstName: formData.firstName || undefined,
-          lastName: formData.lastName || undefined,
-          employer: formData.employer || undefined,
-          jobTitle: formData.jobTitle || undefined,
-        },
-      })
-      setUser({
-        ...user,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        employer: formData.employer,
-        jobTitle: formData.jobTitle,
-      })
-      setIsEditing(false)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update profile")
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const handleCancel = () => {
-    setFormData({
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-      employer: user?.employer || "",
-      jobTitle: user?.jobTitle || "",
-    })
-    setIsEditing(false)
-  }
-
-  if (isSessionLoading || isLoading) {
+  if (loadError) {
     return (
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-        <p className="text-gray-600 mt-2">Loading...</p>
+      <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 sm:px-6">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-semibold tracking-tight">Profile</h1>
+          <p className="text-sm text-muted-foreground">We could not load your profile right now.</p>
+        </div>
+        <Card className="border-destructive/40">
+          <CardHeader>
+            <CardTitle className="text-destructive">Something went wrong</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">{loadError}</p>
+            <Button onClick={() => void router.invalidate()}>Try again</Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
-  if (error) {
+  if (!profile) {
     return (
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-        <p className="text-red-600 mt-2">{error}</p>
+      <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 sm:px-6">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-semibold tracking-tight">Profile</h1>
+          <p className="text-sm text-muted-foreground">
+            We could not find profile details for this account.
+          </p>
+        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <Button onClick={() => void router.invalidate()}>Reload profile</Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
-  if (!user) {
-    return (
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-        <p className="text-gray-600 mt-2">Failed to load user data</p>
-      </div>
-    )
-  }
+  const fallbackDisplayName = getLegacyName(profile)
+  const activeDisplayName = form.state.values.displayName.trim() || fallbackDisplayName
+  const activeAvatarUrl = form.state.values.avatarUrl.trim()
+  const generatedSeed = `${activeDisplayName}-${profile.email}`.toLowerCase()
+  const generatedAvatarUrl = getGeneratedAvatarUrl(generatedSeed)
+  const avatarSrc = activeAvatarUrl || generatedAvatarUrl
+  const avatarHue = generatedSeed.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360
+  const initials = getInitials(activeDisplayName)
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
+    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="space-y-1">
+        <h1 className="text-3xl font-semibold tracking-tight">Profile</h1>
+        <p className="text-sm text-muted-foreground">
+          Manage your personal details and how you appear across Dokumen AI.
+        </p>
+      </div>
 
-      <Card className="max-w-2xl">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Profile</CardTitle>
+      <Card className="overflow-hidden border-border/80 shadow-sm">
+        <CardHeader className="flex flex-col gap-3 border-b sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="text-xl">Personal Information</CardTitle>
           <div className="flex gap-2">
             {!isEditing ? (
-              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                <EditIcon className="h-4 w-4 mr-2" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSaveError(null)
+                  form.reset(toFormValues(profile))
+                  setIsEditing(true)
+                }}
+              >
+                <EditIcon className="mr-2 h-4 w-4" />
                 Edit
               </Button>
             ) : (
               <>
-                <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSaving}>
-                  <XIcon className="h-4 w-4 mr-2" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    form.reset(toFormValues(profile))
+                    setSaveError(null)
+                    setIsEditing(false)
+                  }}
+                  disabled={form.state.isSubmitting}
+                >
+                  <XIcon className="mr-2 h-4 w-4" />
                   Cancel
                 </Button>
-                <Button size="sm" onClick={handleSave} disabled={isSaving}>
-                  <SaveIcon className="h-4 w-4 mr-2" />
-                  {isSaving ? "Saving..." : "Save"}
+                <Button
+                  size="sm"
+                  disabled={form.state.isSubmitting}
+                  onClick={() => void form.handleSubmit()}
+                >
+                  {form.state.isSubmitting ? (
+                    <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <SaveIcon className="mr-2 h-4 w-4" />
+                  )}
+                  {form.state.isSubmitting ? "Saving..." : "Save"}
                 </Button>
               </>
             )}
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
-          {/* Avatar Section */}
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-              <img
-                src={getAvatarUrl()}
-                alt="Profile Avatar"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.style.display = "none"
-                  const fallback = target.nextElementSibling as HTMLDivElement
-                  if (fallback) fallback.style.display = "flex"
-                }}
-              />
+        <CardContent className="grid gap-0 p-0 lg:grid-cols-[300px_1fr]">
+          <aside className="space-y-5 border-b bg-muted/20 p-6 lg:border-b-0 lg:border-r">
+            <div className="relative h-24 w-24 overflow-hidden rounded-full border border-border/70 bg-muted">
+              {!avatarLoadFailed && (
+                <img
+                  src={avatarSrc}
+                  alt="Profile avatar"
+                  className="h-full w-full object-cover"
+                  onError={() => setAvatarLoadFailed(true)}
+                />
+              )}
               <div
-                className="w-full h-full rounded-full flex items-center justify-center text-white text-xl font-bold"
+                className={`absolute inset-0 flex items-center justify-center text-2xl font-semibold text-white ${
+                  avatarLoadFailed ? "opacity-100" : "opacity-0"
+                }`}
                 style={{
-                  display: "none",
-                  background: `linear-gradient(45deg, hsl(${(avatarSeed * 360) % 360}, 70%, 50%), hsl(${((avatarSeed + 0.5) * 360) % 360}, 70%, 60%))`,
+                  background: `linear-gradient(145deg, hsl(${avatarHue} 72% 48%), hsl(${(avatarHue + 48) % 360} 78% 56%))`,
                 }}
               >
-                {getInitials()}
+                {initials}
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={regenerateAvatar}>
-              <RefreshCwIcon className="h-4 w-4 mr-2" />
-              Regenerate Avatar
-            </Button>
-          </div>
 
-          {/* User Info Section */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="firstName">First Name</Label>
-              {isEditing ? (
-                <Input
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                />
-              ) : (
-                <p className="text-sm text-gray-900 mt-1">{formData.firstName || "Not set"}</p>
-              )}
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold">{activeDisplayName}</h2>
+              <p className="break-all text-sm text-muted-foreground">{profile.email}</p>
             </div>
 
-            <div>
-              <Label htmlFor="lastName">Last Name</Label>
-              {isEditing ? (
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                />
-              ) : (
-                <p className="text-sm text-gray-900 mt-1">{formData.lastName || "Not set"}</p>
-              )}
+            {isEditing && (
+              <div className="space-y-2">
+                <AlertDialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" className="w-full">
+                      Choose File
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Upload Profile Photo</AlertDialogTitle>
+                      <AlertDialogDescription className="space-y-2 text-sm">
+                        <span className="block">
+                          Limits: 1 image, max size 2MB, common image formats only.
+                        </span>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="space-y-2">
+                      <UploadButton
+                        endpoint="avatarUploader"
+                        appearance={{
+                          button:
+                            "w-full rounded-md bg-primary text-primary-foreground hover:bg-primary/90 ut-readying:bg-primary/90 ut-uploading:cursor-not-allowed ut-uploading:bg-primary/80",
+                          container: "w-full",
+                          allowedContent: "text-xs text-muted-foreground",
+                        }}
+                        onClientUploadComplete={(files) => {
+                          const uploadedFile = files[0]
+                          const uploadedUrl = uploadedFile?.ufsUrl
+                          if (!uploadedUrl) {
+                            setUploadFailure(
+                              "Upload finished, but we couldn't read the file URL. Please try uploading again.",
+                            )
+                            return
+                          }
+                          void (async () => {
+                            try {
+                              await updateUser({
+                                data: {
+                                  id: profile.id,
+                                  avatarUrl: uploadedUrl,
+                                },
+                              })
+                              form.setFieldValue("avatarUrl", uploadedUrl)
+                              setProfile({
+                                ...profile,
+                                avatarUrl: uploadedUrl,
+                              })
+                              setAvatarLoadFailed(false)
+                              setUploadFailure(null)
+                              setIsUploadModalOpen(false)
+                            } catch {
+                              setUploadFailure(
+                                "Upload succeeded, but we couldn't save it to your profile. Please click Save and try again.",
+                              )
+                            }
+                          })()
+                        }}
+                        onUploadError={(error) => {
+                          const friendlyMessage = toUserUploadErrorMessage(error)
+                          setUploadFailure(friendlyMessage)
+                          setSaveError(friendlyMessage)
+                        }}
+                      />
+                    </div>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Close</AlertDialogCancel>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    form.setFieldValue("avatarUrl", "")
+                    setAvatarLoadFailed(false)
+                  }}
+                >
+                  <Trash2Icon className="mr-2 h-4 w-4" />
+                  Remove Photo
+                </Button>
+                {uploadFailure && <p className="text-xs text-destructive">{uploadFailure}</p>}
+              </div>
+            )}
+          </aside>
+
+          <form
+            className="space-y-5 p-6"
+            onSubmit={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              if (!isEditing || form.state.isSubmitting) return
+              void form.handleSubmit()
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape" && isEditing && !form.state.isSubmitting) {
+                e.preventDefault()
+                form.reset(toFormValues(profile))
+                setSaveError(null)
+                setIsEditing(false)
+              }
+            }}
+          >
+            {(saveError || form.state.errorMap.onSubmit) && (
+              <div className="rounded-md border border-destructive/35 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                {saveError ??
+                  (form.state.errorMap.onSubmit as { form?: string })?.form ??
+                  "Could not save changes."}
+              </div>
+            )}
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <form.Field
+                name="displayName"
+                children={({ state, handleBlur, handleChange }) => (
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label htmlFor="displayName">Display Name</Label>
+                    {isEditing ? (
+                      <>
+                        <Input
+                          id="displayName"
+                          value={state.value}
+                          onBlur={handleBlur}
+                          onChange={(e) => handleChange(e.target.value)}
+                        />
+                        {state.meta.errors[0] && (
+                          <p className="text-xs text-destructive">{String(state.meta.errors[0])}</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="min-h-9 rounded-md border border-transparent px-0.5 py-2 text-sm">
+                        {profile.displayName?.trim() ? (
+                          profile.displayName
+                        ) : (
+                          <span className="italic text-muted-foreground">
+                            Using legacy fallback: {fallbackDisplayName}
+                          </span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                )}
+              />
+
+              <form.Field
+                name="firstName"
+                children={({ state, handleBlur, handleChange }) => (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="firstName">First Name</Label>
+                    {isEditing ? (
+                      <>
+                        <Input
+                          id="firstName"
+                          value={state.value}
+                          onBlur={handleBlur}
+                          onChange={(e) => handleChange(e.target.value)}
+                        />
+                        {state.meta.errors[0] && (
+                          <p className="text-xs text-destructive">{String(state.meta.errors[0])}</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="min-h-9 rounded-md border border-transparent px-0.5 py-2 text-sm">
+                        {profile.firstName || (
+                          <span className="italic text-muted-foreground">Not set</span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                )}
+              />
+
+              <form.Field
+                name="lastName"
+                children={({ state, handleBlur, handleChange }) => (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    {isEditing ? (
+                      <>
+                        <Input
+                          id="lastName"
+                          value={state.value}
+                          onBlur={handleBlur}
+                          onChange={(e) => handleChange(e.target.value)}
+                        />
+                        {state.meta.errors[0] && (
+                          <p className="text-xs text-destructive">{String(state.meta.errors[0])}</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="min-h-9 rounded-md border border-transparent px-0.5 py-2 text-sm">
+                        {profile.lastName || (
+                          <span className="italic text-muted-foreground">Not set</span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                )}
+              />
+
+              <form.Field
+                name="employer"
+                children={({ state, handleBlur, handleChange }) => (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="employer">Company</Label>
+                    {isEditing ? (
+                      <>
+                        <Input
+                          id="employer"
+                          value={state.value}
+                          onBlur={handleBlur}
+                          onChange={(e) => handleChange(e.target.value)}
+                        />
+                        {state.meta.errors[0] && (
+                          <p className="text-xs text-destructive">{String(state.meta.errors[0])}</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="min-h-9 rounded-md border border-transparent px-0.5 py-2 text-sm">
+                        {profile.employer || (
+                          <span className="italic text-muted-foreground">Not set</span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                )}
+              />
+
+              <form.Field
+                name="jobTitle"
+                children={({ state, handleBlur, handleChange }) => (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="jobTitle">Title</Label>
+                    {isEditing ? (
+                      <>
+                        <Input
+                          id="jobTitle"
+                          value={state.value}
+                          onBlur={handleBlur}
+                          onChange={(e) => handleChange(e.target.value)}
+                        />
+                        {state.meta.errors[0] && (
+                          <p className="text-xs text-destructive">{String(state.meta.errors[0])}</p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="min-h-9 rounded-md border border-transparent px-0.5 py-2 text-sm">
+                        {profile.jobTitle || (
+                          <span className="italic text-muted-foreground">Not set</span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                )}
+              />
+
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>Email</Label>
+                <p className="min-h-9 rounded-md border border-dashed border-border/60 bg-muted/25 px-3 py-2 text-sm">
+                  {profile.email}
+                </p>
+              </div>
             </div>
 
-            <div>
-              <Label htmlFor="employer">Company</Label>
-              {isEditing ? (
-                <Input
-                  id="employer"
-                  value={formData.employer}
-                  onChange={(e) => setFormData({ ...formData, employer: e.target.value })}
-                />
-              ) : (
-                <p className="text-sm text-gray-900 mt-1">{formData.employer || "Not set"}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="jobTitle">Title</Label>
-              {isEditing ? (
-                <Input
-                  id="jobTitle"
-                  value={formData.jobTitle}
-                  onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
-                />
-              ) : (
-                <p className="text-sm text-gray-900 mt-1">{formData.jobTitle || "Not set"}</p>
-              )}
-            </div>
-
-            <div className="col-span-2">
-              <Label>Email</Label>
-              <p className="text-sm text-gray-900 mt-1">{user.email}</p>
-            </div>
-          </div>
+            {isEditing && (
+              <p className="text-xs text-muted-foreground">
+                Press <kbd className="rounded border bg-muted px-1.5 py-0.5 text-[11px]">Esc</kbd>{" "}
+                to cancel changes.
+              </p>
+            )}
+          </form>
         </CardContent>
       </Card>
     </div>

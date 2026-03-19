@@ -5,13 +5,12 @@ const runTests = process.env.TEST_DB === "true"
 
 describe.if(runTests)("User Table Server Functions", () => {
   const testEmail = `test-${Date.now()}@example.com`
-  const testPassword = "password123"
 
   it("should handle the full user lifecycle (CRUD)", async () => {
     // --- CREATE ---
     const createInput = {
       email: testEmail,
-      password: testPassword,
+      displayName: "Test User",
       firstName: "Test",
       lastName: "User",
     }
@@ -22,6 +21,7 @@ describe.if(runTests)("User Table Server Functions", () => {
     const userByEmail = await getUserByEmail({ data: { email: testEmail } })
     expect(userByEmail).toBeDefined()
     expect(userByEmail.email).toBe(testEmail)
+    expect(userByEmail.displayName).toBe("Test User")
     expect(userByEmail.firstName).toBe("Test")
     const userId = userByEmail.id
 
@@ -34,6 +34,7 @@ describe.if(runTests)("User Table Server Functions", () => {
     // --- UPDATE ---
     const updateInput = {
       id: userId,
+      displayName: "Updated User",
       firstName: "UpdatedName",
       employer: "TestCorp",
     }
@@ -41,6 +42,7 @@ describe.if(runTests)("User Table Server Functions", () => {
     expect(updateOutput.success).toBe(true)
 
     const updatedUser = await getUserById({ data: { id: userId } })
+    expect(updatedUser.displayName).toBe("Updated User")
     expect(updatedUser.firstName).toBe("UpdatedName")
     expect(updatedUser.employer).toBe("TestCorp")
 
@@ -56,15 +58,6 @@ describe.if(runTests)("User Table Server Functions", () => {
     it("throws error for invalid email format in createUser", async () => {
       const input = {
         email: "invalid-email",
-        password: "password123",
-      }
-      await expect(createUser({ data: input })).rejects.toThrow()
-    })
-
-    it("throws error when password is too short", async () => {
-      const input = {
-        email: "short-pw@example.com",
-        password: "short",
       }
       await expect(createUser({ data: input })).rejects.toThrow()
     })

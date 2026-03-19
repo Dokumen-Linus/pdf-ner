@@ -11,6 +11,7 @@ export const env = createEnv({
     RESEND_API_KEY: z.string(),
     FROM_EMAIL: z.email(),
     MY_EMAIL: z.email(),
+    UPLOADTHING_TOKEN: z.string(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

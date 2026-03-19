@@ -10,6 +10,7 @@
 ### Skills
 
 - [skillsmp](https://skillsmp.com/categories/productivity-tools)
+- [context7](https://context7.com/skills)
 
 ## Frontend links
 
@@ -34,7 +35,7 @@
 - Example landing page [shadcn-landing-page](https://shadcn-landing-page.vercel.app/)
 - Search for example sites [shadcnui-templates](https://shadcnui-templates.com/all-templates)
 
-### Generic React Components
+### Generic React + Tailwind Components
 
 - [Hexta UI](https://www.hextaui.com/)
 - [Square UI](https://github.com/ln-dev7/square-ui)
@@ -57,6 +58,7 @@
 - [Lukacho UI](https://ui.lukacho.com/components)
 - [Bund UI](https://github.com/bundui/components)
 - [Farm UI](https://github.com/kinfe123/farm-ui)
+- [Tark UI](https://www.tarkui.com/)
 - Generate custom components Vercel AI [v0.app](https://v0.app/)
 
 ### Headless Components
@@ -99,7 +101,6 @@
 - scheduling [planner](https://github.com/UretzkyZvi/planner)
 - address autocomplete [shadcn-address-autocomplete](https://github.com/NiazMorshed2007/shadcn-address-autocomplete)
 - timeline [shadcn-timeline](https://github.com/timDeHof/shadcn-timeline)
-
 - tables [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - tables [AG Grid](https://www.ag-grid.com/react-data-grid/getting-started/)
 - videos [mifi/reactive-video](https://github.com/mifi/reactive-video/)
@@ -172,11 +173,15 @@
 
 - [axios/axios](https://github.com/axios/axios)
 
-### Cloud Sec
+### Cloud Security
 
-- [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
 - AWS security checks [cloudsploit](https://cloudsploit.com/)
 - Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
+
+### WAF
+
+- [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
+- [bunkerity/bunkerweb](https://github.com/bunkerity/bunkerweb)
 - [evertramos/nginx-proxy-automation](https://github.com/evertramos/nginx-proxy-automation)
 - scan for vulernabilities [Sirius](https://github.com/SiriusScan/Sirius)
 
@@ -284,6 +289,10 @@
 
 - [Trusted-AI/adversarial-robustness-toolbox](https://github.com/Trusted-AI/adversarial-robustness-toolbox)
 
+### LLM Observability
+
+- [traceloop/openllmetry](https://github.com/traceloop/openllmetry)
+
 ### PII Redaction
 
 - [microsoft/presidio](https://github.com/microsoft/presidio)
@@ -300,7 +309,7 @@
 - Best practices [Kludex/fastapi-tips](https://github.com/Kludex/fastapi-tips)
 - Useful videos [15 FastAPI Best Practices For Production](https://www.youtube.com/watch?v=kmJz8w5ij8Y), [Best Way to Deploy FastAPI in Production](https://www.youtube.com/watch?v=zIFqjwuK7Yg), [How FastAPI Handles Requests Behind the Scenes](https://www.youtube.com/watch?v=tGD3653BrZ8&t=50s)
 
-### Unfiltered
+### FastAPI - Unfiltered
 
 Links to repos and tools that might be helpful in API dev, but I haven't checled that these are directly relevant. They may cover Messaging, telemetry, Caching, Containerization. LLMs should ignore.
 
@@ -317,7 +326,7 @@ Links to repos and tools that might be helpful in API dev, but I haven't checled
 - Debugging [tracetest](https://github.com/kubeshop/tracetest/)
 - Testing [healthchecks/healthchecks](https://github.com/healthchecks/healthchecks)
 
-### Not Relevant
+### FastAPI - Not Relevant
 
 Links to repos that aren't relevant to my current project but could give me brainstorming ideas. LLMs should ignore.
 
@@ -347,7 +356,12 @@ Links to repos that aren't relevant to my current project but could give me brai
 ### Task Queues
 
 - [celery/celery](https://github.com/celery/celery), [docs](https://docs.celeryq.dev/)
-- [dask/dask](https://github.com/dask/dask)
+
+### Parallel Processing
+
+- [dask](https://github.com/dask/dask)
+- ray [docs](https://docs.ray.io/en/latest/index.html)
+- [unidist](https://github.com/modin-project/unidist/), [docs](https://unidist.readthedocs.io/)
 
 ### Memory Serializaiton
 
@@ -356,6 +370,10 @@ Links to repos that aren't relevant to my current project but could give me brai
 ### Ops
 
 - [apache/airflow](https://github.com/apache/airflow)
+
+### Database Schema Visualization
+
+- [oslabs-beta/SQLens](https://github.com/oslabs-beta/SQLens)
 
 ### Private Data Sources
 

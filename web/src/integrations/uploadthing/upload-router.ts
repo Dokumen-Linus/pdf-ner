@@ -12,6 +12,8 @@ export const uploadRouter = {
       maxFileSize: "2MB",
       maxFileCount: 1,
     },
+  }, {
+    awaitServerData: false,
   })
     .middleware(async () => {
       const headers = getRequestHeaders()
@@ -26,8 +28,10 @@ export const uploadRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       await updateUser({
-        id: metadata.userId,
-        avatarUrl: file.ufsUrl,
+        data: {
+          id: metadata.userId,
+          avatarUrl: file.ufsUrl,
+        },
       })
 
       return {

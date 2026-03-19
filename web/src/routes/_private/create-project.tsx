@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { getRequestHeaders } from "@tanstack/react-start/server"
 import { Palette, Plus, X } from "lucide-react"
 import ColorPicker from "@/components/custom/color-picker"
 import { Button } from "@/components/shadcn-ui/button"
@@ -23,20 +22,15 @@ import {
 } from "@/components/shadcn-ui/select"
 import { Textarea } from "@/components/shadcn-ui/textarea"
 import { createProject } from "@/db-fns/web/projects"
-import { auth } from "@/lib/auth"
+import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/_private/create-project")({
-  beforeLoad: async () => {
-    const headers = getRequestHeaders()
-    const session = await auth.api.getSession({ headers })
-    return { session }
-  },
   component: CreateProjectPage,
 })
 
 function CreateProjectPage() {
   const navigate = useNavigate()
-  const { session } = Route.useLoaderData()
+  const { data: session } = authClient.useSession()
   const [colorPresets, setColorPresets] = useState<string[]>(["#3B82F6"])
 
   const form = useForm({
@@ -52,7 +46,7 @@ function CreateProjectPage() {
         }
 
         try {
-          const result = await createProject({
+          await createProject({
             data: {
               name: value.name,
               ownerId: session.user.id,
@@ -63,8 +57,7 @@ function CreateProjectPage() {
           })
 
           navigate({
-            to: "/_private/projects/$projectId",
-            params: { projectId: result.id },
+            to: "/profile",
           })
         } catch (error) {
           return {
@@ -258,7 +251,7 @@ function CreateProjectPage() {
                 <div className="text-center py-8 border-2 border-dashed border-muted rounded-lg">
                   <Palette className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    No color presets added. Click "Add Color" to get started.
+                    No color presets added. Click &quot;Add Color&quot; to get started.
                   </p>
                 </div>
               )}
@@ -281,7 +274,7 @@ function CreateProjectPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate({ to: "/private/projects" })}
+                onClick={() => navigate({ to: "/profile" })}
                 className="flex-1"
               >
                 Cancel
