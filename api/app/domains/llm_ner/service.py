@@ -83,18 +83,21 @@ async def extract_entities(
     if not project:
         logger.error("Project not found: %s", request.project_id)
         raise HTTPException(status_code=404, detail="Project not found")
+    logger.debug("Project fetched: %s", project["id"])
 
     # Fetch entity types
     entity_types = await repository.fetch_entity_types(conn, request.project_id)
     if not entity_types:
         logger.error("No entity types defined for project: %s", request.project_id)
         raise HTTPException(status_code=400, detail="No entity types defined for project")
+    logger.debug("Entity types fetched: count=%d", len(entity_types))
 
     # Fetch template
     template = await repository.fetch_template(conn, request.template_id)
     if not template:
         logger.error("Template not found: %s", request.template_id)
         raise HTTPException(status_code=404, detail="Template not found")
+    logger.debug("Template fetched: %s", template["id"])
 
     # Build prompt
     system_prompt = build_prompt_from_template(

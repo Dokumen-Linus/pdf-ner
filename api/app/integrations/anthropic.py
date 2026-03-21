@@ -1,7 +1,13 @@
 from anthropic import AsyncAnthropic
 
-async def call_anthropic_async(client: AsyncAnthropic,  model: str, system_prompt: str, user_prompt: str,
-                            temp: int = 0.01, max_tokens: int = 2048) -> str:
+async def call_anthropic_async(
+    client: AsyncAnthropic,
+    model: str,
+    system_prompt: str,
+    user_prompt: str,
+    temp: int = 0.01,
+    max_tokens: int = 10**4,
+) -> str:
   response = await client.messages.create(
         model=model,
         temperature=temp,
