@@ -8,7 +8,7 @@
 
 - [Tom Doerr](https://tom-doerr.github.io/repo_posts/archive.html)
 - Perplexity
-- Google Scholar (IEEE papers or others)
+- Google Scholar
 - [search IEEE journal names](https://ieeexplore.ieee.org/browse/periodicals/title?contentType=periodicals&refinements=ContentType:Journals&refinements=Publisher:IEEE)
 
 ## Competitors
@@ -53,7 +53,7 @@
 - Google Stitch
 - Lovable
 
-### Generate Images
+### Images
 
 - Gemini
 - SVG Icons: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
@@ -74,9 +74,13 @@
 
 ### Shadcn UI
 
-- [shadcn/ui Components](https://ui.shadcn.com/docs/components)
-- Shadcn ui blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
+- [shadcn/ui all components](https://ui.shadcn.com/docs/components)
+- [official blocks](https://ui.shadcn.com/blocks)
+- official charts [docs0](https://ui.shadcn.com/docs/components/radix/chart), [docs1](https://ui.shadcn.com/charts/area)
+- blocks [shadcnspace](https://shadcnspace.com/)
+- blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
 - Search for example sites [shadcnui-templates](https://shadcnui-templates.com/all-templates)
+- some link? [https://ui.shadcn.com/create](https://ui.shadcn.com/create)
 
 ### Generic React + Tailwind Components
 
@@ -103,6 +107,7 @@
 - [Farm UI](https://github.com/kinfe123/farm-ui)
 - [Tark UI](https://www.tarkui.com/)
 - [Gray UI CRM](https://github.com/Jason-uxui/gray-ui-crm/tree/main/components)
+- list of many libraries [shadcn0ui directory](https://ui.shadcn.com/docs/directory)
 
 ### Headless Components
 
