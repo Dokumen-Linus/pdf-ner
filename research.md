@@ -2,45 +2,88 @@
 
 ## Learning
 
-- [what is react]( https://www.theodinproject.com/paths/full-stack-javascript/courses/react)
-- [what are llms](https://arxiv.org/pdf/2501.09223)
+- [Foundations of Large Language Models](https://arxiv.org/pdf/2501.09223)
+
+## Research tools
+
+- [Tom Doerr](https://tom-doerr.github.io/repo_posts/archive.html)
+- Perplexity
+- Google Scholar (IEEE papers or others)
+- [search IEEE journal names](https://ieeexplore.ieee.org/browse/periodicals/title?contentType=periodicals&refinements=ContentType:Journals&refinements=Publisher:IEEE)
+
+## Competitors
+
+- [Reducto AI](https://reducto.ai/)
+- [Landing AI](https://landing.ai/)
 
 ## Coding Agents
+
+### Paid Options
+
+- Claude Code
+- Codex
+- Cursor (I recommend against this)
+- [Grok CLI](https://github.com/superagent-ai/grok-cli)
+
+### Free Options
+
+- GitHub Copilot
+- Kilo
+- Opencode
+- Antigravity
+- Windsurf
+
+### Claude
+
+- monitor usage [claude-pulse](https://github.com/NoobyGains/claude-pulse)
 
 ### Skills
 
 - [skillsmp](https://skillsmp.com/categories/productivity-tools)
 - [context7](https://context7.com/skills)
 
+### Generate React Components
+
+- Vercel AI [v0.app](https://v0.app/)
+- [jau123/MeiGen-AI-Design-MCP](https://github.com/jau123/MeiGen-AI-Design-MCP)
+- [millonoco/react-doctor](https://github.com/millionco/react-doctor)
+
+### Frontend Design
+
+- Google Stitch
+- Lovable
+
+### Generate Images
+
+- Gemini
+- SVG Icons: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
+
 ## Frontend links
 
 ### PDF Web rendering
 
 - [embedpdf/embed-pdf-viewer](https://github.com/embedpdf/embed-pdf-viewer)
-- [@embedpdf/models pdf.ts](https://github.com/embedpdf/embed-pdf-viewer/blob/feature/multi-view/packages/models/src/pdf.ts#L1992)
-- [@embedpdf/snippet example component](https://github.com/embedpdf/embed-pdf-viewer/blob/main/snippet/src/components/app.tsx)
-- [EmbedPDF React Docs](https://www.embedpdf.com/docs/react/understanding-plugins)
+- [EmbedPDF React Docs](https://www.embedpdf.com/docs/react/headless/introduction)
 - [PDFium JS docs](https://www.embedpdf.com/docs/pdfium/introduction)
 
 ### Colors
 
 - [TailColors](https://tailcolors.com/)
-- [Hex Color Codes](  https://html-color.codes/)
+- [Hex Color Codes](https://html-color.codes/)
 - generators for complimentary hex codes [Coolors](https://coolors.co/) (no acct required), [Atmos](https://atmos.style/) (requires free acct)
 
 ### Shadcn UI
 
 - [shadcn/ui Components](https://ui.shadcn.com/docs/components)
-- **Shadcn ui blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)**
-- Example landing page [shadcn-landing-page](https://shadcn-landing-page.vercel.app/)
+- Shadcn ui blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
 - Search for example sites [shadcnui-templates](https://shadcnui-templates.com/all-templates)
 
 ### Generic React + Tailwind Components
 
-- [Hexta UI](https://www.hextaui.com/)
-- [Square UI](https://github.com/ln-dev7/square-ui)
 - [Material UI (MUI)](https://mui.com/material-ui/getting-started/), css styling [MUI System](https://mui.com/system/getting-started/)
 - [Ant Design](https://ant.design/components/overview/)
+- [Hexta UI](https://www.hextaui.com/)
+- [Square UI](https://github.com/ln-dev7/square-ui)
 - [Untitled UI](https://www.untitledui.com/react/components)
 - [Flyon UI](https://flyonui.com/docs/component/)
 - [Mantine UI](https://ui.mantine.dev/)
@@ -59,7 +102,7 @@
 - [Bund UI](https://github.com/bundui/components)
 - [Farm UI](https://github.com/kinfe123/farm-ui)
 - [Tark UI](https://www.tarkui.com/)
-- Generate custom components Vercel AI [v0.app](https://v0.app/)
+- [Gray UI CRM](https://github.com/Jason-uxui/gray-ui-crm/tree/main/components)
 
 ### Headless Components
 
@@ -83,7 +126,6 @@
 - Currently: [Lucide Icons](https://lucide.dev/icons/)
 - Others: [React Icons](https://react-icons.github.io/react-icons/)
 - Download SVGs: [Iconstack](https://ossian-icons-60.lovable.app/)
-- AI generate SVGs: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
 
 ### Special Components
 
@@ -100,13 +142,14 @@
 - [shadcn-image-cropper](https://github.com/sujjeee/shadcn-image-cropper)
 - scheduling [planner](https://github.com/UretzkyZvi/planner)
 - address autocomplete [shadcn-address-autocomplete](https://github.com/NiazMorshed2007/shadcn-address-autocomplete)
+- Power Automate copy [chrisjpatty/flume](https://github.com/chrisjpatty/flume)
 - timeline [shadcn-timeline](https://github.com/timDeHof/shadcn-timeline)
 - tables [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - tables [AG Grid](https://www.ag-grid.com/react-data-grid/getting-started/)
 - videos [mifi/reactive-video](https://github.com/mifi/reactive-video/)
 - Component dependency grapher [Madge](https://github.com/pahen/madge)
 - [Alibaba ChatUI](https://chatui.io/)
-- Wrapper for OpenAI API to enable react component creation [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
+- Wrapper for OpenAI API to enable user to create auto-rended react components [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
 - long list [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
 
 ### Charts
@@ -127,7 +170,7 @@
 
 - [odoo/odoo](https://github.com/odoo/odoo)
 - [vercel/next-forge](https://github.com/vercel/next-forge)
-- Vercel [Next.js SaaS Starter](https://vercel.com/templates/authentication/next-js-saas-starter)
+- [Vercel Next.js SaaS Starter](https://vercel.com/templates/authentication/next-js-saas-starter)
 - [Blazity/next-enterprise](https://github.com/Blazity/next-enterprise/tree/main)
 - [arhamkhnz/next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard)
 - [cruip/open-react-template](https://github.com/cruip/open-react-template)
@@ -196,11 +239,12 @@
 - [Stripe](https://stripe.com/)
 - self-hosted alternative [Lago](https://getlago.com/docs/welcome)
 
-### Automated Emails
+### Emails
 
 - [React Email AWS SES](https://react-email.mintlify.dev/docs/integrations/aws-ses)
 - [Resend](https://resend.com/docs/send-with-nextjs)
-- dashboard [freeresend](https://github.com/eibrahim/freeresend)
+- self-hosted dashboard [freeresend](https://github.com/eibrahim/freeresend)
+- self-hosted all-in-one [forwardemail](https://github.com/forwardemail/forwardemail.net)
 - proxy for Cloudflare worker emails [Sh4yy/cloudflare-email](https://github.com/Sh4yy/cloudflare-email)
 
 ## Backend links
@@ -215,22 +259,31 @@
 - [Pymupdf](https://github.com/pymupdf/PyMuPDF)
 - [marker](https://github.com/vikparuchuri/marker)
 
-### OCR
+### Traditional Engines for OCR
 
 - [tesseract-ocr/tesseract](https://github.com/tesseract-ocr/tesseract)
 - [madmaze/pytesseract](https://github.com/madmaze/pytesseract)
 - [naptha/tesseract.js](https://github.com/naptha/tesseract.js)
 - Tesseract python cli [ocrmypdf/OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF)
-- Custom LM [NanoNets/docext](https://github.com/NanoNets/docext)
-- Custom LM  [chatdoc-com/OCRFlux](https://github.com/chatdoc-com/OCRFlux)
-- Custom LM [Yuliang-Liu/MonkeyOCR](https://github.com/Yuliang-Liu/MonkeyOCR)
+
+### SLMs for OCR
+
+- [NanoNets/docext](https://github.com/NanoNets/docext)
+- [chatdoc-com/OCRFlux](https://github.com/chatdoc-com/OCRFlux)
+- [Yuliang-Liu/MonkeyOCR](https://github.com/Yuliang-Liu/MonkeyOCR)
 - Pytorch [mindee/doctr](https://github.com/mindee/doctr)
 - Pytorch [JaidedAI/EasyOCR](https://github.com/JaidedAI/EasyOCR)
-- Other [docling](https://github.com/docling-project/docling)
-- LLM checking trad OCR [Dicklesworthstone/llm_aided_ocr](https://github.com/Dicklesworthstone/llm_aided_ocr)
+- [docling](https://github.com/docling-project/docling)
+
+### LLMs for OCR
+
 - **[deepseek-ai/DeepSeek-OCR](https://github.com/deepseek-ai/DeepSeek-OCR)**
 - **[allenai/olmocr](https://github.com/allenai/olmocr)**
-- **[NanoNets/docstrange](https://github.com/NanoNets/docstrange)**
+- LLM checking trad OCR [Dicklesworthstone/llm_aided_ocr](https://github.com/Dicklesworthstone/llm_aided_ocr)
+
+### Orchestrator of OCR options
+
+- [/enoch3712/ExtractThinker](https://github.com/enoch3712/ExtractThinker)
 
 ### Convert to PDF
 
@@ -266,9 +319,11 @@
 - [Matt Pocock X](https://x.com/mattpocockuk/status/1958179930262356032)
 - [Hunyuan-PromptEnhancer/PromptEnhancer](https://github.com/Hunyuan-PromptEnhancer/PromptEnhancer)
 - [promptslab/Promptify](https://github.com/promptslab/Promptify)
+- [Context Engineering research](https://github.com/Meirtz/Awesome-Context-Engineering)
 
 ### LLM Memory
 
+- Supermemory
 - [MemoriLabs/Memori](https://github.com/MemoriLabs/Memori)
 
 ### Local hosting LLMs
@@ -293,7 +348,7 @@
 
 - [traceloop/openllmetry](https://github.com/traceloop/openllmetry)
 
-### PII Redaction
+### SLMs for PII Redaction
 
 - [microsoft/presidio](https://github.com/microsoft/presidio)
 
@@ -371,6 +426,12 @@ Links to repos that aren't relevant to my current project but could give me brai
 
 - [apache/airflow](https://github.com/apache/airflow)
 
+## DB links
+
+### Database Search
+
+- PostgreSQL [paradedb](https://github.com/paradedb/paradedb)
+
 ### Database Schema Visualization
 
 - [oslabs-beta/SQLens](https://github.com/oslabs-beta/SQLens)
@@ -384,17 +445,3 @@ Links to repos that aren't relevant to my current project but could give me brai
 - Azure Blob
 - S3
 - GCS
-
-### Need to research
-
-- Node.js server on EC2 VM with nginx, bun, + Tanstack Start
-- Cloudflare or AWS WAF
-- AWS Artifact report generation for HIPPA, PCI, and others (first US and India only)
-- TIF to PDF conversion in Python
-
-## Research tools
-
-- [Tom Doerr](https://tom-doerr.github.io/repo_posts/archive.html)
-- Perplexity
-- Google Scholar (IEEE papers or others)
-- [search IEEE journal names](https://ieeexplore.ieee.org/browse/periodicals/title?contentType=periodicals&refinements=ContentType:Journals&refinements=Publisher:IEEE)
