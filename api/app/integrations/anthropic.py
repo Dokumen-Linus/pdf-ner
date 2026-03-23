@@ -1,4 +1,10 @@
+import logging
+import time
+
 from anthropic import AsyncAnthropic
+
+logger = logging.getLogger(__name__)
+
 
 async def call_anthropic_async(
     client: AsyncAnthropic,
@@ -8,13 +14,19 @@ async def call_anthropic_async(
     temp: int = 0.01,
     max_tokens: int = 10**4,
 ) -> str:
-  response = await client.messages.create(
+    logger.info("Anthropic call started: model=%s", model)
+    start = time.perf_counter()
+
+    response = await client.messages.create(
         model=model,
         temperature=temp,
         max_tokens=max_tokens,
         system=system_prompt,
         messages=[
             {"role": "user", "content": user_prompt}
-        ]
+        ],
     )
-  return response.content[0].text
+
+    duration = time.perf_counter() - start
+    logger.info("Anthropic call completed: model=%s, duration=%.2fs", model, duration)
+    return response.content[0].text
