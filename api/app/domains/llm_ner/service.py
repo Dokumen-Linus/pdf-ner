@@ -1,14 +1,13 @@
 import json
 import logging
-import time
 from uuid import UUID
 
 import asyncpg
 from fastapi import HTTPException
 
-from app.utils.llm_calls.anthropic import call_anthropic_async
-from app.utils.llm_calls.gemini import call_google_ai_async
-from app.utils.llm_calls.openai import call_openai_async
+from app.integrations.anthropic import call_anthropic_async
+from app.integrations.gemini import call_google_ai_async
+from app.integrations.openai import call_openai_async
 
 from . import repository
 from .schemas import ExtractEntitiesRequest
@@ -115,14 +114,6 @@ async def extract_entities(
     )
 
     # Call LLM
-    logger.info(
-        "LLM call started: provider=%s, model=%s, project_id=%s",
-        request.provider,
-        request.model,
-        request.project_id,
-    )
-    start_time = time.perf_counter()
-
     try:
         llm_response = await call_llm(
             clients,
@@ -131,12 +122,11 @@ async def extract_entities(
             system_prompt,
             request.document_text,
         )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("LLM provider error: %s", e)
-        raise HTTPException(status_code=502, detail=f"LLM provider error: {e}") from None
-
-    duration = time.perf_counter() - start_time
-    logger.info("LLM call completed: duration=%.2fs", duration)
+        raise HTTPException(status_code=502, detail="LLM provider error") from None
 
     # Validate JSON
     extracted = validate_json(llm_response)

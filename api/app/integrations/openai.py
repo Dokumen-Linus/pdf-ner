@@ -1,4 +1,10 @@
+import logging
+import time
+
 from openai import AsyncOpenAI
+
+logger = logging.getLogger(__name__)
+
 
 async def call_openai_async(
     client: AsyncOpenAI,
@@ -10,6 +16,9 @@ async def call_openai_async(
     temp: float = 0.01,
     max_tokens: int = 10**4,
 ) -> str:
+    logger.info("OpenAI call started: model=%s", model)
+    start = time.perf_counter()
+
     kwargs: dict = {
         "model": model,
         "temperature": temp,
@@ -29,4 +38,7 @@ async def call_openai_async(
             },
         }
     response = await client.chat.completions.create(**kwargs)
+
+    duration = time.perf_counter() - start
+    logger.info("OpenAI call completed: model=%s, duration=%.2fs", model, duration)
     return response.choices[0].message.content
