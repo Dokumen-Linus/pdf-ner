@@ -1,9 +1,6 @@
 ---
 name: typescript-type-system
 description: Use when working with TypeScript's type system including strict mode, advanced types, generics, type guards, and compiler configuration.
-allowed-tools:
-  - Bash
-  - Read
 ---
 
 # TypeScript Type System

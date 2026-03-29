@@ -1,5 +1,5 @@
 ---
-name: fastapi-middleware
+name: fastapi-asgi-middleware
 description: Guide for writing pure ASGI middleware in FastAPI/Starlette. Use when creating custom middleware, intercepting requests/responses, adding headers, logging, authentication, or any request processing pipeline.
 ---
 

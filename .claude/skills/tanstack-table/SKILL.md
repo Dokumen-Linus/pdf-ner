@@ -2,7 +2,6 @@
 name: tanstack-table
 description: TanStack Table v8 headless data tables with server-side features for Cloudflare Workers + D1. Use for pagination, filtering, sorting, virtualization, or encountering state management, TanStack Query coordination, URL sync errors.
 license: MIT
-allowed-tools: [Bash, Read, Write, Edit]
 metadata:
   version: 1.1.0
   author: Claude Skills Maintainers

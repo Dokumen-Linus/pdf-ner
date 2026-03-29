@@ -7,17 +7,19 @@
   },
   "permissions": {
     "allow": [
-      "Read(*)",
-      "Write(*)",
-      "Edit(*)",
-      "MultiEdit(*)",
+      "Read",
+      "Write",
+      "Edit",
+      "MultiEdit",
+      
+      "Grep",
+      "Glob",
+      "LS",
 
-      "Bash(*)",
+      "Bash",
 
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:bun.com)",
-      "WebFetch(domain:tanstack.com)",
-      "WebFetch(domain:docs.uploadthing.com)"
+      "WebFetch",
+      "WebSearch"
     ],
     "deny": [
       "Bash(sudo:*)",
