@@ -33,6 +33,10 @@
 - Antigravity
 - Windsurf
 
+### Essential Tools
+
+- [Browser Use](https://docs.browser-use.com/open-source/browser-use-cli)
+
 ### Claude
 
 - monitor usage [claude-pulse](https://github.com/NoobyGains/claude-pulse)
@@ -41,6 +45,7 @@
 
 - [skillsmp](https://skillsmp.com/categories/productivity-tools)
 - [context7](https://context7.com/skills)
+- [@zodchii Top 50](https://x.com/zodchiii/status/2034924354337714642)
 
 ### Generate React Components
 
@@ -53,7 +58,7 @@
 - Google Stitch
 - Lovable
 
-### Images
+### Generate Images
 
 - Gemini
 - SVG Icons: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
@@ -131,6 +136,7 @@
 - Currently: [Lucide Icons](https://lucide.dev/icons/)
 - Others: [React Icons](https://react-icons.github.io/react-icons/)
 - Download SVGs: [Iconstack](https://ossian-icons-60.lovable.app/)
+- Download SVGs: [tabler](https://github.com/tabler/tabler-icons)
 
 ### Special Components
 
@@ -226,12 +232,17 @@
 - AWS security checks [cloudsploit](https://cloudsploit.com/)
 - Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
 
+### Testing
+
+- [supercheck](https://github.com/supercheck-io/supercheck)
+- [OWASP/Nettacker](https://github.com/OWASP/Nettacker)
+- scan for vulernabilities [Sirius](https://github.com/SiriusScan/Sirius)
+
 ### WAF
 
 - [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
 - [bunkerity/bunkerweb](https://github.com/bunkerity/bunkerweb)
 - [evertramos/nginx-proxy-automation](https://github.com/evertramos/nginx-proxy-automation)
-- scan for vulernabilities [Sirius](https://github.com/SiriusScan/Sirius)
 
 ### Frontend Testing (besides Bun, Playwright)
 
@@ -243,6 +254,13 @@
 
 - [Stripe](https://stripe.com/)
 - self-hosted alternative [Lago](https://getlago.com/docs/welcome)
+
+### File Upload
+
+- uploadthing
+- self-hosted [chibisafe](https://github.com/chibisafe/chibisafe)
+- AWS S3 only
+
 
 ### Emails
 

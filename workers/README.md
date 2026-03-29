@@ -1,5 +1,75 @@
 # Celery Worker App
 
+## Quickstart
+
+1 Install [Python 3.13](https://www.python.org/downloads/release/python-31311/) without Conda/MiniConda/AnaConda distributions and set PATH environment variable (Windows)
+
+2 Create Python environment and install libraries
+
+On Windows (dev):
+
+```cmd
+uv venv .venv
+powershell .\.venv\Scripts\activate
+uv pip install .
+uv pip install -e ".[dev]"
+```
+
+On Mac (dev):
+
+```cmd
+uv venv .venv
+source .venv/bin/activate
+uv pip install .
+uv pip install -e ".[dev]"
+```
+
+Later, activate your existing environment with just the second command.
+
+Pre-prod:
+
+```cmd
+uv pip compile pyproject.toml -o uv.lock
+```
+
+On prod Linux (in Dockerfile):
+
+```cmd
+uv venv .venv
+source .venv/bin/activate
+uv pip sync uv.lock
+```
+
+Using v3.13 until most libraries have upgraded to 3.14 (currently I have "python" PATH set to 3.13.11 and "py" set to 3.14.2)
+
+### Running the api
+
+1 Start the database server
+
+```cmd
+pg_ctl -D .\pgdata -l logfile start
+```
+
+2 Activate the Python environment
+
+Windows:
+
+```cmd
+powershell .\.venv\Scripts\activate
+```
+
+Mac:
+
+```cmd
+source .venv/bin/activate
+```
+
+3 Ensure .env is created following to .env.local.example
+
+4 Run the workers
+
+TODO
+
 ## Tech Stack
 
 - Framework: [Celery](https://docs.celeryq.dev/en/stable/index.html)
@@ -11,7 +81,7 @@
 
 1. The database schemas are defined in ./db/migrations/ SQL scripts
 
-**Restriction on Workers Interactions with Database**: 
+**Restriction on Workers Interactions with Database**:
 
 ### Start Instructions
 
