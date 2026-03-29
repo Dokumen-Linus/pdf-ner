@@ -1,3 +1,11 @@
+# python
+**/__pycache__/
+*.pyc
+**/.venv/
+
+# javascript
+**/node_modules/
+
 # postgresql
 pgdata/
 logfile
