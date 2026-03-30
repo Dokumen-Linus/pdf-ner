@@ -2,10 +2,10 @@ from dataclasses import asdict
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID, uuid4
 
+from api.app.domains.pdf_utils.pdfium_utils import PhraseHighlightResult
 import pytest
 
 from app.domains.pdf_utils import service
-from api.app.domains.pdf_utils.pdfium_utils import PhraseHighlightResult
 from app.domains.pdf_utils.schemas import HighlightRequest
 
 

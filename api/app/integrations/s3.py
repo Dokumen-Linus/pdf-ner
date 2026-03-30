@@ -1,5 +1,6 @@
 import anyio
 
+
 async def get_object_bytes(s3_client, bucket: str, key: str) -> bytes:
     """Download an object from S3 and return its bytes."""
 
