@@ -1,7 +1,8 @@
-import io
 from dataclasses import dataclass, field
+import io
 
 import pypdfium2
+
 
 def find_text_objects(pdf, search_text: str, page_idx: int | None = None) -> list[dict]:
     """Find all occurrences of text and return their bounding boxes."""
@@ -166,4 +167,3 @@ def highlight_phrases(
     output_bytes = buf.getvalue()
 
     return output_bytes, results
-

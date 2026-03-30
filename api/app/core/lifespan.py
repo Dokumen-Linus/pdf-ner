@@ -1,10 +1,10 @@
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+from anthropic import AsyncAnthropic
 import anyio
 import asyncpg
 import boto3
-from anthropic import AsyncAnthropic
 from fastapi import FastAPI
 from google import genai
 from openai import AsyncOpenAI
@@ -12,6 +12,7 @@ from redis.asyncio import Redis
 
 from .config import settings
 from .logging import configure_logging
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:

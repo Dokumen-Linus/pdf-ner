@@ -2,6 +2,7 @@ from uuid import UUID
 
 import asyncpg
 
+
 async def fetch_pdf(conn: asyncpg.Connection, pdf_id: UUID) -> asyncpg.Record | None:
     """Fetch PDF location (S3 key) and bucket via workers.pdfs → web.projects."""
     return await conn.fetchrow(

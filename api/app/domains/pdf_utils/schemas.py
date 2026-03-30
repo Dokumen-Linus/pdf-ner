@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+
 class HighlightRequest(BaseModel):
     pdf_id: UUID
     phrases: dict[str, str] = Field(

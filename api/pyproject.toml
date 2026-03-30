@@ -21,6 +21,7 @@ dev = [
   "deptry",
   "pytest",
   "pytest-anyio",
+  "pytest-mock",
   "httpx",
 ]
 
@@ -50,9 +51,8 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-lines-between-types = 0
-lines-after-imports = 1
-no-lines-before = ["future", "standard-library"]
+known-first-party = ["app", "tests"]
+force-sort-within-sections = true
 
 [tool.ruff.lint.flake8-unused-arguments]
 ignore-variadic-names = true
@@ -61,6 +61,7 @@ ignore-variadic-names = true
 "tests/**" = ["S101"]
 "tests/conftest.py" = ["E402"]  # env vars must be set before app imports
 "**/router.py" = ["B008"]  # FastAPI Depends() in function defaults
+"**/db.py" = ["B008"]  # FastAPI Depends() in function defaults
 
 [tool.ruff.format]
 quote-style = "double"

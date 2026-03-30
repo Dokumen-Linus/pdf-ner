@@ -49,15 +49,11 @@ async def call_llm(
 ) -> str:
     """Route to appropriate LLM based on provider."""
     if provider == "anthropic":
-        return await call_anthropic_async(
-            clients["anthropic"], model, system_prompt, user_prompt
-        )
+        return await call_anthropic_async(clients["anthropic"], model, system_prompt, user_prompt)
     elif provider == "openai":
         return await call_openai_async(clients["openai"], model, system_prompt, user_prompt)
     elif provider == "gemini":
-        return await call_google_ai_async(
-            clients["gemini"], model, system_prompt, user_prompt
-        )
+        return await call_google_ai_async(clients["gemini"], model, system_prompt, user_prompt)
     else:
         raise HTTPException(status_code=422, detail=f"Unknown provider: {provider}")
 

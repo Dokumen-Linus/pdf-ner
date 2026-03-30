@@ -22,9 +22,7 @@ async def call_anthropic_async(
         temperature=temp,
         max_tokens=max_tokens,
         system=system_prompt,
-        messages=[
-            {"role": "user", "content": user_prompt}
-        ],
+        messages=[{"role": "user", "content": user_prompt}],
     )
 
     duration = time.perf_counter() - start
