@@ -1,5 +1,6 @@
 from enum import Enum
 from functools import lru_cache
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,7 +21,13 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     GOOGLE_AI_API_KEY: str
 
-    # need to set CELERY_BROKER_URL and CELERY_RESULT_BACKEND to REDIS_URL
+    @property
+    def CELERY_BROKER_URL(self) -> str:
+        return self.REDIS_URL
+
+    @property
+    def CELERY_RESULT_BACKEND(self) -> str:
+        return self.REDIS_URL
 
     model_config = SettingsConfigDict(
         frozen=True,

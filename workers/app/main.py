@@ -13,4 +13,4 @@ app.conf.task_serializer = "json"
 app.conf.result_serializer = "json"
 app.conf.accept_content = ["json"]
 
-app.auto_discover_tasks()
+app.autodiscover_tasks()
