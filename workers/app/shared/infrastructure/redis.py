@@ -1,7 +1,7 @@
 import redis.asyncio as redis
 from typing import Optional
 from celery import current_app
-from workers.app.core.config import settings
+from app.core.config import settings
 
 
 async def get_redis() -> redis.Redis:

@@ -1,6 +1,6 @@
 import asyncpg
 from celery import current_app
-from workers.app.core.config import settings
+from app.core.config import settings
 
 
 async def get_pool() -> asyncpg.Pool:
