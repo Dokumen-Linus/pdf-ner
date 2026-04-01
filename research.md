@@ -81,6 +81,7 @@
 
 - [shadcn/ui all components](https://ui.shadcn.com/docs/components)
 - [official blocks](https://ui.shadcn.com/blocks)
+- **add themes [shadcn/studio](https://shadcnstudio.com/components)
 - official charts [docs0](https://ui.shadcn.com/docs/components/radix/chart), [docs1](https://ui.shadcn.com/charts/area)
 - blocks [shadcnspace](https://shadcnspace.com/)
 - blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
@@ -103,7 +104,7 @@
 - [Joy UI](https://mui.com/joy-ui/getting-started/)
 - [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
 - [Magic UI](https://github.com/magicuidesign/magicui)
-- [Cult UI](https://github.com/nolly-studio/cult-ui)
+- **[Cult UI](https://github.com/nolly-studio/cult-ui)**
 - [Page UI](https://github.com/danmindru/page-ui)
 - [Syntax UI](https://github.com/SyntaxUI/syntaxui)
 - [Jolly UI](https://github.com/jolbol1/jolly-ui)
@@ -137,6 +138,7 @@
 - Others: [React Icons](https://react-icons.github.io/react-icons/)
 - Download SVGs: [Iconstack](https://ossian-icons-60.lovable.app/)
 - Download SVGs: [tabler](https://github.com/tabler/tabler-icons)
+- **Download TSX: https://nucleoapp.com/app/**
 
 ### Special Components
 
@@ -213,6 +215,10 @@
 - [File upload](https://docs.uploadthing.com/getting-started/tanstack-start)
 - [Sitemap creation](https://github.com/Ryanjso/tanstack-router-sitemap)
 
+### Better Text Rendering
+
+- [pretext](https://github.com/chenglou/pretext)
+
 ### Auth
 
 - Better Auth setup using [Installation](https://www.better-auth.com/docs/installation) and [Tanstack Integration](https://www.better-auth.com/docs/integrations/tanstack) docs
@@ -231,6 +237,7 @@
 
 - AWS security checks [cloudsploit](https://cloudsploit.com/)
 - Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
+- Self-hosted CDN [leandromoreira/cdn-up-and-running](https://github.com/leandromoreira/cdn-up-and-running)
 
 ### Testing
 
@@ -260,7 +267,6 @@
 - uploadthing
 - self-hosted [chibisafe](https://github.com/chibisafe/chibisafe)
 - AWS S3 only
-
 
 ### Emails
 
