@@ -95,9 +95,4 @@ skills:
 
   - task: "querying TanStack docs, library metadata, or available add-on ids from the CLI"
     load: "web/node_modules/@tanstack/cli/skills/query-docs-library-metadata/SKILL.md"
-
-  # ── @rolder-kit/tanstack (available now) ──────────────────────────────────
-
-  - task: "reading or setting cookies isomorphically (server and client) in TanStack Start"
-    load: "web/node_modules/@rolder-kit/tanstack/skills/cookies/SKILL.md"
 <!-- intent-skills:end -->

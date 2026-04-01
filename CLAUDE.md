@@ -23,8 +23,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 @web/node_modules/@tanstack/cli/skills/create-app-scaffold/SKILL.md
 @web/node_modules/@tanstack/cli/skills/maintain-custom-addons-dev-watch/SKILL.md
 @web/node_modules/@tanstack/cli/skills/query-docs-library-metadata/SKILL.md
-@web/node_modules/@rolder-kit/tanstack/skills/cookies/SKILL.md
-
 ## Project Overview
 
 Dokumen AI is a monorepo for a PDF entity labeling and NER (Named Entity Recognition) application. The architecture consists of:

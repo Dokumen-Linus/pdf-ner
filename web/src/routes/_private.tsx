@@ -1,5 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 import Header from "@/components/public-site/header"
+import { SidebarProvider } from "@/components/shadcn-ui/sidebar"
+import { getCookie } from "@/lib/cookies"
 
 export const Route = createFileRoute("/_private")({
   beforeLoad: async ({ location }) => {
@@ -12,7 +14,7 @@ export const Route = createFileRoute("/_private")({
           search: { redirect: location.href },
         })
       }
-      return { session }
+      return { session, sidebarOpen: getCookie("sidebar_state", "true") === "true" }
     }
 
     const [{ getRequestHeaders }, { auth }] = await Promise.all([
@@ -27,18 +29,19 @@ export const Route = createFileRoute("/_private")({
         search: { redirect: location.href },
       })
     }
-    return { session }
+    return { session, sidebarOpen: getCookie("sidebar_state", "true") === "true" }
   },
   component: DashboardLayout,
 })
 
 function DashboardLayout() {
+  const { sidebarOpen } = Route.useRouteContext()
   return (
-    <>
+    <SidebarProvider defaultOpen={sidebarOpen}>
       <Header />
       <main>
         <Outlet />
       </main>
-    </>
+    </SidebarProvider>
   )
 }
