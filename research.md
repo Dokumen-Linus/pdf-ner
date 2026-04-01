@@ -46,6 +46,7 @@
 - [skillsmp](https://skillsmp.com/categories/productivity-tools)
 - [context7](https://context7.com/skills)
 - [@zodchii Top 50](https://x.com/zodchiii/status/2034924354337714642)
+- [Tanstack Intent](https://tanstack.com/intent/registry)
 
 ### Generate React Components
 
@@ -81,7 +82,7 @@
 
 - [shadcn/ui all components](https://ui.shadcn.com/docs/components)
 - [official blocks](https://ui.shadcn.com/blocks)
-- **add themes [shadcn/studio](https://shadcnstudio.com/components)
+- **add themes [shadcn/studio](https://shadcnstudio.com/components)**
 - official charts [docs0](https://ui.shadcn.com/docs/components/radix/chart), [docs1](https://ui.shadcn.com/charts/area)
 - blocks [shadcnspace](https://shadcnspace.com/)
 - blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
@@ -122,10 +123,10 @@
 
 ### Animated Components
 
+- [Framer Motion](https://www.framer.com/motion/)
 - [Animate UI](https://animate-ui.com/docs/components)
 - [Eldora UI](https://eldoraui.site/docs)
 - [Mixcn UI](https://github.com/taqui-786/mixcnui)
-- [Framer Motion](https://www.framer.com/motion/)
 - [react-use-gesture](https://github.com/pmndrs/use-gesture)
 - [react-spring](https://github.com/pmndrs/react-spring)
 - [react-three-fiber](https://github.com/pmndrs/react-three-fiber)
@@ -138,7 +139,7 @@
 - Others: [React Icons](https://react-icons.github.io/react-icons/)
 - Download SVGs: [Iconstack](https://ossian-icons-60.lovable.app/)
 - Download SVGs: [tabler](https://github.com/tabler/tabler-icons)
-- **Download TSX: https://nucleoapp.com/app/**
+- **Download TSX: [nucleo](https://nucleoapp.com/app/) Isometric tab**
 
 ### Special Components
 
@@ -150,7 +151,7 @@
 - [Kanaries/graphic-walker](https://github.com/Kanaries/graphic-walker)
 - [vercel/avatar](https://github.com/vercel/avatar)
 - [vercel/react-tweet](https://github.com/vercel/react-tweet)
-- [chatbot assistant](https://ai-sdk.dev/elements/examples/chatbot)
+- [Vercel AI SDK](https://ai-sdk.dev/elements/examples/chatbot)
 - [Ant chat](https://github.com/ant-design/pro-chat)
 - [shadcn-image-cropper](https://github.com/sujjeee/shadcn-image-cropper)
 - scheduling [planner](https://github.com/UretzkyZvi/planner)

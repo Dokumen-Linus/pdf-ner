@@ -2,6 +2,29 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Agent Skills
+
+@web/node_modules/@tanstack/intent/meta/domain-discovery/SKILL.md
+@web/node_modules/@tanstack/intent/meta/feedback-collection/SKILL.md
+@web/node_modules/@tanstack/intent/meta/generate-skill/SKILL.md
+@web/node_modules/@tanstack/intent/meta/skill-staleness-check/SKILL.md
+@web/node_modules/@tanstack/intent/meta/tree-generator/SKILL.md
+@web/node_modules/@tanstack/start-client-core/skills/start-core/SKILL.md
+@web/node_modules/@tanstack/start-client-core/skills/start-core/deployment/SKILL.md
+@web/node_modules/@tanstack/start-client-core/skills/start-core/execution-model/SKILL.md
+@web/node_modules/@tanstack/start-client-core/skills/start-core/middleware/SKILL.md
+@web/node_modules/@tanstack/start-client-core/skills/start-core/server-functions/SKILL.md
+@web/node_modules/@tanstack/start-client-core/skills/start-core/server-routes/SKILL.md
+@web/node_modules/@tanstack/start-server-core/skills/start-server-core/SKILL.md
+@web/node_modules/@tanstack/router-plugin/skills/router-plugin/SKILL.md
+@web/node_modules/@tanstack/virtual-file-routes/skills/virtual-file-routes/SKILL.md
+@web/node_modules/@tanstack/cli/skills/add-addons-existing-app/SKILL.md
+@web/node_modules/@tanstack/cli/skills/choose-ecosystem-integrations/SKILL.md
+@web/node_modules/@tanstack/cli/skills/create-app-scaffold/SKILL.md
+@web/node_modules/@tanstack/cli/skills/maintain-custom-addons-dev-watch/SKILL.md
+@web/node_modules/@tanstack/cli/skills/query-docs-library-metadata/SKILL.md
+@web/node_modules/@rolder-kit/tanstack/skills/cookies/SKILL.md
+
 ## Project Overview
 
 Dokumen AI is a monorepo for a PDF entity labeling and NER (Named Entity Recognition) application. The architecture consists of:
