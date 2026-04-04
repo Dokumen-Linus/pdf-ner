@@ -1,7 +1,7 @@
 import { CSSProperties, HTMLAttributes, useEffect, useMemo, useState } from "react"
 import { useDocumentState } from "@embedpdf/core/react"
-import { SearchResultState } from "@embedpdf/plugin-search"
 import { useSearchCapability } from "../hooks"
+import { SearchResultState } from "../lib"
 
 type SearchLayoutProps = Omit<HTMLAttributes<HTMLDivElement>, "style"> & {
   documentId: string

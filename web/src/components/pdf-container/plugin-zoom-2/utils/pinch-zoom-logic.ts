@@ -1,5 +1,5 @@
 import type { ViewportCapability } from '@embedpdf/plugin-viewport';
-import type { ZoomCapability } from '@embedpdf/plugin-zoom';
+import type { ZoomCapability } from '../lib';
 
 export interface ZoomGestureOptions {
   /** Enable pinch-to-zoom gesture (default: true) */
