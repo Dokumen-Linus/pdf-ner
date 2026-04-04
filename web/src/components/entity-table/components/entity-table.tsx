@@ -153,9 +153,11 @@ const EntityTable = () => {
                   }}
                 />
               </TableCell>
-              <TableCell>{name}</TableCell>
+              <TableCell className="cursor-pointer" onClick={() => activateEntityType(name)}>
+                {name}
+              </TableCell>
               <TableCell
-                className={!annotationText ? "cursor-pointer" : ""}
+                className="cursor-pointer"
                 onClick={() => {
                   activateEntityType(name)
                 }}
