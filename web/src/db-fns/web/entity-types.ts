@@ -1,9 +1,8 @@
-import { createServerFn } from "@tanstack/react-start";
-import { eq } from "drizzle-orm/sql";
-import { z } from "zod";
-import { db } from "@/db/client";
+import { createServerFn } from "@tanstack/react-start"
+import { eq } from "drizzle-orm/sql"
+import { z } from "zod"
+import { db } from "@/db/client"
 import { entityTypes } from "@/db/schemas/web/entity-types"
-
 
 // ** CREATE **
 export const CreateEntityTypeSchema = z.object({
@@ -26,7 +25,7 @@ export const CreateEntityTypeSchema = z.object({
 export const createEntityType = createServerFn({ method: "POST" })
   .inputValidator(CreateEntityTypeSchema)
   .handler(async ({ data }) => {
-    const [entityType] = await db.insert(entityTypes).values(data).returning({id: entityTypes.id})
+    const [entityType] = await db.insert(entityTypes).values(data).returning({ id: entityTypes.id })
     return { id: entityType.id }
   })
 

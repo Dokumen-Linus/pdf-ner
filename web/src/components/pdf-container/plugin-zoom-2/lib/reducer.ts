@@ -68,7 +68,6 @@ export const zoomReducer: Reducer<ZoomState, ZoomAction> = (state = initialState
       }
     }
 
-
     default:
       return state
   }

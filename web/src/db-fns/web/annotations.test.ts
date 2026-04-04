@@ -59,7 +59,9 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
     const annotationId = createdAnnotation!.id
 
     // --- READ (by id) ---
-    const annotationById = (await getAnnotationById({ data: { id: annotationId } })) as AnnotationRecord
+    const annotationById = (await getAnnotationById({
+      data: { id: annotationId },
+    })) as AnnotationRecord
     expect(annotationById).toBeDefined()
     expect(annotationById.pdfId).toBe(testPdfId)
     expect(annotationById.subtype).toBe(testSubtype)

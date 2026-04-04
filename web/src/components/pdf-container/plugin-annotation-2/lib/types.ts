@@ -1,9 +1,9 @@
 import {
+  PdfAnnotationSubtype,
   PdfHighlightAnnoObject,
   PdfSquigglyAnnoObject,
   PdfStrikeOutAnnoObject,
   PdfUnderlineAnnoObject,
-  PdfAnnotationSubtype,
 } from "@embedpdf/models"
 
 export type PdfTextMarkupAnnotationObject =
@@ -32,11 +32,16 @@ export type Subtype = "highlight" | "underline" | "strikeout" | "squiggly"
 
 export function subtypeToEnum(subtype: Subtype): PdfAnnotationSubtype {
   switch (subtype) {
-    case "highlight":  return PdfAnnotationSubtype.HIGHLIGHT
-    case "underline":  return PdfAnnotationSubtype.UNDERLINE
-    case "strikeout":  return PdfAnnotationSubtype.STRIKEOUT
-    case "squiggly":   return PdfAnnotationSubtype.SQUIGGLY
-    default: throw new Error(`Invalid subtype: ${subtype}`)
+    case "highlight":
+      return PdfAnnotationSubtype.HIGHLIGHT
+    case "underline":
+      return PdfAnnotationSubtype.UNDERLINE
+    case "strikeout":
+      return PdfAnnotationSubtype.STRIKEOUT
+    case "squiggly":
+      return PdfAnnotationSubtype.SQUIGGLY
+    default:
+      throw new Error(`Invalid subtype: ${subtype}`)
   }
 }
 

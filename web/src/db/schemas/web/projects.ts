@@ -1,9 +1,8 @@
-import { relations } from "drizzle-orm";
+import { relations } from "drizzle-orm"
 import { text, timestamp, uuid } from "drizzle-orm/pg-core"
 import { entityTypes } from "./entity-types"
-import { webSchema } from "./schema";
-import { users } from "./users";
-
+import { webSchema } from "./schema"
+import { users } from "./users"
 
 export const projects = webSchema.table("projects", {
   id: uuid("id").primaryKey().defaultRandom(),

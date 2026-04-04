@@ -37,7 +37,6 @@ export interface SetZoomLevelAction extends Action {
   }
 }
 
-
 export type ZoomAction =
   | InitZoomStateAction
   | CleanupZoomStateAction
@@ -64,4 +63,3 @@ export function setZoomLevel(
 ): SetZoomLevelAction {
   return { type: SET_ZOOM_LEVEL, payload: { documentId, zoomLevel, currentZoomLevel } }
 }
-

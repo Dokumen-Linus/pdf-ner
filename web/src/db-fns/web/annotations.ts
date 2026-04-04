@@ -1,6 +1,6 @@
-import { createServerFn } from "@tanstack/react-start";
-import { eq } from "drizzle-orm/sql";
-import { z } from "zod";
+import { createServerFn } from "@tanstack/react-start"
+import { eq } from "drizzle-orm/sql"
+import { z } from "zod"
 import { db } from "@/db/client"
 import { annotations } from "@/db/schemas/web/annotations"
 
@@ -25,7 +25,7 @@ export const CreateAnnotationSchema = z.object({
 export const createAnnotation = createServerFn({ method: "POST" })
   .inputValidator(CreateAnnotationSchema)
   .handler(async ({ data }) => {
-    const [annotation] = await db.insert(annotations).values(data).returning({id: annotations.id})
+    const [annotation] = await db.insert(annotations).values(data).returning({ id: annotations.id })
     return { id: annotation.id }
   })
 

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, mock } from "bun:test"
+import Cookies from "js-cookie"
 
 // mock.module is hoisted before imports by Bun.
 // In non-Vite environments @tanstack/react-start resolves to start-fn-stubs,
@@ -7,8 +8,10 @@ import { afterEach, describe, expect, it, mock } from "bun:test"
 mock.module("@tanstack/react-start", () => ({
   createIsomorphicFn: () => ({
     server: (_: (...args: unknown[]) => unknown) => ({
-      client: (clientFn: (...args: unknown[]) => unknown) =>
-        (...args: unknown[]) => clientFn(...args),
+      client:
+        (clientFn: (...args: unknown[]) => unknown) =>
+        (...args: unknown[]) =>
+          clientFn(...args),
     }),
   }),
   createClientOnlyFn: (fn: (...args: unknown[]) => unknown) => fn,
@@ -21,7 +24,6 @@ mock.module("@tanstack/react-start/server", () => ({
   deleteCookie: () => {},
 }))
 
-import Cookies from "js-cookie"
 // Import AFTER mocks so the modules pick up the mocked @tanstack/react-start.
 const { getCookie, setCookie, setCookies } = await import(".")
 
@@ -115,10 +117,7 @@ describe("setCookies", () => {
 
   it("mixes sets and deletes in one call", () => {
     setCookie("old", "value", 7)
-    setCookies([
-      { name: "old" },
-      { name: "new", value: "hello", expires: 30 },
-    ])
+    setCookies([{ name: "old" }, { name: "new", value: "hello", expires: 30 }])
     expect(getCookie("old")).toBeUndefined()
     expect(getCookie("new")).toBe("hello")
   })

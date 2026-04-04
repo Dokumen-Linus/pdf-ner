@@ -1,6 +1,6 @@
-import { createServerFn } from "@tanstack/react-start";
-import { eq } from "drizzle-orm/sql";
-import { z } from "zod";
+import { createServerFn } from "@tanstack/react-start"
+import { eq } from "drizzle-orm/sql"
+import { z } from "zod"
 import { db } from "@/db/client"
 import { users } from "@/db/schemas/web/users"
 
