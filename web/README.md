@@ -2,7 +2,7 @@
 
 ## Quickstart
 
-1 Install [Node.js v22](https://nodejs.org/en/download/) and [Bun.js](https://bun.sh/)
+1 Install [Node.js v24](https://nodejs.org/en/download/) and [Bun.js](https://bun.sh/)
 2 Clone repo and install dependencies:
 
 ```cmd

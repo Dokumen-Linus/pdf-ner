@@ -1,10 +1,4 @@
 {
-  "mcpServers": {
-    "tanstack": {
-      "command": "npx",
-      "args": ["@tanstack/cli", "mcp"]
-    }
-  },
   "hooks": {
     "PreToolUse": [
       {
@@ -24,6 +18,10 @@
           {
             "type": "command",
             "command": ".claude/hooks/format-on-edit.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/typecheck-on-edit.sh"
           }
         ]
       }

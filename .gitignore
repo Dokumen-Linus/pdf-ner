@@ -18,3 +18,6 @@ node_modules/
 
 # coding LLM settings
 **/settings.local.json
+
+# base dir env
+.env

@@ -1,0 +1,11 @@
+2026-04-04T14:34:57-04:00 echo '{"tool_input":{"command":"echo hello"}}' | bash "C:/Users/zchar/Desktop/pdf-ner/.claude/hooks/log-commands.sh" 2>&1 && echo "exit: $?"
+2026-04-04T14:35:01-04:00 echo hello
+2026-04-04T14:35:03-04:00 tail -1 "C:/Users/zchar/Desktop/pdf-ner/.claude/command-log.txt"
+2026-04-04T14:35:40-04:00 cd "C:/Users/zchar/Desktop/pdf-ner" && npx @tanstack/cli mcp 2>&1 | head -20
+2026-04-04T14:35:53-04:00 sleep 3 && cat "C:/Users/zchar/AppData/Local/Temp/claude/C--Users-zchar-Desktop-pdf-ner/7b7f001f-975b-4e44-8e11-4b8ae9c7e12a/tasks/br2btcoy8.output" 2>/dev/null | head -30
+2026-04-04T14:36:05-04:00 cat "C:/Users/zchar/Desktop/pdf-ner/web/node_modules/@tanstack/cli/package.json" 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('version')); print(list(d.get('bin',{}).keys()))"
+2026-04-04T14:36:13-04:00 cd "C:/Users/zchar/Desktop/pdf-ner/web" && npx tanstack --help 2>&1 | head -30
+2026-04-04T14:51:55-04:00 where go 2>/dev/null; go version 2>/dev/null
+2026-04-04T14:52:09-04:00 gh release list --repo github/github-mcp-server --limit 3 2>/dev/null
+2026-04-04T14:52:20-04:00 gh release view v0.32.0 --repo github/github-mcp-server --json assets --jq '.assets[].name' 2>/dev/null
+2026-04-04T16:11:28-04:00 chmod +x C:/Users/zchar/Desktop/pdf-ner/.claude/hooks/typecheck-on-edit.sh
