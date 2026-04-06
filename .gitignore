@@ -19,5 +19,8 @@ node_modules/
 # coding LLM settings
 **/settings.local.json
 
+# claude log
+.claude/command.log
+
 # base dir env
 .env
