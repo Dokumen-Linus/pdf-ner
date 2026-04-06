@@ -52,16 +52,24 @@ export function TextMarkupPreview({ documentId, pageIndex, scale }: TextMarkupPr
   let inner: ReactElement | null = null
   switch (subtype) {
     case PdfAnnotationSubtype.UNDERLINE:
-      inner = <Underline color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      inner = (
+        <Underline color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      )
       break
     case PdfAnnotationSubtype.HIGHLIGHT:
-      inner = <Highlight color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      inner = (
+        <Highlight color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      )
       break
     case PdfAnnotationSubtype.STRIKEOUT:
-      inner = <Strikeout color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      inner = (
+        <Strikeout color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      )
       break
     case PdfAnnotationSubtype.SQUIGGLY:
-      inner = <Squiggly color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      inner = (
+        <Squiggly color={activeColor} opacity={activeOpacity} segmentRects={rects} scale={scale} />
+      )
       break
     default:
       return null
@@ -70,7 +78,9 @@ export function TextMarkupPreview({ documentId, pageIndex, scale }: TextMarkupPr
   return (
     <div
       style={{
-        mixBlendMode: blendModeToCss(subtype === PdfAnnotationSubtype.HIGHLIGHT ? PdfBlendMode.Multiply : PdfBlendMode.Normal),
+        mixBlendMode: blendModeToCss(
+          subtype === PdfAnnotationSubtype.HIGHLIGHT ? PdfBlendMode.Multiply : PdfBlendMode.Normal,
+        ),
         pointerEvents: "none",
         position: "absolute",
         inset: 0,

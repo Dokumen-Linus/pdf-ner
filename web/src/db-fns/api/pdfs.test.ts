@@ -96,7 +96,9 @@ describe.if(runTests)("API PDFs Read-Only Functions", () => {
     })
 
     it("returns an empty array for non-existent extract method", async () => {
-      const result = await getApiPdfsByExtractMethod({ data: { extractMethod: "non_existent_method" } })
+      const result = await getApiPdfsByExtractMethod({
+        data: { extractMethod: "non_existent_method" },
+      })
       expect(Array.isArray(result)).toBe(true)
       expect(result.length).toBe(0)
     })
@@ -107,7 +109,9 @@ describe.if(runTests)("API PDFs Read-Only Functions", () => {
       const allPdfs = await getAllApiPdfs({ data: {} })
       const pdfWithModelType = allPdfs.find((p) => p.modelType !== null)
       if (pdfWithModelType) {
-        const result = await getApiPdfsByModelType({ data: { modelType: pdfWithModelType.modelType! } })
+        const result = await getApiPdfsByModelType({
+          data: { modelType: pdfWithModelType.modelType! },
+        })
         expect(Array.isArray(result)).toBe(true)
         expect(result.length).toBeGreaterThan(0)
         for (const pdf of result) {

@@ -1,6 +1,6 @@
+from datetime import datetime
 import os
 import re
-from datetime import datetime
 
 TEMPLATE_NUMBER = 1
 DOCUMENT_AT_END = "true"
@@ -41,10 +41,10 @@ def make_seed_for_template(template_number: int, document_at_end: str) -> None:
     timestamp = datetime.now()
     timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
 
-    sql = f"""UPDATE api.templates 
-SET txt = '{escaped_txt}', 
-    inserts = {inserts_array}, 
-    document_at_end = {document_at_end.lower()}, 
+    sql = f"""UPDATE api.templates
+SET txt = '{escaped_txt}',
+    inserts = {inserts_array},
+    document_at_end = {document_at_end.lower()},
     updated_at = now()
 WHERE id = {template_number};"""
     output_path = os.path.join(os.path.dirname(__file__), f"{timestamp_str}.sql")

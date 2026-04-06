@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "browser-use": {
+      "source": "browser-use/browser-use",
+      "sourceType": "github",
+      "computedHash": "7e21515c782df6fdea5ceda35549ed7ceb054d546899a4aa922861ebeced9398"
+    },
+    "flash": {
+      "source": "runpod/skills",
+      "sourceType": "github",
+      "computedHash": "855993bf9d8604e03b11ad94f47769350d9823bdf75844e68cc3cfc43f7a59a0"
+    },
+    "runpodctl": {
+      "source": "runpod/skills",
+      "sourceType": "github",
+      "computedHash": "a436feb0655bea9acc3f6ed7dffa78cd0c30c58f896d9fa5439a9e8735fa5e1a"
+    }
+  }
+}

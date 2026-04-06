@@ -58,7 +58,7 @@ export const reducer: Reducer<InteractionManagerState, InteractionManagerAction>
 
     case CLEANUP_INTERACTION_STATE: {
       const documentId = action.payload
-      const { [documentId]: removed, ...remainingDocs } = state.documents
+      const { [documentId]: _removed, ...remainingDocs } = state.documents
       return {
         ...state,
         documents: remainingDocs,

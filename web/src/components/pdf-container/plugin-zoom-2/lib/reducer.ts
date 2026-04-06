@@ -35,7 +35,7 @@ export const zoomReducer: Reducer<ZoomState, ZoomAction> = (state = initialState
 
     case CLEANUP_ZOOM_STATE: {
       const documentId = action.payload
-      const { [documentId]: removed, ...remainingDocs } = state.documents
+      const { [documentId]: _removed, ...remainingDocs } = state.documents
       return {
         ...state,
         documents: remainingDocs,
@@ -67,7 +67,6 @@ export const zoomReducer: Reducer<ZoomState, ZoomAction> = (state = initialState
         },
       }
     }
-
 
     default:
       return state

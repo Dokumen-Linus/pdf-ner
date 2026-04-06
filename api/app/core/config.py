@@ -3,6 +3,7 @@ from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Environment(Enum):
     DEVELOPMENT = "development"
     STAGING = "staging"
@@ -26,6 +27,8 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str
     AWS_REGION: str = "us-east-1"
     AWS_ENDPOINT_URL: str | None = None
+
+    STRIPE_SECRET_KEY: str
 
     model_config = SettingsConfigDict(
         frozen=True,

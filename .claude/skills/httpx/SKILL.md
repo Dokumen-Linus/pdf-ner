@@ -1,12 +1,13 @@
 ---
 name: httpx
 description: A next-generation HTTP client for Python with both sync and async support, perfect for modern Python applications
-when_to_use: Use when you need to make HTTP requests in Python, especially with async/await, streaming, or advanced authentication
 ---
 
 # HTTPX Skill
 
 HTTPX is a fully featured HTTP client for Python that provides both synchronous and asynchronous APIs, with support for HTTP/1.1 and HTTP/2.
+
+when_to_use: Use when you need to make HTTP requests in Python, especially with async/await, streaming, or advanced authentication
 
 ## Quick Start
 

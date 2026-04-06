@@ -9,10 +9,10 @@ import {
   PdfAnnotationSubtype,
   PdfErrorCode,
   PdfErrorReason,
-  PdfTaskHelper,
   PdfTask,
+  PdfTaskHelper,
   Task,
-  uuidV4
+  uuidV4,
 } from "@embedpdf/models"
 import {
   InteractionManagerCapability,
@@ -21,25 +21,24 @@ import {
 import { SelectionCapability, SelectionPlugin } from "../../plugin-selection-2"
 import type { AnnotationAction } from "./actions"
 import {
-  createAnnotation,
+  batchCreateAnnotations,
+  batchDeleteAnnotations,
+  batchUpdateAnnotations,
   cleanupAnnotationState,
-  initAnnotationState,
+  createAnnotation,
   deleteAnnotation,
   deselectAnnotation,
-  updateAnnotation,
-  selectAnnotation,
   emptyPendingCommits,
-  batchCreateAnnotations,
-  batchUpdateAnnotations,
-  batchDeleteAnnotations,
+  initAnnotationState,
+  selectAnnotation,
   setCanUndoRedo,
   setCreateAnnotationDefaults,
+  updateAnnotation,
 } from "./actions"
-import { CommitType } from "./types"
-import type { Command, Commit, PdfTextMarkupAnnotationObject, Subtype } from "./types"
-import { subtypeToEnum } from "./types"
 import type { AnnotationState } from "./state"
 import { initialDocumentState } from "./state"
+import { CommitType, subtypeToEnum } from "./types"
+import type { Command, Commit, PdfTextMarkupAnnotationObject, Subtype } from "./types"
 
 function ignore() {}
 
@@ -70,7 +69,11 @@ export interface AnnotationCapability {
     items: { id: string; patch: Partial<PdfTextMarkupAnnotationObject> }[],
     documentId?: string,
   ) => void // for consumer program to batch update annotations (without adding to timeline)
-  updateAnnotation: (annotationId: string, patch: Partial<PdfTextMarkupAnnotationObject>, documentId?: string) => void // change the props of an annotation
+  updateAnnotation: (
+    annotationId: string,
+    patch: Partial<PdfTextMarkupAnnotationObject>,
+    documentId?: string,
+  ) => void // change the props of an annotation
   deleteAnnotations: (annotationIds: string[], documentId?: string) => void // for consumer program to batch delete annotations (without adding to timeline)
   deleteAnnotation: (annotationId: string, documentId?: string) => void
   undo: () => void
@@ -103,7 +106,6 @@ export class AnnotationPlugin extends BasePlugin<
       registry.getPlugin<InteractionManagerPlugin>("interaction-manager")?.provides() ?? null
   }
 
-  
   // ─────────────────────────────────────────────────────────
   // Document Lifecycle (from BasePlugin)
   // ─────────────────────────────────────────────────────────
@@ -112,14 +114,18 @@ export class AnnotationPlugin extends BasePlugin<
     this.dispatch(initAnnotationState(documentId, initialDocumentState))
 
     // Enable text selection while in "annotation" interaction mode
-    this.selection?.enableForMode("annotation", {
-      enableSelection: true,
-      showSelectionRects: false,
-    }, documentId)
+    this.selection?.enableForMode(
+      "annotation",
+      {
+        enableSelection: true,
+        showSelectionRects: false,
+      },
+      documentId,
+    )
 
     this.logger.debug(
-      'AnnotationPlugin',
-      'DocumentOpened',
+      "AnnotationPlugin",
+      "DocumentOpened",
       `Initialized annotation state for document: ${documentId}`,
     )
   }
@@ -159,8 +165,8 @@ export class AnnotationPlugin extends BasePlugin<
     this.dispatch(cleanupAnnotationState(documentId))
 
     this.logger.debug(
-      'AnnotationPlugin',
-      'DocumentClosed',
+      "AnnotationPlugin",
+      "DocumentClosed",
       `Cleaned up annotation state for document: ${documentId}`,
     )
   }
@@ -173,7 +179,7 @@ export class AnnotationPlugin extends BasePlugin<
       exclusive: false,
       cursor: "text",
     })
-    
+
     // Create annotations using SelectionPluginCapability callback
     this.selection?.onEndSelection(() => {
       const { activeSubtype, activeColor, activeOpacity, activeEntityType } = this.state
@@ -250,17 +256,17 @@ export class AnnotationPlugin extends BasePlugin<
 
   override onStoreUpdated(prev: AnnotationState, next: AnnotationState): void {
     // Reset undo/redo timeline if changing active document
-    if (prev.activeDocumentId !== next.activeDocumentId) {      
+    if (prev.activeDocumentId !== next.activeDocumentId) {
       this.timeline = []
       this.timelineIndex = -1
     }
 
     // Change interaction mode when activeSubtype changes between null and non-null
     if (!prev.activeSubtype && next.activeSubtype) {
-        this.interactionManager?.activate("annotation")
+      this.interactionManager?.activate("annotation")
     }
     if (prev.activeSubtype && !next.activeSubtype) {
-        this.interactionManager?.activateDefaultMode()
+      this.interactionManager?.activateDefaultMode()
     }
 
     this.state$.emit(next)
@@ -289,7 +295,7 @@ export class AnnotationPlugin extends BasePlugin<
     }
 
     const command: Command = {
-      execute:  () => {
+      execute: () => {
         this.dispatch(createAnnotation(docId, annotationModified))
       },
       undo: () => {
@@ -303,7 +309,7 @@ export class AnnotationPlugin extends BasePlugin<
   // consumer capability to batch update annotations
   private updateAnnotations(
     items: { id: string; patch: Partial<PdfTextMarkupAnnotationObject> }[],
-    documentId?: string
+    documentId?: string,
   ) {
     const docId = documentId || this.getActiveDocumentId()
     const stampedItems = items.map(({ id, patch }) => ({
@@ -314,7 +320,11 @@ export class AnnotationPlugin extends BasePlugin<
     this.commit(docId)
   }
 
-  private updateAnnotation(id: string, patch: Partial<PdfTextMarkupAnnotationObject>, documentId?: string) {
+  private updateAnnotation(
+    id: string,
+    patch: Partial<PdfTextMarkupAnnotationObject>,
+    documentId?: string,
+  ) {
     const docId = documentId || this.getActiveDocumentId()
 
     const originalAnnotation = this.state.documents[docId]?.byUid[id]
@@ -378,8 +388,7 @@ export class AnnotationPlugin extends BasePlugin<
 
       // change state.canUndo, state.canRedo
       this.dispatch(setCanUndoRedo(this.timelineIndex, this.timeline.length))
-    }
-    else {
+    } else {
       command.execute()
       this.commit(documentId)
     }
@@ -390,7 +399,7 @@ export class AnnotationPlugin extends BasePlugin<
     const commits: Commit[] = this.state.documents[documentId].pendingCommits
     if (!commits) {
       return PdfTaskHelper.resolve(true)
-    } 
+    }
 
     // empty pending commits in state first so that if commit() is called while this call is running, commits aren't repeated
     this.dispatch(emptyPendingCommits(documentId))
@@ -399,7 +408,7 @@ export class AnnotationPlugin extends BasePlugin<
     const coreDocState = this.getCoreDocument(documentId)
     const docObj = coreDocState?.document
     if (!docObj) {
-      return PdfTaskHelper.reject({ code: PdfErrorCode.NotFound, message: 'Document not found' });
+      return PdfTaskHelper.reject({ code: PdfErrorCode.NotFound, message: "Document not found" })
     }
 
     // collect pendingTasks
@@ -409,7 +418,7 @@ export class AnnotationPlugin extends BasePlugin<
       const pageIndex = annoObj.pageIndex
       const pageObj = docObj?.pages.find((p: any) => p.index === pageIndex)
       if (!pageObj) {
-        return PdfTaskHelper.reject({ code: PdfErrorCode.NotFound, message: 'Page not found' });
+        return PdfTaskHelper.reject({ code: PdfErrorCode.NotFound, message: "Page not found" })
       }
 
       switch (commit.type) {
@@ -433,7 +442,7 @@ export class AnnotationPlugin extends BasePlugin<
     // execute pendingTasks and wait for them to be settled
     Task.allSettled(pendingTasks).wait(
       () => returnTask.resolve(true),
-      (error) => returnTask.fail(error)
+      (error) => returnTask.fail(error),
     )
 
     return returnTask

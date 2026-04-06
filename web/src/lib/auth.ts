@@ -1,7 +1,7 @@
-import { betterAuth } from "better-auth";
-import { haveIBeenPwned } from "better-auth/plugins";
-import { tanstackStartCookies } from "better-auth/tanstack-start";
-import { Pool } from "pg";
+import { betterAuth } from "better-auth"
+import { haveIBeenPwned } from "better-auth/plugins"
+import { tanstackStartCookies } from "better-auth/tanstack-start"
+import { Pool } from "pg"
 import { env } from "../env.server"
 import { resendClient } from "../integrations/resend"
 

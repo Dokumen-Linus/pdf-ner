@@ -7,14 +7,17 @@ import { auth } from "@/lib/auth"
 const f = createUploadthing()
 
 export const uploadRouter = {
-  avatarUploader: f({
-    image: {
-      maxFileSize: "2MB",
-      maxFileCount: 1,
+  avatarUploader: f(
+    {
+      image: {
+        maxFileSize: "2MB",
+        maxFileCount: 1,
+      },
     },
-  }, {
-    awaitServerData: false,
-  })
+    {
+      awaitServerData: false,
+    },
+  )
     .middleware(async () => {
       const headers = getRequestHeaders()
       const session = await auth.api.getSession({ headers })

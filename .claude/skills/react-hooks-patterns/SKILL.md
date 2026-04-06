@@ -1,9 +1,6 @@
 ---
 name: react-hooks-patterns
 description: Use when React Hooks patterns including useState, useEffect, useContext, useMemo, useCallback, and custom hooks. Use for modern React development.
-allowed-tools:
-  - Bash
-  - Read
 ---
 
 # React Hooks Patterns

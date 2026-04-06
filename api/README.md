@@ -42,6 +42,8 @@ uv pip sync uv.lock
 
 Using v3.13 until most libraries have upgraded to 3.14 (currently I have "python" PATH set to 3.13.11 and "py" set to 3.14.2)
 
+3 Ensure .env is created following to .env.local.example
+
 ### Running the api
 
 1 Start the database server
@@ -64,9 +66,7 @@ Mac:
 source .venv/bin/activate
 ```
 
-3 Ensure .env is created following to .env.local.example
-
-4 Run the app as a module (not a script)
+3 Run the app as a module (not a script)
 
 ```cmd
 uvicorn app.main:app --reload
@@ -75,6 +75,18 @@ uvicorn app.main:app --reload
 ### Fast API Endpoint VSCode Extension
 
 Visualizes the endpoints exposed by the api and what file defines them
+
+## Database
+
+### How Database is Exposed to API
+
+1. The database schemas are defined in ./db/migrations/ SQL scripts
+1. ./backend/core/db.py defines the PostgreSQL pool that can execute read-write queries to api schema and read queries to app schema
+1. ./backend/domains/**/router.py files import ./backend/core/db in order to start a single connection per endpoint call
+
+**Restriction on API Interactions with Database**: The API can only execute SQL scripts in functions in repository.py files using the [asyncpg](https://github.com/MagicStack/asyncpg) connection created in router.py. No ORM, Pydantic, or other Python schemas for the SQL database are allowed. Validation of the query is solely whether SQL can execute it. Connection is passed from router.py to service.py functions to repository.py functions.
+
+**Schemas**: api_user has CRUD permissions on api schema and read permissions on web, workers, and public schemas with the exception of workers.llm_usage and workers.stripe_customers
 
 ## Tech Stack
 
@@ -103,6 +115,7 @@ Visualizes the endpoints exposed by the api and what file defines them
 
 - core: global functionalities like config, logging, db connection, connection to external APIs
 - domains: contains different domains, which are groups of endpoints to acheive a business purpose
+- domains\shared: schemas, repositiories, tasks or events that apply to multiple domains
 - integration:  code not specific to a business purpose that defines use of an external service
 - utils: generic code not specific to a business purpose that could be re-used in a hypothetical new domain
 
@@ -111,7 +124,7 @@ Visualizes the endpoints exposed by the api and what file defines them
 Each domain may have the following files:
 
 - router.py (wiring layer) - defines what endpoints are exposed and provides the wiring layer, creates connection using core.db.get_conn()
-- schema.py (typing) - defines pydantic validation schemas for endpoint inputs (never responses, never set response_model)
+- schema.py (typing) - defines pydantic validation schemas for endpoint inputs (never responses, never set response_model) and dataclasses for function outputs when needed for consistency across multiple functions
 - service.py (business logic) - creates functions to perform the main business logic/purpose of the endpoint ()
 - repository.py (db queries) - executes SQL queries to handle necessary database interaction using the connection passed from service.py and router.py
 - tasks.py (side processes) - creates FastAPI background tasks that router.py should call when code can be executed indepndently of/after the response
@@ -121,50 +134,15 @@ Each domain may have the following files:
 
 - avoid blocking code and do not put it inside async fncts
 - use anyio instead of asyncio whenever possible. attempt to replace every use of asyncio with anyio
-- perform all http requests with [httpx](https://www.python-httpx.org/), [repo](https://github.com/encode/httpx)
+- perform all http requests with httpx [docs](https://www.python-httpx.org/), [repo](https://github.com/encode/httpx)
 - never pass app.state to service.py, define specific dependencies in a function in core.dependencites.py
 - never create a class in service.py, repository.py, tasks.py, events.py - create functions
+- never create a dataclass in a file that is not named schemas.py
 - import settings, never get_settings() from core.settings.py
 - do not create global variables, add them to app.state and initialize in lifespan.py
 - only functions in a repository.py may execute SQL scripts
 - schemas should never be defined in Python for the db, the only validation is whether SQL statements by asyncpg execute
 - pyproject.toml installs `fastapi[standard]` to ensure uvloop and httptools are used in prod (uvloop is not installable on Windows)
-
-## Database
-
-### How Database is Exposed to API
-
-1. The database schemas are defined in ./db/migrations/ SQL scripts
-1. ./backend/core/db.py defines the PostgreSQL pool that can execute read-write queries to api schema and read queries to app schema
-1. ./backend/domains/**/router.py files import ./backend/core/db in order to start a single connection per endpoint call
-
-**Restriction on API Interactions with Database**: The backend only can execute SQL scripts in functions in repository.py files using the [asyncpg](https://github.com/MagicStack/asyncpg) connection created in router.py. No ORM, Pydantic, or other Python schemas for the SQL database are allowed. Validation of the query is solely whether SQL can execute it. Connection is passed from router.py to service.py functions to repository.py functions.
-
-### Start Instructions
-
-Must start the database server before running the FastAPI app. Should run the app and db start commands in separate terminals so that terminating one does not terminate the other.
-
-```cmd
-pg_ctl -D .\pgdata -l logfile start
-```
-
-### Schemas
-
-#### Auth Schema
-
-API does not touch authentication.
-
-#### Web Schema
-
-Contains all tables for the web app defined in ./db/migrations/web. Role api_user has read-only access.
-
-#### Api Schema
-
-Contains all tables for the backend API defined in ./db/migrations/api. Role owner_role owns the schema so it can be used in migrations. Role api_user can edit tables (not create or delete tables).
-
-#### Workers Schema
-
-Contains all tables for the backend workers defined in ./db/migrations/workers. Role api_user has read-only access.
 
 ## Tests
 

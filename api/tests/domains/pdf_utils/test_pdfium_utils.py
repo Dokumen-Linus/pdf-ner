@@ -1,11 +1,10 @@
 from unittest.mock import patch
 
-import pytest
-
 from api.app.domains.pdf_utils.pdfium_utils import (
     highlight_phrases,
     parse_hex_color,
 )
+import pytest
 
 
 class TestParseHexColor:

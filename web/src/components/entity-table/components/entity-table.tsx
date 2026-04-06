@@ -70,7 +70,9 @@ const EntityTable = () => {
       </TableHeader>
       <TableBody>
         {Object.entries(entityTypesByName).map(([name, entityType]) => {
-          const activeDoc = annoState?.activeDocumentId ? annoState.documents[annoState.activeDocumentId] : null
+          const activeDoc = annoState?.activeDocumentId
+            ? annoState.documents[annoState.activeDocumentId]
+            : null
           const annotationUids = activeDoc?.byEntityType?.[name] || []
           const firstUid = annotationUids[0]
           const annotation = firstUid ? activeDoc?.byUid?.[firstUid] : null
@@ -94,7 +96,9 @@ const EntityTable = () => {
                       })
                     }
                     // use PluginStore to change existing annotations of this ET
-                    const activeDoc = annoState?.activeDocumentId ? annoState.documents[annoState.activeDocumentId] : null
+                    const activeDoc = annoState?.activeDocumentId
+                      ? annoState.documents[annoState.activeDocumentId]
+                      : null
                     const annoIds = activeDoc?.byEntityType?.[name] || []
                     annoCapability?.updateAnnotations(
                       annoIds.map((id) => ({
@@ -140,7 +144,9 @@ const EntityTable = () => {
                       })
                     }
                     // use PluginStore to change existing annotations of this ET
-                    const activeDoc = annoState?.activeDocumentId ? annoState.documents[annoState.activeDocumentId] : null
+                    const activeDoc = annoState?.activeDocumentId
+                      ? annoState.documents[annoState.activeDocumentId]
+                      : null
                     const annoIds = activeDoc?.byEntityType?.[name] || []
                     annoCapability?.updateAnnotations(
                       annoIds.map((id) => ({

@@ -20,9 +20,9 @@ for _k, _v in _TEST_ENV.items():
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock
 
+from fastapi import APIRouter, Depends, FastAPI
 import httpx
 import pytest
-from fastapi import APIRouter, Depends, FastAPI
 
 from app.core.db import get_conn
 from app.core.dependencies import get_llm_clients, get_s3_client, verify_api_key

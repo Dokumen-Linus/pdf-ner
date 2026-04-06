@@ -61,7 +61,9 @@ test.describe("Authentication Flow", () => {
       await page.getByLabel("Password", { exact: true }).fill("nouppercase123!")
       await page.getByLabel("Password", { exact: true }).blur()
 
-      await expect(page.getByText("Password must contain at least one uppercase letter")).toBeVisible()
+      await expect(
+        page.getByText("Password must contain at least one uppercase letter"),
+      ).toBeVisible()
     })
 
     test("should validate password confirmation match", async ({ page }) => {
@@ -93,7 +95,9 @@ test.describe("Authentication Flow", () => {
       await page.goto("/signin")
 
       await expect(page.getByRole("heading", { name: "Sign In" })).toBeVisible()
-      await expect(page.getByText("Enter your email and password to access your account")).toBeVisible()
+      await expect(
+        page.getByText("Enter your email and password to access your account"),
+      ).toBeVisible()
       await expect(page.getByLabel("Email")).toBeVisible()
       await expect(page.getByLabel("Password")).toBeVisible()
       await expect(page.getByRole("button", { name: "Sign In" })).toBeVisible()
@@ -146,12 +150,14 @@ test.describe("Authentication Flow", () => {
     test("should show correct auth header on signup page", async ({ page }) => {
       await page.goto("/signup")
 
-      // Should show auth layout header  
+      // Should show auth layout header
       await expect(page.locator("header")).toBeVisible()
       await expect(page.getByText("Dokumen AI")).toBeVisible()
     })
 
-    test("should redirect to signin when accessing protected route without auth", async ({ page }) => {
+    test("should redirect to signin when accessing protected route without auth", async ({
+      page,
+    }) => {
       await page.goto("/profile")
 
       // Should redirect to signin page
@@ -197,7 +203,7 @@ test.describe("Authentication Flow", () => {
 
       // Wait for page to load and check focus
       await page.waitForLoadState("domcontentloaded")
-      
+
       const emailInput = page.getByLabel("Email")
       await emailInput.focus()
       await expect(emailInput).toBeFocused()
@@ -223,9 +229,9 @@ test.describe("Authentication Flow", () => {
       await page.goto("/signout")
 
       await expect(page.getByText("Signing out...")).toBeVisible()
-      
+
       // Should have loading spinner
-      await expect(page.locator('.animate-spin')).toBeVisible()
+      await expect(page.locator(".animate-spin")).toBeVisible()
     })
 
     test("should redirect to homepage after signout", async ({ page }) => {
@@ -241,7 +247,7 @@ test.describe("Authentication Flow", () => {
     test("should handle network errors gracefully on signin", async ({ page }) => {
       // Simulate offline mode to trigger network errors
       await page.context().setOffline(true)
-      
+
       await page.goto("/signin")
 
       await page.getByLabel("Email").fill("test@example.com")
@@ -255,7 +261,7 @@ test.describe("Authentication Flow", () => {
     test("should handle navigation errors", async ({ page }) => {
       // Try to access a non-existent auth route
       const response = await page.goto("/auth/nonexistent")
-      
+
       // Should handle gracefully (404 or redirect)
       expect(response?.status()).toBeTruthy()
     })

@@ -1,23 +1,47 @@
 {
-  "mcpServers": {
-    "tanstack": {
-      "command": "npx",
-      "args": ["@tanstack/cli", "mcp"]
-    }
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/log-commands.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/format-on-edit.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/typecheck-on-edit.sh"
+          }
+        ]
+      }
+    ]
   },
   "permissions": {
     "allow": [
-      "Read(*)",
-      "Write(*)",
-      "Edit(*)",
-      "MultiEdit(*)",
+      "Read",
+      "Write",
+      "Edit",
+      "MultiEdit",
+      
+      "Grep",
+      "Glob",
+      "LS",
 
-      "Bash(*)",
+      "Bash",
 
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:bun.com)",
-      "WebFetch(domain:tanstack.com)",
-      "WebFetch(domain:docs.uploadthing.com)"
+      "WebFetch",
+      "WebSearch"
     ],
     "deny": [
       "Bash(sudo:*)",

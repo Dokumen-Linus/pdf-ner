@@ -6,7 +6,6 @@ CREATE TABLE workers.pdfs (
 
   -- info from web sent to api via request
   project_id UUID NOT NULL REFERENCES web.projects (id) ON DELETE CASCADE,
-  labeled_entities JSONB,
 
   -- info from extract_text
   full_text TEXT,

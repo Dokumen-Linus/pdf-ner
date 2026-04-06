@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, it } from "bun:test"
 import {
   getAllStdEntityTypes,
   getStdEntityTypeById,
@@ -41,7 +41,9 @@ describe.if(runTests)("API Standard Entity Types Read-Only Functions", () => {
       const allTypes = await getAllStdEntityTypes({ data: {} })
       if (allTypes.length > 0) {
         const firstType = allTypes[0]
-        const result = await getStdEntityTypeByShortName({ data: { shortName: firstType.shortName } })
+        const result = await getStdEntityTypeByShortName({
+          data: { shortName: firstType.shortName },
+        })
         expect(result).toBeDefined()
         expect(result.shortName).toBe(firstType.shortName)
       }
@@ -61,7 +63,9 @@ describe.if(runTests)("API Standard Entity Types Read-Only Functions", () => {
     })
 
     it("returns an empty array for non-existent datatype", async () => {
-      const result = await getStdEntityTypesByDatatype({ data: { datatype: "non_existent_datatype" } })
+      const result = await getStdEntityTypesByDatatype({
+        data: { datatype: "non_existent_datatype" },
+      })
       expect(Array.isArray(result)).toBe(true)
       expect(result.length).toBe(0)
     })

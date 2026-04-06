@@ -6,6 +6,7 @@ import pytest
 
 from app.domains.pdf_utils.schemas import HighlightRequest
 
+
 @pytest.fixture
 def empty_pdf_bytes() -> bytes:
     """A valid single-page PDF with no searchable text."""

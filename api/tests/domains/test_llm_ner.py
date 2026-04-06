@@ -1,11 +1,12 @@
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
-import pytest
 from fastapi import HTTPException
+import pytest
 
 from app.domains.llm_ner import service
 from app.domains.llm_ner.schemas import ExtractEntitiesRequest
+
 
 class TestBuildPrompt:
     """Unit tests for build_prompt_from_template function."""

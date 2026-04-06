@@ -1,8 +1,8 @@
 import { CSSProperties, JSX, useEffect, useState } from "react"
 import { useDoublePressProps } from "../../../../../hooks/mouse-events/use-double-press-props"
 import type { PdfTextMarkupAnnotationObject } from "../../lib/types"
-import { SelectedMenu } from "./selected-menu"
 import { CounterRotate } from "./counter-rotate"
+import { SelectedMenu } from "./selected-menu"
 
 export interface SelectionOutline {
   color?: string
@@ -38,12 +38,16 @@ export function AnnotationContainer({
   style = {},
   ...props
 }: AnnotationContainerProps): JSX.Element {
-  const outline = { width: 1, color: "black", offset: 0, style: "solid" as const, ...selectionOutline }
+  const outline = {
+    width: 1,
+    color: "black",
+    offset: 0,
+    style: "solid" as const,
+    ...selectionOutline,
+  }
 
   const [preview, setPreview] = useState<PdfTextMarkupAnnotationObject>(annotation)
-  const currentObject = preview
-    ? { ...annotation, ...preview }
-    : annotation
+  const currentObject = preview ? { ...annotation, ...preview } : annotation
 
   const doubleProps = useDoublePressProps(onDoubleClick)
 

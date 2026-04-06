@@ -1,9 +1,10 @@
+from datetime import datetime
 import os
 import re
-from datetime import datetime
 
 TEMPLATE_NUMBER = 1
 DOCUMENT_AT_END = "true"
+
 
 def extract_inserts(text: str) -> list[str]:
     """Extract all substrings that start with < and end with >"""

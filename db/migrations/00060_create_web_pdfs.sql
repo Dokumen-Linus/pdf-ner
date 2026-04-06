@@ -4,6 +4,7 @@ CREATE TABLE web.pdfs (
   CONSTRAINT pdfs_id_fkey FOREIGN KEY (id) REFERENCES workers.pdfs (id) ON DELETE CASCADE, -- same id as workers.pdfs
   
   -- any info about pdfs that web writes
+  labeled_entities JSONB,
   uploaded_by UUID REFERENCES web.users (id) ON DELETE CASCADE,
   first_viewed_at TIMESTAMPTZ DEFAULT now()
 );

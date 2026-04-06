@@ -47,7 +47,7 @@ export const selectionReducer = (state = initialState, action: SelectionAction):
 
     case CLEANUP_SELECTION_STATE: {
       const documentId = action.payload
-      const { [documentId]: removed, ...remaining } = state.documents
+      const { [documentId]: _removed, ...remaining } = state.documents
       return {
         ...state,
         documents: remaining,

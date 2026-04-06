@@ -1,8 +1,13 @@
-# EmbedPDF React Headless Components
+---
+name: embedpdf-headless
+description: "How to use EmbedPDF React Headless Components"
+---
+
+# EmbedPDF Headless
 
 ## Overview
 
-EmbedPDF React's headless library is an **unopinionated UI toolkit** for building fully customized PDF experiences. It provides logic (hooks) and rendering primitives (components) with **zero styling** -- you control the UI entirely.
+EmbedPDF React's headless library is an unopinionated UI toolkit for building fully customized PDF experiences. It provides logic (hooks) and rendering primitives (components)
 
 **Powered by:** PDFium via WebAssembly (same engine as Google Chrome), virtualization, first-class TypeScript, tree-shakeable imports.
 

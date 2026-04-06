@@ -39,7 +39,7 @@ const useEntityTypeStore = create<EntityTypeStore>()(
           }
         }),
 
-        reset: () => set(initialState),
+      reset: () => set(initialState),
     }),
     { name: "entity-type-store" },
   ),

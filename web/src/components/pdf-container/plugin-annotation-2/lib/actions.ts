@@ -1,12 +1,12 @@
 import type { Action, Reducer } from "@embedpdf/core"
-import { CommitType, PdfTextMarkupAnnotationObject, Subtype } from "./types"
 import type { AnnotationDocumentState, AnnotationState } from "./state"
+import { CommitType, PdfTextMarkupAnnotationObject, Subtype } from "./types"
 
 // ***ACTION CONSTANTS***
 // document lifecycle
-export const INIT_ANNOTATION_STATE = 'ANNOTATION/INIT_STATE'
-export const CLEANUP_ANNOTATION_STATE = 'ANNOTATION/CLEANUP_STATE'
-export const SET_ACTIVE_DOCUMENT = 'ANNOTATION/SET_ACTIVE_DOCUMENT'
+export const INIT_ANNOTATION_STATE = "ANNOTATION/INIT_STATE"
+export const CLEANUP_ANNOTATION_STATE = "ANNOTATION/CLEANUP_STATE"
+export const SET_ACTIVE_DOCUMENT = "ANNOTATION/SET_ACTIVE_DOCUMENT"
 
 // global actions
 export const SELECT_ANNOTATION = "ANNOTATION/SELECT_ANNOTATION"
@@ -25,19 +25,19 @@ export const EMPTY_PENDING_COMMITS = "ANNOTATION/EMPTY_PENDING_COMMITS"
 
 // ***ACTION INTERFACES***
 export interface InitAnnotationStateAction extends Action {
-  type: typeof INIT_ANNOTATION_STATE;
+  type: typeof INIT_ANNOTATION_STATE
   payload: {
-    documentId: string;
-    state: AnnotationDocumentState;
-  };
+    documentId: string
+    state: AnnotationDocumentState
+  }
 }
 export interface CleanupAnnotationStateAction extends Action {
-  type: typeof CLEANUP_ANNOTATION_STATE;
-  payload: string; // documentId
+  type: typeof CLEANUP_ANNOTATION_STATE
+  payload: string // documentId
 }
 export interface SetActiveDocumentAction extends Action {
-  type: typeof SET_ACTIVE_DOCUMENT;
-  payload: string | null; // documentId
+  type: typeof SET_ACTIVE_DOCUMENT
+  payload: string | null // documentId
 }
 
 export interface SelectAnnotationAction extends Action {
@@ -63,7 +63,7 @@ export interface SetCanUndoRedoAction extends Action {
 
 export interface BatchCreateAnnotationsAction extends Action {
   type: typeof BATCH_CREATE_ANNOTATIONS
-  payload: { documentId: string; annotations: PdfTextMarkupAnnotationObject[]}
+  payload: { documentId: string; annotations: PdfTextMarkupAnnotationObject[] }
 }
 export interface CreateAnnotationAction extends Action {
   type: typeof CREATE_ANNOTATION
@@ -71,7 +71,10 @@ export interface CreateAnnotationAction extends Action {
 }
 export interface BatchUpdateAnnotationsAction extends Action {
   type: typeof BATCH_UPDATE_ANNOTATIONS
-  payload: { documentId: string; items: { id: string; patch: Partial<PdfTextMarkupAnnotationObject> }[] }
+  payload: {
+    documentId: string
+    items: { id: string; patch: Partial<PdfTextMarkupAnnotationObject> }[]
+  }
 }
 export interface UpdateAnnotationAction extends Action {
   type: typeof UPDATE_ANNOTATION
@@ -112,13 +115,13 @@ export function initAnnotationState(
   documentId: string,
   state: AnnotationDocumentState,
 ): InitAnnotationStateAction {
-  return { type: INIT_ANNOTATION_STATE, payload: { documentId, state } };
+  return { type: INIT_ANNOTATION_STATE, payload: { documentId, state } }
 }
 export function cleanupAnnotationState(documentId: string): CleanupAnnotationStateAction {
-  return { type: CLEANUP_ANNOTATION_STATE, payload: documentId };
+  return { type: CLEANUP_ANNOTATION_STATE, payload: documentId }
 }
 export function setActiveDocument(documentId: string | null): SetActiveDocumentAction {
-  return { type: SET_ACTIVE_DOCUMENT, payload: documentId };
+  return { type: SET_ACTIVE_DOCUMENT, payload: documentId }
 }
 
 export const selectAnnotation = (id: string): SelectAnnotationAction => ({
@@ -169,7 +172,10 @@ export const updateAnnotation = (
   id: string,
   patch: Partial<PdfTextMarkupAnnotationObject>,
 ): UpdateAnnotationAction => ({ type: UPDATE_ANNOTATION, payload: { documentId, id, patch } })
-export const batchDeleteAnnotations = (documentId: string, ids: string[]): BatchDeleteAnnotationsAction => ({
+export const batchDeleteAnnotations = (
+  documentId: string,
+  ids: string[],
+): BatchDeleteAnnotationsAction => ({
   type: BATCH_DELETE_ANNOTATIONS,
   payload: { documentId, ids },
 })
@@ -186,7 +192,7 @@ export const emptyPendingCommits = (documentId: string): EmptyPendingCommitsActi
 export const reducer: Reducer<AnnotationState, AnnotationAction> = (state, action) => {
   switch (action.type) {
     case INIT_ANNOTATION_STATE: {
-      const { documentId, state: docState } = action.payload;
+      const { documentId, state: docState } = action.payload
       return {
         ...state,
         documents: {
@@ -195,17 +201,17 @@ export const reducer: Reducer<AnnotationState, AnnotationAction> = (state, actio
         },
         // Set as active if no active document
         activeDocumentId: state.activeDocumentId ?? documentId,
-      };
+      }
     }
 
     case CLEANUP_ANNOTATION_STATE: {
-      const documentId = action.payload;
-      const { [documentId]: removed, ...remainingDocs } = state.documents;
+      const documentId = action.payload
+      const { [documentId]: _removed, ...remainingDocs } = state.documents
       return {
         ...state,
         documents: remainingDocs,
         activeDocumentId: state.activeDocumentId === documentId ? null : state.activeDocumentId,
-      };
+      }
     }
 
     case SET_ACTIVE_DOCUMENT: {
@@ -219,7 +225,7 @@ export const reducer: Reducer<AnnotationState, AnnotationAction> = (state, actio
         canRedo: false,
       }
     }
-    
+
     case SET_CREATE_ANNOTATION_DEFAULTS:
       return {
         ...state,
@@ -232,7 +238,10 @@ export const reducer: Reducer<AnnotationState, AnnotationAction> = (state, actio
 
     case SELECT_ANNOTATION: {
       // if annotation is not on active document, don't select it
-      if (state.activeDocumentId && state.documents[state.activeDocumentId].byUid[action.payload.id]) {
+      if (
+        state.activeDocumentId &&
+        state.documents[state.activeDocumentId].byUid[action.payload.id]
+      ) {
         return { ...state, selectedUid: action.payload.id }
       }
       return state
@@ -256,7 +265,7 @@ export const reducer: Reducer<AnnotationState, AnnotationAction> = (state, actio
       const newByUid = { ...docState.byUid }
       const newByPage = { ...docState.byPage }
       const newByEntityType = { ...docState.byEntityType }
-      const commits = [ ...docState.pendingCommits ]
+      const commits = [...docState.pendingCommits]
       for (const anno of annotations) {
         const pageIndex = anno.pageIndex
         const uid = anno.id
@@ -281,21 +290,21 @@ export const reducer: Reducer<AnnotationState, AnnotationAction> = (state, actio
             byUid: newByUid,
             byPage: newByPage,
             byEntityType: newByEntityType,
-            pendingCommits: commits
-          }
-        }
+            pendingCommits: commits,
+          },
+        },
       }
     }
-    
+
     case CREATE_ANNOTATION: {
       const { documentId, annotation: anno } = action.payload
       const docState = state.documents[documentId]
       if (!docState) return state
-    
+
       const uid = anno.id
       const pageIndex = anno.pageIndex
       const et = anno.custom?.entityType
-    
+
       return {
         ...state,
         documents: {
@@ -313,10 +322,7 @@ export const reducer: Reducer<AnnotationState, AnnotationAction> = (state, actio
                   [et]: [...(docState.byEntityType[et] || []), uid],
                 }
               : docState.byEntityType,
-            pendingCommits: [
-              ...docState.pendingCommits,
-              { type: CommitType.Create, anno },
-            ],
+            pendingCommits: [...docState.pendingCommits, { type: CommitType.Create, anno }],
           },
         },
       }
@@ -377,13 +383,16 @@ export const reducer: Reducer<AnnotationState, AnnotationAction> = (state, actio
       const oldEt = existing.custom?.entityType
       const newEt = updatedAnno.custom?.entityType
 
-      const newByEntityType = oldEt !== newEt
-        ? {
-            ...docState.byEntityType,
-            ...(oldEt ? { [oldEt]: (docState.byEntityType[oldEt] || []).filter((u) => u !== id) } : {}),
-            ...(newEt ? { [newEt]: [...(docState.byEntityType[newEt] || []), id] } : {}),
-          }
-        : docState.byEntityType
+      const newByEntityType =
+        oldEt !== newEt
+          ? {
+              ...docState.byEntityType,
+              ...(oldEt
+                ? { [oldEt]: (docState.byEntityType[oldEt] || []).filter((u) => u !== id) }
+                : {}),
+              ...(newEt ? { [newEt]: [...(docState.byEntityType[newEt] || []), id] } : {}),
+            }
+          : docState.byEntityType
 
       return {
         ...state,
@@ -471,10 +480,7 @@ export const reducer: Reducer<AnnotationState, AnnotationAction> = (state, actio
                   [et]: (docState.byEntityType[et] || []).filter((u) => u !== uid),
                 }
               : docState.byEntityType,
-            pendingCommits: [
-              ...docState.pendingCommits,
-              { type: CommitType.Delete, anno },
-            ],
+            pendingCommits: [...docState.pendingCommits, { type: CommitType.Delete, anno }],
           },
         },
       }

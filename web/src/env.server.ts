@@ -12,6 +12,7 @@ export const env = createEnv({
     FROM_EMAIL: z.email(),
     MY_EMAIL: z.email(),
     UPLOADTHING_TOKEN: z.string(),
+    STRIPE_SECRET_KEY: z.string(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

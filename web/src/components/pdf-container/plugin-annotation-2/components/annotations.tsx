@@ -1,6 +1,10 @@
 import { MouseEvent, TouchEvent, useCallback, useEffect, useMemo, useState } from "react"
 import { blendModeToCss, PdfAnnotationSubtype, PdfBlendMode } from "@embedpdf/models"
-import { EmbedPdfPointerEvent, PointerEventHandlers, usePointerHandlers } from "../../plugin-interaction-manager-2"
+import {
+  EmbedPdfPointerEvent,
+  PointerEventHandlers,
+  usePointerHandlers,
+} from "../../plugin-interaction-manager-2"
 import { useSelectionCapability } from "../../plugin-selection-2"
 import { useAnnotationCapability } from "../hooks"
 import type { AnnotationDocumentState } from "../lib/state"
@@ -11,7 +15,10 @@ import { Squiggly } from "./text-markup/squiggly"
 import { Strikeout } from "./text-markup/strikeout"
 import { Underline } from "./text-markup/underline"
 
-function getAnnotationsByPageIndex(s: AnnotationDocumentState, page: number): PdfTextMarkupAnnotationObject[] {
+function getAnnotationsByPageIndex(
+  s: AnnotationDocumentState,
+  page: number,
+): PdfTextMarkupAnnotationObject[] {
   return (s.byPage[page] ?? []).map((uid) => s.byUid[uid])
 }
 
@@ -82,7 +89,12 @@ export function Annotations(annotationsProps: AnnotationsProps) {
             isSelected={selectedUid === annotation.id}
             onSelect={(e) => handleClick(e, annotation)}
             style={{
-              mixBlendMode: blendModeToCss(annotation.blendMode ?? (annotation.type === PdfAnnotationSubtype.HIGHLIGHT ? PdfBlendMode.Multiply : PdfBlendMode.Normal)),
+              mixBlendMode: blendModeToCss(
+                annotation.blendMode ??
+                  (annotation.type === PdfAnnotationSubtype.HIGHLIGHT
+                    ? PdfBlendMode.Multiply
+                    : PdfBlendMode.Normal),
+              ),
             }}
             documentId={documentId}
             scale={scale}
@@ -92,13 +104,21 @@ export function Annotations(annotationsProps: AnnotationsProps) {
             {(obj) => {
               switch (obj.type) {
                 case PdfAnnotationSubtype.HIGHLIGHT:
-                  return <Highlight {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                  return (
+                    <Highlight {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                  )
                 case PdfAnnotationSubtype.SQUIGGLY:
-                  return <Squiggly {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                  return (
+                    <Squiggly {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                  )
                 case PdfAnnotationSubtype.STRIKEOUT:
-                  return <Strikeout {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                  return (
+                    <Strikeout {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                  )
                 case PdfAnnotationSubtype.UNDERLINE:
-                  return <Underline {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                  return (
+                    <Underline {...obj} scale={scale} onClick={(e) => handleClick(e, annotation)} />
+                  )
                 default:
                   return null
               }

@@ -1,14 +1,14 @@
 import { CSSProperties, HTMLAttributes, useMemo } from "react"
 import { useDocumentState } from "@embedpdf/core/react"
 import { Rotation } from "@embedpdf/models"
+import type { SelectionOutline } from "./annotation-container/annotation-container"
 import { Annotations } from "./annotations"
 import { TextMarkupPreview } from "./text-markup/preview"
-import type { SelectionOutline } from "./annotation-container/annotation-container"
 
 type AnnotationLayerProps = Omit<HTMLAttributes<HTMLDivElement>, "style"> & {
   documentId: string
   pageIndex: number
-  scale?: number;
+  scale?: number
   rotation?: number
   selectionOutline?: SelectionOutline
   style?: CSSProperties
@@ -38,7 +38,6 @@ export function AnnotationLayer({
     const docRotation = documentState?.rotation ?? 0
     return ((pageRotation + docRotation) % 4) as Rotation
   }, [overrideRotation, page?.rotation, documentState?.rotation])
-
 
   return (
     <div

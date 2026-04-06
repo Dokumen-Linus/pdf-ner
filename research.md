@@ -33,6 +33,10 @@
 - Antigravity
 - Windsurf
 
+### Essential Tools
+
+- [Browser Use](https://docs.browser-use.com/open-source/browser-use-cli)
+
 ### Claude
 
 - monitor usage [claude-pulse](https://github.com/NoobyGains/claude-pulse)
@@ -41,6 +45,8 @@
 
 - [skillsmp](https://skillsmp.com/categories/productivity-tools)
 - [context7](https://context7.com/skills)
+- [@zodchii Top 50](https://x.com/zodchiii/status/2034924354337714642)
+- [Tanstack Intent](https://tanstack.com/intent/registry)
 
 ### Generate React Components
 
@@ -53,7 +59,7 @@
 - Google Stitch
 - Lovable
 
-### Images
+### Generate Images
 
 - Gemini
 - SVG Icons: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
@@ -76,6 +82,7 @@
 
 - [shadcn/ui all components](https://ui.shadcn.com/docs/components)
 - [official blocks](https://ui.shadcn.com/blocks)
+- **add themes [shadcn/studio](https://shadcnstudio.com/components)**
 - official charts [docs0](https://ui.shadcn.com/docs/components/radix/chart), [docs1](https://ui.shadcn.com/charts/area)
 - blocks [shadcnspace](https://shadcnspace.com/)
 - blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
@@ -98,7 +105,7 @@
 - [Joy UI](https://mui.com/joy-ui/getting-started/)
 - [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
 - [Magic UI](https://github.com/magicuidesign/magicui)
-- [Cult UI](https://github.com/nolly-studio/cult-ui)
+- **[Cult UI](https://github.com/nolly-studio/cult-ui)**
 - [Page UI](https://github.com/danmindru/page-ui)
 - [Syntax UI](https://github.com/SyntaxUI/syntaxui)
 - [Jolly UI](https://github.com/jolbol1/jolly-ui)
@@ -116,10 +123,10 @@
 
 ### Animated Components
 
+- [Framer Motion](https://www.framer.com/motion/)
 - [Animate UI](https://animate-ui.com/docs/components)
 - [Eldora UI](https://eldoraui.site/docs)
 - [Mixcn UI](https://github.com/taqui-786/mixcnui)
-- [Framer Motion](https://www.framer.com/motion/)
 - [react-use-gesture](https://github.com/pmndrs/use-gesture)
 - [react-spring](https://github.com/pmndrs/react-spring)
 - [react-three-fiber](https://github.com/pmndrs/react-three-fiber)
@@ -131,6 +138,8 @@
 - Currently: [Lucide Icons](https://lucide.dev/icons/)
 - Others: [React Icons](https://react-icons.github.io/react-icons/)
 - Download SVGs: [Iconstack](https://ossian-icons-60.lovable.app/)
+- Download SVGs: [tabler](https://github.com/tabler/tabler-icons)
+- **Download TSX: [nucleo](https://nucleoapp.com/app/) Isometric tab**
 
 ### Special Components
 
@@ -142,16 +151,16 @@
 - [Kanaries/graphic-walker](https://github.com/Kanaries/graphic-walker)
 - [vercel/avatar](https://github.com/vercel/avatar)
 - [vercel/react-tweet](https://github.com/vercel/react-tweet)
-- [chatbot assistant](https://ai-sdk.dev/elements/examples/chatbot)
+- [Vercel AI SDK](https://ai-sdk.dev/elements/examples/chatbot)
 - [Ant chat](https://github.com/ant-design/pro-chat)
 - [shadcn-image-cropper](https://github.com/sujjeee/shadcn-image-cropper)
+- sounds [soundcn](https://github.com/kapishdima/soundcn)
 - scheduling [planner](https://github.com/UretzkyZvi/planner)
 - address autocomplete [shadcn-address-autocomplete](https://github.com/NiazMorshed2007/shadcn-address-autocomplete)
 - Power Automate copy [chrisjpatty/flume](https://github.com/chrisjpatty/flume)
 - timeline [shadcn-timeline](https://github.com/timDeHof/shadcn-timeline)
 - tables [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - tables [AG Grid](https://www.ag-grid.com/react-data-grid/getting-started/)
-- videos [mifi/reactive-video](https://github.com/mifi/reactive-video/)
 - Component dependency grapher [Madge](https://github.com/pahen/madge)
 - [Alibaba ChatUI](https://chatui.io/)
 - Wrapper for OpenAI API to enable user to create auto-rended react components [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
@@ -171,31 +180,11 @@
 - [tailadmin](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
 - [satnaing/shadcn-admin](https://github.com/satnaing/shadcn-admin)
 
-### Next.js Boilerplates
-
-- [odoo/odoo](https://github.com/odoo/odoo)
-- [vercel/next-forge](https://github.com/vercel/next-forge)
-- [Vercel Next.js SaaS Starter](https://vercel.com/templates/authentication/next-js-saas-starter)
-- [Blazity/next-enterprise](https://github.com/Blazity/next-enterprise/tree/main)
-- [arhamkhnz/next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard)
-- [cruip/open-react-template](https://github.com/cruip/open-react-template)
-- [ixartz/SaaS-Boilerplate](https://github.com/ixartz/SaaS-Boilerplate)
-- [nextify-limited/saasfly](https://github.com/nextify-limited/saasfly)
-- [mickasmt/next-saas-stripe-starter](https://github.com/mickasmt/next-saas-stripe-starter)
-- [reliverse/relivator](https://github.com/reliverse/relivator)
-- [michaelshimeles/nextjs-starter-kit](https://github.com/michaelshimeles/nextjs-starter-kit)
-- [alifarooq9/launchmvpfast](https://github.com/alifarooq9/launchmvpfast)
-- [cellajs/cella](https://github.com/cellajs/cella)
-- [get-convex/convex-saas](https://github.com/get-convex/convex-saas)
-
 ### Tanstack Start/Router Boilerplates
 
 - Biome, Drizzle, Query [Vijayabaskar56/tanstack-start-faster](https://github.com/Vijayabaskar56/tanstack-start-faster)
 - Example Router app [specfy/getstack](https://github.com/specfy/getstack)
 - [TanStack Dashboard Demo](https://github.com/themeselection/tanstack-dashboard-demo)
-- not great [jackytea/tanstack-starter](https://github.com/jackytea/tanstack-starter)
-- not great [abdullahelmetwali/tanstack-starter](https://github.com/abdullahelmetwali/tanstack-starter)
-
 ### Tanstack Start/Router Official Examples
 
 - [All Examples](https://github.com/TanStack/router/tree/main/examples/react)
@@ -206,6 +195,10 @@
 
 - [File upload](https://docs.uploadthing.com/getting-started/tanstack-start)
 - [Sitemap creation](https://github.com/Ryanjso/tanstack-router-sitemap)
+
+### Better Text Rendering
+
+- [pretext](https://github.com/chenglou/pretext)
 
 ### Auth
 
@@ -225,13 +218,19 @@
 
 - AWS security checks [cloudsploit](https://cloudsploit.com/)
 - Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
+- Self-hosted CDN [leandromoreira/cdn-up-and-running](https://github.com/leandromoreira/cdn-up-and-running)
+
+### Testing
+
+- [supercheck](https://github.com/supercheck-io/supercheck)
+- [OWASP/Nettacker](https://github.com/OWASP/Nettacker)
+- scan for vulernabilities [Sirius](https://github.com/SiriusScan/Sirius)
 
 ### WAF
 
 - [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
 - [bunkerity/bunkerweb](https://github.com/bunkerity/bunkerweb)
 - [evertramos/nginx-proxy-automation](https://github.com/evertramos/nginx-proxy-automation)
-- scan for vulernabilities [Sirius](https://github.com/SiriusScan/Sirius)
 
 ### Frontend Testing (besides Bun, Playwright)
 
@@ -243,6 +242,12 @@
 
 - [Stripe](https://stripe.com/)
 - self-hosted alternative [Lago](https://getlago.com/docs/welcome)
+
+### File Upload
+
+- uploadthing
+- self-hosted [chibisafe](https://github.com/chibisafe/chibisafe)
+- AWS S3 only
 
 ### Emails
 

@@ -61,7 +61,9 @@ describe.if(runTests)("API Prompts Read-Only Functions", () => {
       const allPrompts = await getAllPrompts({ data: {} })
       const promptWithTemplate = allPrompts.find((p) => p.templateId !== null)
       if (promptWithTemplate) {
-        const result = await getPromptsByTemplateId({ data: { templateId: promptWithTemplate.templateId! } })
+        const result = await getPromptsByTemplateId({
+          data: { templateId: promptWithTemplate.templateId! },
+        })
         expect(Array.isArray(result)).toBe(true)
         expect(result.length).toBeGreaterThan(0)
         for (const prompt of result) {

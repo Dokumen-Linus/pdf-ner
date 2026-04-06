@@ -65,7 +65,7 @@ type Store = ReturnType<typeof useStore.getState>
 ### 1. Define Store Interfaces
 
 Always define explicit interfaces for better type safety and IDE support:
-
+cd
 ```typescript
 interface User {
   id: string

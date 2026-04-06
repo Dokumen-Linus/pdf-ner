@@ -1,16 +1,46 @@
-import { BasePlugin, createBehaviorEmitter, DocumentState, Listener, PluginRegistry, SET_PAGES, Unsubscribe } from '@embedpdf/core';
-import { PdfPageObjectWithRotatedSize, Rect, Rotation, transformSize } from '@embedpdf/models';
-import { InteractionManagerPlugin } from '@embedpdf/plugin-interaction-manager';
-import { ViewportCapability, ViewportMetrics, ViewportPlugin } from '@embedpdf/plugin-viewport';
-import { cleanupScrollState, initScrollState, ScrollAction, setScrollStrategy, updateDocumentScrollState } from './actions';
-import { defaultPageChangeState } from './reducer';
-import { getScrollerLayout } from './selectors';
-import { BaseScrollStrategy, ScrollStrategyConfig } from './strategies/base-strategy';
-import { HorizontalScrollStrategy } from './strategies/horizontal-strategy';
-import { VerticalScrollStrategy } from './strategies/vertical-strategy';
-import { LayoutChangeEvent, LayoutChangePayload, LayoutReadyEvent, PageChangeEvent, PageChangeState, PageChangeStateEvent, ScrollBehavior, ScrollCapability, ScrollDocumentState, ScrollerLayout, ScrollEvent, ScrollMetrics, ScrollPluginConfig, ScrollScope, ScrollState, ScrollStrategy, ScrollToPageOptions } from './types';
-import { VirtualItem } from './types/virtual-item';
-
+import {
+  BasePlugin,
+  createBehaviorEmitter,
+  DocumentState,
+  Listener,
+  PluginRegistry,
+  Unsubscribe,
+} from "@embedpdf/core"
+import { PdfPageObjectWithRotatedSize, Rect, Rotation, transformSize } from "@embedpdf/models"
+import { ViewportCapability, ViewportMetrics, ViewportPlugin } from "@embedpdf/plugin-viewport"
+import { InteractionManagerPlugin } from "../../plugin-interaction-manager-2"
+import {
+  cleanupScrollState,
+  initScrollState,
+  ScrollAction,
+  setScrollStrategy,
+  updateDocumentScrollState,
+} from "./actions"
+import { defaultPageChangeState } from "./reducer"
+import { getScrollerLayout } from "./selectors"
+import { BaseScrollStrategy, ScrollStrategyConfig } from "./strategies/base-strategy"
+import { HorizontalScrollStrategy } from "./strategies/horizontal-strategy"
+import { VerticalScrollStrategy } from "./strategies/vertical-strategy"
+import {
+  LayoutChangeEvent,
+  LayoutChangePayload,
+  LayoutReadyEvent,
+  PageChangeEvent,
+  PageChangeState,
+  PageChangeStateEvent,
+  ScrollBehavior,
+  ScrollCapability,
+  ScrollDocumentState,
+  ScrollerLayout,
+  ScrollEvent,
+  ScrollMetrics,
+  ScrollPluginConfig,
+  ScrollScope,
+  ScrollState,
+  ScrollStrategy,
+  ScrollToPageOptions,
+} from "./types"
+import { VirtualItem } from "./types/virtual-item"
 
 export class ScrollPlugin extends BasePlugin<
   ScrollPluginConfig,
@@ -18,84 +48,92 @@ export class ScrollPlugin extends BasePlugin<
   ScrollState,
   ScrollAction
 > {
-  static readonly id = 'scroll' as const;
+  static readonly id = "scroll" as const
 
-  private viewport: ViewportCapability;
+  private viewport: ViewportCapability
 
   // Elevated pages per document (derived from InteractionManager page activity)
-  private elevatedPages = new Map<string, Set<number>>();
+  private elevatedPages = new Map<string, Set<number>>()
 
   // Strategies per document
-  private strategies = new Map<string, BaseScrollStrategy>();
+  private strategies = new Map<string, BaseScrollStrategy>()
 
   // Layout ready tracking per document
-  private layoutReady = new Set<string>();
+  private layoutReady = new Set<string>()
 
   // Tracks documents that have had their initial layout ready (cleared only on document close)
-  private initialLayoutFired = new Set<string>();
+  private initialLayoutFired = new Set<string>()
 
   // Per-document scroller layout emitters (for real-time scroll updates)
   private scrollerLayoutEmitters = new Map<
     string,
     ReturnType<typeof createBehaviorEmitter<ScrollerLayout>>
-  >();
+  >()
 
   // Event emitters (include documentId)
-  private readonly pageChange$ = createBehaviorEmitter<PageChangeEvent>();
-  private readonly scroll$ = createBehaviorEmitter<ScrollEvent>();
-  private readonly layoutChange$ = createBehaviorEmitter<LayoutChangeEvent>();
-  private readonly pageChangeState$ = createBehaviorEmitter<PageChangeStateEvent>();
-  private readonly layoutReady$ = createBehaviorEmitter<LayoutReadyEvent>();
-  private readonly state$ = createBehaviorEmitter<ScrollDocumentState>();
+  private readonly pageChange$ = createBehaviorEmitter<PageChangeEvent>()
+  private readonly scroll$ = createBehaviorEmitter<ScrollEvent>()
+  private readonly layoutChange$ = createBehaviorEmitter<LayoutChangeEvent>()
+  private readonly pageChangeState$ = createBehaviorEmitter<PageChangeStateEvent>()
+  private readonly layoutReady$ = createBehaviorEmitter<LayoutReadyEvent>()
+  private readonly state$ = createBehaviorEmitter<ScrollDocumentState>()
 
   constructor(
     public readonly id: string,
     registry: PluginRegistry,
     private config?: ScrollPluginConfig,
   ) {
-    super(id, registry);
+    super(id, registry)
 
-    this.viewport = this.registry.getPlugin<ViewportPlugin>('viewport')!.provides();
+    this.viewport = this.registry.getPlugin<ViewportPlugin>("viewport")!.provides()
 
     // Subscribe to viewport scroll activity (per document)
     this.viewport.onScrollActivity((event) => {
-      const docState = this.getDocumentState(event.documentId);
+      const docState = this.getDocumentState(event.documentId)
       if (docState?.pageChangeState.isChanging && !event.activity.isSmoothScrolling) {
-        this.completePageChange(event.documentId);
+        this.completePageChange(event.documentId)
       }
-    });
+    })
 
     // Subscribe to page activity changes from the interaction manager (optional)
-    const im = this.registry.getPlugin<InteractionManagerPlugin>('interaction-manager')?.provides();
-    if (im && 'onPageActivityChange' in im && typeof im.onPageActivityChange === 'function') {
-      (im.onPageActivityChange as (listener: (event: { documentId: string; pageIndex: number; hasActivity: boolean }) => void) => void)((event: { documentId: string; pageIndex: number; hasActivity: boolean }) => {
-        let pages = this.elevatedPages.get(event.documentId);
+    const im = this.registry.getPlugin<InteractionManagerPlugin>("interaction-manager")?.provides()
+    if (im && "onPageActivityChange" in im && typeof im.onPageActivityChange === "function") {
+      ;(
+        im.onPageActivityChange as (
+          listener: (event: {
+            documentId: string
+            pageIndex: number
+            hasActivity: boolean
+          }) => void,
+        ) => void
+      )((event: { documentId: string; pageIndex: number; hasActivity: boolean }) => {
+        let pages = this.elevatedPages.get(event.documentId)
         if (event.hasActivity) {
           if (!pages) {
-            pages = new Set();
-            this.elevatedPages.set(event.documentId, pages);
+            pages = new Set()
+            this.elevatedPages.set(event.documentId, pages)
           }
-          pages.add(event.pageIndex);
+          pages.add(event.pageIndex)
         } else {
-          pages?.delete(event.pageIndex);
+          pages?.delete(event.pageIndex)
         }
-        this.pushScrollerLayout(event.documentId);
-      });
+        this.pushScrollerLayout(event.documentId)
+      })
     }
 
     // Subscribe to viewport changes (per document) with throttling
     this.viewport.onViewportChange((event) => {
-      const docState = this.getDocumentState(event.documentId);
-      if (!docState) return;
+      const docState = this.getDocumentState(event.documentId)
+      if (!docState) return
 
       // Compute the metrics based on the incoming event
-      const computedMetrics = this.computeMetrics(event.documentId, event.metrics);
+      const computedMetrics = this.computeMetrics(event.documentId, event.metrics)
 
       // THE GUARD: Only update the scrollOffset if the layout is already "ready".
       if (this.layoutReady.has(event.documentId)) {
         // Layout is ready, so this is a real scroll event from the user.
         // Commit all metrics, including the new scrollOffset.
-        this.commitMetrics(event.documentId, computedMetrics);
+        this.commitMetrics(event.documentId, computedMetrics)
       } else {
         // Layout is NOT ready. This is the initial, premature event.
         // We must commit the other metrics (like visible pages for rendering)
@@ -103,88 +141,88 @@ export class ScrollPlugin extends BasePlugin<
         this.commitMetrics(event.documentId, {
           ...computedMetrics,
           scrollOffset: docState.scrollOffset,
-        });
+        })
       }
-    });
+    })
   }
 
   // ─────────────────────────────────────────────────────────
   // Document Lifecycle Hooks (from BasePlugin)
   // ─────────────────────────────────────────────────────────
   protected override onDocumentLoadingStarted(documentId: string): void {
-    const coreDoc = this.getCoreDocument(documentId);
-    if (!coreDoc) return;
+    const coreDoc = this.getCoreDocument(documentId)
+    if (!coreDoc) return
     // Initialize scroll state for this document
-    const docState = this.createDocumentState(coreDoc);
-    this.dispatch(initScrollState(documentId, docState));
+    const docState = this.createDocumentState(coreDoc)
+    this.dispatch(initScrollState(documentId, docState))
 
     // Create strategy for this document
-    const strategy = this.createStrategy(docState.strategy);
-    this.strategies.set(documentId, strategy);
+    const strategy = this.createStrategy(docState.strategy)
+    this.strategies.set(documentId, strategy)
 
     // Create scroller layout emitter for this document
-    this.scrollerLayoutEmitters.set(documentId, createBehaviorEmitter<ScrollerLayout>());
+    this.scrollerLayoutEmitters.set(documentId, createBehaviorEmitter<ScrollerLayout>())
   }
 
   protected override onDocumentLoaded(documentId: string): void {
-    const coreDoc = this.getCoreDocument(documentId);
-    if (!coreDoc) return;
+    const coreDoc = this.getCoreDocument(documentId)
+    if (!coreDoc) return
 
     this.dispatch(
       updateDocumentScrollState(documentId, { totalPages: coreDoc.document?.pageCount ?? 0 }),
-    );
+    )
     // Initial layout computation
-    this.refreshDocumentLayout(documentId);
+    this.refreshDocumentLayout(documentId)
 
     this.logger.debug(
-      'ScrollPlugin',
-      'DocumentOpened',
+      "ScrollPlugin",
+      "DocumentOpened",
       `Initialized scroll state for document: ${documentId}`,
-    );
+    )
   }
 
   protected override onDocumentClosed(documentId: string): void {
     // Cleanup strategy
-    this.strategies.delete(documentId);
+    this.strategies.delete(documentId)
 
     // Cleanup layout ready tracking
-    this.layoutReady.delete(documentId);
-    this.initialLayoutFired.delete(documentId);
+    this.layoutReady.delete(documentId)
+    this.initialLayoutFired.delete(documentId)
 
     // Cleanup elevated pages
-    this.elevatedPages.delete(documentId);
+    this.elevatedPages.delete(documentId)
 
     // Cleanup scroller layout emitter
-    const emitter = this.scrollerLayoutEmitters.get(documentId);
+    const emitter = this.scrollerLayoutEmitters.get(documentId)
     if (emitter) {
-      emitter.clear();
-      this.scrollerLayoutEmitters.delete(documentId);
+      emitter.clear()
+      this.scrollerLayoutEmitters.delete(documentId)
     }
 
     // Cleanup state
-    this.dispatch(cleanupScrollState(documentId));
+    this.dispatch(cleanupScrollState(documentId))
 
     this.logger.debug(
-      'ScrollPlugin',
-      'DocumentClosed',
+      "ScrollPlugin",
+      "DocumentClosed",
       `Cleaned up scroll state for document: ${documentId}`,
-    );
+    )
   }
 
   protected override onScaleChanged(documentId: string): void {
-    const coreDoc = this.coreState.core.documents[documentId];
-    if (!coreDoc || coreDoc.status !== 'loaded') return;
+    const coreDoc = this.coreState.core.documents[documentId]
+    if (!coreDoc || coreDoc.status !== "loaded") return
 
-    const viewportScope = this.viewport.forDocument(documentId);
-    const metrics = this.computeMetrics(documentId, viewportScope.getMetrics());
+    const viewportScope = this.viewport.forDocument(documentId)
+    const metrics = this.computeMetrics(documentId, viewportScope.getMetrics())
 
     // Use the canonical path so scroll/pageChange events and scroller layout
     // updates all flow through the same place.
-    this.commitMetrics(documentId, metrics);
+    this.commitMetrics(documentId, metrics)
   }
 
   protected override onRotationChanged(documentId: string): void {
-    this.refreshDocumentLayout(documentId);
+    this.refreshDocumentLayout(documentId)
   }
 
   // ─────────────────────────────────────────────────────────
@@ -199,58 +237,58 @@ export class ScrollPlugin extends BasePlugin<
     documentId: string,
     callback: (layout: ScrollerLayout) => void,
   ): Unsubscribe {
-    const emitter = this.scrollerLayoutEmitters.get(documentId);
+    const emitter = this.scrollerLayoutEmitters.get(documentId)
     if (!emitter) {
-      throw new Error(`No scroller layout emitter found for document: ${documentId}`);
+      throw new Error(`No scroller layout emitter found for document: ${documentId}`)
     }
-    return emitter.on(callback);
+    return emitter.on(callback)
   }
 
   /**
    * Get current scroller layout for a document
    */
   public getScrollerLayout(documentId: string): ScrollerLayout {
-    const docState = this.getDocumentState(documentId);
-    const coreDoc = this.getCoreDocumentOrThrow(documentId);
+    const docState = this.getDocumentState(documentId)
+    const coreDoc = this.getCoreDocumentOrThrow(documentId)
 
     if (!docState || !coreDoc) {
-      throw new Error(`Cannot get scroller layout for document: ${documentId}`);
+      throw new Error(`Cannot get scroller layout for document: ${documentId}`)
     }
 
-    return getScrollerLayout(docState, coreDoc.scale, this.elevatedPages.get(documentId));
+    return getScrollerLayout(docState, coreDoc.scale, this.elevatedPages.get(documentId))
   }
 
   public setLayoutReady(documentId: string): void {
     // This guard logic is now reliable because the flag gets reset correctly.
     if (this.layoutReady.has(documentId)) {
-      return;
+      return
     }
 
-    const docState = this.getDocumentState(documentId);
-    if (!docState) return;
+    const docState = this.getDocumentState(documentId)
+    if (!docState) return
 
-    this.layoutReady.add(documentId);
+    this.layoutReady.add(documentId)
 
     // Determine if this is the initial layout for this document
-    const isInitial = !this.initialLayoutFired.has(documentId);
+    const isInitial = !this.initialLayoutFired.has(documentId)
     if (isInitial) {
-      this.initialLayoutFired.add(documentId);
+      this.initialLayoutFired.add(documentId)
     }
 
     // Restore the persisted scroll position
-    const viewport = this.viewport.forDocument(documentId);
-    viewport.scrollTo({ ...docState.scrollOffset, behavior: 'instant' });
+    const viewport = this.viewport.forDocument(documentId)
+    viewport.scrollTo({ ...docState.scrollOffset, behavior: "instant" })
 
     this.layoutReady$.emit({
       documentId,
       isInitial,
       pageNumber: docState.currentPage,
       totalPages: docState.totalPages,
-    });
+    })
   }
 
   public clearLayoutReady(documentId: string): void {
-    this.layoutReady.delete(documentId);
+    this.layoutReady.delete(documentId)
   }
 
   // ─────────────────────────────────────────────────────────
@@ -286,7 +324,7 @@ export class ScrollPlugin extends BasePlugin<
       onLayoutReady: this.layoutReady$.on,
       onPageChangeState: this.pageChangeState$.on,
       onStateChange: this.state$.on,
-    };
+    }
   }
 
   // ─────────────────────────────────────────────────────────
@@ -309,42 +347,42 @@ export class ScrollPlugin extends BasePlugin<
       setScrollStrategy: (strategy) => this.setScrollStrategyForDocument(strategy, documentId),
       onPageChange: (listener: Listener<PageChangeEvent>) =>
         this.pageChange$.on((event) => {
-          if (event.documentId === documentId) listener(event);
+          if (event.documentId === documentId) listener(event)
         }),
       onScroll: (listener: Listener<ScrollMetrics>) =>
         this.scroll$.on((event) => {
-          if (event.documentId === documentId) listener(event.metrics);
+          if (event.documentId === documentId) listener(event.metrics)
         }),
       onLayoutChange: (listener: Listener<LayoutChangePayload>) =>
         this.layoutChange$.on((event) => {
-          if (event.documentId === documentId) listener(event.layout);
+          if (event.documentId === documentId) listener(event.layout)
         }),
-    };
+    }
   }
 
   // ─────────────────────────────────────────────────────────
   // State Helpers
   // ─────────────────────────────────────────────────────────
   private getDocumentState(documentId?: string): ScrollDocumentState | null {
-    const id = documentId ?? this.getActiveDocumentId();
-    return this.state.documents[id] ?? null;
+    const id = documentId ?? this.getActiveDocumentId()
+    return this.state.documents[id] ?? null
   }
 
   private getDocumentStateOrThrow(documentId?: string): ScrollDocumentState {
-    const state = this.getDocumentState(documentId);
+    const state = this.getDocumentState(documentId)
     if (!state) {
-      throw new Error(`Scroll state not found for document: ${documentId ?? 'active'}`);
+      throw new Error(`Scroll state not found for document: ${documentId ?? "active"}`)
     }
-    return state;
+    return state
   }
 
   private getStrategy(documentId?: string): BaseScrollStrategy {
-    const id = documentId ?? this.getActiveDocumentId();
-    const strategy = this.strategies.get(id);
+    const id = documentId ?? this.getActiveDocumentId()
+    const strategy = this.strategies.get(id)
     if (!strategy) {
-      throw new Error(`Strategy not found for document: ${id}`);
+      throw new Error(`Strategy not found for document: ${id}`)
     }
-    return strategy;
+    return strategy
   }
 
   private createStrategy(strategyType: ScrollStrategy): BaseScrollStrategy {
@@ -352,11 +390,11 @@ export class ScrollPlugin extends BasePlugin<
       pageGap: this.state.defaultPageGap,
       viewportGap: this.viewport.getViewportGap(),
       bufferSize: this.state.defaultBufferSize,
-    };
+    }
 
     return strategyType === ScrollStrategy.Horizontal
       ? new HorizontalScrollStrategy(config)
-      : new VerticalScrollStrategy(config);
+      : new VerticalScrollStrategy(config)
   }
 
   private createDocumentState(coreDoc: DocumentState): ScrollDocumentState {
@@ -374,7 +412,7 @@ export class ScrollPlugin extends BasePlugin<
       startSpacing: 0,
       endSpacing: 0,
       pageChangeState: defaultPageChangeState,
-    };
+    }
   }
 
   // ─────────────────────────────────────────────────────────
@@ -384,37 +422,37 @@ export class ScrollPlugin extends BasePlugin<
   private startPageChange(
     documentId: string,
     targetPage: number,
-    behavior: ScrollBehavior = 'smooth',
+    behavior: ScrollBehavior = "smooth",
   ): void {
-    const docState = this.getDocumentState(documentId);
-    if (!docState) return;
+    const docState = this.getDocumentState(documentId)
+    if (!docState) return
 
     const pageChangeState: PageChangeState = {
       isChanging: true,
       targetPage,
       fromPage: docState.currentPage,
       startTime: Date.now(),
-    };
+    }
 
-    this.dispatch(updateDocumentScrollState(documentId, { pageChangeState }));
+    this.dispatch(updateDocumentScrollState(documentId, { pageChangeState }))
 
-    if (behavior === 'instant') {
-      this.completePageChange(documentId);
+    if (behavior === "instant") {
+      this.completePageChange(documentId)
     }
   }
 
   private completePageChange(documentId: string): void {
-    const docState = this.getDocumentState(documentId);
-    if (!docState || !docState.pageChangeState.isChanging) return;
+    const docState = this.getDocumentState(documentId)
+    if (!docState || !docState.pageChangeState.isChanging) return
 
     const pageChangeState: PageChangeState = {
       isChanging: false,
       targetPage: docState.pageChangeState.targetPage,
       fromPage: docState.pageChangeState.fromPage,
       startTime: docState.pageChangeState.startTime,
-    };
+    }
 
-    this.dispatch(updateDocumentScrollState(documentId, { pageChangeState }));
+    this.dispatch(updateDocumentScrollState(documentId, { pageChangeState }))
   }
 
   // ─────────────────────────────────────────────────────────
@@ -425,13 +463,13 @@ export class ScrollPlugin extends BasePlugin<
     documentId: string,
     pages: PdfPageObjectWithRotatedSize[][],
   ): {
-    virtualItems: VirtualItem[];
-    totalContentSize: { width: number; height: number };
+    virtualItems: VirtualItem[]
+    totalContentSize: { width: number; height: number }
   } {
-    const strategy = this.getStrategy(documentId);
-    const virtualItems = strategy.createVirtualItems(pages);
-    const totalContentSize = strategy.getTotalContentSize(virtualItems);
-    return { virtualItems, totalContentSize };
+    const strategy = this.getStrategy(documentId)
+    const virtualItems = strategy.createVirtualItems(pages)
+    const totalContentSize = strategy.getTotalContentSize(virtualItems)
+    return { virtualItems, totalContentSize }
   }
 
   private computeMetrics(
@@ -439,12 +477,12 @@ export class ScrollPlugin extends BasePlugin<
     vp: ViewportMetrics,
     items?: VirtualItem[],
   ): ScrollMetrics {
-    const coreDocState = this.getCoreDocumentOrThrow(documentId);
-    const docState = this.getDocumentState(documentId);
-    const strategy = this.getStrategy(documentId);
-    if (!docState) throw new Error(`Document state not found: ${documentId}`);
+    const coreDocState = this.getCoreDocumentOrThrow(documentId)
+    const docState = this.getDocumentState(documentId)
+    const strategy = this.getStrategy(documentId)
+    if (!docState) throw new Error(`Document state not found: ${documentId}`)
 
-    return strategy.handleScroll(vp, items ?? docState.virtualItems, coreDocState.scale);
+    return strategy.handleScroll(vp, items ?? docState.virtualItems, coreDocState.scale)
   }
 
   // ─────────────────────────────────────────────────────────
@@ -452,14 +490,14 @@ export class ScrollPlugin extends BasePlugin<
   // ─────────────────────────────────────────────────────────
 
   private commitMetrics(documentId: string, metrics: ScrollMetrics): void {
-    const docState = this.getDocumentState(documentId);
-    if (!docState) return;
+    const docState = this.getDocumentState(documentId)
+    if (!docState) return
 
     // Update state
-    this.dispatch(updateDocumentScrollState(documentId, metrics));
+    this.dispatch(updateDocumentScrollState(documentId, metrics))
 
     // Emit scroll event
-    this.scroll$.emit({ documentId, metrics });
+    this.scroll$.emit({ documentId, metrics })
 
     // Emit page change if current page changed
     if (metrics.currentPage !== docState.currentPage) {
@@ -467,36 +505,36 @@ export class ScrollPlugin extends BasePlugin<
         documentId,
         pageNumber: metrics.currentPage,
         totalPages: docState.totalPages,
-      });
+      })
     }
 
     // CRITICAL: Push updated scroller layout (for spacing/visible items reactivity)
-    this.pushScrollerLayout(documentId);
+    this.pushScrollerLayout(documentId)
   }
 
   private pushScrollerLayout(documentId: string): void {
-    const emitter = this.scrollerLayoutEmitters.get(documentId);
-    if (!emitter) return;
+    const emitter = this.scrollerLayoutEmitters.get(documentId)
+    if (!emitter) return
 
     try {
-      const layout = this.getScrollerLayout(documentId);
-      emitter.emit(layout);
-    } catch (error) {
+      const layout = this.getScrollerLayout(documentId)
+      emitter.emit(layout)
+    } catch (_error) {
       // Document might be closing, ignore
     }
   }
 
   private refreshDocumentLayout(documentId: string): void {
-    const coreDoc = this.coreState.core.documents[documentId];
-    const docState = this.getDocumentState(documentId);
+    const coreDoc = this.coreState.core.documents[documentId]
+    const docState = this.getDocumentState(documentId)
 
-    if (!coreDoc || !docState || coreDoc.status !== 'loaded') return;
+    if (!coreDoc || !docState || coreDoc.status !== "loaded") return
 
-    const pages = this.getSpreadPagesWithRotatedSize(documentId);
-    const layout = this.computeLayout(documentId, pages);
+    const pages = this.getSpreadPagesWithRotatedSize(documentId)
+    const layout = this.computeLayout(documentId, pages)
     // Get viewport metrics for this document
-    const viewport = this.viewport.forDocument(documentId);
-    const metrics = this.computeMetrics(documentId, viewport.getMetrics(), layout.virtualItems);
+    const viewport = this.viewport.forDocument(documentId)
+    const metrics = this.computeMetrics(documentId, viewport.getMetrics(), layout.virtualItems)
 
     // Update state with layout + metrics
     this.dispatch(
@@ -504,31 +542,31 @@ export class ScrollPlugin extends BasePlugin<
         ...layout,
         ...metrics,
       }),
-    );
+    )
     // Emit layout change event
-    this.layoutChange$.emit({ documentId, layout });
+    this.layoutChange$.emit({ documentId, layout })
 
     // Push updated scroller layout
-    this.pushScrollerLayout(documentId);
+    this.pushScrollerLayout(documentId)
   }
 
   private getSpreadPagesWithRotatedSize(documentId?: string): PdfPageObjectWithRotatedSize[][] {
-    const id = documentId ?? this.getActiveDocumentId();
-    const coreDoc = this.coreState.core.documents[id];
-    if (!coreDoc) throw new Error(`Document ${id} not loaded`);
+    const id = documentId ?? this.getActiveDocumentId()
+    const coreDoc = this.coreState.core.documents[id]
+    if (!coreDoc) throw new Error(`Document ${id} not loaded`)
 
-    const spreadPages = coreDoc.document?.pages.map((page) => [page]) || [];
+    const spreadPages = coreDoc.document?.pages.map((page) => [page]) || []
 
     return spreadPages.map((spread) =>
       spread.map((page) => {
         // Combine page intrinsic rotation with document rotation
-        const effectiveRotation = ((page.rotation ?? 0) + coreDoc.rotation) % 4;
+        const effectiveRotation = ((page.rotation ?? 0) + coreDoc.rotation) % 4
         return {
           ...page,
           rotatedSize: transformSize(page.size, effectiveRotation, 1),
-        };
+        }
       }),
-    );
+    )
   }
 
   // ─────────────────────────────────────────────────────────
@@ -536,30 +574,30 @@ export class ScrollPlugin extends BasePlugin<
   // ─────────────────────────────────────────────────────────
 
   private getCurrentPage(documentId?: string): number {
-    return this.getDocumentStateOrThrow(documentId).currentPage;
+    return this.getDocumentStateOrThrow(documentId).currentPage
   }
 
   private getTotalPages(documentId?: string): number {
-    return this.getDocumentStateOrThrow(documentId).totalPages;
+    return this.getDocumentStateOrThrow(documentId).totalPages
   }
 
   private getPageChangeState(documentId?: string): PageChangeState {
-    return this.getDocumentStateOrThrow(documentId).pageChangeState;
+    return this.getDocumentStateOrThrow(documentId).pageChangeState
   }
 
   private scrollToPage(options: ScrollToPageOptions, documentId?: string): void {
-    const id = documentId ?? this.getActiveDocumentId();
-    const docState = this.getDocumentStateOrThrow(id);
-    const strategy = this.getStrategy(id);
-    const coreDoc = this.getCoreDocumentOrThrow(id);
+    const id = documentId ?? this.getActiveDocumentId()
+    const docState = this.getDocumentStateOrThrow(id)
+    const strategy = this.getStrategy(id)
+    const coreDoc = this.getCoreDocumentOrThrow(id)
 
-    const { pageNumber, behavior = 'smooth', pageCoordinates, alignX, alignY } = options;
+    const { pageNumber, behavior = "smooth", pageCoordinates, alignX, alignY } = options
 
-    this.startPageChange(id, pageNumber, behavior);
+    this.startPageChange(id, pageNumber, behavior)
 
     // Calculate effective rotation for this page (page intrinsic + document rotation)
-    const pageObj = coreDoc.document?.pages[pageNumber - 1];
-    const effectiveRotation = ((pageObj?.rotation ?? 0) + coreDoc.rotation) % 4;
+    const pageObj = coreDoc.document?.pages[pageNumber - 1]
+    const effectiveRotation = ((pageObj?.rotation ?? 0) + coreDoc.rotation) % 4
 
     const position = strategy.getScrollPositionForPage(
       pageNumber,
@@ -567,97 +605,97 @@ export class ScrollPlugin extends BasePlugin<
       coreDoc.scale,
       effectiveRotation as Rotation,
       pageCoordinates,
-    );
+    )
 
     if (position) {
-      const viewport = this.viewport.forDocument(id);
-      viewport.scrollTo({ ...position, behavior, alignX, alignY });
+      const viewport = this.viewport.forDocument(id)
+      viewport.scrollTo({ ...position, behavior, alignX, alignY })
     } else {
-      this.completePageChange(id);
+      this.completePageChange(id)
     }
   }
 
-  private scrollToNextPage(behavior: ScrollBehavior = 'smooth', documentId?: string): void {
-    const id = documentId ?? this.getActiveDocumentId();
-    const docState = this.getDocumentStateOrThrow(id);
-    const strategy = this.getStrategy(id);
-    const coreDoc = this.getCoreDocumentOrThrow(id);
+  private scrollToNextPage(behavior: ScrollBehavior = "smooth", documentId?: string): void {
+    const id = documentId ?? this.getActiveDocumentId()
+    const docState = this.getDocumentStateOrThrow(id)
+    const strategy = this.getStrategy(id)
+    const coreDoc = this.getCoreDocumentOrThrow(id)
 
     const currentItemIndex = docState.virtualItems.findIndex((item) =>
       item.pageNumbers.includes(docState.currentPage),
-    );
+    )
 
     if (currentItemIndex >= 0 && currentItemIndex < docState.virtualItems.length - 1) {
-      const nextItem = docState.virtualItems[currentItemIndex + 1];
-      const targetPage = nextItem.pageNumbers[0];
+      const nextItem = docState.virtualItems[currentItemIndex + 1]
+      const targetPage = nextItem.pageNumbers[0]
 
-      this.startPageChange(id, targetPage, behavior);
+      this.startPageChange(id, targetPage, behavior)
 
       const position = strategy.getScrollPositionForPage(
         targetPage,
         docState.virtualItems,
         coreDoc.scale,
         coreDoc.rotation,
-      );
+      )
 
       if (position) {
-        const viewport = this.viewport.forDocument(id);
-        viewport.scrollTo({ ...position, behavior });
+        const viewport = this.viewport.forDocument(id)
+        viewport.scrollTo({ ...position, behavior })
       } else {
-        this.completePageChange(id);
+        this.completePageChange(id)
       }
     }
   }
 
-  private scrollToPreviousPage(behavior: ScrollBehavior = 'smooth', documentId?: string): void {
-    const id = documentId ?? this.getActiveDocumentId();
-    const docState = this.getDocumentStateOrThrow(id);
-    const strategy = this.getStrategy(id);
-    const coreDoc = this.coreState.core.documents[id];
+  private scrollToPreviousPage(behavior: ScrollBehavior = "smooth", documentId?: string): void {
+    const id = documentId ?? this.getActiveDocumentId()
+    const docState = this.getDocumentStateOrThrow(id)
+    const strategy = this.getStrategy(id)
+    const coreDoc = this.coreState.core.documents[id]
 
     const currentItemIndex = docState.virtualItems.findIndex((item) =>
       item.pageNumbers.includes(docState.currentPage),
-    );
+    )
 
     if (currentItemIndex > 0) {
-      const prevItem = docState.virtualItems[currentItemIndex - 1];
-      const targetPage = prevItem.pageNumbers[0];
+      const prevItem = docState.virtualItems[currentItemIndex - 1]
+      const targetPage = prevItem.pageNumbers[0]
 
-      this.startPageChange(id, targetPage, behavior);
+      this.startPageChange(id, targetPage, behavior)
 
       const position = strategy.getScrollPositionForPage(
         targetPage,
         docState.virtualItems,
         coreDoc.scale,
         coreDoc.rotation,
-      );
+      )
 
       if (position) {
-        const viewport = this.viewport.forDocument(id);
-        viewport.scrollTo({ ...position, behavior });
+        const viewport = this.viewport.forDocument(id)
+        viewport.scrollTo({ ...position, behavior })
       } else {
-        this.completePageChange(id);
+        this.completePageChange(id)
       }
     }
   }
 
   private getMetrics(viewport?: ViewportMetrics, documentId?: string): ScrollMetrics {
-    const id = documentId ?? this.getActiveDocumentId();
+    const id = documentId ?? this.getActiveDocumentId()
 
     if (viewport) {
-      return this.computeMetrics(id, viewport);
+      return this.computeMetrics(id, viewport)
     }
 
-    const viewportScope = this.viewport.forDocument(id);
-    return this.computeMetrics(id, viewportScope.getMetrics());
+    const viewportScope = this.viewport.forDocument(id)
+    return this.computeMetrics(id, viewportScope.getMetrics())
   }
 
   private getLayout(documentId?: string): LayoutChangePayload {
-    const docState = this.getDocumentStateOrThrow(documentId);
+    const docState = this.getDocumentStateOrThrow(documentId)
     return {
       virtualItems: docState.virtualItems,
       totalContentSize: docState.totalContentSize,
-    };
+    }
   }
 
   private getRectPositionForPage(
@@ -667,16 +705,16 @@ export class ScrollPlugin extends BasePlugin<
     rotation?: Rotation,
     documentId?: string,
   ): Rect | null {
-    const id = documentId ?? this.getActiveDocumentId();
-    const docState = this.getDocumentStateOrThrow(id);
-    const strategy = this.getStrategy(id);
-    const coreDoc = this.getCoreDocumentOrThrow(id);
+    const id = documentId ?? this.getActiveDocumentId()
+    const docState = this.getDocumentStateOrThrow(id)
+    const strategy = this.getStrategy(id)
+    const coreDoc = this.getCoreDocumentOrThrow(id)
 
     // Calculate effective rotation if not provided (page intrinsic + document rotation)
-    let effectiveRotation = rotation;
+    let effectiveRotation = rotation
     if (effectiveRotation === undefined) {
-      const pageObj = coreDoc.document?.pages[pageIndex];
-      effectiveRotation = (((pageObj?.rotation ?? 0) + coreDoc.rotation) % 4) as Rotation;
+      const pageObj = coreDoc.document?.pages[pageIndex]
+      effectiveRotation = (((pageObj?.rotation ?? 0) + coreDoc.rotation) % 4) as Rotation
     }
 
     return strategy.getRectPositionForPage(
@@ -685,24 +723,24 @@ export class ScrollPlugin extends BasePlugin<
       scale ?? coreDoc.scale,
       effectiveRotation,
       rect,
-    );
+    )
   }
 
   private setScrollStrategyForDocument(newStrategy: ScrollStrategy, documentId?: string): void {
-    const id = documentId ?? this.getActiveDocumentId();
-    const docState = this.getDocumentState(id);
+    const id = documentId ?? this.getActiveDocumentId()
+    const docState = this.getDocumentState(id)
 
-    if (!docState || docState.strategy === newStrategy) return;
+    if (!docState || docState.strategy === newStrategy) return
 
     // Create new strategy
-    const strategy = this.createStrategy(newStrategy);
-    this.strategies.set(id, strategy);
+    const strategy = this.createStrategy(newStrategy)
+    this.strategies.set(id, strategy)
 
     // Update state
-    this.dispatch(setScrollStrategy(id, newStrategy));
+    this.dispatch(setScrollStrategy(id, newStrategy))
 
     // Recalculate layout
-    this.refreshDocumentLayout(id);
+    this.refreshDocumentLayout(id)
   }
 
   // ─────────────────────────────────────────────────────────
@@ -712,21 +750,21 @@ export class ScrollPlugin extends BasePlugin<
   override onStoreUpdated(prevState: ScrollState, newState: ScrollState): void {
     // Emit state changes and push scroller layout for each changed document
     for (const documentId in newState.documents) {
-      const prevDoc = prevState.documents[documentId];
-      const newDoc = newState.documents[documentId];
+      const prevDoc = prevState.documents[documentId]
+      const newDoc = newState.documents[documentId]
 
       if (prevDoc !== newDoc) {
-        this.state$.emit(newDoc);
+        this.state$.emit(newDoc)
 
         if (prevDoc?.pageChangeState !== newDoc.pageChangeState) {
           this.pageChangeState$.emit({
             documentId,
             state: newDoc.pageChangeState,
-          });
+          })
         }
 
         // Push scroller layout on any state change
-        this.pushScrollerLayout(documentId);
+        this.pushScrollerLayout(documentId)
       }
     }
   }
@@ -736,28 +774,28 @@ export class ScrollPlugin extends BasePlugin<
   // ─────────────────────────────────────────────────────────
 
   async initialize(): Promise<void> {
-    this.logger.info('ScrollPlugin', 'Initialize', 'Scroll plugin initialized');
+    this.logger.info("ScrollPlugin", "Initialize", "Scroll plugin initialized")
   }
 
   async destroy(): Promise<void> {
-    this.strategies.clear();
-    this.layoutReady.clear();
-    this.initialLayoutFired.clear();
-    this.elevatedPages.clear();
+    this.strategies.clear()
+    this.layoutReady.clear()
+    this.initialLayoutFired.clear()
+    this.elevatedPages.clear()
 
     // Clear all scroller layout emitters
     for (const emitter of this.scrollerLayoutEmitters.values()) {
-      emitter.clear();
+      emitter.clear()
     }
-    this.scrollerLayoutEmitters.clear();
+    this.scrollerLayoutEmitters.clear()
 
-    this.pageChange$.clear();
-    this.scroll$.clear();
-    this.layoutChange$.clear();
-    this.pageChangeState$.clear();
-    this.layoutReady$.clear();
-    this.state$.clear();
+    this.pageChange$.clear()
+    this.scroll$.clear()
+    this.layoutChange$.clear()
+    this.pageChangeState$.clear()
+    this.layoutReady$.clear()
+    this.state$.clear()
 
-    super.destroy();
+    super.destroy()
   }
 }

@@ -708,7 +708,7 @@ export class SelectionPlugin extends BasePlugin<
     this.notifyAllPages(documentId)
   }
 
-  private updateSelection(documentId: string, page: number, index: number, modeId: string) {
+  private updateSelection(documentId: string, page: number, index: number, _modeId: string) {
     if (!this.selecting.get(documentId) || !this.anchor.get(documentId)) return
 
     const a = this.anchor.get(documentId)!

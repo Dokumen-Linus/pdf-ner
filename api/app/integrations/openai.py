@@ -1,6 +1,7 @@
 import logging
 import time
 
+from api.app.domains.shared.schemas import LLMResponseData
 from openai import AsyncOpenAI
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ async def call_openai_async(
     schema_name: str | None = None,
     temp: float = 0.01,
     max_tokens: int = 10**4,
-) -> str:
+) -> LLMResponseData:
     logger.info("OpenAI call started: model=%s", model)
     start = time.perf_counter()
 
@@ -39,6 +40,20 @@ async def call_openai_async(
         }
     response = await client.chat.completions.create(**kwargs)
 
+    usage = response.usage
+    input_tokens = usage.prompt_tokens if usage else 0
+    output_tokens = usage.completion_tokens if usage else 0
+
     duration = time.perf_counter() - start
-    logger.info("OpenAI call completed: model=%s, duration=%.2fs", model, duration)
-    return response.choices[0].message.content
+    logger.info(
+        "OpenAI call completed: model=%s, duration=%.2fs, in=%d, out=%d",
+        model,
+        duration,
+        input_tokens,
+        output_tokens,
+    )
+    return LLMResponseData(
+        text=response.choices[0].message.content or "",
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+    )

@@ -1,3 +1,14 @@
+# python
+**/__pycache__/
+*.pyc
+**/.venv/
+**/.pytest_cache/
+**/.ruff_cache/
+**/*egg-info
+
+# javascript
+**/node_modules/
+
 # postgresql
 pgdata/
 logfile
@@ -7,3 +18,9 @@ node_modules/
 
 # coding LLM settings
 **/settings.local.json
+
+# claude log
+.claude/command.log
+
+# base dir env
+.env
