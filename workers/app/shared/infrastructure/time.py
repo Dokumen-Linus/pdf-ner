@@ -1,6 +1,7 @@
+from datetime import UTC, datetime
 import time
-from datetime import datetime, timezone
 from typing import Protocol
+
 import anyio
 
 
@@ -14,7 +15,7 @@ class Clock(Protocol):
 # prod implementation
 class SystemClock:
     def now(self) -> datetime:
-        return datetime.now(tz=timezone.utc)
+        return datetime.now(tz=UTC)
 
     async def sleep(self, seconds: float) -> None:
         await anyio.sleep(seconds)

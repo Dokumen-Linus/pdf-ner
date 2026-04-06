@@ -1,6 +1,6 @@
+from datetime import datetime
 import os
 import re
-from datetime import datetime
 
 TEMPLATE_NUMBER = 1
 DOCUMENT_AT_END = "true"

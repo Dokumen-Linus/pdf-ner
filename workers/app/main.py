@@ -1,10 +1,8 @@
 from celery import Celery
+
 from .core.config import settings
 
-app = Celery(
-    "myapp",
-    broker=settings.CELERY_BROKER_URL
-)
+app = Celery("myapp", broker=settings.CELERY_BROKER_URL)
 
 app.config_from_object(settings, namespace="CELERY")
 
@@ -13,7 +11,9 @@ app.conf.task_serializer = "json"
 app.conf.result_serializer = "json"
 app.conf.accept_content = ["json"]
 
-app.autodiscover_tasks([
-    "app.domains.billing",
-    "app.domains.context_engineering",
-])
+app.autodiscover_tasks(
+    [
+        "app.domains.billing",
+        "app.domains.context_engineering",
+    ]
+)

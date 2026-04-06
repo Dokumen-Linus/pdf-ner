@@ -8,8 +8,8 @@ dict containing every discovered module.
 """
 
 import json
-import re
 from pathlib import Path
+import re
 
 SCRIPT_DIR = Path(__file__).parent
 WEB_DIR = SCRIPT_DIR.parent

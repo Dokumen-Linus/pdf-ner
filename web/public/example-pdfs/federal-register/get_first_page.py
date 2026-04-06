@@ -1,5 +1,7 @@
 import os
+
 from pypdf import PdfReader, PdfWriter
+
 
 def extract_first_page(input_path):
     try:
@@ -21,7 +23,7 @@ def extract_first_page(input_path):
 
             with open(output_path, "wb") as output_file:
                 writer.write(output_file)
-            
+
             print(f"Successfully created: {output_path}")
         else:
             print(f"Skipping {input_path}: PDF is empty.")
@@ -29,13 +31,10 @@ def extract_first_page(input_path):
     except Exception as e:
         print(f"Error processing {input_path}: {e}")
 
+
 def main():
     # List of specific PDFs to process
-    pdf_files = [
-        "2025-19982.pdf",
-        "2025-21665.pdf",
-        "2025-21767.pdf"
-    ]
+    pdf_files = ["2025-19982.pdf", "2025-21665.pdf", "2025-21767.pdf"]
 
     # Get the directory of the script
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -46,6 +45,7 @@ def main():
             extract_first_page(file_path)
         else:
             print(f"File not found: {file_path}")
+
 
 if __name__ == "__main__":
     main()

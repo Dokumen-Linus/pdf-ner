@@ -5,9 +5,9 @@ import logging
 
 import asyncpg
 from openai import AsyncOpenAI
+from workers.app.shared.domain.LLMResponseData import LLMResponseData
 
 from app.integrations.openai import call_openai
-from workers.app.shared.domain.LLMResponseData import LLMResponseData
 from app.shared.infrastructure.usage_tracker import record_llm_usage
 
 from ..domain import services
