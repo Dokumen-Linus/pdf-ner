@@ -61,7 +61,7 @@ export const searchReducer: Reducer<SearchState, SearchAction> = (state = initia
 
     case CLEANUP_SEARCH_STATE: {
       const documentId = action.payload
-      const { [documentId]: removed, ...remaining } = state.documents
+      const { [documentId]: _removed, ...remaining } = state.documents
       return {
         ...state,
         documents: remaining,

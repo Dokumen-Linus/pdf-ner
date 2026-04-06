@@ -519,7 +519,7 @@ export class ScrollPlugin extends BasePlugin<
     try {
       const layout = this.getScrollerLayout(documentId)
       emitter.emit(layout)
-    } catch (error) {
+    } catch (_error) {
       // Document might be closing, ignore
     }
   }

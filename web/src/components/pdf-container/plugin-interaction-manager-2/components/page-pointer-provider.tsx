@@ -63,7 +63,7 @@ export const PagePointerProvider = ({
 
       return restorePosition(rotatedNaturalSize, displayPoint, rotation, scale)
     },
-    [naturalPageSize, rotation, scale],
+    [displaySize.width, displaySize.height, rotation, scale],
   )
 
   useEffect(() => {

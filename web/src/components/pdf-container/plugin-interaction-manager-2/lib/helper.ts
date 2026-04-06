@@ -1,3 +1,4 @@
+import { Position } from "@embedpdf/models"
 import { EmbedPdfPointerEvent, PointerEventHandlers } from "./types"
 
 export function mergeHandlers(list: PointerEventHandlers[]): PointerEventHandlers {
@@ -19,7 +20,7 @@ export function mergeHandlers(list: PointerEventHandlers[]): PointerEventHandler
   ]
   const out: Partial<PointerEventHandlers> = {}
   for (const k of keys) {
-    out[k] = (pos: any, evt: EmbedPdfPointerEvent, modeId: string) => {
+    out[k] = (pos: Position, evt: EmbedPdfPointerEvent, modeId: string) => {
       for (const h of list) {
         // Stop calling handlers if propagation was stopped
         if (evt.isImmediatePropagationStopped()) break

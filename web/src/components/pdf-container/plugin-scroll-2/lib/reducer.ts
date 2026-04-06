@@ -39,7 +39,7 @@ export const scrollReducer: Reducer<ScrollState, ScrollAction> = (state, action)
     }
 
     case CLEANUP_SCROLL_STATE: {
-      const { [action.payload]: removed, ...remaining } = state.documents
+      const { [action.payload]: _removed, ...remaining } = state.documents
       return {
         ...state,
         documents: remaining,
