@@ -26,12 +26,11 @@ import { env } from "@/env.client"
 const stripePromise = loadStripe(env.VITE_STRIPE_PUBLISHABLE_KEY)
 
 export const Route = createFileRoute("/_private/billing")({
-  loader: async ({ context }) => {
-    const userId = context.session.user.id
+  loader: async () => {
     const [{ clientSecret }, usage, stripeCustomer] = await Promise.all([
       createSetupIntent(),
-      getUsageSummary({ data: { userId } }),
-      getStripeCustomer({ data: { userId } }),
+      getUsageSummary(),
+      getStripeCustomer(),
     ])
     return { clientSecret, usage, stripeCustomer }
   },

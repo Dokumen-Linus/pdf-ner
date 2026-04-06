@@ -104,8 +104,8 @@ async def upsert_stripe_customer(
 async def update_stripe_subscription(
     conn: asyncpg.Connection,
     user_id: UUID,
-    subscription_id: str,
-    subscription_item_id: str,
+    subscription_id: str | None,
+    subscription_item_id: str | None,
 ) -> None:
     await conn.execute(
         """

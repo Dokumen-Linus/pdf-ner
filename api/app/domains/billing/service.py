@@ -95,7 +95,7 @@ async def cancel_subscription(conn: asyncpg.Connection, user_id: UUID) -> None:
 
     client = get_stripe()
     client.subscriptions.cancel(existing["stripe_subscription_id"])
-    await repository.update_stripe_subscription(conn, user_id, "", "")
+    await repository.update_stripe_subscription(conn, user_id, None, None)
     logger.info("Cancelled Stripe subscription for user=%s", user_id)
 
 
