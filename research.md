@@ -154,13 +154,13 @@
 - [Vercel AI SDK](https://ai-sdk.dev/elements/examples/chatbot)
 - [Ant chat](https://github.com/ant-design/pro-chat)
 - [shadcn-image-cropper](https://github.com/sujjeee/shadcn-image-cropper)
+- sounds [soundcn](https://github.com/kapishdima/soundcn)
 - scheduling [planner](https://github.com/UretzkyZvi/planner)
 - address autocomplete [shadcn-address-autocomplete](https://github.com/NiazMorshed2007/shadcn-address-autocomplete)
 - Power Automate copy [chrisjpatty/flume](https://github.com/chrisjpatty/flume)
 - timeline [shadcn-timeline](https://github.com/timDeHof/shadcn-timeline)
 - tables [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - tables [AG Grid](https://www.ag-grid.com/react-data-grid/getting-started/)
-- videos [mifi/reactive-video](https://github.com/mifi/reactive-video/)
 - Component dependency grapher [Madge](https://github.com/pahen/madge)
 - [Alibaba ChatUI](https://chatui.io/)
 - Wrapper for OpenAI API to enable user to create auto-rended react components [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
@@ -180,31 +180,11 @@
 - [tailadmin](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
 - [satnaing/shadcn-admin](https://github.com/satnaing/shadcn-admin)
 
-### Next.js Boilerplates
-
-- [odoo/odoo](https://github.com/odoo/odoo)
-- [vercel/next-forge](https://github.com/vercel/next-forge)
-- [Vercel Next.js SaaS Starter](https://vercel.com/templates/authentication/next-js-saas-starter)
-- [Blazity/next-enterprise](https://github.com/Blazity/next-enterprise/tree/main)
-- [arhamkhnz/next-shadcn-admin-dashboard](https://github.com/arhamkhnz/next-shadcn-admin-dashboard)
-- [cruip/open-react-template](https://github.com/cruip/open-react-template)
-- [ixartz/SaaS-Boilerplate](https://github.com/ixartz/SaaS-Boilerplate)
-- [nextify-limited/saasfly](https://github.com/nextify-limited/saasfly)
-- [mickasmt/next-saas-stripe-starter](https://github.com/mickasmt/next-saas-stripe-starter)
-- [reliverse/relivator](https://github.com/reliverse/relivator)
-- [michaelshimeles/nextjs-starter-kit](https://github.com/michaelshimeles/nextjs-starter-kit)
-- [alifarooq9/launchmvpfast](https://github.com/alifarooq9/launchmvpfast)
-- [cellajs/cella](https://github.com/cellajs/cella)
-- [get-convex/convex-saas](https://github.com/get-convex/convex-saas)
-
 ### Tanstack Start/Router Boilerplates
 
 - Biome, Drizzle, Query [Vijayabaskar56/tanstack-start-faster](https://github.com/Vijayabaskar56/tanstack-start-faster)
 - Example Router app [specfy/getstack](https://github.com/specfy/getstack)
 - [TanStack Dashboard Demo](https://github.com/themeselection/tanstack-dashboard-demo)
-- not great [jackytea/tanstack-starter](https://github.com/jackytea/tanstack-starter)
-- not great [abdullahelmetwali/tanstack-starter](https://github.com/abdullahelmetwali/tanstack-starter)
-
 ### Tanstack Start/Router Official Examples
 
 - [All Examples](https://github.com/TanStack/router/tree/main/examples/react)
