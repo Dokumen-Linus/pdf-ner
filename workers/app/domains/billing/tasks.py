@@ -21,4 +21,4 @@ def report_usage_to_stripe_task(self):
         return result
     except Exception as exc:
         logger.exception("billing.report_usage_to_stripe failed")
-        raise self.retry(exc=exc, countdown=60)
+        raise self.retry(exc=exc, countdown=60) from exc

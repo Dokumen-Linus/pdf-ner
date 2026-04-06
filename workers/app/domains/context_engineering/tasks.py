@@ -24,4 +24,4 @@ def optimize_prompt_task(self, project_id: str, max_iterations: int = 5, model: 
         return result
     except Exception as exc:
         logger.error("Prompt optimization failed: %s", exc, exc_info=True)
-        raise self.retry(exc=exc, countdown=60)
+        raise self.retry(exc=exc, countdown=60) from exc

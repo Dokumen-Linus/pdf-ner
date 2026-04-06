@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from uuid import UUID
 
-from .value_objects import F1Score
+from .value_objects import EntityMatch, F1Score
 
 
 @dataclass
