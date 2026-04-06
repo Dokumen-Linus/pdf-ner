@@ -1,6 +1,6 @@
 # Dokumen AI Web App
 
-## Quickstart
+## Setup
 
 1 Install [Node.js v24](https://nodejs.org/en/download/) and [Bun.js](https://bun.sh/)
 2 Clone repo and install dependencies:
@@ -17,6 +17,24 @@ bun i
 
 ```cmd
 bunx playwright install
+```
+
+4 Ensure .env is created following to .env.local.example
+
+### Running the web app
+
+1 Start the database server
+
+```cmd
+pg_ctl -D .\pgdata -l logfile start
+```
+
+
+
+3 Run the app (currently with Node.js, later will migrate to Bun.js)
+
+```cmd
+npm run dev
 ```
 
 ## Scripts
@@ -38,6 +56,23 @@ bunx playwright install
 | test         | run tests using Bun Test Runner, React Testing Library DOM    |
 | test:db      | run database functions tests, must have database on           |
 | test:e2e     | run playwright end-to-end tests                               |
+
+## Database
+
+The database schemas are defined in:
+
+1. ./db/migrations/ SQL scripts
+2. ./src/db/schema/ Drizzle Typescript schemas
+3. ./src/db-fns/ Zod validation schemas
+
+- Any changes to the database schema must be made in all three locations
+- Test ./src/db-fns/match-schemas.test.ts ensures that [2] Drizzle schemas equal the [3] Zod validation schemas
+- There's no test to ensure that [1] SQL schemas equal the [2] Drizzle schemas
+
+**Restriction on App Interactions with Database**: The frontend can only interact with database through db-fns to ensure that all database interactions are validated and consistent.
+
+**Schemas**: api_user has CRUD permissions on api schema and read permissions on web, workers, and public schemas with the exception of workers.llm_usage and workers.stripe_customers
+
 
 ## Tech Stack
 
@@ -101,50 +136,3 @@ npx shadcn@latest add --overwrite accordion alert-dialog alert aspect-ratio avat
 - EmbedPDF: [GitHub](https://github.com/embedpdf/embed-pdf-viewer), [docs for @embedpdf/pdfium](https://www.embedpdf.com/docs/pdfium/introduction) the JS library to wrap the C++ engine, [docs for @embedpdf/core/react](https://www.embedpdf.com/docs/react/introduction)
 - Plugins are built in consitent style defined by core (not using standard Redux style) and must have commented sections and same subfolders and filenames as existing local plugins
 - PDF retrieval: currently from URL as defined by @embedpdf/plugin-loader
-
-### Color Pickers
-
-- TailwindCSS: [tailcolors](https://tailcolors.com/)
-- Hex color codes: [HTML Color Codes](https://html-color.codes/)
-
-## Database
-
-### Start Instructions
-
-Must start the database server before running test:db or dev. Should run dev in a separate terminal so that terminating dev does not terminate the database and you can run dev again without running pg_ctl start again.
-
-```cmd
-pg_ctl -D .\pgdata -l logfile start
-```
-
-### Schemas
-
-#### Auth Schema
-
-Contains all tables for Better Auth. Created by "bunx @better-auth/cli@latest generate" and modifying to use shema auth and user auth_role. This way Better Auth can only edit auth schema and other users can't edit auth schema.
-
-#### Web Schema
-
-Contains all tables for the app defined in ./db/migrations/web. Role owner_role owns the schema so it can be used in migrations. Role web_user can only edit tables so that Drizzle can't create or delete tables etc.
-
-#### Api Schema
-
-Contains all tables for the backend API defined in ./db/migrations/api. Role web_user has read-only access.
-
-#### Workers Schema
-
-Contains all tables for the backend workers defined in ./db/migrations/workers. Role web_user has read-only access.
-
-### How Database is Exposed to App
-
-The database schemas are defined in:
-
-1. ./db/migrations/ SQL scripts
-2. ./src/db/schema/ Drizzle Typescript schemas
-3. ./src/db-fns/ Zod validation schemas
-
-- Any changes to the database schema must be made in all three locations
-- Test ./src/db-fns/match-schemas.test.ts ensures that [2] Drizzle schemas equal the [3] Zod validation schemas
-- There's no test to ensure that [1] SQL schemas equal the [2] Drizzle schemas
-
-**Restriction on App Interactions with Database**: The frontend can only interact with database through db-fns to ensure that all database interactions are validated and consistent.

@@ -1,52 +1,14 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Agent Skills
-
-@web/node_modules/@tanstack/intent/meta/domain-discovery/SKILL.md
-@web/node_modules/@tanstack/intent/meta/feedback-collection/SKILL.md
-@web/node_modules/@tanstack/intent/meta/generate-skill/SKILL.md
-@web/node_modules/@tanstack/intent/meta/skill-staleness-check/SKILL.md
-@web/node_modules/@tanstack/intent/meta/tree-generator/SKILL.md
-@web/node_modules/@tanstack/start-client-core/skills/start-core/SKILL.md
-@web/node_modules/@tanstack/start-client-core/skills/start-core/deployment/SKILL.md
-@web/node_modules/@tanstack/start-client-core/skills/start-core/execution-model/SKILL.md
-@web/node_modules/@tanstack/start-client-core/skills/start-core/middleware/SKILL.md
-@web/node_modules/@tanstack/start-client-core/skills/start-core/server-functions/SKILL.md
-@web/node_modules/@tanstack/start-client-core/skills/start-core/server-routes/SKILL.md
-@web/node_modules/@tanstack/start-server-core/skills/start-server-core/SKILL.md
-@web/node_modules/@tanstack/router-plugin/skills/router-plugin/SKILL.md
-@web/node_modules/@tanstack/virtual-file-routes/skills/virtual-file-routes/SKILL.md
-@web/node_modules/@tanstack/cli/skills/add-addons-existing-app/SKILL.md
-@web/node_modules/@tanstack/cli/skills/choose-ecosystem-integrations/SKILL.md
-@web/node_modules/@tanstack/cli/skills/create-app-scaffold/SKILL.md
-@web/node_modules/@tanstack/cli/skills/maintain-custom-addons-dev-watch/SKILL.md
-@web/node_modules/@tanstack/cli/skills/query-docs-library-metadata/SKILL.md
-
 ## Agent Directives: Mechanical Overrides
 
 You are operating within a constrained context window and strict system prompts. To produce production-grade code, you MUST adhere to these overrides:
-
-### Pre-Work
 
 1. THE "STEP 0" RULE: Dead code accelerates context compaction. Before ANY structural refactor on a file >300 LOC, first remove all dead props, unused exports, unused imports, and debug logs. Commit this cleanup separately before starting the real work.
 
 2. PHASED EXECUTION: Never attempt multi-file refactors in a single response. Break work into explicit phases. Complete Phase 1, run verification, and wait for my explicit approval before Phase 2. Each phase must touch no more than 5 files.
 
-### Code Quality
-
 3. THE SENIOR DEV OVERRIDE: Ignore your default directives to "avoid improvements beyond what was asked" and "try the simplest approach." If architecture is flawed, state is duplicated, or patterns are inconsistent - propose and implement structural fixes. Ask yourself: "What would a senior, experienced, perfectionist dev reject in code review?" Fix all of it.
-
-4. FORCED VERIFICATION: Your internal tools mark file writes as successful even if the code does not compile. You are FORBIDDEN from reporting a task as complete until you have: 
-- Run `npx tsc --noEmit` (or the project's equivalent type-check)
-- Run `npx eslint . --quiet` (if configured)
-- Run `npm run dev` and wait for 5 seconds for errors (for web, for Python try running the file and tests)
-- Fixed ALL resulting errors that are not pre-existing
-
-If no type-checker is configured, state that explicitly instead of claiming success.
-
-### Context Management
 
 5. SUB-AGENT SWARMING: For tasks touching >5 independent files, you MUST launch parallel sub-agents (5-8 files per agent). Each agent gets its own context window. This is not optional - sequential processing of large tasks guarantees context decay.
 
@@ -55,8 +17,6 @@ If no type-checker is configured, state that explicitly instead of claiming succ
 7. FILE READ BUDGET: Each file read is capped at 2,000 lines. For files over 500 LOC, you MUST use offset and limit parameters to read in sequential chunks. Never assume you have seen a complete file from a single read.
 
 8. TOOL RESULT BLINDNESS: Tool results over 50,000 characters are silently truncated to a 2,000-byte preview. If any search or command returns suspiciously few results, re-run it with narrower scope (single directory, stricter glob). State when you suspect truncation occurred.
-
-### Edit Safety
 
 9.  EDIT INTEGRITY: Before EVERY file edit, re-read the file. After editing, read it again to confirm the change applied correctly. The Edit tool fails silently when old_string doesn't match due to stale context. Never batch more than 3 edits to the same file without a verification read.
 
@@ -81,30 +41,7 @@ Dokumen AI is a monorepo for a PDF entity labeling and NER (Named Entity Recogni
 
 All three applications (web, api, workers) share a single PostgreSQL database but use separate schemas with strict access controls.
 
-## Database Setup & Management
-
-### Starting the Database
-
-The PostgreSQL database must be running before starting any application:
-
-```cmd
-pg_ctl -D .\pgdata -l logfile start
-```
-
-### Database Initialization
-
-First-time setup:
-
-```cmd
-initdb -D .\pgdata
-pg_ctl -D .\pgdata -l logfile start
-createdb dokumen
-set DATABASE_URL=postgres://localhost/dokumen?sslmode=disable
-dbmate up
-psql -f .\db\migrations\better-auth\2025-12-22T03-27-15.344Z.sql -d dokumen
-```
-
-### Schema Architecture
+## DB
 
 The database has multiple schemas with role-based access control:
 
@@ -114,31 +51,14 @@ The database has multiple schemas with role-based access control:
 - **workers schema**: Worker tables, owned by `worker_owner`, read-only for `web_user`
 - **public schema**: Only for migration scripts
 
-### Migration Scripts
+## API
 
-Located in `db/migrations/` with subdirectories for each schema. Currently using numerical prefixes (will switch to datetime on first release). Scripts run in alphanumeric order via dbmate.
+## Tech Stack
 
-## API (FastAPI Backend)
-
-### Setup & Development
-
-```cmd
-cd api
-uv venv .venv
-powershell .\.venv\Scripts\activate   # Windows
-# OR
-source .venv/bin/activate              # Mac/Linux
-uv pip install .
-uv pip install -e ".[dev]"
-```
-
-### Running the API
-
-```cmd
-cd api
-powershell .\.venv\Scripts\activate   # activate environment
-uvicorn app.main:app --reload
-```
+- Framework: FastAPI [docs](https://fastapi.tiangolo.com/), [repo](https://github.com/fastapi/fastapi) with auto-generated MKDocs and concurrent programming
+- Typing: Pydantic [docs](https://docs.pydantic.dev/), [repo](https://github.com/pydantic/pydantic)
+- Environment variables: imported from .env in ./core/config.py, validated and accessed using [pydantic_settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
+- Package manager: uvicorn [uv](https://docs.astral.sh/uv/) to install dependencies in pyproject.toml
 
 ### Architecture
 
@@ -152,61 +72,28 @@ uvicorn app.main:app --reload
   - Currently contains empty extract_text and llm_ner directories
   - When implementing: follow the router → service → repository pattern
   - Each domain may contain:
-    - **router.py**: Endpoint definitions (wiring layer)
-    - **schema.py**: Pydantic validation schemas for inputs (NOT responses)
-    - **service.py**: Business logic
-    - **repository.py**: SQL queries using asyncpg connection
-    - **tasks.py**: FastAPI background tasks
+    - router.py (wiring layer) - defines what endpoints are exposed and provides the wiring layer, creates connection using core.db.get_conn()
+    - schema.py (typing) - defines pydantic validation schemas for endpoint inputs (never responses, never set response_model) and dataclasses for function outputs when needed for consistency across multiple functions
+    - service.py (business logic) - creates functions to perform the main business logic/purpose of the endpoint ()
+    - repository.py (db queries) - executes SQL queries to handle necessary database interaction using the connection passed from service.py and router.py
+    - tasks.py (side processes) - creates FastAPI background tasks that router.py should call when code can be executed indepndently of/after the response
+    - events.py (messaging to workers) - sends tasks to Redis broker using Celery client from core.messaging.celery, messsaging is sync but fast
 - **app/utils/**: Generic reusable utilities
 
 ### Critical Constraints
 
-- Database interactions ONLY in repository.py files using asyncpg
+- Database interactions ONLY in repository.py files using asyncpg connection passed from router → service → repository
 - NO ORM, NO Pydantic/Python schemas for SQL database
 - Never set `response_model` in endpoints
-- Connection passed from router → service → repository
 - Avoid blocking code in async functions
 - Use anyio over asyncio when possible
 - Use httpx for all HTTP requests
-- Never use uvloop on Windows (installed via `fastapi[standard]` for prod)
+- never create a class in service.py, repository.py, tasks.py, events.py - create functions
+- never create a dataclass in a file that is not named schemas.py
+- import settings, never get_settings() from core.settings.py
+- do not create global variables, add them to app.state and initialize in lifespan.py
 
-### Linting & Formatting
-
-```cmd
-cd api
-ruff check .
-ruff format .
-deptry .  # check dependencies
-```
-
-Configuration in `api/pyproject.toml` and root `ruff.toml`.
-
-## Web (React Frontend)
-
-### Setup & Development
-
-```cmd
-cd web
-bun i
-bunx playwright install  # for e2e tests
-bun dev                  # starts on port 3000
-```
-
-### Key Commands
-
-| Command | Description |
-|---------|-------------|
-| `bun dev` | Run dev server on port 3000 |
-| `bun build` | Build for production |
-| `bun tsc` | Type check without emitting files |
-| `bun lint` | Check linting |
-| `bun lint:fix` | Auto-fix linting errors |
-| `bun prettier:fix` | Format code |
-| `bun test` | Run Bun tests with React Testing Library |
-| `bun test:db` | Run database function tests (requires db running) |
-| `bun test:e2e` | Run Playwright e2e tests |
-| `bun depcheck` | Check for unused dependencies |
-| `bun storybook` | Start Storybook on port 6006 |
+## Web
 
 ### Architecture
 
@@ -229,152 +116,43 @@ bun dev                  # starts on port 3000
 - **Components**: shadcn/ui in `components/shadcn-ui`
 - **PDF Rendering**: EmbedPDF (@embedpdf/pdfium + @embedpdf/core/react) with custom plugins
   - Plugins follow consistent structure with same subfolders as existing plugins
+- **Environment Variables** MUST import from `src/env.server.ts` or `src/env.client.ts` (validated via t3-env), NOT from process.env or cross-env.
 
-### Key Framework Files
+## Workers
 
-- `src/__root.tsx`: Root layout for entire site
-- `src/router.tsx`: Exposes routes
-- `src/client.tsx`: Client entrypoint
-- `src/server.tsx`: Server entrypoint
-- `src/env.client.ts`, `src/env.server.ts`: Environment variable validation (import env from here, not process.env)
-- `src/routes/_public.tsx`: Public site layout
-- `src/routes/_auth.tsx`: Auth pages layout
+### Architecture — Domain-Driven Design
 
-### Environment Variables
+Workers follow a layered DDD architecture. Each domain is self-contained:
 
-MUST import from `src/env.server.ts` or `src/env.client.ts` (validated via t3-env), NOT from process.env or cross-env.
+workers/app/
+├── __main__.py          # Celery app, queues, routing
+├── core/                # Config, logging — NO domain imports
+├── shared/              # Shared kernel: stable cross-domain concepts
+│   ├── domain/          # Value objects (Money, DocumentId), events, exceptions
+│   ├── application/     # Cross-domain commands, handlers, queries
+│   └── infrastructure/  # DB pool, Redis client, time utilities
+├── domains/domain_name1/
+│   ├── domain/          # Pure business logic — entities, value objects, services, policies, events, repository interfaces
+│   ├── application/     # Use-case orchestration — commands, handlers, workflows
+│   ├── infrastructure/  # Adapters — DB repositories, SDK clients, event publishers
+│   └── tasks.py         # Celery entrypoints (thin wrappers over handlers)
+└── integrations/        # Cross-domain third-party clients (OpenAI, etc.)
 
-### Linting & Formatting
+### Layer Rules
 
-- ESLint 9 (config: `eslint.config.mjs`)
-- Prettier (auto-formats on save in VSCode)
-- Commitlint enforces Conventional Commits via husky
+- **domain/**: Pure business logic. No Celery, no DB, no HTTP, no SDKs. "Is this rule still true if the internet is down?"
+- **application/**: Use-case orchestration. Calls domain methods, coordinates repositories. No framework decorators. Handlers must be callable from Celery, FastAPI, CLI, and tests.
+- **infrastructure/**: Adapters to the real world. Implements interfaces defined in domain/. "Could I delete this and swap vendors?"
+- **tasks.py**: Thin Celery wrappers only — delegate immediately to application handlers.
 
-### Commit Message Format
+### shared/ (Shared Kernel)
 
-Must use conventional commit prefixes:
+NOT a utils folder. Only put things here if multiple domains depend on it AND it represents a stable business concept (DocumentId, DomainEvent, base repository interfaces, retry/idempotency abstractions). If it changes frequently, it doesn't belong here.
 
-- `feat:` - new feature (minor version bump)
-- `fix:` - bug fix (patch)
-- `perf:` - performance improvement (patch)
-- `docs:`, `test:`, `ci:`, `refactor:`, `style:`, `chore:`, `build:` - no version bump
-- `type!:` - breaking change (major version bump)
+### Critical Constraints
 
-## Workers (Celery) - IN DEVELOPMENT
-
-**Current Status**: The workers directory structure exists but is not fully implemented.
-
-### Setup Required
-
-The workers currently have:
-- Empty pyproject.toml (needs dependencies)
-- Incomplete Celery configuration (missing CELERY_BROKER_URL property)
-- No actual task implementations
-- Empty Redis/Docker configuration files
-
-### Tech Stack (When Implemented)
-
-- Celery framework with Redis message broker
-- Python 3.13 (matches API)
-
-### Directory Structure
-
-- `workers/app/main.py`: Celery app definition
-- `workers/app/core/`: Core configuration
-- `workers/app/tasks/`: Task definitions (currently empty)
-
-### When Implementing Workers:
-
-- Add Celery and Redis dependencies to pyproject.toml
-- Complete the settings configuration in workers/app/core/config.py
-- Set up Redis infrastructure (infra/redis.conf is currently empty)
-- Implement actual tasks in workers/app/tasks/
-
-## Infrastructure - IN DEVELOPMENT
-
-The infra/ directory exists but configuration files are currently empty:
-- docker-compose.yml (0 bytes)
-- redis.conf (0 bytes)
-
-These need to be implemented when setting up production deployment.
-
-## Development Workflow
-
-### Terminal Setup
-
-Use separate terminals for each service to prevent accidental termination:
-
-1. Terminal 1: Database (`pg_ctl -D .\pgdata -l logfile start`)
-2. Terminal 2: API (`cd api && uvicorn app.main:app --reload`)
-3. Terminal 3: Web (`cd web && bun dev`)
-4. Terminal 4: Workers (when needed)
-
-### Common Issues
-
-- **Database not running**: Start with `pg_ctl -D .\pgdata -l logfile start`
-- **Python env not activated**: Run `powershell .\.venv\Scripts\activate` (Windows) or `source .venv/bin/activate` (Mac)
-- **Node modules out of sync**: Run `bun i` in web directory
-- **Type errors in web**: Never edit `src/routeTree.gen.ts`, close it while dev server is running
-
-### Testing
-
-- API: Tests in `api/tests/` (setup TBD, use pytest with pytest.mark.anyio)
-- Web: Tests in `web/tests/` and `web/src/**/*.{spec,test}.{ts,tsx}`
-  - Unit tests: Bun Test Runner + React Testing Library
-  - E2E tests: Playwright in `tests/e2e/*.e2e.ts`
-  - Storybook: Component stories in `src/components/shadcn-stories/`
-
-### PDF Processing
-
-The application uses EmbedPDF packages for PDF rendering and interaction:
-- Core: @embedpdf/core, @embedpdf/engines, @embedpdf/pdfium
-- Plugins: viewport, zoom, render, thumbnail, interaction-manager, etc.
-- Custom implementations located in `web/src/components/pdf-container/`
-- Plugins follow consistent structure with same subfolders as existing plugins
-
-### Package Patches
-
-- Uses patch-package for NPM package modifications
-- Postinstall script: "npx patch-package -y"
-- Patches applied automatically after npm install
-
-### Environment Variables
-
-The project includes example environment files:
-- Web: .env.local.example (includes AUTH_DATABASE_URL and APP_DATABASE_URL for multi-role setup)
-- API: .env.local.example
-- Workers: .env.local.example (REDIS_URL configuration)
-
-## Code Style & Best Practices
-
-### Python (API/Workers)
-
-- Format with Ruff (line length: 100)
-- Use asyncpg for database queries
-- Never create global variables, use `app.state` initialized in lifespan
-- Pass database connection as dependency through layers
-- Repository pattern: router → service → repository
-- Double quotes, space indentation
-
-### TypeScript/React (Web)
-
-- Format with Prettier + ESLint
-- Import env from `src/env.*.ts` files only
-- Database access ONLY through db-fns server functions
-- Forms: Tanstack Form + shadcn/ui + Zod
-- Icons: Lucide React
-- Testing: React Testing Library + Bun Test Runner
-
-### SQL
-
-- Migrations in `db/migrations/{schema}/` subdirectories
-- Follow `db/migrations/rules.md`
-
-## VSCode Configuration
-
-The project is configured with format-on-save for all file types:
-
-- Python: Ruff formatter
-- TypeScript/JavaScript/React: Prettier + ESLint
-- Auto-save on focus change enabled
-- Protected branch: master
+- No fat Celery tasks — all logic lives in application/ handlers
+- Domain layer has zero infrastructure imports
+- Repository interfaces in domain/, implementations in infrastructure/
+- Use `app.state` patterns, no global variables
+- Celery broker: Redis
