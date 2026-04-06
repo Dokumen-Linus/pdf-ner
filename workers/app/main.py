@@ -13,4 +13,7 @@ app.conf.task_serializer = "json"
 app.conf.result_serializer = "json"
 app.conf.accept_content = ["json"]
 
-app.autodiscover_tasks()
+app.autodiscover_tasks([
+    "app.domains.billing",
+    "app.domains.context_engineering",
+])

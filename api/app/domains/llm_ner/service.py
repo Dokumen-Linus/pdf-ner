@@ -5,9 +5,11 @@ from uuid import UUID
 import asyncpg
 from fastapi import HTTPException
 
+from app.domains.shared.repository import fetch_model_cost
 from app.integrations.anthropic import call_anthropic_async
 from app.integrations.gemini import call_google_ai_async
 from app.integrations.openai import call_openai_async
+from app.shared.schemas import LLMResponseData
 
 from . import repository
 from .schemas import ExtractEntitiesRequest
@@ -46,8 +48,8 @@ async def call_llm(
     model: str,
     system_prompt: str,
     user_prompt: str,
-) -> str:
-    """Route to appropriate LLM based on provider."""
+) -> LLMResponseData:
+    """Route to appropriate LLM based on provider. Returns LLMResponseData with text + token counts."""
     if provider == "anthropic":
         return await call_anthropic_async(clients["anthropic"], model, system_prompt, user_prompt)
     elif provider == "openai":
@@ -67,41 +69,69 @@ def validate_json(response_text: str) -> dict:
         raise HTTPException(status_code=422, detail="LLM response is not valid JSON") from None
 
 
+async def record_llm_usage(
+    conn: asyncpg.Connection,
+    user_id: UUID | None,
+    project_id: UUID | None,
+    provider: str,
+    model: str,
+    input_tokens: int,
+    output_tokens: int,
+) -> None:
+    """Insert one usage record into workers.llm_usage (api_user has INSERT grant)."""
+    cost = await fetch_model_cost(conn, model, input_tokens, output_tokens)
+    try:
+        await conn.execute(
+            """
+            INSERT INTO workers.llm_usage
+                (user_id, project_id, provider, model, source, input_tokens, output_tokens, cost_usd)
+            VALUES ($1, $2, $3, $4, 'api', $5, $6, $7)
+            """,
+            user_id,
+            project_id,
+            provider,
+            model,
+            input_tokens,
+            output_tokens,
+            cost,
+        )
+    except Exception:
+        logger.exception(
+            "Failed to record LLM usage: provider=%s model=%s in=%d out=%d",
+            provider,
+            model,
+            input_tokens,
+            output_tokens,
+        )
+
+
 async def extract_entities(
     conn: asyncpg.Connection,
     clients: dict,
     request: ExtractEntitiesRequest,
 ) -> dict:
     """Orchestration function for entity extraction."""
-    # Fetch project
     project = await repository.fetch_project(conn, request.project_id)
     if not project:
         logger.error("Project not found: %s", request.project_id)
         raise HTTPException(status_code=404, detail="Project not found")
-    logger.debug("Project fetched: %s", project["id"])
 
-    # Fetch entity types
     entity_types = await repository.fetch_entity_types(conn, request.project_id)
     if not entity_types:
         logger.error("No entity types defined for project: %s", request.project_id)
         raise HTTPException(status_code=400, detail="No entity types defined for project")
-    logger.debug("Entity types fetched: count=%d", len(entity_types))
 
-    # Fetch template
     template = await repository.fetch_template(conn, request.template_id)
     if not template:
         logger.error("Template not found: %s", request.template_id)
         raise HTTPException(status_code=404, detail="Template not found")
-    logger.debug("Template fetched: %s", template["id"])
 
-    # Build prompt
     system_prompt = build_prompt_from_template(
         template["txt"],
         project["description"],
         entity_types,
     )
 
-    # Save prompt to database
     prompt_id: UUID = await repository.insert_prompt(
         conn,
         request.project_id,
@@ -109,9 +139,8 @@ async def extract_entities(
         system_prompt,
     )
 
-    # Call LLM
     try:
-        llm_response = await call_llm(
+        llm_usage: LLMResponseData = await call_llm(
             clients,
             request.provider,
             request.model,
@@ -124,8 +153,18 @@ async def extract_entities(
         logger.error("LLM provider error: %s", e)
         raise HTTPException(status_code=502, detail="LLM provider error") from None
 
-    # Validate JSON
-    extracted = validate_json(llm_response)
+    # Record usage (non-blocking best-effort)
+    await record_llm_usage(
+        conn,
+        request.user_id,
+        request.project_id,
+        request.provider,
+        request.model,
+        llm_usage.input_tokens,
+        llm_usage.output_tokens,
+    )
+
+    extracted = validate_json(llm_usage.text)
 
     return {
         "prompt_id": str(prompt_id),

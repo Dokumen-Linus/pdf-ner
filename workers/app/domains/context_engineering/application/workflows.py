@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import json
 import logging
 
@@ -6,6 +7,8 @@ import asyncpg
 from openai import AsyncOpenAI
 
 from app.integrations.openai import call_openai
+from workers.app.shared.domain.LLMResponseData import LLMResponseData
+from app.shared.infrastructure.usage_tracker import record_llm_usage
 
 from ..domain import services
 from ..domain.entities import EntityTypeInfo, EvaluationResult, LabeledPdf, PromptCandidate
@@ -13,6 +16,8 @@ from ..infrastructure import repositories as repo
 from .commands import OptimizePrompt
 
 logger = logging.getLogger(__name__)
+
+_TASK_NAME = "context_engineering.optimize_prompt"
 
 
 async def prompt_optimization_workflow(
@@ -60,7 +65,14 @@ async def prompt_optimization_workflow(
 
         candidate = PromptCandidate(system_prompt=full_prompt, iteration=0)
         eval_results = await _evaluate_prompt_on_pdfs(
-            openai_client, candidate, eval_pdfs, json_schema, entity_types, cmd.model
+            conn,
+            openai_client,
+            candidate,
+            eval_pdfs,
+            json_schema,
+            entity_types,
+            cmd.model,
+            cmd.project_id,
         )
         avg_f1 = sum(r.overall_f1 for r in eval_results) / max(len(eval_results), 1)
         candidate.overall_f1 = avg_f1
@@ -73,7 +85,14 @@ async def prompt_optimization_workflow(
     # 5. Iterative refinement
     for iteration in range(1, cmd.max_iterations + 1):
         eval_results = await _evaluate_prompt_on_pdfs(
-            openai_client, best_candidate, eval_pdfs, json_schema, entity_types, cmd.model
+            conn,
+            openai_client,
+            best_candidate,
+            eval_pdfs,
+            json_schema,
+            entity_types,
+            cmd.model,
+            cmd.project_id,
         )
 
         error_analysis = services.build_error_analysis(eval_results, entity_types)
@@ -81,20 +100,35 @@ async def prompt_optimization_workflow(
             logger.info("No errors to fix at iteration %d. Stopping.", iteration)
             break
 
-        # Ask LLM to refine the prompt
         refinement_meta_prompt = services.build_refinement_prompt(
             best_candidate.system_prompt, error_analysis, entity_types
         )
-        refined_text = await call_openai(
+        llm_usage: LLMResponseData = await call_openai(
             openai_client,
             cmd.refinement_model,
             "You are a prompt engineering expert.",
             refinement_meta_prompt,
         )
+        await record_llm_usage(
+            conn,
+            provider="openai",
+            model=cmd.refinement_model,
+            input_tokens=llm_usage.input_tokens,
+            output_tokens=llm_usage.output_tokens,
+            project_id=cmd.project_id,
+            task_name=_TASK_NAME,
+        )
 
-        refined_candidate = PromptCandidate(system_prompt=refined_text, iteration=iteration)
+        refined_candidate = PromptCandidate(system_prompt=llm_usage.text, iteration=iteration)
         refined_results = await _evaluate_prompt_on_pdfs(
-            openai_client, refined_candidate, eval_pdfs, json_schema, entity_types, cmd.model
+            conn,
+            openai_client,
+            refined_candidate,
+            eval_pdfs,
+            json_schema,
+            entity_types,
+            cmd.model,
+            cmd.project_id,
         )
         refined_f1 = sum(r.overall_f1 for r in refined_results) / max(len(refined_results), 1)
         refined_candidate.overall_f1 = refined_f1
@@ -139,17 +173,19 @@ async def prompt_optimization_workflow(
 
 
 async def _evaluate_prompt_on_pdfs(
+    conn: asyncpg.Connection,
     openai_client: AsyncOpenAI,
     candidate: PromptCandidate,
     eval_pdfs: list[LabeledPdf],
     json_schema: dict,
     entity_types: list[EntityTypeInfo],
     model: str,
+    project_id,
 ) -> list[EvaluationResult]:
     """Run NER with the candidate prompt on each eval PDF and evaluate."""
     results: list[EvaluationResult] = []
     for pdf in eval_pdfs:
-        response_text = await call_openai(
+        llm_usage: LLMResponseData = await call_openai(
             openai_client,
             model,
             candidate.system_prompt,
@@ -157,8 +193,17 @@ async def _evaluate_prompt_on_pdfs(
             schema=json_schema,
             schema_name="ner_extraction",
         )
+        await record_llm_usage(
+            conn,
+            provider="openai",
+            model=model,
+            input_tokens=llm_usage.input_tokens,
+            output_tokens=llm_usage.output_tokens,
+            project_id=project_id,
+            task_name=_TASK_NAME,
+        )
         try:
-            predicted = json.loads(response_text)
+            predicted = json.loads(llm_usage.text)
         except json.JSONDecodeError:
             logger.warning("Invalid JSON from LLM for PDF %s", pdf.pdf_id)
             predicted = {}

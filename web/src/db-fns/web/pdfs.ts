@@ -1,8 +1,9 @@
-import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm/sql"
-import { z } from "zod"
-import { db } from "@/db/client"
-import { pdfs } from "@/db/schemas/web/pdfs"
+import { createServerFn } from "@tanstack/react-start";
+import { eq } from "drizzle-orm/sql";
+import { z } from "zod";
+import { db } from "@/db/client";
+import { pdfs } from "@/db/schemas/web/pdfs";
+
 
 // ** CREATE **
 export const CreatePdfSchema = z.object({

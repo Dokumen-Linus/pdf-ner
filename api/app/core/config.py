@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     AWS_REGION: str = "us-east-1"
     AWS_ENDPOINT_URL: str | None = None
 
+    STRIPE_SECRET_KEY: str
+
     model_config = SettingsConfigDict(
         frozen=True,
         env_file=".env",

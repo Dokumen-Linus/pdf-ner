@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Any, Dict
+from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID, uuid4
 
 
@@ -14,8 +14,8 @@ class DomainEvent:
     occurred_at: datetime
 
     @staticmethod
-    def new() -> Dict[str, Any]:
+    def new() -> dict[str, Any]:
         return {
             "event_id": uuid4(),
-            "occurred_at": datetime.now(tz=timezone.utc),
+            "occurred_at": datetime.now(tz=UTC),
         }

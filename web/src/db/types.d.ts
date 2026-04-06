@@ -1,5 +1,6 @@
 import { InferInsertModel, InferModel, InferSelectModel } from "drizzle-orm"
 import * as schema from "./schemas"
+import { llmUsage, stripeCustomers } from "./schemas/workers"
 
 // web - CRUD
 export type User = InferModel<typeof schema.users>
@@ -20,7 +21,7 @@ export type DbEntityTypeUpdate = Partial<Omit<FoundDbEntityType, "id" | "created
 export type DbWebPdf = InferModel<typeof schema.pdfs>
 export type FoundDbWebPdf = InferSelectModel<typeof schema.pdfs>
 export type NewDbWebPdf = InferInsertModel<typeof schema.pdfs>
-export type DbPdfWebUpdate = Partial<Omit<FoundDbPdf, "id">>
+export type DbWebPdfUpdate = Partial<Omit<FoundDbPdf, "id">>
 
 export type DbAnnotation = InferModel<typeof schema.annotations>
 export type FoundDbAnnotation = InferSelectModel<typeof schema.annotations>
@@ -32,3 +33,7 @@ export type FoundStandardEntityType = InferSelectModel<typeof schema.stdEntityTy
 export type FoundPrompt = InferSelectModel<typeof schema.prompts>
 export type FoundDbApiPdf = InferSelectModel<typeof schema.apiPdfs>
 export type FoundTemplate = InferSelectModel<typeof schema.templates>
+
+// workers - read only
+export type LlmUsage = InferSelectModel<typeof llmUsage>
+export type StripeCustomer = InferSelectModel<typeof stripeCustomers>

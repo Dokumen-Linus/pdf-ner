@@ -10,3 +10,4 @@ class ExtractEntitiesRequest(BaseModel):
     document_text: str = Field(min_length=1)
     provider: Literal["anthropic", "gemini", "openai"]
     model: str = Field(min_length=1)
+    user_id: UUID | None = None

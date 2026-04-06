@@ -3,10 +3,10 @@ import { z } from "zod"
 import type {
   DbAnnotationUpdate,
   DbEntityTypeUpdate,
-  DbPdfUpdate,
+  DbWebPdfUpdate,
   NewDbAnnotation,
   NewDbEntityType,
-  NewDbPdf,
+  NewDbWebPdf,
   NewProject,
   NewUser,
   ProjectUpdate,
@@ -94,9 +94,9 @@ describe("Schema vs DB Type Matching", () => {
   })
 
   // ** PDFS **
-  it("CreatePdfSchema should match NewDbPdf", () => {
+  it("CreatePdfSchema should match NewDbWebPdf", () => {
     type ZodType = z.infer<typeof CreatePdfSchema>
-    type DbType = NewDbPdf
+    type DbType = NewDbWebPdf
 
     // Zod output should be assignable to DB input
     const _zodToDb: DbType = {} as ZodType
@@ -104,11 +104,11 @@ describe("Schema vs DB Type Matching", () => {
     expect(true).toBe(true)
   })
 
-  it("UpdatePdfSchema payload should match DbPdfUpdate", () => {
+  it("UpdatePdfSchema payload should match DbWebPdfUpdate", () => {
     type ZodType = z.infer<typeof UpdatePdfSchema>
-    // UpdatePdfSchema includes `id`, but DbPdfUpdate excludes it
+    // UpdatePdfSchema includes `id`, but DbWebPdfUpdate excludes it
     type ZodPayload = Omit<ZodType, "id">
-    type DbPayload = DbPdfUpdate
+    type DbPayload = DbWebPdfUpdate
 
     const _zodToDb: DbPayload = {} as ZodPayload
 

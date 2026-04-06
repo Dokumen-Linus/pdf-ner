@@ -16,10 +16,11 @@ class Settings(BaseSettings):
     REDIS_URL: str
     WORKERS_DATABASE_URL: str
 
-    # LLM API keys for NER tasks
     ANTHROPIC_API_KEY: str
     OPENAI_API_KEY: str
     GOOGLE_AI_API_KEY: str
+
+    STRIPE_SECRET_KEY: str
 
     @property
     def CELERY_BROKER_URL(self) -> str:

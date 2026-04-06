@@ -13,11 +13,18 @@ CREATE SCHEMA workers AUTHORIZATION owner_role;
 
 -- privileges on schemas
 GRANT USAGE, CREATE ON SCHEMA public TO owner_role;
+GRANT USAGE ON SCHEMA public TO web_user, api_user, workers_user;
 GRANT USAGE ON SCHEMA web TO web_user, api_user, workers_user;
 GRANT USAGE ON SCHEMA api TO web_user, api_user, workers_user;
 GRANT USAGE ON SCHEMA workers TO web_user, api_user, workers_user;
 
 -- privileges on tables in web, api, and workers schemas
+ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA public
+    GRANT SELECT ON TABLES TO web_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA public
+    GRANT SELECT ON TABLES TO api_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA public
+    GRANT SELECT ON TABLES TO workers_user;
 ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA web
     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO web_user;
 ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA web
