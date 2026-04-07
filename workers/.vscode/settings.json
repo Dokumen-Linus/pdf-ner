@@ -32,8 +32,4 @@
   },
   "ruff.configuration": "pyproject.toml",
   "ruff.lineLength": 100,
-
-  // api
-  "fastapi-endpoint.files.include": "**/*.py",
-  "fastapi-endpoint.files.exclude": "**/conda_env/**/*.*",
 }

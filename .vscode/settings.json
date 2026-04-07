@@ -11,20 +11,31 @@
   "git.enableSmartCommit": true,
   "git.fetchOnPull": true,
 
-  // backend  
+  // use Kilo Code for autocomplete instead of GitHub Copilot
+  "github.copilot.enable": {
+    "*": false
+  },
+  "editor.inlineSuggest.enabled": true,
+  "editor.quickSuggestions": {
+    "other": "inline",
+    "comments": "off",
+    "strings": "off"
+  },
+
+  // python
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.formatOnPaste": true,
-    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
         "source.fixAll.ruff": "explicit"
     },
   },
+  "ruff.configuration": "pyproject.toml",
+  "ruff.lineLength": 100,
+
+  // api
   "fastapi-endpoint.files.include": "**/*.py",
   "fastapi-endpoint.files.exclude": "**/conda_env/**/*.*",
-  "ruff.configuration": "api/ruff.toml",
-
-  // db
 
   // frontend
   "[javascript]": {
@@ -59,10 +70,9 @@
       "source.fixAll.eslint": "explicit"
     },
   },
-  "javascript.updateImportsOnFileMove.enabled": "always",
   "prettier.configPath": "web/.prettierrc",
   "prettier.ignorePath": "web/.prettierignore",
   "tailwindCSS.experimental.configFile": "web/src/styles.css",
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.updateImportsOnFileMove.enabled": "always"
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.updateImportsOnFileMove.enabled": "always"
 }

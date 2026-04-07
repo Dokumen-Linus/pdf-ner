@@ -10,24 +10,4 @@
   "git.confirmNoVerifyCommit": true,
   "git.enableSmartCommit": true,
   "git.fetchOnPull": true,
-
-  // db - decided there's no good postgres formatter extension
-  // "[sql]": {
-  //   "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc",
-  // },
-  // "SQL-Formatter-VSCode.dialect": "postgresql",
-  // "SQL-Formatter-VSCode.keywordCase": "upper",
-  // "SQL-Formatter-VSCode.dataTypeCase": "upper",
-  // "SQL-Formatter-VSCode.functionCase": "upper",
-  // "SQL-Formatter-VSCode.identifierCase": "lower",
-  // "SQL-Formatter-VSCode.expressionWidth": 100,
-  // "SQL-Formatter-VSCode.linesBetweenQueries": 0,
-  // "[sql]": {
-  //   "editor.defaultFormatter": "bradymholt.pgformatter",
-  //   "editor.formatOnSave": true
-  // },
-  // "pgFormatter.functionCase": "lowercase",
-  // "pgFormatter.noExtraLine": true,
-  // "pgFormatter.wrapLimit": 100,
-  // "pgFormatter.wrapComment": true,
 }
