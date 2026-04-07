@@ -143,7 +143,6 @@
 
 ### Special Components
 
-- videos [Untitled UI](https://www.untitledui.com/react/components/video-players)
 - [kozakdenys/qr-code-styling](https://github.com/kozakdenys/qr-code-styling)
 - [masroorejaz/react-simple-captcha](https://github.com/masroorejaz/react-simple-captcha)
 - [Home page scroll animation](https://www.builder.io/blog/3d-gsap)

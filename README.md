@@ -1,17 +1,5 @@
 # Dokumen AI Monorepo
 
-## Database
-
-The [PostgreSQL](https://www.postgresql.org/) database is defined by SQL scripts. Migrations are performed by [dbmate](https://github.com/amacneil/dbmate). The database server needs to be started before running code that depends on it. The database will be saved locally in .\pgdata. To start, run this script in a separate, dedicated terminal:
-
-```cmd
-pg_ctl -D .\pgdata -l logfile start
-```
-
-## Containerization
-
-- [Docker](https://www.docker.com/)
-
 ## Quickstart
 
 1 Install [Git](https://git-scm.com/downloads) and [Microsoft VS Code](https://code.visualstudio.com/download) or fork
@@ -22,6 +10,12 @@ git clone https://github.com/optimalcharb/pdf-entity-labeling.git
 ```
 
 3 Install recommended extensions
+
+4 Install JavaScript libraries for formatting and linting in base dir
+
+```cmd
+bun i
+```
 
 ## Version Control
 
@@ -42,3 +36,19 @@ git clone https://github.com/optimalcharb/pdf-entity-labeling.git
 | refactor:     | none                   | reorganizing code without changes          |
 | chore:        | none                   | maintenance tasks                          |
 | build:        | none                   | build system or dependencies               |
+
+## Auto-Format and Auto-Lint
+
+For the VSCode plugins and Claude Code hooks for auto-formatting to work correctly, you need to have Python installed globally with executable path "python", ruff installed globally (pip install ruff outside of any Python env), bun installed globally with executable path "bunx".
+
+## Database
+
+The [PostgreSQL](https://www.postgresql.org/) database is defined by SQL scripts. Migrations are performed by [dbmate](https://github.com/amacneil/dbmate). The database server needs to be started before running code that depends on it. The database will be saved locally in .\pgdata. To start, run this script in a separate, dedicated terminal:
+
+```cmd
+pg_ctl -D .\pgdata -l logfile start
+```
+
+## Containerization
+
+- [Docker](https://www.docker.com/)
