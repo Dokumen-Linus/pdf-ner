@@ -150,8 +150,6 @@
 - [Kanaries/graphic-walker](https://github.com/Kanaries/graphic-walker)
 - [vercel/avatar](https://github.com/vercel/avatar)
 - [vercel/react-tweet](https://github.com/vercel/react-tweet)
-- [Vercel AI SDK](https://ai-sdk.dev/elements/examples/chatbot)
-- [Ant chat](https://github.com/ant-design/pro-chat)
 - [shadcn-image-cropper](https://github.com/sujjeee/shadcn-image-cropper)
 - sounds [soundcn](https://github.com/kapishdima/soundcn)
 - scheduling [planner](https://github.com/UretzkyZvi/planner)
@@ -160,17 +158,21 @@
 - timeline [shadcn-timeline](https://github.com/timDeHof/shadcn-timeline)
 - tables [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - tables [AG Grid](https://www.ag-grid.com/react-data-grid/getting-started/)
-- Component dependency grapher [Madge](https://github.com/pahen/madge)
+- long list [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
+
+### Chatbot Components
+
+- [Vercel AI SDK](https://ai-sdk.dev/elements/examples/chatbot)
+- [Ant chat](https://github.com/ant-design/pro-chat)
 - [Alibaba ChatUI](https://chatui.io/)
 - Wrapper for OpenAI API to enable user to create auto-rended react components [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
-- long list [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
 
 ### Charts
 
-- [ApexCharts](https://github.com/apexcharts/react-apexcharts/)
 - [Recharts](https://github.com/recharts/recharts)
 - [Ant Design Charts](https://github.com/ant-design/ant-design-charts)
 - [MUI X](https://mui.com/x/react-charts/)
+- [ApexCharts](https://github.com/apexcharts/react-apexcharts/)
 
 ### React Dashboard Examples
 
@@ -181,9 +183,9 @@
 
 ### Tanstack Start/Router Boilerplates
 
-- Biome, Drizzle, Query [Vijayabaskar56/tanstack-start-faster](https://github.com/Vijayabaskar56/tanstack-start-faster)
 - Example Router app [specfy/getstack](https://github.com/specfy/getstack)
 - [TanStack Dashboard Demo](https://github.com/themeselection/tanstack-dashboard-demo)
+
 ### Tanstack Start/Router Official Examples
 
 - [All Examples](https://github.com/TanStack/router/tree/main/examples/react)
