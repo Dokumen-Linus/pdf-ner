@@ -12,11 +12,14 @@ class TestCallOpenai:
     async def test_basic_call(self):
         mock_client = AsyncMock()
         mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="Hello response"))]
+            choices=[MagicMock(message=MagicMock(content="Hello response"))],
+            usage=MagicMock(prompt_tokens=10, completion_tokens=5),
         )
 
         result = await call_openai(mock_client, "gpt-4o", "system", "user")
-        assert result == "Hello response"
+        assert result.text == "Hello response"
+        assert result.input_tokens == 10
+        assert result.output_tokens == 5
         mock_client.chat.completions.create.assert_awaited_once()
 
     @pytest.mark.anyio
@@ -75,7 +78,7 @@ class TestCallOpenai:
         assert call_kwargs["response_format"]["json_schema"]["name"] == "test_schema"
         assert call_kwargs["response_format"]["json_schema"]["strict"] is True
         assert call_kwargs["response_format"]["json_schema"]["schema"] is schema
-        assert result == '{"name": "John"}'
+        assert result.text == '{"name": "John"}'
 
     @pytest.mark.anyio
     async def test_schema_name_defaults_to_response(self):

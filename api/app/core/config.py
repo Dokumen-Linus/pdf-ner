@@ -23,11 +23,6 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     GOOGLE_AI_API_KEY: str
 
-    AWS_ACCESS_KEY_ID: str
-    AWS_SECRET_ACCESS_KEY: str
-    AWS_REGION: str = "us-east-1"
-    AWS_ENDPOINT_URL: str | None = None
-
     STRIPE_SECRET_KEY: str
 
     model_config = SettingsConfigDict(

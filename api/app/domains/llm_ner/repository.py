@@ -33,6 +33,18 @@ async def fetch_template(conn: asyncpg.Connection, template_id: int) -> asyncpg.
     )
 
 
+async def fetch_pdf_text(conn: asyncpg.Connection, pdf_id: UUID, project_id: UUID) -> tuple[bool, str | None]:
+    """Returns (found, full_text). found=False means no matching row."""
+    row = await conn.fetchrow(
+        "SELECT full_text FROM workers.pdfs WHERE id = $1 AND project_id = $2",
+        pdf_id,
+        project_id,
+    )
+    if row is None:
+        return False, None
+    return True, row["full_text"]
+
+
 async def insert_prompt(
     conn: asyncpg.Connection, project_id: UUID, template_id: int, full_text: str
 ) -> UUID:

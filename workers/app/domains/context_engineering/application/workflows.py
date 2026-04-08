@@ -5,10 +5,10 @@ import logging
 
 import asyncpg
 from openai import AsyncOpenAI
-from workers.app.shared.domain.LLMResponseData import LLMResponseData
-
+from app.domains.billing.infrastructure.repository import record_llm_usage
 from app.integrations.openai import call_openai
-from app.shared.infrastructure.usage_tracker import record_llm_usage
+from app.shared.domain.LLMResponseData import LLMResponseData
+from app.shared.infrastructure.s3 import download_pdf_bytes
 
 from ..domain import services
 from ..domain.entities import EntityTypeInfo, EvaluationResult, LabeledPdf, PromptCandidate
@@ -42,6 +42,33 @@ async def prompt_optimization_workflow(
     if not labeled_pdfs:
         raise ValueError(f"No labeled PDFs for project: {cmd.project_id}")
 
+    # For PDFs without extracted text, attempt S3 download.
+    # PDFs that fail download or have no text are skipped.
+    usable_pdfs: list[LabeledPdf] = []
+    for pdf in labeled_pdfs:
+        if pdf.full_text is not None:
+            usable_pdfs.append(pdf)
+            continue
+        try:
+            _data, _filepath = await download_pdf_bytes(conn, pdf.pdf_id)
+            logger.warning(
+                "PDF %s: downloaded from S3 (key=%s) but text extraction from raw bytes "
+                "not yet implemented — skipping",
+                pdf.pdf_id,
+                _filepath,
+            )
+        except Exception as exc:
+            logger.warning(
+                "PDF %s: S3 download failed — skipping (error=%s)",
+                pdf.pdf_id,
+                exc,
+                exc_info=True,
+            )
+    labeled_pdfs = usable_pdfs
+
+    if not labeled_pdfs:
+        raise ValueError(f"No labeled PDFs with usable text for project: {cmd.project_id}")
+
     # Split: first 2 for few-shot examples, rest for evaluation
     few_shot_pdfs = labeled_pdfs[:2]
     eval_pdfs = labeled_pdfs[2:] if len(labeled_pdfs) > 2 else labeled_pdfs
@@ -65,14 +92,12 @@ async def prompt_optimization_workflow(
 
         candidate = PromptCandidate(system_prompt=full_prompt, iteration=0)
         eval_results = await _evaluate_prompt_on_pdfs(
-            conn,
             openai_client,
             candidate,
             eval_pdfs,
             json_schema,
             entity_types,
             cmd.model,
-            cmd.project_id,
         )
         avg_f1 = sum(r.overall_f1 for r in eval_results) / max(len(eval_results), 1)
         candidate.overall_f1 = avg_f1
@@ -85,14 +110,12 @@ async def prompt_optimization_workflow(
     # 5. Iterative refinement
     for iteration in range(1, cmd.max_iterations + 1):
         eval_results = await _evaluate_prompt_on_pdfs(
-            conn,
             openai_client,
             best_candidate,
             eval_pdfs,
             json_schema,
             entity_types,
             cmd.model,
-            cmd.project_id,
         )
 
         error_analysis = services.build_error_analysis(eval_results, entity_types)
@@ -121,14 +144,12 @@ async def prompt_optimization_workflow(
 
         refined_candidate = PromptCandidate(system_prompt=llm_usage.text, iteration=iteration)
         refined_results = await _evaluate_prompt_on_pdfs(
-            conn,
             openai_client,
             refined_candidate,
             eval_pdfs,
             json_schema,
             entity_types,
             cmd.model,
-            cmd.project_id,
         )
         refined_f1 = sum(r.overall_f1 for r in refined_results) / max(len(refined_results), 1)
         refined_candidate.overall_f1 = refined_f1
@@ -173,14 +194,12 @@ async def prompt_optimization_workflow(
 
 
 async def _evaluate_prompt_on_pdfs(
-    conn: asyncpg.Connection,
     openai_client: AsyncOpenAI,
     candidate: PromptCandidate,
     eval_pdfs: list[LabeledPdf],
     json_schema: dict,
     entity_types: list[EntityTypeInfo],
     model: str,
-    project_id,
 ) -> list[EvaluationResult]:
     """Run NER with the candidate prompt on each eval PDF and evaluate."""
     results: list[EvaluationResult] = []
@@ -189,18 +208,9 @@ async def _evaluate_prompt_on_pdfs(
             openai_client,
             model,
             candidate.system_prompt,
-            pdf.full_text,
+            pdf.full_text or "",
             schema=json_schema,
             schema_name="ner_extraction",
-        )
-        await record_llm_usage(
-            conn,
-            provider="openai",
-            model=model,
-            input_tokens=llm_usage.input_tokens,
-            output_tokens=llm_usage.output_tokens,
-            project_id=project_id,
-            task_name=_TASK_NAME,
         )
         try:
             predicted = json.loads(llm_usage.text)

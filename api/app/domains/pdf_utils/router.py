@@ -3,7 +3,6 @@ from botocore.exceptions import ClientError
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.db import get_conn
-from app.core.dependencies import get_s3_client
 
 from . import service
 from .schemas import HighlightRequest
@@ -15,10 +14,9 @@ router = APIRouter(prefix="/pdf-utils", tags=["pdf-utils"])
 async def highlight_phrases(
     request: HighlightRequest,
     conn: asyncpg.Connection = Depends(get_conn),
-    s3_client=Depends(get_s3_client),
 ):
     try:
-        return await service.highlight(conn, s3_client, request)
+        return await service.highlight(conn, request)
     except LookupError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

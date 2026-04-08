@@ -8,6 +8,7 @@ os.environ.setdefault("WORKERS_DATABASE_URL", "postgres://localhost/dokumen_test
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 os.environ.setdefault("OPENAI_API_KEY", "test-key")
 os.environ.setdefault("GOOGLE_AI_API_KEY", "test-key")
+os.environ.setdefault("STRIPE_SECRET_KEY", "sk_test_dummy")
 os.environ.setdefault("ENV", "development")
 
 from datetime import UTC, datetime

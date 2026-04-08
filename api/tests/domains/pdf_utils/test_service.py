@@ -2,7 +2,7 @@ from dataclasses import asdict
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID, uuid4
 
-from api.app.domains.pdf_utils.pdfium_utils import PhraseHighlightResult
+from app.domains.pdf_utils.pdfium_utils import PhraseHighlightResult
 import pytest
 
 from app.domains.pdf_utils import service
@@ -12,10 +12,14 @@ from app.domains.pdf_utils.schemas import HighlightRequest
 @pytest.fixture
 def sample_row():
     return {
-        "location": "pdfs/original/test.pdf",
-        "bucket": "my-bucket",
+        "filepath": "pdfs/original/test.pdf",
+        "bucket_name": "my-bucket",
         "name": "test.pdf",
         "project_id": uuid4(),
+        "region": "us-east-1",
+        "access_key_id": "AKIAIOSFODNN7EXAMPLE",
+        "secret_access_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+        "endpoint_url": None,
     }
 
 
@@ -41,6 +45,7 @@ class TestHighlight:
                 "app.domains.pdf_utils.repository.fetch_pdf",
                 AsyncMock(return_value=sample_row),
             ),
+            patch("boto3.client", return_value=mock_s3),
             patch("app.integrations.s3.get_object_bytes", AsyncMock(return_value=b"pdf-bytes")),
             patch(
                 "anyio.to_process.run_sync",
@@ -48,11 +53,11 @@ class TestHighlight:
             ),
             patch("app.integrations.s3.put_object_bytes", AsyncMock()),
         ):
-            result = await service.highlight(mock_conn, mock_s3, sample_request)
+            result = await service.highlight(mock_conn, sample_request)
 
         assert result["pdf_id"] == str(sample_request.pdf_id)
         assert result["output_key"] == sample_request.output_key
-        assert result["bucket"] == sample_row["bucket"]
+        assert result["bucket"] == sample_row["bucket_name"]
         assert result["total_phrases"] == 1
         assert result["successfully_highlighted"] == 1
         assert result["results"] == [asdict(phrase_result)]
@@ -64,16 +69,20 @@ class TestHighlight:
 
         with patch("app.domains.pdf_utils.repository.fetch_pdf", AsyncMock(return_value=None)):
             with pytest.raises(LookupError, match="PDF not found"):
-                await service.highlight(mock_conn, MagicMock(), sample_request)
+                await service.highlight(mock_conn, sample_request)
 
     @pytest.mark.anyio
     async def test_raises_lookup_error_when_bucket_is_null(self, sample_request):
         """Raises LookupError when the row has no bucket configured."""
         row_no_bucket = {
-            "location": "pdfs/test.pdf",
-            "bucket": None,
+            "filepath": "pdfs/test.pdf",
+            "bucket_name": None,
             "name": "test.pdf",
             "project_id": uuid4(),
+            "region": "us-east-1",
+            "access_key_id": "key",
+            "secret_access_key": "secret",
+            "endpoint_url": None,
         }
         mock_conn = AsyncMock()
 
@@ -82,11 +91,11 @@ class TestHighlight:
             AsyncMock(return_value=row_no_bucket),
         ):
             with pytest.raises(LookupError, match="no S3 bucket configured"):
-                await service.highlight(mock_conn, MagicMock(), sample_request)
+                await service.highlight(mock_conn, sample_request)
 
     @pytest.mark.anyio
     async def test_downloads_from_bucket_and_key_in_row(self, sample_row, sample_request):
-        """S3 download is called with the bucket and location from the DB row."""
+        """S3 download is called with the bucket and filepath from the DB row."""
         mock_conn = AsyncMock()
         mock_s3 = MagicMock()
         mock_get = AsyncMock(return_value=b"pdf")
@@ -96,13 +105,14 @@ class TestHighlight:
                 "app.domains.pdf_utils.repository.fetch_pdf",
                 AsyncMock(return_value=sample_row),
             ),
+            patch("boto3.client", return_value=mock_s3),
             patch("app.integrations.s3.get_object_bytes", mock_get),
             patch("anyio.to_process.run_sync", AsyncMock(return_value=[(b"out", [])])),
             patch("app.integrations.s3.put_object_bytes", AsyncMock()),
         ):
-            await service.highlight(mock_conn, mock_s3, sample_request)
+            await service.highlight(mock_conn, sample_request)
 
-        mock_get.assert_called_once_with(mock_s3, sample_row["bucket"], sample_row["location"])
+        mock_get.assert_called_once_with(mock_s3, sample_row["bucket_name"], sample_row["filepath"])
 
     @pytest.mark.anyio
     async def test_uploads_output_bytes_to_output_key(self, sample_row, sample_request):
@@ -117,6 +127,7 @@ class TestHighlight:
                 "app.domains.pdf_utils.repository.fetch_pdf",
                 AsyncMock(return_value=sample_row),
             ),
+            patch("boto3.client", return_value=mock_s3),
             patch("app.integrations.s3.get_object_bytes", AsyncMock(return_value=b"pdf")),
             patch(
                 "anyio.to_process.run_sync",
@@ -124,10 +135,10 @@ class TestHighlight:
             ),
             patch("app.integrations.s3.put_object_bytes", mock_put),
         ):
-            await service.highlight(mock_conn, mock_s3, sample_request)
+            await service.highlight(mock_conn, sample_request)
 
         mock_put.assert_called_once_with(
-            mock_s3, sample_row["bucket"], sample_request.output_key, output_bytes
+            mock_s3, sample_row["bucket_name"], sample_request.output_key, output_bytes
         )
 
     @pytest.mark.anyio
@@ -138,6 +149,7 @@ class TestHighlight:
             PhraseHighlightResult("missing", found=False),
         ]
         mock_conn = AsyncMock()
+        mock_s3 = MagicMock()
         request = HighlightRequest(
             pdf_id=UUID("12345678-1234-5678-1234-567812345678"),
             phrases={"hello": "#FF0000", "missing": "#00FF00"},
@@ -149,11 +161,48 @@ class TestHighlight:
                 "app.domains.pdf_utils.repository.fetch_pdf",
                 AsyncMock(return_value=sample_row),
             ),
+            patch("boto3.client", return_value=mock_s3),
             patch("app.integrations.s3.get_object_bytes", AsyncMock(return_value=b"pdf")),
             patch("anyio.to_process.run_sync", AsyncMock(return_value=[(b"out", results)])),
             patch("app.integrations.s3.put_object_bytes", AsyncMock()),
         ):
-            result = await service.highlight(mock_conn, MagicMock(), request)
+            result = await service.highlight(mock_conn, request)
 
         assert result["total_phrases"] == 2
         assert result["successfully_highlighted"] == 1
+
+    @pytest.mark.anyio
+    async def test_builds_s3_client_with_endpoint_url_when_present(self, sample_request):
+        """boto3.client is called with endpoint_url when row has one."""
+        mock_conn = AsyncMock()
+        mock_s3 = MagicMock()
+        row_with_endpoint = {
+            "filepath": "pdfs/test.pdf",
+            "bucket_name": "my-bucket",
+            "name": "test.pdf",
+            "project_id": uuid4(),
+            "region": "us-east-1",
+            "access_key_id": "key",
+            "secret_access_key": "secret",
+            "endpoint_url": "https://s3.custom.example.com",
+        }
+
+        with (
+            patch(
+                "app.domains.pdf_utils.repository.fetch_pdf",
+                AsyncMock(return_value=row_with_endpoint),
+            ),
+            patch("boto3.client", return_value=mock_s3) as mock_boto3,
+            patch("app.integrations.s3.get_object_bytes", AsyncMock(return_value=b"pdf")),
+            patch("anyio.to_process.run_sync", AsyncMock(return_value=[(b"out", [])])),
+            patch("app.integrations.s3.put_object_bytes", AsyncMock()),
+        ):
+            await service.highlight(mock_conn, sample_request)
+
+        mock_boto3.assert_called_once_with(
+            "s3",
+            aws_access_key_id="key",
+            aws_secret_access_key="secret",
+            region_name="us-east-1",
+            endpoint_url="https://s3.custom.example.com",
+        )

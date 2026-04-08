@@ -3,12 +3,11 @@ from uuid import UUID
 import asyncpg
 
 
-async def fetch_pdf(conn: asyncpg.Connection, pdf_id: UUID) -> asyncpg.Record | None:
-    """Fetch PDF filepath, bucket credentials, and metadata via workers.pdfs → public.aws_buckets."""
+async def fetch_pdf_bucket_info(conn: asyncpg.Connection, pdf_id: UUID) -> asyncpg.Record | None:
+    """Fetch filepath and bucket credentials for a PDF."""
     return await conn.fetchrow(
         """
-        SELECT w.filepath, w.name, w.project_id,
-               ab.name AS bucket_name, ab.region,
+        SELECT w.filepath, ab.name AS bucket_name, ab.region,
                ab.access_key_id, ab.secret_access_key, ab.endpoint_url
         FROM workers.pdfs w
         JOIN public.aws_buckets ab ON ab.id = w.bucket_id

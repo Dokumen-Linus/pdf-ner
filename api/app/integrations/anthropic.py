@@ -2,7 +2,7 @@ import logging
 import time
 
 from anthropic import AsyncAnthropic
-from api.app.domains.shared.schemas import LLMResponseData
+from app.domains.shared.schemas import LLMResponseData
 
 logger = logging.getLogger(__name__)
 

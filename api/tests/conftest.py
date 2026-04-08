@@ -10,9 +10,7 @@ _TEST_ENV = {
     "ANTHROPIC_API_KEY": "test-anthropic-key",
     "OPENAI_API_KEY": "test-openai-key",
     "GOOGLE_AI_API_KEY": "test-google-key",
-    "AWS_ACCESS_KEY_ID": "test-aws-key-id",
-    "AWS_SECRET_ACCESS_KEY": "test-aws-secret",
-    "AWS_REGION": "us-east-1",
+    "STRIPE_SECRET_KEY": "sk_test_dummy",
 }
 for _k, _v in _TEST_ENV.items():
     os.environ.setdefault(_k, _v)
@@ -25,7 +23,7 @@ import httpx
 import pytest
 
 from app.core.db import get_conn
-from app.core.dependencies import get_llm_clients, get_s3_client, verify_api_key
+from app.core.dependencies import get_llm_clients, verify_api_key
 from app.core.exceptions import register_exception_handlers
 from app.domains.llm_ner.router import router as llm_ner_router
 from app.domains.pdf_utils.router import router as pdf_utils_router
@@ -95,12 +93,6 @@ def mock_redis():
     return redis
 
 
-@pytest.fixture
-def mock_s3_client():
-    """Synchronous boto3 S3 client mock."""
-    return MagicMock()
-
-
 # ---------------------------------------------------------------------------
 # FastAPI test client
 # ---------------------------------------------------------------------------
@@ -112,12 +104,11 @@ async def async_client(
     mock_anthropic_client,
     mock_openai_client,
     mock_google_client,
-    mock_s3_client,
     mock_redis,
 ):
     """httpx.AsyncClient wired to a test FastAPI app.
 
-    All external dependencies (DB, S3, Redis, LLM clients) are replaced with
+    All external dependencies (DB, Redis, LLM clients) are replaced with
     mocks so no running services are required.  The API key header is included
     so auth passes on every request.
     """
@@ -136,7 +127,6 @@ async def async_client(
 
     app.dependency_overrides[verify_api_key] = lambda: None
     app.dependency_overrides[get_conn] = _get_test_conn
-    app.dependency_overrides[get_s3_client] = lambda: mock_s3_client
     app.dependency_overrides[get_llm_clients] = lambda: {
         "anthropic": mock_anthropic_client,
         "openai": mock_openai_client,
