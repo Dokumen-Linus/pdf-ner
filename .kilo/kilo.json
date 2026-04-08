@@ -1,0 +1,23 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "mcp": {
+    "git": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-git",
+        "--repository",
+        "C:\\Users\\zchar\\Desktop\\pdf-ner\\"
+      ]
+    },
+    "filesystem": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\zchar\\Desktop\\pdf-ner\\"
+      ]
+    }
+  }
+}
