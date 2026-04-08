@@ -11,6 +11,7 @@ export const projects = webSchema.table("projects", {
     .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
+  bucketId: uuid("bucket_id"),
   colorPresets: text("color_presets").array(),
   orientation: text("orientation").notNull().default("any"),
   createdAt: timestamp("created_at").defaultNow(),

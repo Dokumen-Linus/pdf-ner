@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
+import { createBucket } from "@/db-fns/api/storage"
 import { db } from "@/db/client"
 import { projects } from "@/db/schemas/web/projects"
 
@@ -17,6 +18,22 @@ export const createProject = createServerFn({ method: "POST" })
   .inputValidator(CreateProjectSchema)
   .handler(async ({ data }) => {
     const [project] = await db.insert(projects).values(data).returning({ id: projects.id })
+
+    // Create an S3 bucket for this project and link it
+    try {
+      const bucket = await createBucket(`dokumen-${project.id}`)
+      await db
+        .update(projects)
+        .set({ bucketId: bucket.bucket_id })
+        .where(eq(projects.id, project.id))
+    } catch (error) {
+      // Delete the project if bucket creation fails
+      await db.delete(projects).where(eq(projects.id, project.id))
+      throw new Error(
+        `Failed to create storage bucket: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+
     return { id: project.id }
   })
 
