@@ -49,7 +49,8 @@
       "Bash(rm -fr:*)",
 
       "Bash(git push)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git commit:*)"
     ],
     "ask": []
   }

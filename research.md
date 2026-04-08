@@ -22,7 +22,6 @@
 
 - Claude Code
 - Codex
-- Cursor (I recommend against this)
 - [Grok CLI](https://github.com/superagent-ai/grok-cli)
 
 ### Free Options
@@ -32,6 +31,12 @@
 - Opencode
 - Antigravity
 - Windsurf
+
+### Non-Options
+
+- Cursor
+- Lovable
+- Replit
 
 ### Essential Tools
 
@@ -45,7 +50,6 @@
 
 - [skillsmp](https://skillsmp.com/categories/productivity-tools)
 - [context7](https://context7.com/skills)
-- [@zodchii Top 50](https://x.com/zodchiii/status/2034924354337714642)
 - [Tanstack Intent](https://tanstack.com/intent/registry)
 
 ### Generate React Components
@@ -57,7 +61,7 @@
 ### Frontend Design
 
 - Google Stitch
-- Lovable
+- Google Stich DESIGN.md set [VoltAgent](https://github.com/VoltAgent/awesome-design-md)
 
 ### Generate Images
 
