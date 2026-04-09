@@ -68,6 +68,10 @@
 - Gemini
 - SVG Icons: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
 
+## Deployment
+
+- [aws-doctor](https://github.com/elC0mpa/aws-doctor)
+
 ## Frontend links
 
 ### PDF Web rendering
