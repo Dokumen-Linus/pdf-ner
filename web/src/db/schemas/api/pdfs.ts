@@ -1,35 +1,10 @@
-import { relations } from "drizzle-orm"
-import { jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core"
-import { projects } from "../web/projects"
-import { prompts } from "./prompts"
+import { boolean, text, uuid } from "drizzle-orm/pg-core"
 import { apiSchema } from "./schema"
 
+// api.pdfs is a thin extension of workers.pdfs (same id).
+// It holds only the fields that the API layer adds after text extraction.
 export const apiPdfs = apiSchema.table("pdfs", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  projectId: uuid("project_id")
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-  labeledEntities: jsonb("labeled_entities"),
-  fullText: text("full_text"),
-  extractMethod: text("extract_method"),
-  textByPage: jsonb("text_by_page"),
-  bookmarks: jsonb("bookmarks"),
-  predictedEntities: jsonb("predicted_entities"),
-  modelType: text("model_type"),
-  model: text("model"),
-  promptId: uuid("prompt_id").references(() => prompts.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  id: uuid("id").primaryKey(),
+  bookmarks: text("bookmarks").array(),
+  originalHasText: boolean("original_has_text"),
 })
-
-export const apiPdfsRelations = relations(apiPdfs, ({ one }) => ({
-  project: one(projects, {
-    fields: [apiPdfs.projectId],
-    references: [projects.id],
-  }),
-  prompt: one(prompts, {
-    fields: [apiPdfs.promptId],
-    references: [prompts.id],
-  }),
-}))

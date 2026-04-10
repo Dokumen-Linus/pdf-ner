@@ -2,6 +2,7 @@ import { createEnv } from "@t3-oss/env-core"
 import { z } from "zod"
 
 export const env = createEnv({
+  isServer: true,
   server: {
     DATABASE_URL: z.string(),
     AUTH_DATABASE_URL: z.string(),

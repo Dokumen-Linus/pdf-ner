@@ -1,4 +1,4 @@
-export { apiPdfs, apiPdfsRelations } from "./pdfs"
+export { apiPdfs } from "./pdfs"
 export { prompts, promptsRelations } from "./prompts"
 export { apiSchema } from "./schema"
 export { stdEntityTypes } from "./std-entity-types"

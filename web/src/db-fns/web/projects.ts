@@ -42,7 +42,7 @@ export const getProjectById = createServerFn({ method: "GET" })
   .inputValidator((data: { id: string }) => data)
   .handler(async ({ data }) => {
     const project = await db.select().from(projects).where(eq(projects.id, data.id))
-    if (!project) {
+    if (project.length === 0) {
       throw new Error("Project not found")
     }
     return project
@@ -52,7 +52,7 @@ export const getProjectByName = createServerFn({ method: "GET" })
   .inputValidator((data: { name: string }) => data)
   .handler(async ({ data }) => {
     const project = await db.select().from(projects).where(eq(projects.name, data.name))
-    if (!project) {
+    if (project.length === 0) {
       throw new Error("Project not found")
     }
     return project

@@ -29,9 +29,7 @@ bunx playwright install
 pg_ctl -D .\pgdata -l logfile start
 ```
 
-
-
-3 Run the app (currently with Node.js, later will migrate to Bun.js)
+2 Run the app (currently with Node.js, later will migrate to Bun.js)
 
 ```cmd
 npm run dev
@@ -71,8 +69,7 @@ The database schemas are defined in:
 
 **Restriction on App Interactions with Database**: The frontend can only interact with database through db-fns to ensure that all database interactions are validated and consistent.
 
-**Schemas**: api_user has CRUD permissions on api schema and read permissions on web, workers, and public schemas with the exception of workers.llm_usage and workers.stripe_customers
-
+**Schemas**: web_user has CRUD permissions on web schema and read permissions on api, workers, and public schemas
 
 ## Tech Stack
 
