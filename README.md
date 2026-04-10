@@ -19,12 +19,19 @@ bun i
 
 ## Version Control
 
-- DevOps CI/CD: [GitHub Actions](https://github.com/features/actions)
-- [Conventional Commits](https://www.conventionalcommits.org/) enforced by [husky](https://github.com/typicode/husky) config by .commitlintrc.json, commit messages must start with a prefix in the table below, the workflow edits CHANGELOG.md on any version bump
+### CI/CD
+
+[GitHub Actions](https://github.com/features/actions)
+
+- git-cliff: auto-update CHANGELOG.md to catch new conventional commits following [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/) format using [git-cliff](https://git-cliff.org/docs/)
+- claude: talk to Claude in GitHub comments by @claude
+
+### Enforced Commit Pattern
+
+[Conventional Commits](https://www.conventionalcommits.org/) enforced by [husky](https://github.com/typicode/husky) config by .commitlintrc.json, commit messages must start with a prefix in the table below, the workflow edits CHANGELOG.md on any version bump
 
 | commit prefix | version bump           | definition                                 |
 | ------------- | ---------------------- | ------------------------------------------ |
-| type!:        | major (0.0.0 -> 1.0.0) | breaking changes (`feat!:`, `perf!:`, ...) |
 | feat:         | minor (0.0.0 -> 0.1.0) | new feature                                |
 | perf:         | patch (0.0.0 -> 0.0.1) | performance improvement                    |
 | fix:          | patch (0.0.0 -> 0.0.1) | bug fix                                    |
