@@ -56,6 +56,7 @@ The [PostgreSQL](https://www.postgresql.org/) database is defined by SQL scripts
 pg_ctl -D .\pgdata -l logfile start
 ```
 
-## Containerization
+## Deployment
 
 - [Docker](https://www.docker.com/)
+- [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html)
