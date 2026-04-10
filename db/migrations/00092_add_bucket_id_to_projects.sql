@@ -4,8 +4,8 @@
 ALTER TABLE web.projects DROP COLUMN IF EXISTS bucket;
 ALTER TABLE web.projects ADD COLUMN bucket_id UUID REFERENCES public.aws_buckets (id);
 
--- web_owner needs REFERENCES on aws_buckets for the FK constraint
-GRANT REFERENCES ON public.aws_buckets TO web_owner;
+-- owner_role needs REFERENCES on aws_buckets for the FK constraint
+GRANT REFERENCES ON public.aws_buckets TO owner_role;
 -- web_user needs SELECT to read bucket_id values when joining
 GRANT SELECT ON public.aws_buckets TO web_user;
 
@@ -13,4 +13,4 @@ GRANT SELECT ON public.aws_buckets TO web_user;
 ALTER TABLE web.projects DROP COLUMN IF EXISTS bucket_id;
 ALTER TABLE web.projects ADD COLUMN bucket TEXT;
 REVOKE SELECT ON public.aws_buckets FROM web_user;
-REVOKE REFERENCES ON public.aws_buckets FROM web_owner;
+REVOKE REFERENCES ON public.aws_buckets FROM owner_role;

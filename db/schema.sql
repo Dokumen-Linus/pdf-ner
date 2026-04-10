@@ -1,4 +1,4 @@
-\restrict 4rQzZ3clxP3HtI09p7rhAtJNARLkQgGaQ14DHfupsAQW84nD5rJS1cYV0Y0gFNz
+\restrict KWHhclXdQbLm77ST5WiGH2nzIHvXabcImJoWDwyOksUeMX9b0DiaxTE0fSpgFCH
 
 -- Dumped from database version 18.1
 -- Dumped by pg_dump version 18.1
@@ -66,22 +66,9 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE api.pdfs (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    name text NOT NULL,
-    project_id uuid NOT NULL,
-    labeled_entities jsonb,
-    full_text text,
-    extract_method text,
-    text_by_page jsonb,
-    bookmarks jsonb,
-    predicted_entities jsonb,
-    model_type text,
-    model text,
-    prompt_id uuid,
-    created_at timestamp with time zone DEFAULT now(),
-    updated_at timestamp with time zone DEFAULT now(),
-    CONSTRAINT pdfs_extract_method_check CHECK ((extract_method = ANY (ARRAY['pdfium'::text, 'tesseract'::text, 'olm'::text, 'deepseek'::text]))),
-    CONSTRAINT pdfs_model_type_check CHECK ((model_type = ANY (ARRAY['SLM'::text, 'LLM'::text])))
+    id uuid NOT NULL,
+    bookmarks text[],
+    original_has_text boolean
 );
 
 
@@ -106,8 +93,9 @@ CREATE TABLE api.prompts (
 CREATE TABLE api.std_entity_types (
     id bigint NOT NULL,
     short_name text NOT NULL,
-    long_name text,
-    definition text,
+    long_name text NOT NULL,
+    category text NOT NULL,
+    definition text NOT NULL,
     examples text[],
     format_description text,
     datatype text,
@@ -159,6 +147,37 @@ ALTER TABLE api.templates ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     NO MINVALUE
     NO MAXVALUE
     CACHE 1
+);
+
+
+--
+-- Name: aws_buckets; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.aws_buckets (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    region text DEFAULT 'us-east-1'::text NOT NULL,
+    access_key_id text NOT NULL,
+    secret_access_key text NOT NULL,
+    endpoint_url text,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: models; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.models (
+    id text NOT NULL,
+    provider text NOT NULL,
+    usd_per_1m_input numeric(10,4) NOT NULL,
+    usd_per_1m_output numeric(10,4) NOT NULL,
+    release_date timestamp with time zone NOT NULL,
+    available_date timestamp with time zone DEFAULT now() NOT NULL,
+    end_available_date timestamp with time zone,
+    CONSTRAINT models_provider_check CHECK ((provider = ANY (ARRAY['openai'::text, 'anthropic'::text, 'google'::text])))
 );
 
 
@@ -230,6 +249,8 @@ CREATE TABLE web.entity_types (
 
 CREATE TABLE web.pdfs (
     id uuid NOT NULL,
+    labeled_entities jsonb,
+    uploaded_by uuid,
     first_viewed_at timestamp with time zone DEFAULT now()
 );
 
@@ -247,6 +268,7 @@ CREATE TABLE web.projects (
     orientation text DEFAULT 'any'::text NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
+    bucket_id uuid,
     CONSTRAINT projects_orientation_check CHECK ((orientation = ANY (ARRAY['any'::text, 'portrait'::text, 'landscape'::text])))
 );
 
@@ -262,8 +284,97 @@ CREATE TABLE web.users (
     last_name text,
     employer text,
     job_title text,
+    avatar_url text,
     created_at timestamp with time zone DEFAULT now(),
-    updated_at timestamp with time zone DEFAULT now()
+    updated_at timestamp with time zone DEFAULT now(),
+    display_name text
+);
+
+
+--
+-- Name: llm_usage; Type: TABLE; Schema: workers; Owner: -
+--
+
+CREATE TABLE workers.llm_usage (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid,
+    project_id uuid,
+    provider text NOT NULL,
+    model text NOT NULL,
+    source text NOT NULL,
+    task_name text,
+    input_tokens integer DEFAULT 0 NOT NULL,
+    output_tokens integer DEFAULT 0 NOT NULL,
+    cost_usd numeric(12,8) DEFAULT 0 NOT NULL,
+    stripe_reported boolean DEFAULT false NOT NULL,
+    stripe_usage_event_id text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT llm_usage_source_check CHECK ((source = ANY (ARRAY['api'::text, 'worker'::text])))
+);
+
+
+--
+-- Name: optimized_prompts; Type: TABLE; Schema: workers; Owner: -
+--
+
+CREATE TABLE workers.optimized_prompts (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    project_id uuid NOT NULL,
+    full_text text NOT NULL,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: pdfs; Type: TABLE; Schema: workers; Owner: -
+--
+
+CREATE TABLE workers.pdfs (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text,
+    bucket_id uuid NOT NULL,
+    filepath text NOT NULL,
+    project_id uuid NOT NULL,
+    full_text text,
+    extract_method text,
+    text_by_page jsonb,
+    text_by_bookmarks jsonb,
+    predicted_entities jsonb,
+    model_type text,
+    model text,
+    prompt_id uuid,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT pdfs_extract_method_check CHECK ((extract_method = ANY (ARRAY['pdfium'::text, 'tesseract'::text, 'olm'::text, 'deepseek'::text]))),
+    CONSTRAINT pdfs_model_type_check CHECK ((model_type = ANY (ARRAY['SLM'::text, 'LLM'::text])))
+);
+
+
+--
+-- Name: prompt_evaluations; Type: TABLE; Schema: workers; Owner: -
+--
+
+CREATE TABLE workers.prompt_evaluations (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    prompt_id uuid NOT NULL,
+    overall_f1 real NOT NULL,
+    per_entity_scores jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: stripe_customers; Type: TABLE; Schema: workers; Owner: -
+--
+
+CREATE TABLE workers.stripe_customers (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    stripe_customer_id text NOT NULL,
+    stripe_subscription_id text,
+    stripe_subscription_item_id text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -297,6 +408,30 @@ ALTER TABLE ONLY api.std_entity_types
 
 ALTER TABLE ONLY api.templates
     ADD CONSTRAINT templates_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: aws_buckets aws_buckets_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.aws_buckets
+    ADD CONSTRAINT aws_buckets_name_key UNIQUE (name);
+
+
+--
+-- Name: aws_buckets aws_buckets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.aws_buckets
+    ADD CONSTRAINT aws_buckets_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: models models_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.models
+    ADD CONSTRAINT models_pkey PRIMARY KEY (id);
 
 
 --
@@ -348,10 +483,80 @@ ALTER TABLE ONLY web.users
 
 
 --
--- Name: pdfs pdfs_updated_at; Type: TRIGGER; Schema: api; Owner: -
+-- Name: llm_usage llm_usage_pkey; Type: CONSTRAINT; Schema: workers; Owner: -
 --
 
-CREATE TRIGGER pdfs_updated_at BEFORE UPDATE ON api.pdfs FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+ALTER TABLE ONLY workers.llm_usage
+    ADD CONSTRAINT llm_usage_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: optimized_prompts optimized_prompts_pkey; Type: CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.optimized_prompts
+    ADD CONSTRAINT optimized_prompts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: pdfs pdfs_pkey; Type: CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.pdfs
+    ADD CONSTRAINT pdfs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: prompt_evaluations prompt_evaluations_pkey; Type: CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.prompt_evaluations
+    ADD CONSTRAINT prompt_evaluations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: stripe_customers stripe_customers_pkey; Type: CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.stripe_customers
+    ADD CONSTRAINT stripe_customers_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: stripe_customers stripe_customers_stripe_customer_id_key; Type: CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.stripe_customers
+    ADD CONSTRAINT stripe_customers_stripe_customer_id_key UNIQUE (stripe_customer_id);
+
+
+--
+-- Name: stripe_customers stripe_customers_user_id_key; Type: CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.stripe_customers
+    ADD CONSTRAINT stripe_customers_user_id_key UNIQUE (user_id);
+
+
+--
+-- Name: llm_usage_created_at_idx; Type: INDEX; Schema: workers; Owner: -
+--
+
+CREATE INDEX llm_usage_created_at_idx ON workers.llm_usage USING btree (created_at);
+
+
+--
+-- Name: llm_usage_unreported_idx; Type: INDEX; Schema: workers; Owner: -
+--
+
+CREATE INDEX llm_usage_unreported_idx ON workers.llm_usage USING btree (stripe_reported) WHERE (NOT stripe_reported);
+
+
+--
+-- Name: llm_usage_user_id_idx; Type: INDEX; Schema: workers; Owner: -
+--
+
+CREATE INDEX llm_usage_user_id_idx ON workers.llm_usage USING btree (user_id);
 
 
 --
@@ -397,19 +602,25 @@ CREATE TRIGGER users_updated_at BEFORE UPDATE ON web.users FOR EACH ROW EXECUTE 
 
 
 --
--- Name: pdfs pdfs_project_id_fkey; Type: FK CONSTRAINT; Schema: api; Owner: -
+-- Name: pdfs pdfs_updated_at; Type: TRIGGER; Schema: workers; Owner: -
+--
+
+CREATE TRIGGER pdfs_updated_at BEFORE UPDATE ON workers.pdfs FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: stripe_customers stripe_customers_updated_at; Type: TRIGGER; Schema: workers; Owner: -
+--
+
+CREATE TRIGGER stripe_customers_updated_at BEFORE UPDATE ON workers.stripe_customers FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: pdfs pdfs_id_fkey; Type: FK CONSTRAINT; Schema: api; Owner: -
 --
 
 ALTER TABLE ONLY api.pdfs
-    ADD CONSTRAINT pdfs_project_id_fkey FOREIGN KEY (project_id) REFERENCES web.projects(id) ON DELETE CASCADE;
-
-
---
--- Name: pdfs pdfs_prompt_id_fkey; Type: FK CONSTRAINT; Schema: api; Owner: -
---
-
-ALTER TABLE ONLY api.pdfs
-    ADD CONSTRAINT pdfs_prompt_id_fkey FOREIGN KEY (prompt_id) REFERENCES api.prompts(id) ON DELETE CASCADE;
+    ADD CONSTRAINT pdfs_id_fkey FOREIGN KEY (id) REFERENCES workers.pdfs(id) ON DELETE CASCADE;
 
 
 --
@@ -457,7 +668,23 @@ ALTER TABLE ONLY web.entity_types
 --
 
 ALTER TABLE ONLY web.pdfs
-    ADD CONSTRAINT pdfs_id_fkey FOREIGN KEY (id) REFERENCES api.pdfs(id) ON DELETE CASCADE;
+    ADD CONSTRAINT pdfs_id_fkey FOREIGN KEY (id) REFERENCES workers.pdfs(id) ON DELETE CASCADE;
+
+
+--
+-- Name: pdfs pdfs_uploaded_by_fkey; Type: FK CONSTRAINT; Schema: web; Owner: -
+--
+
+ALTER TABLE ONLY web.pdfs
+    ADD CONSTRAINT pdfs_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES web.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: projects projects_bucket_id_fkey; Type: FK CONSTRAINT; Schema: web; Owner: -
+--
+
+ALTER TABLE ONLY web.projects
+    ADD CONSTRAINT projects_bucket_id_fkey FOREIGN KEY (bucket_id) REFERENCES public.aws_buckets(id);
 
 
 --
@@ -469,10 +696,74 @@ ALTER TABLE ONLY web.projects
 
 
 --
+-- Name: llm_usage llm_usage_project_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.llm_usage
+    ADD CONSTRAINT llm_usage_project_id_fkey FOREIGN KEY (project_id) REFERENCES web.projects(id) ON DELETE SET NULL;
+
+
+--
+-- Name: llm_usage llm_usage_user_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.llm_usage
+    ADD CONSTRAINT llm_usage_user_id_fkey FOREIGN KEY (user_id) REFERENCES web.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: optimized_prompts optimized_prompts_project_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.optimized_prompts
+    ADD CONSTRAINT optimized_prompts_project_id_fkey FOREIGN KEY (project_id) REFERENCES web.projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: pdfs pdfs_bucket_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.pdfs
+    ADD CONSTRAINT pdfs_bucket_id_fkey FOREIGN KEY (bucket_id) REFERENCES public.aws_buckets(id);
+
+
+--
+-- Name: pdfs pdfs_project_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.pdfs
+    ADD CONSTRAINT pdfs_project_id_fkey FOREIGN KEY (project_id) REFERENCES web.projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: pdfs pdfs_prompt_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.pdfs
+    ADD CONSTRAINT pdfs_prompt_id_fkey FOREIGN KEY (prompt_id) REFERENCES api.prompts(id) ON DELETE CASCADE;
+
+
+--
+-- Name: prompt_evaluations prompt_evaluations_prompt_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.prompt_evaluations
+    ADD CONSTRAINT prompt_evaluations_prompt_id_fkey FOREIGN KEY (prompt_id) REFERENCES workers.optimized_prompts(id) ON DELETE CASCADE;
+
+
+--
+-- Name: stripe_customers stripe_customers_user_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.stripe_customers
+    ADD CONSTRAINT stripe_customers_user_id_fkey FOREIGN KEY (user_id) REFERENCES web.users(id) ON DELETE CASCADE;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 4rQzZ3clxP3HtI09p7rhAtJNARLkQgGaQ14DHfupsAQW84nD5rJS1cYV0Y0gFNz
+\unrestrict KWHhclXdQbLm77ST5WiGH2nzIHvXabcImJoWDwyOksUeMX9b0DiaxTE0fSpgFCH
 
 
 --
@@ -482,11 +773,18 @@ ALTER TABLE ONLY web.projects
 INSERT INTO public.schema_migrations (version) VALUES
     ('00002'),
     ('00010'),
+    ('00011'),
     ('00020'),
     ('00030'),
     ('00031'),
     ('00040'),
     ('00041'),
+    ('00049'),
     ('00050'),
+    ('00051'),
     ('00060'),
-    ('00070');
+    ('00070'),
+    ('00080'),
+    ('00090'),
+    ('00091'),
+    ('00092');
