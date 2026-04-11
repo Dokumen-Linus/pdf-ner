@@ -22,7 +22,7 @@
 
 - Claude Code
 - Codex
-- [Grok CLI](https://github.com/superagent-ai/grok-cli)
+- [MiniMax CLI](https://github.com/MiniMax-AI/cli)
 
 ### Free Options
 
