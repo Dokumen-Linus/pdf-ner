@@ -62,7 +62,7 @@ After installing the extension and starting the db, you can establish a connecti
 1. Press Add New Connection to open the Connect a Server window
 1. At the top list of connection methods, select Connection String instead of Paramaters
 1. Enter your connection string postgres://you-windows-user@localhost/dokumen?sslmode=disable, which depends on your Windows username.
-For example if your user profile is C:\Users\zchar, your is postgres://you-windows-user@localhost/dokumen?sslmode=disable
+For example if your user profile is C:\Users\zchar, yours is postgres://zchar@localhost/dokumen?sslmode=disable
 1. Change Authentication Type to None instead of Password
 1. Name your connection localconn
 1. Press Save & Connect and then the connection will appear in the PostgreSQL extension tab (the elephant)

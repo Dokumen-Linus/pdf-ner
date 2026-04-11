@@ -4,6 +4,7 @@ CREATE TABLE web.users (
   email TEXT NOT NULL,
   first_name TEXT,
   last_name TEXT,
+  display_name TEXT,
   employer TEXT,
   job_title TEXT,
   avatar_url TEXT,

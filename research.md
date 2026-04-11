@@ -181,6 +181,7 @@
 - [Ant Design Charts](https://github.com/ant-design/ant-design-charts)
 - [MUI X](https://mui.com/x/react-charts/)
 - [ApexCharts](https://github.com/apexcharts/react-apexcharts/)
+- [nteract/semiotic](https://github.com/nteract/semiotic)
 
 ### React Dashboard Examples
 
