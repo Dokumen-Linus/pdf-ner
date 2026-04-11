@@ -2,6 +2,7 @@ from dataclasses import asdict
 
 import anyio
 import asyncpg
+import boto3
 
 from app.integrations import s3
 
@@ -49,33 +50,42 @@ async def parallel_pdf_tasks(pdf_tasks: list[PdfTask]) -> list[list]:
     return results
 
 
-async def highlight(conn: asyncpg.Connection, s3_client, request: HighlightRequest) -> dict:
+async def highlight(conn: asyncpg.Connection, request: HighlightRequest) -> dict:
     """Orchestrate PDF highlighting: DB lookup -> S3 download -> highlight -> S3 upload."""
     row = await repository.fetch_pdf(conn, request.pdf_id)
     if row is None:
         raise LookupError(f"PDF not found: {request.pdf_id}")
 
-    bucket = row["bucket"]
-    s3_key = row["location"]
+    bucket_name = row["bucket_name"]
+    filepath = row["filepath"]
 
-    if not bucket:
+    if not bucket_name:
         raise LookupError(f"PDF {request.pdf_id} has no S3 bucket configured")
 
-    pdf_bytes = await s3.get_object_bytes(s3_client, bucket, s3_key)
+    s3_kwargs = {
+        "aws_access_key_id": row["access_key_id"],
+        "aws_secret_access_key": row["secret_access_key"],
+        "region_name": row["region"],
+    }
+    if row["endpoint_url"]:
+        s3_kwargs["endpoint_url"] = row["endpoint_url"]
+    s3_client = boto3.client("s3", **s3_kwargs)
+
+    pdf_bytes = await s3.get_object_bytes(s3_client, bucket_name, filepath)
 
     [[highlight_result]] = await parallel_pdf_tasks(
         [PdfTask(pdf_bytes=pdf_bytes, tasks=[HighlightTask(phrases=request.phrases)])]
     )
     output_bytes, phrase_results = highlight_result
 
-    await s3.put_object_bytes(s3_client, bucket, request.output_key, output_bytes)
+    await s3.put_object_bytes(s3_client, bucket_name, request.output_key, output_bytes)
 
     successfully_highlighted = sum(1 for r in phrase_results if r.found)
 
     return {
         "pdf_id": str(request.pdf_id),
         "output_key": request.output_key,
-        "bucket": bucket,
+        "bucket": bucket_name,
         "total_phrases": len(request.phrases),
         "successfully_highlighted": successfully_highlighted,
         "results": [asdict(r) for r in phrase_results],

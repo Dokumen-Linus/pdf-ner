@@ -1,7 +1,7 @@
 import logging
 import time
 
-from api.app.domains.shared.schemas import LLMResponseData
+from app.domains.shared.schemas import LLMResponseData
 from google.genai import Client, types
 
 logger = logging.getLogger(__name__)

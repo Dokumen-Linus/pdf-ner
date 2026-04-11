@@ -1,0 +1,339 @@
+## [unreleased]
+
+### 🚀 Features
+
+- Plugin-zoom with local hammer
+- Plugin-export converted to single react ts file #6
+- Add zoom plugin and pinch wrapper to pdf-container, ensure spinner appears during loading
+- Add export to json
+- Create new updateAnnotation
+- Add export btn
+- Add zoom btns, replace btn text with icons
+- *(toolbar)* Add undo/redo buttons via history capability
+- [**breaking**] Annotation table and convert toolbar to zustand hooks
+- In progress thumbnail-sidebar, update embedpdf
+- [**breaking**] Change from annotation store to plugin store, and sync entire anno state
+- Add capabilities, remove selectors, rename state.pages to state.byPage
+- Setup for annotationmenu prompt
+- Init working annotation-menu
+- Annotation menu, migrate embedpdf/utils
+- Working on rotate
+- Add optional rotate
+- Move text, add entityType to anno objects
+- Annos byEntityType
+- Upload example pdfs
+- Create basic entity table and store
+- Add subtype select to entity table
+- DeactivateSubtypeAfterCreate set to true
+- Enhance entity-table
+- Add author to AnnotationPluginConfig
+- Add postgres and drizzle orm
+- New toolbar and save dev components
+- Remove clerk
+- Add db-fns for users and projects
+- Password hashing
+- Create db fns and tests
+- Add better auth
+- Improve signup
+- Start backend and create template for domain
+- *(frontend)* Add layouts, Footer, ErrorBoundary, docs
+- *(api)* Add helpers for async llm calls
+- *(db)* Move to single owner_role
+- *(db)* Prompt templates table
+- *(api)* Add celery and redis to core
+- *(db)* Make prompt templates
+- *(api)* Add json output to llm-calls
+- *(api)* Llm_ner domain
+- Update db and web db schemas and db-fns
+- *(fe)* Robots.txt
+- *(fe)* Auth route
+- *(fe)* Uploadthing integration
+- *(fe)* Profile page, avatarUrl column, and fix db-fns
+- *(fe)* BetterAuth email verify with Resend
+- *(fe)* Mid claude attempt to make create-project page
+- *(wk)* Main celery setup with db and redis
+- *(db)* Create workers.pdfs
+- *(wk)* Time and DomainEvent
+- Hero and profile pages, plus style and linting
+- *(api)* Enhance core, add s3 integration and middleware
+- *(api)* Update llm_ner logging and integrations
+- *(api)* Start pdf_utils domain
+- Trigger activeEntityType on Name and Value column clicks
+- *(api)* Pdf_utils domain
+- *(wk)* Context_eng domain first draft
+- *(db)* Seed for standard entity types
+- *(web)* Cookies management and example with sidebar
+- *(all)* Inital billing and usage tracking
+- [**breaking**] Pdf storage
+- *(web)* Auto-create S3 bucket on project creation and add PDF upload page
+
+### 🐛 Bug Fixes
+
+- Add hammer types, move hammer file to lib, remove MarqueeZoom
+- Finish last commit
+- Ts errors
+- Add tw-animate-css to package.json
+- Manifest defaultConfig
+- Finish move to plugin-history-2
+- Imports and minor edits
+- Add bun types
+- Add bun types continued
+- Imports
+- Bun types
+- Ts error from last commit
+- Apply new params of selectAnnotation
+- Ts error in toolbar
+- Update prettier extension
+- Fix update to prettier vscode extension
+- Drizzle config
+- Tsconfig for vite
+- Tsc errors
+- Eslint config and apply
+- Return commitlint to package,json
+- Change to entity type table color or subtype should be applied to existing annos #4
+- Move plugin-store to plugin-scroll-2
+- Better auth and database
+- Finish t3-env
+- Continue fastapi setup
+- *(db)* Api.templates
+- *(api)* Rename llm_calls
+- *(fe)* Auth components redirect
+- *(fe)* Web db url
+- *(fe)* Config
+- *(fe)* Drizzle config
+- *(fe)* Start updating pdf-container
+- *(web)* Package.json
+- *(web)* Update pdf-container plugins except annotation
+- *(web)* Tanstack start + vite config error
+- *(wk)* Main and core config
+- *(web)* Embedpdf imports
+- *(api)* Remove old routers
+- Ruff lint
+- *(claude)* Hooks
+- *(web)* Linting
+- Codex-review of billing
+
+### 💼 Other
+
+- Run npm i
+
+### 🚜 Refactor
+
+- Add shadcn-ui to tsconfig exclude
+- Add shadcn-ui and hammer to eslint ignores
+- Rename files and componnets, change exports/imports, simplify importAnnotations
+- Rename defaultTools and exportAnnotations
+- Rename to toolbar
+- Remove hammer.js and unused packages
+- Rename annotation-container
+- Remove useAnnotation
+- Move annotation store
+- Anno conatiner
+- Change import type
+- Split interaction manager hooks into different files
+- Reorder init and builCapability
+- Import type
+- Add PdfTextMarkupAnnotattion to make patch creation easier, move to local uuid and ignore
+- Move pdfium test
+- Add import type
+- Move thumbnail sidebar
+- Remove generic type from anno container
+- Use PdfAnnotationObject in TrackedAnnotation type
+- Always create Date in plugin.createAnnotation
+- Rename temp toolbar.tsx to toolbar-dev.tsx
+- Update package.json
+- Move from @/src to @/ and apply prettier
+- Move drizzle from db/drizzle to src/db
+- Finish last commit
+- Add default client and server entry points
+- Update package.json
+- Remove postgres logfile
+- Create backend dir
+- Move to frontend dir
+- *(FE)* Use env var in __root metadata
+- *(BE)* Create FastAPI with best practices
+- Start web api workers layout
+- Move attempted db vscode settings.json
+- *(fe)* Move color-picker
+- *(api)* Separate utils and integrations
+
+### 📚 Documentation
+
+- Edit readme
+- Include embedpdf snippet fragment for reference
+- Add idea section
+- Idea section 2
+- Update README
+- Do more reserch and add to github
+- Update readme
+- Add comments
+- Minor comments
+- Minor comments
+- Two comments
+- Add anno docs
+- Research
+- Research
+- Update
+- Comments for entity-table
+- Anno plugin
+- Change README from pdf-entity-labeling to pdf-ner
+- Research
+- Generic components research
+- Update readme
+- Sql script rules
+- Update README
+- Add db readme
+- Extensive readme updates
+- Update docs, move to pyproject.toml, add markdownlint extension
+- Research.md
+- License
+- *(db)* Fix db docs
+- Update .env examples
+- *(api)* Readme
+- Update db setup
+- Update
+- *(wk)* Move layout plan
+- Research
+- Research
+- Uv explanation in workers
+- Update READMEs
+- Add seeds cmd to db/README
+- Basedir README
+- *(db)* README
+- Claude skill for billing
+- *(wk)* Revision for clarity
+
+### ⚡ Performance
+
+- Convert plugin-zoom to typescript
+- Start core rebuild
+- [**breaking**] Pdf container using npm packages and local annotation and wasm
+- Remove handlers and patching
+- Remove vertex, resize, draggable
+- Remove ability to add tools to state
+- Update tools
+- Remove sidebar category, move capability and config
+- Update shadcn-ui
+- Remove AnnotationCreateContext
+- Always autoCommit annotations
+- Remove renderAnnotation
+- Reduce parames of create, update, delete annotations
+- Move to local plugin-history
+- Remove history plugin
+- Add to anno
+- Remove selectors
+- Switch to local plugin-selection
+- Stop exporting usePlugin hooks
+- Move anno components to plugin-selection-2
+- Move to plugin-interaction-manager-2
+- Move to plugin-loader-2
+- Add destroy to plugin anno
+- Move to plugin-scroll-2
+- [**breaking**] Replace annotation tools with activeSubtype, activeColor, etc
+- Add subtype validation to reducer
+- Add usePluginCapabilities
+- Change from consumer usage of PdfAnnotationSubtype enum to type Subtype
+- [**breaking**] Migrate to tanstack start from next.js
+- Move from plugin-loader-2 to @embedpdf
+- #5 make plugin-search-2
+- Move to plugin-search-2
+- Use ts-env properly
+- Add to root metadata and make notFoundComponent
+- Add email verify to signup
+- Add have-i-been-pawned
+- Change server-fns to return and test uuid
+
+### 🎨 Styling
+
+- Fix typo in template comment, also remove some exports
+- Apply prettier
+- Change comments
+- Run prettier
+- Change eslint config to add bun and exclude .js
+- Change prettier import ordering
+- Apply new prettier
+- Edit anno manifest
+- Apply prettier that git mirror and vscode unapplied
+- Migrate to new vscode extension for prettier
+- Apply prettier
+- Return to old prettier vscode extension
+- Apply prettier for tanstack
+- Sql and python formatting and ruff linting
+- Copy to backend/ruff.toml
+- Remove broken sql formatter, add api schema
+- Ruff config
+- Python ruff
+- Put prettier and eslint config in root repo dir to allow formatting from root dir and frontend dir
+- Edit eslint config
+- *(api)* Ruff
+- *(ci)* Gitignore
+- Ruff
+- *(api)* Fix ruff isort in pyrpoject
+- *(web)* Apply prettier
+- *(web)* Fix .prettierignore
+- *(api)* Ruff
+- *(api)* Ruff
+
+### 🧪 Testing
+
+- Uncomment consolelogger
+- Add e2e test for annotations
+- Incorporate pdfium-wasm-equals into bun
+- Annotation-capability.test.tsx
+- Remove depreciated anno capabilities
+- Add byUid to plugin-store-table
+- Comment out some of plugin store table
+- Switch pdf
+- Update bunfig
+- Setup and write tests for database functions
+- Update readme and package.json
+- Finish user-fns test
+- Schema-match to compare drizzle and zod inferred types
+- Add @storybook/addon-actions
+- Create expect().toBeUuid()
+- *(api)* Setup and test_llm_ner
+- *(fe)* Auth
+- *(api)* Start pdf_utils test
+- *(wk)* Setup and context_env domain
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* 1.0.0 [skip ci]
+- Semantic release workflow stops if no version bump
+- *(release)* 1.0.1 [skip ci]
+- Remove npm req
+- Disable semantic release
+- Active semantic release
+- Fix semantic release github action
+- Disable semantic release since GitHub actions does not support bun.lock
+- Update gitignore
+- Don't store coding agent config
+- Claude stuff shouldn't be in gitignore
+- Fix husky by moving dir
+- Monorepo commitlint and settings.json
+- Update claude
+- *(api)* Add logging to llm_ner
+- Update skills
+- Update gitignore
+- Add pytest and ruff cache to gitignore
+- *(web)* Make_full_package_json
+- *(web)* Update tanstack
+- *(web)* Add tanstack intent skills
+- *(claude)* Add hooks
+- *(claude)* Setup
+- *(claude)* Add runpod skills
+- *(claude)* Add logs to gitignore
+- Update vscode settings and extensions
+- Kilo.json
+- [**breaking**] Docker setup
+- *(llm)* Remove skills
+- *(llm)* CLAUDE.md
+
+### ◀️ Revert
+
+- Core
+- Add back setToolDefaults
+- Delete preact-plugin-ui
+- Remove password auth
+- *(fe)* Remove storybook
+- *(web)* Tanstack update

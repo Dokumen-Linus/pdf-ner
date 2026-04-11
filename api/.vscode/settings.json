@@ -11,7 +11,18 @@
   "git.enableSmartCommit": true,
   "git.fetchOnPull": true,
 
-  // backend
+  // use Kilo Code for autocomplete instead of GitHub Copilot
+  "github.copilot.enable": {
+    "*": false
+  },
+  "editor.inlineSuggest.enabled": true,
+  "editor.quickSuggestions": {
+    "other": "inline",
+    "comments": "off",
+    "strings": "off"
+  },
+
+  // python
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
@@ -19,8 +30,10 @@
         "source.fixAll.ruff": "explicit"
     },
   },
-  "fastapi-endpoint.files.include": "**/*.py",
-  "fastapi-endpoint.files.exclude": "**/conda_env/**/*.*",
   "ruff.configuration": "pyproject.toml",
   "ruff.lineLength": 100,
+
+  // api
+  "fastapi-endpoint.files.include": "**/*.py",
+  "fastapi-endpoint.files.exclude": "**/conda_env/**/*.*",
 }

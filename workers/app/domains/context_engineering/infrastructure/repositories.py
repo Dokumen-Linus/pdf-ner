@@ -71,10 +71,9 @@ async def fetch_labeled_pdfs(conn: asyncpg.Connection, project_id: UUID) -> list
     """
     pdf_rows = await conn.fetch(
         """
-        SELECT p.id, p.full_text, p.text_by_page
+        SELECT p.id, p.full_text, p.text_by_page, p.bucket_id, p.filepath
         FROM workers.pdfs p
         WHERE p.project_id = $1
-          AND p.full_text IS NOT NULL
         """,
         project_id,
     )
@@ -117,6 +116,8 @@ async def fetch_labeled_pdfs(conn: asyncpg.Connection, project_id: UUID) -> list
                     full_text=pdf_row["full_text"],
                     text_by_page=pdf_row["text_by_page"],
                     annotations=annotations,
+                    bucket_id=UUID(str(pdf_row["bucket_id"])) if pdf_row["bucket_id"] else None,
+                    filepath=pdf_row["filepath"],
                 )
             )
 

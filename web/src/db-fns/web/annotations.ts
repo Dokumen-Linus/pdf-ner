@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm/sql"
+import { eq, inArray } from "drizzle-orm/sql"
 import { z } from "zod"
 import { db } from "@/db/client"
 import { annotations } from "@/db/schemas/web/annotations"
@@ -48,6 +48,20 @@ export const getAnnotationsByPdfId = createServerFn({ method: "GET" })
       .from(annotations)
       .where(eq(annotations.pdfId, data.pdfId))
     return pdfAnnotations
+  })
+
+export const getAnnotationsByPdfIds = createServerFn({ method: "GET" })
+  .inputValidator((data: { pdfIds: string[] }) => data)
+  .handler(async ({ data }) => {
+    if (data.pdfIds.length === 0) return []
+    return db
+      .select({
+        id: annotations.id,
+        customEntityType: annotations.customEntityType,
+        subtype: annotations.subtype,
+      })
+      .from(annotations)
+      .where(inArray(annotations.pdfId, data.pdfIds))
   })
 
 export const getAnnotationsBySubtype = createServerFn({ method: "GET" })

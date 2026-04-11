@@ -1,5 +1,6 @@
 from decimal import Decimal
 import logging
+from uuid import UUID
 
 import asyncpg
 
@@ -34,3 +35,10 @@ async def fetch_model_cost(
         + output_tokens * float(row["usd_per_1m_output"])
     ) / 1_000_000
     return Decimal(str(round(cost, 8)))
+
+
+async def fetch_bucket_by_id(conn: asyncpg.Connection, bucket_id: UUID) -> asyncpg.Record | None:
+    return await conn.fetchrow(
+        "SELECT id, name, region, access_key_id, secret_access_key, endpoint_url FROM api.aws_buckets WHERE id = $1",
+        bucket_id,
+    )

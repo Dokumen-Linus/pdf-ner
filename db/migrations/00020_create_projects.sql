@@ -4,7 +4,7 @@ CREATE TABLE web.projects (
   owner_id UUID NOT NULL REFERENCES web.users (id) ON DELETE CASCADE,
   "name" TEXT NOT NULL,
   "description" TEXT,
-  bucket TEXT,          -- S3 bucket for all PDFs in this project
+  bucket_id UUID REFERENCES api.aws_buckets (id),
   color_presets TEXT[], -- list of hex color code strings
   orientation TEXT NOT NULL DEFAULT 'any' CHECK (orientation IN ('any', 'portrait', 'landscape')),
   created_at TIMESTAMPTZ DEFAULT now(),

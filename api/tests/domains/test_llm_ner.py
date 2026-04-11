@@ -6,6 +6,7 @@ import pytest
 
 from app.domains.llm_ner import service
 from app.domains.llm_ner.schemas import ExtractEntitiesRequest
+from pydantic import ValidationError
 
 
 class TestBuildPrompt:
@@ -93,7 +94,7 @@ class TestCallLlm:
             mock_clients, "anthropic", "claude-3-opus", "system", "user"
         )
 
-        assert result == '{"field1": "value1"}'
+        assert result.text == '{"field1": "value1"}'
         mock_clients["anthropic"].messages.create.assert_called_once()
 
     @pytest.mark.anyio
@@ -101,7 +102,7 @@ class TestCallLlm:
         """Verify openai provider routes correctly."""
         result = await service.call_llm(mock_clients, "openai", "gpt-4o", "system", "user")
 
-        assert result == '{"field1": "value1"}'
+        assert result.text == '{"field1": "value1"}'
         mock_clients["openai"].chat.completions.create.assert_called_once()
 
     @pytest.mark.anyio
@@ -109,7 +110,7 @@ class TestCallLlm:
         """Verify gemini provider routes correctly."""
         result = await service.call_llm(mock_clients, "gemini", "gemini-pro", "system", "user")
 
-        assert result == '{"field1": "value1"}'
+        assert result.text == '{"field1": "value1"}'
         mock_clients["gemini"].aio.models.generate_content.assert_called_once()
 
     @pytest.mark.anyio
@@ -137,10 +138,13 @@ class TestExtractEntities:
             side_effect=[
                 {"id": project_id, "description": "Test project"},
                 sample_template,
+                # fetch_model_cost: None triggers fallback-to-zero path
+                None,
             ]
         )
         mock_conn.fetch = AsyncMock(return_value=sample_entity_types)
         mock_conn.fetchval = AsyncMock(return_value=prompt_id)
+        mock_conn.execute = AsyncMock()
 
         request = ExtractEntitiesRequest(
             project_id=project_id,
@@ -227,6 +231,110 @@ class TestExtractEntities:
         assert exc_info.value.status_code == 400
         assert "No entity types defined" in exc_info.value.detail
 
+    @pytest.mark.anyio
+    async def test_extract_entities_with_pdf_id_success(
+        self, mock_clients, sample_entity_types, sample_template
+    ):
+        """Provide pdf_id without document_text; fetched text is passed to LLM."""
+        project_id = uuid4()
+        pdf_id = uuid4()
+        prompt_id = uuid4()
+        extracted_text = "Invoice text from PDF"
+
+        mock_conn = AsyncMock()
+        # fetchrow: project, then template; fetchrow for fetch_pdf_text
+        mock_conn.fetchrow = AsyncMock(
+            side_effect=[
+                {"id": project_id, "description": "Test project"},
+                sample_template,
+                {"full_text": extracted_text},  # fetch_pdf_text
+                # fetch_model_cost: None triggers fallback-to-zero path
+                None,
+            ]
+        )
+        mock_conn.fetch = AsyncMock(return_value=sample_entity_types)
+        mock_conn.fetchval = AsyncMock(return_value=prompt_id)
+        mock_conn.execute = AsyncMock()
+
+        request = ExtractEntitiesRequest(
+            project_id=project_id,
+            template_id=1,
+            pdf_id=pdf_id,
+            provider="openai",
+            model="gpt-4o",
+        )
+
+        result = await service.extract_entities(mock_conn, mock_clients, request)
+
+        assert result["prompt_id"] == str(prompt_id)
+        assert result["extracted"] == {"field1": "value1"}
+        # Verify the openai client was called (text was passed to LLM)
+        mock_clients["openai"].chat.completions.create.assert_called_once()
+
+    @pytest.mark.anyio
+    async def test_extract_entities_pdf_not_found(
+        self, mock_clients, sample_entity_types, sample_template
+    ):
+        """Returns 404 when fetch_pdf_text returns None (PDF not in DB)."""
+        project_id = uuid4()
+        pdf_id = uuid4()
+
+        mock_conn = AsyncMock()
+        mock_conn.fetchrow = AsyncMock(
+            side_effect=[
+                {"id": project_id, "description": "Test project"},
+                sample_template,
+                None,  # fetch_pdf_text returns None
+            ]
+        )
+        mock_conn.fetch = AsyncMock(return_value=sample_entity_types)
+
+        request = ExtractEntitiesRequest(
+            project_id=project_id,
+            template_id=1,
+            pdf_id=pdf_id,
+            provider="openai",
+            model="gpt-4o",
+        )
+
+        with pytest.raises(HTTPException) as exc_info:
+            await service.extract_entities(mock_conn, mock_clients, request)
+
+        assert exc_info.value.status_code == 404
+        assert "PDF not found" in exc_info.value.detail
+
+    @pytest.mark.anyio
+    async def test_extract_entities_pdf_empty_text(
+        self, mock_clients, sample_entity_types, sample_template
+    ):
+        """Returns 422 when fetched PDF text is blank/whitespace."""
+        project_id = uuid4()
+        pdf_id = uuid4()
+
+        mock_conn = AsyncMock()
+        mock_conn.fetchrow = AsyncMock(
+            side_effect=[
+                {"id": project_id, "description": "Test project"},
+                sample_template,
+                {"full_text": "   "},  # whitespace only
+            ]
+        )
+        mock_conn.fetch = AsyncMock(return_value=sample_entity_types)
+
+        request = ExtractEntitiesRequest(
+            project_id=project_id,
+            template_id=1,
+            pdf_id=pdf_id,
+            provider="openai",
+            model="gpt-4o",
+        )
+
+        with pytest.raises(HTTPException) as exc_info:
+            await service.extract_entities(mock_conn, mock_clients, request)
+
+        assert exc_info.value.status_code == 422
+        assert "no text content" in exc_info.value.detail
+
 
 class TestExtractEntitiesRequestSchema:
     """Test the Pydantic schema validation."""
@@ -253,3 +361,30 @@ class TestExtractEntitiesRequestSchema:
                 provider="invalid_provider",
                 model="model",
             )
+
+    def test_requires_text_or_pdf_id(self):
+        """Verify ValidationError when neither document_text nor pdf_id is provided."""
+        with pytest.raises(ValidationError) as exc_info:
+            ExtractEntitiesRequest(
+                project_id=uuid4(),
+                template_id=1,
+                provider="openai",
+                model="gpt-4o",
+                # no document_text, no pdf_id
+            )
+
+        errors = exc_info.value.errors()
+        assert any("Either document_text or pdf_id" in str(e) for e in errors)
+
+    def test_valid_with_pdf_id_only(self):
+        """Verify request with pdf_id and no document_text passes validation."""
+        request = ExtractEntitiesRequest(
+            project_id=uuid4(),
+            template_id=1,
+            pdf_id=uuid4(),
+            provider="openai",
+            model="gpt-4o",
+        )
+
+        assert request.pdf_id is not None
+        assert request.document_text == ""

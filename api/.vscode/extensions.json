@@ -1,15 +1,19 @@
 {
   "recommendations": [
     // all    
-    "DavidAnson.vscode-markdownlint",
     "tomoki1207.pdf",
 
-    // backend
+    // use Kilo Code for autocomplete instead of GitHub Copilot
+    "kilocode.kilo-code",
+
+    // python
     "charliermarsh.ruff",
     "ms-python.debugpy",
     "ms-python.python",
     "ms-python.vscode-pylance",
     "ms-toolsai.jupyter",
-    "onegang2.fastapi-endpoint"
+
+    // api
+    "onegang2.fastapi-endpoint",
   ]
 }

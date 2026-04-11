@@ -5,8 +5,7 @@ name = "dokumen"
 NODE_ENV = "test"
 
 [test]
-timout = 10000 # 10 seconds (default is 5000ms)
-invalidOption = true
+timeout = 10000 # 10 seconds (default is 5000ms)
 
 preload = ["./tests/bun-test-setup/main.ts"]
 

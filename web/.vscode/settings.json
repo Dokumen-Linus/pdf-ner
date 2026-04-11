@@ -11,35 +11,53 @@
   "git.enableSmartCommit": true,
   "git.fetchOnPull": true,
 
+  // use Kilo Code for autocomplete instead of GitHub Copilot
+  "github.copilot.enable": {
+    "*": false
+  },
+  "editor.inlineSuggest.enabled": true,
+  "editor.quickSuggestions": {
+    "other": "inline",
+    "comments": "off",
+    "strings": "off"
+  },
+
   // frontend
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     },
   },
   "[javascriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     },
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     },
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     },
   },
-  "javascript.updateImportsOnFileMove.enabled": "always",
-  "prettier.configPath": ".prettierrc",
-  "prettier.ignorePath": ".prettierignore",
-  "tailwindCSS.experimental.configFile": "app/globals.css",
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.updateImportsOnFileMove.enabled": "always"
+  "prettier.configPath": "web/.prettierrc",
+  "prettier.ignorePath": "web/.prettierignore",
+  "tailwindCSS.experimental.configFile": "web/src/styles.css",
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.updateImportsOnFileMove.enabled": "always"
 }

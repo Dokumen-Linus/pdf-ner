@@ -28,18 +28,15 @@ describe.if(runTests)("Project Table Server Functions", () => {
     // --- READ (by name to get the created project) ---
     const projectsByName = await getProjectByName({ data: { name: testName } })
     expect(projectsByName).toBeDefined()
-    expect(projectsByName.length).toBeGreaterThan(0)
-    expect(projectsByName[0].name).toBe(testName)
-    expect(projectsByName[0].ownerId).toBe(testOwnerId)
-    const projectId = projectsByName[0].id
+    expect(projectsByName.name).toBe(testName)
+    expect(projectsByName.ownerId).toBe(testOwnerId)
+    const projectId = projectsByName.id
 
     // --- READ (by id) ---
     const projectById = await getProjectById({ data: { id: projectId } })
     expect(projectById).toBeDefined()
-    expect(Array.isArray(projectById)).toBe(true)
-    expect(projectById.length).toBeGreaterThan(0)
-    expect(projectById[0].id).toBe(projectId)
-    expect(projectById[0].name).toBe(testName)
+    expect(projectById.id).toBe(projectId)
+    expect(projectById.name).toBe(testName)
 
     // --- READ (by ownerId) ---
     const projectsByOwnerId = await getProjectsByOwnerId({ data: { ownerId: testOwnerId } })
@@ -57,8 +54,8 @@ describe.if(runTests)("Project Table Server Functions", () => {
     expect(updateOutput.success).toBe(true)
 
     const updatedProject = await getProjectById({ data: { id: projectId } })
-    expect(updatedProject[0].name).toBe("Updated Project Name")
-    expect(updatedProject[0].colorPresets).toEqual(["#0000ff", "#ffff00"])
+    expect(updatedProject.name).toBe("Updated Project Name")
+    expect(updatedProject.colorPresets).toEqual(["#0000ff", "#ffff00"])
 
     // --- DELETE ---
     const deleteOutput = await deleteProject({ data: { id: projectId } })

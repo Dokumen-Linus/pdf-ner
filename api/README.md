@@ -156,30 +156,6 @@ uv pip install -e ".[dev]"
 
 This installs pytest, pytest-anyio, and httpx for testing.
 
-### Directory Structure
-
-```text
-tests/
-├── __init__.py
-├── conftest.py          # shared fixtures
-├── main.py              # (reserved for future use)
-└── domains/
-    ├── __init__.py
-    └── test_llm_ner.py  # tests for domains/llm_ner
-```
-
-Test files mirror the `app/domains/` structure. Each domain's tests go in `tests/domains/test_{domain_name}.py`.
-
-### Naming Convention
-
-Test files must be named `test_*.py` (not `*_test.py`). This is configured in pyproject.toml:
-
-```toml
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = "test_*.py"
-```
-
 ### Running Tests
 
 From the `api/` directory with the virtual environment activated:
@@ -207,14 +183,36 @@ pytest tests/domains/test_llm_ner.py::TestBuildPrompt
 pytest tests/domains/test_llm_ner.py::TestBuildPrompt::test_interpolates_all_placeholders
 ```
 
+### Directory Structure
+
+```text
+tests/
+├── __init__.py
+├── conftest.py          # shared fixtures
+├── main.py              # (reserved for future use)
+└── domains/
+    ├── __init__.py
+    └── test_llm_ner.py  # tests for domains/llm_ner
+```
+
+Test files mirror the `app/domains/` structure. Each domain's tests go in `tests/domains/test_{domain_name}.py`.
+
+### Naming Convention
+
+Test files must be named `test_*.py` (not `*_test.py`). This is configured in pyproject.toml:
+
+```toml
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+```
+
 ### Fixtures
 
 Shared fixtures are defined in `tests/conftest.py`. These include:
 
 - `mock_anthropic_client` - mocked Anthropic client
-- `mock_openai_client` - mocked OpenAI client
-- `mock_google_client` - mocked Google AI client
-- `mock_clients` - dict containing all three mocked clients
+- `mock_clients` - dict containing all three mocked clients (Anthropic, OpenAI, Gemini)
 - `sample_entity_types` - sample entity type records
 - `sample_template` - sample template record
 

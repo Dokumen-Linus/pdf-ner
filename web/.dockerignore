@@ -1,0 +1,10 @@
+.vscode/
+node_modules/
+.output
+.vite
+*.local
+.env
+.env.*
+!.env.local.example
+tests
+playwright.config.ts

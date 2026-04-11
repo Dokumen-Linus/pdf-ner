@@ -9,7 +9,7 @@ from app.domains.shared.repository import fetch_model_cost
 from app.integrations.anthropic import call_anthropic_async
 from app.integrations.gemini import call_google_ai_async
 from app.integrations.openai import call_openai_async
-from app.shared.schemas import LLMResponseData
+from app.domains.shared.schemas import LLMResponseData
 
 from . import repository
 from .schemas import ExtractEntitiesRequest
@@ -132,6 +132,15 @@ async def extract_entities(
         entity_types,
     )
 
+    document_text = request.document_text
+    if not document_text and request.pdf_id is not None:
+        found, pdf_text = await repository.fetch_pdf_text(conn, request.pdf_id, request.project_id)
+        if not found:
+            raise HTTPException(status_code=404, detail="PDF not found in this project")
+        if not pdf_text or not pdf_text.strip():
+            raise HTTPException(status_code=422, detail="PDF has no text content")
+        document_text = pdf_text
+
     prompt_id: UUID = await repository.insert_prompt(
         conn,
         request.project_id,
@@ -145,7 +154,7 @@ async def extract_entities(
             request.provider,
             request.model,
             system_prompt,
-            request.document_text,
+            document_text,
         )
     except HTTPException:
         raise

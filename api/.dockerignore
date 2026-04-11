@@ -1,0 +1,12 @@
+.vscode/
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.local.example
+build/
+*.egg-info/
+tests/
+.ruff_cache/
+.pytest_cache/

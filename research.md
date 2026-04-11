@@ -22,8 +22,7 @@
 
 - Claude Code
 - Codex
-- Cursor (I recommend against this)
-- [Grok CLI](https://github.com/superagent-ai/grok-cli)
+- [MiniMax CLI](https://github.com/MiniMax-AI/cli)
 
 ### Free Options
 
@@ -32,6 +31,13 @@
 - Opencode
 - Antigravity
 - Windsurf
+- [Qwen](https://qwenlm.github.io/qwen-code-docs/en/users/overview/)
+
+### Non-Options
+
+- Cursor
+- Lovable
+- Replit
 
 ### Essential Tools
 
@@ -39,13 +45,13 @@
 
 ### Claude
 
+- [HouseofMVPs](https://github.com/Houseofmvps?tab=repositories)
 - monitor usage [claude-pulse](https://github.com/NoobyGains/claude-pulse)
 
 ### Skills
 
 - [skillsmp](https://skillsmp.com/categories/productivity-tools)
 - [context7](https://context7.com/skills)
-- [@zodchii Top 50](https://x.com/zodchiii/status/2034924354337714642)
 - [Tanstack Intent](https://tanstack.com/intent/registry)
 
 ### Generate React Components
@@ -57,12 +63,16 @@
 ### Frontend Design
 
 - Google Stitch
-- Lovable
+- Google Stich DESIGN.md set [VoltAgent](https://github.com/VoltAgent/awesome-design-md)
 
 ### Generate Images
 
 - Gemini
 - SVG Icons: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
+
+## Deployment
+
+- [aws-doctor](https://github.com/elC0mpa/aws-doctor)
 
 ## Frontend links
 
@@ -143,7 +153,6 @@
 
 ### Special Components
 
-- videos [Untitled UI](https://www.untitledui.com/react/components/video-players)
 - [kozakdenys/qr-code-styling](https://github.com/kozakdenys/qr-code-styling)
 - [masroorejaz/react-simple-captcha](https://github.com/masroorejaz/react-simple-captcha)
 - [Home page scroll animation](https://www.builder.io/blog/3d-gsap)
@@ -151,8 +160,6 @@
 - [Kanaries/graphic-walker](https://github.com/Kanaries/graphic-walker)
 - [vercel/avatar](https://github.com/vercel/avatar)
 - [vercel/react-tweet](https://github.com/vercel/react-tweet)
-- [Vercel AI SDK](https://ai-sdk.dev/elements/examples/chatbot)
-- [Ant chat](https://github.com/ant-design/pro-chat)
 - [shadcn-image-cropper](https://github.com/sujjeee/shadcn-image-cropper)
 - sounds [soundcn](https://github.com/kapishdima/soundcn)
 - scheduling [planner](https://github.com/UretzkyZvi/planner)
@@ -161,17 +168,22 @@
 - timeline [shadcn-timeline](https://github.com/timDeHof/shadcn-timeline)
 - tables [data-table-filters](https://github.com/openstatusHQ/data-table-filters)
 - tables [AG Grid](https://www.ag-grid.com/react-data-grid/getting-started/)
-- Component dependency grapher [Madge](https://github.com/pahen/madge)
+- long list [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
+
+### Chatbot Components
+
+- [Vercel AI SDK](https://ai-sdk.dev/elements/examples/chatbot)
+- [Ant chat](https://github.com/ant-design/pro-chat)
 - [Alibaba ChatUI](https://chatui.io/)
 - Wrapper for OpenAI API to enable user to create auto-rended react components [tambo-ai/tambo](https://github.com/tambo-ai/tambo/tree/main/react-sdk), [tambo-ai/analytics-template](https://github.com/tambo-ai/analytics-template), [tambo-ai/ui](https://ui.tambo.co/components/control-bar)
-- long list [brillout/awesome-react-components](https://github.com/brillout/awesome-react-components?tab=readme-ov-file#ui-components)
 
 ### Charts
 
-- [ApexCharts](https://github.com/apexcharts/react-apexcharts/)
 - [Recharts](https://github.com/recharts/recharts)
 - [Ant Design Charts](https://github.com/ant-design/ant-design-charts)
 - [MUI X](https://mui.com/x/react-charts/)
+- [ApexCharts](https://github.com/apexcharts/react-apexcharts/)
+- [nteract/semiotic](https://github.com/nteract/semiotic)
 
 ### React Dashboard Examples
 
@@ -182,9 +194,9 @@
 
 ### Tanstack Start/Router Boilerplates
 
-- Biome, Drizzle, Query [Vijayabaskar56/tanstack-start-faster](https://github.com/Vijayabaskar56/tanstack-start-faster)
 - Example Router app [specfy/getstack](https://github.com/specfy/getstack)
 - [TanStack Dashboard Demo](https://github.com/themeselection/tanstack-dashboard-demo)
+
 ### Tanstack Start/Router Official Examples
 
 - [All Examples](https://github.com/TanStack/router/tree/main/examples/react)

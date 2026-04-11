@@ -15,6 +15,16 @@
       "source": "runpod/skills",
       "sourceType": "github",
       "computedHash": "a436feb0655bea9acc3f6ed7dffa78cd0c30c58f896d9fa5439a9e8735fa5e1a"
+    },
+    "vercel-react-view-transitions": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "c8952fc9127fa0564d0cb71dccb4215a5608ac933b5831104f09173a97a46f85"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
     }
   }
 }

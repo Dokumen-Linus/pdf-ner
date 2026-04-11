@@ -1,0 +1,7 @@
+.vscode
+*.py
+**/*.py
+*.pyc
+**/*.pyc
+__pycache__
+migrations/_init.sql

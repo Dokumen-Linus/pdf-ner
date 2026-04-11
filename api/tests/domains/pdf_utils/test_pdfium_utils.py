@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-from api.app.domains.pdf_utils.pdfium_utils import (
+from app.domains.pdf_utils.pdfium_utils import (
     highlight_phrases,
     parse_hex_color,
 )
@@ -69,7 +69,7 @@ class TestHighlightPhrases:
             "overall_bounds": (10.0, 10.0, 50.0, 20.0),
         }
         with patch(
-            "app.domains.pdf_utils.pdf_utils.find_text_objects",
+            "app.domains.pdf_utils.pdfium_utils.find_text_objects",
             return_value=[fake_match],
         ):
             _, results = highlight_phrases(empty_pdf_bytes, {"hello": "#FF0000"})
@@ -99,7 +99,7 @@ class TestHighlightPhrases:
             },
         ]
         with patch(
-            "app.domains.pdf_utils.pdf_utils.find_text_objects",
+            "app.domains.pdf_utils.pdfium_utils.find_text_objects",
             return_value=fake_matches,
         ):
             _, results = highlight_phrases(three_page_pdf_bytes, {"hello": "#0000FF"})
@@ -126,7 +126,7 @@ class TestHighlightPhrases:
         def _mock_find(pdf, phrase, *args, **kwargs):
             return [fake_match] if phrase == "yes" else []
 
-        with patch("app.domains.pdf_utils.pdf_utils.find_text_objects", side_effect=_mock_find):
+        with patch("app.domains.pdf_utils.pdfium_utils.find_text_objects", side_effect=_mock_find):
             _, results = highlight_phrases(empty_pdf_bytes, {"yes": "#FF0000", "no": "#00FF00"})
 
         yes_result = next(r for r in results if r.phrase == "yes")

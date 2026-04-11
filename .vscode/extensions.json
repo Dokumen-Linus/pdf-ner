@@ -3,12 +3,24 @@
     // all
     "tomoki1207.pdf",
 
-    // api
+    // use Kilo Code for autocomplete instead of GitHub Copilot
+    // "kilocode.kilo-code",
+
+    // web
+    "bradlc.vscode-tailwindcss",
+    "christian-kohler.npm-intellisense",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-typescript-next",
+
+    // python
     "charliermarsh.ruff",
     "ms-python.debugpy",
     "ms-python.python",
     "ms-python.vscode-pylance",
     "ms-toolsai.jupyter",
+
+    // api
     "onegang2.fastapi-endpoint",
     
     // db
@@ -16,12 +28,5 @@
 
     // infra
     "Redis.redis-for-vscode",
-
-    // web
-    "bradlc.vscode-tailwindcss",
-    "christian-kohler.npm-intellisense",
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "ms-vscode.vscode-typescript-next"
   ]
 }

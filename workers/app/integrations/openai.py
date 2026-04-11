@@ -2,7 +2,8 @@ import logging
 import time
 
 from openai import AsyncOpenAI
-from workers.app.shared.domain.LLMResponseData import LLMResponseData
+
+from app.shared.domain.LLMResponseData import LLMResponseData
 
 logger = logging.getLogger(__name__)
 

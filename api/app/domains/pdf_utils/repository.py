@@ -4,12 +4,14 @@ import asyncpg
 
 
 async def fetch_pdf(conn: asyncpg.Connection, pdf_id: UUID) -> asyncpg.Record | None:
-    """Fetch PDF location (S3 key) and bucket via workers.pdfs → web.projects."""
+    """Fetch PDF filepath, bucket credentials, and metadata via workers.pdfs → api.aws_buckets."""
     return await conn.fetchrow(
         """
-        SELECT w.location, w.name, w.project_id, p.bucket
+        SELECT w.filepath, w.name, w.project_id,
+               ab.name AS bucket_name, ab.region,
+               ab.access_key_id, ab.secret_access_key, ab.endpoint_url
         FROM workers.pdfs w
-        JOIN web.projects p ON p.id = w.project_id
+        JOIN api.aws_buckets ab ON ab.id = w.bucket_id
         WHERE w.id = $1
         """,
         pdf_id,

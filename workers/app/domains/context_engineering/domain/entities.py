@@ -55,9 +55,11 @@ class LabeledPdf:
     """A PDF with its extracted text and ground-truth labels."""
 
     pdf_id: UUID
-    full_text: str
+    full_text: str | None
     text_by_page: dict | None
     annotations: list[LabeledAnnotation]
+    bucket_id: UUID | None = None
+    filepath: str | None = None
 
     @property
     def ground_truth(self) -> dict[str, list[str]]:

@@ -1,16 +1,17 @@
 {
   "recommendations": [
     // all    
-    "DavidAnson.vscode-markdownlint",
     "tomoki1207.pdf",
 
-    // frontend
+    // use Kilo Code for autocomplete instead of GitHub Copilot
+    "kilocode.kilo-code",
+
+    // web
     "bradlc.vscode-tailwindcss",
     "christian-kohler.npm-intellisense",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "ms-vscode.vscode-typescript-next",
-    "pmneo.tsimporter"
   ]
 }
 

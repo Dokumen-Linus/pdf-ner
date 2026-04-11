@@ -1,7 +1,8 @@
 """Tests for prompt optimization workflows."""
 
 import json
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import uuid4
 
 import pytest
 
@@ -13,10 +14,14 @@ from app.domains.context_engineering.application.workflows import (
 )
 from app.domains.context_engineering.domain.entities import (
     EvaluationResult,
+    LabeledAnnotation,
+    LabeledPdf,
     PromptCandidate,
 )
 from app.domains.context_engineering.domain.value_objects import F1Score
-from tests.conftest import PROJECT_ID, PROMPT_ID
+from tests.conftest import PDF_ID_1, PROJECT_ID, PROMPT_ID
+
+BUCKET_ID = uuid4()
 
 # ─── _avg_score ──────────────────────────────────────────────────────────
 
@@ -226,16 +231,22 @@ class TestPromptOptimizationWorkflow:
                 "id": labeled_pdf_1.pdf_id,
                 "full_text": labeled_pdf_1.full_text,
                 "text_by_page": None,
+                "bucket_id": BUCKET_ID,
+                "filepath": "uploads/doc1.pdf",
             },
             {
                 "id": labeled_pdf_2.pdf_id,
                 "full_text": labeled_pdf_2.full_text,
                 "text_by_page": None,
+                "bucket_id": BUCKET_ID,
+                "filepath": "uploads/doc2.pdf",
             },
             {
                 "id": labeled_pdf_3.pdf_id,
                 "full_text": labeled_pdf_3.full_text,
                 "text_by_page": None,
+                "bucket_id": BUCKET_ID,
+                "filepath": "uploads/doc3.pdf",
             },
         ]
         ann_rows = []
@@ -278,3 +289,122 @@ class TestPromptOptimizationWorkflow:
         conn.fetchval.assert_called_once()
         # insert_evaluation was called
         conn.execute.assert_called_once()
+
+    @pytest.mark.anyio
+    async def test_skips_pdf_with_no_full_text_and_logs_warning(
+        self, name_entity_type, caplog
+    ):
+        """PDFs with full_text=None that are successfully downloaded from S3 are skipped
+        (text extraction not yet implemented) and a warning is logged."""
+        import logging
+
+        conn = AsyncMock()
+        conn.fetchrow.return_value = {"id": PROJECT_ID, "name": "Test", "description": "desc"}
+
+        entity_row = {
+            "name": name_entity_type.name,
+            "user_definition": name_entity_type.user_definition,
+            "user_examples": name_entity_type.user_examples,
+            "user_format_description": name_entity_type.user_format_description,
+            "datatype": name_entity_type.datatype,
+            "single_word": name_entity_type.single_word,
+            "exact_length": name_entity_type.exact_length,
+            "unique": name_entity_type.unique,
+            "required": name_entity_type.required,
+            "std_definition": name_entity_type.std_definition,
+            "std_examples": name_entity_type.std_examples,
+            "std_format_description": name_entity_type.std_format_description,
+            "std_regex": name_entity_type.std_regex,
+        }
+
+        # One PDF with no full_text
+        pdf_rows = [
+            {
+                "id": PDF_ID_1,
+                "full_text": None,
+                "text_by_page": None,
+                "bucket_id": BUCKET_ID,
+                "filepath": "uploads/doc1.pdf",
+            },
+        ]
+        ann_rows = [
+            {
+                "pdf_id": PDF_ID_1,
+                "custom_entity_type": "full_name",
+                "contents": "John Smith",
+                "page_index": 0,
+            },
+        ]
+        conn.fetch.side_effect = [entity_row if False else [entity_row], pdf_rows, ann_rows]
+
+        client = AsyncMock()
+        cmd = OptimizePrompt(project_id=PROJECT_ID)
+
+        with patch(
+            "app.domains.context_engineering.application.workflows.download_pdf_bytes"
+        ) as mock_dl:
+            mock_dl.return_value = (b"raw pdf bytes", "uploads/doc1.pdf")
+            with caplog.at_level(logging.WARNING):
+                with pytest.raises(ValueError, match="No labeled PDFs with usable text"):
+                    await prompt_optimization_workflow(conn, client, cmd)
+
+        # download_pdf_bytes was called for the PDF with no full_text
+        mock_dl.assert_awaited_once_with(conn, PDF_ID_1)
+        # A warning was logged about text extraction not being implemented
+        assert any("not yet implemented" in r.message for r in caplog.records)
+
+    @pytest.mark.anyio
+    async def test_uses_full_text_from_db_when_present(self, name_entity_type):
+        """PDFs that already have full_text do NOT trigger download_pdf_bytes."""
+        conn = AsyncMock()
+        conn.fetchrow.return_value = {"id": PROJECT_ID, "name": "Test", "description": "desc"}
+
+        entity_row = {
+            "name": name_entity_type.name,
+            "user_definition": name_entity_type.user_definition,
+            "user_examples": name_entity_type.user_examples,
+            "user_format_description": name_entity_type.user_format_description,
+            "datatype": name_entity_type.datatype,
+            "single_word": name_entity_type.single_word,
+            "exact_length": name_entity_type.exact_length,
+            "unique": name_entity_type.unique,
+            "required": name_entity_type.required,
+            "std_definition": name_entity_type.std_definition,
+            "std_examples": name_entity_type.std_examples,
+            "std_format_description": name_entity_type.std_format_description,
+            "std_regex": name_entity_type.std_regex,
+        }
+
+        pdf_rows = [
+            {
+                "id": PDF_ID_1,
+                "full_text": "John Smith SSN: 123-45-6789",
+                "text_by_page": None,
+                "bucket_id": BUCKET_ID,
+                "filepath": "uploads/doc1.pdf",
+            },
+        ]
+        ann_rows = [
+            {
+                "pdf_id": PDF_ID_1,
+                "custom_entity_type": "full_name",
+                "contents": "John Smith",
+                "page_index": 0,
+            },
+        ]
+        conn.fetch.side_effect = [[entity_row], pdf_rows, ann_rows]
+        conn.fetchval.return_value = PROMPT_ID
+
+        mock_client = AsyncMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content=json.dumps({"full_name": "John Smith"})))]
+        )
+
+        with patch(
+            "app.domains.context_engineering.application.workflows.download_pdf_bytes"
+        ) as mock_dl:
+            cmd = OptimizePrompt(project_id=PROJECT_ID, max_iterations=1)
+            await prompt_optimization_workflow(conn, mock_client, cmd)
+
+        # download_pdf_bytes must NOT have been called since full_text was present
+        mock_dl.assert_not_awaited()

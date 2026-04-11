@@ -1,0 +1,16 @@
+{
+  "recommendations": [
+    // all    
+    "tomoki1207.pdf",
+
+    // python
+    "charliermarsh.ruff",
+    "ms-python.debugpy",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-toolsai.jupyter",
+
+    // api
+    "onegang2.fastapi-endpoint",
+  ]
+}

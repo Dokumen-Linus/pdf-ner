@@ -5,7 +5,7 @@ CREATE TABLE api.pdfs (
   
   -- first two endpoints for kevin
   bookmarks TEXT[],
-  original_has_text BOOLEAN,
+  original_has_text BOOLEAN
 );
 
 -- migrate:down

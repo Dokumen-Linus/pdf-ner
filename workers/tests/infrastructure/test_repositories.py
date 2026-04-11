@@ -2,6 +2,7 @@
 
 import json
 from unittest.mock import AsyncMock
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -15,6 +16,8 @@ from app.domains.context_engineering.infrastructure.repositories import (
     insert_optimized_prompt,
 )
 from tests.conftest import PDF_ID_1, PDF_ID_2, PROJECT_ID, PROMPT_ID
+
+BUCKET_ID_1 = uuid4()
 
 
 class TestFetchProject:
@@ -104,7 +107,13 @@ class TestFetchLabeledPdfs:
         conn.fetch.side_effect = [
             # pdf_rows
             [
-                {"id": PDF_ID_1, "full_text": "Document text", "text_by_page": None},
+                {
+                    "id": PDF_ID_1,
+                    "full_text": "Document text",
+                    "text_by_page": None,
+                    "bucket_id": BUCKET_ID_1,
+                    "filepath": "uploads/doc1.pdf",
+                },
             ],
             # annotation_rows
             [
@@ -127,14 +136,28 @@ class TestFetchLabeledPdfs:
         assert isinstance(result[0], LabeledPdf)
         assert len(result[0].annotations) == 2
         assert result[0].full_text == "Document text"
+        assert result[0].bucket_id == UUID(str(BUCKET_ID_1))
+        assert result[0].filepath == "uploads/doc1.pdf"
 
     @pytest.mark.anyio
     async def test_excludes_pdfs_without_annotations(self):
         conn = AsyncMock()
         conn.fetch.side_effect = [
             [
-                {"id": PDF_ID_1, "full_text": "Has annotations", "text_by_page": None},
-                {"id": PDF_ID_2, "full_text": "No annotations", "text_by_page": None},
+                {
+                    "id": PDF_ID_1,
+                    "full_text": "Has annotations",
+                    "text_by_page": None,
+                    "bucket_id": BUCKET_ID_1,
+                    "filepath": "uploads/doc1.pdf",
+                },
+                {
+                    "id": PDF_ID_2,
+                    "full_text": "No annotations",
+                    "text_by_page": None,
+                    "bucket_id": BUCKET_ID_1,
+                    "filepath": "uploads/doc2.pdf",
+                },
             ],
             [
                 {
@@ -148,6 +171,35 @@ class TestFetchLabeledPdfs:
         result = await fetch_labeled_pdfs(conn, PROJECT_ID)
         assert len(result) == 1
         assert result[0].pdf_id == PDF_ID_1
+
+    @pytest.mark.anyio
+    async def test_returns_pdf_without_full_text_when_annotated(self):
+        """PDFs with no full_text but with annotations are now included (S3 fallback)."""
+        conn = AsyncMock()
+        conn.fetch.side_effect = [
+            [
+                {
+                    "id": PDF_ID_1,
+                    "full_text": None,
+                    "text_by_page": None,
+                    "bucket_id": BUCKET_ID_1,
+                    "filepath": "uploads/doc1.pdf",
+                },
+            ],
+            [
+                {
+                    "pdf_id": PDF_ID_1,
+                    "custom_entity_type": "full_name",
+                    "contents": "John Smith",
+                    "page_index": 0,
+                },
+            ],
+        ]
+        result = await fetch_labeled_pdfs(conn, PROJECT_ID)
+        assert len(result) == 1
+        assert result[0].full_text is None
+        assert result[0].bucket_id == UUID(str(BUCKET_ID_1))
+        assert result[0].filepath == "uploads/doc1.pdf"
 
     @pytest.mark.anyio
     async def test_empty_when_no_pdfs(self):

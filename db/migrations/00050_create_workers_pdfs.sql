@@ -2,7 +2,8 @@
 CREATE TABLE workers.pdfs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "name" TEXT,
-  "location" TEXT NOT NULL,
+  bucket_id UUID NOT NULL REFERENCES api.aws_buckets (id),
+  filepath  TEXT NOT NULL,
 
   -- info from web sent to api via request
   project_id UUID NOT NULL REFERENCES web.projects (id) ON DELETE CASCADE,

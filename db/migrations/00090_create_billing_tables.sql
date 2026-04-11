@@ -34,7 +34,7 @@ CREATE TABLE workers.stripe_customers (
 
 CREATE TRIGGER stripe_customers_updated_at
     BEFORE UPDATE ON workers.stripe_customers
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- api_user and web_user need INSERT/UPDATE for customer + subscription management
 GRANT INSERT, UPDATE ON workers.stripe_customers TO api_user;

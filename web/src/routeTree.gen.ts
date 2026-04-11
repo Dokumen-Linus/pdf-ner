@@ -8,154 +8,203 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import type { createStart } from "@tanstack/react-start"
-import type { getRouter } from "./router.tsx"
-import { Route as rootRouteImport } from "./routes/__root"
-import { Route as AuthRouteImport } from "./routes/_auth"
-import { Route as AuthSigninRouteImport } from "./routes/_auth/signin"
-import { Route as AuthSignoutRouteImport } from "./routes/_auth/signout"
-import { Route as AuthSignupRouteImport } from "./routes/_auth/signup"
-import { Route as PrivateRouteImport } from "./routes/_private"
-import { Route as PrivateCreateProjectRouteImport } from "./routes/_private/create-project"
-import { Route as PrivateProfileRouteImport } from "./routes/_private/profile"
-import { Route as PublicRouteImport } from "./routes/_public"
-import { Route as PublicDemoRouteImport } from "./routes/_public/demo"
-import { Route as PublicIndexRouteImport } from "./routes/_public/index"
-import { Route as ApiAuthSplatRouteImport } from "./routes/api/auth/$"
-import { Route as ApiUploadthingRouteImport } from "./routes/api/uploadthing"
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as PublicRouteImport } from './routes/_public'
+import { Route as PrivateRouteImport } from './routes/_private'
+import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as PublicIndexRouteImport } from './routes/_public/index'
+import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
+import { Route as PublicDemoRouteImport } from './routes/_public/demo'
+import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
+import { Route as PrivateBillingRouteImport } from './routes/_private/billing'
+import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
+import { Route as AuthSignoutRouteImport } from './routes/_auth/signout'
+import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
+import { Route as PrivateProjectsIndexRouteImport } from './routes/_private/projects.index'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as PrivateProjectsProjectIdRouteImport } from './routes/_private/projects.$projectId'
+import { Route as PrivateProjectsProjectIdDocumentsRouteImport } from './routes/_private/projects.$projectId_.documents'
+import { Route as PrivateProjectsProjectIdDashboardRouteImport } from './routes/_private/projects.$projectId_.dashboard'
 
 const PublicRoute = PublicRouteImport.update({
-  id: "/_public",
+  id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivateRoute = PrivateRouteImport.update({
-  id: "/_private",
+  id: '/_private',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
-  id: "/_auth",
+  id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => PublicRoute,
 } as any)
 const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
-  id: "/api/uploadthing",
-  path: "/api/uploadthing",
+  id: '/api/uploadthing',
+  path: '/api/uploadthing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicDemoRoute = PublicDemoRouteImport.update({
-  id: "/demo",
-  path: "/demo",
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => PublicRoute,
 } as any)
 const PrivateProfileRoute = PrivateProfileRouteImport.update({
-  id: "/profile",
-  path: "/profile",
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => PrivateRoute,
 } as any)
-const PrivateCreateProjectRoute = PrivateCreateProjectRouteImport.update({
-  id: "/create-project",
-  path: "/create-project",
+const PrivateBillingRoute = PrivateBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => PrivateRoute,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
-  id: "/signup",
-  path: "/signup",
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthSignoutRoute = AuthSignoutRouteImport.update({
-  id: "/signout",
-  path: "/signout",
+  id: '/signout',
+  path: '/signout',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthSigninRoute = AuthSigninRouteImport.update({
-  id: "/signin",
-  path: "/signin",
+  id: '/signin',
+  path: '/signin',
   getParentRoute: () => AuthRoute,
 } as any)
+const PrivateProjectsIndexRoute = PrivateProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => PrivateRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: "/api/auth/$",
-  path: "/api/auth/$",
+  id: '/api/auth/$',
+  path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivateProjectsProjectIdRoute =
+  PrivateProjectsProjectIdRouteImport.update({
+    id: '/projects/$projectId',
+    path: '/projects/$projectId',
+    getParentRoute: () => PrivateRoute,
+  } as any)
+const PrivateProjectsProjectIdDocumentsRoute =
+  PrivateProjectsProjectIdDocumentsRouteImport.update({
+    id: '/projects/$projectId_/documents',
+    path: '/projects/$projectId/documents',
+    getParentRoute: () => PrivateRoute,
+  } as any)
+const PrivateProjectsProjectIdDashboardRoute =
+  PrivateProjectsProjectIdDashboardRouteImport.update({
+    id: '/projects/$projectId_/dashboard',
+    path: '/projects/$projectId/dashboard',
+    getParentRoute: () => PrivateRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof PublicIndexRoute
-  "/signin": typeof AuthSigninRoute
-  "/signout": typeof AuthSignoutRoute
-  "/signup": typeof AuthSignupRoute
-  "/create-project": typeof PrivateCreateProjectRoute
-  "/profile": typeof PrivateProfileRoute
-  "/demo": typeof PublicDemoRoute
-  "/api/uploadthing": typeof ApiUploadthingRoute
-  "/api/auth/$": typeof ApiAuthSplatRoute
+  '/': typeof PublicIndexRoute
+  '/signin': typeof AuthSigninRoute
+  '/signout': typeof AuthSignoutRoute
+  '/signup': typeof AuthSignupRoute
+  '/billing': typeof PrivateBillingRoute
+  '/profile': typeof PrivateProfileRoute
+  '/demo': typeof PublicDemoRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
+  '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/projects/': typeof PrivateProjectsIndexRoute
+  '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
+  '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof PublicIndexRoute
-  "/signin": typeof AuthSigninRoute
-  "/signout": typeof AuthSignoutRoute
-  "/signup": typeof AuthSignupRoute
-  "/create-project": typeof PrivateCreateProjectRoute
-  "/profile": typeof PrivateProfileRoute
-  "/demo": typeof PublicDemoRoute
-  "/api/uploadthing": typeof ApiUploadthingRoute
-  "/api/auth/$": typeof ApiAuthSplatRoute
+  '/': typeof PublicIndexRoute
+  '/signin': typeof AuthSigninRoute
+  '/signout': typeof AuthSignoutRoute
+  '/signup': typeof AuthSignupRoute
+  '/billing': typeof PrivateBillingRoute
+  '/profile': typeof PrivateProfileRoute
+  '/demo': typeof PublicDemoRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
+  '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/projects': typeof PrivateProjectsIndexRoute
+  '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
+  '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  "/_auth": typeof AuthRouteWithChildren
-  "/_private": typeof PrivateRouteWithChildren
-  "/_public": typeof PublicRouteWithChildren
-  "/_auth/signin": typeof AuthSigninRoute
-  "/_auth/signout": typeof AuthSignoutRoute
-  "/_auth/signup": typeof AuthSignupRoute
-  "/_private/create-project": typeof PrivateCreateProjectRoute
-  "/_private/profile": typeof PrivateProfileRoute
-  "/_public/demo": typeof PublicDemoRoute
-  "/api/uploadthing": typeof ApiUploadthingRoute
-  "/_public/": typeof PublicIndexRoute
-  "/api/auth/$": typeof ApiAuthSplatRoute
+  '/_auth': typeof AuthRouteWithChildren
+  '/_private': typeof PrivateRouteWithChildren
+  '/_public': typeof PublicRouteWithChildren
+  '/_auth/signin': typeof AuthSigninRoute
+  '/_auth/signout': typeof AuthSignoutRoute
+  '/_auth/signup': typeof AuthSignupRoute
+  '/_private/billing': typeof PrivateBillingRoute
+  '/_private/profile': typeof PrivateProfileRoute
+  '/_public/demo': typeof PublicDemoRoute
+  '/api/uploadthing': typeof ApiUploadthingRoute
+  '/_public/': typeof PublicIndexRoute
+  '/_private/projects/$projectId': typeof PrivateProjectsProjectIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_private/projects/': typeof PrivateProjectsIndexRoute
+  '/_private/projects/$projectId_/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
+  '/_private/projects/$projectId_/documents': typeof PrivateProjectsProjectIdDocumentsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/signin"
-    | "/signout"
-    | "/signup"
-    | "/create-project"
-    | "/profile"
-    | "/demo"
-    | "/api/uploadthing"
-    | "/api/auth/$"
+    | '/'
+    | '/signin'
+    | '/signout'
+    | '/signup'
+    | '/billing'
+    | '/profile'
+    | '/demo'
+    | '/api/uploadthing'
+    | '/projects/$projectId'
+    | '/api/auth/$'
+    | '/projects/'
+    | '/projects/$projectId/dashboard'
+    | '/projects/$projectId/documents'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/signin"
-    | "/signout"
-    | "/signup"
-    | "/create-project"
-    | "/profile"
-    | "/demo"
-    | "/api/uploadthing"
-    | "/api/auth/$"
+    | '/'
+    | '/signin'
+    | '/signout'
+    | '/signup'
+    | '/billing'
+    | '/profile'
+    | '/demo'
+    | '/api/uploadthing'
+    | '/projects/$projectId'
+    | '/api/auth/$'
+    | '/projects'
+    | '/projects/$projectId/dashboard'
+    | '/projects/$projectId/documents'
   id:
-    | "__root__"
-    | "/_auth"
-    | "/_private"
-    | "/_public"
-    | "/_auth/signin"
-    | "/_auth/signout"
-    | "/_auth/signup"
-    | "/_private/create-project"
-    | "/_private/profile"
-    | "/_public/demo"
-    | "/api/uploadthing"
-    | "/_public/"
-    | "/api/auth/$"
+    | '__root__'
+    | '/_auth'
+    | '/_private'
+    | '/_public'
+    | '/_auth/signin'
+    | '/_auth/signout'
+    | '/_auth/signup'
+    | '/_private/billing'
+    | '/_private/profile'
+    | '/_public/demo'
+    | '/api/uploadthing'
+    | '/_public/'
+    | '/_private/projects/$projectId'
+    | '/api/auth/$'
+    | '/_private/projects/'
+    | '/_private/projects/$projectId_/dashboard'
+    | '/_private/projects/$projectId_/documents'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -166,91 +215,119 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/_public": {
-      id: "/_public"
-      path: ""
-      fullPath: "/"
+    '/_public': {
+      id: '/_public'
+      path: ''
+      fullPath: '/'
       preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/_private": {
-      id: "/_private"
-      path: ""
-      fullPath: "/"
+    '/_private': {
+      id: '/_private'
+      path: ''
+      fullPath: '/'
       preLoaderRoute: typeof PrivateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/_auth": {
-      id: "/_auth"
-      path: ""
-      fullPath: "/"
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/_public/": {
-      id: "/_public/"
-      path: "/"
-      fullPath: "/"
+    '/_public/': {
+      id: '/_public/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
     }
-    "/api/uploadthing": {
-      id: "/api/uploadthing"
-      path: "/api/uploadthing"
-      fullPath: "/api/uploadthing"
+    '/api/uploadthing': {
+      id: '/api/uploadthing'
+      path: '/api/uploadthing'
+      fullPath: '/api/uploadthing'
       preLoaderRoute: typeof ApiUploadthingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/_public/demo": {
-      id: "/_public/demo"
-      path: "/demo"
-      fullPath: "/demo"
+    '/_public/demo': {
+      id: '/_public/demo'
+      path: '/demo'
+      fullPath: '/demo'
       preLoaderRoute: typeof PublicDemoRouteImport
       parentRoute: typeof PublicRoute
     }
-    "/_private/profile": {
-      id: "/_private/profile"
-      path: "/profile"
-      fullPath: "/profile"
+    '/_private/profile': {
+      id: '/_private/profile'
+      path: '/profile'
+      fullPath: '/profile'
       preLoaderRoute: typeof PrivateProfileRouteImport
       parentRoute: typeof PrivateRoute
     }
-    "/_private/create-project": {
-      id: "/_private/create-project"
-      path: "/create-project"
-      fullPath: "/create-project"
-      preLoaderRoute: typeof PrivateCreateProjectRouteImport
+    '/_private/billing': {
+      id: '/_private/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof PrivateBillingRouteImport
       parentRoute: typeof PrivateRoute
     }
-    "/_auth/signup": {
-      id: "/_auth/signup"
-      path: "/signup"
-      fullPath: "/signup"
+    '/_auth/signup': {
+      id: '/_auth/signup'
+      path: '/signup'
+      fullPath: '/signup'
       preLoaderRoute: typeof AuthSignupRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/signout": {
-      id: "/_auth/signout"
-      path: "/signout"
-      fullPath: "/signout"
+    '/_auth/signout': {
+      id: '/_auth/signout'
+      path: '/signout'
+      fullPath: '/signout'
       preLoaderRoute: typeof AuthSignoutRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/signin": {
-      id: "/_auth/signin"
-      path: "/signin"
-      fullPath: "/signin"
+    '/_auth/signin': {
+      id: '/_auth/signin'
+      path: '/signin'
+      fullPath: '/signin'
       preLoaderRoute: typeof AuthSigninRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/api/auth/$": {
-      id: "/api/auth/$"
-      path: "/api/auth/$"
-      fullPath: "/api/auth/$"
+    '/_private/projects/': {
+      id: '/_private/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof PrivateProjectsIndexRouteImport
+      parentRoute: typeof PrivateRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_private/projects/$projectId': {
+      id: '/_private/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof PrivateProjectsProjectIdRouteImport
+      parentRoute: typeof PrivateRoute
+    }
+    '/_private/projects/$projectId_/documents': {
+      id: '/_private/projects/$projectId_/documents'
+      path: '/projects/$projectId/documents'
+      fullPath: '/projects/$projectId/documents'
+      preLoaderRoute: typeof PrivateProjectsProjectIdDocumentsRouteImport
+      parentRoute: typeof PrivateRoute
+    }
+    '/_private/projects/$projectId_/dashboard': {
+      id: '/_private/projects/$projectId_/dashboard'
+      path: '/projects/$projectId/dashboard'
+      fullPath: '/projects/$projectId/dashboard'
+      preLoaderRoute: typeof PrivateProjectsProjectIdDashboardRouteImport
+      parentRoute: typeof PrivateRoute
     }
   }
 }
@@ -270,16 +347,27 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface PrivateRouteChildren {
-  PrivateCreateProjectRoute: typeof PrivateCreateProjectRoute
+  PrivateBillingRoute: typeof PrivateBillingRoute
   PrivateProfileRoute: typeof PrivateProfileRoute
+  PrivateProjectsProjectIdRoute: typeof PrivateProjectsProjectIdRoute
+  PrivateProjectsIndexRoute: typeof PrivateProjectsIndexRoute
+  PrivateProjectsProjectIdDashboardRoute: typeof PrivateProjectsProjectIdDashboardRoute
+  PrivateProjectsProjectIdDocumentsRoute: typeof PrivateProjectsProjectIdDocumentsRoute
 }
 
 const PrivateRouteChildren: PrivateRouteChildren = {
-  PrivateCreateProjectRoute: PrivateCreateProjectRoute,
+  PrivateBillingRoute: PrivateBillingRoute,
   PrivateProfileRoute: PrivateProfileRoute,
+  PrivateProjectsProjectIdRoute: PrivateProjectsProjectIdRoute,
+  PrivateProjectsIndexRoute: PrivateProjectsIndexRoute,
+  PrivateProjectsProjectIdDashboardRoute:
+    PrivateProjectsProjectIdDashboardRoute,
+  PrivateProjectsProjectIdDocumentsRoute:
+    PrivateProjectsProjectIdDocumentsRoute,
 }
 
-const PrivateRouteWithChildren = PrivateRoute._addFileChildren(PrivateRouteChildren)
+const PrivateRouteWithChildren =
+  PrivateRoute._addFileChildren(PrivateRouteChildren)
 
 interface PublicRouteChildren {
   PublicDemoRoute: typeof PublicDemoRoute
@@ -291,7 +379,8 @@ const PublicRouteChildren: PublicRouteChildren = {
   PublicIndexRoute: PublicIndexRoute,
 }
 
-const PublicRouteWithChildren = PublicRoute._addFileChildren(PublicRouteChildren)
+const PublicRouteWithChildren =
+  PublicRoute._addFileChildren(PublicRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
@@ -304,7 +393,9 @@ export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
-declare module "@tanstack/react-start" {
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
