@@ -2,8 +2,8 @@
 
 > **Stack:** fastapi | drizzle | react | typescript
 
-> 9 routes | 18 models | 51 components | 121 lib files | 34 env vars | 9 middleware | 1 events | 52% test coverage
-> **Token savings:** this file is ~11,900 tokens. Without it, AI exploration would cost ~75,800 tokens. **Saves ~63,900 tokens per conversation.**
+> 9 routes | 18 models | 54 components | 121 lib files | 34 env vars | 9 middleware | 1 events | 52% test coverage
+> **Token savings:** this file is ~12,000 tokens. Without it, AI exploration would cost ~76,800 tokens. **Saves ~64,800 tokens per conversation.**
 
 ---
 
@@ -33,12 +33,20 @@
 - job_title: text
 - avatar_url: text
 
+### aws_buckets
+- id: uuid (pk)
+- name: text (required)
+- region: text (required)
+- access_key_id: text (required, fk)
+- secret_access_key: text (required)
+- endpoint_url: text
+
 ### projects
 - id: uuid (pk)
 - owner_id: uuid (required, fk)
 - name: text (required)
 - description: text
-- bucket: text
+- bucket_id: uuid (fk)
 
 ### std_entity_types
 - id: bigint (pk)
@@ -71,14 +79,6 @@
 - project_id: uuid (required, fk)
 - template_id: bigint (fk)
 - full_text: text
-
-### aws_buckets
-- id: uuid (pk)
-- name: text (required)
-- region: text (required)
-- access_key_id: text (required, fk)
-- secret_access_key: text (required)
-- endpoint_url: text
 
 ### pdfs
 - id: uuid (pk)
@@ -225,7 +225,10 @@
 - **Route** — `web\src\routes\_auth\signup.tsx`
 - **Route** — `web\src\routes\_auth.tsx`
 - **Route** — `web\src\routes\_private\billing.tsx`
-- **Route** — `web\src\routes\_private\create-project.tsx`
+- **Route** — `web\src\routes\_private\new-pages\projects.$projectId.tsx`
+- **Route** — `web\src\routes\_private\new-pages\projects.$projectId_.dashboard.tsx`
+- **Route** — `web\src\routes\_private\new-pages\projects.$projectId_.documents.tsx`
+- **Route** — `web\src\routes\_private\new-pages\projects.index.tsx`
 - **Route** — `web\src\routes\_private\profile.tsx`
 - **Route** — `web\src\routes\_private\storage.tsx`
 - **Route** — `web\src\routes\_private.tsx`
@@ -733,12 +736,12 @@
 ## Covered Models
 
 - users
+- aws_buckets
 - projects
 - std_entity_types
 - entity_types
 - templates
 - prompts
-- aws_buckets
 - pdfs
 - annotations
 - llm_usage

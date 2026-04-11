@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/log-commands.sh"
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/log-commands.sh"
           }
         ]
       }
@@ -41,11 +41,26 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/format-on-edit.sh"
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/format-on-edit.sh"
           },
           {
             "type": "command",
-            "command": ".claude/hooks/typecheck-on-edit.sh"
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/typecheck-on-edit.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd $CLAUDE_PROJECT_DIR && npx -y codesight --wiki"
+          },
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/run-tests.sh"
           }
         ]
       }

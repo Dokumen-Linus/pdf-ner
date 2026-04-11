@@ -10,12 +10,20 @@
 - job_title: text
 - avatar_url: text
 
+### aws_buckets
+- id: uuid (pk)
+- name: text (required)
+- region: text (required)
+- access_key_id: text (required, fk)
+- secret_access_key: text (required)
+- endpoint_url: text
+
 ### projects
 - id: uuid (pk)
 - owner_id: uuid (required, fk)
 - name: text (required)
 - description: text
-- bucket: text
+- bucket_id: uuid (fk)
 
 ### std_entity_types
 - id: bigint (pk)
@@ -48,14 +56,6 @@
 - project_id: uuid (required, fk)
 - template_id: bigint (fk)
 - full_text: text
-
-### aws_buckets
-- id: uuid (pk)
-- name: text (required)
-- region: text (required)
-- access_key_id: text (required, fk)
-- secret_access_key: text (required)
-- endpoint_url: text
 
 ### pdfs
 - id: uuid (pk)

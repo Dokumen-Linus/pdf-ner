@@ -17,15 +17,26 @@ pk: `id` (uuid)
 - `job_title`: text
 - `avatar_url`: text
 
+### aws_buckets
+
+pk: `id` (uuid) · fk: access_key_id
+
+- `id`: uuid _(pk)_
+- `name`: text _(required)_
+- `region`: text _(required)_
+- `access_key_id`: text _(required, fk)_
+- `secret_access_key`: text _(required)_
+- `endpoint_url`: text
+
 ### projects
 
-pk: `id` (uuid) · fk: owner_id
+pk: `id` (uuid) · fk: owner_id, bucket_id
 
 - `id`: uuid _(pk)_
 - `owner_id`: uuid _(required, fk)_
 - `name`: text _(required)_
 - `description`: text
-- `bucket`: text
+- `bucket_id`: uuid _(fk)_
 
 ### std_entity_types
 
@@ -70,17 +81,6 @@ pk: `id` (uuid) · fk: project_id, template_id
 - `project_id`: uuid _(required, fk)_
 - `template_id`: bigint _(fk)_
 - `full_text`: text
-
-### aws_buckets
-
-pk: `id` (uuid) · fk: access_key_id
-
-- `id`: uuid _(pk)_
-- `name`: text _(required)_
-- `region`: text _(required)_
-- `access_key_id`: text _(required, fk)_
-- `secret_access_key`: text _(required)_
-- `endpoint_url`: text
 
 ### pdfs
 

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "codesight": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "codesight",
+        "--mcp"
+      ]
+    }
+  }
+}

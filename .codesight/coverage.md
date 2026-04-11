@@ -6,12 +6,12 @@
 ## Covered Models
 
 - users
+- aws_buckets
 - projects
 - std_entity_types
 - entity_types
 - templates
 - prompts
-- aws_buckets
 - pdfs
 - annotations
 - llm_usage

@@ -8,7 +8,8 @@ FILE=$(python -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_inp
 if [[ "$FILE" == *.ts || "$FILE" == *.tsx ]]; then
   REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
   cd "$REPO_ROOT/web"
-  bunx tsc --noEmit 2>&1 || true
+  bunx tsc --noEmit 2>&1 | grep -i "$FILE" || true
+  bunx eslint --fix "$FILE" 2>/dev/null || true
 fi
 
 exit 0
