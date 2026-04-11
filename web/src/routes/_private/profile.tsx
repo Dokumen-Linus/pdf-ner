@@ -89,6 +89,15 @@ const getInitials = (label: string) => {
   return `${words[0]?.charAt(0) ?? ""}${words[1]?.charAt(0) ?? ""}`.toUpperCase()
 }
 
+const getProfileInitials = (user: ProfileUser, displayName: string) => {
+  const firstInitial = user.firstName?.trim().charAt(0) ?? ""
+  const lastInitial = user.lastName?.trim().charAt(0) ?? ""
+  const fullNameInitials = `${firstInitial}${lastInitial}`.toUpperCase()
+
+  if (fullNameInitials) return fullNameInitials
+  return getInitials(displayName)
+}
+
 const getGeneratedAvatarUrl = (seed: string) =>
   `https://avatar.vercel.sh/${encodeURIComponent(seed)}?size=192`
 
@@ -324,11 +333,12 @@ function ProfilePage() {
   const fallbackDisplayName = getLegacyName(profile)
   const activeDisplayName = form.state.values.displayName.trim() || fallbackDisplayName
   const activeAvatarUrl = form.state.values.avatarUrl.trim()
+  const hasUploadedAvatar = activeAvatarUrl.length > 0
   const generatedSeed = `${activeDisplayName}-${profile.email}`.toLowerCase()
   const generatedAvatarUrl = getGeneratedAvatarUrl(generatedSeed)
   const avatarSrc = activeAvatarUrl || generatedAvatarUrl
   const avatarHue = generatedSeed.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360
-  const initials = getInitials(activeDisplayName)
+  const initials = getProfileInitials(profile, activeDisplayName)
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
@@ -398,6 +408,11 @@ function ProfilePage() {
                   className="h-full w-full object-cover"
                   onError={() => setAvatarLoadFailed(true)}
                 />
+              )}
+              {!hasUploadedAvatar && !avatarLoadFailed && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/10 text-2xl font-semibold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]">
+                  {initials}
+                </div>
               )}
               <div
                 className={`absolute inset-0 flex items-center justify-center text-2xl font-semibold text-white ${
@@ -552,7 +567,7 @@ function ProfilePage() {
                           profile.displayName
                         ) : (
                           <span className="italic text-muted-foreground">
-                            Using legacy fallback: {fallbackDisplayName}
+                            {fallbackDisplayName}
                           </span>
                         )}
                       </p>

@@ -45,7 +45,7 @@ export const getProjectById = createServerFn({ method: "GET" })
     if (project.length === 0) {
       throw new Error("Project not found")
     }
-    return project
+    return project[0]
   })
 
 export const getProjectByName = createServerFn({ method: "GET" })
@@ -55,7 +55,7 @@ export const getProjectByName = createServerFn({ method: "GET" })
     if (project.length === 0) {
       throw new Error("Project not found")
     }
-    return project
+    return project[0]
   })
 
 export const getProjectsByOwnerId = createServerFn({ method: "GET" })

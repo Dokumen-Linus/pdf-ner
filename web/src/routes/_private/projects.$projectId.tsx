@@ -21,6 +21,7 @@ import { getPromptsByProjectId } from "@/db-fns/api/prompts"
 import { getAllTemplates } from "@/db-fns/api/templates"
 import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
 import { getProjectById } from "@/db-fns/web/projects"
+import type { FoundDbEntityType, FoundPrompt, FoundTemplate } from "@/db/types"
 
 // Use a skeleton for loaders
 function ProjectDetailsPageSkeleton() {
@@ -43,36 +44,36 @@ function ProjectDetailsPageSkeleton() {
   )
 }
 
-export const Route = createFileRoute("/_private/new-pages/projects/$projectId")({
+export const Route = createFileRoute("/_private/projects/$projectId")({
   loader: async ({ params, context }) => {
     try {
-      const email = context.session?.user?.email
-      if (!email) {
+      const userId = context.session?.user?.id
+      if (!userId) {
         return {
           project: null,
-          entityTypes: [],
-          prompts: [],
-          templates: [],
+          entityTypes: [] as FoundDbEntityType[],
+          prompts: [] as FoundPrompt[],
+          templates: [] as FoundTemplate[],
           loadError: "Not authenticated",
         }
       }
 
       const project = await getProjectById({ data: { id: params.projectId } })
 
-      const [entityTypes, prompts, templates] = await Promise.all([
+      const [entityTypes, prompts, templates] = (await Promise.all([
         getEntityTypesByProjectId({ data: { projectId: params.projectId } }),
         getPromptsByProjectId({ data: { projectId: params.projectId } }),
         getAllTemplates(),
-      ])
+      ])) as [FoundDbEntityType[], FoundPrompt[], FoundTemplate[]]
 
       return { project, entityTypes, prompts, templates, loadError: null }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       return {
         project: null,
-        entityTypes: [],
-        prompts: [],
-        templates: [],
+        entityTypes: [] as FoundDbEntityType[],
+        prompts: [] as FoundPrompt[],
+        templates: [] as FoundTemplate[],
         loadError: message,
       }
     }
@@ -109,8 +110,8 @@ function ProjectDetailsPage() {
 
   // Find matching templates for the prompts
   const activeTemplates = prompts
-    .map((prompt) => templates.find((t) => t.id === prompt.templateId))
-    .filter(Boolean)
+    .map((prompt: FoundPrompt) => templates.find((t: FoundTemplate) => t.id === prompt.templateId))
+    .filter((t): t is FoundTemplate => Boolean(t))
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
@@ -203,7 +204,7 @@ function ProjectDetailsPage() {
               <p className="text-sm text-muted-foreground">No entity types defined yet.</p>
             ) : (
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                {entityTypes.map((et) => (
+                {entityTypes.map((et: FoundDbEntityType) => (
                   <div
                     key={et.id}
                     className="flex items-center justify-between rounded-lg border border-border p-2.5 text-sm"
@@ -246,7 +247,7 @@ function ProjectDetailsPage() {
               <p className="text-sm text-muted-foreground">No templates linked to this project.</p>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {activeTemplates.map((template) => (
+                {activeTemplates.map((template: FoundTemplate) => (
                   <div
                     key={template!.id}
                     className="space-y-2 rounded-lg border border-border bg-muted/20 p-4"
@@ -256,7 +257,7 @@ function ProjectDetailsPage() {
                       {template!.txt}
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
-                      {template!.inserts?.slice(0, 3).map((insert, i) => (
+                      {template!.inserts?.slice(0, 3).map((insert: string, i: number) => (
                         <Badge key={i} variant="secondary" className="px-1.5 py-0 text-[10px]">
                           {insert}
                         </Badge>

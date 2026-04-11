@@ -18,8 +18,10 @@ import {
   CardTitle,
 } from "@/components/shadcn-ui/card"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
-import { getProjectDashboardStats } from "@/db-fns/web/dashboard"
+import { getAnnotationsByPdfIds } from "@/db-fns/web/annotations"
+import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
 import { getProjectById } from "@/db-fns/web/projects"
+import { getWorkersPdfIdsByProjectId } from "@/db-fns/workers/pdfs"
 
 function DashboardSkeleton() {
   return (
@@ -43,18 +45,40 @@ function DashboardSkeleton() {
   )
 }
 
-export const Route = createFileRoute("/_private/new-pages/projects/$projectId_/dashboard")({
+export const Route = createFileRoute("/_private/projects/$projectId_/dashboard")({
   loader: async ({ params, context }) => {
     try {
-      const email = context.session?.user?.email
-      if (!email) {
+      const userId = context.session?.user?.id
+      if (!userId) {
         return { project: null, stats: null, loadError: "Not authenticated" }
       }
 
-      const [project, stats] = await Promise.all([
+      const [project, pdfRows, entityTypesList] = await Promise.all([
         getProjectById({ data: { id: params.projectId } }),
-        getProjectDashboardStats({ data: { projectId: params.projectId } }),
+        getWorkersPdfIdsByProjectId({ data: { projectId: params.projectId } }),
+        getEntityTypesByProjectId({ data: { projectId: params.projectId } }),
       ])
+
+      const pdfIds = pdfRows.map((p) => p.id)
+      const projectAnnotations = await getAnnotationsByPdfIds({ data: { pdfIds } })
+
+      const entityTypeMap = new Map(entityTypesList.map((t) => [t.id, t.name]))
+
+      const breakdownMap = new Map<string, number>()
+      for (const ann of projectAnnotations) {
+        const typeKey = ann.customEntityType || ann.subtype || "Unknown"
+        const displayName = entityTypeMap.get(typeKey) || typeKey
+        breakdownMap.set(displayName, (breakdownMap.get(displayName) || 0) + 1)
+      }
+
+      const stats = {
+        totalDocuments: pdfIds.length,
+        totalAnnotations: projectAnnotations.length,
+        entityTypeBreakdown: Array.from(breakdownMap.entries()).map(([name, count]) => ({
+          name,
+          count,
+        })),
+      }
 
       return { project, stats, loadError: null }
     } catch (error) {

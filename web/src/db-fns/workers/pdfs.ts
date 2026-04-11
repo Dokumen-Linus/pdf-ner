@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm/sql"
+import { count, eq } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "@/db/client"
 import { workersPdfs } from "@/db/schemas/workers/pdfs"
@@ -18,6 +18,25 @@ export const getAllWorkersPdfs = createServerFn({ method: "GET" })
   .inputValidator(() => ({}))
   .handler(async () => {
     return db.select().from(workersPdfs)
+  })
+
+export const getWorkersPdfIdsByProjectId = createServerFn({ method: "GET" })
+  .inputValidator((data: { projectId: string }) => data)
+  .handler(async ({ data }) => {
+    return db
+      .select({ id: workersPdfs.id })
+      .from(workersPdfs)
+      .where(eq(workersPdfs.projectId, data.projectId))
+  })
+
+export const getWorkersPdfsCountByProjectId = createServerFn({ method: "GET" })
+  .inputValidator((data: { projectId: string }) => data)
+  .handler(async ({ data }) => {
+    const [result] = await db
+      .select({ count: count() })
+      .from(workersPdfs)
+      .where(eq(workersPdfs.projectId, data.projectId))
+    return result?.count ?? 0
   })
 
 export const getWorkersPdfsByProjectId = createServerFn({ method: "GET" })

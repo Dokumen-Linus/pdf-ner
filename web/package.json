@@ -105,7 +105,6 @@
     "@eslint/eslintrc": "^3.3.3",
     "@ianvs/prettier-plugin-sort-imports": "^4.7",
     "@playwright/test": "^1.58.1",
-    "@tanstack/cli": "^0.62.5",
     "@tanstack/intent": "^0.0.27",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

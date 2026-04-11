@@ -11,7 +11,7 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { getProjectsByOwnerId } from "@/db-fns/web/projects"
-import { getUserByEmail } from "@/db-fns/web/users"
+import type { FoundProject } from "@/db/types"
 
 function ProjectsPageSkeleton() {
   return (
@@ -29,24 +29,24 @@ function ProjectsPageSkeleton() {
   )
 }
 
-export const Route = createFileRoute("/_private/new-pages/projects/")({
+export const Route = createFileRoute("/_private/projects/")({
   loader: async ({ context }) => {
     try {
-      const email = context.session?.user?.email
-      if (!email) {
-        return { user: null, projects: [], loadError: "No authenticated session was found." }
+      const userId = context.session?.user?.id
+      if (!userId) {
+        return {
+          projects: [] as FoundProject[],
+          loadError: "No authenticated session was found.",
+        }
       }
-      const user = await getUserByEmail({ data: { email } })
-      if (!user) {
-        return { user: null, projects: [], loadError: "User could not be found." }
-      }
-      const projects = await getProjectsByOwnerId({ data: { ownerId: user.id } })
-      return { user, projects, loadError: null as string | null }
+      const projects = (await getProjectsByOwnerId({
+        data: { ownerId: userId },
+      })) as FoundProject[]
+      return { projects, loadError: null as string | null }
     } catch (error) {
       void error
       return {
-        user: null,
-        projects: [],
+        projects: [] as FoundProject[],
         loadError: "We couldn't load your projects right now. Please try again.",
       }
     }
@@ -57,7 +57,7 @@ export const Route = createFileRoute("/_private/new-pages/projects/")({
 
 function ProjectsPage() {
   const router = useRouter()
-  const { user, projects, loadError } = Route.useLoaderData()
+  const { projects, loadError } = Route.useLoaderData()
 
   if (loadError) {
     return (
@@ -81,19 +81,6 @@ function ProjectsPage() {
     )
   }
 
-  if (!user) {
-    return (
-      <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight">Projects</h1>
-          <p className="text-sm text-muted-foreground">We could not find your account.</p>
-        </div>
-      </div>
-    )
-  }
-
-  const legacyName = user.displayName || user.firstName || "You"
-
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <div className="space-y-1">
@@ -106,21 +93,17 @@ function ProjectsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card className="flex min-h-50 h-full flex-col items-center justify-center border-dashed text-center transition-colors hover:bg-muted/50">
           <CardContent className="pt-6">
-            <Button variant="ghost" className="h-auto flex-col gap-2 p-4" asChild>
-              <Link to="/create-project">
-                <div className="mb-2 rounded-full bg-primary/10 p-3">
-                  <PlusIcon className="h-6 w-6 text-primary" />
-                </div>
-                <div className="text-lg font-semibold">Create New Project</div>
-                <div className="text-sm font-normal text-muted-foreground">
-                  Start a new PDF analysis workspace
-                </div>
-              </Link>
+            <Button variant="ghost" className="h-auto flex-col gap-2 p-4" disabled>
+              <div className="mb-2 rounded-full bg-primary/10 p-3">
+                <PlusIcon className="h-6 w-6 text-primary" />
+              </div>
+              <div className="text-lg font-semibold">Create New Project</div>
+              <div className="text-sm font-normal text-muted-foreground">Coming soon</div>
             </Button>
           </CardContent>
         </Card>
 
-        {projects.map((project) => (
+        {projects.map((project: FoundProject) => (
           <Card key={project.id} className="flex min-h-50 h-full flex-col">
             <CardHeader>
               <CardTitle className="line-clamp-1" title={project.name}>
@@ -132,7 +115,7 @@ function ProjectsPage() {
             </CardHeader>
             <CardContent className="flex-1">
               <div className="text-sm text-muted-foreground">
-                <p>Owner: {legacyName}</p>
+                <p>Owner: You</p>
                 {project.colorPresets && project.colorPresets.length > 0 && (
                   <p className="mt-1">{project.colorPresets.length} color presets</p>
                 )}

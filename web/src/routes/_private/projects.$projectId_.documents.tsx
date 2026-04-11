@@ -1,6 +1,17 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { CheckCircle2Icon, FileTextIcon, LayoutDashboardIcon, Loader2Icon, PlusIcon, RefreshCwIcon, SettingsIcon, UploadIcon } from "lucide-react"
+import {
+  CheckCircle2Icon,
+  FileTextIcon,
+  FileUp,
+  LayoutDashboardIcon,
+  Loader2,
+  Loader2Icon,
+  PlusIcon,
+  RefreshCwIcon,
+  SettingsIcon,
+  UploadIcon,
+} from "lucide-react"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -28,10 +39,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcn-ui/table"
-import { getWorkersPdfsByProjectId } from "@/db-fns/web/pdfs"
-import { workersPdfs } from "@/db/schemas/workers/pdfs"
+import { uploadPdf } from "@/db-fns/api/storage"
 import { getProjectById } from "@/db-fns/web/projects"
-import { UploadDropzone } from "@/integrations/uploadthing/components-hooks"
+import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
+import type { FoundWorkersPdf } from "@/db/types"
 
 function DocumentsSkeleton() {
   return (
@@ -52,20 +63,20 @@ function DocumentsSkeleton() {
   )
 }
 
-export const Route = createFileRoute("/_private/new-pages/projects/$projectId_/documents")({
+export const Route = createFileRoute("/_private/projects/$projectId_/documents")({
   loader: async ({ params, context }) => {
     try {
-      const email = context.session?.user?.email
-      if (!email) {
+      const userId = context.session?.user?.id
+      if (!userId) {
         return { project: null, pdfs: null, loadError: "Not authenticated" }
       }
 
-      const [project, rawPdfs] = await Promise.all([
-        getProjectById({ data: { id: params.projectId } }),
-        getWorkersPdfsByProjectId({ data: { projectId: params.projectId } }) as Promise<(typeof workersPdfs.$inferSelect)[]>,
-      ])
+      const project = await getProjectById({ data: { id: params.projectId } })
+      const rawPdfs = await getWorkersPdfsByProjectId({
+        data: { projectId: params.projectId },
+      })
 
-      const mappedPdfs = rawPdfs.map((pdf) => ({
+      const mappedPdfs = (rawPdfs as FoundWorkersPdf[]).map((pdf) => ({
         id: pdf.id,
         name: pdf.name,
         extractMethod: pdf.extractMethod,
@@ -88,6 +99,10 @@ function DocumentsPage() {
   const { project, pdfs, loadError } = Route.useLoaderData()
   const { projectId } = Route.useParams()
   const [isUploadOpen, setIsUploadOpen] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   if (loadError || !project || !pdfs) {
     return (
@@ -113,6 +128,60 @@ function DocumentsPage() {
     )
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null
+    setUploadError(null)
+
+    if (file && file.type !== "application/pdf") {
+      setUploadError("Only PDF files are accepted.")
+      setSelectedFile(null)
+      return
+    }
+
+    if (file && file.size > 50 * 1024 * 1024) {
+      setUploadError("File exceeds the 50 MB size limit.")
+      setSelectedFile(null)
+      return
+    }
+
+    setSelectedFile(file)
+  }
+
+  const handleUpload = async () => {
+    if (!selectedFile || !project.bucketId) return
+
+    setUploading(true)
+    setUploadError(null)
+
+    try {
+      const buffer = await selectedFile.arrayBuffer()
+      const bytes = new Uint8Array(buffer)
+      const chunks: string[] = []
+      for (let i = 0; i < bytes.length; i += 8192) {
+        chunks.push(String.fromCharCode(...bytes.subarray(i, i + 8192)))
+      }
+      const fileBase64 = btoa(chunks.join(""))
+
+      await uploadPdf({
+        data: {
+          projectId,
+          bucketId: project.bucketId,
+          fileName: selectedFile.name,
+          fileBase64,
+        },
+      })
+
+      setSelectedFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ""
+      setIsUploadOpen(false)
+      void router.invalidate()
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed. Please try again.")
+    } finally {
+      setUploading(false)
+    }
+  }
+
   // Sort pdfs by newest first
   const sortedPdfs = [...pdfs].sort((a, b) => {
     const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0
@@ -130,9 +199,19 @@ function DocumentsPage() {
           </p>
         </div>
 
-        <AlertDialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+        <AlertDialog
+          open={isUploadOpen}
+          onOpenChange={(open) => {
+            setIsUploadOpen(open)
+            if (!open) {
+              setSelectedFile(null)
+              setUploadError(null)
+              if (fileInputRef.current) fileInputRef.current.value = ""
+            }
+          }}
+        >
           <AlertDialogTrigger asChild>
-            <Button size="lg" className="shadow-sm">
+            <Button size="lg" className="shadow-sm" disabled={!project.bucketId}>
               <PlusIcon className="mr-2 h-5 w-5" />
               Upload PDF
             </Button>
@@ -141,34 +220,77 @@ function DocumentsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Upload Document</AlertDialogTitle>
               <AlertDialogDescription>
-                Drag and drop a PDF to add it to this project.
+                Select a PDF to upload to this project (max 50 MB).
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <div className="py-4">
-              <UploadDropzone
-                endpoint="documentUploader"
-                input={{ projectId }}
-                onClientUploadComplete={() => {
-                  setIsUploadOpen(false)
-                  void router.invalidate()
+            <div className="py-4 space-y-4">
+              <div
+                className="flex cursor-pointer flex-col items-center gap-3 rounded-lg border-2 border-dashed border-border/60 bg-muted/20 p-8 transition-colors hover:bg-muted/30"
+                onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click()
                 }}
-                onUploadError={(error) => {
-                  console.error("Upload error:", error)
-                }}
-                appearance={{
-                  container: "w-full border-2 border-dashed border-border/60 bg-muted/20 hover:bg-muted/30 transition-colors p-8 rounded-lg cursor-pointer",
-                  label: "text-primary hover:text-primary/90 font-medium",
-                  button: "bg-primary text-primary-foreground hover:bg-primary/90 ut-readying:bg-primary/90 px-6 py-2.5 h-auto text-sm font-semibold rounded-md shadow-sm mt-4",
-                  allowedContent: "text-xs text-muted-foreground mt-1",
-                }}
+                role="button"
+                tabIndex={0}
+              >
+                <FileUp className="h-10 w-10 text-muted-foreground" />
+                {selectedFile ? (
+                  <div className="text-center">
+                    <p className="text-sm font-medium">{selectedFile.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Click to select a PDF</p>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={handleFileChange}
               />
+
+              {uploadError && (
+                <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3">
+                  <p className="text-sm font-medium text-destructive">{uploadError}</p>
+                </div>
+              )}
+
+              <Button
+                className="w-full"
+                disabled={!selectedFile || uploading}
+                onClick={handleUpload}
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <UploadIcon className="mr-2 h-4 w-4" />
+                    Upload PDF
+                  </>
+                )}
+              </Button>
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel>Close</AlertDialogCancel>
+              <AlertDialogCancel disabled={uploading}>Close</AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </div>
+
+      {!project.bucketId && (
+        <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3">
+          <p className="text-sm text-destructive">
+            This project has no storage bucket. Re-create the project or contact support.
+          </p>
+        </div>
+      )}
 
       <div className="flex space-x-1 border-b pb-px overflow-x-auto">
         <Link
@@ -202,7 +324,12 @@ function DocumentsPage() {
                 {sortedPdfs.length} PDFs associated with this project.
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm" className="h-8" onClick={() => void router.invalidate()}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8"
+              onClick={() => void router.invalidate()}
+            >
               <RefreshCwIcon className="mr-2 h-3 w-3" />
               Refresh
             </Button>
@@ -212,10 +339,18 @@ function DocumentsPage() {
               <Table>
                 <TableHeader className="bg-muted/30">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="py-3 px-6 h-auto text-xs font-semibold uppercase tracking-wider">Filename</TableHead>
-                    <TableHead className="py-3 px-4 h-auto text-xs font-semibold uppercase tracking-wider text-center">Source</TableHead>
-                    <TableHead className="py-3 px-4 h-auto text-xs font-semibold uppercase tracking-wider text-center">Status</TableHead>
-                    <TableHead className="py-3 px-6 h-auto text-xs font-semibold uppercase tracking-wider text-right">Added</TableHead>
+                    <TableHead className="py-3 px-6 h-auto text-xs font-semibold uppercase tracking-wider">
+                      Filename
+                    </TableHead>
+                    <TableHead className="py-3 px-4 h-auto text-xs font-semibold uppercase tracking-wider text-center">
+                      Source
+                    </TableHead>
+                    <TableHead className="py-3 px-4 h-auto text-xs font-semibold uppercase tracking-wider text-center">
+                      Status
+                    </TableHead>
+                    <TableHead className="py-3 px-6 h-auto text-xs font-semibold uppercase tracking-wider text-right">
+                      Added
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -230,10 +365,15 @@ function DocumentsPage() {
                     </TableRow>
                   ) : (
                     sortedPdfs.map((pdf) => {
-                      const timestamp = pdf.createdAt ? new Date(pdf.createdAt).toLocaleDateString() : "Unknown"
+                      const timestamp = pdf.createdAt
+                        ? new Date(pdf.createdAt).toLocaleDateString()
+                        : "Unknown"
 
                       return (
-                        <TableRow key={pdf.id} className="group hover:bg-muted/20 transition-colors">
+                        <TableRow
+                          key={pdf.id}
+                          className="group hover:bg-muted/20 transition-colors"
+                        >
                           <TableCell className="py-4 px-6 font-medium">{pdf.name}</TableCell>
                           <TableCell className="py-4 px-4 text-center">
                             <span className="capitalize px-2 py-1 rounded bg-muted/40 text-[11px] font-medium text-muted-foreground border border-border/40">

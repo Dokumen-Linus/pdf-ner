@@ -15,17 +15,16 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
 import { Route as PublicDemoRouteImport } from './routes/_public/demo'
-import { Route as PrivateStorageRouteImport } from './routes/_private/storage'
 import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
 import { Route as PrivateBillingRouteImport } from './routes/_private/billing'
 import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as AuthSignoutRouteImport } from './routes/_auth/signout'
 import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
+import { Route as PrivateProjectsIndexRouteImport } from './routes/_private/projects.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as PrivateNewPagesProjectsIndexRouteImport } from './routes/_private/new-pages/projects.index'
-import { Route as PrivateNewPagesProjectsProjectIdRouteImport } from './routes/_private/new-pages/projects.$projectId'
-import { Route as PrivateNewPagesProjectsProjectIdDocumentsRouteImport } from './routes/_private/new-pages/projects.$projectId_.documents'
-import { Route as PrivateNewPagesProjectsProjectIdDashboardRouteImport } from './routes/_private/new-pages/projects.$projectId_.dashboard'
+import { Route as PrivateProjectsProjectIdRouteImport } from './routes/_private/projects.$projectId'
+import { Route as PrivateProjectsProjectIdDocumentsRouteImport } from './routes/_private/projects.$projectId_.documents'
+import { Route as PrivateProjectsProjectIdDashboardRouteImport } from './routes/_private/projects.$projectId_.dashboard'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -54,11 +53,6 @@ const PublicDemoRoute = PublicDemoRouteImport.update({
   path: '/demo',
   getParentRoute: () => PublicRoute,
 } as any)
-const PrivateStorageRoute = PrivateStorageRouteImport.update({
-  id: '/storage',
-  path: '/storage',
-  getParentRoute: () => PrivateRoute,
-} as any)
 const PrivateProfileRoute = PrivateProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -84,33 +78,32 @@ const AuthSigninRoute = AuthSigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => AuthRoute,
 } as any)
+const PrivateProjectsIndexRoute = PrivateProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => PrivateRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivateNewPagesProjectsIndexRoute =
-  PrivateNewPagesProjectsIndexRouteImport.update({
-    id: '/new-pages/projects/',
-    path: '/new-pages/projects/',
+const PrivateProjectsProjectIdRoute =
+  PrivateProjectsProjectIdRouteImport.update({
+    id: '/projects/$projectId',
+    path: '/projects/$projectId',
     getParentRoute: () => PrivateRoute,
   } as any)
-const PrivateNewPagesProjectsProjectIdRoute =
-  PrivateNewPagesProjectsProjectIdRouteImport.update({
-    id: '/new-pages/projects/$projectId',
-    path: '/new-pages/projects/$projectId',
+const PrivateProjectsProjectIdDocumentsRoute =
+  PrivateProjectsProjectIdDocumentsRouteImport.update({
+    id: '/projects/$projectId_/documents',
+    path: '/projects/$projectId/documents',
     getParentRoute: () => PrivateRoute,
   } as any)
-const PrivateNewPagesProjectsProjectIdDocumentsRoute =
-  PrivateNewPagesProjectsProjectIdDocumentsRouteImport.update({
-    id: '/new-pages/projects/$projectId_/documents',
-    path: '/new-pages/projects/$projectId/documents',
-    getParentRoute: () => PrivateRoute,
-  } as any)
-const PrivateNewPagesProjectsProjectIdDashboardRoute =
-  PrivateNewPagesProjectsProjectIdDashboardRouteImport.update({
-    id: '/new-pages/projects/$projectId_/dashboard',
-    path: '/new-pages/projects/$projectId/dashboard',
+const PrivateProjectsProjectIdDashboardRoute =
+  PrivateProjectsProjectIdDashboardRouteImport.update({
+    id: '/projects/$projectId_/dashboard',
+    path: '/projects/$projectId/dashboard',
     getParentRoute: () => PrivateRoute,
   } as any)
 
@@ -121,14 +114,13 @@ export interface FileRoutesByFullPath {
   '/signup': typeof AuthSignupRoute
   '/billing': typeof PrivateBillingRoute
   '/profile': typeof PrivateProfileRoute
-  '/storage': typeof PrivateStorageRoute
   '/demo': typeof PublicDemoRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
+  '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/new-pages/projects/$projectId': typeof PrivateNewPagesProjectsProjectIdRoute
-  '/new-pages/projects/': typeof PrivateNewPagesProjectsIndexRoute
-  '/new-pages/projects/$projectId/dashboard': typeof PrivateNewPagesProjectsProjectIdDashboardRoute
-  '/new-pages/projects/$projectId/documents': typeof PrivateNewPagesProjectsProjectIdDocumentsRoute
+  '/projects/': typeof PrivateProjectsIndexRoute
+  '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
+  '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -137,14 +129,13 @@ export interface FileRoutesByTo {
   '/signup': typeof AuthSignupRoute
   '/billing': typeof PrivateBillingRoute
   '/profile': typeof PrivateProfileRoute
-  '/storage': typeof PrivateStorageRoute
   '/demo': typeof PublicDemoRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
+  '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/new-pages/projects/$projectId': typeof PrivateNewPagesProjectsProjectIdRoute
-  '/new-pages/projects': typeof PrivateNewPagesProjectsIndexRoute
-  '/new-pages/projects/$projectId/dashboard': typeof PrivateNewPagesProjectsProjectIdDashboardRoute
-  '/new-pages/projects/$projectId/documents': typeof PrivateNewPagesProjectsProjectIdDocumentsRoute
+  '/projects': typeof PrivateProjectsIndexRoute
+  '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
+  '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -156,15 +147,14 @@ export interface FileRoutesById {
   '/_auth/signup': typeof AuthSignupRoute
   '/_private/billing': typeof PrivateBillingRoute
   '/_private/profile': typeof PrivateProfileRoute
-  '/_private/storage': typeof PrivateStorageRoute
   '/_public/demo': typeof PublicDemoRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/_public/': typeof PublicIndexRoute
+  '/_private/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/_private/new-pages/projects/$projectId': typeof PrivateNewPagesProjectsProjectIdRoute
-  '/_private/new-pages/projects/': typeof PrivateNewPagesProjectsIndexRoute
-  '/_private/new-pages/projects/$projectId_/dashboard': typeof PrivateNewPagesProjectsProjectIdDashboardRoute
-  '/_private/new-pages/projects/$projectId_/documents': typeof PrivateNewPagesProjectsProjectIdDocumentsRoute
+  '/_private/projects/': typeof PrivateProjectsIndexRoute
+  '/_private/projects/$projectId_/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
+  '/_private/projects/$projectId_/documents': typeof PrivateProjectsProjectIdDocumentsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -175,14 +165,13 @@ export interface FileRouteTypes {
     | '/signup'
     | '/billing'
     | '/profile'
-    | '/storage'
     | '/demo'
     | '/api/uploadthing'
+    | '/projects/$projectId'
     | '/api/auth/$'
-    | '/new-pages/projects/$projectId'
-    | '/new-pages/projects/'
-    | '/new-pages/projects/$projectId/dashboard'
-    | '/new-pages/projects/$projectId/documents'
+    | '/projects/'
+    | '/projects/$projectId/dashboard'
+    | '/projects/$projectId/documents'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -191,14 +180,13 @@ export interface FileRouteTypes {
     | '/signup'
     | '/billing'
     | '/profile'
-    | '/storage'
     | '/demo'
     | '/api/uploadthing'
+    | '/projects/$projectId'
     | '/api/auth/$'
-    | '/new-pages/projects/$projectId'
-    | '/new-pages/projects'
-    | '/new-pages/projects/$projectId/dashboard'
-    | '/new-pages/projects/$projectId/documents'
+    | '/projects'
+    | '/projects/$projectId/dashboard'
+    | '/projects/$projectId/documents'
   id:
     | '__root__'
     | '/_auth'
@@ -209,15 +197,14 @@ export interface FileRouteTypes {
     | '/_auth/signup'
     | '/_private/billing'
     | '/_private/profile'
-    | '/_private/storage'
     | '/_public/demo'
     | '/api/uploadthing'
     | '/_public/'
+    | '/_private/projects/$projectId'
     | '/api/auth/$'
-    | '/_private/new-pages/projects/$projectId'
-    | '/_private/new-pages/projects/'
-    | '/_private/new-pages/projects/$projectId_/dashboard'
-    | '/_private/new-pages/projects/$projectId_/documents'
+    | '/_private/projects/'
+    | '/_private/projects/$projectId_/dashboard'
+    | '/_private/projects/$projectId_/documents'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -272,13 +259,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicDemoRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/_private/storage': {
-      id: '/_private/storage'
-      path: '/storage'
-      fullPath: '/storage'
-      preLoaderRoute: typeof PrivateStorageRouteImport
-      parentRoute: typeof PrivateRoute
-    }
     '/_private/profile': {
       id: '/_private/profile'
       path: '/profile'
@@ -314,6 +294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSigninRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_private/projects/': {
+      id: '/_private/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof PrivateProjectsIndexRouteImport
+      parentRoute: typeof PrivateRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -321,32 +308,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_private/new-pages/projects/': {
-      id: '/_private/new-pages/projects/'
-      path: '/new-pages/projects'
-      fullPath: '/new-pages/projects/'
-      preLoaderRoute: typeof PrivateNewPagesProjectsIndexRouteImport
+    '/_private/projects/$projectId': {
+      id: '/_private/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof PrivateProjectsProjectIdRouteImport
       parentRoute: typeof PrivateRoute
     }
-    '/_private/new-pages/projects/$projectId': {
-      id: '/_private/new-pages/projects/$projectId'
-      path: '/new-pages/projects/$projectId'
-      fullPath: '/new-pages/projects/$projectId'
-      preLoaderRoute: typeof PrivateNewPagesProjectsProjectIdRouteImport
+    '/_private/projects/$projectId_/documents': {
+      id: '/_private/projects/$projectId_/documents'
+      path: '/projects/$projectId/documents'
+      fullPath: '/projects/$projectId/documents'
+      preLoaderRoute: typeof PrivateProjectsProjectIdDocumentsRouteImport
       parentRoute: typeof PrivateRoute
     }
-    '/_private/new-pages/projects/$projectId_/documents': {
-      id: '/_private/new-pages/projects/$projectId_/documents'
-      path: '/new-pages/projects/$projectId/documents'
-      fullPath: '/new-pages/projects/$projectId/documents'
-      preLoaderRoute: typeof PrivateNewPagesProjectsProjectIdDocumentsRouteImport
-      parentRoute: typeof PrivateRoute
-    }
-    '/_private/new-pages/projects/$projectId_/dashboard': {
-      id: '/_private/new-pages/projects/$projectId_/dashboard'
-      path: '/new-pages/projects/$projectId/dashboard'
-      fullPath: '/new-pages/projects/$projectId/dashboard'
-      preLoaderRoute: typeof PrivateNewPagesProjectsProjectIdDashboardRouteImport
+    '/_private/projects/$projectId_/dashboard': {
+      id: '/_private/projects/$projectId_/dashboard'
+      path: '/projects/$projectId/dashboard'
+      fullPath: '/projects/$projectId/dashboard'
+      preLoaderRoute: typeof PrivateProjectsProjectIdDashboardRouteImport
       parentRoute: typeof PrivateRoute
     }
   }
@@ -369,23 +349,21 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 interface PrivateRouteChildren {
   PrivateBillingRoute: typeof PrivateBillingRoute
   PrivateProfileRoute: typeof PrivateProfileRoute
-  PrivateStorageRoute: typeof PrivateStorageRoute
-  PrivateNewPagesProjectsProjectIdRoute: typeof PrivateNewPagesProjectsProjectIdRoute
-  PrivateNewPagesProjectsIndexRoute: typeof PrivateNewPagesProjectsIndexRoute
-  PrivateNewPagesProjectsProjectIdDashboardRoute: typeof PrivateNewPagesProjectsProjectIdDashboardRoute
-  PrivateNewPagesProjectsProjectIdDocumentsRoute: typeof PrivateNewPagesProjectsProjectIdDocumentsRoute
+  PrivateProjectsProjectIdRoute: typeof PrivateProjectsProjectIdRoute
+  PrivateProjectsIndexRoute: typeof PrivateProjectsIndexRoute
+  PrivateProjectsProjectIdDashboardRoute: typeof PrivateProjectsProjectIdDashboardRoute
+  PrivateProjectsProjectIdDocumentsRoute: typeof PrivateProjectsProjectIdDocumentsRoute
 }
 
 const PrivateRouteChildren: PrivateRouteChildren = {
   PrivateBillingRoute: PrivateBillingRoute,
   PrivateProfileRoute: PrivateProfileRoute,
-  PrivateStorageRoute: PrivateStorageRoute,
-  PrivateNewPagesProjectsProjectIdRoute: PrivateNewPagesProjectsProjectIdRoute,
-  PrivateNewPagesProjectsIndexRoute: PrivateNewPagesProjectsIndexRoute,
-  PrivateNewPagesProjectsProjectIdDashboardRoute:
-    PrivateNewPagesProjectsProjectIdDashboardRoute,
-  PrivateNewPagesProjectsProjectIdDocumentsRoute:
-    PrivateNewPagesProjectsProjectIdDocumentsRoute,
+  PrivateProjectsProjectIdRoute: PrivateProjectsProjectIdRoute,
+  PrivateProjectsIndexRoute: PrivateProjectsIndexRoute,
+  PrivateProjectsProjectIdDashboardRoute:
+    PrivateProjectsProjectIdDashboardRoute,
+  PrivateProjectsProjectIdDocumentsRoute:
+    PrivateProjectsProjectIdDocumentsRoute,
 }
 
 const PrivateRouteWithChildren =
