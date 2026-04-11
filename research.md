@@ -44,6 +44,7 @@
 
 ### Claude
 
+- [HouseofMVPs](https://github.com/Houseofmvps?tab=repositories)
 - monitor usage [claude-pulse](https://github.com/NoobyGains/claude-pulse)
 
 ### Skills

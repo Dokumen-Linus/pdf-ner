@@ -1,4 +1,28 @@
 {
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "MultiEdit",
+      "Skill",
+      "Grep",
+      "Glob",
+      "LS",
+      "Bash",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "deny": [
+      "Bash(sudo:*)",
+      "Bash(rm -rf:*)",
+      "Bash(rm -fr:*)",
+      "Bash(git push)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)"
+    ],
+    "ask": []
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -27,31 +51,16 @@
       }
     ]
   },
-  "permissions": {
-    "allow": [
-      "Read",
-      "Write",
-      "Edit",
-      "MultiEdit",
-      
-      "Grep",
-      "Glob",
-      "LS",
-
-      "Bash",
-
-      "WebFetch",
-      "WebSearch"
-    ],
-    "deny": [
-      "Bash(sudo:*)",
-      "Bash(rm -rf:*)",
-      "Bash(rm -fr:*)",
-
-      "Bash(git push)",
-      "Bash(git push:*)",
-      "Bash(git commit:*)"
-    ],
-    "ask": []
+  "enabledPlugins": {
+    "codex@openai-codex": true,
+    "deploy-on-aws@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "hookify@claude-plugins-official": true,
+    "chrome-devtools-mcp@claude-plugins-official": true,
+    "claude-rank@claude-rank": true
   }
 }
