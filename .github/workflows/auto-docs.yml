@@ -1,4 +1,4 @@
-name: Git Cliff
+name: Changelog and Wiki
 
 on:
   pull_request:
@@ -27,11 +27,14 @@ jobs:
           OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
 
+      - name: Generate wiki
+        run: npx -y codesight --wiki
+
       - name: Commit changelog
         if: github.event.pull_request.merged == true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git diff --cached --quiet || git commit -m "chore(changelog): update CHANGELOG.md [skip ci]"
+          git add CHANGELOG.md .codesight/wiki/
+          git diff --cached --quiet || git commit -m "chore(changelog): update CHANGELOG.md and .codesight/wiki [skip ci]"
           git push
