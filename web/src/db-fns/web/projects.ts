@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm/sql"
+import { and, eq, isNotNull } from "drizzle-orm/sql"
 import { z } from "zod"
 import { createBucket } from "@/db-fns/api/storage"
 import { db } from "@/db/client"
@@ -17,22 +17,32 @@ export const CreateProjectSchema = z.object({
 export const createProject = createServerFn({ method: "POST" })
   .inputValidator(CreateProjectSchema)
   .handler(async ({ data }) => {
+    // Reuse the bucket from an existing project if the user already has one
+    const [existingWithBucket] = await db
+      .select({ bucketId: projects.bucketId })
+      .from(projects)
+      .where(and(eq(projects.ownerId, data.ownerId), isNotNull(projects.bucketId)))
+      .limit(1)
+
     const [project] = await db.insert(projects).values(data).returning({ id: projects.id })
 
-    // Create an S3 bucket for this project and link it
-    try {
-      const bucket = await createBucket(`dokumen-${project.id}`)
-      await db
-        .update(projects)
-        .set({ bucketId: bucket.bucket_id })
-        .where(eq(projects.id, project.id))
-    } catch (error) {
-      // Delete the project if bucket creation fails
-      await db.delete(projects).where(eq(projects.id, project.id))
-      throw new Error(
-        `Failed to create storage bucket: ${error instanceof Error ? error.message : String(error)}`,
-      )
+    let bucketId: string
+    if (existingWithBucket?.bucketId) {
+      bucketId = existingWithBucket.bucketId
+    } else {
+      // No existing bucket — create a new one and link it
+      try {
+        const bucket = await createBucket(`dokumen-${project.id}`)
+        bucketId = bucket.bucket_id
+      } catch (error) {
+        await db.delete(projects).where(eq(projects.id, project.id))
+        throw new Error(
+          `Failed to create storage bucket: ${error instanceof Error ? error.message : String(error)}`,
+        )
+      }
     }
+
+    await db.update(projects).set({ bucketId }).where(eq(projects.id, project.id))
 
     return { id: project.id }
   })

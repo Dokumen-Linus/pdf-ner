@@ -65,6 +65,25 @@ describe.if(runTests)("Project Table Server Functions", () => {
     await expect(getProjectById({ data: { id: projectId } })).rejects.toThrow("Project not found")
   })
 
+  it("should reuse the existing bucket when user already has a project", async () => {
+    const createInput = {
+      name: "First Project",
+      ownerId: testOwnerId,
+    }
+    const firstProject = await createProject({ data: createInput })
+    const firstProjectData = await getProjectById({ data: { id: firstProject.id } })
+    expect(firstProjectData.bucketId).toBeDefined()
+
+    const secondProject = await createProject({ data: { name: "Second Project", ownerId: testOwnerId } })
+    const secondProjectData = await getProjectById({ data: { id: secondProject.id } })
+
+    expect(secondProjectData.bucketId).toBe(firstProjectData.bucketId)
+
+    // Cleanup
+    await deleteProject({ data: { id: firstProject.id } })
+    await deleteProject({ data: { id: secondProject.id } })
+  })
+
   describe("Validation and Error Handling", () => {
     it("throws error for empty name in createProject", async () => {
       const input = {
