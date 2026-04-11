@@ -51,8 +51,8 @@ npm run dev
 | prepare      | auto-called by install, enforces Conventional Commits         |
 | postinstall  | auto-called by install, patches packages                      |
 | depcheck     | check for unused dependencies                                 |
-| test         | run tests using Bun Test Runner, React Testing Library DOM    |
-| test:db      | run database functions tests, must have database on           |
+| test         | run tests using Bun Test Runner + React Testing Library DOM   |
+| test:db      | run database functions tests (must have db on)                |
 | test:e2e     | run playwright end-to-end tests                               |
 
 ## Database
@@ -67,7 +67,7 @@ The database schemas are defined in:
 - Test ./src/db-fns/match-schemas.test.ts ensures that [2] Drizzle schemas equal the [3] Zod validation schemas
 - There's no test to ensure that [1] SQL schemas equal the [2] Drizzle schemas
 
-**Restriction on App Interactions with Database**: The frontend can only interact with database through db-fns to ensure that all database interactions are validated and consistent.
+**Restriction on App Interactions with Database**: The frontend can only interact with database through db-fns to ensure that all database interactions are validated and consistent. db-fns must be created in a file named the same as the table they query. When you use db-fns, use types from ./src/db/types.d.ts whenever possible. db, db-fns, and types.d.ts must match and be complete.
 
 **Schemas**: web_user has CRUD permissions on web schema and read permissions on api, workers, and public schemas
 
@@ -133,3 +133,8 @@ npx shadcn@latest add --overwrite accordion alert-dialog alert aspect-ratio avat
 - EmbedPDF: [GitHub](https://github.com/embedpdf/embed-pdf-viewer), [docs for @embedpdf/pdfium](https://www.embedpdf.com/docs/pdfium/introduction) the JS library to wrap the C++ engine, [docs for @embedpdf/core/react](https://www.embedpdf.com/docs/react/introduction)
 - Plugins are built in consitent style defined by core (not using standard Redux style) and must have commented sections and same subfolders and filenames as existing local plugins
 - PDF retrieval: currently from URL as defined by @embedpdf/plugin-loader
+
+## Tests
+
+- Three test setups: one with standard tests Bun and JSDOM, one wi
+- Naming Conventions: Unit test files should be named as ".test.{ts,tsx}" and Playwright test files should be named as ".e2e.ts"

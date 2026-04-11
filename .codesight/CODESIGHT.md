@@ -3,7 +3,6 @@
 > **Stack:** fastapi | drizzle | react | typescript
 
 > 9 routes | 18 models | 54 components | 121 lib files | 34 env vars | 9 middleware | 1 events | 52% test coverage
-> **Token savings:** this file is ~12,000 tokens. Without it, AI exploration would cost ~76,800 tokens. **Saves ~64,800 tokens per conversation.**
 
 ---
 
@@ -225,11 +224,11 @@
 - **Route** — `web\src\routes\_auth\signup.tsx`
 - **Route** — `web\src\routes\_auth.tsx`
 - **Route** — `web\src\routes\_private\billing.tsx`
-- **Route** — `web\src\routes\_private\new-pages\projects.$projectId.tsx`
-- **Route** — `web\src\routes\_private\new-pages\projects.$projectId_.dashboard.tsx`
-- **Route** — `web\src\routes\_private\new-pages\projects.$projectId_.documents.tsx`
-- **Route** — `web\src\routes\_private\new-pages\projects.index.tsx`
 - **Route** — `web\src\routes\_private\profile.tsx`
+- **Route** — `web\src\routes\_private\projects.$projectId.tsx`
+- **Route** — `web\src\routes\_private\projects.$projectId_.dashboard.tsx`
+- **Route** — `web\src\routes\_private\projects.$projectId_.documents.tsx`
+- **Route** — `web\src\routes\_private\projects.index.tsx`
 - **Route** — `web\src\routes\_private\storage.tsx`
 - **Route** — `web\src\routes\_private.tsx`
 - **Route** — `web\src\routes\_public\demo.tsx`

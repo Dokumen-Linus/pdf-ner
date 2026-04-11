@@ -4,7 +4,7 @@
     "tomoki1207.pdf",
 
     // use Kilo Code for autocomplete instead of GitHub Copilot
-    "kilocode.kilo-code",
+    // "kilocode.kilo-code",
 
     // web
     "bradlc.vscode-tailwindcss",

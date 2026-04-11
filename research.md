@@ -31,6 +31,7 @@
 - Opencode
 - Antigravity
 - Windsurf
+- [Qwen](https://qwenlm.github.io/qwen-code-docs/en/users/overview/)
 
 ### Non-Options
 
