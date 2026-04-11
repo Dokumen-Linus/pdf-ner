@@ -37,7 +37,7 @@ async def fetch_entity_types_with_std(
             s.format_description AS std_format_description,
             s.regex             AS std_regex
         FROM web.entity_types et
-        LEFT JOIN api.std_entity_types s ON et.standard_entity_type_id = s.id
+        LEFT JOIN public.std_entity_types s ON et.standard_entity_type_id = s.id
         WHERE et.project_id = $1
         ORDER BY et.created_at
         """,

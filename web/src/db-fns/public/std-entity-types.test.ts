@@ -8,7 +8,7 @@ import {
 
 const runTests = process.env.TEST_DB === "true"
 
-describe.if(runTests)("API Standard Entity Types Read-Only Functions", () => {
+describe.if(runTests)("Public Standard Entity Types Read-Only Functions", () => {
   describe("getAllStdEntityTypes", () => {
     it("returns an array of standard entity types", async () => {
       const result = await getAllStdEntityTypes({ data: {} })

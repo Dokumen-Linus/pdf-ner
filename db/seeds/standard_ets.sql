@@ -1,4 +1,4 @@
-INSERT INTO api.std_entity_types (
+INSERT INTO public.std_entity_types (
   short_name, long_name, category, definition, examples, format_description, datatype, regex, exact_length, single_word
 )
 VALUES

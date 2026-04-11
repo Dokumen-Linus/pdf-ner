@@ -28,12 +28,14 @@ async def fetch_entity_types(conn: asyncpg.Connection, project_id: UUID) -> list
 async def fetch_template(conn: asyncpg.Connection, template_id: int) -> asyncpg.Record | None:
     logger.debug("Fetching template: template_id=%s", template_id)
     return await conn.fetchrow(
-        "SELECT id, txt, inserts, document_at_end FROM api.templates WHERE id = $1",
+        "SELECT id, txt, inserts, document_at_end FROM public.templates WHERE id = $1",
         template_id,
     )
 
 
-async def fetch_pdf_text(conn: asyncpg.Connection, pdf_id: UUID, project_id: UUID) -> tuple[bool, str | None]:
+async def fetch_pdf_text(
+    conn: asyncpg.Connection, pdf_id: UUID, project_id: UUID
+) -> tuple[bool, str | None]:
     """Returns (found, full_text). found=False means no matching row."""
     row = await conn.fetchrow(
         "SELECT full_text FROM workers.pdfs WHERE id = $1 AND project_id = $2",

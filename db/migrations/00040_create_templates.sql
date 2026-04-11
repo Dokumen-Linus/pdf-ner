@@ -1,5 +1,5 @@
 -- migrate:up
-CREATE TABLE api.templates (
+CREATE TABLE public.templates (
   id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
   txt TEXT NOT NULL,
   inserts TEXT[] NOT NULL,
@@ -9,10 +9,10 @@ CREATE TABLE api.templates (
 );
 
 CREATE TRIGGER templates_updated_at
-BEFORE UPDATE ON api.templates
+BEFORE UPDATE ON public.templates
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
 -- migrate:down
-DROP TRIGGER templates_updated_at ON api.templates;
-DROP TABLE api.templates;
+DROP TRIGGER templates_updated_at ON public.templates;
+DROP TABLE public.templates;

@@ -34,11 +34,14 @@ export type FoundDbAnnotation = InferSelectModel<typeof schema.annotations>
 export type NewDbAnnotation = InferInsertModel<typeof schema.annotations>
 export type DbAnnotationUpdate = Partial<Omit<FoundDbAnnotation, "id" | "createdAt" | "updatedAt">>
 
-// api - read only
+// public - read only
 export type FoundStandardEntityType = InferSelectModel<typeof schema.stdEntityTypes>
+export type FoundTemplate = InferSelectModel<typeof schema.templates>
+export type FoundModel = InferSelectModel<typeof schema.models>
+
+// api - read only
 export type FoundPrompt = InferSelectModel<typeof schema.prompts>
 export type FoundDbApiPdf = InferSelectModel<typeof schema.apiPdfs>
-export type FoundTemplate = InferSelectModel<typeof schema.templates>
 
 // workers - read only
 export type LlmUsage = InferSelectModel<typeof llmUsage>

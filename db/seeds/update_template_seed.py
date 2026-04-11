@@ -41,7 +41,7 @@ def make_seed_for_template(template_number: int, document_at_end: str) -> None:
     timestamp = datetime.now()
     timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
 
-    sql = f"""UPDATE api.templates
+    sql = f"""UPDATE public.templates
 SET txt = '{escaped_txt}',
     inserts = {inserts_array},
     document_at_end = {document_at_end.lower()},

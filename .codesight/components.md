@@ -48,7 +48,6 @@
 - **Route** — `web\src\routes\_private\projects.$projectId_.dashboard.tsx`
 - **Route** — `web\src\routes\_private\projects.$projectId_.documents.tsx`
 - **Route** — `web\src\routes\_private\projects.index.tsx`
-- **Route** — `web\src\routes\_private\storage.tsx`
 - **Route** — `web\src\routes\_private.tsx`
 - **Route** — `web\src\routes\_public\demo.tsx`
 - **Route** — `web\src\routes\_public\index.tsx`

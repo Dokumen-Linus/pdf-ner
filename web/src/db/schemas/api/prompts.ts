@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm"
 import { bigint, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { templates } from "../public/templates"
 import { projects } from "../web/projects"
 import { apiSchema } from "./schema"
-import { templates } from "./templates"
 
 export const prompts = apiSchema.table("prompts", {
   id: uuid("id").primaryKey().defaultRandom(),

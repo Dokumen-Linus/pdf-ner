@@ -18,7 +18,7 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { getPromptsByProjectId } from "@/db-fns/api/prompts"
-import { getAllTemplates } from "@/db-fns/api/templates"
+import { getAllTemplates } from "@/db-fns/public/templates"
 import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
 import { getProjectById } from "@/db-fns/web/projects"
 import type { FoundDbEntityType, FoundPrompt, FoundTemplate } from "@/db/types"
