@@ -1,5 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { motion } from "motion/react"
+import { Tweet } from "react-tweet"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/shadcn-ui/carousel"
 
 export const Route = createFileRoute("/_public/")({ component: App })
 
@@ -213,8 +221,8 @@ export default function App() {
           <div className="w-full md:w-1/2 max-w-sm">
             <h2 className="text-[32px] font-medium text-[#171A20] mb-4">Lightning Models</h2>
             <p className="text-[16px] font-normal text-[#5C5E62] leading-[1.6]">
-              Use fast performant extraction models instantly, tailored to your
-              custom document schemas.
+              Use fast performant extraction models instantly, tailored to your custom document
+              schemas.
             </p>
           </div>
           <div className="w-full md:w-1/2 relative h-75 flex items-center justify-center">
@@ -379,8 +387,45 @@ export default function App() {
         </div>
       </section>
 
+      {/* Tweets Section */}
+      <section className="py-32 px-6 bg-white">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-16">
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">Loved by builders</h2>
+            <p className="text-[16px] font-normal text-[#5C5E62]">
+              See what developers are saying about the engine.
+            </p>
+          </div>
+
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full relative"
+          >
+            <CarouselContent className="-ml-4">
+              {[
+                "1628832338187636740",
+                "2042723870055239708",
+                "1617979122625712128",
+                "2043057246897148374",
+              ].map((id) => (
+                <CarouselItem key={id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                  <Tweet id={id} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="hidden md:block">
+              <CarouselPrevious className="-left-12 bg-white/50 hover:bg-white" />
+              <CarouselNext className="-right-12 bg-white/50 hover:bg-white" />
+            </div>
+          </Carousel>
+        </div>
+      </section>
+
       {/* Demo Link Section */}
-      <section className="py-40 px-6 flex flex-col items-center justify-center text-center bg-white min-h-[50vh]">
+      <section className="py-40 px-6 flex flex-col items-center justify-center text-center bg-[#F4F4F4] min-h-[50vh]">
         <h2 className="text-[40px] font-medium text-[#171A20] mb-6">Experience the engine.</h2>
         <p className="text-[16px] font-normal text-[#393C41] mb-10 max-w-md">
           See the visual labeling interface directly in your browser.

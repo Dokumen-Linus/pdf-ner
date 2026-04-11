@@ -17,6 +17,12 @@ const config = defineConfig({
       },
     }),
   ],
+  ssr: {
+    noExternal: ["react-tweet"],
+    resolve: {
+      conditions: ["react-server"],
+    },
+  },
 })
 
 export default config
