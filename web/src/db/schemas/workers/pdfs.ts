@@ -6,7 +6,7 @@ import { workersSchema } from "./schema"
 export const workersPdfs = workersSchema.table("pdfs", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name"),
-  // bucketId references public.aws_buckets — no .references() since public schema has no Drizzle definition
+  // bucketId references api.aws_buckets — no .references() cross-schema
   bucketId: uuid("bucket_id").notNull(),
   filepath: text("filepath").notNull(),
   projectId: uuid("project_id")

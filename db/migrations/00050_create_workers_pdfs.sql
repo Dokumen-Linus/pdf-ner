@@ -2,7 +2,7 @@
 CREATE TABLE workers.pdfs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "name" TEXT,
-  bucket_id UUID NOT NULL REFERENCES public.aws_buckets (id),
+  bucket_id UUID NOT NULL REFERENCES api.aws_buckets (id),
   filepath  TEXT NOT NULL,
 
   -- info from web sent to api via request

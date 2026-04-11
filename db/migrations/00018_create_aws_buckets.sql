@@ -1,5 +1,5 @@
 -- migrate:up
-CREATE TABLE public.aws_buckets (
+CREATE TABLE api.aws_buckets (
   id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name              TEXT NOT NULL UNIQUE,
   region            TEXT NOT NULL DEFAULT 'us-east-1',
@@ -9,8 +9,5 @@ CREATE TABLE public.aws_buckets (
   created_at        TIMESTAMPTZ DEFAULT now()
 );
 
-GRANT SELECT, INSERT, UPDATE ON public.aws_buckets TO api_user;
-GRANT SELECT                 ON public.aws_buckets TO workers_user;
-
 -- migrate:down
-DROP TABLE public.aws_buckets;
+DROP TABLE api.aws_buckets;

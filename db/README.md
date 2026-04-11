@@ -70,17 +70,21 @@ For example if your user profile is C:\Users\zchar, yours is postgres://zchar@lo
 The extension will save your connection details so you only need to refresh the connection after starting the db.
 Do this by right-clicking on localconn under CONNECTIONS > Servers and pressing Refresh.
 
-## Directories
+## Schemas
 
-### migrations
+Each app has its own schema that it can write to and it can read from the other app's schemas. Information controlled by the Dokumen maintainers (not modified by apps) should be in schema public.
+
+## Files
+
+### migrations\
 
 SQL scripts that create objects
 
-### seeds
+### seeds\
 
 SQL scripts that INSERT data into objects defined in migrations
 
-### better-auth_migrations
+### better-auth_migrations\
 
 SQL scripts created by "bun x @better-auth/cli@latest generate". Modified to use shema auth and user auth_role.
 

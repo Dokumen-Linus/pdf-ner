@@ -411,8 +411,7 @@ class TestCreateBucketS3Rollback:
         assert response.status_code == 502
         # Verify delete_bucket was called (rollback)
         delete_calls = [
-            c for c in mock_conn.execute.call_args_list
-            if "DELETE FROM public.aws_buckets" in str(c)
+            c for c in mock_conn.execute.call_args_list if "DELETE FROM api.aws_buckets" in str(c)
         ]
         assert len(delete_calls) == 1
 
@@ -459,10 +458,7 @@ class TestUploadPdfS3Rollback:
 
         assert response.status_code == 502
         # Verify delete_pdf was called (rollback): api.pdfs, web.pdfs, workers.pdfs
-        delete_calls = [
-            c for c in mock_conn.execute.call_args_list
-            if "DELETE FROM" in str(c)
-        ]
+        delete_calls = [c for c in mock_conn.execute.call_args_list if "DELETE FROM" in str(c)]
         assert len(delete_calls) == 3
 
 
