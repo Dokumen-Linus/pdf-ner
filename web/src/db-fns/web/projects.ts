@@ -9,6 +9,7 @@ import { projects } from "@/db/schemas/web/projects"
 export const CreateProjectSchema = z.object({
   name: z.string(),
   ownerId: z.string(),
+  teamId: z.string().optional(),
   description: z.string().optional(),
   colorPresets: z.array(z.string()).optional(),
   orientation: z.enum(["any", "portrait", "landscape"]).optional(),
@@ -63,6 +64,13 @@ export const getProjectsByOwnerId = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const userProjects = await db.select().from(projects).where(eq(projects.ownerId, data.ownerId))
     return userProjects
+  })
+
+export const getProjectsByTeamId = createServerFn({ method: "GET" })
+  .inputValidator((data: { teamId: string }) => data)
+  .handler(async ({ data }) => {
+    const teamProjects = await db.select().from(projects).where(eq(projects.teamId, data.teamId))
+    return teamProjects
   })
 
 // ** UPDATE **

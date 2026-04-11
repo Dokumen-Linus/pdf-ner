@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth"
 import { haveIBeenPwned } from "better-auth/plugins"
+import { organization } from "better-auth/plugins"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { Pool } from "pg"
 import { env } from "../env.server"
@@ -62,6 +63,17 @@ export const auth = betterAuth({
     haveIBeenPwned({
       customPasswordCompromisedMessage:
         "Password likely has been compromised. Please choose a different password.",
+    }),
+    organization({
+      teams: {
+        enabled: true,
+      },
+      schema: {
+        organization: { modelName: "auth.organization" },
+        member: { modelName: "auth.member" },
+        invitation: { modelName: "auth.invitation" },
+        team: { modelName: "auth.team" },
+      },
     }),
     tanstackStartCookies(), // tanstackStartCookies must be the last plugin in the array
   ],
