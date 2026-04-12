@@ -86,7 +86,7 @@ celery -A app.main worker --loglevel=info --concurrency=4
 
 ## Database
 
-**Restriction on Workers Interactions with Database**: The workers can only execute SQL scripts in functions in repository.py files using the [asyncpg](https://github.com/MagicStack/asyncpg) connection created in workers\infrastructure\db.py. No ORM, Pydantic, or other Python schemas for the SQL database are allowed. Validation of the query is solely whether SQL can execute it. Connection is passed from router.py to service.py functions to repository.py functions.
+**Restriction on Workers Interactions with Database**: The workers can only execute SQL scripts in functions in repository.py files using the [asyncpg](https://github.com/MagicStack/asyncpg) connection created in workers\app\shared\infrastructure\db.py. No ORM, Pydantic, or other Python schemas for the SQL database are allowed. Validation of the query is solely whether SQL can execute it. Connection is passed from router.py to service.py functions to repository.py functions.
 
 **Schemas**: worker_user has CRUD permissions on workers schema and read permissions on web, api, and public schemas
 

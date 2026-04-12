@@ -2,11 +2,11 @@
 
 ## Migration SQL Scripts Naming Conventions
 
-**Rules:** Since Dokumen is in development (no staging, UAT, pre-prod, prod environments currently run), the script names have numerical prefices. The scripts, order, and table columns may still be changed. On the first release of Dokumen AI, the numerical prefices will be replaced with datetime. Migration is performed by dbmate which runs scripts in alphanumeric order.
+**Rules:** Since Dokumen is in development (no staging, UAT, pre-prod, prod environments currently run), the script names have numerical prefixes. The scripts, order, and table columns may still be changed. On the first release of Dokumen AI, the numerical prefixes will be replaced with datetime. Migration is performed by dbmate which runs scripts in alphanumeric order.
 
 ## Quickstart
 
-1 Install [PostrgreSQL v18](https://www.postgresql.org/download/) including CLI tools psql, pg_ctl, pg_dump
+1 Install [PostgreSQL v18](https://www.postgresql.org/download/) including CLI tools psql, pg_ctl, pg_dump
 
 2 Install dbmate
 
@@ -60,7 +60,7 @@ for f in db/seeds/*.sql; do echo "Executing $f"; psql -d dokumen -f "$f"; done
 After installing the extension and starting the db, you can establish a connection by:
 
 1. Press Add New Connection to open the Connect a Server window
-1. At the top list of connection methods, select Connection String instead of Paramaters
+1. At the top list of connection methods, select Connection String instead of Parameters
 1. Enter your connection string postgres://you-windows-user@localhost/dokumen?sslmode=disable, which depends on your Windows username.
 For example if your user profile is C:\Users\zchar, yours is postgres://zchar@localhost/dokumen?sslmode=disable
 1. Change Authentication Type to None instead of Password
@@ -86,7 +86,7 @@ SQL scripts that INSERT data into objects defined in migrations
 
 ### better-auth_migrations\
 
-SQL scripts created by "bun x @better-auth/cli@latest generate". Modified to use shema auth and user auth_role.
+SQL scripts created by "bun x @better-auth/cli@latest generate". Modified to use schema auth and user auth_role.
 
 ### schema.sql
 
