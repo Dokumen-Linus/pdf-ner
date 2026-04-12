@@ -23,6 +23,7 @@ import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
 import { Route as PrivateProjectsIndexRouteImport } from './routes/_private/projects.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PrivateProjectsProjectIdRouteImport } from './routes/_private/projects.$projectId'
+import { Route as PrivateProjectsProjectIdEngineeringRouteImport } from './routes/_private/projects.$projectId_.engineering'
 import { Route as PrivateProjectsProjectIdDocumentsRouteImport } from './routes/_private/projects.$projectId_.documents'
 import { Route as PrivateProjectsProjectIdDashboardRouteImport } from './routes/_private/projects.$projectId_.dashboard'
 
@@ -94,6 +95,12 @@ const PrivateProjectsProjectIdRoute =
     path: '/projects/$projectId',
     getParentRoute: () => PrivateRoute,
   } as any)
+const PrivateProjectsProjectIdEngineeringRoute =
+  PrivateProjectsProjectIdEngineeringRouteImport.update({
+    id: '/projects/$projectId_/engineering',
+    path: '/projects/$projectId/engineering',
+    getParentRoute: () => PrivateRoute,
+  } as any)
 const PrivateProjectsProjectIdDocumentsRoute =
   PrivateProjectsProjectIdDocumentsRouteImport.update({
     id: '/projects/$projectId_/documents',
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/projects/': typeof PrivateProjectsIndexRoute
   '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
   '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
+  '/projects/$projectId/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -136,6 +144,7 @@ export interface FileRoutesByTo {
   '/projects': typeof PrivateProjectsIndexRoute
   '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
   '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
+  '/projects/$projectId/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -155,6 +164,7 @@ export interface FileRoutesById {
   '/_private/projects/': typeof PrivateProjectsIndexRoute
   '/_private/projects/$projectId_/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
   '/_private/projects/$projectId_/documents': typeof PrivateProjectsProjectIdDocumentsRoute
+  '/_private/projects/$projectId_/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/projects/'
     | '/projects/$projectId/dashboard'
     | '/projects/$projectId/documents'
+    | '/projects/$projectId/engineering'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/projects/$projectId/dashboard'
     | '/projects/$projectId/documents'
+    | '/projects/$projectId/engineering'
   id:
     | '__root__'
     | '/_auth'
@@ -205,6 +217,7 @@ export interface FileRouteTypes {
     | '/_private/projects/'
     | '/_private/projects/$projectId_/dashboard'
     | '/_private/projects/$projectId_/documents'
+    | '/_private/projects/$projectId_/engineering'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -315,6 +328,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateProjectsProjectIdRouteImport
       parentRoute: typeof PrivateRoute
     }
+    '/_private/projects/$projectId_/engineering': {
+      id: '/_private/projects/$projectId_/engineering'
+      path: '/projects/$projectId/engineering'
+      fullPath: '/projects/$projectId/engineering'
+      preLoaderRoute: typeof PrivateProjectsProjectIdEngineeringRouteImport
+      parentRoute: typeof PrivateRoute
+    }
     '/_private/projects/$projectId_/documents': {
       id: '/_private/projects/$projectId_/documents'
       path: '/projects/$projectId/documents'
@@ -353,6 +373,7 @@ interface PrivateRouteChildren {
   PrivateProjectsIndexRoute: typeof PrivateProjectsIndexRoute
   PrivateProjectsProjectIdDashboardRoute: typeof PrivateProjectsProjectIdDashboardRoute
   PrivateProjectsProjectIdDocumentsRoute: typeof PrivateProjectsProjectIdDocumentsRoute
+  PrivateProjectsProjectIdEngineeringRoute: typeof PrivateProjectsProjectIdEngineeringRoute
 }
 
 const PrivateRouteChildren: PrivateRouteChildren = {
@@ -364,6 +385,8 @@ const PrivateRouteChildren: PrivateRouteChildren = {
     PrivateProjectsProjectIdDashboardRoute,
   PrivateProjectsProjectIdDocumentsRoute:
     PrivateProjectsProjectIdDocumentsRoute,
+  PrivateProjectsProjectIdEngineeringRoute:
+    PrivateProjectsProjectIdEngineeringRoute,
 }
 
 const PrivateRouteWithChildren =

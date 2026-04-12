@@ -33,13 +33,15 @@
   - function cancel_subscription: (conn, user_id) -> None
   - function get_usage_summary: (conn, user_id, days) -> UsageSummary
   - function report_usage_to_stripe: (conn) -> dict
+- `api\app\domains\llm_ner\events.py` — function dispatch_optimize_prompt: (project_id, max_iterations, model) -> str, function get_task_status: (task_id) -> dict
 - `api\app\domains\llm_ner\repository.py`
   - function fetch_project: (conn, project_id) -> asyncpg.Record | None
   - function fetch_entity_types: (conn, project_id) -> list[asyncpg.Record]
   - function fetch_template: (conn, template_id) -> asyncpg.Record | None
   - function fetch_pdf_text: (conn, pdf_id, project_id) -> tuple[bool, str | None]
   - function insert_prompt: (conn, project_id, template_id, full_text) -> UUID
-- `api\app\domains\llm_ner\schemas.py` — class ExtractEntitiesRequest
+- `api\app\domains\llm_ner\router.py` — function get_optimize_prompt_status: (task_id, request)
+- `api\app\domains\llm_ner\schemas.py` — class OptimizePromptRequest, class ExtractEntitiesRequest
 - `api\app\domains\llm_ner\service.py`
   - function build_prompt_from_template: (template_txt, project_description, entity_types) -> str
   - function validate_json: (response_text) -> dict
@@ -93,6 +95,7 @@
   - class TestCallLlm
   - class TestExtractEntities
   - class TestExtractEntitiesRequestSchema
+  - class TestOptimizePromptAuthorization
 - `api\tests\domains\test_pdf_storage.py`
   - function storage_client: (mock_conn, mock_redis)
   - class TestCreateBucket
@@ -258,6 +261,10 @@
   - interface ZoomGestureDeps
 - `web\src\components\plugin-store\hooks\use-plugin-store.ts` — function usePluginCapabilities
 - `web\src\db-fns\api\storage.ts` — function createBucket: (name) => Promise<, const uploadPdf
+- `web\src\db-fns\api\_helpers.ts`
+  - function requireUserId: () => Promise<string>
+  - function requireProjectOwnership: (projectId, userId) => void
+  - function apiRequest: (path, options) => void
 - `web\src\hooks\mouse-events\use-double-press-props.ts` — function useDoublePressProps: (onDouble?, {...}, tolerancePx) => DoubleProps<T>
 - `web\src\hooks\shadcn-ui\use-mobile.ts` — function useIsMobile: () => void
 - `web\src\lib\cookies\getCookie.ts` — function getCookie: (name, defaultValue?) => void
@@ -277,8 +284,8 @@
   - function mark_reported: (conn, usage_ids, event_id) -> None
 - `workers\app\domains\billing\tasks.py` — function report_usage_to_stripe_task: (self)
 - `workers\app\domains\context_engineering\application\commands.py` — class OptimizePrompt
-- `workers\app\domains\context_engineering\application\handlers.py` — function handle_optimize_prompt: (cmd) -> dict
-- `workers\app\domains\context_engineering\application\workflows.py` — function prompt_optimization_workflow: (conn, openai_client, cmd) -> dict
+- `workers\app\domains\context_engineering\application\handlers.py` — function handle_optimize_prompt: (cmd, task) -> dict
+- `workers\app\domains\context_engineering\application\workflows.py` — function prompt_optimization_workflow: (conn, openai_client, cmd, task) -> dict
 - `workers\app\domains\context_engineering\domain\entities.py`
   - class EntityTypeInfo
   - class LabeledAnnotation

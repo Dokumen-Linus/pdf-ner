@@ -113,13 +113,11 @@ async def async_client(
     so auth passes on every request.
     """
 
-    @asynccontextmanager
-    async def _test_lifespan(application: FastAPI):
-        application.state.redis = mock_redis
-        yield
-
-    app = FastAPI(lifespan=_test_lifespan)
+    app = FastAPI()
     register_exception_handlers(app)
+
+    # Set state directly (lifespan isn't called by httpx.ASGITransport)
+    app.state.redis = mock_redis
 
     # Async-generator override for the DB connection dependency
     async def _get_test_conn():

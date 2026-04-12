@@ -388,3 +388,101 @@ class TestExtractEntitiesRequestSchema:
 
         assert request.pdf_id is not None
         assert request.document_text == ""
+
+
+class TestOptimizePromptAuthorization:
+    """Tests for authorization on prompt optimization endpoints."""
+
+    @pytest.mark.anyio
+    async def test_optimize_prompt_returns_404_for_nonexistent_project(
+        self, async_client, mock_conn
+    ):
+        """Verify 404 when project_id doesn't exist in database."""
+        mock_conn.fetchrow = AsyncMock(return_value=None)
+
+        response = await async_client.post(
+            "/api/v1/llm-ner/optimize-prompt",
+            json={
+                "project_id": str(uuid4()),
+                "max_iterations": 5,
+                "model": "gpt-4o",
+            },
+        )
+
+        assert response.status_code == 404
+        assert "Project not found" in response.json()["detail"]
+
+    @pytest.mark.anyio
+    async def test_optimize_prompt_stores_task_project_mapping(
+        self, async_client, mock_conn, mock_redis, monkeypatch
+    ):
+        """Verify task->project mapping is stored in Redis on successful dispatch."""
+        from app.domains.llm_ner import events
+
+        project_id = uuid4()
+        mock_task_id = "mock-task-id-123"
+
+        mock_conn.fetchrow = AsyncMock(return_value={"id": project_id, "description": "Test"})
+        monkeypatch.setattr(events, "dispatch_optimize_prompt", lambda **kw: mock_task_id)
+
+        response = await async_client.post(
+            "/api/v1/llm-ner/optimize-prompt",
+            json={
+                "project_id": str(project_id),
+                "max_iterations": 5,
+                "model": "gpt-4o",
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json()["task_id"] == mock_task_id
+
+        # Verify redis.set was called with the task->project mapping
+        mock_redis.set.assert_called_once()
+        call_args = mock_redis.set.call_args
+        assert f"task:project:{mock_task_id}" == call_args[0][0]
+        assert str(project_id) == call_args[0][1]
+
+    @pytest.mark.anyio
+    async def test_status_returns_project_id_from_redis(
+        self, async_client, mock_redis, monkeypatch
+    ):
+        """Verify status endpoint returns project_id looked up from Redis."""
+        from app.domains.llm_ner import events
+
+        project_id = str(uuid4())
+        task_id = "test-task-123"
+
+        mock_redis.get = AsyncMock(return_value=project_id)
+        monkeypatch.setattr(
+            events,
+            "get_task_status",
+            lambda tid: {"task_id": tid, "status": "PENDING"},
+        )
+
+        response = await async_client.get(f"/api/v1/llm-ner/optimize-prompt/{task_id}/status")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["project_id"] == project_id
+        mock_redis.get.assert_called_with(f"task:project:{task_id}")
+
+    @pytest.mark.anyio
+    async def test_status_returns_null_project_id_for_unknown_task(
+        self, async_client, mock_redis, monkeypatch
+    ):
+        """Verify status returns null project_id when task not in Redis."""
+        from app.domains.llm_ner import events
+
+        mock_redis.get = AsyncMock(return_value=None)
+        monkeypatch.setattr(
+            events,
+            "get_task_status",
+            lambda tid: {"task_id": tid, "status": "PENDING"},
+        )
+
+        response = await async_client.get("/api/v1/llm-ner/optimize-prompt/unknown-task/status")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["project_id"] is None

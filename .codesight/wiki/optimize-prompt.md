@@ -1,13 +1,19 @@
-# Extract
+# Optimize-prompt
 
 > **Navigation aid.** Route list and file locations extracted via AST. Read the source files listed below before implementing or modifying this subsystem.
 
-The Extract subsystem handles **1 routes** and touches: cache.
+The Optimize-prompt subsystem handles **2 routes** and touches: cache.
 
 ## Routes
 
-- `POST` `/extract` → in: ExtractEntitiesRequest [cache]
+- `POST` `/optimize-prompt` → in: ExtractEntitiesRequest [cache]
   `api\app\domains\llm_ner\router.py`
+- `GET` `/optimize-prompt/{task_id}/status` params(task_id) [cache]
+  `api\app\domains\llm_ner\router.py`
+
+## Related Models
+
+- **prompt_evaluations** (4 fields) → [database.md](./database.md)
 
 ## Source Files
 

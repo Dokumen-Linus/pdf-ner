@@ -84,6 +84,7 @@
 
 ### Colors
 
+- **[DESIGN.md set](https://getdesign.md/)**
 - [TailColors](https://tailcolors.com/)
 - [Hex Color Codes](https://html-color.codes/)
 - generators for complimentary hex codes [Coolors](https://coolors.co/) (no acct required), [Atmos](https://atmos.style/) (requires free acct)
@@ -211,6 +212,10 @@
 ### Better Text Rendering
 
 - [pretext](https://github.com/chenglou/pretext)
+
+### TypeScript API creation
+
+- [millionco/cli-to-js](https://github.com/millionco/cli-to-js)
 
 ### Auth
 

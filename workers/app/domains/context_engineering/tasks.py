@@ -20,7 +20,7 @@ def optimize_prompt_task(self, project_id: str, max_iterations: int = 5, model: 
         model=model,
     )
     try:
-        result = asyncio.run(handle_optimize_prompt(cmd))
+        result = asyncio.run(handle_optimize_prompt(cmd, task=self))
         return result
     except Exception as exc:
         logger.error("Prompt optimization failed: %s", exc, exc_info=True)

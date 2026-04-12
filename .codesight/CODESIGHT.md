@@ -2,8 +2,8 @@
 
 > **Stack:** fastapi | drizzle | react | typescript
 
-> 9 routes | 18 models | 53 components | 121 lib files | 34 env vars | 9 middleware | 1 events | 52% test coverage
-> **Token savings:** this file is ~11,900 tokens. Without it, AI exploration would cost ~76,400 tokens. **Saves ~64,500 tokens per conversation.**
+> 11 routes | 18 models | 54 components | 124 lib files | 36 env vars | 9 middleware | 1 events | 48% test coverage
+> **Token savings:** this file is ~12,200 tokens. Without it, AI exploration would cost ~78,800 tokens. **Saves ~66,600 tokens per conversation.**
 
 ---
 
@@ -14,7 +14,9 @@
 - `POST` `/subscription` params() → in: CreateCustomerRequest, out: None [db, payment]
 - `DELETE` `/subscription` params() → in: CancelSubscriptionRequest, out: None [db, payment]
 - `POST` `/report-to-stripe` params() → in: CreateCustomerRequest, out: None [db, payment]
-- `POST` `/extract` params() → in: ExtractEntitiesRequest
+- `POST` `/extract` params() → in: ExtractEntitiesRequest [cache]
+- `POST` `/optimize-prompt` params() → in: ExtractEntitiesRequest [cache]
+- `GET` `/optimize-prompt/{task_id}/status` params(task_id) [cache]
 - `POST` `/buckets` params() → in: CreateBucketRequest [upload]
 - `POST` `/pdfs` params() → in: CreateBucketRequest [upload]
 - `POST` `/highlight` params() → in: HighlightRequest
@@ -229,6 +231,7 @@
 - **Route** — `web\src\routes\_private\projects.$projectId.tsx`
 - **Route** — `web\src\routes\_private\projects.$projectId_.dashboard.tsx`
 - **Route** — `web\src\routes\_private\projects.$projectId_.documents.tsx`
+- **Route** — `web\src\routes\_private\projects.$projectId_.engineering.tsx`
 - **Route** — `web\src\routes\_private\projects.index.tsx`
 - **Route** — `web\src\routes\_private.tsx`
 - **Route** — `web\src\routes\_public\demo.tsx`
@@ -273,13 +276,15 @@
   - function cancel_subscription: (conn, user_id) -> None
   - function get_usage_summary: (conn, user_id, days) -> UsageSummary
   - function report_usage_to_stripe: (conn) -> dict
+- `api\app\domains\llm_ner\events.py` — function dispatch_optimize_prompt: (project_id, max_iterations, model) -> str, function get_task_status: (task_id) -> dict
 - `api\app\domains\llm_ner\repository.py`
   - function fetch_project: (conn, project_id) -> asyncpg.Record | None
   - function fetch_entity_types: (conn, project_id) -> list[asyncpg.Record]
   - function fetch_template: (conn, template_id) -> asyncpg.Record | None
   - function fetch_pdf_text: (conn, pdf_id, project_id) -> tuple[bool, str | None]
   - function insert_prompt: (conn, project_id, template_id, full_text) -> UUID
-- `api\app\domains\llm_ner\schemas.py` — class ExtractEntitiesRequest
+- `api\app\domains\llm_ner\router.py` — function get_optimize_prompt_status: (task_id, request)
+- `api\app\domains\llm_ner\schemas.py` — class OptimizePromptRequest, class ExtractEntitiesRequest
 - `api\app\domains\llm_ner\service.py`
   - function build_prompt_from_template: (template_txt, project_description, entity_types) -> str
   - function validate_json: (response_text) -> dict
@@ -333,6 +338,7 @@
   - class TestCallLlm
   - class TestExtractEntities
   - class TestExtractEntitiesRequestSchema
+  - class TestOptimizePromptAuthorization
 - `api\tests\domains\test_pdf_storage.py`
   - function storage_client: (mock_conn, mock_redis)
   - class TestCreateBucket
@@ -498,6 +504,10 @@
   - interface ZoomGestureDeps
 - `web\src\components\plugin-store\hooks\use-plugin-store.ts` — function usePluginCapabilities
 - `web\src\db-fns\api\storage.ts` — function createBucket: (name) => Promise<, const uploadPdf
+- `web\src\db-fns\api\_helpers.ts`
+  - function requireUserId: () => Promise<string>
+  - function requireProjectOwnership: (projectId, userId) => void
+  - function apiRequest: (path, options) => void
 - `web\src\hooks\mouse-events\use-double-press-props.ts` — function useDoublePressProps: (onDouble?, {...}, tolerancePx) => DoubleProps<T>
 - `web\src\hooks\shadcn-ui\use-mobile.ts` — function useIsMobile: () => void
 - `web\src\lib\cookies\getCookie.ts` — function getCookie: (name, defaultValue?) => void
@@ -517,8 +527,8 @@
   - function mark_reported: (conn, usage_ids, event_id) -> None
 - `workers\app\domains\billing\tasks.py` — function report_usage_to_stripe_task: (self)
 - `workers\app\domains\context_engineering\application\commands.py` — class OptimizePrompt
-- `workers\app\domains\context_engineering\application\handlers.py` — function handle_optimize_prompt: (cmd) -> dict
-- `workers\app\domains\context_engineering\application\workflows.py` — function prompt_optimization_workflow: (conn, openai_client, cmd) -> dict
+- `workers\app\domains\context_engineering\application\handlers.py` — function handle_optimize_prompt: (cmd, task) -> dict
+- `workers\app\domains\context_engineering\application\workflows.py` — function prompt_optimization_workflow: (conn, openai_client, cmd, task) -> dict
 - `workers\app\domains\context_engineering\domain\entities.py`
   - class EntityTypeInfo
   - class LabeledAnnotation
@@ -635,6 +645,8 @@
 - `FROM_EMAIL` (has default) — web\.env
 - `GITHUB_PERSONAL_ACCESS_TOKEN` (has default) — .env
 - `GOOGLE_AI_API_KEY` **required** — workers\.env.example
+- `GOOGLE_CLIENT_ID` (has default) — web\.env
+- `GOOGLE_CLIENT_SECRET` (has default) — web\.env
 - `MY_EMAIL` (has default) — web\.env
 - `OPENAI_API_KEY` **required** — workers\.env.example
 - `OWNER_ROLE_PASSWORD` (has default) — infra\.env.example
@@ -729,7 +741,7 @@
 
 # Test Coverage
 
-> **52%** of routes and models are covered by tests
+> **48%** of routes and models are covered by tests
 > 35 test files found
 
 ## Covered Models

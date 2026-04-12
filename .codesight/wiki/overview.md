@@ -6,22 +6,23 @@
 
 ## Scale
 
-9 API routes · 18 database models · 53 UI components · 9 middleware layers · 34 environment variables
+11 API routes · 18 database models · 54 UI components · 9 middleware layers · 36 environment variables
 
 ## Subsystems
 
 - **[Payments](./payments.md)** — 2 routes — touches: db, payment
 - **[Buckets](./buckets.md)** — 1 routes — touches: upload
 - **[Customer](./customer.md)** — 1 routes — touches: db, payment
-- **[Extract](./extract.md)** — 1 routes
+- **[Extract](./extract.md)** — 1 routes — touches: cache
 - **[Highlight](./highlight.md)** — 1 routes
+- **[Optimize-prompt](./optimize-prompt.md)** — 2 routes — touches: cache
 - **[Pdfs](./pdfs.md)** — 1 routes — touches: upload
 - **[Report-to-stripe](./report-to-stripe.md)** — 1 routes — touches: db, payment
 - **[Usage](./usage.md)** — 1 routes — touches: db, payment
 
 **Database:** unknown, 18 models — see [database.md](./database.md)
 
-**UI:** 53 components (react) — see [ui.md](./ui.md)
+**UI:** 54 components (react) — see [ui.md](./ui.md)
 
 ## High-Impact Files
 
@@ -46,4 +47,4 @@ Changes to these files have the widest blast radius across the codebase:
 - `TEST_DB` — `web\src\db\drizzle-client.test.ts`
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-04-11_
+_Back to [index.md](./index.md) · Generated 2026-04-12_
