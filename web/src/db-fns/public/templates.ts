@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm/sql"
 import { db } from "@/db/client"
-import { templates } from "@/db/schemas/api/templates"
+import { templates } from "@/db/schemas/public/templates"
 
 export const getTemplateById = createServerFn({ method: "GET" })
   .inputValidator((data: { id: number }) => data)

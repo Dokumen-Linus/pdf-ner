@@ -114,8 +114,8 @@ Visualizes the endpoints exposed by the api and what file defines them
 ### Directories
 
 - core: global functionalities like config, logging, db connection, connection to external APIs
-- domains: contains different domains, which are groups of endpoints to acheive a business purpose
-- domains\shared: schemas, repositiories, tasks or events that apply to multiple domains
+- domains: contains different domains, which are groups of endpoints to achieve a business purpose
+- domains\shared: schemas, repositories, tasks or events that apply to multiple domains
 - integration:  code not specific to a business purpose that defines use of an external service
 - utils: generic code not specific to a business purpose that could be re-used in a hypothetical new domain
 
@@ -127,15 +127,15 @@ Each domain may have the following files:
 - schema.py (typing) - defines pydantic validation schemas for endpoint inputs (never responses, never set response_model) and dataclasses for function outputs when needed for consistency across multiple functions
 - service.py (business logic) - creates functions to perform the main business logic/purpose of the endpoint ()
 - repository.py (db queries) - executes SQL queries to handle necessary database interaction using the connection passed from service.py and router.py
-- tasks.py (side processes) - creates FastAPI background tasks that router.py should call when code can be executed indepndently of/after the response
-- events.py (messaging to workers) - sends tasks to Redis broker using Celery client from core.messaging.celery, messsaging is sync but fast
+- tasks.py (side processes) - creates FastAPI background tasks that router.py should call when code can be executed independently of/after the response
+- events.py (messaging to workers) - sends tasks to Redis broker using Celery client from core.messaging.celery, messaging is sync but fast
 
 ### Required Best Practices
 
-- avoid blocking code and do not put it inside async fncts
+- avoid blocking code and do not put it inside async functions
 - use anyio instead of asyncio whenever possible. attempt to replace every use of asyncio with anyio
 - perform all http requests with httpx [docs](https://www.python-httpx.org/), [repo](https://github.com/encode/httpx)
-- never pass app.state to service.py, define specific dependencies in a function in core.dependencites.py
+- never pass app.state to service.py, define specific dependencies in a function in core.dependencies.py
 - never create a class in service.py, repository.py, tasks.py, events.py - create functions
 - never create a dataclass in a file that is not named schemas.py
 - import settings, never get_settings() from core.settings.py

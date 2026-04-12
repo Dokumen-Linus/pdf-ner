@@ -3,7 +3,7 @@ CREATE TABLE web.entity_types (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES web.projects (id) ON DELETE CASCADE,
   "name" TEXT NOT NULL,
-  standard_entity_type_id BIGINT REFERENCES api.std_entity_types (id) ON DELETE CASCADE,
+  standard_entity_type_id BIGINT REFERENCES public.std_entity_types (id) ON DELETE CASCADE,
   
   -- page1 user inputs
   user_definition TEXT,

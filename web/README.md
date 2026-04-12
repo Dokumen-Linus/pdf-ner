@@ -106,8 +106,8 @@ The database schemas are defined in:
 | `./styles.css`              | Required file to define CSS applied to entire site                                  |
 | `./client.tsx`              | Client entrypoint to site                                                           |
 | `./server.tsx`              | Server entrypoint to site                                                           |
-| `./env.client.tsx`          | Validaiton of client-side environment variables                                     |
-| `./env.server.tsx`          | Validaiton of server-side environment variables                                     |
+| `./env.client.tsx`          | Validation of client-side environment variables                                     |
+| `./env.server.tsx`          | Validation of server-side environment variables                                     |
 | `./routes/_public.tsx`      | Layout for public site (when no user is authenticated)                              |
 | `./routes/_public/index.tsx`| Page displayed at base URL                                                          |
 | `./routes/_auth.tsx`        | Layout for authentication pages                                                     |
@@ -131,10 +131,10 @@ npx shadcn@latest add --overwrite accordion alert-dialog alert aspect-ratio avat
 ### PDF Rendering
 
 - EmbedPDF: [GitHub](https://github.com/embedpdf/embed-pdf-viewer), [docs for @embedpdf/pdfium](https://www.embedpdf.com/docs/pdfium/introduction) the JS library to wrap the C++ engine, [docs for @embedpdf/core/react](https://www.embedpdf.com/docs/react/introduction)
-- Plugins are built in consitent style defined by core (not using standard Redux style) and must have commented sections and same subfolders and filenames as existing local plugins
+- Plugins are built in consistent style defined by core (not using standard Redux style) and must have commented sections and same subfolders and filenames as existing local plugins
 - PDF retrieval: currently from URL as defined by @embedpdf/plugin-loader
 
 ## Tests
 
-- Three test setups: one with standard tests Bun and JSDOM, one wi
+- Three test setups: one with standard tests Bun and JSDOM, one with database tests, one with Playwright E2E tests
 - Naming Conventions: Unit test files should be named as ".test.{ts,tsx}" and Playwright test files should be named as ".e2e.ts"

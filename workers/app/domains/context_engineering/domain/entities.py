@@ -8,7 +8,7 @@ from .value_objects import EntityMatch, F1Score
 
 @dataclass
 class EntityTypeInfo:
-    """Merged entity type info from web.entity_types + api.std_entity_types."""
+    """Merged entity type info from web.entity_types + public.std_entity_types."""
 
     name: str
     user_definition: str | None

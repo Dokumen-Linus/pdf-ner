@@ -19,6 +19,8 @@
 - `FROM_EMAIL` (has default) — web\.env
 - `GITHUB_PERSONAL_ACCESS_TOKEN` (has default) — .env
 - `GOOGLE_AI_API_KEY` **required** — workers\.env.example
+- `GOOGLE_CLIENT_ID` (has default) — web\.env
+- `GOOGLE_CLIENT_SECRET` (has default) — web\.env
 - `MY_EMAIL` (has default) — web\.env
 - `OPENAI_API_KEY` **required** — workers\.env.example
 - `OWNER_ROLE_PASSWORD` (has default) — infra\.env.example

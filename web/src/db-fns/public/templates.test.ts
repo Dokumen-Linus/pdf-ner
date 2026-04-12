@@ -3,7 +3,7 @@ import { getAllTemplates, getTemplateById, getTemplatesByDocumentAtEnd } from ".
 
 const runTests = process.env.TEST_DB === "true"
 
-describe.if(runTests)("API Templates Read-Only Functions", () => {
+describe.if(runTests)("Public Templates Read-Only Functions", () => {
   describe("getAllTemplates", () => {
     it("returns an array of templates", async () => {
       const result = await getAllTemplates({ data: {} })

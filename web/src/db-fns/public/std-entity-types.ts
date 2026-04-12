@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
 import { db } from "@/db/client"
-import { stdEntityTypes } from "@/db/schemas/api/std-entity-types"
+import { stdEntityTypes } from "@/db/schemas/public/std-entity-types"
 
 export const getStdEntityTypeById = createServerFn({ method: "GET" })
   .inputValidator((data: { id: number }) => data)

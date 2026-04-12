@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+from typing import Any
 
 import asyncpg
 from openai import AsyncOpenAI
@@ -20,10 +21,28 @@ logger = logging.getLogger(__name__)
 _TASK_NAME = "context_engineering.optimize_prompt"
 
 
+def _report_progress(
+    task: Any | None, phase: str, message: str, percent: int, **details: Any
+) -> None:
+    """Push a PROGRESS state update to the Celery result backend."""
+    if task is None:
+        return
+    task.update_state(
+        state="PROGRESS",
+        meta={
+            "phase": phase,
+            "message": message,
+            "percent": percent,
+            "details": details,
+        },
+    )
+
+
 async def prompt_optimization_workflow(
     conn: asyncpg.Connection,
     openai_client: AsyncOpenAI,
     cmd: OptimizePrompt,
+    task: Any | None = None,
 ) -> dict:
     """Main optimization loop.
 
@@ -73,6 +92,15 @@ async def prompt_optimization_workflow(
     few_shot_pdfs = labeled_pdfs[:2]
     eval_pdfs = labeled_pdfs[2:] if len(labeled_pdfs) > 2 else labeled_pdfs
 
+    _report_progress(
+        task,
+        "data_fetched",
+        f"Loaded {len(labeled_pdfs)} PDFs and {len(entity_types)} entity types",
+        5,
+        pdfs_loaded=len(labeled_pdfs),
+        entity_types_count=len(entity_types),
+    )
+
     # 2. Build JSON response schema
     json_schema = services.build_json_schema(entity_types)
 
@@ -80,6 +108,14 @@ async def prompt_optimization_workflow(
     base_prompt = services.build_base_system_prompt(project["description"], entity_types)
     few_shot_text = services.format_few_shot_examples(few_shot_pdfs)
     variants = services.generate_prompt_variants(base_prompt, entity_types, project["description"])
+
+    _report_progress(
+        task,
+        "prompts_prepared",
+        f"Generated {len(variants)} prompt variants",
+        10,
+        variants_count=len(variants),
+    )
 
     # 4. Evaluate each variant, pick best
     best_candidate: PromptCandidate | None = None
@@ -103,12 +139,34 @@ async def prompt_optimization_workflow(
         candidate.overall_f1 = avg_f1
         logger.info("Variant %d F1: %.4f", var_idx, avg_f1)
 
+        variant_percent = 15 + (var_idx * 30 // max(len(variants) - 1, 1))
+        _report_progress(
+            task,
+            "evaluating_variant",
+            f"Evaluated variant {var_idx + 1}/{len(variants)} — F1: {avg_f1:.3f}",
+            variant_percent,
+            variant=var_idx + 1,
+            total_variants=len(variants),
+            f1=round(avg_f1, 4),
+        )
+
         if avg_f1 > best_f1:
             best_f1 = avg_f1
             best_candidate = candidate
 
     # 5. Iterative refinement
     for iteration in range(1, cmd.max_iterations + 1):
+        iter_base_pct = 50 + (iteration - 1) * 45 // max(cmd.max_iterations, 1)
+        _report_progress(
+            task,
+            "evaluating_current",
+            f"Iteration {iteration}/{cmd.max_iterations} — evaluating current best",
+            iter_base_pct,
+            iteration=iteration,
+            max_iterations=cmd.max_iterations,
+            best_f1=round(best_f1, 4),
+        )
+
         eval_results = await _evaluate_prompt_on_pdfs(
             openai_client,
             best_candidate,
@@ -122,6 +180,15 @@ async def prompt_optimization_workflow(
         if not error_analysis.strip():
             logger.info("No errors to fix at iteration %d. Stopping.", iteration)
             break
+
+        _report_progress(
+            task,
+            "generating_refinement",
+            f"Iteration {iteration}/{cmd.max_iterations} — generating refined prompt",
+            iter_base_pct + 15 // max(cmd.max_iterations, 1),
+            iteration=iteration,
+            max_iterations=cmd.max_iterations,
+        )
 
         refinement_meta_prompt = services.build_refinement_prompt(
             best_candidate.system_prompt, error_analysis, entity_types
@@ -163,6 +230,17 @@ async def prompt_optimization_workflow(
             best_f1,
         )
 
+        _report_progress(
+            task,
+            "iteration_evaluated",
+            f"Iteration {iteration}/{cmd.max_iterations} — refined F1: {refined_f1:.3f}",
+            iter_base_pct + 30 // max(cmd.max_iterations, 1),
+            iteration=iteration,
+            max_iterations=cmd.max_iterations,
+            refined_f1=round(refined_f1, 4),
+            best_f1=round(best_f1, 4),
+        )
+
         improvement = refined_f1 - best_f1
         if refined_f1 > best_f1:
             best_f1 = refined_f1
@@ -178,6 +256,14 @@ async def prompt_optimization_workflow(
             break
 
     # 6. Store best prompt and scores
+    _report_progress(
+        task,
+        "storing_results",
+        "Saving optimized prompt and evaluation scores",
+        98,
+        best_f1=round(best_f1, 4),
+    )
+
     per_entity_scores = {et.name: _avg_score(eval_results, et.name) for et in entity_types}
     best_candidate.scores = per_entity_scores
 

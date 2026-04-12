@@ -14,7 +14,6 @@
 - `web\src\components\plugin-store\hooks\use-plugin-store.ts` — imported by **5** files
 - `web\src\components\pdf-container\plugin-search-2\lib\types.ts` — imported by **5** files
 - `web\src\components\pdf-container\plugin-zoom-2\lib\types.ts` — imported by **5** files
-- `web\src\db\schemas\api\schema.ts` — imported by **5** files
 - `web\src\components\pdf-container\plugin-interaction-manager-2\hooks\use-interaction-manager.ts` — imported by **4** files
 - `web\src\db\schemas\workers\schema.ts` — imported by **4** files
 - `/config.py` — imported by **3** files
@@ -22,6 +21,7 @@
 - `web\src\components\pdf-container\plugin-selection-2\components\types.ts` — imported by **3** files
 - `web\src\components\pdf-container\plugin-selection-2\lib\utils.ts` — imported by **3** files
 - `web\src\components\pdf-container\plugin-zoom-2\hooks\use-zoom.ts` — imported by **3** files
+- `web\src\db\schemas\api\schema.ts` — imported by **3** files
 
 ## Import Map (who imports what)
 
