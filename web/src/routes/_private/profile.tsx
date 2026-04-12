@@ -20,6 +20,7 @@ import { Label } from "@/components/shadcn-ui/label"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { getUserByEmail, updateUser } from "@/db-fns/web/users"
 import { UploadButton } from "@/integrations/uploadthing/components-hooks"
+import { m } from "@/paraglide/messages.js"
 
 type ProfileUser = Awaited<ReturnType<typeof getUserByEmail>>
 
@@ -106,14 +107,14 @@ const toUserLoadErrorMessage = (error: unknown) => {
   const message = rawMessage.toLowerCase()
 
   if (message.includes("failed query")) {
-    return "We couldn't load your profile due to a temporary server issue. Please try again in a moment."
+    return m.profile_msg_load_server_error()
   }
 
   if (message.includes("user not found")) {
-    return "We couldn't find your profile yet. If you just signed up, refresh and try again."
+    return m.profile_msg_load_not_found()
   }
 
-  return "We couldn't load your profile right now. Please try again."
+  return m.profile_msg_load_fallback()
 }
 
 const toUserSaveErrorMessage = (error: unknown) => {
@@ -121,14 +122,14 @@ const toUserSaveErrorMessage = (error: unknown) => {
   const message = rawMessage.toLowerCase()
 
   if (message.includes("failed query")) {
-    return "We couldn't save your profile due to a temporary server issue. Please try again."
+    return m.profile_msg_save_server_error()
   }
 
   if (message.includes("user not found")) {
-    return "Your account could not be found while saving. Please sign out and sign back in."
+    return m.profile_msg_save_not_found()
   }
 
-  return "We couldn't save your changes. Please review your inputs and try again."
+  return m.profile_msg_save_fallback()
 }
 
 const toUserUploadErrorMessage = (error: { message?: string } | unknown) => {
@@ -139,22 +140,22 @@ const toUserUploadErrorMessage = (error: { message?: string } | unknown) => {
   const message = rawMessage.toLowerCase()
 
   if (message.includes("filesizemismatch") || message.includes("2mb")) {
-    return "That file is too large. Please upload an image smaller than 2MB."
+    return m.profile_msg_upload_too_large()
   }
 
   if (message.includes("file count") || message.includes("maxfilecount")) {
-    return "Please upload only one image file."
+    return m.profile_msg_upload_count()
   }
 
   if (message.includes("file type") || message.includes("invalid type")) {
-    return "That file type is not supported. Please upload a JPG, PNG, GIF, WEBP, or similar image."
+    return m.profile_msg_upload_type()
   }
 
-  if (message.includes("network") || message.includes("fetch")) {
-    return "Upload failed due to a network issue. Please check your connection and try again."
+  if (message.includes("network") || message.includes("network")) {
+    return m.profile_msg_upload_network()
   }
 
-  return "We couldn't upload that file. Please choose a valid image under 2MB and try again."
+  return m.profile_msg_upload_fallback()
 }
 
 function ProfilePageSkeleton() {
@@ -296,16 +297,16 @@ function ProfilePage() {
     return (
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 sm:px-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight">Profile</h1>
-          <p className="text-sm text-muted-foreground">We could not load your profile right now.</p>
+          <h1 className="text-3xl font-semibold tracking-tight">{m.profile_title()}</h1>
+          <p className="text-sm text-muted-foreground">{m.profile_error_load_description()}</p>
         </div>
         <Card className="border-destructive/40">
           <CardHeader>
-            <CardTitle className="text-destructive">Something went wrong</CardTitle>
+            <CardTitle className="text-destructive">{m.profile_error_load_title()}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">{loadError}</p>
-            <Button onClick={() => void router.invalidate()}>Try again</Button>
+            <Button onClick={() => void router.invalidate()}>{m.profile_error_load_retry()}</Button>
           </CardContent>
         </Card>
       </div>
@@ -316,14 +317,14 @@ function ProfilePage() {
     return (
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 sm:px-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight">Profile</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{m.profile_title()}</h1>
           <p className="text-sm text-muted-foreground">
-            We could not find profile details for this account.
+            {m.profile_error_empty_description()}
           </p>
         </div>
         <Card>
           <CardContent className="pt-6">
-            <Button onClick={() => void router.invalidate()}>Reload profile</Button>
+            <Button onClick={() => void router.invalidate()}>{m.profile_error_empty_retry()}</Button>
           </CardContent>
         </Card>
       </div>
@@ -343,15 +344,15 @@ function ProfilePage() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <div className="space-y-1">
-        <h1 className="text-3xl font-semibold tracking-tight">Profile</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{m.profile_title()}</h1>
         <p className="text-sm text-muted-foreground">
-          Manage your personal details and how you appear across Dokumen AI.
+          {m.profile_description()}
         </p>
       </div>
 
       <Card className="overflow-hidden border-border/80 shadow-sm">
         <CardHeader className="flex flex-col gap-3 border-b sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle className="text-xl">Personal Information</CardTitle>
+          <CardTitle className="text-xl">{m.profile_subtitle()}</CardTitle>
           <div className="flex gap-2">
             {!isEditing ? (
               <Button
@@ -364,7 +365,7 @@ function ProfilePage() {
                 }}
               >
                 <EditIcon className="mr-2 h-4 w-4" />
-                Edit
+                {m.profile_edit_button()}
               </Button>
             ) : (
               <>
@@ -379,7 +380,7 @@ function ProfilePage() {
                   disabled={form.state.isSubmitting}
                 >
                   <XIcon className="mr-2 h-4 w-4" />
-                  Cancel
+                  {m.profile_cancel_button()}
                 </Button>
                 <Button
                   size="sm"
@@ -391,7 +392,7 @@ function ProfilePage() {
                   ) : (
                     <SaveIcon className="mr-2 h-4 w-4" />
                   )}
-                  {form.state.isSubmitting ? "Saving..." : "Save"}
+                  {form.state.isSubmitting ? m.profile_save_button_loading() : m.profile_save_button()}
                 </Button>
               </>
             )}
@@ -434,17 +435,17 @@ function ProfilePage() {
             {isEditing && (
               <div className="space-y-2">
                 <AlertDialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-                  <AlertDialogTrigger asChild>
-                    <Button type="button" className="w-full">
-                      Choose File
-                    </Button>
-                  </AlertDialogTrigger>
+                    <AlertDialogTrigger asChild>
+                      <Button type="button" className="w-full">
+                        {m.profile_avatar_upload_button()}
+                      </Button>
+                    </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Upload Profile Photo</AlertDialogTitle>
+                      <AlertDialogTitle>{m.profile_avatar_upload_modal_title()}</AlertDialogTitle>
                       <AlertDialogDescription className="space-y-2 text-sm">
                         <span className="block">
-                          Limits: 1 image, max size 2MB, common image formats only.
+                          {m.profile_avatar_upload_modal_description()}
                         </span>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -497,7 +498,7 @@ function ProfilePage() {
                       />
                     </div>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Close</AlertDialogCancel>
+                      <AlertDialogCancel>{m.projects_docs_upload_modal_close()}</AlertDialogCancel>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -511,7 +512,7 @@ function ProfilePage() {
                   }}
                 >
                   <Trash2Icon className="mr-2 h-4 w-4" />
-                  Remove Photo
+                  {m.profile_avatar_remove_button()}
                 </Button>
                 {uploadFailure && <p className="text-xs text-destructive">{uploadFailure}</p>}
               </div>
@@ -548,7 +549,7 @@ function ProfilePage() {
                 name="displayName"
                 children={({ state, handleBlur, handleChange }) => (
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="displayName">Display Name</Label>
+                    <Label htmlFor="displayName">{m.profile_field_displayname_label()}</Label>
                     {isEditing ? (
                       <>
                         <Input
@@ -580,7 +581,7 @@ function ProfilePage() {
                 name="firstName"
                 children={({ state, handleBlur, handleChange }) => (
                   <div className="space-y-1.5">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName">{m.profile_field_firstname_label()}</Label>
                     {isEditing ? (
                       <>
                         <Input
@@ -608,7 +609,7 @@ function ProfilePage() {
                 name="lastName"
                 children={({ state, handleBlur, handleChange }) => (
                   <div className="space-y-1.5">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="lastName">{m.profile_field_lastname_label()}</Label>
                     {isEditing ? (
                       <>
                         <Input
@@ -636,7 +637,7 @@ function ProfilePage() {
                 name="employer"
                 children={({ state, handleBlur, handleChange }) => (
                   <div className="space-y-1.5">
-                    <Label htmlFor="employer">Company</Label>
+                    <Label htmlFor="employer">{m.profile_field_company_label()}</Label>
                     {isEditing ? (
                       <>
                         <Input
@@ -664,7 +665,7 @@ function ProfilePage() {
                 name="jobTitle"
                 children={({ state, handleBlur, handleChange }) => (
                   <div className="space-y-1.5">
-                    <Label htmlFor="jobTitle">Title</Label>
+                    <Label htmlFor="jobTitle">{m.profile_field_title_label()}</Label>
                     {isEditing ? (
                       <>
                         <Input
@@ -689,7 +690,7 @@ function ProfilePage() {
               />
 
               <div className="space-y-1.5 sm:col-span-2">
-                <Label>Email</Label>
+                <Label>{m.profile_field_email_label()}</Label>
                 <p className="min-h-9 rounded-md border border-dashed border-border/60 bg-muted/25 px-3 py-2 text-sm">
                   {profile.email}
                 </p>
@@ -698,8 +699,7 @@ function ProfilePage() {
 
             {isEditing && (
               <p className="text-xs text-muted-foreground">
-                Press <kbd className="rounded border bg-muted px-1.5 py-0.5 text-[11px]">Esc</kbd>{" "}
-                to cancel changes.
+                {m.profile_edit_footer()}
               </p>
             )}
           </form>

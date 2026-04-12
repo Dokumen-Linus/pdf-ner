@@ -114,7 +114,7 @@ export default function Header() {
           <button
             onClick={() => setIsOpen(true)}
             className="md:hidden rounded-lg p-1.5 text-[#171A20] hover:bg-[#F4F4F4] transition-colors"
-            aria-label="Menu"
+            aria-label={m.common_aria_menu()}
           >
             <Menu size={20} />
           </button>
@@ -133,7 +133,7 @@ export default function Header() {
           <button
             onClick={() => setIsOpen(false)}
             className="rounded-lg p-2 text-[#171A20] hover:bg-[#F4F4F4] transition-colors"
-            aria-label="Close"
+            aria-label={m.common_aria_close()}
           >
             <X size={20} />
           </button>

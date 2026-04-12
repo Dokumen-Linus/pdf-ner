@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { authClient } from "@/lib/auth-client"
+import { m } from "@/paraglide/messages.js"
 
 export const Route = createFileRoute("/_auth/signin")({
   validateSearch: z.object({
@@ -52,8 +53,8 @@ function SignInPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl">Sign In</CardTitle>
-          <CardDescription>Enter your email and password to access your account</CardDescription>
+          <CardTitle className="text-2xl">{m.auth_signin_title()}</CardTitle>
+          <CardDescription>{m.auth_signin_description()}</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -71,7 +72,7 @@ function SignInPage() {
               }}
               children={({ state, handleChange, handleBlur }) => (
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{m.auth_signin_email_label()}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -96,7 +97,7 @@ function SignInPage() {
               }}
               children={({ state, handleChange, handleBlur }) => (
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{m.auth_signin_password_label()}</Label>
                   <Input
                     id="password"
                     type="password"
@@ -125,15 +126,15 @@ function SignInPage() {
             />
 
             <Button type="submit" className="w-full" disabled={form.state.isSubmitting}>
-              {form.state.isSubmitting ? "Signing in..." : "Sign In"}
+              {form.state.isSubmitting ? m.auth_signin_button_loading() : m.auth_signin_button()}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
+            {m.auth_signin_footer_text()}{" "}
             <Link to="/signup" className="text-primary hover:underline">
-              Sign up
+              {m.auth_signin_footer_link()}
             </Link>
           </p>
         </CardFooter>

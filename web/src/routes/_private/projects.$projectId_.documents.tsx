@@ -43,6 +43,7 @@ import { uploadPdf } from "@/db-fns/api/storage"
 import { getProjectById } from "@/db-fns/web/projects"
 import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
 import type { FoundWorkersPdf } from "@/db/types"
+import { m } from "@/paraglide/messages.js"
 
 function DocumentsSkeleton() {
   return (
@@ -108,19 +109,19 @@ function DocumentsPage() {
     return (
       <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight">Project Documents</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{m.projects_docs_title()}</h1>
         </div>
         <Card className="border-destructive/40">
           <CardHeader>
-            <CardTitle className="text-destructive">Error Loading Documents</CardTitle>
+            <CardTitle className="text-destructive">{m.projects_docs_error_title()}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              {loadError || "Project or documents not found."}
+              {loadError || m.projects_docs_error_not_found()}
             </p>
-            <Button onClick={() => void router.invalidate()}>Try again</Button>
+            <Button onClick={() => void router.invalidate()}>{m.projects_docs_error_retry()}</Button>
             <Button variant="outline" asChild className="ml-2">
-              <Link to="/projects">Back to Projects</Link>
+              <Link to="/projects">{m.projects_docs_back_button()}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -133,13 +134,13 @@ function DocumentsPage() {
     setUploadError(null)
 
     if (file && file.type !== "application/pdf") {
-      setUploadError("Only PDF files are accepted.")
+      setUploadError(m.projects_docs_upload_error_not_pdf())
       setSelectedFile(null)
       return
     }
 
     if (file && file.size > 50 * 1024 * 1024) {
-      setUploadError("File exceeds the 50 MB size limit.")
+      setUploadError(m.projects_docs_upload_error_too_large())
       setSelectedFile(null)
       return
     }
@@ -176,7 +177,7 @@ function DocumentsPage() {
       setIsUploadOpen(false)
       void router.invalidate()
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Upload failed. Please try again.")
+      setUploadError(err instanceof Error ? err.message : m.projects_docs_upload_error_failed())
     } finally {
       setUploading(false)
     }
@@ -213,14 +214,14 @@ function DocumentsPage() {
           <AlertDialogTrigger asChild>
             <Button size="lg" className="shadow-sm" disabled={!project.bucketId}>
               <PlusIcon className="mr-2 h-5 w-5" />
-              Upload PDF
+              {m.projects_docs_upload_button()}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="sm:max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle>Upload Document</AlertDialogTitle>
+              <AlertDialogTitle>{m.projects_docs_upload_modal_title()}</AlertDialogTitle>
               <AlertDialogDescription>
-                Select a PDF to upload to this project (max 50 MB).
+                {m.projects_docs_upload_modal_description()}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="py-4 space-y-4">
@@ -242,7 +243,7 @@ function DocumentsPage() {
                     </p>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Click to select a PDF</p>
+                  <p className="text-sm text-muted-foreground">{m.projects_docs_upload_modal_placeholder()}</p>
                 )}
               </div>
               <input
@@ -267,18 +268,18 @@ function DocumentsPage() {
                 {uploading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Uploading...
+                    {m.projects_docs_upload_button_loading()}
                   </>
                 ) : (
-                  <>
+                   <>
                     <UploadIcon className="mr-2 h-4 w-4" />
-                    Upload PDF
+                    {m.projects_docs_upload_button()}
                   </>
                 )}
               </Button>
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={uploading}>Close</AlertDialogCancel>
+              <AlertDialogCancel disabled={uploading}>{m.projects_docs_upload_modal_close()}</AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -287,7 +288,7 @@ function DocumentsPage() {
       {!project.bucketId && (
         <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3">
           <p className="text-sm text-destructive">
-            This project has no storage bucket. Re-create the project or contact support.
+            {m.projects_docs_no_bucket_error()}
           </p>
         </div>
       )}
@@ -299,7 +300,7 @@ function DocumentsPage() {
           className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
         >
           <SettingsIcon className="mr-2 h-4 w-4" />
-          Overview
+          {m.projects_details_tab_overview()}
         </Link>
         <Link
           to="/projects/$projectId/dashboard"
@@ -307,11 +308,11 @@ function DocumentsPage() {
           className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
         >
           <LayoutDashboardIcon className="mr-2 h-4 w-4" />
-          Dashboard
+          {m.projects_details_tab_dashboard()}
         </Link>
         <div className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-primary bg-muted/40 px-4 py-2.5 text-sm font-medium text-foreground transition-all">
           <FileTextIcon className="mr-2 h-4 w-4 text-primary" />
-          Documents
+          {m.projects_details_tab_documents()}
         </div>
       </div>
 
@@ -319,9 +320,9 @@ function DocumentsPage() {
         <Card className="border-border/60 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 py-4">
             <div className="space-y-1">
-              <CardTitle className="text-lg">Project Documents</CardTitle>
+              <CardTitle className="text-lg">{m.projects_docs_title()}</CardTitle>
               <CardDescription className="text-xs">
-                {sortedPdfs.length} PDFs associated with this project.
+                {m.projects_docs_list_count({ count: sortedPdfs.length })}
               </CardDescription>
             </div>
             <Button
@@ -331,7 +332,7 @@ function DocumentsPage() {
               onClick={() => void router.invalidate()}
             >
               <RefreshCwIcon className="mr-2 h-3 w-3" />
-              Refresh
+              {m.projects_docs_refresh_button()}
             </Button>
           </CardHeader>
           <CardContent className="p-0 border-t">
@@ -340,16 +341,16 @@ function DocumentsPage() {
                 <TableHeader className="bg-muted/30">
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="py-3 px-6 h-auto text-xs font-semibold uppercase tracking-wider">
-                      Filename
+                      {m.projects_docs_table_col_name()}
                     </TableHead>
                     <TableHead className="py-3 px-4 h-auto text-xs font-semibold uppercase tracking-wider text-center">
-                      Source
+                      {m.projects_docs_table_col_source()}
                     </TableHead>
                     <TableHead className="py-3 px-4 h-auto text-xs font-semibold uppercase tracking-wider text-center">
-                      Status
+                      {m.projects_docs_table_col_status()}
                     </TableHead>
                     <TableHead className="py-3 px-6 h-auto text-xs font-semibold uppercase tracking-wider text-right">
-                      Added
+                      {m.projects_docs_table_col_date()}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -359,7 +360,7 @@ function DocumentsPage() {
                       <TableCell colSpan={4} className="h-40 text-center text-muted-foreground">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <UploadIcon className="h-8 w-8 opacity-20" />
-                          <p>No documents found. Start by uploading one.</p>
+                          <p>{m.projects_docs_list_empty()}</p>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -385,12 +386,12 @@ function DocumentsPage() {
                               {pdf.isProcessed ? (
                                 <div className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
                                   <CheckCircle2Icon className="mr-1 h-3 w-3" />
-                                  Processed
+                                  {m.projects_docs_status_processed()}
                                 </div>
                               ) : (
                                 <div className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold bg-blue-500/10 text-blue-600 border-blue-500/20">
                                   <Loader2Icon className="mr-1 h-3 w-3 animate-spin" />
-                                  Processing
+                                  {m.projects_docs_status_processing()}
                                 </div>
                               )}
                             </div>

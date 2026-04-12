@@ -14,6 +14,7 @@ import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { createUser, deleteUserByEmail, getUserByEmail } from "@/db-fns/web/users"
 import { authClient } from "@/lib/auth-client"
+import { m } from "@/paraglide/messages.js"
 
 export const Route = createFileRoute("/_auth/signup")({
   component: SignUpPage,
@@ -87,21 +88,20 @@ function SignUpPage() {
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4 my-8">
         <Card className="w-full max-w-xl">
           <CardHeader>
-            <CardTitle className="text-2xl">Check your email</CardTitle>
+            <CardTitle className="text-2xl">{m.auth_signup_success_title()}</CardTitle>
             <CardDescription>
-              We&apos;ve sent a verification link to your email address. Please click the link to
-              verify your account.
+              {m.auth_signup_success_description()}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Once you have verified your email, you can sign in.
+              {m.auth_signup_success_content()}
             </p>
             <Link to="/signin">
-              <Button className="w-full">Go to Sign In</Button>
+              <Button className="w-full">{m.auth_signup_success_button()}</Button>
             </Link>
             <p className="text-xs text-muted-foreground text-center mt-2">
-              After verifying your email and signing in, you&apos;ll be redirected to your profile.
+              {m.auth_signup_success_footer()}
             </p>
           </CardContent>
         </Card>
@@ -113,8 +113,8 @@ function SignUpPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4 my-8">
       <Card className="w-full max-w-xl">
         <CardHeader>
-          <CardTitle className="text-2xl">Sign Up</CardTitle>
-          <CardDescription>Create an account to get started</CardDescription>
+          <CardTitle className="text-2xl">{m.auth_signup_title()}</CardTitle>
+          <CardDescription>{m.auth_signup_description()}</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -133,7 +133,7 @@ function SignUpPage() {
                 }}
                 children={({ state, handleChange, handleBlur }) => (
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName">{m.auth_signup_firstname_label()}</Label>
                     <Input
                       id="firstName"
                       value={state.value}
@@ -155,7 +155,7 @@ function SignUpPage() {
                 }}
                 children={({ state, handleChange, handleBlur }) => (
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="lastName">{m.auth_signup_lastname_label()}</Label>
                     <Input
                       id="lastName"
                       value={state.value}
@@ -175,7 +175,7 @@ function SignUpPage() {
               name="employer"
               children={({ state, handleChange, handleBlur }) => (
                 <div className="space-y-2">
-                  <Label htmlFor="employer">Employer</Label>
+                  <Label htmlFor="employer">{m.auth_signup_employer_label()}</Label>
                   <Input
                     id="employer"
                     value={state.value}
@@ -189,7 +189,7 @@ function SignUpPage() {
               name="jobTitle"
               children={({ state, handleChange, handleBlur }) => (
                 <div className="space-y-2">
-                  <Label htmlFor="jobTitle">Job Title</Label>
+                  <Label htmlFor="jobTitle">{m.auth_signup_jobtitle_label()}</Label>
                   <Input
                     id="jobTitle"
                     value={state.value}
@@ -216,7 +216,7 @@ function SignUpPage() {
               }}
               children={({ state, handleChange, handleBlur }) => (
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{m.auth_signup_email_label()}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -251,7 +251,7 @@ function SignUpPage() {
               }}
               children={({ state, handleChange, handleBlur }) => (
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{m.auth_signup_password_label()}</Label>
                   <Input
                     id="password"
                     type="password"
@@ -274,7 +274,7 @@ function SignUpPage() {
               }}
               children={({ state, handleChange, handleBlur }) => (
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword">{m.auth_signup_confirmpassword_label()}</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
@@ -301,15 +301,15 @@ function SignUpPage() {
               }
             />
             <Button type="submit" className="w-full" disabled={form.state.isSubmitting}>
-              {form.state.isSubmitting ? "Creating Account..." : "Sign Up"}
+              {form.state.isSubmitting ? m.auth_signup_button_loading() : m.auth_signup_button()}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
+            {m.auth_signup_footer_text()}{" "}
             <Link to="/signin" className="text-primary hover:underline">
-              Sign in
+              {m.auth_signup_footer_link()}
             </Link>
           </p>
         </CardFooter>

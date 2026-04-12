@@ -1,52 +1,53 @@
 import type { EntityType } from "./entity-type"
+import { m } from "@/paraglide/messages.js"
 
 const initialEntityTypes0: Pick<EntityType, "name" | "subtype">[] = [
   {
-    name: "Register ID",
+    name: m.entity_type_register_id(),
     subtype: "highlight",
   },
   {
-    name: "Register Volume",
+    name: m.entity_type_register_volume(),
     subtype: "underline",
   },
   {
-    name: "Register Number",
+    name: m.entity_type_register_number(),
     subtype: "underline",
   },
   {
-    name: "Register Date",
+    name: m.entity_type_register_date(),
     subtype: "highlight",
   },
   {
-    name: "Effective Date",
+    name: m.entity_type_effective_date(),
     subtype: "highlight",
   },
   {
-    name: "Title",
+    name: m.entity_type_title(),
     subtype: "highlight",
   },
   {
-    name: "Agency",
+    name: m.entity_type_agency(),
     subtype: "highlight",
   },
   {
-    name: "Action",
+    name: m.entity_type_action(),
     subtype: "highlight",
   },
   {
-    name: "Summary",
+    name: m.entity_type_summary(),
     subtype: "squiggly",
   },
   {
-    name: "Contact Name",
+    name: m.entity_type_contact_name(),
     subtype: "highlight",
   },
   {
-    name: "Contact Position",
+    name: m.entity_type_contact_position(),
     subtype: "highlight",
   },
   {
-    name: "Contact Email",
+    name: m.entity_type_contact_email(),
     subtype: "highlight",
   },
 ]

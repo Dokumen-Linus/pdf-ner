@@ -22,6 +22,7 @@ import { getAllTemplates } from "@/db-fns/api/templates"
 import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
 import { getProjectById } from "@/db-fns/web/projects"
 import type { FoundDbEntityType, FoundPrompt, FoundTemplate } from "@/db/types"
+import { m } from "@/paraglide/messages.js"
 
 // Use a skeleton for loaders
 function ProjectDetailsPageSkeleton() {
@@ -90,17 +91,17 @@ function ProjectDetailsPage() {
     return (
       <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight">Project Details</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{m.projects_details_title()}</h1>
         </div>
         <Card className="border-destructive/40">
           <CardHeader>
-            <CardTitle className="text-destructive">Error Loading Project</CardTitle>
+            <CardTitle className="text-destructive">{m.projects_details_error_title()}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">{loadError || "Project not found."}</p>
-            <Button onClick={() => void router.invalidate()}>Try again</Button>
+            <p className="text-sm text-muted-foreground">{loadError || m.projects_details_error_not_found()}</p>
+            <Button onClick={() => void router.invalidate()}>{m.projects_details_error_retry()}</Button>
             <Button variant="outline" asChild className="ml-2">
-              <Link to="/projects">Back to Projects</Link>
+              <Link to="/projects">{m.projects_details_back_button()}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -125,7 +126,7 @@ function ProjectDetailsPage() {
       <div className="flex space-x-1 border-b pb-px overflow-x-auto">
         <div className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-primary bg-muted/40 px-4 py-2.5 text-sm font-medium text-foreground transition-all">
           <SettingsIcon className="mr-2 h-4 w-4 text-primary" />
-          Overview
+          {m.projects_details_tab_overview()}
         </div>
         <Link
           to="/projects/$projectId/dashboard"
@@ -133,7 +134,7 @@ function ProjectDetailsPage() {
           className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
         >
           <LayoutDashboardIcon className="mr-2 h-4 w-4" />
-          Dashboard
+          {m.projects_details_tab_dashboard()}
         </Link>
         <Link
           to="/projects/$projectId/documents"
@@ -141,7 +142,7 @@ function ProjectDetailsPage() {
           className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
         >
           <FileTextIcon className="mr-2 h-4 w-4" />
-          Documents
+          {m.projects_details_tab_documents()}
         </Link>
       </div>
 
@@ -150,24 +151,24 @@ function ProjectDetailsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <SettingsIcon className="h-5 w-5 text-primary" />
-              Project Settings
+              {m.projects_details_settings_title()}
             </CardTitle>
-            <CardDescription>Basic configuration and properties</CardDescription>
+            <CardDescription>{m.projects_details_settings_description()}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
               <div>
-                <span className="text-muted-foreground block mb-1">Orientation</span>
+                <span className="text-muted-foreground block mb-1">{m.projects_details_settings_orientation()}</span>
                 <span className="font-medium capitalize">{project.orientation}</span>
               </div>
               <div>
-                <span className="text-muted-foreground block mb-1">Color Presets</span>
+                <span className="text-muted-foreground block mb-1">{m.projects_details_settings_color_presets()}</span>
                 <span className="font-medium">{project.colorPresets?.length || 0}</span>
               </div>
               <div>
                 <span className="text-muted-foreground flex items-center gap-1 mb-1">
                   <CalendarIcon className="h-3 w-3" />
-                  Created
+                  {m.projects_details_settings_created()}
                 </span>
                 <span className="font-medium">
                   {project.createdAt ? new Date(project.createdAt).toLocaleDateString() : "Unknown"}
@@ -176,7 +177,7 @@ function ProjectDetailsPage() {
               <div>
                 <span className="text-muted-foreground flex items-center gap-1 mb-1">
                   <CalendarIcon className="h-3 w-3" />
-                  Updated
+                  {m.projects_details_settings_updated()}
                 </span>
                 <span className="font-medium">
                   {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : "Unknown"}
@@ -192,9 +193,9 @@ function ProjectDetailsPage() {
               <div className="space-y-1">
                 <CardTitle className="flex items-center gap-2">
                   <TagIcon className="h-5 w-5 text-primary" />
-                  Entity Types
+                  {m.projects_details_entities_title()}
                 </CardTitle>
-                <CardDescription>Entities being extracted</CardDescription>
+                <CardDescription>{m.projects_details_entities_description()}</CardDescription>
               </div>
               <Badge variant="secondary">{entityTypes.length}</Badge>
             </div>
@@ -213,12 +214,12 @@ function ProjectDetailsPage() {
                     <div className="flex gap-2">
                       {et.required && (
                         <Badge variant="outline" className="px-1.5 py-0 text-[10px] font-normal">
-                          Required
+                          {m.projects_details_entities_required()}
                         </Badge>
                       )}
                       {et.unique && (
                         <Badge variant="outline" className="px-1.5 py-0 text-[10px] font-normal">
-                          Unique
+                          {m.projects_details_entities_unique()}
                         </Badge>
                       )}
                     </div>
@@ -235,9 +236,9 @@ function ProjectDetailsPage() {
               <div className="space-y-1">
                 <CardTitle className="flex items-center gap-2">
                   <CodeIcon className="h-5 w-5 text-primary" />
-                  Templates
+                  {m.projects_details_templates_title()}
                 </CardTitle>
-                <CardDescription>Extraction templates applied to this project</CardDescription>
+                <CardDescription>{m.projects_details_templates_description()}</CardDescription>
               </div>
               <Badge variant="secondary">{activeTemplates.length}</Badge>
             </div>
@@ -252,7 +253,7 @@ function ProjectDetailsPage() {
                     key={template!.id}
                     className="space-y-2 rounded-lg border border-border bg-muted/20 p-4"
                   >
-                    <div className="text-sm font-medium">Template #{template!.id}</div>
+                    <div className="text-sm font-medium">{m.projects_details_templates_item_title({ id: template!.id! })}</div>
                     <div className="line-clamp-3 text-xs text-muted-foreground">
                       {template!.txt}
                     </div>

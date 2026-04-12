@@ -24,6 +24,7 @@ import ColorPicker from "../../custom/color-picker"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import useEntityTypeStore from "../hooks/use-entity-type-store"
 import initialEntityTypes from "../initial-entity-types"
+import { m } from "@/paraglide/messages.js"
 
 const EntityTable = () => {
   // **IMPORTANT**
@@ -62,10 +63,10 @@ const EntityTable = () => {
     <Table className="[&_th]:px-1.5 [&_td]:px-1.5 [&_th]:py-2.5 [&_td]:py-2">
       <TableHeader>
         <TableRow>
-          <TableHead>Subtype</TableHead>
-          <TableHead>Color</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>EntityValue</TableHead>
+          <TableHead>{m.entity_table_col_subtype()}</TableHead>
+          <TableHead>{m.entity_table_col_color()}</TableHead>
+          <TableHead>{m.entity_table_col_name()}</TableHead>
+          <TableHead>{m.entity_table_col_value()}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -110,12 +111,12 @@ const EntityTable = () => {
                     )
                   }}
                 >
-                  <SelectTrigger className="w-[70px]">
+                  <SelectTrigger className="w-17.5">
                     <SelectValue placeholder={entityType.subtype} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="highlight">
-                      <Highlighter className="w-[40px]" />
+                      <Highlighter className="w-10" />
                     </SelectItem>
                     <SelectItem value="underline">
                       <Underline className="h-4 w-4" />
@@ -168,7 +169,7 @@ const EntityTable = () => {
                   activateEntityType(name)
                 }}
               >
-                {isActive ? "Select text..." : annotationText || "Press to assign..."}
+                {isActive ? m.entity_table_state_selecting() : annotationText || m.entity_table_state_empty()}
               </TableCell>
             </TableRow>
           )

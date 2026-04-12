@@ -8,6 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/shadcn-ui/carousel"
+import { m } from "@/paraglide/messages.js"
 
 export const Route = createFileRoute("/_public/")({ component: App })
 
@@ -38,11 +39,10 @@ export default function App() {
         {/* Left Side: Headline & Copy */}
         <div className="w-full md:w-1/2 flex flex-col justify-center z-10 py-12">
           <h1 className="text-[40px] font-medium leading-[1.2] text-[#171A20] tracking-normal mb-6 max-w-lg">
-            Turn PDFs into structured data.
+            {m.landing_hero_title()}
           </h1>
           <p className="text-[14px] font-normal leading-[1.43] text-[#393C41] mb-10 max-w-md">
-            Label entities, train models, and automate extraction workflows. Dokumen AI acts as the
-            connective tissue between your unstructured documents and database.
+            {m.landing_hero_description()}
           </p>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -50,13 +50,13 @@ export default function App() {
               to="/signup"
               className="group flex items-center justify-center min-h-10 w-full sm:w-50 rounded-lg bg-[#3E6AE1] px-4 text-[14px] font-medium text-white border-[3px] border-transparent transition-all duration-330 hover:bg-[#2e52b5] focus:border-[#3E6AE1] focus:shadow-[inset_0_0_0_2px_white]"
             >
-              Sign up
+              {m.landing_hero_cta_signup()}
             </Link>
             <Link
               to="/demo"
               className="group flex items-center justify-center min-h-10 w-full sm:w-50 rounded-lg bg-[#F4F4F4] px-4 text-[14px] font-medium text-[#393C41] border-[3px] border-transparent transition-all duration-330 hover:bg-[#EAEAEA]"
             >
-              View Demo
+              {m.landing_hero_cta_demo()}
             </Link>
           </div>
         </div>
@@ -147,10 +147,9 @@ export default function App() {
       <section className="py-32 px-6 bg-[#F4F4F4]">
         <div className="mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-16">
           <div className="w-full md:w-1/2 max-w-sm">
-            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">No-Code Interface</h2>
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_feature_nocode_title()}</h2>
             <p className="text-[16px] font-normal text-[#5C5E62] leading-[1.6]">
-              Visually annotate PDF regions with zero scripting required. Simply click and drag to
-              establish dataset fields instantly.
+              {m.landing_feature_nocode_description()}
             </p>
           </div>
           <div className="w-full md:w-1/2 relative h-75 flex items-center justify-center">
@@ -192,7 +191,7 @@ export default function App() {
                     repeatDelay: 2.2,
                   }}
                 >
-                  Vendor Name
+                  {m.landing_feature_nocode_label_vendor()}
                 </motion.div>
               </div>
 
@@ -219,10 +218,9 @@ export default function App() {
       <section className="py-32 px-6 bg-white">
         <div className="mx-auto max-w-5xl flex flex-col md:flex-row-reverse items-center justify-between gap-16">
           <div className="w-full md:w-1/2 max-w-sm">
-            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">Lightning Models</h2>
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_feature_models_title()}</h2>
             <p className="text-[16px] font-normal text-[#5C5E62] leading-[1.6]">
-              Use fast performant extraction models instantly, tailored to your custom document
-              schemas.
+              {m.landing_feature_models_description()}
             </p>
           </div>
           <div className="w-full md:w-1/2 relative h-75 flex items-center justify-center">
@@ -300,10 +298,9 @@ export default function App() {
       <section className="py-32 px-6 bg-[#F4F4F4]">
         <div className="mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-16">
           <div className="w-full md:w-1/2 max-w-sm">
-            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">Seamless Integration</h2>
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_feature_integration_title()}</h2>
             <p className="text-[16px] font-normal text-[#5C5E62] leading-[1.6]">
-              Output structured data natively to webhooks, APIs, and direct database sinks
-              synchronously.
+              {m.landing_feature_integration_description()}
             </p>
           </div>
           <div className="w-full md:w-1/2 relative h-75 flex items-center justify-center">
@@ -311,9 +308,9 @@ export default function App() {
             <div className="relative w-85 h-65 flex items-center">
               {/* Source Node */}
               <div className="w-25 h-25 bg-white border border-[#D0D1D2] flex flex-col items-center justify-center z-10 shadow-sm relative rounded-xl">
-                <span className="text-[12px] font-semibold text-[#171A20] mb-1">Pipeline</span>
+                <span className="text-[12px] font-semibold text-[#171A20] mb-1">{m.landing_feature_integration_pipeline()}</span>
                 <div className="px-2 py-0.5 bg-[#3E6AE1]/10 text-[#3E6AE1] text-[10px] font-mono rounded-[2px] border border-[#3E6AE1]/20">
-                  Active
+                  {m.landing_feature_integration_active()}
                 </div>
 
                 {/* Origin Pulse */}
@@ -364,9 +361,8 @@ export default function App() {
 
               {/* Destinations */}
               <div className="absolute right-0 h-47.5 w-32.5 flex flex-col justify-between py-1 z-10">
-                {/* Top Dest */}
                 <div className="w-25 h-12 bg-white border border-[#D0D1D2] shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex items-center justify-center ml-auto rounded-xl">
-                  <span className="text-[12px] font-medium text-[#5C5E62]">REST API</span>
+                  <span className="text-[12px] font-medium text-[#5C5E62]">{m.landing_feature_integration_rest_api()}</span>
                 </div>
                 {/* Mid Dest / Highlighted */}
                 <motion.div
@@ -374,12 +370,12 @@ export default function App() {
                   animate={{ y: [-2, 2, -2] }}
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <span className="text-[13px] font-semibold text-[#171A20]">PostgreSQL</span>
-                  <span className="text-[10px] text-[#3E6AE1] font-mono mt-0.5">Synced 1s ago</span>
+                  <span className="text-[13px] font-semibold text-[#171A20]">{m.landing_feature_integration_postgresql()}</span>
+                  <span className="text-[10px] text-[#3E6AE1] font-mono mt-0.5">{m.landing_feature_integration_synced_ago({ time: "1s" })}</span>
                 </motion.div>
                 {/* Bottom Dest */}
                 <div className="w-25 h-12 bg-white border border-[#D0D1D2] shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex items-center justify-center ml-auto rounded-xl">
-                  <span className="text-[12px] font-medium text-[#5C5E62]">Webhook</span>
+                  <span className="text-[12px] font-medium text-[#5C5E62]">{m.landing_feature_integration_webhook()}</span>
                 </div>
               </div>
             </div>
@@ -391,9 +387,9 @@ export default function App() {
       <section className="py-32 px-6 bg-white">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-16">
-            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">Loved by builders</h2>
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_tweets_title()}</h2>
             <p className="text-[16px] font-normal text-[#5C5E62]">
-              See what developers are saying about the engine.
+              {m.landing_tweets_description()}
             </p>
           </div>
 
@@ -426,15 +422,15 @@ export default function App() {
 
       {/* Demo Link Section */}
       <section className="py-40 px-6 flex flex-col items-center justify-center text-center bg-[#F4F4F4] min-h-[50vh]">
-        <h2 className="text-[40px] font-medium text-[#171A20] mb-6">Experience the engine.</h2>
+        <h2 className="text-[40px] font-medium text-[#171A20] mb-6">{m.landing_demo_title()}</h2>
         <p className="text-[16px] font-normal text-[#393C41] mb-10 max-w-md">
-          See the visual labeling interface directly in your browser.
+          {m.landing_demo_description()}
         </p>
         <Link
           to="/demo"
           className="rounded-lg bg-[#3E6AE1] px-16 py-4 flex items-center justify-center text-[15px] font-medium text-white transition-all duration-330 hover:bg-[#2e52b5] shadow-[0_4px_14px_0_rgba(62,106,225,0.39)] hover:shadow-[0_6px_20px_rgba(62,106,225,0.23)] hover:-translate-y-0.5"
         >
-          Try the demo
+          {m.landing_demo_cta()}
         </Link>
       </section>
     </div>

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { createFileRoute } from "@tanstack/react-router"
+import { m } from "@/paraglide/messages.js"
 import { CreditCardIcon, LoaderCircleIcon, ZapIcon } from "lucide-react"
 import { Badge } from "@/components/shadcn-ui/badge"
 import { Button } from "@/components/shadcn-ui/button"
@@ -102,7 +103,7 @@ function PaymentForm() {
     })
 
     if (stripeError) {
-      setError(stripeError.message ?? "Something went wrong. Please try again.")
+      setError(stripeError.message ?? m.billing_payment_error_fallback())
       setIsSubmitting(false)
       return
     }
@@ -114,7 +115,7 @@ function PaymentForm() {
   if (succeeded) {
     return (
       <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-        Payment method saved successfully.
+        {m.billing_payment_success()}
       </div>
     )
   }
@@ -129,7 +130,7 @@ function PaymentForm() {
       )}
       <Button type="submit" disabled={!stripe || isSubmitting} className="w-full">
         {isSubmitting && <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />}
-        {isSubmitting ? "Saving..." : "Save Payment Method"}
+        {isSubmitting ? m.billing_payment_button_loading() : m.billing_payment_button()}
       </Button>
     </form>
   )
@@ -142,46 +143,46 @@ function BillingPage() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-8 px-4 py-6 sm:px-6">
       <div className="space-y-1">
-        <h1 className="text-3xl font-semibold tracking-tight">Billing & Usage</h1>
-        <p className="text-sm text-muted-foreground">Current month usage and payment details.</p>
+        <h1 className="text-3xl font-semibold tracking-tight">{m.billing_title()}</h1>
+        <p className="text-sm text-muted-foreground">{m.billing_description()}</p>
       </div>
 
       {/* Usage Summary */}
       <section className="space-y-3">
-        <h2 className="text-lg font-medium">Usage This Month</h2>
+        <h2 className="text-lg font-medium">{m.billing_usage_title()}</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <StatCard
-            label="Total Tokens"
+            label={m.billing_usage_tokens_title()}
             value={totalTokens.toLocaleString()}
             sub={
               usage
-                ? `${usage.totalInputTokens.toLocaleString()} in / ${usage.totalOutputTokens.toLocaleString()} out`
+                ? m.billing_usage_tokens_description({ input: usage.totalInputTokens.toLocaleString(), output: usage.totalOutputTokens.toLocaleString() })
                 : undefined
             }
           />
           <StatCard
-            label="Total Cost"
+            label={m.billing_usage_cost_title()}
             value={usage ? formatCost(usage.totalCostUsd) : "$0.000000"}
           />
-          <StatCard label="API Calls" value={(usage?.callCount ?? 0).toLocaleString()} />
+          <StatCard label={m.billing_usage_calls_title()} value={(usage?.callCount ?? 0).toLocaleString()} />
         </div>
       </section>
 
       {/* Usage by Model */}
       {usage && usage.byModel.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-medium">Usage by Model</h2>
+          <h2 className="text-lg font-medium">{m.billing_model_usage_title()}</h2>
           <Card className="border-border/80 shadow-sm">
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Provider</TableHead>
-                    <TableHead>Model</TableHead>
-                    <TableHead className="text-right">Input Tokens</TableHead>
-                    <TableHead className="text-right">Output Tokens</TableHead>
-                    <TableHead className="text-right">Cost</TableHead>
-                    <TableHead className="text-right">Calls</TableHead>
+                    <TableHead>{m.billing_table_col_provider()}</TableHead>
+                    <TableHead>{m.billing_table_col_model()}</TableHead>
+                    <TableHead className="text-right">{m.billing_table_col_input()}</TableHead>
+                    <TableHead className="text-right">{m.billing_table_col_output()}</TableHead>
+                    <TableHead className="text-right">{m.billing_table_col_cost()}</TableHead>
+                    <TableHead className="text-right">{m.billing_table_col_calls()}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -214,21 +215,21 @@ function BillingPage() {
 
       {/* Stripe Status */}
       <section className="space-y-3">
-        <h2 className="text-lg font-medium">Subscription</h2>
+        <h2 className="text-lg font-medium">{m.billing_sub_title()}</h2>
         <Card className="border-border/80 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-2">
               <ZapIcon className="h-5 w-5 text-muted-foreground" />
               <CardTitle className="text-base">
                 {stripeCustomer?.stripeSubscriptionId
-                  ? "Active Subscription"
-                  : "No Active Subscription"}
+                  ? m.billing_sub_status_active()
+                  : m.billing_sub_status_inactive()}
               </CardTitle>
             </div>
             <CardDescription>
               {stripeCustomer?.stripeSubscriptionId
-                ? "You are on a metered plan. Charges are based on actual usage."
-                : "Subscribe to enable API access beyond the free tier."}
+                ? m.billing_sub_description_active()
+                : m.billing_sub_description_inactive()}
             </CardDescription>
           </CardHeader>
           {stripeCustomer?.stripeSubscriptionId && (
@@ -243,15 +244,15 @@ function BillingPage() {
 
       {/* Payment Method */}
       <section className="space-y-3">
-        <h2 className="text-lg font-medium">Payment Method</h2>
+        <h2 className="text-lg font-medium">{m.billing_payment_title()}</h2>
         <Card className="border-border/80 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-2">
               <CreditCardIcon className="h-5 w-5 text-muted-foreground" />
-              <CardTitle className="text-base">Payment Information</CardTitle>
+              <CardTitle className="text-base">{m.billing_payment_subtitle()}</CardTitle>
             </div>
             <CardDescription>
-              Your card details are secured by Stripe and never stored on our servers.
+              {m.billing_payment_description()}
             </CardDescription>
           </CardHeader>
           <CardContent>

@@ -4,6 +4,7 @@ import { useChat } from "@tanstack/ai-react"
 import { Bot, MessageSquare, Send, Sparkles, User, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { cn } from "@/lib/shadcn-ui/utils"
+import { m } from "@/paraglide/messages.js"
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false)
@@ -42,7 +43,7 @@ export default function Chatbot() {
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-[#3E6AE1]" />
-                <span className="font-medium text-[15px]">Chat</span>
+                <span className="font-medium text-[15px]">{m.chatbot_header_title()}</span>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
@@ -60,8 +61,8 @@ export default function Chatbot() {
             >
               {messages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
-                  <Bot className="w-10 h-10 mb-3" />
-                  <p className="text-[14px]">How can I help you today?</p>
+                   <Bot className="w-10 h-10 mb-3" />
+                  <p className="text-[14px]">{m.chatbot_empty_state()}</p>
                 </div>
               ) : (
                 messages.map((m) => (
@@ -119,7 +120,7 @@ export default function Chatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 type="text"
-                placeholder="Ask about Dokumen AI..."
+                placeholder={m.chatbot_input_placeholder()}
                 className="flex-1 bg-[#F4F4F4] text-[14px] rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-[#3E6AE1]/20 transition-all border border-transparent focus:border-[#3E6AE1]/50"
               />
               <button
