@@ -6,7 +6,7 @@ The Pdfs subsystem handles **1 routes**.
 
 ## Routes
 
-- `POST` `/pdfs` → in: CreateBucketRequest [upload]
+- `POST` `/api/v1/pdfs` → in: CreateBucketRequest [upload]
   `api\app\domains\pdf_storage\router.py`
 
 ## Related Models

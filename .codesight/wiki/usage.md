@@ -6,7 +6,7 @@ The Usage subsystem handles **1 routes** and touches: db, payment.
 
 ## Routes
 
-- `GET` `/usage` → in: UUI, out: None [db, payment]
+- `GET` `/api/v1/usage` → in: UUI, out: None [db, payment]
   `api\app\domains\billing\router.py`
 
 ## Related Models

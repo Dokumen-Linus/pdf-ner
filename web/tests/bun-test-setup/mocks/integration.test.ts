@@ -9,11 +9,8 @@
 // entry point). The global afterEach in main.ts resets state between tests,
 // so each `it` starts from unauthenticated + empty fetch registry.
 //
-// NOTE: we deliberately don't import @/db-fns/api/_helpers here because it
-// pulls in @/db/client, which currently fails to load under bun:test due to
-// an unrelated `pgSchema("public")` issue in @/db/schemas/public/schema.ts.
-// Instead, we demonstrate the same flow using the same primitives that
-// _helpers uses internally: auth.api.getSession + global fetch.
+// NOTE: we demonstrate the auth + fetch flow using primitives directly
+// rather than importing _helpers, so this test file is self-contained.
 
 import { describe, expect, it } from "bun:test"
 import { auth } from "@/lib/auth"

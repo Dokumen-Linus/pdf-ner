@@ -6,7 +6,7 @@ The Extract subsystem handles **1 routes** and touches: cache.
 
 ## Routes
 
-- `POST` `/extract` → in: ExtractEntitiesRequest [cache]
+- `POST` `/api/v1/extract` → in: ExtractEntitiesRequest [cache]
   `api\app\domains\llm_ner\router.py`
 
 ## Source Files

@@ -6,9 +6,9 @@ The Payments subsystem handles **2 routes** and touches: db, payment.
 
 ## Routes
 
-- `POST` `/subscription` → in: CreateCustomerRequest, out: None [db, payment]
+- `POST` `/api/v1/subscription` → in: CreateCustomerRequest, out: None [db, payment]
   `api\app\domains\billing\router.py`
-- `DELETE` `/subscription` → in: CancelSubscriptionRequest, out: None [db, payment]
+- `DELETE` `/api/v1/subscription` → in: CancelSubscriptionRequest, out: None [db, payment]
   `api\app\domains\billing\router.py`
 
 ## Source Files

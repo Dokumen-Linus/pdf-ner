@@ -1,10 +1,5 @@
-// Smoke test for the shared test mocks. Double-purpose: (1) catches
-// regressions in the mock infrastructure itself, (2) serves as a copy-paste
-// reference for how tests should use the helpers.
-//
-// NOTE: main.ts preload already called installAuthMock(), installAuthClientMock(),
-// and installFetchMock() before any of this file's imports run. The helpers
-// below just flip shared state; the mocks read from that state on every call.
+// Smoke tests for the shared mocks. main.ts preload installs the mocks;
+// these tests verify the infrastructure works and serve as usage examples.
 
 import { describe, expect, it } from "bun:test"
 import { auth } from "@/lib/auth"
@@ -157,8 +152,6 @@ describe("fetch mock", () => {
 
 describe("reset behavior", () => {
   it("main.ts afterEach clears auth state between tests", async () => {
-    // If the afterEach in main.ts didn't fire, the previous describe block's
-    // setAuthenticated() call would leak into this one.
     const serverSession = await auth.api.getSession({ headers: new Headers() })
     const { data: clientSession } = await authClient.getSession()
     expect(serverSession).toBeNull()
@@ -166,7 +159,6 @@ describe("reset behavior", () => {
   })
 
   it("main.ts afterEach clears fetch routes between tests", async () => {
-    // Same idea — any route registered in a previous test must be gone.
     await expect(fetch("http://api.test/api/v1/pdfs")).rejects.toThrow(/No mock registered/)
   })
 

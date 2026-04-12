@@ -6,7 +6,7 @@ The Customer subsystem handles **1 routes** and touches: db, payment.
 
 ## Routes
 
-- `POST` `/customer` → in: CreateCustomerRequest, out: None [db, payment]
+- `POST` `/api/v1/customer` → in: CreateCustomerRequest, out: None [db, payment]
   `api\app\domains\billing\router.py`
 
 ## Source Files
