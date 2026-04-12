@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react"
 import { getUserByEmail } from "@/db-fns/web/users"
 import { authClient } from "@/lib/auth-client"
 import logoUrl from "@/logo.svg"
+import { m } from "@/paraglide/messages.js"
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -60,7 +61,7 @@ export default function Header() {
                   "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
               }}
             >
-              Home
+              {m.nav_home()}
             </Link>
             <Link
               to="/demo"
@@ -70,7 +71,7 @@ export default function Header() {
                   "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
               }}
             >
-              Demo
+              {m.nav_demo()}
             </Link>
           </nav>
 
@@ -88,7 +89,7 @@ export default function Header() {
                   to="/signout"
                   className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
                 >
-                  Sign Out
+                  {m.nav_signout()}
                 </Link>
               </>
             ) : (
@@ -97,13 +98,13 @@ export default function Header() {
                   to="/signin"
                   className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
                 >
-                  Sign In
+                  {m.nav_signin()}
                 </Link>
                 <Link
                   to="/signup"
                   className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
                 >
-                  Sign Up
+                  {m.nav_signup()}
                 </Link>
               </>
             )}
@@ -144,14 +145,14 @@ export default function Header() {
             onClick={() => setIsOpen(false)}
             className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
           >
-            Home
+            {m.nav_home()}
           </Link>
           <Link
             to="/demo"
             onClick={() => setIsOpen(false)}
             className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
           >
-            Demo
+            {m.nav_demo()}
           </Link>
           {session ? (
             <>
@@ -160,14 +161,14 @@ export default function Header() {
                 onClick={() => setIsOpen(false)}
                 className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors mt-4"
               >
-                Profile
+                {m.nav_profile()}
               </Link>
               <Link
                 to="/signout"
                 onClick={() => setIsOpen(false)}
                 className="text-[17px] font-medium text-[#5C5E62] hover:text-[#171A20] transition-colors mt-2"
               >
-                Sign Out
+                {m.nav_signout()}
               </Link>
             </>
           ) : (
@@ -177,14 +178,14 @@ export default function Header() {
                 onClick={() => setIsOpen(false)}
                 className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors mt-4"
               >
-                Sign In
+                {m.nav_signin()}
               </Link>
               <Link
                 to="/signup"
                 onClick={() => setIsOpen(false)}
                 className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors mt-2"
               >
-                Sign Up
+                {m.nav_signup()}
               </Link>
             </>
           )}

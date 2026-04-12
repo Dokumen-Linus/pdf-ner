@@ -75,9 +75,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   shellComponent: RootDocument,
 })
 
+import { getLocale } from "../paraglide/runtime"
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="bg-white text-black dark:bg-gray-950 dark:text-white">
+    <html lang={getLocale()} className="bg-white text-black dark:bg-gray-950 dark:text-white">
       <head>
         <HeadContent />
       </head>

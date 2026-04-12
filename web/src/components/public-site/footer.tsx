@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router"
+import { m } from "../../paraglide/messages.js"
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -9,7 +10,7 @@ export default function Footer() {
         <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-4 mb-4">
           <li>
             <span className="text-[12px] font-medium text-[#D0D1D2]">
-              Dokumen AI &copy; {currentYear}
+              {m.footer_brand()} &copy; {currentYear}
             </span>
           </li>
           <li>
@@ -17,7 +18,7 @@ export default function Footer() {
               to="/demo"
               className="text-[12px] font-medium text-[#D0D1D2] hover:text-[#FFFFFF] transition-colors"
             >
-              Demo
+              {m.footer_demo()}
             </Link>
           </li>
           <li>
@@ -25,7 +26,7 @@ export default function Footer() {
               to="/signin"
               className="text-[12px] font-medium text-[#D0D1D2] hover:text-[#FFFFFF] transition-colors"
             >
-              Sign In
+              {m.footer_signin()}
             </Link>
           </li>
           <li>
@@ -33,7 +34,7 @@ export default function Footer() {
               to="/signup"
               className="text-[12px] font-medium text-[#D0D1D2] hover:text-[#FFFFFF] transition-colors"
             >
-              Sign Up
+              {m.footer_signup()}
             </Link>
           </li>
         </ul>

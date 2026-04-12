@@ -1,0 +1,13 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "footer_brand": "Dokumen AI",
+  "footer_demo": "Demo",
+  "footer_signin": "Sign In",
+  "footer_signup": "Sign Up",
+  "nav_home": "Home",
+  "nav_demo": "Demo",
+  "nav_profile": "Profile",
+  "nav_signout": "Sign Out",
+  "nav_signin": "Sign In",
+  "nav_signup": "Sign Up"
+}
