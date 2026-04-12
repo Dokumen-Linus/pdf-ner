@@ -52,7 +52,7 @@ pip install jq pytest ruff uv
 
 [GitHub Actions](https://github.com/features/actions)
 
-- auto-docs: generate CHANGLELOG.md and .codesight/wiki
+- auto-docs: generate CHANGELOG.md and .codesight/wiki
 - claude: talk to Claude in GitHub comments by @claude
 
 ### Enforced Commit Pattern

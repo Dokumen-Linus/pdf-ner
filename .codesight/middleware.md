@@ -13,4 +13,6 @@
 - auth-client — `web\src\lib\auth-client.ts`
 - auth — `web\src\lib\auth.ts`
 - auth — `web\src\middleware\auth.ts`
+- auth-client — `web\tests\bun-test-setup\mocks\auth-client.ts`
+- auth — `web\tests\bun-test-setup\mocks\auth.ts`
 - auth.e2e — `web\tests\e2e\auth.e2e.ts`

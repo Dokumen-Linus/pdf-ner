@@ -6,7 +6,7 @@
 
 ## Scale
 
-11 API routes · 18 database models · 54 UI components · 9 middleware layers · 36 environment variables
+11 API routes · 18 database models · 54 UI components · 11 middleware layers · 36 environment variables
 
 ## Subsystems
 

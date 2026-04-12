@@ -1,7 +1,7 @@
 # Test Coverage
 
-> **48%** of routes and models are covered by tests
-> 35 test files found
+> **52%** of routes and models are covered by tests
+> 37 test files found
 
 ## Covered Models
 
@@ -19,3 +19,4 @@
 - models
 - user
 - session
+- account

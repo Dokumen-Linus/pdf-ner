@@ -1,7 +1,11 @@
-import { expect, mock } from "bun:test"
+import { afterEach, expect, mock } from "bun:test"
 import { isUuidV4 } from "@/lib/misc/uuid"
 import setupDB from "./db-setup"
 import setupDOM from "./dom-setup"
+import { resetMocks } from "./mocks"
+import { installAuthMock, installBetterAuthPackageMock } from "./mocks/auth"
+import { installAuthClientMock, installBetterAuthReactMock } from "./mocks/auth-client"
+import { installFetchMock } from "./mocks/fetch"
 import "./bun-test-extensions.d.ts"
 
 // ─── Module Mocks ─────────────────────────────────────────────────────────────
@@ -48,9 +52,10 @@ mock.module("@tanstack/react-start", () => ({
   },
 }))
 
-// getRequestHeaders is used by auth-gated functions (billing, etc.).
-// Returning empty Headers causes auth.api.getSession to return null,
-// so requireUserId() throws "Unauthorized" — the expected test behavior.
+// getRequestHeaders is used by auth-gated functions (billing, etc.). The
+// returned Headers object is ignored by the mocked @/lib/auth (below) — it
+// reads session state from tests/bun-test-setup/mocks/state.ts instead. We
+// still stub this so the real server-only module is never loaded.
 mock.module("@tanstack/react-start/server", () => ({
   getRequestHeaders: () => new Headers(),
 }))
@@ -60,6 +65,26 @@ mock.module("@tanstack/react-start/server", () => ({
 mock.module("@/db-fns/api/storage", () => ({
   createBucket: async (name: string) => ({ bucket_id: crypto.randomUUID(), name }),
 }))
+
+// ─── Shared auth + fetch mocks ────────────────────────────────────────────────
+//
+// @/lib/auth and @/lib/auth-client are replaced with stubs that read from a
+// shared mutable state object. Tests flip that state with helpers from
+// "@/tests/bun-test-setup/mocks" (setAuthenticated, setUnauthenticated,
+// setApiSuccess, setApiUnauthorized, etc.).
+//
+// Default state: unauthenticated + empty fetch registry. Unmatched fetch
+// calls throw, so silent real-network hits are impossible. A global
+// afterEach() below calls resetMocks() so each test starts clean.
+installAuthMock()
+installAuthClientMock()
+installBetterAuthPackageMock()
+installBetterAuthReactMock()
+installFetchMock()
+
+afterEach(() => {
+  resetMocks()
+})
 
 // ─── Extend expect ────────────────────────────────────────────────────────────
 expect.extend({

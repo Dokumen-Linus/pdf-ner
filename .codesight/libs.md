@@ -270,6 +270,25 @@
 - `web\src\lib\cookies\getCookie.ts` — function getCookie: (name, defaultValue?) => void
 - `web\src\lib\misc\uuid.ts` — function isUuidV4: (value) => boolean
 - `web\src\lib\shadcn-ui\utils.ts` — function cn: (...inputs) => void
+- `web\tests\bun-test-setup\mocks\auth-client.ts` — function installAuthClientMock: () => void, function installBetterAuthReactMock: () => void
+- `web\tests\bun-test-setup\mocks\auth.ts` — function installAuthMock: () => void, function installBetterAuthPackageMock: () => void
+- `web\tests\bun-test-setup\mocks\fetch.ts` — function installFetchMock: () => void
+- `web\tests\bun-test-setup\mocks\index.ts`
+  - function setAuthenticated: (userOverrides) => MockSession
+  - function setUnauthenticated: () => void
+  - function setSignInResult: (result) => void
+  - function setSignUpResult: (result) => void
+  - function setSignOutResult: (result) => void
+  - function setApiResponse: (key, response) => void
+  - _...7 more_
+- `web\tests\bun-test-setup\mocks\state.ts`
+  - function resetAuthState: () => void
+  - function resetFetchState: () => void
+  - type MockUser
+  - type MockSessionRecord
+  - type MockSession
+  - type MockAuthError
+  - _...7 more_
 - `workers\app\core\config.py`
   - function get_settings: () -> Settings
   - class Environment

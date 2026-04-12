@@ -2,8 +2,8 @@
 
 > **Stack:** fastapi | drizzle | react | typescript
 
-> 11 routes | 18 models | 54 components | 124 lib files | 36 env vars | 9 middleware | 1 events | 48% test coverage
-> **Token savings:** this file is ~12,200 tokens. Without it, AI exploration would cost ~78,800 tokens. **Saves ~66,600 tokens per conversation.**
+> 11 routes | 18 models | 54 components | 129 lib files | 36 env vars | 11 middleware | 1 events | 52% test coverage
+> **Token savings:** this file is ~12,500 tokens. Without it, AI exploration would cost ~80,700 tokens. **Saves ~68,200 tokens per conversation.**
 
 ---
 
@@ -513,6 +513,25 @@
 - `web\src\lib\cookies\getCookie.ts` — function getCookie: (name, defaultValue?) => void
 - `web\src\lib\misc\uuid.ts` — function isUuidV4: (value) => boolean
 - `web\src\lib\shadcn-ui\utils.ts` — function cn: (...inputs) => void
+- `web\tests\bun-test-setup\mocks\auth-client.ts` — function installAuthClientMock: () => void, function installBetterAuthReactMock: () => void
+- `web\tests\bun-test-setup\mocks\auth.ts` — function installAuthMock: () => void, function installBetterAuthPackageMock: () => void
+- `web\tests\bun-test-setup\mocks\fetch.ts` — function installFetchMock: () => void
+- `web\tests\bun-test-setup\mocks\index.ts`
+  - function setAuthenticated: (userOverrides) => MockSession
+  - function setUnauthenticated: () => void
+  - function setSignInResult: (result) => void
+  - function setSignUpResult: (result) => void
+  - function setSignOutResult: (result) => void
+  - function setApiResponse: (key, response) => void
+  - _...7 more_
+- `web\tests\bun-test-setup\mocks\state.ts`
+  - function resetAuthState: () => void
+  - function resetFetchState: () => void
+  - type MockUser
+  - type MockSessionRecord
+  - type MockSession
+  - type MockAuthError
+  - _...7 more_
 - `workers\app\core\config.py`
   - function get_settings: () -> Settings
   - class Environment
@@ -689,6 +708,8 @@
 - auth-client — `web\src\lib\auth-client.ts`
 - auth — `web\src\lib\auth.ts`
 - auth — `web\src\middleware\auth.ts`
+- auth-client — `web\tests\bun-test-setup\mocks\auth-client.ts`
+- auth — `web\tests\bun-test-setup\mocks\auth.ts`
 - auth.e2e — `web\tests\e2e\auth.e2e.ts`
 
 ---
@@ -741,8 +762,8 @@
 
 # Test Coverage
 
-> **48%** of routes and models are covered by tests
-> 35 test files found
+> **52%** of routes and models are covered by tests
+> 37 test files found
 
 ## Covered Models
 
@@ -760,6 +781,7 @@
 - models
 - user
 - session
+- account
 
 ---
 
