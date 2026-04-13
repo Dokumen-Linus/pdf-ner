@@ -6,13 +6,19 @@ import anyio
 import asyncpg
 import boto3
 from botocore.exceptions import ClientError
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 
 from app.domains.pdf_storage import repository
 from app.domains.pdf_storage.schemas import CreateBucketRequest
 from app.domains.shared.repository import fetch_bucket_by_id
 
 logger = logging.getLogger(__name__)
+
+# S3 multipart upload parameters.
+# S3 requires every part except the last to be >= 5 MiB. We use exactly 5 MiB
+# so a 50 MB file splits into ten parts (memory footprint: one 5 MiB buffer).
+_S3_PART_SIZE = 5 * 1024 * 1024
+_MAX_PDF_SIZE = 50 * 1024 * 1024
 
 
 async def create_bucket(conn: asyncpg.Connection, request: CreateBucketRequest) -> dict:
@@ -65,28 +71,14 @@ async def create_bucket(conn: asyncpg.Connection, request: CreateBucketRequest) 
     return {"bucket_id": str(bucket_id), "name": request.name}
 
 
-async def upload_pdf(
-    conn: asyncpg.Connection,
-    bucket_id: UUID,
-    project_id: UUID,
-    filename: str,
-    file_bytes: bytes,
-) -> dict:
-    bucket = await fetch_bucket_by_id(conn, bucket_id)
-    if bucket is None:
-        raise HTTPException(status_code=404, detail="Bucket not found")
+def _sanitize_filename(filename: str) -> str:
+    # Strip path separators, collapse control chars, drop dangerous punctuation.
+    safe = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", filename)
+    safe = safe.strip(". ")
+    return safe or "upload.pdf"
 
-    # Sanitize filename: strip path separators, collapse whitespace, remove control chars
-    safe_name = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", filename)
-    safe_name = safe_name.strip(". ")
-    if not safe_name:
-        safe_name = "upload.pdf"
-    filepath = f"{project_id}/{uuid4()}/{safe_name}"
 
-    # 1. Insert DB rows first
-    pdf_id = await repository.insert_pdf(conn, project_id, bucket_id, filepath, safe_name)
-
-    # 2. Upload to S3
+def _build_s3_client(bucket: asyncpg.Record):
     s3_kwargs = {
         "aws_access_key_id": bucket["access_key_id"],
         "aws_secret_access_key": bucket["secret_access_key"],
@@ -94,21 +86,116 @@ async def upload_pdf(
     }
     if bucket["endpoint_url"]:
         s3_kwargs["endpoint_url"] = bucket["endpoint_url"]
-    s3 = boto3.client("s3", **s3_kwargs)
+    return boto3.client("s3", **s3_kwargs)
 
-    def _upload():
-        s3.put_object(
-            Bucket=bucket["name"],
-            Key=filepath,
-            Body=file_bytes,
-            ContentType="application/pdf",
-        )
 
+async def upload_pdf_stream(
+    conn: asyncpg.Connection,
+    bucket_id: UUID,
+    project_id: UUID,
+    filename: str,
+    request: Request,
+) -> dict:
+    """Stream the request body into S3 using multipart upload.
+
+    Memory footprint: one `_S3_PART_SIZE` (5 MiB) buffer per concurrent request.
+    Byte counting during the stream is authoritative for the 50 MB size cap —
+    Content-Length is pre-checked in the router but cannot be trusted alone.
+    """
+    bucket = await fetch_bucket_by_id(conn, bucket_id)
+    if bucket is None:
+        raise HTTPException(status_code=404, detail="Bucket not found")
+
+    safe_name = _sanitize_filename(filename)
+    filepath = f"{project_id}/{uuid4()}/{safe_name}"
+
+    # Insert DB rows first so a successful S3 upload never lacks a matching row.
+    pdf_id = await repository.insert_pdf(conn, project_id, bucket_id, filepath, safe_name)
+
+    s3 = _build_s3_client(bucket)
+    bucket_name = bucket["name"]
+
+    # Initiate S3 multipart upload. From here on, every error path MUST call
+    # abort_multipart_upload and roll back the DB rows.
     try:
-        await anyio.to_thread.run_sync(_upload)
+        init = await anyio.to_thread.run_sync(
+            lambda: s3.create_multipart_upload(
+                Bucket=bucket_name, Key=filepath, ContentType="application/pdf"
+            )
+        )
     except ClientError as e:
-        # Rollback DB rows on S3 failure
         await repository.delete_pdf(conn, pdf_id)
         raise HTTPException(status_code=502, detail=f"S3 error: {e.response['Error']['Message']}")
 
-    return {"pdf_id": str(pdf_id), "filepath": filepath, "bucket_name": bucket["name"]}
+    upload_id = init["UploadId"]
+
+    async def _abort_and_rollback():
+        try:
+            await anyio.to_thread.run_sync(
+                lambda: s3.abort_multipart_upload(
+                    Bucket=bucket_name, Key=filepath, UploadId=upload_id
+                )
+            )
+        except ClientError:
+            # Best-effort abort; orphaned parts expire per bucket lifecycle.
+            logger.exception("Failed to abort S3 multipart upload %s", upload_id)
+        await repository.delete_pdf(conn, pdf_id)
+
+    parts: list[dict] = []
+    part_number = 1
+    total_bytes = 0
+    buffer = bytearray()
+
+    async def _upload_part(body: bytes, number: int) -> None:
+        resp = await anyio.to_thread.run_sync(
+            lambda: s3.upload_part(
+                Bucket=bucket_name,
+                Key=filepath,
+                UploadId=upload_id,
+                PartNumber=number,
+                Body=body,
+            )
+        )
+        parts.append({"PartNumber": number, "ETag": resp["ETag"]})
+
+    try:
+        async for chunk in request.stream():
+            if not chunk:
+                continue
+            total_bytes += len(chunk)
+            if total_bytes > _MAX_PDF_SIZE:
+                raise HTTPException(status_code=413, detail="File exceeds 50 MB limit")
+            buffer.extend(chunk)
+            # Flush full 5 MiB parts; keep remainder for the next iteration.
+            while len(buffer) >= _S3_PART_SIZE:
+                part_body = bytes(buffer[:_S3_PART_SIZE])
+                del buffer[:_S3_PART_SIZE]
+                await _upload_part(part_body, part_number)
+                part_number += 1
+
+        if total_bytes == 0:
+            raise HTTPException(status_code=400, detail="Request body is empty")
+
+        # Flush the final partial part (S3 allows the last part to be <5 MiB).
+        if buffer:
+            await _upload_part(bytes(buffer), part_number)
+
+        await anyio.to_thread.run_sync(
+            lambda: s3.complete_multipart_upload(
+                Bucket=bucket_name,
+                Key=filepath,
+                UploadId=upload_id,
+                MultipartUpload={"Parts": parts},
+            )
+        )
+    except HTTPException:
+        await _abort_and_rollback()
+        raise
+    except ClientError as e:
+        await _abort_and_rollback()
+        raise HTTPException(status_code=502, detail=f"S3 error: {e.response['Error']['Message']}")
+    except Exception:
+        await _abort_and_rollback()
+        raise
+
+    return {"pdf_id": str(pdf_id), "filepath": filepath, "bucket_name": bucket_name}

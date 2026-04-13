@@ -4,6 +4,7 @@
 import {
   authState,
   fetchState,
+  helpersState,
   type MockAuthCallResult,
   type MockFetchResponse,
   type MockRoute,
@@ -11,6 +12,7 @@ import {
   type MockUser,
   resetAuthState,
   resetFetchState,
+  resetHelpersState,
 } from "./state"
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
@@ -122,6 +124,41 @@ export function setFetchFallback(fallback: "throw" | MockFetchResponse): void {
   fetchState.fallback = fallback
 }
 
+// ─── Helpers (db-fns/api/_helpers) ────────────────────────────────────────────
+
+/** Override the function the mocked requireUserId() calls. Throw to simulate errors. */
+export function setRequireUserId(fn: () => Promise<string>): void {
+  helpersState.requireUserId = fn
+}
+
+/** Shortcut: make requireUserId() throw "Unauthorized" (matches production error string). */
+export function setRequireUserIdUnauthorized(): void {
+  helpersState.requireUserId = async () => {
+    throw new Error("Unauthorized")
+  }
+}
+
+/** Override the function the mocked requireProjectOwnership() calls. */
+export function setRequireProjectOwnership(
+  fn: (projectId: string, userId: string) => Promise<void>,
+): void {
+  helpersState.requireProjectOwnership = fn
+}
+
+/** Shortcut: make requireProjectOwnership() reject with the production "access" error string. */
+export function setRequireProjectOwnershipDenied(): void {
+  helpersState.requireProjectOwnership = async () => {
+    throw new Error("You do not have access to this project")
+  }
+}
+
+/** Shortcut: make requireProjectOwnership() reject with the production "not found" string. */
+export function setProjectNotFound(): void {
+  helpersState.requireProjectOwnership = async () => {
+    throw new Error("Project not found")
+  }
+}
+
 // ─── Reset helpers ────────────────────────────────────────────────────────────
 
 /** Reset only the auth state back to "unauthenticated" + default call results. */
@@ -134,10 +171,16 @@ export function resetFetchMocks(): void {
   resetFetchState()
 }
 
-/** Reset both auth and fetch state. Called automatically by the global afterEach. */
+/** Reset the helpers state (requireUserId / requireProjectOwnership) to pass-through defaults. */
+export function resetHelpersMocks(): void {
+  resetHelpersState()
+}
+
+/** Reset auth, fetch, and helpers state. Called automatically by the global afterEach. */
 export function resetMocks(): void {
   resetAuthState()
   resetFetchState()
+  resetHelpersState()
 }
 
 // ─── Re-export types for convenience ──────────────────────────────────────────
