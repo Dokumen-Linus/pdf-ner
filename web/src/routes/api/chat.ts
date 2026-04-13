@@ -7,7 +7,7 @@ import { env } from "@/env.server"
 
 async function getChatbotKnowledge() {
   try {
-    const knowledgeDir = join(import.meta.dirname, "../../chatbot-knowledge")
+    const knowledgeDir = join(import.meta.dirname, "../../../public/chatbot-knowledge")
     const files = await readdir(knowledgeDir)
     let knowledgeContent = ""
 
