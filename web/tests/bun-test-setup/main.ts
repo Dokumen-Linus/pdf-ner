@@ -6,6 +6,7 @@ import { resetMocks } from "./mocks"
 import { installAuthMock, installBetterAuthPackageMock } from "./mocks/auth"
 import { installAuthClientMock, installBetterAuthReactMock } from "./mocks/auth-client"
 import { installFetchMock } from "./mocks/fetch"
+import { installHelpersMock } from "./mocks/helpers"
 import "./bun-test-extensions.d.ts"
 
 // ─── Module Mocks ─────────────────────────────────────────────────────────────
@@ -81,6 +82,7 @@ installAuthClientMock()
 installBetterAuthPackageMock()
 installBetterAuthReactMock()
 installFetchMock()
+installHelpersMock()
 
 afterEach(() => {
   resetMocks()

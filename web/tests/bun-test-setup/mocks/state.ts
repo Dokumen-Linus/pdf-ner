@@ -96,3 +96,27 @@ export function resetFetchState(): void {
   fetchState.routes.length = 0
   fetchState.fallback = "throw"
 }
+
+// ─── Helpers state (db-fns/api/_helpers) ──────────────────────────────────────
+
+const DEFAULT_MOCK_USER_ID = "00000000-0000-0000-0000-000000000001"
+
+export type HelpersMockState = {
+  /** Called by the mocked requireUserId(). Throw to simulate unauthorized. */
+  requireUserId: () => Promise<string>
+  /** Called by the mocked requireProjectOwnership(). Throw to simulate denial. */
+  requireProjectOwnership: (projectId: string, userId: string) => Promise<void>
+}
+
+function defaultHelpersState(): HelpersMockState {
+  return {
+    requireUserId: async () => DEFAULT_MOCK_USER_ID,
+    requireProjectOwnership: async () => {},
+  }
+}
+
+export const helpersState: HelpersMockState = defaultHelpersState()
+
+export function resetHelpersState(): void {
+  Object.assign(helpersState, defaultHelpersState())
+}
