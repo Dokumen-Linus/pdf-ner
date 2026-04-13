@@ -96,6 +96,7 @@
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.71.1",
     "react-resizable-panels": "^4.5.9",
+    "react-tweet": "^3.3.0",
     "recharts": "3.7.0",
     "resend": "^6.9.1",
     "stripe": "^22.0.0",
