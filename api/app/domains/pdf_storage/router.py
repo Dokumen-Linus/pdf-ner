@@ -2,7 +2,7 @@ from urllib.parse import unquote
 from uuid import UUID
 
 import asyncpg
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 
 from app.core.db import get_conn
 from app.domains.pdf_storage import service
@@ -19,6 +19,23 @@ async def create_bucket(
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     return await service.create_bucket(conn, request)
+
+
+@router.get("/pdfs/{pdf_id}/url")
+async def get_pdf_url(
+    pdf_id: UUID,
+    x_user_id: UUID | None = Header(default=None, alias="X-User-Id"),
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    """Return a presigned S3 GET URL the browser can fetch directly.
+
+    Internal-only route: the web server authenticates the browser session,
+    forwards the caller via X-User-Id, and this route re-checks ownership
+    before minting the signed URL.
+    """
+    if x_user_id is None:
+        raise HTTPException(status_code=401, detail="Missing X-User-Id header")
+    return await service.generate_pdf_get_url(conn, pdf_id, x_user_id)
 
 
 @router.post("/pdfs")

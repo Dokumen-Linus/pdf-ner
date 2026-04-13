@@ -48,6 +48,19 @@ async def insert_pdf(
     return pdf_id
 
 
+async def fetch_pdf_by_id(conn: asyncpg.Connection, pdf_id: UUID) -> asyncpg.Record | None:
+    """Return the workers.pdfs row plus owner context needed for URL authz."""
+    return await conn.fetchrow(
+        """
+        SELECT p.id, p.bucket_id, p.filepath, p.name, p.project_id, pr.owner_id
+        FROM workers.pdfs AS p
+        INNER JOIN web.projects AS pr ON pr.id = p.project_id
+        WHERE p.id = $1
+        """,
+        pdf_id,
+    )
+
+
 async def delete_bucket(conn: asyncpg.Connection, bucket_id: UUID) -> None:
     await conn.execute("DELETE FROM api.aws_buckets WHERE id = $1", bucket_id)
 

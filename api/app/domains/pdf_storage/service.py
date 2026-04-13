@@ -89,6 +89,46 @@ def _build_s3_client(bucket: asyncpg.Record):
     return boto3.client("s3", **s3_kwargs)
 
 
+_PRESIGNED_URL_TTL_SECONDS = 3600  # 1 hour — balances cache-friendliness with security
+
+
+async def generate_pdf_get_url(conn: asyncpg.Connection, pdf_id: UUID, user_id: UUID) -> dict:
+    """Return a time-limited S3 GET URL the browser can fetch directly.
+
+    Credentials never leave the API tier. Per-bucket creds are loaded from
+    api.aws_buckets, the same pattern used by upload_pdf_stream.
+    """
+    pdf = await repository.fetch_pdf_by_id(conn, pdf_id)
+    if pdf is None:
+        raise HTTPException(status_code=404, detail="PDF not found")
+    if pdf["owner_id"] != user_id:
+        raise HTTPException(status_code=403, detail="You do not have access to this PDF")
+
+    bucket = await fetch_bucket_by_id(conn, pdf["bucket_id"])
+    if bucket is None:
+        # Orphaned PDF row — workers.pdfs.bucket_id references api.aws_buckets
+        # without an FK (cross-schema), so this can theoretically happen.
+        raise HTTPException(status_code=500, detail="PDF bucket missing")
+
+    s3 = _build_s3_client(bucket)
+    bucket_name = bucket["name"]
+    key = pdf["filepath"]
+
+    def _sign() -> str:
+        return s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket_name, "Key": key},
+            ExpiresIn=_PRESIGNED_URL_TTL_SECONDS,
+        )
+
+    try:
+        url = await anyio.to_thread.run_sync(_sign)
+    except ClientError as e:
+        raise HTTPException(status_code=502, detail=f"S3 error: {e.response['Error']['Message']}")
+
+    return {"url": url, "expires_in": _PRESIGNED_URL_TTL_SECONDS, "pdf_id": str(pdf_id)}
+
+
 async def upload_pdf_stream(
     conn: asyncpg.Connection,
     bucket_id: UUID,

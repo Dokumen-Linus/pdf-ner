@@ -462,6 +462,175 @@ class TestUploadPdfS3Rollback:
         assert len(delete_calls) == 3
 
 
+class TestGetPdfUrl:
+    """GET /pdf-storage/pdfs/{pdf_id}/url — presigned S3 GET URL for the browser."""
+
+    @pytest.mark.anyio
+    async def test_happy_path(self, storage_client, mock_conn):
+        """Returns a signed URL, the TTL, and the pdf_id on success."""
+        pdf_id = uuid4()
+        bucket_id = uuid4()
+        owner_id = uuid4()
+        pdf_row = {
+            "id": pdf_id,
+            "bucket_id": bucket_id,
+            "filepath": f"{uuid4()}/{uuid4()}/doc.pdf",
+            "name": "doc.pdf",
+            "project_id": uuid4(),
+            "owner_id": owner_id,
+        }
+        bucket_row = {
+            "id": bucket_id,
+            "name": "my-bucket",
+            "region": "us-east-1",
+            "access_key_id": "key",
+            "secret_access_key": "secret",
+            "endpoint_url": None,
+        }
+        # First fetchrow is fetch_pdf_by_id, second is fetch_bucket_by_id.
+        mock_conn.fetchrow = AsyncMock(side_effect=[pdf_row, bucket_row])
+
+        signed_url = "https://my-bucket.s3.amazonaws.com/signed?X-Amz-Signature=abc"
+        mock_s3 = MagicMock()
+        mock_s3.generate_presigned_url.return_value = signed_url
+
+        with (
+            patch("boto3.client", return_value=mock_s3),
+            patch(
+                "anyio.to_thread.run_sync",
+                new=AsyncMock(side_effect=lambda fn, *args, **kwargs: fn()),
+            ),
+        ):
+            response = await storage_client.get(
+                f"/api/v1/pdf-storage/pdfs/{pdf_id}/url",
+                headers={"X-User-Id": str(owner_id)},
+            )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["url"] == signed_url
+        assert body["expires_in"] == 3600
+        assert body["pdf_id"] == str(pdf_id)
+
+        mock_s3.generate_presigned_url.assert_called_once_with(
+            "get_object",
+            Params={"Bucket": "my-bucket", "Key": pdf_row["filepath"]},
+            ExpiresIn=3600,
+        )
+
+    @pytest.mark.anyio
+    async def test_missing_forwarded_user_header_returns_401(self, storage_client):
+        response = await storage_client.get(f"/api/v1/pdf-storage/pdfs/{uuid4()}/url")
+        assert response.status_code == 401
+        assert "Missing X-User-Id header" in response.json()["detail"]
+
+    @pytest.mark.anyio
+    async def test_cross_project_pdf_id_returns_403(self, storage_client, mock_conn):
+        pdf_id = uuid4()
+        bucket_id = uuid4()
+        mock_conn.fetchrow = AsyncMock(
+            return_value={
+                "id": pdf_id,
+                "bucket_id": bucket_id,
+                "filepath": "other-project.pdf",
+                "name": "other-project.pdf",
+                "project_id": uuid4(),
+                "owner_id": uuid4(),
+            }
+        )
+
+        response = await storage_client.get(
+            f"/api/v1/pdf-storage/pdfs/{pdf_id}/url",
+            headers={"X-User-Id": str(uuid4())},
+        )
+
+        assert response.status_code == 403
+        assert "do not have access" in response.json()["detail"]
+
+    @pytest.mark.anyio
+    async def test_pdf_not_found_returns_404(self, storage_client, mock_conn):
+        """Unknown pdf_id → 404."""
+        mock_conn.fetchrow = AsyncMock(return_value=None)
+        response = await storage_client.get(
+            f"/api/v1/pdf-storage/pdfs/{uuid4()}/url",
+            headers={"X-User-Id": str(uuid4())},
+        )
+        assert response.status_code == 404
+        assert "PDF not found" in response.json()["detail"]
+
+    @pytest.mark.anyio
+    async def test_orphaned_bucket_returns_500(self, storage_client, mock_conn):
+        """pdf row exists but its bucket doesn't — surface as 500."""
+        pdf_id = uuid4()
+        bucket_id = uuid4()
+        owner_id = uuid4()
+        pdf_row = {
+            "id": pdf_id,
+            "bucket_id": bucket_id,
+            "filepath": "path/to/file.pdf",
+            "name": "file.pdf",
+            "project_id": uuid4(),
+            "owner_id": owner_id,
+        }
+        mock_conn.fetchrow = AsyncMock(side_effect=[pdf_row, None])
+
+        response = await storage_client.get(
+            f"/api/v1/pdf-storage/pdfs/{pdf_id}/url",
+            headers={"X-User-Id": str(owner_id)},
+        )
+        assert response.status_code == 500
+        assert "bucket missing" in response.json()["detail"]
+
+    @pytest.mark.anyio
+    async def test_s3_client_error_returns_502(self, storage_client, mock_conn):
+        """S3 ClientError during sign → 502."""
+        pdf_id = uuid4()
+        bucket_id = uuid4()
+        owner_id = uuid4()
+        mock_conn.fetchrow = AsyncMock(
+            side_effect=[
+                {
+                    "id": pdf_id,
+                    "bucket_id": bucket_id,
+                    "filepath": "f.pdf",
+                    "name": "f.pdf",
+                    "project_id": uuid4(),
+                    "owner_id": owner_id,
+                },
+                {
+                    "id": bucket_id,
+                    "name": "b",
+                    "region": "us-east-1",
+                    "access_key_id": "k",
+                    "secret_access_key": "s",
+                    "endpoint_url": None,
+                },
+            ]
+        )
+        mock_s3 = MagicMock()
+        mock_s3.generate_presigned_url.side_effect = _make_client_error(
+            "SignatureDoesNotMatch", "bad sig"
+        )
+
+        async def _run_sync_directly(fn, *args, **kwargs):
+            return fn()
+
+        with (
+            patch("boto3.client", return_value=mock_s3),
+            patch(
+                "app.domains.pdf_storage.service.anyio.to_thread.run_sync",
+                side_effect=_run_sync_directly,
+            ),
+        ):
+            response = await storage_client.get(
+                f"/api/v1/pdf-storage/pdfs/{pdf_id}/url",
+                headers={"X-User-Id": str(owner_id)},
+            )
+
+        assert response.status_code == 502
+        assert "S3 error" in response.json()["detail"]
+
+
 class TestUploadPdfSizeLimit:
     @pytest.mark.anyio
     async def test_upload_pdf_rejects_oversized_file(self, storage_client):
