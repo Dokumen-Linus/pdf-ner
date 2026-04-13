@@ -93,6 +93,22 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
+// recharts v3 separates the props you pass to <Tooltip /> from the props a
+// custom tooltip `content` component receives. We're implementing the latter,
+// so we take TooltipContentProps — it re-adds active/payload/label on top of
+// TooltipProps. `payload` items are `ReadonlyArray<any>` per recharts.
+// Shape of a single payload item as provided by recharts at render time.
+// `payload` sub-object is always present on tooltip payload entries (it's
+// the underlying datum), so we mark it required here.
+type ChartTooltipItem = {
+  type?: string
+  name?: string | number
+  dataKey?: string | number
+  value?: number | string
+  color?: string
+  payload: { fill?: string } & Record<string, unknown>
+}
+
 function ChartTooltipContent({
   active,
   payload,
@@ -107,8 +123,14 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+}: Omit<
+  React.ComponentProps<typeof RechartsPrimitive.Tooltip>,
+  "active" | "payload" | "label"
+> &
   React.ComponentProps<"div"> & {
+    active?: boolean
+    payload?: ReadonlyArray<ChartTooltipItem>
+    label?: string | number
     hideLabel?: boolean
     hideIndicator?: boolean
     indicator?: "line" | "dot" | "dashed"
@@ -131,8 +153,13 @@ function ChartTooltipContent({
         : itemConfig?.label
 
     if (labelFormatter) {
+      // recharts' labelFormatter expects ReadonlyArray<Payload<TValue,TName>>.
+      // Our local ChartTooltipItem is shape-compatible but nominally different;
+      // the cast bridges our local type to recharts' internal Payload generic.
       return (
-        <div className={cn("font-medium", labelClassName)}>{labelFormatter(value, payload)}</div>
+        <div className={cn("font-medium", labelClassName)}>
+          {labelFormatter(value, payload as never)}
+        </div>
       )
     }
 
@@ -174,7 +201,10 @@ function ChartTooltipContent({
                 )}
               >
                 {formatter && item?.value !== undefined && item.name ? (
-                  formatter(item.value, item.name, item, index, item.payload)
+                  // See labelFormatter note — recharts' Formatter types
+                  // against its internal Payload generic; `never` widens
+                  // our shape-compatible local type to satisfy the call.
+                  formatter(item.value, item.name, item as never, index, payload as never)
                 ) : (
                   <>
                     {itemConfig?.icon ? (
@@ -231,17 +261,28 @@ function ChartTooltipContent({
 
 const ChartLegend = RechartsPrimitive.Legend
 
+// In recharts v3 LegendProps omits `payload` and `verticalAlign` (they're
+// provided by the chart at render time, not by the consumer). Re-declare
+// them here since this IS the render-time content component.
+type ChartLegendItem = {
+  value?: string | number
+  type?: string
+  color?: string
+  dataKey?: string | number
+}
+
 function ChartLegendContent({
   className,
   hideIcon = false,
   payload,
   verticalAlign = "bottom",
   nameKey,
-}: React.ComponentProps<"div"> &
-  Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
-    hideIcon?: boolean
-    nameKey?: string
-  }) {
+}: React.ComponentProps<"div"> & {
+  payload?: ReadonlyArray<ChartLegendItem>
+  verticalAlign?: "top" | "bottom" | "middle"
+  hideIcon?: boolean
+  nameKey?: string
+}) {
   const { config } = useChart()
 
   if (!payload?.length) {
