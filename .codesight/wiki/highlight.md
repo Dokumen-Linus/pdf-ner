@@ -7,12 +7,12 @@ The Highlight subsystem handles **1 routes**.
 ## Routes
 
 - `POST` `/api/v1/highlight` → in: HighlightRequest
-  `api\app\domains\pdf_utils\router.py`
+  `api/app/domains/pdf_utils/router.py`
 
 ## Source Files
 
 Read these before implementing or modifying this subsystem:
-- `api\app\domains\pdf_utils\router.py`
+- `api/app/domains/pdf_utils/router.py`
 
 ---
 _Back to [overview.md](./overview.md)_

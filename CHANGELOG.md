@@ -66,6 +66,27 @@
 - *(all)* Inital billing and usage tracking
 - [**breaking**] Pdf storage
 - *(web)* Auto-create S3 bucket on project creation and add PDF upload page
+- *(web)* Add mehul code in temp dir
+- *(web)* Integrate mehul project pages
+- Added organization plugin
+- Enhanced tesla style hero, removed cards
+- Add react-tweet with a carousel
+- Added generic chat using gpt-5-nano
+- Add sitemap
+- Install paraglide for translations
+- Localizations on all routes
+- Enable web to trigger workers context_engineering through
+- *(web)* Enhance hero page -  issue #55
+- Enhance chatbot (#59)
+- *(web)* Enhance chatbot #59
+- *(web)* Reuse existing bucket when creating a second project
+- *(web)* Reuse existing bucket when creating a second project #52
+- Adds french translations and header picker
+- *(web)* Add pricing page
+- *(web)* Add project entity types page
+- *(web)* Add plugin-thumbnail-2
+- *(api)* Get pdf url endpt
+- *(web)* BREAKING CHANGE add labelling page and documentManagerCapabiltiy in PluginStoreSync
 
 ### 🐛 Bug Fixes
 
@@ -112,10 +133,24 @@
 - *(claude)* Hooks
 - *(web)* Linting
 - Codex-review of billing
+- *(db)* Sql typos
+- *(web)* Update drizzle and db-fns to match current sql
+- *(web)* Bun.lock
+- *(web)* Add react-tweet to package.json
+- Typescript errors
+- *(web)* Update bun.lock
+- *(web)* New pdfium.wasm
+- *(web)* Remove invalid pgSchema("public") call
+- *(web)* Shadcn-ui components (consider looking at newly published ones)
+- *(web)* Pricing points to signup
+- *(web)* Rename to -pdf-upload.test.ts
+- *(web)* Update drizzle foreign keys
+- *(web)* Plugin-tiling-2, plugin-viewport-2
 
 ### 💼 Other
 
 - Run npm i
+- Removed invalid tsconfig rule
 
 ### 🚜 Refactor
 
@@ -156,6 +191,14 @@
 - Move attempted db vscode settings.json
 - *(fe)* Move color-picker
 - *(api)* Separate utils and integrations
+- *(db)* Move add col into create table for users.display_name
+- *(db)* Move std_entity_types and templates to public schema
+- *(web)* Move sitemap and paraglide to integrations
+- *(db)* Move col creation
+- *(web)* Move messages dir
+- *(api, wk)* Move LLM integrations to library
+- *(web)* Move chatbot-knowledge to public
+- *(web)* Remove use of npm-published plugin render, viewport, document-manager, tiling
 
 ### 📚 Documentation
 
@@ -202,6 +245,12 @@
 - *(db)* README
 - Claude skill for billing
 - *(wk)* Revision for clarity
+- Main README
+- README and CLAUDE
+- Fix typos
+- Delete outdated s3 plan
+- *(web)* Add print manifests.json
+- *(web)* Readme
 
 ### ⚡ Performance
 
@@ -242,6 +291,11 @@
 - Add email verify to signup
 - Add have-i-been-pawned
 - Change server-fns to return and test uuid
+- *(web)* Move to streaming pdf upload
+- *(db)* Change foreign keys
+- *(web)* Move to local plugin-document-manager
+- *(web)* Move to local document manager plugin
+- *(web)* Move to local plugin render, viewport, tiling
 
 ### 🎨 Styling
 
@@ -273,6 +327,9 @@
 - *(web)* Fix .prettierignore
 - *(api)* Ruff
 - *(api)* Ruff
+- *(web)* Prettier header.tsx
+- *(web)* Add paraglide to eslint ignores
+- *(web)* Fix lint errors
 
 ### 🧪 Testing
 
@@ -295,6 +352,12 @@
 - *(fe)* Auth
 - *(api)* Start pdf_utils test
 - *(wk)* Setup and context_env domain
+- *(web)* Add db-fns tests
+- *(web)* Project pages e2e
+- *(web)* Setup shared mocking of auth and fetch
+- *(web)* Fix mocks/integration.test.ts
+- *(web)* New pdf uplaod
+- *(db)* Add script to setup db on windows
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -328,6 +391,22 @@
 - [**breaking**] Docker setup
 - *(llm)* Remove skills
 - *(llm)* CLAUDE.md
+- Setup git-cliff
+- *(llm)* Add skills
+- Update commitlint
+- *(llm)* Add AST wiki, MCPs, and read-wiki behavior
+- *(llm)* Add MCP to claude and add hooks
+- Add wiki generation to auto-docs.yml
+- Add commitlint
+- Fix commitlint.yml
+- Fix .commitlintrc.json
+- Bump tanstack ai
+- Remove community tanstack skill
+- Update actions/checkout to v6
+- *(llm)* Add tanstack-ai skill
+- *(llm)* Remove .agents/skills
+- Fix auto-docs.yml by giving PR read permissions
+- Add skill copies to gitignore
 
 ### ◀️ Revert
 
