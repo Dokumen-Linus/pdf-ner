@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react"
 import { Link } from "@tanstack/react-router"
-import { Menu, X } from "lucide-react"
+import { Languages, Menu, X } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn-ui/popover"
 import { getUserByEmail } from "@/db-fns/web/users"
 import { authClient } from "@/lib/auth-client"
 import logoUrl from "@/logo.svg"
 import { m } from "@/paraglide/messages.js"
+import { getLocale, locales, setLocale } from "@/paraglide/runtime"
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const { data: session } = authClient.useSession()
   const [headerIdentity, setHeaderIdentity] = useState("")
+  const currentLocale = getLocale()
+
+  const handleLanguageChange = (newLocale: string) => {
+    setLocale(newLocale as (typeof locales)[number])
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -108,6 +115,32 @@ export default function Header() {
                 </Link>
               </>
             )}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="rounded-lg p-2 text-[#171A20] hover:bg-[#F4F4F4] transition-colors ml-1">
+                  <Languages size={18} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                sideOffset={8}
+                className="bg-white rounded-lg shadow-lg border border-[#EEEEEE] w-auto min-w-20 p-1"
+              >
+                {locales.map((tag: string) => (
+                  <button
+                    key={tag}
+                    onClick={() => handleLanguageChange(tag)}
+                    className={`w-full text-left uppercase px-3 py-1.5 text-sm rounded-md transition-colors ${
+                      tag === currentLocale
+                        ? "bg-[#F4F4F4] font-semibold text-[#171A20]"
+                        : "text-[#5C5E62] hover:bg-[#F4F4F4] hover:text-[#171A20]"
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Mobile Menu Button */}
@@ -129,7 +162,33 @@ export default function Header() {
       <aside
         className={`fixed right-0 top-0 z-50 flex h-full w-80 flex-col bg-white shadow-[-8px_0_24px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        <div className="flex items-center justify-end p-4">
+        <div className="flex items-center justify-between p-4">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="rounded-lg p-2 text-[#171A20] hover:bg-[#F4F4F4] transition-colors">
+                <Languages size={18} />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              sideOffset={8}
+              className="bg-white rounded-lg shadow-lg border border-[#EEEEEE] w-auto min-w-20 p-1"
+            >
+              {locales.map((tag: string) => (
+                <button
+                  key={tag}
+                  onClick={() => handleLanguageChange(tag)}
+                  className={`w-full text-left uppercase px-3 py-1.5 text-sm rounded-md transition-colors ${
+                    tag === currentLocale
+                      ? "bg-[#F4F4F4] font-semibold text-[#171A20]"
+                      : "text-[#5C5E62] hover:bg-[#F4F4F4] hover:text-[#171A20]"
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </PopoverContent>
+          </Popover>
           <button
             onClick={() => setIsOpen(false)}
             className="rounded-lg p-2 text-[#171A20] hover:bg-[#F4F4F4] transition-colors"
