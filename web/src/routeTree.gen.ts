@@ -16,6 +16,7 @@ import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
 import { Route as ApiPdfUploadRouteImport } from './routes/api/pdf-upload'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as PublicPricingRouteImport } from './routes/_public/pricing'
 import { Route as PublicDemoRouteImport } from './routes/_public/demo'
 import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
 import { Route as PrivateBillingRouteImport } from './routes/_private/billing'
@@ -25,6 +26,7 @@ import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
 import { Route as PrivateProjectsIndexRouteImport } from './routes/_private/projects.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PrivateProjectsProjectIdRouteImport } from './routes/_private/projects.$projectId'
+import { Route as PrivateProjectsProjectIdEntity_typesRouteImport } from './routes/_private/projects.$projectId_.entity_types'
 import { Route as PrivateProjectsProjectIdEngineeringRouteImport } from './routes/_private/projects.$projectId_.engineering'
 import { Route as PrivateProjectsProjectIdDocumentsRouteImport } from './routes/_private/projects.$projectId_.documents'
 import { Route as PrivateProjectsProjectIdDashboardRouteImport } from './routes/_private/projects.$projectId_.dashboard'
@@ -60,6 +62,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PublicPricingRoute = PublicPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => PublicRoute,
 } as any)
 const PublicDemoRoute = PublicDemoRouteImport.update({
   id: '/demo',
@@ -107,6 +114,12 @@ const PrivateProjectsProjectIdRoute =
     path: '/projects/$projectId',
     getParentRoute: () => PrivateRoute,
   } as any)
+const PrivateProjectsProjectIdEntity_typesRoute =
+  PrivateProjectsProjectIdEntity_typesRouteImport.update({
+    id: '/projects/$projectId_/entity_types',
+    path: '/projects/$projectId/entity_types',
+    getParentRoute: () => PrivateRoute,
+  } as any)
 const PrivateProjectsProjectIdEngineeringRoute =
   PrivateProjectsProjectIdEngineeringRouteImport.update({
     id: '/projects/$projectId_/engineering',
@@ -134,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof PrivateBillingRoute
   '/profile': typeof PrivateProfileRoute
   '/demo': typeof PublicDemoRoute
+  '/pricing': typeof PublicPricingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
@@ -143,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
   '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/projects/$projectId/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
+  '/projects/$projectId/entity_types': typeof PrivateProjectsProjectIdEntity_typesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -152,6 +167,7 @@ export interface FileRoutesByTo {
   '/billing': typeof PrivateBillingRoute
   '/profile': typeof PrivateProfileRoute
   '/demo': typeof PublicDemoRoute
+  '/pricing': typeof PublicPricingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
@@ -161,6 +177,7 @@ export interface FileRoutesByTo {
   '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
   '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/projects/$projectId/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
+  '/projects/$projectId/entity_types': typeof PrivateProjectsProjectIdEntity_typesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -173,6 +190,7 @@ export interface FileRoutesById {
   '/_private/billing': typeof PrivateBillingRoute
   '/_private/profile': typeof PrivateProfileRoute
   '/_public/demo': typeof PublicDemoRoute
+  '/_public/pricing': typeof PublicPricingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
@@ -183,6 +201,7 @@ export interface FileRoutesById {
   '/_private/projects/$projectId_/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
   '/_private/projects/$projectId_/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/_private/projects/$projectId_/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
+  '/_private/projects/$projectId_/entity_types': typeof PrivateProjectsProjectIdEntity_typesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -194,6 +213,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/profile'
     | '/demo'
+    | '/pricing'
     | '/api/chat'
     | '/api/pdf-upload'
     | '/api/uploadthing'
@@ -203,6 +223,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/dashboard'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/engineering'
+    | '/projects/$projectId/entity_types'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -212,6 +233,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/profile'
     | '/demo'
+    | '/pricing'
     | '/api/chat'
     | '/api/pdf-upload'
     | '/api/uploadthing'
@@ -221,6 +243,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/dashboard'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/engineering'
+    | '/projects/$projectId/entity_types'
   id:
     | '__root__'
     | '/_auth'
@@ -232,6 +255,7 @@ export interface FileRouteTypes {
     | '/_private/billing'
     | '/_private/profile'
     | '/_public/demo'
+    | '/_public/pricing'
     | '/api/chat'
     | '/api/pdf-upload'
     | '/api/uploadthing'
@@ -242,6 +266,7 @@ export interface FileRouteTypes {
     | '/_private/projects/$projectId_/dashboard'
     | '/_private/projects/$projectId_/documents'
     | '/_private/projects/$projectId_/engineering'
+    | '/_private/projects/$projectId_/entity_types'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -304,6 +329,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_public/pricing': {
+      id: '/_public/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PublicPricingRouteImport
+      parentRoute: typeof PublicRoute
     }
     '/_public/demo': {
       id: '/_public/demo'
@@ -368,6 +400,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateProjectsProjectIdRouteImport
       parentRoute: typeof PrivateRoute
     }
+    '/_private/projects/$projectId_/entity_types': {
+      id: '/_private/projects/$projectId_/entity_types'
+      path: '/projects/$projectId/entity_types'
+      fullPath: '/projects/$projectId/entity_types'
+      preLoaderRoute: typeof PrivateProjectsProjectIdEntity_typesRouteImport
+      parentRoute: typeof PrivateRoute
+    }
     '/_private/projects/$projectId_/engineering': {
       id: '/_private/projects/$projectId_/engineering'
       path: '/projects/$projectId/engineering'
@@ -414,6 +453,7 @@ interface PrivateRouteChildren {
   PrivateProjectsProjectIdDashboardRoute: typeof PrivateProjectsProjectIdDashboardRoute
   PrivateProjectsProjectIdDocumentsRoute: typeof PrivateProjectsProjectIdDocumentsRoute
   PrivateProjectsProjectIdEngineeringRoute: typeof PrivateProjectsProjectIdEngineeringRoute
+  PrivateProjectsProjectIdEntity_typesRoute: typeof PrivateProjectsProjectIdEntity_typesRoute
 }
 
 const PrivateRouteChildren: PrivateRouteChildren = {
@@ -427,6 +467,8 @@ const PrivateRouteChildren: PrivateRouteChildren = {
     PrivateProjectsProjectIdDocumentsRoute,
   PrivateProjectsProjectIdEngineeringRoute:
     PrivateProjectsProjectIdEngineeringRoute,
+  PrivateProjectsProjectIdEntity_typesRoute:
+    PrivateProjectsProjectIdEntity_typesRoute,
 }
 
 const PrivateRouteWithChildren =
@@ -434,11 +476,13 @@ const PrivateRouteWithChildren =
 
 interface PublicRouteChildren {
   PublicDemoRoute: typeof PublicDemoRoute
+  PublicPricingRoute: typeof PublicPricingRoute
   PublicIndexRoute: typeof PublicIndexRoute
 }
 
 const PublicRouteChildren: PublicRouteChildren = {
   PublicDemoRoute: PublicDemoRoute,
+  PublicPricingRoute: PublicPricingRoute,
   PublicIndexRoute: PublicIndexRoute,
 }
 
