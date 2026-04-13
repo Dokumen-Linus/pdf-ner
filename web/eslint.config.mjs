@@ -15,6 +15,7 @@ export default [
       "**/shadcn-ui/**",
       "**/*.stories.tsx",
       "src/routes/routeTree.gen.ts",
+      "**/paraglide/**",
     ],
   },
   {
