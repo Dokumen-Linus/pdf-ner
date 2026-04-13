@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { m } from "../../paraglide/messages.js"
+import { m } from "../../integrations/paraglide/messages.js"
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()

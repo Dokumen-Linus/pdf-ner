@@ -12,7 +12,7 @@ import {
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { getProjectsByOwnerId } from "@/db-fns/web/projects"
 import type { FoundProject } from "@/db/types"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 function ProjectsPageSkeleton() {
   return (

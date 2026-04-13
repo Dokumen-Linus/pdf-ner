@@ -18,9 +18,14 @@ node_modules/
 
 # coding LLM settings
 **/settings.local.json
+skill-lock.json
+skills-lock.json
 
 # claude log
 .claude/command.log
 
 # base dir env
 .env
+
+nul
+**/nul

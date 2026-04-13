@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import type { PdfTextMarkupAnnotationObject, Subtype } from "../plugin-annotation-2"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
   const { provides: exportCapability } = useExportCapability()

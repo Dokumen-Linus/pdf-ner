@@ -45,7 +45,7 @@ import {
 import { getProjectById } from "@/db-fns/web/projects"
 import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
 import type { FoundWorkersPdf } from "@/db/types"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 function DocumentsSkeleton() {
   return (

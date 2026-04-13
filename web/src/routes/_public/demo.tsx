@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import EntityTable from "@/components/entity-table/components/entity-table"
 import PDFContainer from "@/components/pdf-container/pdf-container"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 export const Route = createFileRoute("/_public/demo")({
   component: DemoPage,

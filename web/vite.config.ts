@@ -5,7 +5,7 @@ import { generateSitemap } from "tanstack-router-sitemap"
 import { paraglideVitePlugin } from "@inlang/paraglide-js"
 import { defineConfig } from "vite"
 import viteTsConfigPaths from "vite-tsconfig-paths"
-import { sitemap } from "./src/utils/sitemap"
+import { sitemap } from "./src/integrations/sitemap"
 
 const config = defineConfig({
   plugins: [
@@ -16,7 +16,7 @@ const config = defineConfig({
     tanstackStart(),
     paraglideVitePlugin({
       project: "./project.inlang",
-      outdir: "./src/paraglide",
+      outdir: "./src/integrations/paraglide",
     }),
     generateSitemap(sitemap),
     viteReact({

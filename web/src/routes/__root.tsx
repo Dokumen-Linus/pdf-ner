@@ -75,7 +75,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   shellComponent: RootDocument,
 })
 
-import { getLocale } from "../paraglide/runtime"
+import { getLocale } from "@/integrations/paraglide/runtime"
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
