@@ -130,7 +130,7 @@ function PricingPage() {
             Get started free
           </Link>
           <Link
-            to="/demo"
+            to="/signup"
             className="flex items-center justify-center min-h-10 w-full sm:w-50 rounded-[4px] bg-white px-4 text-[14px] font-medium text-[#393C41] border-[3px] border-transparent transition-all duration-[330ms] hover:bg-[#F4F4F4]"
           >
             Try the demo
