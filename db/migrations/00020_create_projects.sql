@@ -2,9 +2,10 @@
 CREATE TABLE web.projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   owner_id UUID NOT NULL REFERENCES web.users (id) ON DELETE CASCADE,
+  team_id TEXT,
   "name" TEXT NOT NULL,
   "description" TEXT,
-  bucket_id UUID REFERENCES api.aws_buckets (id),
+  bucket_id UUID,
   color_presets TEXT[], -- list of hex color code strings
   orientation TEXT NOT NULL DEFAULT 'any' CHECK (orientation IN ('any', 'portrait', 'landscape')),
   created_at TIMESTAMPTZ DEFAULT now(),

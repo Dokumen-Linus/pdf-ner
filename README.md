@@ -24,9 +24,10 @@ bun i
 Selectively install:
 
 ```cmd
+npm install -g @playwright/test
 npm install -g @tanstack/cli
 npm install -g better-auth-cli
-npm install -g @playwright/test
+npm install -g cross-env
 npm install -g drizzle-kit
 pip install jq
 pip install pytest
@@ -37,7 +38,7 @@ pip install uv
 Install all:
 
 ```cmd
-npm install -g @tanstack/cli better-auth-cli @playwright/test drizzle-kit
+npm install -g @playwright/test @tanstack/cli better-auth-cli cross-env drizzle-kit
 pip install jq pytest ruff uv
 ```
 

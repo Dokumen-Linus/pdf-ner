@@ -20,6 +20,8 @@ node_modules/
 **/settings.local.json
 skill-lock.json
 skills-lock.json
+.agents/skills
+.kilo/skills
 
 # claude log
 .claude/command.log

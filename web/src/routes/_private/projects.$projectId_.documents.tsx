@@ -408,7 +408,16 @@ function DocumentsPage() {
                           key={pdf.id}
                           className="group hover:bg-muted/20 transition-colors"
                         >
-                          <TableCell className="py-4 px-6 font-medium">{pdf.name}</TableCell>
+                          <TableCell className="py-4 px-6 font-medium">
+                            <Link
+                              to="/projects/$projectId/labelling"
+                              params={{ projectId }}
+                              search={{ pdfId: pdf.id }}
+                              className="hover:underline"
+                            >
+                              {pdf.name}
+                            </Link>
+                          </TableCell>
                           <TableCell className="py-4 px-4 text-center">
                             <span className="capitalize px-2 py-1 rounded bg-muted/40 text-[11px] font-medium text-muted-foreground border border-border/40">
                               {pdf.extractMethod || "upload"}

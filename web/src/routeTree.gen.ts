@@ -14,6 +14,7 @@ import { Route as PrivateRouteImport } from './routes/_private'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
+import { Route as ApiReleaseLockRouteImport } from './routes/api/release-lock'
 import { Route as ApiPdfUploadRouteImport } from './routes/api/pdf-upload'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as PublicPricingRouteImport } from './routes/_public/pricing'
@@ -26,6 +27,7 @@ import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
 import { Route as PrivateProjectsIndexRouteImport } from './routes/_private/projects.index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PrivateProjectsProjectIdRouteImport } from './routes/_private/projects.$projectId'
+import { Route as PrivateProjectsProjectIdLabellingRouteImport } from './routes/_private/projects.$projectId_.labelling'
 import { Route as PrivateProjectsProjectIdEntity_typesRouteImport } from './routes/_private/projects.$projectId_.entity_types'
 import { Route as PrivateProjectsProjectIdEngineeringRouteImport } from './routes/_private/projects.$projectId_.engineering'
 import { Route as PrivateProjectsProjectIdDocumentsRouteImport } from './routes/_private/projects.$projectId_.documents'
@@ -51,6 +53,11 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
 const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
   id: '/api/uploadthing',
   path: '/api/uploadthing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReleaseLockRoute = ApiReleaseLockRouteImport.update({
+  id: '/api/release-lock',
+  path: '/api/release-lock',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPdfUploadRoute = ApiPdfUploadRouteImport.update({
@@ -114,6 +121,12 @@ const PrivateProjectsProjectIdRoute =
     path: '/projects/$projectId',
     getParentRoute: () => PrivateRoute,
   } as any)
+const PrivateProjectsProjectIdLabellingRoute =
+  PrivateProjectsProjectIdLabellingRouteImport.update({
+    id: '/projects/$projectId_/labelling',
+    path: '/projects/$projectId/labelling',
+    getParentRoute: () => PrivateRoute,
+  } as any)
 const PrivateProjectsProjectIdEntity_typesRoute =
   PrivateProjectsProjectIdEntity_typesRouteImport.update({
     id: '/projects/$projectId_/entity_types',
@@ -150,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PublicPricingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
+  '/api/release-lock': typeof ApiReleaseLockRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -158,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/projects/$projectId/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
   '/projects/$projectId/entity_types': typeof PrivateProjectsProjectIdEntity_typesRoute
+  '/projects/$projectId/labelling': typeof PrivateProjectsProjectIdLabellingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -170,6 +185,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PublicPricingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
+  '/api/release-lock': typeof ApiReleaseLockRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -178,6 +194,7 @@ export interface FileRoutesByTo {
   '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/projects/$projectId/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
   '/projects/$projectId/entity_types': typeof PrivateProjectsProjectIdEntity_typesRoute
+  '/projects/$projectId/labelling': typeof PrivateProjectsProjectIdLabellingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -193,6 +210,7 @@ export interface FileRoutesById {
   '/_public/pricing': typeof PublicPricingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
+  '/api/release-lock': typeof ApiReleaseLockRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/_public/': typeof PublicIndexRoute
   '/_private/projects/$projectId': typeof PrivateProjectsProjectIdRoute
@@ -202,6 +220,7 @@ export interface FileRoutesById {
   '/_private/projects/$projectId_/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/_private/projects/$projectId_/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
   '/_private/projects/$projectId_/entity_types': typeof PrivateProjectsProjectIdEntity_typesRoute
+  '/_private/projects/$projectId_/labelling': typeof PrivateProjectsProjectIdLabellingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -216,6 +235,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/api/chat'
     | '/api/pdf-upload'
+    | '/api/release-lock'
     | '/api/uploadthing'
     | '/projects/$projectId'
     | '/api/auth/$'
@@ -224,6 +244,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/documents'
     | '/projects/$projectId/engineering'
     | '/projects/$projectId/entity_types'
+    | '/projects/$projectId/labelling'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -236,6 +257,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/api/chat'
     | '/api/pdf-upload'
+    | '/api/release-lock'
     | '/api/uploadthing'
     | '/projects/$projectId'
     | '/api/auth/$'
@@ -244,6 +266,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/documents'
     | '/projects/$projectId/engineering'
     | '/projects/$projectId/entity_types'
+    | '/projects/$projectId/labelling'
   id:
     | '__root__'
     | '/_auth'
@@ -258,6 +281,7 @@ export interface FileRouteTypes {
     | '/_public/pricing'
     | '/api/chat'
     | '/api/pdf-upload'
+    | '/api/release-lock'
     | '/api/uploadthing'
     | '/_public/'
     | '/_private/projects/$projectId'
@@ -267,6 +291,7 @@ export interface FileRouteTypes {
     | '/_private/projects/$projectId_/documents'
     | '/_private/projects/$projectId_/engineering'
     | '/_private/projects/$projectId_/entity_types'
+    | '/_private/projects/$projectId_/labelling'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -275,6 +300,7 @@ export interface RootRouteChildren {
   PublicRoute: typeof PublicRouteWithChildren
   ApiChatRoute: typeof ApiChatRoute
   ApiPdfUploadRoute: typeof ApiPdfUploadRoute
+  ApiReleaseLockRoute: typeof ApiReleaseLockRoute
   ApiUploadthingRoute: typeof ApiUploadthingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -314,6 +340,13 @@ declare module '@tanstack/react-router' {
       path: '/api/uploadthing'
       fullPath: '/api/uploadthing'
       preLoaderRoute: typeof ApiUploadthingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/release-lock': {
+      id: '/api/release-lock'
+      path: '/api/release-lock'
+      fullPath: '/api/release-lock'
+      preLoaderRoute: typeof ApiReleaseLockRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/pdf-upload': {
@@ -400,6 +433,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateProjectsProjectIdRouteImport
       parentRoute: typeof PrivateRoute
     }
+    '/_private/projects/$projectId_/labelling': {
+      id: '/_private/projects/$projectId_/labelling'
+      path: '/projects/$projectId/labelling'
+      fullPath: '/projects/$projectId/labelling'
+      preLoaderRoute: typeof PrivateProjectsProjectIdLabellingRouteImport
+      parentRoute: typeof PrivateRoute
+    }
     '/_private/projects/$projectId_/entity_types': {
       id: '/_private/projects/$projectId_/entity_types'
       path: '/projects/$projectId/entity_types'
@@ -454,6 +494,7 @@ interface PrivateRouteChildren {
   PrivateProjectsProjectIdDocumentsRoute: typeof PrivateProjectsProjectIdDocumentsRoute
   PrivateProjectsProjectIdEngineeringRoute: typeof PrivateProjectsProjectIdEngineeringRoute
   PrivateProjectsProjectIdEntity_typesRoute: typeof PrivateProjectsProjectIdEntity_typesRoute
+  PrivateProjectsProjectIdLabellingRoute: typeof PrivateProjectsProjectIdLabellingRoute
 }
 
 const PrivateRouteChildren: PrivateRouteChildren = {
@@ -469,6 +510,8 @@ const PrivateRouteChildren: PrivateRouteChildren = {
     PrivateProjectsProjectIdEngineeringRoute,
   PrivateProjectsProjectIdEntity_typesRoute:
     PrivateProjectsProjectIdEntity_typesRoute,
+  PrivateProjectsProjectIdLabellingRoute:
+    PrivateProjectsProjectIdLabellingRoute,
 }
 
 const PrivateRouteWithChildren =
@@ -495,6 +538,7 @@ const rootRouteChildren: RootRouteChildren = {
   PublicRoute: PublicRouteWithChildren,
   ApiChatRoute: ApiChatRoute,
   ApiPdfUploadRoute: ApiPdfUploadRoute,
+  ApiReleaseLockRoute: ApiReleaseLockRoute,
   ApiUploadthingRoute: ApiUploadthingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

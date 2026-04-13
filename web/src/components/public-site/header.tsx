@@ -19,10 +19,10 @@ import {
 } from "@/components/shadcn-ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn-ui/popover"
 import { getUserByEmail } from "@/db-fns/web/users"
-import { authClient } from "@/lib/auth-client"
-import logoUrl from "@/logo.svg"
 import { m } from "@/integrations/paraglide/messages.js"
 import { getLocale, locales, setLocale } from "@/integrations/paraglide/runtime"
+import { authClient } from "@/lib/auth-client"
+import logoUrl from "@/logo.svg"
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -257,13 +257,6 @@ export default function Header() {
             className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
           >
             {m.nav_home()}
-          </Link>
-          <Link
-            to="/demo"
-            onClick={() => setIsOpen(false)}
-            className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
-          >
-            {m.nav_demo()}
           </Link>
           <Link
             to="/pricing"

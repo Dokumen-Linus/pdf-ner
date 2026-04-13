@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react"
 import { useCapability } from "@embedpdf/core/react"
-import { useViewportElement, ViewportPlugin } from "@embedpdf/plugin-viewport/react"
+import { useViewportElement, ViewportPlugin } from "../../plugin-viewport-2"
 import { setupZoomGestures, ZoomGestureOptions } from "../utils/zoom-gesture-logic"
 import { useZoomCapability } from "./use-zoom"
 
@@ -35,8 +35,7 @@ export function useZoomGesture(documentId: string, options: ZoomGestureOptions =
     zoomProvides,
     documentId,
     viewportElementRef,
-    options.enablePinch,
-    options.enableWheel,
+    options,
   ])
 
   return { elementRef }

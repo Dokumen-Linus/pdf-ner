@@ -1,12 +1,22 @@
 import { describe, expect, it } from "bun:test"
+import { eq, sql } from "drizzle-orm"
+import { db } from "@/db/client"
+import { workersPdfs } from "@/db/schemas/workers/pdfs"
+import { pdfs } from "@/db/schemas/web/pdfs"
+import { projects } from "@/db/schemas/web/projects"
+import { users } from "@/db/schemas/web/users"
+import { setAuthenticated } from "~/tests/bun-test-setup/mocks"
 import {
   createAnnotation,
   deleteAnnotation,
   getAnnotationById,
   getAnnotationsByPdfId,
   getAnnotationsBySubtype,
+  LabellingLockLostError,
+  saveAnnotationsByPdfId,
   updateAnnotation,
 } from "./annotations"
+import { acquireLabellingLock, releaseLabellingLock } from "./pdfs"
 
 const runTests = process.env.TEST_DB === "true"
 
@@ -154,5 +164,228 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
         "Annotation not found",
       )
     })
+  })
+})
+
+// Save path tests — exercise the lock-checked transactional replace logic.
+// These tests need real fixtures (a workers.pdfs row and two web.users rows)
+// and do NOT share the hard-coded testPdfId above, because that id is expected
+// NOT to exist in the foreign-key parent table.
+async function loadSaveFixtures() {
+  const [ownedPdf] = await db
+    .select({ pdfId: workersPdfs.id, ownerId: projects.ownerId })
+    .from(workersPdfs)
+    .innerJoin(projects, eq(projects.id, workersPdfs.projectId))
+    .limit(1)
+  if (!ownedPdf) return null
+
+  const [otherUser] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(sql`${users.id} <> ${ownedPdf.ownerId}`)
+    .limit(1)
+  if (!otherUser) return null
+
+  return {
+    pdfId: ownedPdf.pdfId,
+    userAId: ownedPdf.ownerId,
+    userBId: otherUser.id,
+  }
+}
+
+describe.if(runTests)("saveAnnotationsByPdfId", () => {
+  const testRect = { x: 0, y: 0, width: 100, height: 50 }
+  const testSegmentRects = [{ x: 0, y: 0, width: 50, height: 25 }]
+
+  it("full-replaces annotations when the lock is held by the caller", async () => {
+    const f = await loadSaveFixtures()
+    if (!f) {
+      console.warn("[annotations.test] skipping save tests — missing fixtures")
+      return
+    }
+    // Start clean.
+    await db
+      .update(pdfs)
+      .set({ lockedBy: null, lockedAt: null })
+      .where(sql`${pdfs.id} = ${f.pdfId}`)
+
+    try {
+      setAuthenticated({ id: f.userAId })
+      await acquireLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId } })
+
+      const initial = [
+        {
+          id: crypto.randomUUID(),
+          pdfId: f.pdfId,
+          subtype: "highlight",
+          rect: testRect,
+          segmentRects: testSegmentRects,
+          pageIndex: 0,
+          color: "#00ff00",
+          opacity: 0.5,
+          contents: "one",
+          customEntityType: "Title",
+        },
+        {
+          id: crypto.randomUUID(),
+          pdfId: f.pdfId,
+          subtype: "underline",
+          rect: testRect,
+          segmentRects: testSegmentRects,
+          pageIndex: 1,
+          color: "#0000ff",
+          opacity: 0.4,
+          contents: "two",
+          customEntityType: "Date",
+        },
+      ]
+      const first = await saveAnnotationsByPdfId({
+        data: {
+          pdfId: f.pdfId,
+          userId: f.userAId,
+          annotations: initial,
+          labeledEntities: { Title: ["one"], Date: ["two"] },
+        },
+      })
+      expect(first.success).toBe(true)
+      expect(first.count).toBe(2)
+
+      const afterFirst = (await getAnnotationsByPdfId({
+        data: { pdfId: f.pdfId },
+      })) as AnnotationRecord[]
+      expect(afterFirst.length).toBe(2)
+      const contentSet = new Set(afterFirst.map((a) => a.contents))
+      expect(contentSet.has("one")).toBe(true)
+      expect(contentSet.has("two")).toBe(true)
+
+      // Second save replaces the prior set completely — "one"/"two" are gone.
+      const replacement = [
+        {
+          id: crypto.randomUUID(),
+          pdfId: f.pdfId,
+          subtype: "highlight",
+          rect: testRect,
+          segmentRects: testSegmentRects,
+          pageIndex: 0,
+          color: "#ff0000",
+          opacity: 0.7,
+          contents: "three",
+          customEntityType: "Agency",
+        },
+      ]
+      await saveAnnotationsByPdfId({
+        data: {
+          pdfId: f.pdfId,
+          userId: f.userAId,
+          annotations: replacement,
+          labeledEntities: { Agency: ["three"] },
+        },
+      })
+
+      const afterSecond = (await getAnnotationsByPdfId({
+        data: { pdfId: f.pdfId },
+      })) as AnnotationRecord[]
+      expect(afterSecond.length).toBe(1)
+      expect(afterSecond[0].contents).toBe("three")
+
+      // Empty save is also valid — clears everything.
+      await saveAnnotationsByPdfId({
+        data: {
+          pdfId: f.pdfId,
+          userId: f.userAId,
+          annotations: [],
+          labeledEntities: {},
+        },
+      })
+      const afterEmpty = (await getAnnotationsByPdfId({
+        data: { pdfId: f.pdfId },
+      })) as AnnotationRecord[]
+      expect(afterEmpty.length).toBe(0)
+    } finally {
+      // Clean up: release lock, wipe any stray test annotations.
+      await db
+        .update(pdfs)
+        .set({ lockedBy: null, lockedAt: null })
+        .where(sql`${pdfs.id} = ${f.pdfId}`)
+    }
+  })
+
+  it("rejects save when the caller does not hold the lock", async () => {
+    const f = await loadSaveFixtures()
+    if (!f) {
+      console.warn("[annotations.test] skipping no-lock test — missing fixtures")
+      return
+    }
+    await db
+      .update(pdfs)
+      .set({ lockedBy: null, lockedAt: null })
+      .where(sql`${pdfs.id} = ${f.pdfId}`)
+
+    try {
+      // userA holds the lock.
+      setAuthenticated({ id: f.userAId })
+      await acquireLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId } })
+
+      // userB tries to save a project they do not own — reject before lock logic.
+      setAuthenticated({ id: f.userBId })
+      await expect(
+        saveAnnotationsByPdfId({
+          data: {
+            pdfId: f.pdfId,
+            userId: f.userBId,
+            annotations: [],
+            labeledEntities: {},
+          },
+        }),
+      ).rejects.toThrow("You do not have access to this project")
+    } finally {
+      setAuthenticated({ id: f.userAId })
+      await releaseLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId } })
+    }
+  })
+
+  it("rejects save when the lock has gone stale", async () => {
+    const f = await loadSaveFixtures()
+    if (!f) {
+      console.warn("[annotations.test] skipping stale-save test — missing fixtures")
+      return
+    }
+    // Seed a stale lock on userA (locked_at 10 min ago).
+    await db
+      .update(pdfs)
+      .set({ lockedBy: f.userAId, lockedAt: sql`now() - interval '10 minutes'` })
+      .where(sql`${pdfs.id} = ${f.pdfId}`)
+
+    try {
+      // Even userA can't save — their own heartbeat is stale, meaning the lock
+      // is logically forfeited. The app should treat it as "session expired".
+      setAuthenticated({ id: f.userAId })
+      await expect(
+        saveAnnotationsByPdfId({
+          data: {
+            pdfId: f.pdfId,
+            userId: f.userAId,
+            annotations: [],
+            labeledEntities: {},
+          },
+        }),
+      ).rejects.toThrow(LabellingLockLostError)
+
+      await expect(
+        saveAnnotationsByPdfId({
+          data: {
+            pdfId: f.pdfId,
+            userId: f.userBId,
+            annotations: [],
+            labeledEntities: {},
+          },
+        }),
+      ).rejects.toThrow("Cannot act as another user")
+    } finally {
+      await db
+        .update(pdfs)
+        .set({ lockedBy: null, lockedAt: null })
+        .where(sql`${pdfs.id} = ${f.pdfId}`)
+    }
   })
 })

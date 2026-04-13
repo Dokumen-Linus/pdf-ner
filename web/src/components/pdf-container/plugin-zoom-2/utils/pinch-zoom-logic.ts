@@ -1,4 +1,4 @@
-import type { ViewportCapability } from "@embedpdf/plugin-viewport"
+import type { ViewportCapability } from "../../plugin-viewport-2"
 import type { ZoomCapability } from "../lib"
 
 export interface ZoomGestureOptions {
