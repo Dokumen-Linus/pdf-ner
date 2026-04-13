@@ -1,12 +1,28 @@
 import { useEffect, useState } from "react"
 import { Link } from "@tanstack/react-router"
-import { Languages, Menu, X } from "lucide-react"
+import {
+  ChevronDownIcon,
+  CreditCardIcon,
+  FolderOpenIcon,
+  Languages,
+  LogOutIcon,
+  Menu,
+  UserIcon,
+  X,
+} from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/shadcn-ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn-ui/popover"
 import { getUserByEmail } from "@/db-fns/web/users"
 import { authClient } from "@/lib/auth-client"
 import logoUrl from "@/logo.svg"
-import { m } from "@/paraglide/messages.js"
-import { getLocale, locales, setLocale } from "@/paraglide/runtime"
+import { m } from "@/integrations/paraglide/messages.js"
+import { getLocale, locales, setLocale } from "@/integrations/paraglide/runtime"
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -80,25 +96,61 @@ export default function Header() {
             >
               {m.nav_demo()}
             </Link>
+            <Link
+              to="/pricing"
+              className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
+              activeProps={{
+                className:
+                  "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
+              }}
+            >
+              Pricing
+            </Link>
           </nav>
 
           {/* Desktop Auth (Right) */}
           <div className="hidden md:flex shrink-0 items-center justify-end gap-2">
             {session ? (
-              <>
-                <Link
-                  to="/profile"
-                  className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
-                >
-                  {headerIdentity || session.user.name || session.user.email}
-                </Link>
-                <Link
-                  to="/signout"
-                  className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
-                >
-                  {m.nav_signout()}
-                </Link>
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]">
+                    <span className="max-w-40 truncate">
+                      {headerIdentity || session.user.name || session.user.email}
+                    </span>
+                    <ChevronDownIcon size={14} className="shrink-0 text-[#5C5E62]" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" sideOffset={8} className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/projects" className="flex items-center gap-2 cursor-pointer">
+                      <FolderOpenIcon size={14} />
+                      Projects
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                      <UserIcon size={14} />
+                      {m.nav_profile()}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/billing" className="flex items-center gap-2 cursor-pointer">
+                      <CreditCardIcon size={14} />
+                      Billing
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/signout"
+                      className="flex items-center gap-2 cursor-pointer text-[#5C5E62]"
+                    >
+                      <LogOutIcon size={14} />
+                      {m.nav_signout()}
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <>
                 <Link
@@ -213,22 +265,52 @@ export default function Header() {
           >
             {m.nav_demo()}
           </Link>
+          <Link
+            to="/pricing"
+            onClick={() => setIsOpen(false)}
+            className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+          >
+            Pricing
+          </Link>
           {session ? (
             <>
-              <Link
-                to="/profile"
-                onClick={() => setIsOpen(false)}
-                className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors mt-4"
-              >
-                {m.nav_profile()}
-              </Link>
-              <Link
-                to="/signout"
-                onClick={() => setIsOpen(false)}
-                className="text-[17px] font-medium text-[#5C5E62] hover:text-[#171A20] transition-colors mt-2"
-              >
-                {m.nav_signout()}
-              </Link>
+              <div className="mt-4 border-t border-[#EEEEEE] pt-4 flex flex-col gap-4">
+                <p className="text-[12px] font-medium uppercase tracking-wide text-[#8E8E8E]">
+                  Account
+                </p>
+                <Link
+                  to="/projects"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+                >
+                  <FolderOpenIcon size={16} />
+                  Projects
+                </Link>
+                <Link
+                  to="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+                >
+                  <UserIcon size={16} />
+                  {m.nav_profile()}
+                </Link>
+                <Link
+                  to="/billing"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+                >
+                  <CreditCardIcon size={16} />
+                  Billing
+                </Link>
+                <Link
+                  to="/signout"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-2 text-[17px] font-medium text-[#5C5E62] hover:text-[#171A20] transition-colors mt-2"
+                >
+                  <LogOutIcon size={16} />
+                  {m.nav_signout()}
+                </Link>
+              </div>
             </>
           ) : (
             <>
