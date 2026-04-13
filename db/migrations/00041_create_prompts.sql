@@ -2,7 +2,7 @@
 CREATE TABLE api.prompts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES web.projects (id) ON DELETE CASCADE,
-  template_id BIGINT REFERENCES public.templates (id) ON DELETE CASCADE,
+  template_id BIGINT REFERENCES public.templates (id) ON DELETE SET NULL,
   full_text TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
