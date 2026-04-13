@@ -435,6 +435,10 @@ Links to repos that aren't relevant to my current project but could give me brai
 - Pydantic Settings + AWS Secrets [okube-ai/settus](https://github.com/okube-ai/settus)
 - Visualization [drivendataorg/erdantic](https://github.com/drivendataorg/erdantic)
 
+### PostgreSQL Vector Search
+
+- [pgsemantic](https://github.com/varmabudharaju/pgsemantic)
+
 ### Task Queues
 
 - [celery/celery](https://github.com/celery/celery), [docs](https://docs.celeryq.dev/)

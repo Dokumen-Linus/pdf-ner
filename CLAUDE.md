@@ -275,7 +275,7 @@ The database has multiple schemas with role-based access control:
     2. TypeScript schemas in `web/src/db/schema/` mirror SQL structure using Drizzle ORM
     3. Server functions in `web/src/db-fns/` provide validated database operations using Zod
     4. Pages in `web/src/routes/` consume the server functions for all database interactions
-- **API Communication**: Tanstack Router API routes in `src/routes/api/` using Axios
+- **API Communication**: Tanstack Router API routes in `src/routes/api/` using fetch, Tanstack Query, and/or Axios when each are appropriate. for simple calls to FastAPI use fetch, createFileRoute, and router.invalidate()
 - **State Management**: React useState (local), Zustand (global)
 - **Forms**: Tanstack Form + shadcn/ui components + Zod validation
 - **Auth**: Better Auth with Tanstack integration
