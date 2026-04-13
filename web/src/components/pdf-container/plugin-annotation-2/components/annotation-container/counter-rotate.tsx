@@ -1,4 +1,4 @@
-import { CSSProperties, Fragment, ReactNode, useEffect, useRef } from "react"
+import { CSSProperties, Fragment, ReactNode, Ref, useEffect, useRef } from "react"
 import { Rect, Rotation } from "@embedpdf/models"
 
 interface CounterTransformResult {
@@ -55,7 +55,7 @@ interface CounterRotateProps {
 
 export interface MenuWrapperProps {
   style: CSSProperties
-  ref: (el: HTMLDivElement | null) => void
+  ref: Ref<HTMLDivElement>
 }
 
 interface CounterRotateComponentProps extends CounterRotateProps {
@@ -112,9 +112,7 @@ export function CounterRotate({ children, ...props }: CounterRotateComponentProp
 
   const menuWrapperProps: MenuWrapperProps = {
     style: menuWrapperStyle,
-    ref: (el: HTMLDivElement | null) => {
-      elementRef.current = el
-    },
+    ref: elementRef,
   }
 
   return (

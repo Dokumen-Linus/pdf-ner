@@ -160,9 +160,10 @@ const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
           patch.color = "red"
           patch.opacity = 0.5
           patch.type = PdfAnnotationSubtype.HIGHLIGHT
-          if (!annoState) return
-          if (!annoState.byUid) return
-          const allAnnoUids = Object.keys(annoState.byUid)
+          if (!annoState || !annoState.activeDocumentId) return
+          const docState = annoState.documents[annoState.activeDocumentId]
+          if (!docState) return
+          const allAnnoUids = Object.keys(docState.byUid)
           annoCapability?.updateAnnotations(allAnnoUids.map((id: string) => ({ id, patch })))
         }}
         className="rounded-md bg-red-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-red-300"
