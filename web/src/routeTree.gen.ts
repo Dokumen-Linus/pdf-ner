@@ -14,6 +14,7 @@ import { Route as PrivateRouteImport } from './routes/_private'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
+import { Route as ApiPdfUploadRouteImport } from './routes/api/pdf-upload'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as PublicDemoRouteImport } from './routes/_public/demo'
 import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
@@ -48,6 +49,11 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
 const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
   id: '/api/uploadthing',
   path: '/api/uploadthing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPdfUploadRoute = ApiPdfUploadRouteImport.update({
+  id: '/api/pdf-upload',
+  path: '/api/pdf-upload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof PrivateProfileRoute
   '/demo': typeof PublicDemoRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/pdf-upload': typeof ApiPdfUploadRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/profile': typeof PrivateProfileRoute
   '/demo': typeof PublicDemoRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/pdf-upload': typeof ApiPdfUploadRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/_private/profile': typeof PrivateProfileRoute
   '/_public/demo': typeof PublicDemoRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/pdf-upload': typeof ApiPdfUploadRoute
   '/api/uploadthing': typeof ApiUploadthingRoute
   '/_public/': typeof PublicIndexRoute
   '/_private/projects/$projectId': typeof PrivateProjectsProjectIdRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/demo'
     | '/api/chat'
+    | '/api/pdf-upload'
     | '/api/uploadthing'
     | '/projects/$projectId'
     | '/api/auth/$'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/demo'
     | '/api/chat'
+    | '/api/pdf-upload'
     | '/api/uploadthing'
     | '/projects/$projectId'
     | '/api/auth/$'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/_private/profile'
     | '/_public/demo'
     | '/api/chat'
+    | '/api/pdf-upload'
     | '/api/uploadthing'
     | '/_public/'
     | '/_private/projects/$projectId'
@@ -237,6 +249,7 @@ export interface RootRouteChildren {
   PrivateRoute: typeof PrivateRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   ApiChatRoute: typeof ApiChatRoute
+  ApiPdfUploadRoute: typeof ApiPdfUploadRoute
   ApiUploadthingRoute: typeof ApiUploadthingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -276,6 +289,13 @@ declare module '@tanstack/react-router' {
       path: '/api/uploadthing'
       fullPath: '/api/uploadthing'
       preLoaderRoute: typeof ApiUploadthingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/pdf-upload': {
+      id: '/api/pdf-upload'
+      path: '/api/pdf-upload'
+      fullPath: '/api/pdf-upload'
+      preLoaderRoute: typeof ApiPdfUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -430,6 +450,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateRoute: PrivateRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   ApiChatRoute: ApiChatRoute,
+  ApiPdfUploadRoute: ApiPdfUploadRoute,
   ApiUploadthingRoute: ApiUploadthingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

@@ -1,5 +1,7 @@
 import { useRef, useState } from "react"
+import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
+import axios, { AxiosError } from "axios"
 import {
   CheckCircle2Icon,
   FileTextIcon,
@@ -30,6 +32,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn-ui/card"
+import { Progress } from "@/components/shadcn-ui/progress"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import {
   Table,
@@ -39,7 +42,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcn-ui/table"
-import { uploadPdf } from "@/db-fns/api/storage"
 import { getProjectById } from "@/db-fns/web/projects"
 import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
 import type { FoundWorkersPdf } from "@/db/types"
@@ -101,9 +103,49 @@ function DocumentsPage() {
   const { projectId } = Route.useParams()
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const [uploadError, setUploadError] = useState<string | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [clientValidationError, setClientValidationError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      if (!project?.bucketId) throw new Error("missing bucket")
+      setUploadProgress(0)
+      const query = new URLSearchParams({
+        project_id: projectId,
+        bucket_id: project.bucketId,
+      }).toString()
+      const res = await axios.post(`/api/pdf-upload?${query}`, file, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "X-Filename": encodeURIComponent(file.name),
+        },
+        onUploadProgress: (event) => {
+          if (event.total) {
+            setUploadProgress(Math.round((event.loaded / event.total) * 100))
+          }
+        },
+      })
+      return res.data
+    },
+    onSuccess: () => {
+      setSelectedFile(null)
+      setUploadProgress(0)
+      if (fileInputRef.current) fileInputRef.current.value = ""
+      setIsUploadOpen(false)
+      void router.invalidate()
+    },
+  })
+
+  const uploadErrorMessage = (() => {
+    if (clientValidationError) return clientValidationError
+    const err = uploadMutation.error
+    if (!err) return null
+    if (err instanceof AxiosError) {
+      return err.response?.data?.detail ?? err.message ?? m.projects_docs_upload_error_failed()
+    }
+    return err instanceof Error ? err.message : m.projects_docs_upload_error_failed()
+  })()
 
   if (loadError || !project || !pdfs) {
     return (
@@ -119,7 +161,9 @@ function DocumentsPage() {
             <p className="text-sm text-muted-foreground">
               {loadError || m.projects_docs_error_not_found()}
             </p>
-            <Button onClick={() => void router.invalidate()}>{m.projects_docs_error_retry()}</Button>
+            <Button onClick={() => void router.invalidate()}>
+              {m.projects_docs_error_retry()}
+            </Button>
             <Button variant="outline" asChild className="ml-2">
               <Link to="/projects">{m.projects_docs_back_button()}</Link>
             </Button>
@@ -131,16 +175,17 @@ function DocumentsPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null
-    setUploadError(null)
+    setClientValidationError(null)
+    uploadMutation.reset()
 
     if (file && file.type !== "application/pdf") {
-      setUploadError(m.projects_docs_upload_error_not_pdf())
+      setClientValidationError(m.projects_docs_upload_error_not_pdf())
       setSelectedFile(null)
       return
     }
 
     if (file && file.size > 50 * 1024 * 1024) {
-      setUploadError(m.projects_docs_upload_error_too_large())
+      setClientValidationError(m.projects_docs_upload_error_too_large())
       setSelectedFile(null)
       return
     }
@@ -148,39 +193,10 @@ function DocumentsPage() {
     setSelectedFile(file)
   }
 
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (!selectedFile || !project.bucketId) return
-
-    setUploading(true)
-    setUploadError(null)
-
-    try {
-      const buffer = await selectedFile.arrayBuffer()
-      const bytes = new Uint8Array(buffer)
-      const chunks: string[] = []
-      for (let i = 0; i < bytes.length; i += 8192) {
-        chunks.push(String.fromCharCode(...bytes.subarray(i, i + 8192)))
-      }
-      const fileBase64 = btoa(chunks.join(""))
-
-      await uploadPdf({
-        data: {
-          projectId,
-          bucketId: project.bucketId,
-          fileName: selectedFile.name,
-          fileBase64,
-        },
-      })
-
-      setSelectedFile(null)
-      if (fileInputRef.current) fileInputRef.current.value = ""
-      setIsUploadOpen(false)
-      void router.invalidate()
-    } catch (err) {
-      setUploadError(err instanceof Error ? err.message : m.projects_docs_upload_error_failed())
-    } finally {
-      setUploading(false)
-    }
+    setClientValidationError(null)
+    uploadMutation.mutate(selectedFile)
   }
 
   // Sort pdfs by newest first
@@ -203,10 +219,16 @@ function DocumentsPage() {
         <AlertDialog
           open={isUploadOpen}
           onOpenChange={(open) => {
+            // Block closing the dialog while an upload is in flight — cancelling
+            // mid-stream would leave an orphaned S3 multipart upload. axios has
+            // no cancel support wired up here, so the safest UX is "locked".
+            if (!open && uploadMutation.isPending) return
             setIsUploadOpen(open)
             if (!open) {
               setSelectedFile(null)
-              setUploadError(null)
+              setClientValidationError(null)
+              setUploadProgress(0)
+              uploadMutation.reset()
               if (fileInputRef.current) fileInputRef.current.value = ""
             }
           }}
@@ -243,7 +265,9 @@ function DocumentsPage() {
                     </p>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">{m.projects_docs_upload_modal_placeholder()}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {m.projects_docs_upload_modal_placeholder()}
+                  </p>
                 )}
               </div>
               <input
@@ -254,24 +278,33 @@ function DocumentsPage() {
                 onChange={handleFileChange}
               />
 
-              {uploadError && (
+              {uploadErrorMessage && (
                 <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3">
-                  <p className="text-sm font-medium text-destructive">{uploadError}</p>
+                  <p className="text-sm font-medium text-destructive">{uploadErrorMessage}</p>
+                </div>
+              )}
+
+              {uploadMutation.isPending && (
+                <div className="space-y-1">
+                  <Progress value={uploadProgress} />
+                  <p className="text-right text-xs tabular-nums text-muted-foreground">
+                    {uploadProgress}%
+                  </p>
                 </div>
               )}
 
               <Button
                 className="w-full"
-                disabled={!selectedFile || uploading}
+                disabled={!selectedFile || uploadMutation.isPending}
                 onClick={handleUpload}
               >
-                {uploading ? (
+                {uploadMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     {m.projects_docs_upload_button_loading()}
                   </>
                 ) : (
-                   <>
+                  <>
                     <UploadIcon className="mr-2 h-4 w-4" />
                     {m.projects_docs_upload_button()}
                   </>
@@ -279,7 +312,9 @@ function DocumentsPage() {
               </Button>
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={uploading}>{m.projects_docs_upload_modal_close()}</AlertDialogCancel>
+              <AlertDialogCancel disabled={uploadMutation.isPending}>
+                {m.projects_docs_upload_modal_close()}
+              </AlertDialogCancel>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -287,9 +322,7 @@ function DocumentsPage() {
 
       {!project.bucketId && (
         <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3">
-          <p className="text-sm text-destructive">
-            {m.projects_docs_no_bucket_error()}
-          </p>
+          <p className="text-sm text-destructive">{m.projects_docs_no_bucket_error()}</p>
         </div>
       )}
 

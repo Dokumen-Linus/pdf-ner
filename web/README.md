@@ -89,7 +89,7 @@ The database schemas are defined in:
 
 ### Backend for Frontend (BFF)
 
-- API: [Tanstack Router](https://tanstack.com/router/latest/docs/overview) in src/routes/api/ which utilizes [Tanstack Query](https://tanstack.com/query/latest/docs/overview) and [Axios](https://axios-http.com/docs/intro) for communication with the external backend REST API
+- API: [Tanstack Router](https://tanstack.com/router/latest/docs/overview) in src/routes/api/ which utilizes fetch, [Tanstack Query](https://tanstack.com/query/latest/docs/overview) and/or [Axios](https://axios-http.com/docs/intro) for communication with the external backend REST API and/or other APIs when appropriate. Simple calls to the FastAPI should use fetch, createFileRoute, and router.invalidate().
 - Database Server Functions (db-fns): must interact with the database using functions in src/db-fns/ built with [Tanstack Start Server Functions](https://tanstack.com/start/latest/docs/framework/react/guide/server-functions), Zod validation, Drizzle ORM client, and PostgreSQL database connection
 - ORM: [Drizzle](https://orm.drizzle.team/docs/overview) client in src/db/client.ts handles interaction between TS and SQL, Typescript schemas defined in src/db/schema
 - Database: defined in SQL for easy migration to standalone instance and integration with other apps

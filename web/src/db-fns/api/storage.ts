@@ -1,7 +1,5 @@
-import { createServerFn } from "@tanstack/react-start"
-import { z } from "zod"
 import { env } from "@/env.server"
-import { apiRequest, requireProjectOwnership, requireUserId } from "./_helpers"
+import { apiRequest } from "./_helpers"
 
 export async function createBucket(name: string): Promise<{ bucket_id: string; name: string }> {
   return apiRequest("/api/v1/pdf-storage/buckets", {
@@ -16,30 +14,3 @@ export async function createBucket(name: string): Promise<{ bucket_id: string; n
     }),
   })
 }
-
-export const uploadPdf = createServerFn({ method: "POST" })
-  .inputValidator(
-    z.object({
-      projectId: z.string().uuid(),
-      bucketId: z.string().uuid(),
-      fileName: z.string(),
-      fileBase64: z.string(),
-    }),
-  )
-  .handler(async ({ data }) => {
-    const userId = await requireUserId()
-    await requireProjectOwnership(data.projectId, userId)
-
-    const fileBytes = Buffer.from(data.fileBase64, "base64")
-    const blob = new Blob([fileBytes], { type: "application/pdf" })
-
-    const formData = new FormData()
-    formData.append("file", blob, data.fileName)
-    formData.append("project_id", data.projectId)
-    formData.append("bucket_id", data.bucketId)
-
-    return apiRequest("/api/v1/pdf-storage/pdfs", {
-      method: "POST",
-      body: formData,
-    })
-  })
