@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "../../../shadcn-ui/table"
 import usePluginStore from "../../hooks/use-plugin-store"
+import { m } from "@/paraglide/messages.js"
 
 // table to view store values in testing
 export default function PluginStoreTable() {
@@ -14,53 +15,53 @@ export default function PluginStoreTable() {
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-      <h2 className="mb-4 text-lg font-semibold">Plugin Store</h2>
+      <h2 className="mb-4 text-lg font-semibold">{m.pdf_dev_store_title()}</h2>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Property</TableHead>
-            <TableHead>Value</TableHead>
+            <TableHead>{m.pdf_dev_store_col_prop()}</TableHead>
+            <TableHead>{m.pdf_dev_store_col_value()}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow>
-            <TableCell className="font-medium">annoCapability Active</TableCell>
+            <TableCell className="font-medium">{m.pdf_dev_store_anno_active()}</TableCell>
             <TableCell>
               <span
                 className={`rounded px-2 py-1 font-mono text-sm ${
                   annoCapability ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                 }`}
               >
-                {annoCapability ? "Yes" : "No"}
+                {annoCapability ? m.common_yes() : m.common_no()}
               </span>
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium">selectCapability Active</TableCell>
+            <TableCell className="font-medium">{m.pdf_dev_store_select_active()}</TableCell>
             <TableCell>
               <span
                 className={`rounded px-2 py-1 font-mono text-sm ${
                   selectCapability ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                 }`}
               >
-                {selectCapability ? "Yes" : "No"}
+                {selectCapability ? m.common_yes() : m.common_no()}
               </span>
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium">scrollCapability Active</TableCell>
+            <TableCell className="font-medium">{m.pdf_dev_store_scroll_active()}</TableCell>
             <TableCell>
               <span
                 className={`rounded px-2 py-1 font-mono text-sm ${
                   scrollCapability ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                 }`}
               >
-                {scrollCapability ? "Yes" : "No"}
+                {scrollCapability ? m.common_yes() : m.common_no()}
               </span>
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium">Active Subtype</TableCell>
+            <TableCell className="font-medium">{m.pdf_dev_store_active_subtype()}</TableCell>
             <TableCell>
               <span className="rounded bg-blue-100 px-2 py-1 font-mono text-sm">
                 {annoState?.activeSubtype ?? "null"}
@@ -68,7 +69,7 @@ export default function PluginStoreTable() {
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell className="font-medium">Selected UID</TableCell>
+            <TableCell className="font-medium">{m.pdf_dev_store_selected_uid()}</TableCell>
             <TableCell>
               <span className="rounded bg-purple-100 px-2 py-1 font-mono text-sm">
                 {annoState?.selectedUid ?? "null"}
@@ -120,7 +121,7 @@ export default function PluginStoreTable() {
           disabled={!annoCapability}
           className="rounded bg-gray-100 px-3 py-1 text-sm font-medium hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Deselect
+          {m.pdf_dev_store_btn_deselect()}
         </button>
       </div>
     </div>

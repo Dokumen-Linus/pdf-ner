@@ -9,6 +9,7 @@ export const projects = webSchema.table("projects", {
   ownerId: uuid("owner_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  teamId: text("team_id"),
   name: text("name").notNull(),
   description: text("description"),
   bucketId: uuid("bucket_id"),

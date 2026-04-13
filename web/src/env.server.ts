@@ -20,6 +20,7 @@ export const env = createEnv({
     AWS_SECRET_ACCESS_KEY: z.string(),
     AWS_REGION: z.string().default("us-east-1"),
     AWS_ENDPOINT_URL: z.string().optional(),
+    OPENAI_API_KEY: z.string().optional(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

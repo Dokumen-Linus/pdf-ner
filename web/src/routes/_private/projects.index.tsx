@@ -12,6 +12,7 @@ import {
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { getProjectsByOwnerId } from "@/db-fns/web/projects"
 import type { FoundProject } from "@/db/types"
+import { m } from "@/paraglide/messages.js"
 
 function ProjectsPageSkeleton() {
   return (
@@ -63,18 +64,18 @@ function ProjectsPage() {
     return (
       <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight">Projects</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{m.projects_list_title()}</h1>
           <p className="text-sm text-muted-foreground">
-            We could not load your projects right now.
+            {m.projects_list_no_description()}
           </p>
         </div>
         <Card className="border-destructive/40">
           <CardHeader>
-            <CardTitle className="text-destructive">Something went wrong</CardTitle>
+            <CardTitle className="text-destructive">{m.projects_list_error_title()}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">{loadError}</p>
-            <Button onClick={() => void router.invalidate()}>Try again</Button>
+            <Button onClick={() => void router.invalidate()}>{m.projects_list_error_retry()}</Button>
           </CardContent>
         </Card>
       </div>
@@ -84,9 +85,9 @@ function ProjectsPage() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <div className="space-y-1">
-        <h1 className="text-3xl font-semibold tracking-tight">Projects</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{m.projects_list_title()}</h1>
         <p className="text-sm text-muted-foreground">
-          Manage and monitor all of your Dokumen AI projects.
+          {m.projects_list_description()}
         </p>
       </div>
 
@@ -97,8 +98,8 @@ function ProjectsPage() {
               <div className="mb-2 rounded-full bg-primary/10 p-3">
                 <PlusIcon className="h-6 w-6 text-primary" />
               </div>
-              <div className="text-lg font-semibold">Create New Project</div>
-              <div className="text-sm font-normal text-muted-foreground">Coming soon</div>
+              <div className="text-lg font-semibold">{m.projects_list_create_button()}</div>
+              <div className="text-sm font-normal text-muted-foreground">{m.projects_list_coming_soon()}</div>
             </Button>
           </CardContent>
         </Card>
@@ -110,21 +111,21 @@ function ProjectsPage() {
                 {project.name}
               </CardTitle>
               <CardDescription className="line-clamp-2" title={project.description ?? ""}>
-                {project.description || "No description provided."}
+                {project.description || m.projects_list_no_description()}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1">
               <div className="text-sm text-muted-foreground">
-                <p>Owner: You</p>
+                <p>{m.projects_list_owner_you()}</p>
                 {project.colorPresets && project.colorPresets.length > 0 && (
-                  <p className="mt-1">{project.colorPresets.length} color presets</p>
+                  <p className="mt-1">{m.projects_list_color_presets_count({ count: project.colorPresets.length })}</p>
                 )}
               </div>
             </CardContent>
             <CardFooter>
               <Button variant="outline" className="w-full" asChild>
                 <Link to="/projects/$projectId" params={{ projectId: project.id }}>
-                  Open Project
+                  {m.projects_list_open_button()}
                 </Link>
               </Button>
             </CardFooter>

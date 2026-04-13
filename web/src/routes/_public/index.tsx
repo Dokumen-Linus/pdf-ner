@@ -1,304 +1,437 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ArrowRight, FileText, Layers, Sparkles, Zap } from "lucide-react"
+import { motion } from "motion/react"
+import { Tweet } from "react-tweet"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/shadcn-ui/carousel"
+import { m } from "@/paraglide/messages.js"
 
 export const Route = createFileRoute("/_public/")({ component: App })
 
-function App() {
+// Cursor SVG for the No-Code interface animation
+const CursorIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="drop-shadow-sm"
+  >
+    <path
+      d="M5.5 3.21V20.8C5.5 21.6 6.4 22 7.03 21.5L11.4 17.5L15.3 22.8C15.7 23.3 16.3 23.5 16.9 23.1L18.8 21.8C19.3 21.4 19.5 20.8 19.1 20.3L15.3 15H20.6C21.4 15 21.8 14 21.3 13.4L6.93 2.53C6.35 2.08 5.5 2.5 5.5 3.21Z"
+      fill="#171A20"
+      stroke="white"
+      strokeWidth="1.5"
+    />
+  </svg>
+)
+
+export default function App() {
   return (
-    <div className="min-h-screen bg-linear-to-b from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-32 px-6 overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 h-125 w-200 rounded-full bg-cyan-500/10 blur-3xl" />
-          <div className="absolute top-1/3 left-1/3 h-75 w-100 rounded-full bg-blue-500/10 blur-3xl" />
-        </div>
-
-        <div className="relative mx-auto max-w-5xl text-center">
-          {/* Badge */}
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300">
-            <Sparkles className="h-4 w-4" />
-            AI-Powered Document Intelligence
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight leading-tight mb-6">
-            Turn PDFs into{" "}
-            <span className="bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-              structured data
-            </span>
+    <div className="min-h-screen bg-[#F8F9FA]">
+      {/* Hero Section - 100vh */}
+      <section className="relative flex min-h-[calc(100vh-56px)] w-full flex-col px-6 md:flex-row items-center justify-center max-w-345.75 mx-auto overflow-hidden">
+        {/* Left Side: Headline & Copy */}
+        <div className="w-full md:w-1/2 flex flex-col justify-center z-10 py-12">
+          <h1 className="text-[40px] font-medium leading-[1.2] text-[#171A20] tracking-normal mb-6 max-w-lg">
+            {m.landing_hero_title()}
           </h1>
-
-          {/* Subheadline */}
-          <p className="mx-auto max-w-2xl text-xl text-slate-400 leading-relaxed mb-10">
-            Label entities, train models, and automate extraction workflows — all without writing
-            code. Dokumen AI reads your PDFs so your team doesn&apos;t have to.
+          <p className="text-[14px] font-normal leading-[1.43] text-[#393C41] mb-10 max-w-md">
+            {m.landing_hero_description()}
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Link
               to="/signup"
-              className="group flex items-center gap-2 bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg shadow-cyan-500/25 transition-all hover:shadow-cyan-500/40 hover:scale-105"
+              className="group flex items-center justify-center min-h-10 w-full sm:w-50 rounded-lg bg-[#3E6AE1] px-4 text-[14px] font-medium text-white border-[3px] border-transparent transition-all duration-330 hover:bg-[#2e52b5] focus:border-[#3E6AE1] focus:shadow-[inset_0_0_0_2px_white]"
             >
-              Get Started Free
-              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              to="/signin"
-              className="flex items-center gap-2 text-lg font-semibold text-slate-300 hover:text-white px-8 py-4 rounded-xl border border-slate-600 hover:border-slate-500 hover:bg-white/5 transition-all"
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-        {/* Gradient transition to next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-b from-transparent to-slate-900 pointer-events-none" />
-      </section>
-
-      {/* Why Dokumen AI? */}
-      <section className="relative py-20 px-6 bg-slate-900">
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Why Dokumen AI?</h2>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-2">
-            {/* The Problem */}
-            <div className="group relative rounded-2xl border border-red-500/20 bg-slate-800/50 p-8 hover:border-red-500/40 transition-all duration-300">
-              <div className="mb-6 flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-400 group-hover:bg-red-500/20 transition-colors">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-white">The Problem</h3>
-              </div>
-              <p className="mb-6 text-base text-slate-400 italic">
-                Every business is modernizing big data processes, but what about information that
-                isn&apos;t stored in a database or transferred in EDI format?
-              </p>
-              <ul className="space-y-3">
-                <li className="flex gap-3 text-slate-300">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
-                  <span>Most unstructured, confidential information is sent as PDFs.</span>
-                </li>
-                <li className="flex gap-3 text-slate-300">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
-                  <span>
-                    PDFs are read once and discarded, or a human has to spend valuable time
-                    recording the details.
-                  </span>
-                </li>
-                <li className="flex gap-3 text-slate-300">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
-                  <span>
-                    Even tech-forward businesses rely on analysts to read PDFs and manually enter
-                    fields or trigger actions.
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            {/* The Solution */}
-            <div className="group relative rounded-2xl border border-emerald-500/20 bg-slate-800/50 p-8 hover:border-emerald-500/40 transition-all duration-300">
-              <div className="mb-6 flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500/20 transition-colors">
-                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-white">The Solution</h3>
-              </div>
-              <p className="mb-6 text-base text-slate-400 italic">
-                Dokumen AI automates PDF reading.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex gap-3 text-slate-300">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-                  <span>
-                    Convert your PDFs into a dataset with our no-code interface for training and
-                    testing language models to extract key features.
-                  </span>
-                </li>
-                <li className="flex gap-3 text-slate-300">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-                  <span>
-                    Finalize automation workflows to execute business logic or mine insights on data
-                    you didn&apos;t realize you had.
-                  </span>
-                </li>
-                <li className="flex gap-3 text-slate-300">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-                  <span>
-                    Pre-built workflows plus customization and integration with your cloud and LLM
-                    providers.
-                  </span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Feature Highlights */}
-      <section className="py-20 px-6">
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Everything you need to automate PDF workflows
-            </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              From labeling to deployment, Dokumen AI provides the complete toolkit for turning
-              unstructured documents into actionable data.
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            {/* Feature 1 */}
-            <div className="group relative rounded-2xl border border-slate-700/50 bg-slate-800/50 p-8 hover:border-cyan-500/50 transition-all duration-300">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-cyan-500/20 to-blue-500/20 text-cyan-400 group-hover:from-cyan-500/30 group-hover:to-blue-500/30 transition-colors">
-                <Layers className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">No-Code Labeling</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Visually annotate entities in your PDFs with an intuitive point-and-click interface.
-                Define custom entity types for your domain.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="group relative rounded-2xl border border-slate-700/50 bg-slate-800/50 p-8 hover:border-cyan-500/50 transition-all duration-300">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-cyan-500/20 to-blue-500/20 text-cyan-400 group-hover:from-cyan-500/30 group-hover:to-blue-500/30 transition-colors">
-                <Sparkles className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">AI-Powered Extraction</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Train and test language models on your labeled data. Integrate with your preferred
-                LLM provider for automated extraction.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="group relative rounded-2xl border border-slate-700/50 bg-slate-800/50 p-8 hover:border-cyan-500/50 transition-all duration-300">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-cyan-500/20 to-blue-500/20 text-cyan-400 group-hover:from-cyan-500/30 group-hover:to-blue-500/30 transition-colors">
-                <Zap className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Workflow Automation</h3>
-              <p className="text-slate-400 leading-relaxed">
-                Build end-to-end pipelines that process PDFs automatically. Connect to your cloud
-                infrastructure and trigger business logic.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Demo / Preview Section */}
-      <section className="py-20 px-6">
-        <div className="mx-auto max-w-6xl">
-          <div className="rounded-3xl border border-slate-700/50 bg-slate-800/30 overflow-hidden">
-            <div className="grid md:grid-cols-2 gap-0">
-              {/* Left: Description */}
-              <div className="p-10 md:p-14 flex flex-col justify-center">
-                <div className="mb-4 inline-flex items-center gap-2 text-sm text-cyan-400 font-medium">
-                  <FileText className="h-4 w-4" />
-                  Interactive Demo
-                </div>
-                <h2 className="text-3xl font-bold text-white mb-4">See Dokumen AI in action</h2>
-                <p className="text-slate-400 leading-relaxed mb-8">
-                  Try our PDF labeling demo to experience the workflow firsthand. Upload a PDF,
-                  define entity types, and start annotating — all in your browser.
-                </p>
-                <div>
-                  <Link
-                    to="/demo"
-                    className="group inline-flex items-center gap-2 bg-white text-slate-900 font-semibold px-6 py-3 rounded-xl hover:bg-slate-100 transition-colors"
-                  >
-                    Launch Demo
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </div>
-              </div>
-
-              {/* Right: Visual Preview */}
-              <div className="relative bg-slate-900/80 p-10 md:p-14 flex items-center justify-center min-h-80">
-                <div className="absolute inset-0 bg-linear-to-br from-cyan-500/5 to-blue-500/5" />
-                <div className="relative w-full max-w-sm">
-                  {/* Mock PDF Preview */}
-                  <div className="rounded-xl border border-slate-700 bg-white shadow-2xl overflow-hidden">
-                    <div className="flex items-center gap-2 px-4 py-3 bg-slate-100 border-b border-slate-200">
-                      <div className="flex gap-1.5">
-                        <div className="h-3 w-3 rounded-full bg-red-400" />
-                        <div className="h-3 w-3 rounded-full bg-yellow-400" />
-                        <div className="h-3 w-3 rounded-full bg-green-400" />
-                      </div>
-                      <span className="ml-2 text-xs text-slate-500 truncate">
-                        invoice_sample.pdf
-                      </span>
-                    </div>
-                    <div className="p-6 space-y-3">
-                      <div className="h-3 w-3/4 bg-slate-200 rounded" />
-                      <div className="h-3 w-1/2 bg-slate-200 rounded" />
-                      <div className="h-3 w-5/6 bg-slate-200 rounded" />
-                      <div className="mt-4 flex gap-2">
-                        <span className="inline-block rounded-md bg-cyan-100 text-cyan-700 text-xs font-medium px-2 py-1">
-                          Vendor
-                        </span>
-                        <span className="inline-block rounded-md bg-emerald-100 text-emerald-700 text-xs font-medium px-2 py-1">
-                          Amount
-                        </span>
-                        <span className="inline-block rounded-md bg-amber-100 text-amber-700 text-xs font-medium px-2 py-1">
-                          Date
-                        </span>
-                      </div>
-                      <div className="h-3 w-2/3 bg-slate-200 rounded" />
-                      <div className="h-3 w-4/5 bg-slate-200 rounded" />
-                      <div className="h-3 w-1/3 bg-slate-200 rounded" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Bottom CTA */}
-      <section className="py-20 px-6">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to automate your PDF workflows?
-          </h2>
-          <p className="text-lg text-slate-400 mb-8">
-            Join teams that are saving hours of manual data entry every week.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              to="/signup"
-              className="group flex items-center gap-2 bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow-lg shadow-cyan-500/25 transition-all hover:shadow-cyan-500/40 hover:scale-105"
-            >
-              Create Free Account
-              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              {m.landing_hero_cta_signup()}
             </Link>
             <Link
               to="/demo"
-              className="flex items-center gap-2 text-lg font-semibold text-slate-300 hover:text-white px-8 py-4 rounded-xl border border-slate-600 hover:border-slate-500 hover:bg-white/5 transition-all"
+              className="group flex items-center justify-center min-h-10 w-full sm:w-50 rounded-lg bg-[#F4F4F4] px-4 text-[14px] font-medium text-[#393C41] border-[3px] border-transparent transition-all duration-330 hover:bg-[#EAEAEA]"
             >
-              Try the Demo
+              {m.landing_hero_cta_demo()}
             </Link>
           </div>
         </div>
+
+        {/* Right Side: UI Animation */}
+        <div className="w-full md:w-1/2 flex items-center justify-center p-8 mt-12 md:mt-0 relative h-100">
+          {/* Animated Document Simulation */}
+          <div className="relative w-full max-w-[320px] aspect-8.5/11 bg-white border border-[#EEEEEE] mx-auto p-8 overflow-hidden rounded-lg">
+            <div className="flex flex-col gap-4">
+              <div className="h-4 w-1/3 bg-[#D0D1D2]" />
+              <div className="h-2 w-full bg-[#EEEEEE]" />
+              <div className="h-2 w-5/6 bg-[#EEEEEE]" />
+              <div className="h-2 w-full bg-[#EEEEEE]" />
+              <div className="h-2 w-4/5 bg-[#EEEEEE]" />
+              <div className="h-2 w-full bg-[#EEEEEE]" />
+            </div>
+
+            <div className="mt-8 flex flex-col gap-4">
+              <div className="h-4 w-1/4 bg-[#D0D1D2]" />
+              <div className="h-2 w-full bg-[#EEEEEE]" />
+
+              {/* Highlight Target */}
+              <div className="relative w-11/12 h-6">
+                <div className="absolute inset-0 flex flex-col gap-2">
+                  <div className="h-2 w-full bg-[#EEEEEE]" />
+                  <div className="h-2 w-3/4 bg-[#EEEEEE]" />
+                </div>
+
+                {/* The Scanning Highlight Box */}
+                <motion.div
+                  className="absolute -left-1 -top-1 -bottom-1 rounded-[2px] bg-[#3E6AE1]/20 border border-[#3E6AE1]"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{
+                    width: ["0%", "100%", "100%", "0%"],
+                    opacity: [0, 1, 1, 0],
+                  }}
+                  transition={{
+                    duration: 3,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                    repeatDelay: 1,
+                  }}
+                />
+              </div>
+
+              <div className="h-2 w-full bg-[#EEEEEE]" />
+            </div>
+
+            {/* Structured Output Extraction Sim */}
+            <motion.div
+              className="absolute right-4 top-[50%] bg-white border border-[#EEEEEE] p-3 text-[10px] text-[#171A20] font-mono shadow-[0_4px_16px_rgba(0,0,0,0.08)] z-20 rounded-lg"
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: [20, 0, 0, 20], opacity: [0, 1, 1, 0] }}
+              transition={{
+                duration: 3,
+                ease: "easeInOut",
+                repeat: Infinity,
+                repeatDelay: 1,
+              }}
+            >
+              &#123;
+              <br />
+              &nbsp;&nbsp;&quot;entity&quot;: &quot;invoice_total&quot;,
+              <br />
+              &nbsp;&nbsp;&quot;value&quot;: &quot;$4,291.00&quot;,
+              <br />
+              &nbsp;&nbsp;&quot;confidence&quot;: 0.98
+              <br />
+              &#125;
+            </motion.div>
+
+            {/* Vertical scanning laser line */}
+            <motion.div
+              className="absolute left-0 right-0 h-0.5 bg-[#3E6AE1]/50 shadow-[0_0_8px_#3E6AE1] z-10"
+              initial={{ top: "10%" }}
+              animate={{ top: ["10%", "90%", "10%"] }}
+              transition={{
+                duration: 4,
+                ease: "linear",
+                repeat: Infinity,
+              }}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Feature 1: No-Code Interface */}
+      <section className="py-32 px-6 bg-[#F4F4F4]">
+        <div className="mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-16">
+          <div className="w-full md:w-1/2 max-w-sm">
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_feature_nocode_title()}</h2>
+            <p className="text-[16px] font-normal text-[#5C5E62] leading-[1.6]">
+              {m.landing_feature_nocode_description()}
+            </p>
+          </div>
+          <div className="w-full md:w-1/2 relative h-75 flex items-center justify-center">
+            {/* Animation 1: Drag & Annotate */}
+            <div className="relative w-85 h-60 bg-white border border-[#D0D1D2] p-8 shadow-sm overflow-hidden rounded-xl">
+              <div className="space-y-4">
+                <div className="h-3 w-1/2 bg-[#EEEEEE] rounded-[2px]" />
+                <div className="h-3 w-full bg-[#EEEEEE] rounded-[2px]" />
+                <div className="h-3 w-5/6 bg-[#EEEEEE] rounded-[2px]" />
+              </div>
+
+              {/* Target Text block */}
+              <div className="mt-8 relative w-4/5 pt-2">
+                <div className="h-5 w-full bg-[#EEEEEE] rounded-[2px]" />
+
+                {/* Animated bounding box matching drag */}
+                <motion.div
+                  className="absolute inset-0 border-2 border-[#3E6AE1] bg-[#3E6AE1]/10 rounded-[2px] mt-2"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: "100%", opacity: 1 }}
+                  transition={{
+                    duration: 1.5,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                    repeatDelay: 2,
+                  }}
+                />
+
+                {/* Animated Label Popup */}
+                <motion.div
+                  className="absolute -top-6 left-0 bg-[#3E6AE1] px-2 py-0.5 text-[10px] text-white font-medium rounded-[2px]"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: 1.2,
+                    ease: "easeOut",
+                    repeat: Infinity,
+                    repeatDelay: 2.2,
+                  }}
+                >
+                  {m.landing_feature_nocode_label_vendor()}
+                </motion.div>
+              </div>
+
+              <div className="mt-8 space-y-4">
+                <div className="h-3 w-full bg-[#EEEEEE] rounded-[2px]" />
+                <div className="h-3 w-2/3 bg-[#EEEEEE] rounded-[2px]" />
+              </div>
+
+              {/* Animated Cursor */}
+              <motion.div
+                className="absolute z-20 pointer-events-none drop-shadow-md"
+                initial={{ x: 28, y: 92 }}
+                animate={{ x: 260, y: 92 }}
+                transition={{ duration: 1.5, ease: "easeInOut", repeat: Infinity, repeatDelay: 2 }}
+              >
+                <CursorIcon />
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature 2: Lightning Models */}
+      <section className="py-32 px-6 bg-white">
+        <div className="mx-auto max-w-5xl flex flex-col md:flex-row-reverse items-center justify-between gap-16">
+          <div className="w-full md:w-1/2 max-w-sm">
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_feature_models_title()}</h2>
+            <p className="text-[16px] font-normal text-[#5C5E62] leading-[1.6]">
+              {m.landing_feature_models_description()}
+            </p>
+          </div>
+          <div className="w-full md:w-1/2 relative h-75 flex items-center justify-center">
+            {/* Animation 2: Model Training */}
+            <div className="relative w-85 h-60 flex items-center justify-between px-4">
+              {/* Flowing Docs (Left -> Center) */}
+              <div className="relative w-16 h-full flex flex-col items-center justify-center">
+                {[1, 2, 3].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-10 h-14 bg-white border-2 border-[#EEEEEE] rounded-[2px] shadow-sm flex flex-col p-1.5 gap-1"
+                    initial={{ x: -60, y: (i - 2) * 20, opacity: 0, scale: 0.8 }}
+                    animate={{ x: 80, y: 0, opacity: [0, 1, 0], scale: [0.8, 1, 0.6] }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      delay: i * 0.6,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    <div className="w-full h-1 bg-[#D0D1D2] rounded-full" />
+                    <div className="w-3/4 h-1 bg-[#D0D1D2] rounded-full" />
+                    <div className="w-full h-1 bg-[#D0D1D2] rounded-full" />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Model Core Engine (Center) */}
+              <div className="relative w-28 h-28 bg-[#171A20] rounded-xl flex items-center justify-center z-10 shadow-lg border border-[#393C41]">
+                {/* Rotating visual 1 */}
+                <motion.div
+                  className="absolute inset-0 border border-[#3E6AE1] rounded-xl m-2 opacity-50"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 10, ease: "linear", repeat: Infinity }}
+                />
+                {/* Rotating visual 2 */}
+                <motion.div
+                  className="absolute inset-0 border border-dashed border-[#5C5E62] rounded-xl m-4"
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 15, ease: "linear", repeat: Infinity }}
+                />
+                {/* Center Dot */}
+                <motion.div
+                  className="w-3 h-3 bg-[#3E6AE1] rounded-full shadow-[0_0_12px_#3E6AE1]"
+                  animate={{ scale: [1, 1.5, 1] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </div>
+
+              {/* Flowing JSON Outputs (Center -> Right) */}
+              <div className="relative w-20 h-full flex flex-col items-center justify-center">
+                {[1, 2, 3].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-20 h-10 bg-[#3E6AE1]/5 border border-[#3E6AE1]/30 rounded-lg flex items-center justify-center text-[#3E6AE1] text-[11px] font-mono shadow-sm"
+                    initial={{ x: -40, opacity: 0, scale: 0.6 }}
+                    animate={{ x: 60, opacity: [0, 1, 0], scale: [0.6, 1, 0.9] }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      delay: i * 0.6 + 1,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    &#123;...&#125;
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature 3: Seamless Integration */}
+      <section className="py-32 px-6 bg-[#F4F4F4]">
+        <div className="mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-16">
+          <div className="w-full md:w-1/2 max-w-sm">
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_feature_integration_title()}</h2>
+            <p className="text-[16px] font-normal text-[#5C5E62] leading-[1.6]">
+              {m.landing_feature_integration_description()}
+            </p>
+          </div>
+          <div className="w-full md:w-1/2 relative h-75 flex items-center justify-center">
+            {/* Animation 3: Integration Pipes */}
+            <div className="relative w-85 h-65 flex items-center">
+              {/* Source Node */}
+              <div className="w-25 h-25 bg-white border border-[#D0D1D2] flex flex-col items-center justify-center z-10 shadow-sm relative rounded-xl">
+                <span className="text-[12px] font-semibold text-[#171A20] mb-1">{m.landing_feature_integration_pipeline()}</span>
+                <div className="px-2 py-0.5 bg-[#3E6AE1]/10 text-[#3E6AE1] text-[10px] font-mono rounded-[2px] border border-[#3E6AE1]/20">
+                  {m.landing_feature_integration_active()}
+                </div>
+
+                {/* Origin Pulse */}
+                <motion.div
+                  className="absolute -right-1 top-1/2 -mt-1 w-2 h-2 bg-[#3E6AE1] rounded-full"
+                  animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                />
+              </div>
+
+              {/* Connection Trace Lines */}
+              <div className="absolute left-25 w-25 h-40 flex items-center">
+                {/* Middle Line */}
+                <div className="w-full h-0.5 bg-[#EEEEEE]" />
+                {/* Top Angled Line */}
+                <div
+                  className="absolute top-5 left-0 w-12.5 h-0.5 bg-[#EEEEEE]"
+                  style={{ transformOrigin: "0 50%", rotate: "-40deg" }}
+                />
+                <div className="absolute top-0 right-0 w-15.5 h-0.5 bg-[#EEEEEE]" />
+                {/* Bottom Angled Line */}
+                <div
+                  className="absolute bottom-5 left-0 w-12.5 h-0.5 bg-[#EEEEEE]"
+                  style={{ transformOrigin: "0 50%", rotate: "40deg" }}
+                />
+                <div className="absolute bottom-0 right-0 w-15.5 h-0.5 bg-[#EEEEEE]" />
+
+                {/* Flowing Data Pellets */}
+                <motion.div
+                  className="absolute h-1.5 w-1.5 bg-[#3E6AE1] rounded-full top-[50%] -mt-0.75"
+                  initial={{ left: 0 }}
+                  animate={{ left: "100%" }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                />
+                <motion.div
+                  className="absolute h-1.5 w-1.5 bg-[#3E6AE1] rounded-full -top-0.75"
+                  initial={{ left: 0, top: "50%" }}
+                  animate={{ left: ["0%", "30%", "100%"], top: ["50%", "0%", "0%"] }}
+                  transition={{ duration: 1, repeat: Infinity, delay: 0.3, ease: "linear" }}
+                />
+                <motion.div
+                  className="absolute h-1.5 w-1.5 bg-[#3E6AE1] rounded-full -bottom-0.75"
+                  initial={{ left: 0, top: "50%" }}
+                  animate={{ left: ["0%", "30%", "100%"], top: ["50%", "100%", "100%"] }}
+                  transition={{ duration: 1, repeat: Infinity, delay: 0.6, ease: "linear" }}
+                />
+              </div>
+
+              {/* Destinations */}
+              <div className="absolute right-0 h-47.5 w-32.5 flex flex-col justify-between py-1 z-10">
+                <div className="w-25 h-12 bg-white border border-[#D0D1D2] shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex items-center justify-center ml-auto rounded-xl">
+                  <span className="text-[12px] font-medium text-[#5C5E62]">{m.landing_feature_integration_rest_api()}</span>
+                </div>
+                {/* Mid Dest / Highlighted */}
+                <motion.div
+                  className="w-30 h-14.5 bg-white border-2 border-[#3E6AE1] shadow-[0_4px_16px_rgba(62,106,225,0.15)] flex flex-col items-center justify-center rounded-xl ml-auto relative"
+                  animate={{ y: [-2, 2, -2] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <span className="text-[13px] font-semibold text-[#171A20]">{m.landing_feature_integration_postgresql()}</span>
+                  <span className="text-[10px] text-[#3E6AE1] font-mono mt-0.5">{m.landing_feature_integration_synced_ago({ time: "1s" })}</span>
+                </motion.div>
+                {/* Bottom Dest */}
+                <div className="w-25 h-12 bg-white border border-[#D0D1D2] shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex items-center justify-center ml-auto rounded-xl">
+                  <span className="text-[12px] font-medium text-[#5C5E62]">{m.landing_feature_integration_webhook()}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tweets Section */}
+      <section className="py-32 px-6 bg-white">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-16">
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_tweets_title()}</h2>
+            <p className="text-[16px] font-normal text-[#5C5E62]">
+              {m.landing_tweets_description()}
+            </p>
+          </div>
+
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full relative"
+          >
+            <CarouselContent className="-ml-4">
+              {[
+                "1628832338187636740",
+                "2042723870055239708",
+                "1617979122625712128",
+                "2043057246897148374",
+              ].map((id) => (
+                <CarouselItem key={id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                  <Tweet id={id} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="hidden md:block">
+              <CarouselPrevious className="-left-12 bg-white/50 hover:bg-white" />
+              <CarouselNext className="-right-12 bg-white/50 hover:bg-white" />
+            </div>
+          </Carousel>
+        </div>
+      </section>
+
+      {/* Demo Link Section */}
+      <section className="py-40 px-6 flex flex-col items-center justify-center text-center bg-[#F4F4F4] min-h-[50vh]">
+        <h2 className="text-[40px] font-medium text-[#171A20] mb-6">{m.landing_demo_title()}</h2>
+        <p className="text-[16px] font-normal text-[#393C41] mb-10 max-w-md">
+          {m.landing_demo_description()}
+        </p>
+        <Link
+          to="/demo"
+          className="rounded-lg bg-[#3E6AE1] px-16 py-4 flex items-center justify-center text-[15px] font-medium text-white transition-all duration-330 hover:bg-[#2e52b5] shadow-[0_4px_14px_0_rgba(62,106,225,0.39)] hover:shadow-[0_6px_20px_rgba(62,106,225,0.23)] hover:-translate-y-0.5"
+        >
+          {m.landing_demo_cta()}
+        </Link>
       </section>
     </div>
   )

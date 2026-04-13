@@ -1,5 +1,5 @@
-import type { ReactNode } from "react"
-import { Component } from "react"
+import { Component, type ReactNode } from "react"
+import { m } from "@/paraglide/messages.js"
 
 type ErrorBoundaryProps = {
   children: ReactNode
@@ -34,8 +34,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               fontFamily: "system-ui, sans-serif",
             }}
           >
-            <h2>Something went wrong</h2>
-            <p>An unexpected error occurred. Contact support if the problem persists.</p>
+            <h2>{m.error_title()}</h2>
+            <p>{m.error_description()}</p>
 
             {import.meta.env.DEV && this.state.error && (
               <pre

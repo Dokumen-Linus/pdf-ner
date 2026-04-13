@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react"
 import { Link } from "@tanstack/react-router"
-import { FileText, Home, LogIn, LogOut, Menu, Sparkles, UserPlus, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { getUserByEmail } from "@/db-fns/web/users"
 import { authClient } from "@/lib/auth-client"
+import logoUrl from "@/logo.svg"
+import { m } from "@/paraglide/messages.js"
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -11,13 +13,11 @@ export default function Header() {
 
   useEffect(() => {
     let cancelled = false
-
     async function loadHeaderIdentity() {
       if (!session?.user?.email) {
         setHeaderIdentity("")
         return
       }
-
       try {
         const user = await getUserByEmail({ data: { email: session.user.email } })
         if (!cancelled) {
@@ -29,9 +29,7 @@ export default function Header() {
         }
       }
     }
-
     void loadHeaderIdentity()
-
     return () => {
       cancelled = true
     }
@@ -39,73 +37,74 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 transition-all duration-300 bg-slate-900/95 backdrop-blur-md shadow-lg border-b border-slate-700/50">
-        <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-cyan-500 to-blue-600 shadow-lg shadow-cyan-500/25 transition-transform group-hover:scale-105">
-              <FileText className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-white tracking-tight">
-              Dokumen<span className="text-cyan-400">AI</span>
+      <header className="sticky top-0 z-40 w-full transition-colors duration-300 bg-white border-b border-[#EEEEEE]">
+        <div className="mx-auto flex h-14 max-w-345.75 items-center justify-between px-6">
+          {/* Logo (Left) */}
+          <Link to="/" className="flex shrink-0 items-center gap-3 group">
+            <img
+              src={logoUrl}
+              className="h-6 w-auto object-contain transition-transform"
+              alt="Dokumen AI"
+            />
+            <span className="text-[17px] font-bold tracking-[0.2em] uppercase text-[#171A20]">
+              Dokumen<span className="text-[#3E6AE1]">AI</span>
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Desktop Nav (Center) */}
+          <nav className="hidden md:flex flex-1 items-center justify-center gap-2">
             <Link
               to="/"
-              className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
               activeProps={{
-                className: "px-4 py-2 text-sm font-medium text-white bg-white/10 rounded-lg",
+                className:
+                  "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
               }}
             >
-              Home
+              {m.nav_home()}
             </Link>
             <Link
               to="/demo"
-              className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
               activeProps={{
-                className: "px-4 py-2 text-sm font-medium text-white bg-white/10 rounded-lg",
+                className:
+                  "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
               }}
             >
-              Demo
+              {m.nav_demo()}
             </Link>
           </nav>
 
-          {/* Desktop Auth */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Desktop Auth (Right) */}
+          <div className="hidden md:flex shrink-0 items-center justify-end gap-2">
             {session ? (
               <>
                 <Link
                   to="/profile"
-                  className="text-sm text-slate-300 hover:text-white transition-colors"
+                  className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
                 >
                   {headerIdentity || session.user.name || session.user.email}
                 </Link>
                 <Link
                   to="/signout"
-                  className="flex items-center gap-2 text-sm bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg transition-colors"
+                  className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
                 >
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
+                  {m.nav_signout()}
                 </Link>
               </>
             ) : (
               <>
                 <Link
                   to="/signin"
-                  className="flex items-center gap-2 text-sm text-slate-300 hover:text-white px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                  className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
                 >
-                  <LogIn className="h-4 w-4" />
-                  Sign In
+                  {m.nav_signin()}
                 </Link>
                 <Link
                   to="/signup"
-                  className="flex items-center gap-2 text-sm bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white px-4 py-2 rounded-lg shadow-lg shadow-cyan-500/25 transition-all hover:shadow-cyan-500/40"
+                  className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
                 >
-                  <UserPlus className="h-4 w-4" />
-                  Sign Up
+                  {m.nav_signup()}
                 </Link>
               </>
             )}
@@ -114,92 +113,62 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(true)}
-            className="md:hidden p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-            aria-label="Open menu"
+            className="md:hidden rounded-lg p-1.5 text-[#171A20] hover:bg-[#F4F4F4] transition-colors"
+            aria-label={m.common_aria_menu()}
           >
-            <Menu size={24} />
+            <Menu size={20} />
           </button>
         </div>
       </header>
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity duration-300 ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-50 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={() => setIsOpen(false)}
       />
       <aside
-        className={`fixed top-0 right-0 h-full w-80 bg-slate-900 text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed right-0 top-0 z-50 flex h-full w-80 flex-col bg-white shadow-[-8px_0_24px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-cyan-500 to-blue-600">
-              <FileText className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-bold">
-              Dokumen<span className="text-cyan-400">AI</span>
-            </span>
-          </div>
+        <div className="flex items-center justify-end p-4">
           <button
             onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
-            aria-label="Close menu"
+            className="rounded-lg p-2 text-[#171A20] hover:bg-[#F4F4F4] transition-colors"
+            aria-label={m.common_aria_close()}
           >
             <X size={20} />
           </button>
         </div>
 
-        <nav className="flex-1 p-4 overflow-y-auto">
+        <nav className="flex-1 overflow-y-auto px-6 pb-6 pt-2 flex flex-col gap-4">
           <Link
             to="/"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors mb-1"
-            activeProps={{
-              className:
-                "flex items-center gap-3 p-3 rounded-lg bg-cyan-600/20 text-cyan-400 transition-colors mb-1",
-            }}
+            className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
           >
-            <Home size={20} />
-            <span className="font-medium">Home</span>
+            {m.nav_home()}
           </Link>
-
           <Link
             to="/demo"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors mb-1"
-            activeProps={{
-              className:
-                "flex items-center gap-3 p-3 rounded-lg bg-cyan-600/20 text-cyan-400 transition-colors mb-1",
-            }}
+            className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
           >
-            <Sparkles size={20} />
-            <span className="font-medium">PDF Labeling Demo</span>
+            {m.nav_demo()}
           </Link>
-
-          <div className="my-4 border-t border-slate-700" />
-
           {session ? (
             <>
               <Link
                 to="/profile"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors mb-1"
+                className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors mt-4"
               >
-                <LogOut size={20} />
-                <span className="font-medium">
-                  {headerIdentity || session.user.name || "Profile"}
-                </span>
+                {m.nav_profile()}
               </Link>
               <Link
                 to="/signout"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors text-red-400"
+                className="text-[17px] font-medium text-[#5C5E62] hover:text-[#171A20] transition-colors mt-2"
               >
-                <LogOut size={20} />
-                <span className="font-medium">Sign Out</span>
+                {m.nav_signout()}
               </Link>
             </>
           ) : (
@@ -207,18 +176,16 @@ export default function Header() {
               <Link
                 to="/signin"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 transition-colors mb-1"
+                className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors mt-4"
               >
-                <LogIn size={20} />
-                <span className="font-medium">Sign In</span>
+                {m.nav_signin()}
               </Link>
               <Link
                 to="/signup"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-lg bg-linear-to-r from-cyan-500 to-blue-600 text-white transition-colors"
+                className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors mt-2"
               >
-                <UserPlus size={20} />
-                <span className="font-medium">Sign Up</span>
+                {m.nav_signup()}
               </Link>
             </>
           )}

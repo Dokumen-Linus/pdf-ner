@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import EntityTable from "@/components/entity-table/components/entity-table"
 import PDFContainer from "@/components/pdf-container/pdf-container"
+import { m } from "@/paraglide/messages.js"
 
 export const Route = createFileRoute("/_public/demo")({
   component: DemoPage,
@@ -16,8 +17,8 @@ function DemoPage() {
               url: "https://raw.githubusercontent.com/optimalcharb/pdf-entity-labeling/cdc90a5392c72982e80c9bf08e330d7b05d29c5d/public/example-pdfs/federal-register/2025-19982_first_page.pdf",
             },
           ]}
-          exportName="labeled_2025-19982_first_page.pdf"
-          author="anonymous"
+          exportName={m.demo_export_name()}
+          author={m.demo_author_fallback()}
           canRotate={false}
         />
       </div>
