@@ -10,7 +10,7 @@ export const prompts = apiSchema.table("prompts", {
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
   templateId: bigint("template_id", { mode: "number" }).references(() => templates.id, {
-    onDelete: "cascade",
+    onDelete: "set null",
   }),
   fullText: text("full_text"),
   createdAt: timestamp("created_at").defaultNow(),

@@ -10,7 +10,10 @@ export const entityTypes = webSchema.table("entity_types", {
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  standardEntityTypeId: bigint("standard_entity_type_id", { mode: "number" }),
+  standardEntityTypeId: bigint("standard_entity_type_id", { mode: "number" }).references(
+    () => stdEntityTypes.id,
+    { onDelete: "set null" },
+  ),
   userDefinition: text("user_definition"),
   userExamples: text("user_examples").array(),
   userFormatDescription: text("user_format_description"),
