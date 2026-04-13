@@ -24,7 +24,7 @@ import ColorPicker from "../../custom/color-picker"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import useEntityTypeStore from "../hooks/use-entity-type-store"
 import initialEntityTypes from "../initial-entity-types"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 const EntityTable = () => {
   // **IMPORTANT**

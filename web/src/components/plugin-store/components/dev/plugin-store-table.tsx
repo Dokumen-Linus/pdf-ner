@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "../../../shadcn-ui/table"
 import usePluginStore from "../../hooks/use-plugin-store"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 // table to view store values in testing
 export default function PluginStoreTable() {

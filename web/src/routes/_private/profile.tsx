@@ -20,7 +20,7 @@ import { Label } from "@/components/shadcn-ui/label"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { getUserByEmail, updateUser } from "@/db-fns/web/users"
 import { UploadButton } from "@/integrations/uploadthing/components-hooks"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 type ProfileUser = Awaited<ReturnType<typeof getUserByEmail>>
 

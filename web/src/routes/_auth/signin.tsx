@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { authClient } from "@/lib/auth-client"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 export const Route = createFileRoute("/_auth/signin")({
   validateSearch: z.object({

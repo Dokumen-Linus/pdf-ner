@@ -22,7 +22,7 @@ import { getAnnotationsByPdfIds } from "@/db-fns/web/annotations"
 import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
 import { getProjectById } from "@/db-fns/web/projects"
 import { getWorkersPdfIdsByProjectId } from "@/db-fns/workers/pdfs"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 function DashboardSkeleton() {
   return (

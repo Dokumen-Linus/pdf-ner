@@ -22,7 +22,7 @@ import { getAllTemplates } from "@/db-fns/public/templates"
 import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
 import { getProjectById } from "@/db-fns/web/projects"
 import type { FoundDbEntityType, FoundPrompt, FoundTemplate } from "@/db/types"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 // Use a skeleton for loaders
 function ProjectDetailsPageSkeleton() {

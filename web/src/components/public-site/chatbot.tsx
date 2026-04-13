@@ -4,7 +4,7 @@ import { useChat } from "@tanstack/ai-react"
 import { Bot, MessageSquare, Send, Sparkles, User, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { cn } from "@/lib/shadcn-ui/utils"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false)

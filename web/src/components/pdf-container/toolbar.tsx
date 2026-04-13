@@ -3,7 +3,7 @@ import { useRotateCapability } from "@embedpdf/plugin-rotate/react"
 import { useZoomCapability } from "@embedpdf/plugin-zoom/react"
 import { Download, Redo2, RotateCcw, RotateCw, Trash2, Undo2, ZoomIn, ZoomOut } from "lucide-react"
 import usePluginStore from "../plugin-store/hooks/use-plugin-store"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
   const { provides: exportCapability } = useExportCapability()

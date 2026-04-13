@@ -1,5 +1,5 @@
 import type { EntityType } from "./entity-type"
-import { m } from "@/paraglide/messages.js"
+import { m } from "@/integrations/paraglide/messages.js"
 
 const initialEntityTypes0: Pick<EntityType, "name" | "subtype">[] = [
   {
