@@ -2,6 +2,7 @@
 CREATE TABLE web.projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   owner_id UUID NOT NULL REFERENCES web.users (id) ON DELETE CASCADE,
+  COLUMN team_id TEXT,
   "name" TEXT NOT NULL,
   "description" TEXT,
   bucket_id UUID REFERENCES api.aws_buckets (id),
