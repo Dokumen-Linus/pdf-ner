@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react"
 import { useCapability } from "@embedpdf/core/react"
-import { useViewportElement, ViewportPlugin } from "@embedpdf/plugin-viewport/react"
+import { useViewportElement, ViewportPlugin } from "../../plugin-viewport-2"
 import { setupZoomGestures, ZoomGestureOptions } from "../utils/pinch-zoom-logic"
 import { useZoomCapability } from "./use-zoom"
 

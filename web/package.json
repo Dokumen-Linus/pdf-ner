@@ -1,5 +1,6 @@
 {
   "name": "dokumen-web",
+  "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -24,14 +25,8 @@
     "@embedpdf/engines": "2.8.0",
     "@embedpdf/models": "2.8.0",
     "@embedpdf/pdfium": "2.8.0",
-    "@embedpdf/plugin-document-manager": "2.8.0",
     "@embedpdf/plugin-export": "2.8.0",
-    "@embedpdf/plugin-render": "2.8.0",
     "@embedpdf/plugin-rotate": "2.8.0",
-    "@embedpdf/plugin-thumbnail": "2.8.0",
-    "@embedpdf/plugin-tiling": "2.8.0",
-    "@embedpdf/plugin-viewport": "2.8.0",
-    "@embedpdf/plugin-zoom": "2.8.0",
     "@embedpdf/utils": "2.8.0",
     "@hookform/resolvers": "^5.2.2",
     "@inlang/paraglide-js": "^2.15.3",

@@ -11,7 +11,7 @@ import {
   Rect,
   Task,
 } from "@embedpdf/models"
-import { ViewportCapability, ViewportMetrics, ViewportPlugin } from "@embedpdf/plugin-viewport"
+import { ViewportCapability, ViewportMetrics, ViewportPlugin } from "../../plugin-viewport-2"
 import {
   InteractionManagerCapability,
   InteractionManagerPlugin,

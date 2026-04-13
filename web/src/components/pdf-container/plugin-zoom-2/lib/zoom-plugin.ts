@@ -8,7 +8,7 @@ import {
   setScale,
 } from "@embedpdf/core"
 import { Rect, rotateRect } from "@embedpdf/models"
-import { ViewportCapability, ViewportMetrics, ViewportPlugin } from "@embedpdf/plugin-viewport"
+import { ViewportCapability, ViewportMetrics, ViewportPlugin } from "../../plugin-viewport-2"
 import { ScrollCapability, ScrollPlugin } from "../../plugin-scroll-2"
 import { cleanupZoomState, initZoomState, setZoomLevel, ZoomAction } from "./actions"
 import { initialDocumentState } from "./reducer"

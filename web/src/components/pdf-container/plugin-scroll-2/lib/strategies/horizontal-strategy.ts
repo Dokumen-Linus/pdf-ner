@@ -1,5 +1,5 @@
 import { PdfPageObjectWithRotatedSize } from "@embedpdf/models"
-import { ViewportMetrics } from "@embedpdf/plugin-viewport"
+import { ViewportMetrics } from "../../../plugin-viewport-2"
 import { PageLayout, VirtualItem } from "../types/virtual-item"
 import { BaseScrollStrategy, ScrollStrategyConfig } from "./base-strategy"
 

@@ -8,7 +8,7 @@ import {
   transformPosition,
   transformRect,
 } from "@embedpdf/models"
-import { ViewportMetrics } from "@embedpdf/plugin-viewport"
+import { ViewportMetrics } from "../../../plugin-viewport-2"
 import { ScrollMetrics } from "../types"
 import { VirtualItem } from "../types/virtual-item"
 
