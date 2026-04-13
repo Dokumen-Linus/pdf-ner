@@ -1,7 +1,7 @@
 import { CSSProperties, HTMLAttributes, useEffect, useMemo, useState } from "react"
 import { useDocumentState } from "@embedpdf/core/react"
 import { useTilingCapability } from "../hooks/use-tiling"
-import { Tile } from "../lib"
+import { Tile, TilingEvent } from "../lib"
 import { TileImg } from "./tile-img"
 
 type TilingLayoutProps = Omit<HTMLAttributes<HTMLDivElement>, "style"> & {
@@ -24,7 +24,7 @@ export function TilingLayer({
 
   useEffect(() => {
     if (tilingProvides) {
-      return tilingProvides.onTileRendering((event) => {
+      return tilingProvides.onTileRendering((event: TilingEvent) => {
         if (event.documentId === documentId) {
           setTiles(event.tiles[pageIndex] ?? [])
         }

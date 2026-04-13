@@ -3,7 +3,7 @@ import { useViewportPlugin } from "./use-viewport"
 
 export function useViewportRef(documentId: string) {
   const { plugin: viewportPlugin } = useViewportPlugin()
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   useLayoutEffect(() => {
     if (!viewportPlugin) return

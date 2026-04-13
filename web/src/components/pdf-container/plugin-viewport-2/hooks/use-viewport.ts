@@ -1,6 +1,6 @@
 import { RefObject, useContext, useEffect, useState } from "react"
 import { useCapability, usePlugin } from "@embedpdf/core/react"
-import { GateChangeEvent, ScrollActivity, ViewportPlugin } from "@embedpdf/plugin-viewport"
+import { GateChangeEvent, ScrollActivity, ViewportPlugin } from "../lib"
 import { ViewportElementContext } from "../context"
 
 export const useViewportPlugin = () => usePlugin<ViewportPlugin>(ViewportPlugin.id)
@@ -10,7 +10,7 @@ export const useViewportCapability = () => useCapability<ViewportPlugin>(Viewpor
  * Hook to get the viewport DOM element ref from context.
  * Must be used within a Viewport component.
  */
-export const useViewportElement = (): RefObject<HTMLDivElement> | null => {
+export const useViewportElement = (): RefObject<HTMLDivElement | null> | null => {
   return useContext(ViewportElementContext)
 }
 

@@ -28,7 +28,7 @@ export function TileImg({ documentId, pageIndex, tile, dpr, scale }: TileImgProp
     if (tile.status === "ready" && urlRef.current) return // already done
     if (!scope) return
     const task = scope.renderTile({ pageIndex, tile, dpr })
-    task.wait((blob) => {
+    task.wait((blob: Blob) => {
       const objectUrl = URL.createObjectURL(blob)
       urlRef.current = objectUrl
       setUrl(objectUrl)
