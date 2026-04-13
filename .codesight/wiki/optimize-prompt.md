@@ -6,9 +6,9 @@ The Optimize-prompt subsystem handles **2 routes** and touches: cache.
 
 ## Routes
 
-- `POST` `/optimize-prompt` → in: ExtractEntitiesRequest [cache]
+- `POST` `/api/v1/optimize-prompt` → in: ExtractEntitiesRequest [cache]
   `api\app\domains\llm_ner\router.py`
-- `GET` `/optimize-prompt/{task_id}/status` params(task_id) [cache]
+- `GET` `/api/v1/optimize-prompt/{task_id}/status` params(task_id) [cache]
   `api\app\domains\llm_ner\router.py`
 
 ## Related Models

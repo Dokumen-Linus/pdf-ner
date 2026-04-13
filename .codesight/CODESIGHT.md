@@ -1,25 +1,27 @@
 # pdf-ner — AI Context Map
 
-> **Stack:** fastapi | drizzle | react | typescript
+> **Stack:** fastapi | drizzle | react | mixed
+> **Monorepo:** api, dokumen-web
 
-> 11 routes | 18 models | 54 components | 129 lib files | 36 env vars | 11 middleware | 1 events | 52% test coverage
-> **Token savings:** this file is ~12,500 tokens. Without it, AI exploration would cost ~80,700 tokens. **Saves ~68,200 tokens per conversation.**
+> 11 routes | 18 models | 54 components | 129 lib files | 36 env vars | 11 middleware | 1 events | 55% test coverage
+> **Token savings:** this file is ~12,600 tokens. Without it, AI exploration would cost ~80,700 tokens. **Saves ~68,100 tokens per conversation.**
+> **Last scanned:** 2026-04-12 23:49 — re-run after significant changes
 
 ---
 
 # Routes
 
-- `POST` `/customer` params() → in: CreateCustomerRequest, out: None [db, payment]
-- `GET` `/usage` params() → in: UUI, out: None [db, payment]
-- `POST` `/subscription` params() → in: CreateCustomerRequest, out: None [db, payment]
-- `DELETE` `/subscription` params() → in: CancelSubscriptionRequest, out: None [db, payment]
-- `POST` `/report-to-stripe` params() → in: CreateCustomerRequest, out: None [db, payment]
-- `POST` `/extract` params() → in: ExtractEntitiesRequest [cache]
-- `POST` `/optimize-prompt` params() → in: ExtractEntitiesRequest [cache]
-- `GET` `/optimize-prompt/{task_id}/status` params(task_id) [cache]
-- `POST` `/buckets` params() → in: CreateBucketRequest [upload]
-- `POST` `/pdfs` params() → in: CreateBucketRequest [upload]
-- `POST` `/highlight` params() → in: HighlightRequest
+- `POST` `/api/v1/customer` params() → in: CreateCustomerRequest, out: None [db, payment]
+- `GET` `/api/v1/usage` params() → in: UUI, out: None [db, payment]
+- `POST` `/api/v1/subscription` params() → in: CreateCustomerRequest, out: None [db, payment]
+- `DELETE` `/api/v1/subscription` params() → in: CancelSubscriptionRequest, out: None [db, payment]
+- `POST` `/api/v1/report-to-stripe` params() → in: CreateCustomerRequest, out: None [db, payment]
+- `POST` `/api/v1/extract` params() → in: ExtractEntitiesRequest [cache]
+- `POST` `/api/v1/optimize-prompt` params() → in: ExtractEntitiesRequest [cache]
+- `GET` `/api/v1/optimize-prompt/{task_id}/status` params(task_id) [cache]
+- `POST` `/api/v1/buckets` params() → in: CreateBucketRequest [upload]
+- `POST` `/api/v1/pdfs` params() → in: CreateBucketRequest [upload] ✓
+- `POST` `/api/v1/highlight` params() → in: HighlightRequest
 
 ---
 
@@ -762,8 +764,12 @@
 
 # Test Coverage
 
-> **52%** of routes and models are covered by tests
+> **55%** of routes and models are covered by tests
 > 37 test files found
+
+## Covered Routes
+
+- POST:/api/v1/pdfs
 
 ## Covered Models
 

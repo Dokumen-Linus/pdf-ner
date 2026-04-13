@@ -6,7 +6,7 @@ The Report-to-stripe subsystem handles **1 routes** and touches: db, payment.
 
 ## Routes
 
-- `POST` `/report-to-stripe` → in: CreateCustomerRequest, out: None [db, payment]
+- `POST` `/api/v1/report-to-stripe` → in: CreateCustomerRequest, out: None [db, payment]
   `api\app\domains\billing\router.py`
 
 ## Related Models

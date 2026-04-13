@@ -1,27 +1,5 @@
-// Public test helper API for the shared mocks. Tests should import from here,
-// not from the individual mock files.
-//
-// Typical usage:
-//
-//   import {
-//     setAuthenticated, setUnauthenticated,
-//     setApiSuccess, setApiUnauthorized,
-//     resetMocks,
-//   } from "@/tests/bun-test-setup/mocks"
-//
-//   it("guards a protected page", async () => {
-//     setUnauthenticated()
-//     // ... assert redirect
-//   })
-//
-//   it("loads usage data", async () => {
-//     setAuthenticated({ email: "u@example.com" })
-//     setApiSuccess("/api/v1/usage/summary", { totalCostUsd: 1.23 })
-//     // ... assert rendered value
-//   })
-//
-// A global afterEach() in main.ts calls resetMocks() for you, so each test
-// starts from a clean slate.
+// Public test helper API for the shared mocks. Tests should import from here.
+// A global afterEach() in main.ts calls resetMocks() after each test.
 
 import {
   authState,

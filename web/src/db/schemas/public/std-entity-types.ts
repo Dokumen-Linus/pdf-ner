@@ -1,7 +1,6 @@
-import { bigserial, boolean, integer, text, timestamp } from "drizzle-orm/pg-core"
-import { publicSchema } from "./schema"
+import { bigserial, boolean, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 
-export const stdEntityTypes = publicSchema.table("std_entity_types", {
+export const stdEntityTypes = pgTable("std_entity_types", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
   shortName: text("short_name").notNull(),
   longName: text("long_name"),
