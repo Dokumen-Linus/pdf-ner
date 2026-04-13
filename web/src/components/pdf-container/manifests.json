@@ -1,0 +1,132 @@
+[
+  {
+    "name": "Document Manager Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "document-manager"
+    ],
+    "requires": [],
+    "optional": []
+  },
+  {
+    "name": "Viewport Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "viewport"
+    ],
+    "requires": [],
+    "optional": []
+  },
+  {
+    "name": "Scroll Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "scroll"
+    ],
+    "requires": [
+      "viewport"
+    ],
+    "optional": [
+      "spread",
+      "interaction-manager"
+    ]
+  },
+  {
+    "name": "Render Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "render"
+    ],
+    "requires": [],
+    "optional": []
+  },
+  {
+    "name": "Rotate Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "rotate"
+    ],
+    "requires": [],
+    "optional": []
+  },
+  {
+    "name": "Interaction Manager Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "interaction-manager"
+    ],
+    "requires": [],
+    "optional": []
+  },
+  {
+    "name": "Tiling Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "tiling"
+    ],
+    "requires": [
+      "render",
+      "scroll",
+      "viewport"
+    ],
+    "optional": []
+  },
+  {
+    "name": "Selection Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "selection"
+    ],
+    "requires": [
+      "interaction-manager"
+    ],
+    "optional": [
+      "viewport",
+      "scroll"
+    ]
+  },
+  {
+    "name": "Annotation Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "annotation"
+    ],
+    "requires": [
+      "interaction-manager",
+      "selection"
+    ],
+    "optional": []
+  },
+  {
+    "name": "Export Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "export"
+    ],
+    "requires": [],
+    "optional": []
+  },
+  {
+    "name": "Zoom Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "zoom"
+    ],
+    "requires": [
+      "viewport",
+      "scroll"
+    ],
+    "optional": [
+      "spread"
+    ]
+  },
+  {
+    "name": "Search Plugin",
+    "version": "1.0.0",
+    "provides": [
+      "search"
+    ],
+    "requires": [],
+    "optional": []
+  }
+]
