@@ -184,7 +184,7 @@ function PricingPage() {
             One plan, metered usage
           </h2>
           <p className="text-[16px] text-[#5C5E62] text-center mb-16 max-w-lg mx-auto">
-            A single active subscription unlocks the full platform. You're only charged for the LLM
+            A single active subscription unlocks the full platform. You&apos;re only charged for the LLM
             calls you make.
           </p>
 

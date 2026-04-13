@@ -416,7 +416,7 @@ export class AnnotationPlugin extends BasePlugin<
     for (const commit of commits) {
       const annoObj = commit.anno
       const pageIndex = annoObj.pageIndex
-      const pageObj = docObj?.pages.find((p: any) => p.index === pageIndex)
+      const pageObj = docObj?.pages.find((p) => p.index === pageIndex)
       if (!pageObj) {
         return PdfTaskHelper.reject({ code: PdfErrorCode.NotFound, message: "Page not found" })
       }
