@@ -1,4 +1,5 @@
 import { jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import type { JsonbRecord, JsonbValue } from "../../types"
 import { prompts } from "../api/prompts"
 import { projects } from "../web/projects"
 import { workersSchema } from "./schema"
@@ -14,12 +15,14 @@ export const workersPdfs = workersSchema.table("pdfs", {
     .references(() => projects.id, { onDelete: "cascade" }),
   fullText: text("full_text"),
   extractMethod: text("extract_method"),
-  textByPage: jsonb("text_by_page"),
-  textByBookmarks: jsonb("text_by_bookmarks"),
-  predictedEntities: jsonb("predicted_entities"),
+  // JSONB shapes owned by the Python workers service — we treat them as
+  // opaque-but-typed (JsonbRecord / JsonbValue, not `unknown`) on the web side.
+  textByPage: jsonb("text_by_page").$type<JsonbRecord | null>(),
+  textByBookmarks: jsonb("text_by_bookmarks").$type<JsonbRecord | null>(),
+  predictedEntities: jsonb("predicted_entities").$type<JsonbValue | null>(),
   modelType: text("model_type"),
   model: text("model"),
-  promptId: uuid("prompt_id").references(() => prompts.id, { onDelete: "cascade" }),
+  promptId: uuid("prompt_id").references(() => prompts.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 })

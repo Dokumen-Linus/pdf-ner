@@ -1,6 +1,7 @@
 import { getRequestHeaders } from "@tanstack/react-start/server"
 import { eq } from "drizzle-orm/sql"
 import { db } from "@/db/client"
+import { workersPdfs } from "@/db/schemas/workers/pdfs"
 import { projects } from "@/db/schemas/web/projects"
 import { env } from "@/env.server"
 import { auth } from "@/lib/auth"
@@ -26,6 +27,24 @@ export async function requireProjectOwnership(projectId: string, userId: string)
   if (project.ownerId !== userId) {
     throw new Error("You do not have access to this project")
   }
+}
+
+export async function requirePdfOwnership(pdfId: string, userId: string): Promise<string> {
+  const [pdf] = await db
+    .select({ projectId: workersPdfs.projectId, ownerId: projects.ownerId })
+    .from(workersPdfs)
+    .innerJoin(projects, eq(projects.id, workersPdfs.projectId))
+    .where(eq(workersPdfs.id, pdfId))
+    .limit(1)
+
+  if (!pdf) {
+    throw new Error("PDF not found")
+  }
+  if (pdf.ownerId !== userId) {
+    throw new Error("You do not have access to this project")
+  }
+
+  return pdf.projectId
 }
 
 export async function apiRequest(path: string, options: RequestInit = {}) {

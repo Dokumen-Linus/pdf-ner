@@ -1,16 +1,32 @@
 import { createServerFn } from "@tanstack/react-start"
-import { eq, inArray } from "drizzle-orm/sql"
+import { and, eq, inArray, sql } from "drizzle-orm"
 import { z } from "zod"
 import { db } from "@/db/client"
 import { annotations } from "@/db/schemas/web/annotations"
+import { pdfs } from "@/db/schemas/web/pdfs"
+import { requirePdfOwnership, requireUserId } from "../api/_helpers"
+import { LabeledEntitiesSchema, LABELLING_LOCK_STALE_SECONDS } from "./pdfs"
+
+// Zod mirror of the `StoredRect` JSONB shape in db/types.ts. Accepts either
+// the nested (EmbedPDF-style) form or the flat form — all keys optional so
+// either serialization round-trips. Reads normalize to the strict EmbedPDF
+// `Rect` via `toEmbedRect` in db/rect.ts.
+const StoredRectSchema = z.object({
+  origin: z.object({ x: z.number(), y: z.number() }).optional(),
+  size: z.object({ width: z.number(), height: z.number() }).optional(),
+  x: z.number().optional(),
+  y: z.number().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+})
 
 // ** CREATE **
 export const CreateAnnotationSchema = z.object({
   id: z.string(),
   pdfId: z.string(),
   subtype: z.string().min(1, "Subtype is required"),
-  rect: z.any(),
-  segmentRects: z.array(z.any()),
+  rect: StoredRectSchema,
+  segmentRects: z.array(StoredRectSchema),
   pageIndex: z.number().int().min(0, "Page index must be non-negative"),
   color: z.string().optional(),
   opacity: z.number().min(0).max(1).optional(),
@@ -103,4 +119,77 @@ export const deleteAnnotation = createServerFn({ method: "POST" })
       throw new Error("Annotation not found")
     }
     return { success: true }
+  })
+
+// ** BULK SAVE WITH LOCK CHECK **
+// Full-replace save path for the labelling page.
+// Atomically:
+//   1. SELECT … FOR UPDATE verifies the caller still holds the editing lock
+//      (and the lock isn't stale).
+//   2. DELETE all existing annotations for the pdf.
+//   3. INSERT the provided annotation set.
+//   4. PATCH labeled_entities on web.pdfs so the row carries the aggregate.
+// Transaction ensures no partial state on network/client death mid-save.
+// Throws "Lock lost" if the lock was stolen after going stale.
+export const SaveAnnotationsSchema = z.object({
+  pdfId: z.string(),
+  userId: z.string().optional(),
+  annotations: z.array(CreateAnnotationSchema),
+  labeledEntities: LabeledEntitiesSchema.optional(),
+})
+
+export class LabellingLockLostError extends Error {
+  constructor(message = "Lock lost — your editing session expired") {
+    super(message)
+    this.name = "LabellingLockLostError"
+  }
+}
+
+export const saveAnnotationsByPdfId = createServerFn({ method: "POST" })
+  .inputValidator(SaveAnnotationsSchema)
+  .handler(async ({ data }) => {
+    const userId = await requireUserId()
+    if (data.userId && data.userId !== userId) {
+      throw new Error("Cannot act as another user")
+    }
+    await requirePdfOwnership(data.pdfId, userId)
+
+    await db.transaction(async (tx) => {
+      const [row] = await tx
+        .select({
+          lockedBy: pdfs.lockedBy,
+          isStale: sql<boolean>`${pdfs.lockedAt} < now() - make_interval(secs => ${LABELLING_LOCK_STALE_SECONDS})`,
+        })
+        .from(pdfs)
+        .where(eq(pdfs.id, data.pdfId))
+        .for("update")
+
+      if (!row) {
+        throw new Error("PDF not found")
+      }
+      if (row.lockedBy !== userId || row.isStale) {
+        throw new LabellingLockLostError()
+      }
+
+      // Refresh the lock's heartbeat as a side effect of a successful save —
+      // saving is activity, so resetting the stale timer is correct. Also
+      // update the `annotated` fast-path flag so future loads of this pdf
+      // can short-circuit the annotations fetch when empty.
+      await tx
+        .update(pdfs)
+        .set({
+          labeledEntities: data.labeledEntities ?? null,
+          lockedAt: sql`now()`,
+          annotated: data.annotations.length > 0,
+        })
+        .where(and(eq(pdfs.id, data.pdfId), eq(pdfs.lockedBy, userId)))
+
+      await tx.delete(annotations).where(eq(annotations.pdfId, data.pdfId))
+
+      if (data.annotations.length > 0) {
+        await tx.insert(annotations).values(data.annotations)
+      }
+    })
+
+    return { success: true, count: data.annotations.length }
   })

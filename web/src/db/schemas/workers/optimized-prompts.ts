@@ -1,4 +1,5 @@
 import { jsonb, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import type { JsonbRecord } from "../../types"
 import { projects } from "../web/projects"
 import { workersSchema } from "./schema"
 
@@ -17,6 +18,6 @@ export const promptEvaluations = workersSchema.table("prompt_evaluations", {
     .notNull()
     .references(() => optimizedPrompts.id, { onDelete: "cascade" }),
   overallF1: real("overall_f1").notNull(),
-  perEntityScores: jsonb("per_entity_scores").notNull(),
+  perEntityScores: jsonb("per_entity_scores").$type<JsonbRecord>().notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 })

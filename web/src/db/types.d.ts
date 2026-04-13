@@ -8,6 +8,56 @@ import {
   workersPdfs,
 } from "./schemas/workers"
 
+// ─────────────────────────────────────────────────────────
+// JSONB column types
+// ─────────────────────────────────────────────────────────
+//
+// JSONB columns default to `unknown` under Drizzle's type inference, which
+// breaks TanStack Start's createServerFn return-type constraint (it rejects
+// `unknown` as not-JSON-serializable-enough). Every JSONB column should opt
+// into a concrete shape here via `.$type<T>()`.
+//
+// `JsonbValue` is the recursive-JSON fallback — use for columns whose
+// runtime shape is set by an external writer (the Python workers service)
+// and so isn't owned by this codebase.
+
+export type JsonbValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonbValue[]
+  | { [key: string]: JsonbValue }
+
+export type JsonbRecord = { [key: string]: JsonbValue }
+export type JsonbArray = JsonbValue[]
+
+// web.annotations.rect / .segment_rects — PDF page coordinates as persisted
+// in JSONB. This is the *storage* shape, not the runtime shape the EmbedPDF
+// plugin operates on (that's `Rect` from @embedpdf/models, where both
+// `origin` and `size` are required).
+//
+// Kept as a union of nested and flat forms because historical rows were
+// written in both — all keys optional so either serialization round-trips
+// without a migration. Normalize to the library `Rect` at the read
+// boundary via `toEmbedRect` in `./rect`.
+export interface StoredRect {
+  origin?: { x: number; y: number }
+  size?: { width: number; height: number }
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+}
+
+// web.pdfs.labeled_entities — entity-type name → labeled strings, written by
+// the labelling save path.
+export type LabeledEntitiesMap = { [entityTypeName: string]: string[] }
+
+// ─────────────────────────────────────────────────────────
+// Drizzle row types
+// ─────────────────────────────────────────────────────────
+
 // web - CRUD
 export type User = InferModel<typeof schema.users>
 export type FoundUser = InferSelectModel<typeof schema.users>

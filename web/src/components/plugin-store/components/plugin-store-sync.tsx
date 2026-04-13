@@ -1,5 +1,6 @@
-import { useEffect } from "react"
+import { useEffect } from "react";
 import { useAnnotationCapability } from "../../pdf-container/plugin-annotation-2"
+import { useDocumentManagerCapability } from "../../pdf-container/plugin-document-manager-2"
 import { useScrollCapability } from "../../pdf-container/plugin-scroll-2"
 import { useSelectionCapability } from "../../pdf-container/plugin-selection-2"
 import usePluginStore from "../hooks/use-plugin-store"
@@ -8,9 +9,10 @@ const PluginStoreSync = () => {
   const { provides: annoCapability } = useAnnotationCapability()
   const { provides: selectCapability } = useSelectionCapability()
   const { provides: scrollCapability } = useScrollCapability()
+  const { provides: docManagerCapability } = useDocumentManagerCapability()
 
   useEffect(() => {
-    if (!annoCapability || !selectCapability || !scrollCapability) return
+    if (!annoCapability || !selectCapability || !scrollCapability || !docManagerCapability) return
 
     const store = usePluginStore.getState()
 
@@ -18,6 +20,7 @@ const PluginStoreSync = () => {
     store.setAnnoCapability(annoCapability)
     store.setSelectCapability(selectCapability)
     store.setScrollCapability(scrollCapability)
+    store.setDocManagerCapability(docManagerCapability)
 
     // sync store with changes
     const syncState = annoCapability.onStateChange((state) => {
@@ -31,8 +34,9 @@ const PluginStoreSync = () => {
       store.setAnnoState(null)
       store.setSelectCapability(null)
       store.setScrollCapability(null)
+      store.setDocManagerCapability(null)
     }
-  }, [annoCapability, selectCapability, scrollCapability])
+  }, [annoCapability, selectCapability, scrollCapability, docManagerCapability])
 
   return null
 }
