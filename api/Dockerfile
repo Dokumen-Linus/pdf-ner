@@ -3,14 +3,16 @@ FROM python:3.13-slim AS build
 
 COPY --from=ghcr.io/astral-sh/uv:0.9.7 /uv /uvx /bin/
 
-WORKDIR /app
+WORKDIR /src
 
 # Install dependencies first (layer caching)
-COPY pyproject.toml uv.lock ./
+COPY api/pyproject.toml api/uv.lock ./api/
+COPY llm_shared/ ./llm_shared/
+WORKDIR /src/api
 RUN uv sync --no-dev --no-install-project --frozen
 
 # Copy source and install project
-COPY app/ app/
+COPY api/app/ ./app/
 RUN uv sync --no-dev --frozen
 
 # ---- Runtime stage ----
@@ -21,8 +23,8 @@ RUN groupadd -g 1001 appgroup && \
 
 WORKDIR /app
 
-COPY --from=build --chown=appuser:appgroup /app/.venv /app/.venv
-COPY --from=build --chown=appuser:appgroup /app/app /app/app
+COPY --from=build --chown=appuser:appgroup /src/api/.venv /app/.venv
+COPY --from=build --chown=appuser:appgroup /src/api/app /app/app
 
 ENV PATH="/app/.venv/bin:$PATH"
 

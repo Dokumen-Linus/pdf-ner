@@ -350,6 +350,23 @@ wheels = [
 ]
 
 [[package]]
+name = "dokumen-llm-shared"
+version = "0.0.0"
+source = { directory = "../llm_shared" }
+dependencies = [
+    { name = "anthropic" },
+    { name = "google-genai" },
+    { name = "openai" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anthropic" },
+    { name = "google-genai" },
+    { name = "openai" },
+]
+
+[[package]]
 name = "dokumen-workers"
 version = "0.0.0"
 source = { virtual = "." }
@@ -358,6 +375,7 @@ dependencies = [
     { name = "asyncpg" },
     { name = "boto3" },
     { name = "celery" },
+    { name = "dokumen-llm-shared" },
     { name = "google-genai" },
     { name = "openai" },
     { name = "pillow" },
@@ -384,6 +402,7 @@ requires-dist = [
     { name = "boto3" },
     { name = "celery" },
     { name = "deptry", marker = "extra == 'dev'" },
+    { name = "dokumen-llm-shared", directory = "../llm_shared" },
     { name = "google-genai" },
     { name = "openai" },
     { name = "pillow" },

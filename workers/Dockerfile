@@ -8,14 +8,16 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc libc-dev && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /src
 
 # Install dependencies first (layer caching)
-COPY pyproject.toml uv.lock ./
+COPY workers/pyproject.toml workers/uv.lock ./workers/
+COPY llm_shared/ ./llm_shared/
+WORKDIR /src/workers
 RUN uv sync --no-dev --no-install-project --frozen
 
 # Copy source and install project
-COPY app/ app/
+COPY workers/app/ ./app/
 RUN uv sync --no-dev --frozen
 
 # ---- Runtime stage ----
@@ -31,8 +33,8 @@ RUN groupadd -g 1001 appgroup && \
 
 WORKDIR /app
 
-COPY --from=build --chown=appuser:appgroup /app/.venv /app/.venv
-COPY --from=build --chown=appuser:appgroup /app/app /app/app
+COPY --from=build --chown=appuser:appgroup /src/workers/.venv /app/.venv
+COPY --from=build --chown=appuser:appgroup /src/workers/app /app/app
 
 ENV PATH="/app/.venv/bin:$PATH"
 

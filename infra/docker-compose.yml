@@ -40,8 +40,8 @@ services:
 
   api:
     build:
-      context: ../api
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: api/Dockerfile
     ports:
       - "127.0.0.1:8000:8000"
     env_file:
@@ -61,8 +61,8 @@ services:
 
   worker:
     build:
-      context: ../workers
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: workers/Dockerfile
     env_file:
       - ../workers/.env
     environment:
