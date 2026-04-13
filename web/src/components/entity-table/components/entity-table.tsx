@@ -20,14 +20,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcn-ui/table"
+import { m } from "@/integrations/paraglide/messages.js"
 import ColorPicker from "../../custom/color-picker"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import useEntityTypeStore from "../hooks/use-entity-type-store"
 import initialEntityTypes from "../initial-entity-types"
-import { m } from "@/integrations/paraglide/messages.js"
 
 const EntityTable = () => {
-  // **IMPORTANT**
   // annoState contains the whole AnnotationState
   // annoState?.byEntityType gives ET name -> array of UIDs of annotations
   // annoState?.byUid[uid].contents - text of annotation
@@ -169,7 +168,9 @@ const EntityTable = () => {
                   activateEntityType(name)
                 }}
               >
-                {isActive ? m.entity_table_state_selecting() : annotationText || m.entity_table_state_empty()}
+                {isActive
+                  ? m.entity_table_state_selecting()
+                  : annotationText || m.entity_table_state_empty()}
               </TableCell>
             </TableRow>
           )

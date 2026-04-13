@@ -3,11 +3,6 @@ import { createPluginRegistration } from "@embedpdf/core"
 import { EmbedPDF } from "@embedpdf/core/react"
 import { usePdfiumEngine } from "@embedpdf/engines/react"
 import { AllLogger, ConsoleLogger, PerfLogger } from "@embedpdf/models"
-import {
-  DocumentContent,
-  DocumentManagerPluginPackage,
-  InitialDocumentOptions,
-} from "@embedpdf/plugin-document-manager/react"
 import { ExportPluginPackage } from "@embedpdf/plugin-export/react"
 import { RenderLayer, RenderPluginPackage } from "@embedpdf/plugin-render/react"
 import { RotatePluginPackage } from "@embedpdf/plugin-rotate/react"
@@ -18,6 +13,11 @@ import PluginStoreSync from "../plugin-store/components/plugin-store-sync"
 // import Toolbar from "./dev/toolbar-dev"
 import PDFLoading from "./pdf-loading"
 import { AnnotationLayer, AnnotationPluginPackage } from "./plugin-annotation-2"
+import {
+  DocumentContent,
+  DocumentManagerPluginPackage,
+  InitialDocumentOptions,
+} from "./plugin-document-manager-2"
 import {
   GlobalPointerProvider,
   InteractionManagerPluginPackage,
