@@ -256,6 +256,7 @@
 - *(web)* Add print manifests.json
 - *(web)* Readme
 - *(web)* Tanstack eslint
+- *(web)* Tanstack start
 
 ### ⚡ Performance
 
@@ -302,6 +303,7 @@
 - *(web)* Move to local document manager plugin
 - *(web)* Move to local plugin render, viewport, tiling
 - *(api)* Better abort on error for S3 creation #67
+- *(web)* Move functions server side
 
 ### 🎨 Styling
 
@@ -416,6 +418,7 @@
 - Add skill copies to gitignore
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add gitignore to llm_shared lib
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
