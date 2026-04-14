@@ -133,7 +133,11 @@ function SignInPage() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             {m.auth_signin_footer_text()}{" "}
-            <Link to="/signup" className="text-primary hover:underline">
+            <Link
+              to="/signup"
+              search={redirect ? { redirect } : undefined}
+              className="text-primary hover:underline"
+            >
               {m.auth_signin_footer_link()}
             </Link>
           </p>
