@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
-import { apiRequest, requireProjectOwnership, requireUserId } from "./_helpers"
+import { apiRequest, requireProjectOwnership, requireUserId } from "./_helpers.server"
 
 export const startPromptOptimization = createServerFn({ method: "POST" })
   .inputValidator(
