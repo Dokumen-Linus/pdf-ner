@@ -146,6 +146,7 @@
 - *(web)* Rename to -pdf-upload.test.ts
 - *(web)* Update drizzle foreign keys
 - *(web)* Plugin-tiling-2, plugin-viewport-2
+- *(web)* Import error
 
 ### 💼 Other
 
@@ -296,6 +297,7 @@
 - *(web)* Move to local plugin-document-manager
 - *(web)* Move to local document manager plugin
 - *(web)* Move to local plugin render, viewport, tiling
+- *(api)* Better abort on error for S3 creation #67
 
 ### 🎨 Styling
 
@@ -407,6 +409,8 @@
 - *(llm)* Remove .agents/skills
 - Fix auto-docs.yml by giving PR read permissions
 - Add skill copies to gitignore
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Add gitignore to llm_shared lib
 
 ### ◀️ Revert
 
