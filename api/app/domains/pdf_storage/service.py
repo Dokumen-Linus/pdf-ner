@@ -20,6 +20,47 @@ logger = logging.getLogger(__name__)
 _S3_PART_SIZE = 5 * 1024 * 1024
 _MAX_PDF_SIZE = 50 * 1024 * 1024
 
+# Safety net for orphan multipart uploads: if the in-request abort_multipart_upload
+# call fails (network blip, process crash), S3 keeps the uploaded parts forever.
+# A bucket-level lifecycle rule auto-aborts anything still in-progress after N days.
+# PDF uploads are single-HTTP-request streams capped at 50 MB — 24 h is far outside
+# any legitimate upload duration, so 1 day minimizes wasted storage.
+_INCOMPLETE_MULTIPART_ABORT_DAYS = 1
+_LIFECYCLE_RULE_ID = "abort-incomplete-multipart-uploads"
+
+
+async def _apply_incomplete_multipart_lifecycle(s3, bucket_name: str) -> bool:
+    """Best-effort: install a lifecycle rule that auto-aborts orphan multiparts.
+
+    Returns True if the rule was applied, False if S3 rejected the call
+    (e.g. MinIO's NotImplemented). Failure here does not fail bucket creation —
+    the bucket itself is usable; the rule is defense-in-depth.
+    """
+    config = {
+        "Rules": [
+            {
+                "ID": _LIFECYCLE_RULE_ID,
+                "Status": "Enabled",
+                "Filter": {"Prefix": ""},
+                "AbortIncompleteMultipartUpload": {
+                    "DaysAfterInitiation": _INCOMPLETE_MULTIPART_ABORT_DAYS
+                },
+            }
+        ]
+    }
+    try:
+        await anyio.to_thread.run_sync(
+            lambda: s3.put_bucket_lifecycle_configuration(
+                Bucket=bucket_name, LifecycleConfiguration=config
+            )
+        )
+        return True
+    except ClientError:
+        logger.exception(
+            "Failed to apply incomplete-multipart lifecycle rule to bucket %s", bucket_name
+        )
+        return False
+
 
 async def create_bucket(conn: asyncpg.Connection, request: CreateBucketRequest) -> dict:
     # 1. Insert DB row first (catches duplicate names early)
@@ -68,7 +109,15 @@ async def create_bucket(conn: asyncpg.Connection, request: CreateBucketRequest) 
         await repository.delete_bucket(conn, bucket_id)
         raise HTTPException(status_code=502, detail=f"S3 error: {e.response['Error']['Message']}")
 
-    return {"bucket_id": str(bucket_id), "name": request.name}
+    # Install the orphan-multipart safety net. Idempotent on S3, so it's safe to
+    # re-apply on the BucketAlreadyOwnedByYou path (which lands here too).
+    lifecycle_applied = await _apply_incomplete_multipart_lifecycle(s3, request.name)
+
+    return {
+        "bucket_id": str(bucket_id),
+        "name": request.name,
+        "lifecycle_applied": lifecycle_applied,
+    }
 
 
 def _sanitize_filename(filename: str) -> str:

@@ -85,6 +85,21 @@ class TestCreateBucket:
         body = response.json()
         assert body["bucket_id"] == str(bucket_id)
         assert body["name"] == "my-test-bucket"
+        assert body["lifecycle_applied"] is True
+
+        mock_s3.put_bucket_lifecycle_configuration.assert_called_once_with(
+            Bucket="my-test-bucket",
+            LifecycleConfiguration={
+                "Rules": [
+                    {
+                        "ID": "abort-incomplete-multipart-uploads",
+                        "Status": "Enabled",
+                        "Filter": {"Prefix": ""},
+                        "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 1},
+                    }
+                ]
+            },
+        )
 
     @pytest.mark.anyio
     async def test_s3_error_returns_502(self, storage_client, mock_conn):
@@ -151,8 +166,12 @@ class TestCreateBucket:
             )
 
         assert response.status_code == 200
-        assert response.json()["name"] == "existing-bucket"
+        body = response.json()
+        assert body["name"] == "existing-bucket"
+        # Lifecycle rule is idempotent — must be (re)applied on the already-owned branch.
+        assert body["lifecycle_applied"] is True
         mock_s3.head_bucket.assert_called_once_with(Bucket="existing-bucket")
+        mock_s3.put_bucket_lifecycle_configuration.assert_called_once()
 
     @pytest.mark.anyio
     async def test_missing_required_fields_returns_422(self, storage_client):
@@ -194,11 +213,76 @@ class TestCreateBucket:
             CreateBucketConfiguration={"LocationConstraint": "eu-west-1"},
         )
 
+    @pytest.mark.anyio
+    async def test_lifecycle_failure_does_not_fail_request(self, storage_client, mock_conn):
+        """Lifecycle config failure (e.g. MinIO NotImplemented) must not fail bucket creation.
+
+        Request returns 200 with lifecycle_applied=False and the DB row is NOT rolled back.
+        """
+        bucket_id = uuid4()
+        mock_conn.fetchval = AsyncMock(return_value=bucket_id)
+        mock_conn.execute = AsyncMock()
+
+        mock_s3 = MagicMock()
+        mock_s3.put_bucket_lifecycle_configuration.side_effect = _make_client_error(
+            "NotImplemented", "lifecycle not supported"
+        )
+
+        # Run closures directly so the lifecycle ClientError raises inside the helper's try/except.
+        async def _run_sync_directly(fn, *args, **kwargs):
+            return fn()
+
+        with (
+            patch("boto3.client", return_value=mock_s3),
+            patch(
+                "app.domains.pdf_storage.service.anyio.to_thread.run_sync",
+                side_effect=_run_sync_directly,
+            ),
+        ):
+            response = await storage_client.post(
+                "/api/v1/pdf-storage/buckets",
+                json={
+                    "name": "minio-bucket",
+                    "region": "us-east-1",
+                    "access_key_id": "key",
+                    "secret_access_key": "secret",
+                    "endpoint_url": "http://localhost:9000",
+                },
+            )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["bucket_id"] == str(bucket_id)
+        assert body["name"] == "minio-bucket"
+        assert body["lifecycle_applied"] is False
+
+        # DB row must NOT be rolled back — the bucket itself is fine.
+        delete_calls = [
+            c for c in mock_conn.execute.call_args_list if "DELETE FROM api.aws_buckets" in str(c)
+        ]
+        assert delete_calls == []
+
+
+def _configure_multipart_mock(mock_s3: MagicMock, upload_id: str = "upload-id-xyz") -> None:
+    """Stub the three multipart calls exercised by a happy-path upload."""
+    mock_s3.create_multipart_upload.return_value = {"UploadId": upload_id}
+    mock_s3.upload_part.return_value = {"ETag": '"etag-0"'}
+    mock_s3.complete_multipart_upload.return_value = {}
+
+
+# Contract for /api/v1/pdf-storage/pdfs:
+#   * project_id, bucket_id are QUERY params (not form fields)
+#   * body is raw PDF bytes with Content-Type: application/pdf
+#   * optional X-Filename header carries the url-encoded filename
+# See api/app/domains/pdf_storage/router.py::upload_pdf.
+_PDF_BODY = b"%PDF-1.4 test content"
+_PDF_HEADERS = {"Content-Type": "application/pdf", "X-Filename": "test.pdf"}
+
 
 class TestUploadPdf:
     @pytest.mark.anyio
     async def test_happy_path(self, storage_client, mock_conn):
-        """Multipart POST returns pdf_id, filepath, and bucket_name on success."""
+        """Raw PDF POST returns pdf_id, filepath, and bucket_name on success."""
         bucket_id = uuid4()
         project_id = uuid4()
         pdf_id = uuid4()
@@ -216,6 +300,7 @@ class TestUploadPdf:
         mock_conn.fetchval = AsyncMock(return_value=pdf_id)
         mock_conn.execute = AsyncMock()
         mock_s3 = MagicMock()
+        _configure_multipart_mock(mock_s3)
 
         with (
             patch("boto3.client", return_value=mock_s3),
@@ -226,8 +311,9 @@ class TestUploadPdf:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/pdfs",
-                data={"project_id": str(project_id), "bucket_id": str(bucket_id)},
-                files={"file": ("test.pdf", b"%PDF-1.4 test content", "application/pdf")},
+                params={"project_id": str(project_id), "bucket_id": str(bucket_id)},
+                content=_PDF_BODY,
+                headers=_PDF_HEADERS,
             )
 
         assert response.status_code == 200
@@ -237,6 +323,11 @@ class TestUploadPdf:
         assert body["bucket_name"] == "my-bucket"
         # filepath should be scoped under project_id
         assert str(project_id) in body["filepath"]
+        # Small body fits in the final partial part → one upload_part call, then complete.
+        mock_s3.create_multipart_upload.assert_called_once()
+        mock_s3.upload_part.assert_called_once()
+        mock_s3.complete_multipart_upload.assert_called_once()
+        mock_s3.abort_multipart_upload.assert_not_called()
 
     @pytest.mark.anyio
     async def test_bucket_not_found_returns_404(self, storage_client, mock_conn):
@@ -248,8 +339,9 @@ class TestUploadPdf:
 
         response = await storage_client.post(
             "/api/v1/pdf-storage/pdfs",
-            data={"project_id": str(project_id), "bucket_id": str(bucket_id)},
-            files={"file": ("test.pdf", b"%PDF-1.4", "application/pdf")},
+            params={"project_id": str(project_id), "bucket_id": str(bucket_id)},
+            content=_PDF_BODY,
+            headers=_PDF_HEADERS,
         )
 
         assert response.status_code == 404
@@ -257,7 +349,7 @@ class TestUploadPdf:
 
     @pytest.mark.anyio
     async def test_s3_upload_error_returns_502(self, storage_client, mock_conn):
-        """A ClientError during S3 put_object propagates as 502 and rolls back DB."""
+        """A ClientError during S3 multipart upload propagates as 502 and rolls back DB."""
         bucket_id = uuid4()
         project_id = uuid4()
         pdf_id = uuid4()
@@ -276,11 +368,13 @@ class TestUploadPdf:
 
         client_error = _make_client_error("AccessDenied", "Access Denied")
         mock_s3 = MagicMock()
-        mock_s3.put_object.side_effect = client_error
+        mock_s3.create_multipart_upload.return_value = {"UploadId": "uid-1"}
+        # Fail on the tail upload_part so the _abort_and_rollback path is exercised.
+        mock_s3.upload_part.side_effect = client_error
 
         # run_sync executes the closure directly so boto3 raises inside the try/except
         async def _run_sync_directly(fn, *args, **kwargs):
-            fn()
+            return fn()
 
         with (
             patch("boto3.client", return_value=mock_s3),
@@ -291,23 +385,43 @@ class TestUploadPdf:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/pdfs",
-                data={"project_id": str(project_id), "bucket_id": str(bucket_id)},
-                files={"file": ("test.pdf", b"%PDF-1.4", "application/pdf")},
+                params={"project_id": str(project_id), "bucket_id": str(bucket_id)},
+                content=_PDF_BODY,
+                headers=_PDF_HEADERS,
             )
 
         assert response.status_code == 502
         assert "S3 error" in response.json()["detail"]
+        # Abort must fire on failure so in-progress multipart parts get cleaned up.
+        mock_s3.abort_multipart_upload.assert_called_once()
 
     @pytest.mark.anyio
-    async def test_missing_form_fields_returns_422(self, storage_client):
-        """Omitting required form fields returns 422."""
+    async def test_missing_query_params_returns_422(self, storage_client):
+        """Omitting required project_id/bucket_id query params returns 422."""
         response = await storage_client.post(
             "/api/v1/pdf-storage/pdfs",
-            files={"file": ("test.pdf", b"%PDF-1.4", "application/pdf")},
-            # no project_id or bucket_id
+            content=_PDF_BODY,
+            headers=_PDF_HEADERS,
+            # no project_id or bucket_id query params
         )
 
         assert response.status_code == 422
+
+    @pytest.mark.anyio
+    async def test_wrong_content_type_returns_415(self, storage_client, mock_conn):
+        """Non-application/pdf Content-Type is rejected with 415 before any S3 work."""
+        project_id = uuid4()
+        bucket_id = uuid4()
+
+        response = await storage_client.post(
+            "/api/v1/pdf-storage/pdfs",
+            params={"project_id": str(project_id), "bucket_id": str(bucket_id)},
+            content=_PDF_BODY,
+            headers={"Content-Type": "multipart/form-data"},
+        )
+
+        assert response.status_code == 415
+        assert "application/pdf" in response.json()["detail"]
 
     @pytest.mark.anyio
     async def test_uses_endpoint_url_when_bucket_has_one(self, storage_client, mock_conn):
@@ -328,6 +442,7 @@ class TestUploadPdf:
         mock_conn.fetchval = AsyncMock(return_value=pdf_id)
         mock_conn.execute = AsyncMock()
         mock_s3 = MagicMock()
+        _configure_multipart_mock(mock_s3)
 
         with (
             patch("boto3.client", return_value=mock_s3) as mock_boto3,
@@ -338,8 +453,9 @@ class TestUploadPdf:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/pdfs",
-                data={"project_id": str(project_id), "bucket_id": str(bucket_id)},
-                files={"file": ("doc.pdf", b"%PDF-1.4", "application/pdf")},
+                params={"project_id": str(project_id), "bucket_id": str(bucket_id)},
+                content=_PDF_BODY,
+                headers={**_PDF_HEADERS, "X-Filename": "doc.pdf"},
             )
 
         assert response.status_code == 200
@@ -419,7 +535,7 @@ class TestCreateBucketS3Rollback:
 class TestUploadPdfS3Rollback:
     @pytest.mark.anyio
     async def test_upload_pdf_s3_failure_rolls_back_db(self, storage_client, mock_conn):
-        """When S3 upload fails, the DB rows inserted by insert_pdf are deleted."""
+        """When S3 multipart upload fails, the DB rows inserted by insert_pdf are deleted."""
         bucket_id = uuid4()
         project_id = uuid4()
         pdf_id = uuid4()
@@ -438,10 +554,11 @@ class TestUploadPdfS3Rollback:
 
         client_error = _make_client_error("AccessDenied", "Access Denied")
         mock_s3 = MagicMock()
-        mock_s3.put_object.side_effect = client_error
+        mock_s3.create_multipart_upload.return_value = {"UploadId": "uid-rollback"}
+        mock_s3.upload_part.side_effect = client_error
 
         async def _run_sync_directly(fn, *args, **kwargs):
-            fn()
+            return fn()
 
         with (
             patch("boto3.client", return_value=mock_s3),
@@ -452,14 +569,16 @@ class TestUploadPdfS3Rollback:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/pdfs",
-                data={"project_id": str(project_id), "bucket_id": str(bucket_id)},
-                files={"file": ("test.pdf", b"%PDF-1.4", "application/pdf")},
+                params={"project_id": str(project_id), "bucket_id": str(bucket_id)},
+                content=_PDF_BODY,
+                headers=_PDF_HEADERS,
             )
 
         assert response.status_code == 502
         # Verify delete_pdf was called (rollback): api.pdfs, web.pdfs, workers.pdfs
         delete_calls = [c for c in mock_conn.execute.call_args_list if "DELETE FROM" in str(c)]
         assert len(delete_calls) == 3
+        mock_s3.abort_multipart_upload.assert_called_once()
 
 
 class TestGetPdfUrl:
@@ -634,15 +753,16 @@ class TestGetPdfUrl:
 class TestUploadPdfSizeLimit:
     @pytest.mark.anyio
     async def test_upload_pdf_rejects_oversized_file(self, storage_client):
-        """Files exceeding MAX_PDF_SIZE are rejected with 413."""
+        """Content-Length exceeding MAX_PDF_SIZE is rejected with 413 at the router."""
         bucket_id = uuid4()
         project_id = uuid4()
 
         with patch("app.domains.pdf_storage.router.MAX_PDF_SIZE", 10):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/pdfs",
-                data={"project_id": str(project_id), "bucket_id": str(bucket_id)},
-                files={"file": ("big.pdf", b"x" * 20, "application/pdf")},
+                params={"project_id": str(project_id), "bucket_id": str(bucket_id)},
+                content=b"x" * 20,
+                headers={"Content-Type": "application/pdf"},
             )
 
         assert response.status_code == 413
