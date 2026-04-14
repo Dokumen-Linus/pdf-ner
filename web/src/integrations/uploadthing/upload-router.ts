@@ -1,7 +1,7 @@
 import { getRequestHeaders } from "@tanstack/react-start/server"
 import { createUploadthing, UploadThingError } from "uploadthing/server"
 import type { FileRouter } from "uploadthing/server"
-import { updateUserByAuthUserId } from "@/db-fns/web/users"
+import { updateUser } from "@/db-fns/web/users"
 import { auth } from "@/lib/auth"
 
 const f = createUploadthing()
@@ -30,9 +30,9 @@ export const uploadRouter = {
       return { userId: user.id }
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      await updateUserByAuthUserId({
+      await updateUser({
         data: {
-          authUserId: metadata.userId,
+          id: metadata.userId,
           avatarUrl: file.ufsUrl,
         },
       })

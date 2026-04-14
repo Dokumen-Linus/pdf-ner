@@ -54,14 +54,9 @@ async def create_subscription(
     request: CreateSubscriptionRequest,
     conn: asyncpg.Connection = Depends(get_conn),
 ):
-    """Create a Stripe subscription with an optional base fee plus metered usage."""
+    """Create a metered Stripe subscription for a user."""
     try:
-        return await service.create_metered_subscription(
-            conn,
-            request.user_id,
-            request.usage_price_id,
-            request.base_price_id,
-        )
+        return await service.create_metered_subscription(conn, request.user_id, request.price_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:

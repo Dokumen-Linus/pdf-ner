@@ -1,4 +1,3 @@
-export * from "./auth"
 export * from "./api"
 export * from "./public"
 export * from "./web"

@@ -4,7 +4,7 @@ import { z } from "zod"
 import { db } from "@/db/client"
 import { annotations } from "@/db/schemas/web/annotations"
 import { pdfs } from "@/db/schemas/web/pdfs"
-import { requirePdfAccess, requirePdfOwnership, requireUserId } from "../api/_helpers.server"
+import { requirePdfOwnership, requireUserId } from "../api/_helpers.server"
 import { LabeledEntitiesSchema, LABELLING_LOCK_STALE_SECONDS } from "./pdfs"
 
 // Zod mirror of the `StoredRect` JSONB shape in db/types.ts. Accepts either
@@ -59,7 +59,6 @@ export const getAnnotationById = createServerFn({ method: "GET" })
 export const getAnnotationsByPdfId = createServerFn({ method: "GET" })
   .inputValidator((data: { pdfId: string }) => data)
   .handler(async ({ data }) => {
-    await requirePdfAccess(data.pdfId, "label")
     const pdfAnnotations = await db
       .select()
       .from(annotations)

@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
-import { requireProjectAccess } from "@/db-fns/api/_helpers.server"
 import { db } from "@/db/client"
 import { entityTypes } from "@/db/schemas/web/entity-types"
 
@@ -26,7 +25,6 @@ export const CreateEntityTypeSchema = z.object({
 export const createEntityType = createServerFn({ method: "POST" })
   .inputValidator(CreateEntityTypeSchema)
   .handler(async ({ data }) => {
-    await requireProjectAccess(data.projectId, "manage")
     const [entityType] = await db.insert(entityTypes).values(data).returning({ id: entityTypes.id })
     return { id: entityType.id }
   })
@@ -45,7 +43,6 @@ export const getEntityTypeById = createServerFn({ method: "GET" })
 export const getEntityTypesByProjectId = createServerFn({ method: "GET" })
   .inputValidator((data: { projectId: string }) => data)
   .handler(async ({ data }) => {
-    await requireProjectAccess(data.projectId, "label")
     const entityTypesList = await db
       .select()
       .from(entityTypes)
@@ -63,15 +60,6 @@ export const updateEntityType = createServerFn({ method: "POST" })
   .inputValidator(UpdateEntityTypeSchema)
   .handler(async ({ data }) => {
     const { id, ...updateData } = data
-    const [existing] = await db
-      .select({ projectId: entityTypes.projectId })
-      .from(entityTypes)
-      .where(eq(entityTypes.id, id))
-      .limit(1)
-    if (!existing) {
-      throw new Error("Entity type not found")
-    }
-    await requireProjectAccess(existing.projectId, "manage")
     const updatedEntityType = await db
       .update(entityTypes)
       .set(updateData)
@@ -86,15 +74,6 @@ export const updateEntityType = createServerFn({ method: "POST" })
 export const deleteEntityType = createServerFn({ method: "POST" })
   .inputValidator((data: { id: string }) => data)
   .handler(async ({ data }) => {
-    const [existing] = await db
-      .select({ projectId: entityTypes.projectId })
-      .from(entityTypes)
-      .where(eq(entityTypes.id, data.id))
-      .limit(1)
-    if (!existing) {
-      throw new Error("Entity type not found")
-    }
-    await requireProjectAccess(existing.projectId, "manage")
     const entityType = await db.delete(entityTypes).where(eq(entityTypes.id, data.id))
     if (entityType.rowCount === 0) {
       throw new Error("Entity type not found")

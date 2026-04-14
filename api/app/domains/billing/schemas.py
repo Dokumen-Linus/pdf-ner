@@ -46,8 +46,7 @@ class CreateCustomerRequest(BaseModel):
 
 class CreateSubscriptionRequest(BaseModel):
     user_id: UUID
-    usage_price_id: str
-    base_price_id: str | None = None
+    price_id: str
 
 
 class CancelSubscriptionRequest(BaseModel):

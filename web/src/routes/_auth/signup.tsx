@@ -13,7 +13,7 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
-import { getUserByEmail, updateUserByAuthUserId } from "@/db-fns/web/users"
+import { createUser, deleteUserByEmail, getUserByEmail } from "@/db-fns/web/users"
 import { authClient } from "@/lib/auth-client"
 import { getPostVerificationRedirect } from "@/lib/auth-redirects"
 import { m } from "@/integrations/paraglide/messages.js"
@@ -51,35 +51,37 @@ function SignUpPage() {
         }
       },
       onSubmitAsync: async ({ value }) => {
-        const fullName = `${value.firstName} ${value.lastName}`.trim()
+        // 1. Create User Profile
+        try {
+          await createUser({
+            data: {
+              email: value.email,
+              firstName: value.firstName,
+              lastName: value.lastName,
+              employer: value.employer || undefined,
+              jobTitle: value.jobTitle || undefined,
+            },
+          })
+        } catch (_error) {
+          return {
+            form: "We couldn't complete sign up right now. Please try again.",
+          }
+        }
 
-        const { data, error: authError } = await authClient.signUp.email({
+        // 2. Create Auth Account
+        const { error: authError } = await authClient.signUp.email({
           email: value.email,
           password: value.password,
-          name: fullName,
+          name: `${value.firstName} ${value.lastName}`.trim(),
           callbackURL: verificationCallbackURL,
         })
 
         if (authError) {
+          try {
+            await deleteUserByEmail({ data: { email: value.email } })
+          } catch (_e) {}
           return {
             form: authError.message || "An error occurred during sign up",
-          }
-        }
-
-        if (data?.user?.id) {
-          try {
-            await updateUserByAuthUserId({
-              data: {
-                authUserId: data.user.id,
-                displayName: fullName || undefined,
-                firstName: value.firstName || undefined,
-                lastName: value.lastName || undefined,
-                employer: value.employer || undefined,
-                jobTitle: value.jobTitle || undefined,
-              },
-            })
-          } catch (error) {
-            console.warn("[signup] profile bootstrap failed", error)
           }
         }
 

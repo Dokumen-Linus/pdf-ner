@@ -147,12 +147,7 @@ export const createSetupIntent = createServerFn({ method: "POST" }).handler(asyn
 })
 
 export const createMeteredSubscription = createServerFn({ method: "POST" })
-  .inputValidator(
-    z.object({
-      usagePriceId: z.string(),
-      basePriceId: z.string().optional(),
-    }),
-  )
+  .inputValidator(z.object({ priceId: z.string() }))
   .handler(async ({ data }) => {
     const userId = await requireUserId()
 
@@ -169,15 +164,10 @@ export const createMeteredSubscription = createServerFn({ method: "POST" })
     const stripe = getStripe()
     const subscription = await stripe.subscriptions.create({
       customer: customer.stripeCustomerId,
-      items: [
-        ...(data.basePriceId ? [{ price: data.basePriceId }] : []),
-        { price: data.usagePriceId },
-      ],
+      items: [{ price: data.priceId }],
     })
 
-    const item =
-      subscription.items.data.find((candidate) => candidate.price?.id === data.usagePriceId) ??
-      subscription.items.data[subscription.items.data.length - 1]
+    const item = subscription.items.data[0]
     if (!item) {
       throw new Error("Stripe subscription created but has no items")
     }

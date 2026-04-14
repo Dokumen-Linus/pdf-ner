@@ -33,7 +33,7 @@ import {
   releaseLabellingLock,
   upsertPdfLabels,
 } from "@/db-fns/web/pdfs"
-import { getCurrentProjectAccess, getProjectById } from "@/db-fns/web/projects"
+import { getProjectById } from "@/db-fns/web/projects"
 import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
 import type { FoundWorkersPdf, LabeledEntitiesMap } from "@/db/types"
 import { useLabellingLock } from "@/hooks/use-labelling-lock"
@@ -57,20 +57,16 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
   validateSearch: LabellingSearchSchema,
   loaderDeps: ({ search }) => ({ pdfId: search.pdfId }),
   loader: async ({ params, deps, context }) => {
-    if (!context.session?.user?.id) {
+    const userId = context.session?.user?.id
+    if (!userId) {
       throw new Error("Not authenticated")
     }
 
-    const [project, pdfsRaw, access] = await Promise.all([
+    const [project, pdfsRaw] = await Promise.all([
       getProjectById({ data: { id: params.projectId } }),
       getWorkersPdfsByProjectId({ data: { projectId: params.projectId } }),
-      getCurrentProjectAccess({ data: { projectId: params.projectId } }),
     ])
     const pdfs = pdfsRaw as FoundWorkersPdf[]
-
-    if (!access.canLabel) {
-      throw new Error("You do not have access to this project")
-    }
 
     const requestedPdfId = deps.pdfId
     const activePdfId =
@@ -87,12 +83,12 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
           | { locked: false }
           | { locked: true; lockedByName: string; lockedAt: Date | null }
           | null,
-        userId: access.userId,
+        userId,
       }
     }
 
     const lockResult = await acquireLabellingLock({
-      data: { pdfId: activePdfId, userId: access.userId },
+      data: { pdfId: activePdfId, userId },
     })
 
     if (!lockResult.acquired) {
@@ -107,7 +103,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
           lockedByName: lockResult.lockedByName ?? "another user",
           lockedAt: lockResult.lockedAt ?? null,
         },
-        userId: access.userId,
+        userId,
       }
     }
 
@@ -123,7 +119,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
       activePdfAnnotated: webPdf.annotated,
       initialUrl: url,
       lockState: { locked: false as const },
-      userId: access.userId,
+      userId,
     }
   },
   pendingComponent: LabellingSkeleton,

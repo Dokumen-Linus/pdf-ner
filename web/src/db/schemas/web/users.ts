@@ -5,7 +5,6 @@ import { webSchema } from "./schema"
 
 export const users = webSchema.table("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-  authUserId: text("auth_user_id"),
   email: text("email").notNull(),
   displayName: text("display_name"),
   firstName: text("first_name"),
