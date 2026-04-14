@@ -151,6 +151,7 @@ function BillingPage() {
       <section className="space-y-3">
         <h2 className="text-lg font-medium">{m.billing_usage_title()}</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <StatCard label="Base Fee" value="$5.00" sub="Monthly workspace subscription" />
           <StatCard
             label={m.billing_usage_tokens_title()}
             value={totalTokens.toLocaleString()}
@@ -163,6 +164,7 @@ function BillingPage() {
           <StatCard
             label={m.billing_usage_cost_title()}
             value={usage ? formatCost(usage.totalCostUsd) : "$0.000000"}
+            sub="Metered usage only"
           />
           <StatCard label={m.billing_usage_calls_title()} value={(usage?.callCount ?? 0).toLocaleString()} />
         </div>

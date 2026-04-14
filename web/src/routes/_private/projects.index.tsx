@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/shadcn-ui/card"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
-import { getProjectsByOwnerId } from "@/db-fns/web/projects"
+import { getAccessibleProjects } from "@/db-fns/web/projects"
 import type { FoundProject } from "@/db/types"
 import { m } from "@/integrations/paraglide/messages.js"
 
@@ -33,16 +33,13 @@ function ProjectsPageSkeleton() {
 export const Route = createFileRoute("/_private/projects/")({
   loader: async ({ context }) => {
     try {
-      const userId = context.session?.user?.id
-      if (!userId) {
+      if (!context.session?.user?.id) {
         return {
           projects: [] as FoundProject[],
           loadError: "No authenticated session was found.",
         }
       }
-      const projects = (await getProjectsByOwnerId({
-        data: { ownerId: userId },
-      })) as FoundProject[]
+      const projects = (await getAccessibleProjects()) as FoundProject[]
       return { projects, loadError: null as string | null }
     } catch (error) {
       void error

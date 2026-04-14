@@ -43,9 +43,10 @@ async def get_or_create_stripe_customer(
 async def create_metered_subscription(
     conn: asyncpg.Connection,
     user_id: UUID,
-    price_id: str,
+    usage_price_id: str,
+    base_price_id: str | None = None,
 ) -> dict:
-    """Create a metered subscription for the user. price_id must be a metered Stripe price."""
+    """Create a subscription for the user with an optional fixed base price and a metered item."""
     existing = await repository.get_stripe_customer(conn, user_id)
     if not existing:
         raise ValueError(f"No Stripe customer for user {user_id}. Create customer first.")
@@ -60,13 +61,24 @@ async def create_metered_subscription(
     client = get_stripe()
     subscription = client.subscriptions.create(
         customer=customer_id,
-        items=[{"price": price_id}],
+        items=[*([{"price": base_price_id}] if base_price_id else []), {"price": usage_price_id}],
         payment_behavior="default_incomplete",
         payment_settings={"save_default_payment_method": "on_subscription"},
         expand=["latest_invoice.payment_intent"],
     )
 
-    item_id = subscription.items.data[0].id
+    metered_item = next(
+        (
+            item
+            for item in subscription.items.data
+            if getattr(item.price, "id", None) == usage_price_id
+        ),
+        subscription.items.data[-1] if subscription.items.data else None,
+    )
+    if metered_item is None:
+        raise ValueError("Stripe subscription created but no metered item was returned.")
+
+    item_id = metered_item.id
     await repository.update_stripe_subscription(conn, user_id, subscription.id, item_id)
     logger.info(
         "Created Stripe subscription: user=%s sub=%s item=%s",

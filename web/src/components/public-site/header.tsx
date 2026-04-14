@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/shadcn-ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn-ui/popover"
-import { getUserByEmail } from "@/db-fns/web/users"
+import { getUserByAuthUserId } from "@/db-fns/web/users"
 import { m } from "@/integrations/paraglide/messages.js"
 import { getLocale, locales, setLocale } from "@/integrations/paraglide/runtime"
 import { authClient } from "@/lib/auth-client"
@@ -37,12 +37,12 @@ export default function Header() {
   useEffect(() => {
     let cancelled = false
     async function loadHeaderIdentity() {
-      if (!session?.user?.email) {
+      if (!session?.user?.id) {
         setHeaderIdentity("")
         return
       }
       try {
-        const user = await getUserByEmail({ data: { email: session.user.email } })
+        const user = await getUserByAuthUserId({ data: { authUserId: session.user.id } })
         if (!cancelled) {
           setHeaderIdentity(user.displayName?.trim() || session.user.name || session.user.email)
         }
@@ -56,7 +56,7 @@ export default function Header() {
     return () => {
       cancelled = true
     }
-  }, [session?.user?.email, session?.user?.name])
+  }, [session?.user?.email, session?.user?.id, session?.user?.name])
 
   return (
     <>

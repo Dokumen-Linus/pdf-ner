@@ -42,7 +42,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcn-ui/table"
-import { getProjectById } from "@/db-fns/web/projects"
+import { getCurrentProjectAccess, getProjectById } from "@/db-fns/web/projects"
 import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
 import type { FoundWorkersPdf } from "@/db/types"
 import { m } from "@/integrations/paraglide/messages.js"
@@ -71,13 +71,16 @@ export const Route = createFileRoute("/_private/projects/$projectId_/documents")
     try {
       const userId = context.session?.user?.id
       if (!userId) {
-        return { project: null, pdfs: null, loadError: "Not authenticated" }
+        return { project: null, pdfs: null, access: null, loadError: "Not authenticated" }
       }
 
-      const project = await getProjectById({ data: { id: params.projectId } })
-      const rawPdfs = await getWorkersPdfsByProjectId({
-        data: { projectId: params.projectId },
-      })
+      const [project, access, rawPdfs] = await Promise.all([
+        getProjectById({ data: { id: params.projectId } }),
+        getCurrentProjectAccess({ data: { projectId: params.projectId } }),
+        getWorkersPdfsByProjectId({
+          data: { projectId: params.projectId },
+        }),
+      ])
 
       const mappedPdfs = (rawPdfs as FoundWorkersPdf[]).map((pdf) => ({
         id: pdf.id,
@@ -87,10 +90,10 @@ export const Route = createFileRoute("/_private/projects/$projectId_/documents")
         createdAt: pdf.createdAt,
       }))
 
-      return { project, pdfs: mappedPdfs, loadError: null }
+      return { project, pdfs: mappedPdfs, access, loadError: null }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      return { project: null, pdfs: null, loadError: message }
+      return { project: null, pdfs: null, access: null, loadError: message }
     }
   },
   pendingComponent: DocumentsSkeleton,
@@ -99,7 +102,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/documents")
 
 function DocumentsPage() {
   const router = useRouter()
-  const { project, pdfs, loadError } = Route.useLoaderData()
+  const { project, pdfs, access, loadError } = Route.useLoaderData()
   const { projectId } = Route.useParams()
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -216,108 +219,111 @@ function DocumentsPage() {
           </p>
         </div>
 
-        <AlertDialog
-          open={isUploadOpen}
-          onOpenChange={(open) => {
-            // Block closing the dialog while an upload is in flight — cancelling
-            // mid-stream would leave an orphaned S3 multipart upload. axios has
-            // no cancel support wired up here, so the safest UX is "locked".
-            if (!open && uploadMutation.isPending) return
-            setIsUploadOpen(open)
-            if (!open) {
-              setSelectedFile(null)
-              setClientValidationError(null)
-              setUploadProgress(0)
-              uploadMutation.reset()
-              if (fileInputRef.current) fileInputRef.current.value = ""
-            }
-          }}
-        >
-          <AlertDialogTrigger asChild>
-            <Button size="lg" className="shadow-sm" disabled={!project.bucketId}>
-              <PlusIcon className="mr-2 h-5 w-5" />
-              {m.projects_docs_upload_button()}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent className="sm:max-w-md">
-            <AlertDialogHeader>
-              <AlertDialogTitle>{m.projects_docs_upload_modal_title()}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {m.projects_docs_upload_modal_description()}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="py-4 space-y-4">
-              <div
-                className="flex cursor-pointer flex-col items-center gap-3 rounded-lg border-2 border-dashed border-border/60 bg-muted/20 p-8 transition-colors hover:bg-muted/30"
-                onClick={() => fileInputRef.current?.click()}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click()
-                }}
-                role="button"
-                tabIndex={0}
-              >
-                <FileUp className="h-10 w-10 text-muted-foreground" />
-                {selectedFile ? (
-                  <div className="text-center">
-                    <p className="text-sm font-medium">{selectedFile.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+        {access?.canManage ? (
+          <AlertDialog
+            open={isUploadOpen}
+            onOpenChange={(open) => {
+              if (!open && uploadMutation.isPending) return
+              setIsUploadOpen(open)
+              if (!open) {
+                setSelectedFile(null)
+                setClientValidationError(null)
+                setUploadProgress(0)
+                uploadMutation.reset()
+                if (fileInputRef.current) fileInputRef.current.value = ""
+              }
+            }}
+          >
+            <AlertDialogTrigger asChild>
+              <Button size="lg" className="shadow-sm" disabled={!project.bucketId}>
+                <PlusIcon className="mr-2 h-5 w-5" />
+                {m.projects_docs_upload_button()}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="sm:max-w-md">
+              <AlertDialogHeader>
+                <AlertDialogTitle>{m.projects_docs_upload_modal_title()}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {m.projects_docs_upload_modal_description()}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="py-4 space-y-4">
+                <div
+                  className="flex cursor-pointer flex-col items-center gap-3 rounded-lg border-2 border-dashed border-border/60 bg-muted/20 p-8 transition-colors hover:bg-muted/30"
+                  onClick={() => fileInputRef.current?.click()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click()
+                  }}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <FileUp className="h-10 w-10 text-muted-foreground" />
+                  {selectedFile ? (
+                    <div className="text-center">
+                      <p className="text-sm font-medium">{selectedFile.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      {m.projects_docs_upload_modal_placeholder()}
+                    </p>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+
+                {uploadErrorMessage && (
+                  <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3">
+                    <p className="text-sm font-medium text-destructive">{uploadErrorMessage}</p>
+                  </div>
+                )}
+
+                {uploadMutation.isPending && (
+                  <div className="space-y-1">
+                    <Progress value={uploadProgress} />
+                    <p className="text-right text-xs tabular-nums text-muted-foreground">
+                      {uploadProgress}%
                     </p>
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    {m.projects_docs_upload_modal_placeholder()}
-                  </p>
                 )}
+
+                <Button
+                  className="w-full"
+                  disabled={!selectedFile || uploadMutation.isPending}
+                  onClick={handleUpload}
+                >
+                  {uploadMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {m.projects_docs_upload_button_loading()}
+                    </>
+                  ) : (
+                    <>
+                      <UploadIcon className="mr-2 h-4 w-4" />
+                      {m.projects_docs_upload_button()}
+                    </>
+                  )}
+                </Button>
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="application/pdf"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-
-              {uploadErrorMessage && (
-                <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3">
-                  <p className="text-sm font-medium text-destructive">{uploadErrorMessage}</p>
-                </div>
-              )}
-
-              {uploadMutation.isPending && (
-                <div className="space-y-1">
-                  <Progress value={uploadProgress} />
-                  <p className="text-right text-xs tabular-nums text-muted-foreground">
-                    {uploadProgress}%
-                  </p>
-                </div>
-              )}
-
-              <Button
-                className="w-full"
-                disabled={!selectedFile || uploadMutation.isPending}
-                onClick={handleUpload}
-              >
-                {uploadMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {m.projects_docs_upload_button_loading()}
-                  </>
-                ) : (
-                  <>
-                    <UploadIcon className="mr-2 h-4 w-4" />
-                    {m.projects_docs_upload_button()}
-                  </>
-                )}
-              </Button>
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={uploadMutation.isPending}>
-                {m.projects_docs_upload_modal_close()}
-              </AlertDialogCancel>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={uploadMutation.isPending}>
+                  {m.projects_docs_upload_modal_close()}
+                </AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        ) : (
+          <p className="max-w-sm text-right text-sm text-muted-foreground">
+            Analysts can review and label PDFs here, but only developers can upload files.
+          </p>
+        )}
       </div>
 
       {!project.bucketId && (
