@@ -10,24 +10,9 @@ export interface MarqueeSelectionConfig {
 
 export interface SelectionPluginConfig extends BasePluginConfig {
   /**
-   * The approximate height of the selection menu in pixels.
-   * Used to determine whether to show the menu above or below the selection.
-   * @default 40
-   */
-  menuHeight?: number
-  /**
    * Configuration for marquee selection behavior.
    */
   marquee?: MarqueeSelectionConfig
-}
-
-export interface SelectionMenuPlacement {
-  pageIndex: number // The page the menu is anchored to
-  rect: Rect // The viewport-relative rect to position against
-  spaceAbove: number
-  spaceBelow: number
-  suggestTop: boolean // The plugin's suggestion
-  isVisible: boolean // Is the anchor rect even in the viewport?
 }
 
 /* ---- user-selection cross-page -------------------------------------- */
@@ -103,11 +88,6 @@ export interface MarqueeSelectionStyle {
 // ─────────────────────────────────────────────────────────
 // Events
 // ─────────────────────────────────────────────────────────
-
-export interface SelectionMenuPlacementEvent {
-  documentId: string
-  placement: SelectionMenuPlacement | null
-}
 
 export interface SelectionChangeEvent {
   documentId: string
