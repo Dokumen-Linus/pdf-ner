@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { FilesIcon, FileTextIcon, LayoutDashboardIcon, SettingsIcon, TagIcon } from "lucide-react"
+import { FilesIcon, LayoutDashboardIcon, SettingsIcon, TagIcon } from "lucide-react"
 import {
   Bar,
   BarChart,
@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { ProjectTabs } from "@/components/project-tabs"
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,
@@ -110,7 +111,9 @@ function DashboardPage() {
             <p className="text-sm text-muted-foreground">
               {loadError || m.projects_dashboard_error_not_found()}
             </p>
-            <Button onClick={() => void router.invalidate()}>{m.projects_dashboard_error_retry()}</Button>
+            <Button onClick={() => void router.invalidate()}>
+              {m.projects_dashboard_error_retry()}
+            </Button>
             <Button variant="outline" asChild className="ml-2">
               <Link to="/projects">{m.projects_dashboard_back_button()}</Link>
             </Button>
@@ -129,35 +132,16 @@ function DashboardPage() {
         </p>
       </div>
 
-      <div className="flex space-x-1 border-b pb-px overflow-x-auto">
-        <Link
-          to="/projects/$projectId"
-          params={{ projectId }}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
-        >
-          <SettingsIcon className="mr-2 h-4 w-4" />
-          {m.projects_details_tab_overview()}
-        </Link>
-        <div className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-primary bg-muted/40 px-4 py-2.5 text-sm font-medium text-foreground transition-all">
-          <LayoutDashboardIcon className="mr-2 h-4 w-4 text-primary" />
-          {m.projects_details_tab_dashboard()}
-        </div>
-        <Link
-          to="/projects/$projectId/documents"
-          params={{ projectId }}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
-        >
-          <FileTextIcon className="mr-2 h-4 w-4" />
-          {m.projects_details_tab_documents()}
-        </Link>
-      </div>
+      <ProjectTabs projectId={projectId} currentStep="dashboard" />
 
       {stats.totalDocuments === 0 ? (
         <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed">
           <div className="rounded-full bg-primary/10 p-4 mb-4">
             <LayoutDashboardIcon className="h-8 w-8 text-primary" />
           </div>
-          <h3 className="text-xl font-semibold tracking-tight mb-2">{m.projects_dashboard_empty_title()}</h3>
+          <h3 className="text-xl font-semibold tracking-tight mb-2">
+            {m.projects_dashboard_empty_title()}
+          </h3>
           <p className="text-sm text-muted-foreground max-w-sm mb-6">
             {m.projects_dashboard_empty_description()}
           </p>
@@ -167,22 +151,30 @@ function DashboardPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{m.projects_dashboard_stats_docs_title()}</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {m.projects_dashboard_stats_docs_title()}
+                </CardTitle>
                 <FilesIcon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalDocuments}</div>
-                <p className="text-xs text-muted-foreground">{m.projects_dashboard_stats_docs_description()}</p>
+                <p className="text-xs text-muted-foreground">
+                  {m.projects_dashboard_stats_docs_description()}
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{m.projects_dashboard_stats_ann_title()}</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {m.projects_dashboard_stats_ann_title()}
+                </CardTitle>
                 <TagIcon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalAnnotations}</div>
-                <p className="text-xs text-muted-foreground">{m.projects_dashboard_stats_ann_description()}</p>
+                <p className="text-xs text-muted-foreground">
+                  {m.projects_dashboard_stats_ann_description()}
+                </p>
               </CardContent>
             </Card>
             <Card>
@@ -192,7 +184,9 @@ function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.entityTypeBreakdown.length}</div>
-                <p className="text-xs text-muted-foreground">{m.projects_dashboard_stats_types_description()}</p>
+                <p className="text-xs text-muted-foreground">
+                  {m.projects_dashboard_stats_types_description()}
+                </p>
               </CardContent>
             </Card>
           </div>

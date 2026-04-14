@@ -1,14 +1,8 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { type ReactFormExtendedApi, useForm } from "@tanstack/react-form"
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import {
-  LoaderCircleIcon,
-  PlusIcon,
-  SaveIcon,
-  SettingsIcon,
-  TagIcon,
-  Trash2Icon,
-} from "lucide-react"
+import { LoaderCircleIcon, PlusIcon, SaveIcon, Trash2Icon } from "lucide-react"
+import { ProjectTabs } from "@/components/project-tabs"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,12 +40,21 @@ import {
   getEntityTypesByProjectId,
   updateEntityType,
 } from "@/db-fns/web/entity-types"
-import { getProjectById } from "@/db-fns/web/projects"
+import { getProjectById, updateProject } from "@/db-fns/web/projects"
 import type { FoundDbEntityType, FoundStandardEntityType } from "@/db/types"
 
 const DATATYPES = ["int", "float", "alphanumeric", "alpha"] as const
 const SUBTYPES = ["highlight", "underline", "squiggly", "strikeout"] as const
+const ORIENTATIONS = ["any", "portrait", "landscape"] as const
 const HEX_COLOR_RE = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
+
+type Orientation = (typeof ORIENTATIONS)[number]
+
+type ProjectSettingsValues = {
+  name: string
+  description: string
+  orientation: Orientation
+}
 
 type EntityTypeRow = {
   // id is empty-string for new rows (not yet persisted); otherwise the db id
@@ -130,20 +133,29 @@ function rowFromStd(std: FoundStandardEntityType): EntityTypeRow {
   }
 }
 
-type RowValidation = { ok: true } | { ok: false; message: string }
+type RowValidation = { ok: true } | { ok: false; message: string; field?: string }
 
 function validateRow(row: EntityTypeRow, index: number): RowValidation {
-  if (!row.name.trim()) return { ok: false, message: `Row ${index + 1}: name is required.` }
+  if (!row.name.trim())
+    return { ok: false, message: `Row ${index + 1}: name is required.`, field: "name" }
   if (row.datatype && !DATATYPES.includes(row.datatype as (typeof DATATYPES)[number]))
-    return { ok: false, message: `Row ${index + 1}: invalid datatype.` }
+    return { ok: false, message: `Row ${index + 1}: invalid datatype.`, field: "datatype" }
   if (row.subtype && !SUBTYPES.includes(row.subtype as (typeof SUBTYPES)[number]))
-    return { ok: false, message: `Row ${index + 1}: invalid subtype.` }
+    return { ok: false, message: `Row ${index + 1}: invalid subtype.`, field: "subtype" }
   if (row.color && !HEX_COLOR_RE.test(row.color))
-    return { ok: false, message: `Row ${index + 1}: color must be a hex code (e.g. #aabbcc).` }
+    return {
+      ok: false,
+      message: `Row ${index + 1}: color must be a hex code (e.g. #aabbcc).`,
+      field: "color",
+    }
   if (row.opacity !== "") {
     const n = Number(row.opacity)
     if (Number.isNaN(n) || n < 0 || n > 1)
-      return { ok: false, message: `Row ${index + 1}: opacity must be between 0 and 1.` }
+      return {
+        ok: false,
+        message: `Row ${index + 1}: opacity must be between 0 and 1.`,
+        field: "opacity",
+      }
   }
   if (row.exactLength !== "") {
     const n = Number(row.exactLength)
@@ -151,6 +163,7 @@ function validateRow(row: EntityTypeRow, index: number): RowValidation {
       return {
         ok: false,
         message: `Row ${index + 1}: exact length must be a non-negative integer.`,
+        field: "exactLength",
       }
   }
   return { ok: true }
@@ -180,6 +193,10 @@ function rowToPayload(row: EntityTypeRow, projectId: string) {
   }
 }
 
+function isOrientation(v: string | null | undefined): v is Orientation {
+  return v === "any" || v === "portrait" || v === "landscape"
+}
+
 function EntityTypesSkeleton() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
@@ -187,6 +204,7 @@ function EntityTypesSkeleton() {
         <Skeleton className="h-10 w-1/3" />
         <Skeleton className="h-5 w-64" />
       </div>
+      <Skeleton className="h-10 w-full" />
       <Skeleton className="h-64 rounded-xl" />
       <Skeleton className="h-64 rounded-xl" />
     </div>
@@ -231,8 +249,89 @@ function EntityTypesPage() {
   const { projectId } = Route.useParams()
 
   const initialRows = useMemo(() => entityTypes.map(toRow), [entityTypes])
-  const initialIds = useMemo(() => new Set(entityTypes.map((et) => et.id)), [entityTypes])
+  const initialIds = useMemo(
+    () => new Set(entityTypes.map((et: FoundDbEntityType) => et.id)),
+    [entityTypes],
+  )
 
+  // Row field refs for focusing the first invalid field on submit.
+  const nameInputRefs = useRef<Map<number, HTMLInputElement | null>>(new Map())
+
+  // Project settings form state
+  const initialProject: ProjectSettingsValues = useMemo(
+    () => ({
+      name: project?.name ?? "",
+      description: project?.description ?? "",
+      orientation: isOrientation(project?.orientation)
+        ? (project!.orientation as Orientation)
+        : "any",
+    }),
+    [project],
+  )
+  const [projectSaveError, setProjectSaveError] = useState<string | null>(null)
+  const [lastSavedProject, setLastSavedProject] = useState<ProjectSettingsValues>(initialProject)
+  const projectNameRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    setLastSavedProject(initialProject)
+  }, [initialProject])
+
+  const projectForm = useForm({
+    defaultValues: initialProject,
+    onSubmit: async ({ value }) => {
+      setProjectSaveError(null)
+
+      const name = value.name.trim()
+      if (!name) {
+        setProjectSaveError("Project name is required.")
+        projectNameRef.current?.focus()
+        throw new Error("Project name is required.")
+      }
+      if (!isOrientation(value.orientation)) {
+        setProjectSaveError("Invalid orientation.")
+        throw new Error("Invalid orientation.")
+      }
+
+      try {
+        await updateProject({
+          data: {
+            id: projectId,
+            name,
+            description: value.description.trim() || undefined,
+            orientation: value.orientation,
+          },
+        })
+        const saved: ProjectSettingsValues = {
+          name,
+          description: value.description,
+          orientation: value.orientation,
+        }
+        setLastSavedProject(saved)
+        projectForm.reset(saved)
+        await router.invalidate()
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        setProjectSaveError(message)
+        throw err
+      }
+    },
+  })
+
+  const isProjectDirty = useMemo(() => {
+    const current = projectForm.state.values
+    return (
+      current.name !== lastSavedProject.name ||
+      current.description !== lastSavedProject.description ||
+      current.orientation !== lastSavedProject.orientation
+    )
+  }, [
+    projectForm.state.values.name,
+    projectForm.state.values.description,
+    projectForm.state.values.orientation,
+    lastSavedProject,
+  ])
+
+  // Entity types form state
   const [saveError, setSaveError] = useState<string | null>(null)
   const [lastSavedRows, setLastSavedRows] = useState<EntityTypeRow[]>(initialRows)
 
@@ -249,6 +348,9 @@ function EntityTypesPage() {
         const v = validateRow(value.rows[i]!, i)
         if (!v.ok) {
           setSaveError(v.message)
+          if (v.field === "name") {
+            nameInputRefs.current.get(i)?.focus()
+          }
           throw new Error(v.message)
         }
       }
@@ -285,34 +387,39 @@ function EntityTypesPage() {
   })
 
   // dirty check: compare current values to last saved snapshot
-  const isDirty = useMemo(() => {
+  const isEntitiesDirty = useMemo(() => {
     const current = form.state.values.rows
     if (current.length !== lastSavedRows.length) return true
     return JSON.stringify(current) !== JSON.stringify(lastSavedRows)
   }, [form.state.values.rows, lastSavedRows])
 
-  // warn before navigating away with unsaved changes
+  const isAnyDirty = isProjectDirty || isEntitiesDirty
+  const isAnySubmitting = projectForm.state.isSubmitting || form.state.isSubmitting
+
+  // warn before navigating away with unsaved changes in either form
   const blocker = useBlocker({
-    shouldBlockFn: () => isDirty && !form.state.isSubmitting,
+    shouldBlockFn: () => isAnyDirty && !isAnySubmitting,
     withResolver: true,
-    enableBeforeUnload: () => isDirty,
+    enableBeforeUnload: () => isAnyDirty,
   })
 
   if (loadError || !project) {
     return (
       <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
         <div className="space-y-1">
-          <h1 className="text-3xl font-semibold tracking-tight">Entity Types</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-pretty">Entity Types</h1>
         </div>
         <Card className="border-destructive/40">
           <CardHeader>
             <CardTitle className="text-destructive">Unable to load entity types</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">{loadError || "Project not found."}</p>
+            <p className="text-sm text-muted-foreground" aria-live="polite">
+              {loadError || "Project not found."}
+            </p>
             <Button onClick={() => void router.invalidate()}>Retry</Button>
             <Button variant="outline" asChild className="ml-2">
-              <Link to="/projects">Back to projects</Link>
+              <Link to="/projects">Back to Projects</Link>
             </Button>
           </CardContent>
         </Card>
@@ -323,26 +430,148 @@ function EntityTypesPage() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <div className="space-y-1">
-        <h1 className="text-3xl font-semibold tracking-tight">{project.name}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-pretty" translate="no">
+          {project.name}
+        </h1>
         <p className="text-sm text-muted-foreground">
-          Define the entity types this project will extract and annotate. Pick a standard entity as
-          a starting point or create a custom one.
+          Define project settings and the entity types this project will extract and annotate.
         </p>
       </div>
 
-      <div className="flex space-x-1 border-b pb-px overflow-x-auto">
-        <Link
-          to="/projects/$projectId"
-          params={{ projectId }}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
-        >
-          <SettingsIcon className="mr-2 h-4 w-4" />
-          Overview
-        </Link>
-        <div className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-primary bg-muted/40 px-4 py-2.5 text-sm font-medium text-foreground transition-all">
-          <TagIcon className="mr-2 h-4 w-4 text-primary" />
-          Entity Types
-        </div>
+      <ProjectTabs projectId={projectId} currentStep="entity_types" />
+
+      {/* ------ Form A: Project Settings ------ */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          void projectForm.handleSubmit()
+        }}
+        className="space-y-4"
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Project Settings</CardTitle>
+            <CardDescription>
+              Edit the project name, description, and default page orientation.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {projectSaveError && (
+              <div
+                role="alert"
+                aria-live="polite"
+                className="rounded-md border border-destructive/35 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+              >
+                {projectSaveError}
+              </div>
+            )}
+
+            <projectForm.Field name="name">
+              {(field) => (
+                <div className="space-y-1.5">
+                  <Label htmlFor="project-name">Name</Label>
+                  <Input
+                    id="project-name"
+                    name="project-name"
+                    autoComplete="off"
+                    ref={(el) => {
+                      projectNameRef.current = el
+                    }}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="e.g. Invoice Extraction…"
+                  />
+                </div>
+              )}
+            </projectForm.Field>
+
+            <projectForm.Field name="description">
+              {(field) => (
+                <div className="space-y-1.5">
+                  <Label htmlFor="project-description">Description</Label>
+                  <Textarea
+                    id="project-description"
+                    name="project-description"
+                    autoComplete="off"
+                    rows={2}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="Short summary shown throughout the app…"
+                  />
+                </div>
+              )}
+            </projectForm.Field>
+
+            <projectForm.Field name="orientation">
+              {(field) => (
+                <div className="space-y-1.5">
+                  <Label>Page Orientation</Label>
+                  <Select
+                    value={field.state.value}
+                    onValueChange={(v) => {
+                      if (isOrientation(v)) field.handleChange(v)
+                    }}
+                  >
+                    <SelectTrigger className="w-60">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">Any</SelectItem>
+                      <SelectItem value="portrait">Portrait</SelectItem>
+                      <SelectItem value="landscape">Landscape</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Default orientation hint for uploaded documents.
+                  </p>
+                </div>
+              )}
+            </projectForm.Field>
+
+            <div className="flex items-center justify-between pt-2">
+              <p className="text-xs text-muted-foreground" aria-live="polite">
+                {isProjectDirty ? "You have unsaved changes." : "All changes saved."}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!isProjectDirty || projectForm.state.isSubmitting}
+                  onClick={() => {
+                    projectForm.reset(lastSavedProject)
+                    setProjectSaveError(null)
+                  }}
+                >
+                  Discard Changes
+                </Button>
+                <Button type="submit" disabled={!isProjectDirty || projectForm.state.isSubmitting}>
+                  {projectForm.state.isSubmitting ? (
+                    <>
+                      <LoaderCircleIcon aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
+                      Saving…
+                    </>
+                  ) : (
+                    <>
+                      <SaveIcon aria-hidden="true" className="mr-2 h-4 w-4" />
+                      Save Settings
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </form>
+
+      {/* ------ Form B: Entity Types ------ */}
+      <div className="space-y-1 pt-2">
+        <h2 className="text-xl font-semibold tracking-tight">Entity Types</h2>
+        <p className="text-sm text-muted-foreground">
+          Pick a standard entity as a starting point or create a custom one.
+        </p>
       </div>
 
       <form
@@ -354,7 +583,11 @@ function EntityTypesPage() {
         className="space-y-4"
       >
         {saveError && (
-          <div className="rounded-md border border-destructive/35 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+          <div
+            role="alert"
+            aria-live="polite"
+            className="rounded-md border border-destructive/35 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+          >
             {saveError}
           </div>
         )}
@@ -369,20 +602,31 @@ function EntityTypesPage() {
                     index={index}
                     projectId={projectId}
                     stdEntityTypes={stdEntityTypes}
-                    onRemove={() => rowsField.removeValue(index)}
+                    onRemove={() => {
+                      nameInputRefs.current.delete(index)
+                      rowsField.removeValue(index)
+                    }}
                     form={form}
+                    registerNameRef={(el) => {
+                      if (el) nameInputRefs.current.set(index, el)
+                      else nameInputRefs.current.delete(index)
+                    }}
                   />
                 ))}
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div
+                className="flex flex-wrap items-center gap-2"
+                role="group"
+                aria-label="Add entity type"
+              >
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => rowsField.pushValue(emptyRow())}
                 >
-                  <PlusIcon className="mr-2 h-4 w-4" />
-                  Add custom entity type
+                  <PlusIcon aria-hidden="true" className="mr-2 h-4 w-4" />
+                  Add Custom Entity Type
                 </Button>
                 <AddFromStandard
                   stdEntityTypes={stdEntityTypes}
@@ -401,28 +645,33 @@ function EntityTypesPage() {
         </form.Field>
 
         <div className="sticky bottom-4 flex items-center justify-between rounded-md border bg-background/95 p-3 shadow-sm backdrop-blur">
-          <p className="text-xs text-muted-foreground">
-            {isDirty ? "You have unsaved changes." : "All changes saved."}
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            {isEntitiesDirty ? "You have unsaved changes." : "All changes saved."}
           </p>
           <div className="flex gap-2">
             <Button
               type="button"
               variant="outline"
-              disabled={!isDirty || form.state.isSubmitting}
+              disabled={!isEntitiesDirty || form.state.isSubmitting}
               onClick={() => {
                 form.reset({ rows: lastSavedRows })
                 setSaveError(null)
               }}
             >
-              Discard changes
+              Discard Changes
             </Button>
-            <Button type="submit" disabled={!isDirty || form.state.isSubmitting}>
+            <Button type="submit" disabled={!isEntitiesDirty || form.state.isSubmitting}>
               {form.state.isSubmitting ? (
-                <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                <>
+                  <LoaderCircleIcon aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />
+                  Saving…
+                </>
               ) : (
-                <SaveIcon className="mr-2 h-4 w-4" />
+                <>
+                  <SaveIcon aria-hidden="true" className="mr-2 h-4 w-4" />
+                  Save Entity Types
+                </>
               )}
-              Save
             </Button>
           </div>
         </div>
@@ -433,14 +682,13 @@ function EntityTypesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Leave without saving?</AlertDialogTitle>
             <AlertDialogDescription>
-              You have unsaved changes to entity types. If you leave now, your edits will be
-              discarded.
+              You have unsaved changes. If you leave now, your edits will be discarded.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on page</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>Stay on Page</AlertDialogCancel>
             <AlertDialogAction onClick={() => blocker.proceed?.()}>
-              Discard & leave
+              Discard &amp; Leave
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -493,12 +741,14 @@ function EntityTypeRowCard({
   stdEntityTypes,
   onRemove,
   form,
+  registerNameRef,
 }: {
   index: number
   projectId: string
   stdEntityTypes: FoundStandardEntityType[]
   onRemove: () => void
   form: ReactFormExtendedApi<FormValues, any, any, any, any, any, any, any, any, any, any, any>
+  registerNameRef: (el: HTMLInputElement | null) => void
 }) {
   const stdLabel = (id: number | null) => {
     if (id == null) return null
@@ -506,11 +756,13 @@ function EntityTypeRowCard({
     return std ? std.shortName : null
   }
 
+  const headingId = `entity-type-heading-${index}`
+
   return (
-    <Card>
+    <Card aria-labelledby={headingId}>
       <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
         <div className="space-y-1">
-          <CardTitle className="text-base">
+          <CardTitle id={headingId} className="text-base">
             Entity Type #{index + 1}
             {form.state.values.rows[index]?.standardEntityTypeId != null && (
               <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -522,8 +774,14 @@ function EntityTypeRowCard({
             Configure how this entity is identified and rendered in the PDF.
           </CardDescription>
         </div>
-        <Button type="button" variant="ghost" size="sm" onClick={onRemove}>
-          <Trash2Icon className="h-4 w-4" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-label={`Remove entity type ${index + 1}`}
+          onClick={onRemove}
+        >
+          <Trash2Icon aria-hidden="true" className="h-4 w-4" />
         </Button>
       </CardHeader>
       <CardContent className="grid gap-4 sm:grid-cols-2">
@@ -534,10 +792,14 @@ function EntityTypeRowCard({
               <Label htmlFor={`name-${index}`}>Name</Label>
               <Input
                 id={`name-${index}`}
+                name={`name-${index}`}
+                autoComplete="off"
+                spellCheck={false}
+                ref={registerNameRef}
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="e.g. Invoice Number"
+                placeholder="e.g. Invoice Number…"
               />
               <p className="text-xs text-muted-foreground">
                 Short label shown in the UI and used to tag spans in the PDF.
@@ -553,11 +815,13 @@ function EntityTypeRowCard({
               <Label htmlFor={`def-${index}`}>Definition</Label>
               <Textarea
                 id={`def-${index}`}
+                name={`def-${index}`}
+                autoComplete="off"
                 rows={2}
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="Describe, in plain language, what counts as this entity."
+                placeholder="Describe, in plain language, what counts as this entity…"
               />
               <p className="text-xs text-muted-foreground">
                 A precise natural-language definition. The LLM uses this to decide what to extract.
@@ -573,6 +837,9 @@ function EntityTypeRowCard({
               <Label htmlFor={`ex-${index}`}>Examples</Label>
               <Textarea
                 id={`ex-${index}`}
+                name={`ex-${index}`}
+                autoComplete="off"
+                spellCheck={false}
                 rows={2}
                 value={field.state.value}
                 onBlur={field.handleBlur}
@@ -590,13 +857,15 @@ function EntityTypeRowCard({
         <form.Field name={`rows[${index}].userFormatDescription`}>
           {(field) => (
             <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor={`fmt-${index}`}>Format description</Label>
+              <Label htmlFor={`fmt-${index}`}>Format Description</Label>
               <Input
                 id={`fmt-${index}`}
+                name={`fmt-${index}`}
+                autoComplete="off"
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="e.g. 'INV-' followed by digits"
+                placeholder="e.g. “INV-” followed by digits…"
               />
               <p className="text-xs text-muted-foreground">
                 Optional description of the expected surface form (pattern, prefix, length, etc.).
@@ -637,7 +906,7 @@ function EntityTypeRowCard({
         <form.Field name={`rows[${index}].singleWord`}>
           {(field) => (
             <div className="space-y-1.5">
-              <Label>Single word</Label>
+              <Label>Single Word</Label>
               <Select
                 value={
                   field.state.value == null ? "__none__" : field.state.value ? "true" : "false"
@@ -664,15 +933,18 @@ function EntityTypeRowCard({
         <form.Field name={`rows[${index}].exactLength`}>
           {(field) => (
             <div className="space-y-1.5">
-              <Label htmlFor={`len-${index}`}>Exact length</Label>
+              <Label htmlFor={`len-${index}`}>Exact Length</Label>
               <Input
                 id={`len-${index}`}
+                name={`len-${index}`}
                 type="number"
+                inputMode="numeric"
+                autoComplete="off"
                 min={0}
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="optional"
+                placeholder="e.g. 10"
               />
               <p className="text-xs text-muted-foreground">
                 If set, extracted values must have exactly this many characters.
@@ -723,7 +995,7 @@ function EntityTypeRowCard({
         <form.Field name={`rows[${index}].subtype`}>
           {(field) => (
             <div className="space-y-1.5">
-              <Label>Annotation style</Label>
+              <Label>Annotation Style</Label>
               <Select
                 value={field.state.value || "__none__"}
                 onValueChange={(v) => field.handleChange(v === "__none__" ? "" : v)}
@@ -755,6 +1027,10 @@ function EntityTypeRowCard({
               <div className="flex items-center gap-2">
                 <Input
                   id={`color-${index}`}
+                  name={`color-${index}`}
+                  autoComplete="off"
+                  spellCheck={false}
+                  inputMode="text"
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
@@ -762,6 +1038,7 @@ function EntityTypeRowCard({
                 />
                 {HEX_COLOR_RE.test(field.state.value) && (
                   <span
+                    aria-hidden="true"
                     className="h-8 w-8 rounded border"
                     style={{ backgroundColor: field.state.value }}
                   />
@@ -781,7 +1058,10 @@ function EntityTypeRowCard({
               <Label htmlFor={`op-${index}`}>Opacity</Label>
               <Input
                 id={`op-${index}`}
+                name={`op-${index}`}
                 type="number"
+                inputMode="decimal"
+                autoComplete="off"
                 step="0.05"
                 min={0}
                 max={1}

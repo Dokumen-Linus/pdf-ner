@@ -4,16 +4,14 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import axios, { AxiosError } from "axios"
 import {
   CheckCircle2Icon,
-  FileTextIcon,
   FileUp,
-  LayoutDashboardIcon,
   Loader2,
   Loader2Icon,
   PlusIcon,
   RefreshCwIcon,
-  SettingsIcon,
   UploadIcon,
 } from "lucide-react"
+import { ProjectTabs } from "@/components/project-tabs"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -326,28 +324,7 @@ function DocumentsPage() {
         </div>
       )}
 
-      <div className="flex space-x-1 border-b pb-px overflow-x-auto">
-        <Link
-          to="/projects/$projectId"
-          params={{ projectId }}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
-        >
-          <SettingsIcon className="mr-2 h-4 w-4" />
-          {m.projects_details_tab_overview()}
-        </Link>
-        <Link
-          to="/projects/$projectId/dashboard"
-          params={{ projectId }}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
-        >
-          <LayoutDashboardIcon className="mr-2 h-4 w-4" />
-          {m.projects_details_tab_dashboard()}
-        </Link>
-        <div className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-primary bg-muted/40 px-4 py-2.5 text-sm font-medium text-foreground transition-all">
-          <FileTextIcon className="mr-2 h-4 w-4 text-primary" />
-          {m.projects_details_tab_documents()}
-        </div>
-      </div>
+      <ProjectTabs projectId={projectId} currentStep="documents" />
 
       <div className="grid gap-6">
         <Card className="border-border/60 shadow-sm">

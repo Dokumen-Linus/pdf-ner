@@ -3,19 +3,13 @@ import { PdfAnnotationSubtype } from "@embedpdf/models"
 import { createFileRoute, Link, useHydrated, useNavigate, useRouter } from "@tanstack/react-router"
 import type { ErrorComponentProps } from "@tanstack/router-core"
 import { formatDistanceToNow } from "date-fns"
-import {
-  FileTextIcon,
-  LayoutDashboardIcon,
-  LockIcon,
-  SaveIcon,
-  SettingsIcon,
-  TagIcon,
-} from "lucide-react"
+import { FileTextIcon, LockIcon, SaveIcon } from "lucide-react"
 import { z } from "zod"
 import EntityTable from "@/components/entity-table/components/entity-table"
 import PDFContainerClient from "@/components/pdf-container/pdf-container-client"
 import { useLoadDbAnnotations } from "@/components/plugin-store/hooks/use-load-db-annotations"
 import usePluginStore from "@/components/plugin-store/hooks/use-plugin-store"
+import { ProjectTabs } from "@/components/project-tabs"
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,
@@ -383,40 +377,7 @@ function LabellingPage() {
       <div className="flex items-center justify-between gap-4 border-b px-4 py-2">
         <div className="flex items-center gap-4">
           <h1 className="text-lg font-semibold tracking-tight">{project.name}</h1>
-          <nav className="flex items-center gap-3 text-sm text-muted-foreground">
-            <Link
-              to="/projects/$projectId"
-              params={{ projectId }}
-              className="inline-flex items-center gap-1 hover:text-foreground"
-            >
-              <SettingsIcon className="h-4 w-4" />
-              Overview
-            </Link>
-            <Link
-              to="/projects/$projectId/dashboard"
-              params={{ projectId }}
-              className="inline-flex items-center gap-1 hover:text-foreground"
-            >
-              <LayoutDashboardIcon className="h-4 w-4" />
-              Dashboard
-            </Link>
-            <Link
-              to="/projects/$projectId/documents"
-              params={{ projectId }}
-              className="inline-flex items-center gap-1 hover:text-foreground"
-            >
-              <FileTextIcon className="h-4 w-4" />
-              Documents
-            </Link>
-            <Link
-              to="/projects/$projectId/entity_types"
-              params={{ projectId }}
-              className="inline-flex items-center gap-1 hover:text-foreground"
-            >
-              <TagIcon className="h-4 w-4" />
-              Entity Types
-            </Link>
-          </nav>
+          <ProjectTabs projectId={projectId} currentStep="labelling" variant="compact" />
         </div>
 
         <div className="flex items-center gap-3">
