@@ -1,15 +1,12 @@
 import { Fragment } from "react"
-import { Rotation } from "@embedpdf/models"
 import { MarqueeSelectionStyle, TextSelectionStyle } from "../lib"
 import { MarqueeSelection } from "./marquee-selection"
 import { TextSelection } from "./text-selection"
-import { SelectionSelectionMenuRenderFn } from "./types"
 
 type Props = {
   documentId: string
   pageIndex: number
   scale?: number
-  rotation?: Rotation
   /**
    * @deprecated Use `textStyle.background` instead.
    */
@@ -20,7 +17,6 @@ type Props = {
   marqueeStyle?: MarqueeSelectionStyle
   /** Optional CSS class applied to the marquee rectangle */
   marqueeClassName?: string
-  selectionMenu?: SelectionSelectionMenuRenderFn
 }
 
 /**
@@ -34,12 +30,10 @@ export function SelectionLayer({
   documentId,
   pageIndex,
   scale,
-  rotation,
   background,
   textStyle,
   marqueeStyle,
   marqueeClassName,
-  selectionMenu,
 }: Props) {
   return (
     <Fragment>
@@ -47,9 +41,7 @@ export function SelectionLayer({
         documentId={documentId}
         pageIndex={pageIndex}
         scale={scale}
-        rotation={rotation}
         background={textStyle?.background ?? background}
-        selectionMenu={selectionMenu}
       />
       <MarqueeSelection
         documentId={documentId}

@@ -9,8 +9,6 @@ export const manifest: PluginManifest<SelectionPluginConfig> = {
   version: "1.0.0",
   provides: ["selection"],
   requires: ["interaction-manager"],
-  optional: ["viewport", "scroll"],
-  defaultConfig: {
-    menuHeight: 40,
-  },
+  optional: [],
+  defaultConfig: {},
 }
