@@ -10,6 +10,8 @@ interface MyRouterContext {
   queryClient: QueryClient
 }
 
+const publicBaseUrl = import.meta.env.VITE_BASE_URL || "http://localhost:3000"
+
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   notFoundComponent: NotFound,
   head: () => ({
@@ -42,11 +44,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         property: "og:image",
-        content: (process.env.BASE_URL || "http://localhost:3000") + "/og.png",
+        content: `${publicBaseUrl}/og.png`,
       },
       {
         property: "og:url",
-        content: process.env.BASE_URL || "http://localhost:3000", // avoid using import.meta.env.VITE_BASE_URL so it's SSR
+        content: publicBaseUrl,
       },
       {
         name: "twitter:title",
@@ -58,11 +60,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         name: "twitter:image",
-        content: (process.env.BASE_URL || "http://localhost:3000") + "/og.png",
+        content: `${publicBaseUrl}/og.png`,
       },
       {
         name: "twitter:url",
-        content: process.env.BASE_URL || "http://localhost:3000",
+        content: publicBaseUrl,
       },
     ],
     links: [

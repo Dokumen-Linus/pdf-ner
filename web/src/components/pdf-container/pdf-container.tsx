@@ -5,9 +5,6 @@ import { usePdfiumEngine } from "@embedpdf/engines/react"
 import { AllLogger, ConsoleLogger, PerfLogger } from "@embedpdf/models"
 import { ExportPluginPackage } from "@embedpdf/plugin-export/react"
 import { RotatePluginPackage } from "@embedpdf/plugin-rotate/react"
-import { RenderLayer, RenderPluginPackage } from "./plugin-render-2"
-import { TilingLayer, TilingPluginPackage } from "./plugin-tiling-2"
-import { Viewport, ViewportPluginPackage } from "./plugin-viewport-2"
 // import { env } from "../../env.client"
 import PluginStoreSync from "../plugin-store/components/plugin-store-sync"
 // import Toolbar from "./dev/toolbar-dev"
@@ -23,9 +20,12 @@ import {
   InteractionManagerPluginPackage,
   PagePointerProvider,
 } from "./plugin-interaction-manager-2"
+import { RenderLayer, RenderPluginPackage } from "./plugin-render-2"
 import { Scroller, ScrollPluginPackage, ScrollStrategy } from "./plugin-scroll-2"
 import { SearchLayer, SearchPluginPackage } from "./plugin-search-2"
 import { SelectionPluginPackage, TextSelection } from "./plugin-selection-2"
+import { TilingLayer, TilingPluginPackage } from "./plugin-tiling-2"
+import { Viewport, ViewportPluginPackage } from "./plugin-viewport-2"
 import { ZoomGestureWrapper, ZoomMode, ZoomPluginPackage } from "./plugin-zoom-2"
 import RotateWrapper from "./rotate-wrapper"
 import Toolbar from "./toolbar"
@@ -49,6 +49,7 @@ export default function PDFContainer({
   const { engine, isLoading } = usePdfiumEngine({
     worker: true,
     logger: logger,
+    // wasmUrl: "/pdfium.wasm",
   })
 
   if (isLoading || !engine) {

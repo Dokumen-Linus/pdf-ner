@@ -66,11 +66,10 @@
     "@tanstack/react-form": "^1.28.0",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-query-devtools": "^5.91.3",
-    "@tanstack/react-router": "1.159.5",
-    "@tanstack/react-router-devtools": "1.159.5",
-    "@tanstack/react-router-ssr-query": "1.159.5",
-    "@tanstack/react-start": "1.159.5",
-    "@tanstack/router-plugin": "1.159.5",
+    "@tanstack/react-router": "1.168.21",
+    "@tanstack/react-router-devtools": "1.166.13",
+    "@tanstack/react-router-ssr-query": "1.166.11",
+    "@tanstack/react-start": "1.167.39",
     "@uploadthing/react": "^7.3.3",
     "axios": "^1.15.0",
     "better-auth": "^1.6.2",
@@ -108,6 +107,7 @@
     "@eslint/eslintrc": "^3.3.5",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@playwright/test": "^1.59.1",
+    "@tanstack/eslint-plugin-start": "^0.0.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -141,5 +141,9 @@
     "typescript": "^5.9.3",
     "vite": "7.3.2",
     "web-vitals": "^5.2.0"
+  },
+  "overrides": {
+    "@tanstack/react-store": "0.9.3",
+    "@tanstack/store": "0.9.3"
   }
 }
