@@ -3,7 +3,13 @@ import { z } from "zod"
 import { env } from "@/env.server"
 import { apiRequest, requirePdfOwnership, requireUserId } from "./_helpers"
 
-export async function createBucket(name: string): Promise<{ bucket_id: string; name: string }> {
+// `lifecycle_applied` reflects whether the bucket received the
+// AbortIncompleteMultipartUpload lifecycle rule (orphan-parts safety net).
+// It can be false on MinIO/custom endpoints that don't implement the API —
+// the bucket itself is still usable.
+export async function createBucket(
+  name: string,
+): Promise<{ bucket_id: string; name: string; lifecycle_applied: boolean }> {
   return apiRequest("/api/v1/pdf-storage/buckets", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
