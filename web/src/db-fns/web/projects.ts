@@ -33,7 +33,7 @@ export const createProject = createServerFn({ method: "POST" })
     } else {
       // No existing bucket — create a new one and link it
       try {
-        const bucket = await createBucket(`dokumen-${project.id}`)
+        const bucket = await createBucket({ data: { name: `dokumen-${project.id}` } })
         bucketId = bucket.bucket_id
       } catch (error) {
         await db.delete(projects).where(eq(projects.id, project.id))

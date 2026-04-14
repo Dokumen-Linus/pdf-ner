@@ -9,7 +9,7 @@
 //   2. Byte-counting during the FastAPI stream (source of truth).
 
 import { createFileRoute } from "@tanstack/react-router"
-import { requireProjectOwnership, requireUserId } from "@/db-fns/api/_helpers"
+import { requireProjectOwnership, requireUserId } from "@/db-fns/api/_helpers.server"
 import { env } from "@/env.server"
 
 const MAX_BYTES = 50 * 1024 * 1024 // 50 MB, matches FastAPI and client cap.
