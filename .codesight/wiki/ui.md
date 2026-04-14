@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**67 components** (react)
+**68 components** (react)
 
 ## Components
 
@@ -10,6 +10,7 @@
 - **EntityTable** — `web/src/components/entity-table/components/entity-table.tsx`
 - **NotFound** — `web/src/components/not-found.tsx`
 - **Toolbar** — props: canRotate — `web/src/components/pdf-container/dev/toolbar-dev.tsx`
+- **PDFContainerClient** — props: initalDocuments, author, exportName, canRotate — `web/src/components/pdf-container/pdf-container-client.tsx`
 - **PDFContainer** — props: initalDocuments, author, exportName, canRotate — `web/src/components/pdf-container/pdf-container.tsx`
 - **PDFLoading** — `web/src/components/pdf-container/pdf-loading.tsx`
 - **AnnotationContainer** — props: documentId, scale, rotation, annotation, isSelected, onDoubleClick, onSelect, selectionOutline, style — `web/src/components/pdf-container/plugin-annotation-2/components/annotation-container/annotation-container.tsx`
@@ -32,8 +33,8 @@
 - **SearchLayer** — props: documentId, pageIndex, scale, style, highlightColor, activeHighlightColor — `web/src/components/pdf-container/plugin-search-2/components/search-layer.tsx`
 - **CopyToClipboard** — `web/src/components/pdf-container/plugin-selection-2/components/copy-to-clipboard.tsx`
 - **MarqueeSelection** — props: documentId, pageIndex, scale, className, background, borderColor, borderStyle, stroke, fill — `web/src/components/pdf-container/plugin-selection-2/components/marquee-selection.tsx`
-- **SelectionLayer** — props: documentId, pageIndex, scale, rotation, background, textStyle, marqueeStyle, marqueeClassName, selectionMenu — `web/src/components/pdf-container/plugin-selection-2/components/selection-layer.tsx`
-- **TextSelection** — props: documentId, pageIndex, scale, rotation, background, selectionMenu — `web/src/components/pdf-container/plugin-selection-2/components/text-selection.tsx`
+- **SelectionLayer** — props: documentId, pageIndex, scale, background, textStyle, marqueeStyle, marqueeClassName — `web/src/components/pdf-container/plugin-selection-2/components/selection-layer.tsx`
+- **TextSelection** — props: documentId, pageIndex, scale, background — `web/src/components/pdf-container/plugin-selection-2/components/text-selection.tsx`
 - **ThumbImg** — props: documentId, meta, style — `web/src/components/pdf-container/plugin-thumbnail-2/components/thumbnail-img.tsx`
 - **ThumbnailsPane** — props: documentId, style — `web/src/components/pdf-container/plugin-thumbnail-2/components/thumbnails-pane.tsx`
 - **TileImg** — props: documentId, pageIndex, tile, dpr, scale — `web/src/components/pdf-container/plugin-tiling-2/components/tile-img.tsx`
