@@ -147,7 +147,9 @@ export default function App() {
       <section className="py-32 px-6 bg-[#F4F4F4]">
         <div className="mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-16">
           <div className="w-full md:w-1/2 max-w-sm">
-            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_feature_nocode_title()}</h2>
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">
+              {m.landing_feature_nocode_title()}
+            </h2>
             <p className="text-[16px] font-normal text-[#5C5E62] leading-[1.6]">
               {m.landing_feature_nocode_description()}
             </p>
@@ -218,7 +220,9 @@ export default function App() {
       <section className="py-32 px-6 bg-white">
         <div className="mx-auto max-w-5xl flex flex-col md:flex-row-reverse items-center justify-between gap-16">
           <div className="w-full md:w-1/2 max-w-sm">
-            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_feature_models_title()}</h2>
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">
+              {m.landing_feature_models_title()}
+            </h2>
             <p className="text-[16px] font-normal text-[#5C5E62] leading-[1.6]">
               {m.landing_feature_models_description()}
             </p>
@@ -298,7 +302,9 @@ export default function App() {
       <section className="py-32 px-6 bg-[#F4F4F4]">
         <div className="mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-16">
           <div className="w-full md:w-1/2 max-w-sm">
-            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_feature_integration_title()}</h2>
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">
+              {m.landing_feature_integration_title()}
+            </h2>
             <p className="text-[16px] font-normal text-[#5C5E62] leading-[1.6]">
               {m.landing_feature_integration_description()}
             </p>
@@ -308,7 +314,9 @@ export default function App() {
             <div className="relative w-85 h-65 flex items-center">
               {/* Source Node */}
               <div className="w-25 h-25 bg-white border border-[#D0D1D2] flex flex-col items-center justify-center z-10 shadow-sm relative rounded-xl">
-                <span className="text-[12px] font-semibold text-[#171A20] mb-1">{m.landing_feature_integration_pipeline()}</span>
+                <span className="text-[12px] font-semibold text-[#171A20] mb-1">
+                  {m.landing_feature_integration_pipeline()}
+                </span>
                 <div className="px-2 py-0.5 bg-[#3E6AE1]/10 text-[#3E6AE1] text-[10px] font-mono rounded-[2px] border border-[#3E6AE1]/20">
                   {m.landing_feature_integration_active()}
                 </div>
@@ -362,7 +370,9 @@ export default function App() {
               {/* Destinations */}
               <div className="absolute right-0 h-47.5 w-32.5 flex flex-col justify-between py-1 z-10">
                 <div className="w-25 h-12 bg-white border border-[#D0D1D2] shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex items-center justify-center ml-auto rounded-xl">
-                  <span className="text-[12px] font-medium text-[#5C5E62]">{m.landing_feature_integration_rest_api()}</span>
+                  <span className="text-[12px] font-medium text-[#5C5E62]">
+                    {m.landing_feature_integration_rest_api()}
+                  </span>
                 </div>
                 {/* Mid Dest / Highlighted */}
                 <motion.div
@@ -370,12 +380,18 @@ export default function App() {
                   animate={{ y: [-2, 2, -2] }}
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <span className="text-[13px] font-semibold text-[#171A20]">{m.landing_feature_integration_postgresql()}</span>
-                  <span className="text-[10px] text-[#3E6AE1] font-mono mt-0.5">{m.landing_feature_integration_synced_ago({ time: "1s" })}</span>
+                  <span className="text-[13px] font-semibold text-[#171A20]">
+                    {m.landing_feature_integration_postgresql()}
+                  </span>
+                  <span className="text-[10px] text-[#3E6AE1] font-mono mt-0.5">
+                    {m.landing_feature_integration_synced_ago({ time: "1s" })}
+                  </span>
                 </motion.div>
                 {/* Bottom Dest */}
                 <div className="w-25 h-12 bg-white border border-[#D0D1D2] shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex items-center justify-center ml-auto rounded-xl">
-                  <span className="text-[12px] font-medium text-[#5C5E62]">{m.landing_feature_integration_webhook()}</span>
+                  <span className="text-[12px] font-medium text-[#5C5E62]">
+                    {m.landing_feature_integration_webhook()}
+                  </span>
                 </div>
               </div>
             </div>
@@ -387,7 +403,9 @@ export default function App() {
       <section className="py-32 px-6 bg-white">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-16">
-            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">{m.landing_tweets_title()}</h2>
+            <h2 className="text-[32px] font-medium text-[#171A20] mb-4">
+              {m.landing_tweets_title()}
+            </h2>
             <p className="text-[16px] font-normal text-[#5C5E62]">
               {m.landing_tweets_description()}
             </p>

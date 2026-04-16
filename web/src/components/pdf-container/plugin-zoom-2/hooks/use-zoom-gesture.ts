@@ -30,13 +30,7 @@ export function useZoomGesture(documentId: string, options: ZoomGestureOptions =
       viewportGap: viewportProvides?.getViewportGap() || 0,
       options,
     })
-  }, [
-    viewportProvides,
-    zoomProvides,
-    documentId,
-    viewportElementRef,
-    options,
-  ])
+  }, [viewportProvides, zoomProvides, documentId, viewportElementRef, options])
 
   return { elementRef }
 }

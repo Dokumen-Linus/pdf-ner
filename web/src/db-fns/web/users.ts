@@ -59,12 +59,7 @@ export const getUserByAuthUserId = createServerFn({ method: "GET" })
     const [user] = await db
       .select()
       .from(users)
-      .where(
-        or(
-          eq(users.authUserId, data.authUserId),
-          sql`${users.id}::text = ${data.authUserId}`,
-        ),
-      )
+      .where(or(eq(users.authUserId, data.authUserId), sql`${users.id}::text = ${data.authUserId}`))
       .limit(1)
 
     if (!user) {
@@ -102,12 +97,7 @@ export const updateUserByAuthUserId = createServerFn({ method: "POST" })
     const updatedUser = await db
       .update(users)
       .set(updateData)
-      .where(
-        or(
-          eq(users.authUserId, authUserId),
-          sql`${users.id}::text = ${authUserId}`,
-        ),
-      )
+      .where(or(eq(users.authUserId, authUserId), sql`${users.id}::text = ${authUserId}`))
     if (updatedUser.rowCount === 0) {
       throw new Error("User not found")
     }

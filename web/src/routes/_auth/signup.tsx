@@ -14,9 +14,9 @@ import {
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { getUserByEmail, updateUserByAuthUserId } from "@/db-fns/web/users"
+import { m } from "@/integrations/paraglide/messages.js"
 import { authClient } from "@/lib/auth-client"
 import { getPostVerificationRedirect } from "@/lib/auth-redirects"
-import { m } from "@/integrations/paraglide/messages.js"
 
 export const Route = createFileRoute("/_auth/signup")({
   validateSearch: z.object({
@@ -95,14 +95,10 @@ function SignUpPage() {
         <Card className="w-full max-w-xl">
           <CardHeader>
             <CardTitle className="text-2xl">{m.auth_signup_success_title()}</CardTitle>
-            <CardDescription>
-              {m.auth_signup_success_description()}
-            </CardDescription>
+            <CardDescription>{m.auth_signup_success_description()}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              {m.auth_signup_success_content()}
-            </p>
+            <p className="text-sm text-muted-foreground mb-4">{m.auth_signup_success_content()}</p>
             <Link to="/signin" search={redirect ? { redirect } : undefined}>
               <Button className="w-full">{m.auth_signup_success_button()}</Button>
             </Link>

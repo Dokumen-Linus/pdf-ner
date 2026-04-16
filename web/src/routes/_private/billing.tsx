@@ -2,7 +2,6 @@ import { useState } from "react"
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { createFileRoute } from "@tanstack/react-router"
-import { m } from "@/integrations/paraglide/messages.js"
 import { CreditCardIcon, LoaderCircleIcon, ZapIcon } from "lucide-react"
 import { Badge } from "@/components/shadcn-ui/badge"
 import { Button } from "@/components/shadcn-ui/button"
@@ -23,6 +22,7 @@ import {
 } from "@/components/shadcn-ui/table"
 import { createSetupIntent, getStripeCustomer, getUsageSummary } from "@/db-fns/workers/billing"
 import { env } from "@/env.client"
+import { m } from "@/integrations/paraglide/messages.js"
 
 const stripePromise = loadStripe(env.VITE_STRIPE_PUBLISHABLE_KEY)
 
@@ -157,7 +157,10 @@ function BillingPage() {
             value={totalTokens.toLocaleString()}
             sub={
               usage
-                ? m.billing_usage_tokens_description({ input: usage.totalInputTokens.toLocaleString(), output: usage.totalOutputTokens.toLocaleString() })
+                ? m.billing_usage_tokens_description({
+                    input: usage.totalInputTokens.toLocaleString(),
+                    output: usage.totalOutputTokens.toLocaleString(),
+                  })
                 : undefined
             }
           />
@@ -166,7 +169,10 @@ function BillingPage() {
             value={usage ? formatCost(usage.totalCostUsd) : "$0.000000"}
             sub="Metered usage only"
           />
-          <StatCard label={m.billing_usage_calls_title()} value={(usage?.callCount ?? 0).toLocaleString()} />
+          <StatCard
+            label={m.billing_usage_calls_title()}
+            value={(usage?.callCount ?? 0).toLocaleString()}
+          />
         </div>
       </section>
 
@@ -253,9 +259,7 @@ function BillingPage() {
               <CreditCardIcon className="h-5 w-5 text-muted-foreground" />
               <CardTitle className="text-base">{m.billing_payment_subtitle()}</CardTitle>
             </div>
-            <CardDescription>
-              {m.billing_payment_description()}
-            </CardDescription>
+            <CardDescription>{m.billing_payment_description()}</CardDescription>
           </CardHeader>
           <CardContent>
             <Elements stripe={stripePromise} options={{ clientSecret }}>

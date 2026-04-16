@@ -1,5 +1,5 @@
-import { Rect, restoreRect, transformSize } from '@embedpdf/models';
-import { CalculateTilesForPageOptions, Tile } from './types';
+import { Rect, restoreRect, transformSize } from "@embedpdf/models"
+import { CalculateTilesForPageOptions, Tile } from "./types"
 
 /**
  * Build a grid where neighbouring tiles overlap by `overlapPx`
@@ -17,47 +17,47 @@ export function calculateTilesForPage({
   metric,
 }: CalculateTilesForPageOptions): Tile[] {
   /* ---- work in screen-pixel space -------------------------------- */
-  const pageW = page.size.width * scale; // px
-  const pageH = page.size.height * scale; // px
+  const pageW = page.size.width * scale // px
+  const pageH = page.size.height * scale // px
 
-  const step = tileSize - overlapPx; // shift between tiles
+  const step = tileSize - overlapPx // shift between tiles
 
-  const containerSize = transformSize(page.size, rotation, scale);
+  const containerSize = transformSize(page.size, rotation, scale)
   const rotatedVisRect: Rect = {
     origin: { x: metric.scaled.pageX, y: metric.scaled.pageY },
     size: { width: metric.scaled.visibleWidth, height: metric.scaled.visibleHeight },
-  };
-  const unrotatedVisRect = restoreRect(containerSize, rotatedVisRect, rotation, 1);
+  }
+  const unrotatedVisRect = restoreRect(containerSize, rotatedVisRect, rotation, 1)
 
-  const visLeft = unrotatedVisRect.origin.x;
-  const visTop = unrotatedVisRect.origin.y;
-  const visRight = visLeft + unrotatedVisRect.size.width;
-  const visBottom = visTop + unrotatedVisRect.size.height;
+  const visLeft = unrotatedVisRect.origin.x
+  const visTop = unrotatedVisRect.origin.y
+  const visRight = visLeft + unrotatedVisRect.size.width
+  const visBottom = visTop + unrotatedVisRect.size.height
 
-  const maxCol = Math.floor((pageW - 1) / step);
-  const maxRow = Math.floor((pageH - 1) / step);
+  const maxCol = Math.floor((pageW - 1) / step)
+  const maxRow = Math.floor((pageH - 1) / step)
 
-  const startCol = Math.max(0, Math.floor(visLeft / step) - extraRings);
-  const endCol = Math.min(maxCol, Math.floor((visRight - 1) / step) + extraRings);
-  const startRow = Math.max(0, Math.floor(visTop / step) - extraRings);
-  const endRow = Math.min(maxRow, Math.floor((visBottom - 1) / step) + extraRings);
+  const startCol = Math.max(0, Math.floor(visLeft / step) - extraRings)
+  const endCol = Math.min(maxCol, Math.floor((visRight - 1) / step) + extraRings)
+  const startRow = Math.max(0, Math.floor(visTop / step) - extraRings)
+  const endRow = Math.min(maxRow, Math.floor((visBottom - 1) / step) + extraRings)
 
   /* ---- build tiles ---------------------------------------------- */
-  const tiles: Tile[] = [];
+  const tiles: Tile[] = []
 
   for (let col = startCol; col <= endCol; col++) {
-    const xScreen = col * step; // px (integer)
-    const wScreen = Math.min(tileSize, pageW - xScreen); // px (≤  tileSize)
+    const xScreen = col * step // px (integer)
+    const wScreen = Math.min(tileSize, pageW - xScreen) // px (≤  tileSize)
 
-    const xPage = xScreen / scale; // pt (may be frac.)
-    const wPage = wScreen / scale; // pt
+    const xPage = xScreen / scale // pt (may be frac.)
+    const wPage = wScreen / scale // pt
 
     for (let row = startRow; row <= endRow; row++) {
-      const yScreen = row * step;
-      const hScreen = Math.min(tileSize, pageH - yScreen);
+      const yScreen = row * step
+      const hScreen = Math.min(tileSize, pageH - yScreen)
 
-      const yPage = yScreen / scale;
-      const hPage = hScreen / scale;
+      const yPage = yScreen / scale
+      const hPage = hScreen / scale
 
       tiles.push({
         id: `p${page.index}-${scale}-x${xScreen}-y${yScreen}-w${wScreen}-h${hScreen}`,
@@ -68,12 +68,12 @@ export function calculateTilesForPage({
           origin: { x: xScreen, y: yScreen },
           size: { width: wScreen, height: hScreen },
         },
-        status: 'queued',
+        status: "queued",
         srcScale: scale,
         isFallback: false,
-      });
+      })
     }
   }
 
-  return tiles;
+  return tiles
 }

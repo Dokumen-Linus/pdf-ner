@@ -3,8 +3,8 @@ import { fetchServerSentEvents } from "@tanstack/ai-client"
 import { useChat } from "@tanstack/ai-react"
 import { Bot, MessageSquare, Send, Sparkles, User, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
-import { cn } from "@/lib/shadcn-ui/utils"
 import { m } from "@/integrations/paraglide/messages.js"
+import { cn } from "@/lib/shadcn-ui/utils"
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false)
@@ -61,7 +61,7 @@ export default function Chatbot() {
             >
               {messages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
-                   <Bot className="w-10 h-10 mb-3" />
+                  <Bot className="w-10 h-10 mb-3" />
                   <p className="text-[14px]">{m.chatbot_empty_state()}</p>
                 </div>
               ) : (

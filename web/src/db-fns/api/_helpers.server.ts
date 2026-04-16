@@ -2,9 +2,9 @@ import { getRequestHeaders } from "@tanstack/react-start/server"
 import { and, eq, or, sql } from "drizzle-orm/sql"
 import { db } from "@/db/client"
 import { authMembers, authTeamMembers, authTeams } from "@/db/schemas/auth"
-import { workersPdfs } from "@/db/schemas/workers/pdfs"
 import { projects } from "@/db/schemas/web/projects"
 import { users } from "@/db/schemas/web/users"
+import { workersPdfs } from "@/db/schemas/workers/pdfs"
 import { env } from "@/env.server"
 import { auth } from "@/lib/auth"
 
@@ -115,10 +115,7 @@ async function getProjectAccessContextForUser(
     )
     .leftJoin(
       authTeamMembers,
-      and(
-        eq(authTeamMembers.teamId, projects.teamId),
-        eq(authTeamMembers.userId, user.authUserId),
-      ),
+      and(eq(authTeamMembers.teamId, projects.teamId), eq(authTeamMembers.userId, user.authUserId)),
     )
     .where(eq(projects.id, projectId))
     .limit(1)

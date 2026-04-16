@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn-ui
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
-import { getUserByEmail, updateUser } from "@/db-fns/web/users"
+import { getUserByAuthUserId, updateUser } from "@/db-fns/web/users"
 import { m } from "@/integrations/paraglide/messages.js"
 
 type ProfileUser = Awaited<ReturnType<typeof getUserByAuthUserId>>

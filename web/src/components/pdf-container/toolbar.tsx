@@ -1,9 +1,23 @@
 import { useExportCapability } from "@embedpdf/plugin-export/react"
 import { useRotateCapability } from "@embedpdf/plugin-rotate/react"
-import { ArrowLeftRight, Download, Redo2, RotateCcw, RotateCw, Trash2, Undo2, ZoomIn, ZoomOut } from "lucide-react"
+import {
+  ArrowLeftRight,
+  Download,
+  Redo2,
+  RotateCcw,
+  RotateCw,
+  Trash2,
+  Undo2,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react"
 import { m } from "@/integrations/paraglide/messages.js"
 import usePluginStore from "../plugin-store/hooks/use-plugin-store"
-import { useActiveDocument, useDocumentManagerCapability, useOpenDocuments } from "./plugin-document-manager-2"
+import {
+  useActiveDocument,
+  useDocumentManagerCapability,
+  useOpenDocuments,
+} from "./plugin-document-manager-2"
 import { useZoomCapability } from "./plugin-zoom-2"
 
 const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
@@ -16,7 +30,9 @@ const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
 
   const { annoCapability, annoState } = usePluginStore()
 
-  const activeDocumentIndex = openDocuments.findIndex((document) => document.id === activeDocumentId)
+  const activeDocumentIndex = openDocuments.findIndex(
+    (document) => document.id === activeDocumentId,
+  )
   const nextDocument =
     openDocuments.length < 2
       ? null

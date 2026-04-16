@@ -1,8 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import {
-  DEFAULT_POST_VERIFICATION_REDIRECT,
-  getPostVerificationRedirect,
-} from "./auth-redirects"
+import { DEFAULT_POST_VERIFICATION_REDIRECT, getPostVerificationRedirect } from "./auth-redirects"
 
 describe("getPostVerificationRedirect", () => {
   it("falls back to the default app destination when no redirect is provided", () => {
