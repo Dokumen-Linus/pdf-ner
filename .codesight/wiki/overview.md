@@ -2,13 +2,13 @@
 
 > **Navigation aid.** This article shows WHERE things live (routes, models, files). Read actual source files before implementing new features or making changes.
 
-**pdf-ner** is a typescript project built with fastapi, using drizzle for data persistence, organized as a monorepo.
+**pdf-ner** is a typescript project built with fastapi, using drizzle for data persistence, organized as a microservices repo.
 
-**Workspaces:** `api` (`api`), `dokumen-web` (`web`)
+**Services:** `api` (`api`), `dokumen-web` (`web`)
 
 ## Scale
 
-12 API routes · 1 database models · 68 UI components · 17 library files · 11 middleware layers · 28 environment variables
+12 API routes · 1 database models · 70 UI components · 17 library files · 11 middleware layers · 28 environment variables
 
 ## Subsystems
 
@@ -24,7 +24,7 @@
 
 **Database:** drizzle, 1 models — see [database.md](./database.md)
 
-**UI:** 68 components (react) — see [ui.md](./ui.md)
+**UI:** 70 components (react) — see [ui.md](./ui.md)
 
 **Libraries:** 17 files — see [libraries.md](./libraries.md)
 
@@ -56,4 +56,4 @@ Changes to these files have the widest blast radius across the codebase:
 - _...2 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-04-14_
+_Back to [index.md](./index.md) · Generated 2026-04-16_

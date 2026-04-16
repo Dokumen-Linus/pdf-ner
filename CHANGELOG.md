@@ -87,6 +87,8 @@
 - *(web)* Add plugin-thumbnail-2
 - *(api)* Get pdf url endpt
 - *(web)* BREAKING CHANGE add labelling page and documentManagerCapabiltiy in PluginStoreSync
+- *(web)* Work on improving pages
+- *(web)* Start demo page
 
 ### 🐛 Bug Fixes
 
@@ -339,6 +341,7 @@
 - *(web)* Add paraglide to eslint ignores
 - *(web)* Fix lint errors
 - *(web)* Add tanstack eslint plugin
+- Ruff
 
 ### 🧪 Testing
 
@@ -420,6 +423,11 @@
 - Add gitignore to llm_shared lib
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(llm)* Skills update
+- *(skills)* Remove angular, vue, svelte content
+- *(skills)* Copy_tanstack_skills.py
+- *(skills)* Remove vercel web design
 
 ### ◀️ Revert
 

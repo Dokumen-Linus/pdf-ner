@@ -2,12 +2,12 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**68 components** (react)
+**70 components** (react)
 
 ## Components
 
 - **ColorPicker** — props: value, onChange — `web/src/components/custom/color-picker.tsx`
-- **EntityTable** — `web/src/components/entity-table/components/entity-table.tsx`
+- **EntityTable** — props: entityTypes — `web/src/components/entity-table/components/entity-table.tsx`
 - **NotFound** — `web/src/components/not-found.tsx`
 - **Toolbar** — props: canRotate — `web/src/components/pdf-container/dev/toolbar-dev.tsx`
 - **PDFContainerClient** — props: initalDocuments, author, exportName, canRotate — `web/src/components/pdf-container/pdf-container-client.tsx`
@@ -44,6 +44,7 @@
 - **RotateWrapper** — props: enabled, documentId, pageIndex, style — `web/src/components/pdf-container/rotate-wrapper.tsx`
 - **Toolbar** — props: canRotate — `web/src/components/pdf-container/toolbar.tsx`
 - **PluginStoreTable** — `web/src/components/plugin-store/components/dev/plugin-store-table.tsx`
+- **ProjectTabs** — props: projectId, currentStep, variant — `web/src/components/project-tabs.tsx`
 - **Chatbot** — `web/src/components/public-site/chatbot.tsx`
 - **Footer** — `web/src/components/public-site/footer.tsx`
 - **Header** — `web/src/components/public-site/header.tsx`
@@ -63,6 +64,7 @@
 - **Route** — `web/src/routes/_private/billing.tsx`
 - **Route** — `web/src/routes/_private/profile.tsx`
 - **Route** — `web/src/routes/_private/projects.$projectId.tsx`
+- **Route** — `web/src/routes/_private/projects.$projectId_.checking.tsx`
 - **Route** — `web/src/routes/_private/projects.$projectId_.dashboard.tsx`
 - **Route** — `web/src/routes/_private/projects.$projectId_.documents.tsx`
 - **Route** — `web/src/routes/_private/projects.$projectId_.engineering.tsx`
