@@ -1,4 +1,18 @@
-# PostgreSQL superuser (for initial setup - usually provided by your PostgreSQL service/docker-compose)
+#!/usr/bin/env python3
+"""Generate infra/.env.example containing all environment variables used across the project.
+
+Truth sources:
+- workers/.env.example
+- api/.env.local.example
+- web/.env.local.example
+- db/init/01_roles.sh (role passwords)
+"""
+
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent
+
+SCRIPT = """# PostgreSQL superuser (for initial setup - usually provided by your PostgreSQL service/docker-compose)
 POSTGRES_PASSWORD=changeme
 
 # Role passwords - must match what you set in db/init/01_roles.sh
@@ -52,3 +66,14 @@ UPLOADTHING_TOKEN=
 # Client-side env vars (Vite)
 VITE_BASE_URL=http://localhost:3000
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
+"""
+
+
+def main() -> None:
+    output = ROOT / "infra" / ".env.example"
+    output.write_text(SCRIPT)
+    print(f"Written to: {output}")
+
+
+if __name__ == "__main__":
+    main()

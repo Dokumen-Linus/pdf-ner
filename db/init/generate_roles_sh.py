@@ -1,4 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env python3
+# Generate db/init/01_roles.sh from db/migrations/_init.sql.
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent
+
+PASSWORD_VARS = {
+    "owner_role": "OWNER_ROLE_PASSWORD",
+    "auth_role": "AUTH_ROLE_PASSWORD",
+    "web_user": "WEB_USER_PASSWORD",
+    "api_user": "API_USER_PASSWORD",
+    "workers_user": "WORKERS_USER_PASSWORD",
+}
+
+SCRIPT = """#!/bin/bash
 # AUTO-GENERATED from _init.sql - do not edit by hand.
 # POSTGRES_USER and POSTGRES_DB should be passed as args or env vars from your PostgreSQL service
 set -e
@@ -53,3 +67,14 @@ psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER:-postgres}" --dbname "${POST
     -- set search path for BetterAuth
     ALTER ROLE auth_role SET search_path = auth;
 EOSQL
+"""
+
+
+def main() -> None:
+    output = ROOT / "db" / "init" / "01_roles.sh"
+    output.write_text(SCRIPT)
+    print(f"Written to: {output}")
+
+
+if __name__ == "__main__":
+    main()
