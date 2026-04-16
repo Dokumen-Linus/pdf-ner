@@ -1,8 +1,8 @@
 # Dokumen Database
 
-## Migration SQL Scripts Naming Conventions
+**Development Phase**: The database has NOT been instantiated. Do not create new .sql to insert columns, modify the create_table.sql scripts directly. Do not create any backwards compatability.
 
-**Rules:** Since Dokumen is in development (no staging, UAT, pre-prod, prod environments currently run), the script names have numerical prefixes. The scripts, order, and table columns may still be changed. On the first release of Dokumen AI, the numerical prefixes will be replaced with datetime. Migration is performed by dbmate which runs scripts in alphanumeric order.
+**Naming Conventions**: any alphabetical order, leave room to insert things where order might matter
 
 ## Quickstart
 
