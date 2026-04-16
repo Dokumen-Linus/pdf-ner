@@ -121,14 +121,11 @@ Consult these references based on what you're doing:
 
 ### Framework-Specific Testing
 
-**When to use**: Testing React, Angular, Vue, or Next.js applications
+**When to use**: Testing React applications
 
-| Activity                  | Reference Files                     |
-| ------------------------- | ----------------------------------- |
-| **Testing React apps**    | [react.md](frameworks/react.md)     |
-| **Testing Angular apps**  | [angular.md](frameworks/angular.md) |
-| **Testing Vue/Nuxt apps** | [vue.md](frameworks/vue.md)         |
-| **Testing Next.js apps**  | [nextjs.md](frameworks/nextjs.md)   |
+| Activity               | Reference Files                  |
+| ---------------------- | ------------------------------- |
+| **Testing React apps** | [react.md](frameworks/react.md) |
 
 ### Refactoring & Maintenance
 
@@ -229,10 +226,7 @@ What are you doing?
 │  └─ Test suite structure → core/test-suite-structure.md
 │
 ├─ Framework-specific testing?
-│  ├─ React app → frameworks/react.md
-│  ├─ Angular app → frameworks/angular.md
-│  ├─ Vue/Nuxt app → frameworks/vue.md
-│  └─ Next.js app → frameworks/nextjs.md
+│  └─ React app → frameworks/react.md
 │
 ├─ Authentication testing?
 │  ├─ Basic auth patterns → advanced/authentication.md

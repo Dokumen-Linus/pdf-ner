@@ -119,12 +119,9 @@ You don't have to mention "skill" or "Playwright best practices"; describe your 
 
 ### Frameworks (`frameworks/`)
 
-| Topic   | Reference     | Use for                        |
-| ------- | ------------- | ------------------------------ |
-| React   | `react.md`    | React-specific testing patterns |
-| Angular | `angular.md`  | Angular-specific testing        |
-| Vue     | `vue.md`      | Vue/Nuxt testing patterns       |
-| Next.js | `nextjs.md`   | Next.js SSR/SSG testing         |
+| Topic   | Reference  | Use for                        |
+| ------- | ----------- | ------------------------------ |
+| React   | `react.md`  | React-specific testing patterns |
 
 ### Infrastructure & CI/CD (`infrastructure-ci-cd/`)
 
