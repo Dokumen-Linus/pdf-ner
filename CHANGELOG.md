@@ -91,6 +91,8 @@
 - *(web)* Start demo page
 - *(api)* Avatar_storage
 - *(web)* Migrate from uploadthing to avatar_url api #38
+- *(web)* Auto-login after email verification
+- Fix profile page layout
 
 ### 🐛 Bug Fixes
 
@@ -154,6 +156,7 @@
 - *(web)* Import error
 - *(web)* Package.json
 - *(web)* Labeling client hydration error
+- Subscription changes
 
 ### 💼 Other
 
@@ -430,6 +433,7 @@
 - *(skills)* Remove angular, vue, svelte content
 - *(skills)* Copy_tanstack_skills.py
 - *(skills)* Remove vercel web design
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]

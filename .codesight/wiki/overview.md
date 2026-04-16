@@ -8,7 +8,7 @@
 
 ## Scale
 
-13 API routes · 1 database models · 70 UI components · 19 library files · 17 middleware layers · 37 environment variables
+13 API routes · 1 database models · 70 UI components · 20 library files · 19 middleware layers · 37 environment variables
 
 ## Subsystems
 
@@ -27,7 +27,7 @@
 
 **UI:** 70 components (react) — see [ui.md](./ui.md)
 
-**Libraries:** 19 files — see [libraries.md](./libraries.md)
+**Libraries:** 20 files — see [libraries.md](./libraries.md)
 
 ## High-Impact Files
 

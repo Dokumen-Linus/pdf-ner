@@ -2,9 +2,9 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**19 library files** across 4 modules
+**20 library files** across 4 modules
 
-## Web (12 files)
+## Web (13 files)
 
 - `web/src/db-fns/web/annotations.ts` — LabellingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
 - `web/src/db-fns/api/_helpers.server.ts` — requireUserId, requireProjectOwnership, requirePdfOwnership, apiRequest
@@ -12,6 +12,7 @@
 - `web/tanstack-start-docs/download_tanstack_guide.py` — gh_get, download_dir, main
 - `web/public/example-pdfs/federal-register/get_first_page.py` — extract_first_page, main
 - `web/src/db/rect.ts` — toEmbedRect, toEmbedRects
+- `web/src/lib/auth-redirects.ts` — getPostVerificationRedirect, DEFAULT_POST_VERIFICATION_REDIRECT
 - `web/src/hooks/mouse-events/use-double-press-props.ts` — useDoublePressProps
 - `web/src/hooks/shadcn-ui/use-mobile.ts` — useIsMobile
 - `web/src/hooks/use-labelling-lock.ts` — useLabellingLock
