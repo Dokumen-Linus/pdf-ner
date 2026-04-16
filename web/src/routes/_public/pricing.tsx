@@ -42,11 +42,12 @@ const PROVIDER_DISPLAY: Record<ProviderSlug, ProviderDisplay> = {
 const PROVIDER_ORDER: ProviderSlug[] = ["anthropic", "openai", "google"]
 
 const PLAN_FEATURES = [
+  "Workspace starts at $5/month",
   "Unlimited PDF uploads",
   "Custom entity type definitions",
   "Multi-model NER extraction",
   "Annotation export (JSON, CSV)",
-  "Project organization",
+  "Role-based project organization",
   "Usage dashboard with cost breakdown",
   "Stripe-managed billing",
 ]
@@ -119,8 +120,8 @@ function PricingPage() {
           Simple, usage-based pricing
         </h1>
         <p className="text-[16px] font-normal leading-[1.6] text-[#393C41] max-w-xl mb-10">
-          Pay only for the LLM tokens you consume. No seats, no tiers, no surprises — your bill
-          reflects exactly what you extract.
+          Every workspace starts at $5/month, then usage is billed from the exact LLM tokens you
+          consume. Developers manage projects and analysts focus on labeling and review.
         </p>
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <Link
@@ -164,7 +165,7 @@ function PricingPage() {
               {
                 step: "03",
                 title: "Pay for what you use",
-                body: "At the end of the month Stripe tallies your usage and charges only for the tokens consumed. No minimums.",
+                body: "At the end of the month Stripe bills a $5 workspace base fee plus the token usage accumulated by your extraction runs.",
               },
             ].map(({ step, title, body }) => (
               <div key={step} className="flex flex-col gap-3">
@@ -181,18 +182,18 @@ function PricingPage() {
       <section className="py-24 px-6 bg-[#F4F4F4]">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-[32px] font-medium text-[#171A20] mb-4 text-center">
-            One plan, metered usage
+            Base plan + metered usage
           </h2>
           <p className="text-[16px] text-[#5C5E62] text-center mb-16 max-w-lg mx-auto">
-            A single active subscription unlocks the full platform. You&apos;re only charged for the LLM
-            calls you make.
+            Each workspace has a $5 monthly base subscription, and model usage is charged on top at
+            the live rates below.
           </p>
 
           <div className="mx-auto max-w-md border border-[#EEEEEE] bg-white p-8">
             <div className="mb-6">
-              <p className="text-[14px] font-medium text-[#3E6AE1] mb-2">Pay-as-you-go</p>
+              <p className="text-[14px] font-medium text-[#3E6AE1] mb-2">Workspace plan</p>
               <p className="text-[40px] font-medium text-[#171A20] leading-none">
-                $0
+                $5
                 <span className="text-[16px] font-normal text-[#5C5E62] ml-1">/ month base</span>
               </p>
               <p className="text-[14px] text-[#5C5E62] mt-2">
@@ -208,6 +209,23 @@ function PricingPage() {
                 </li>
               ))}
             </ul>
+
+            <div className="mb-8 grid gap-4 sm:grid-cols-2">
+              <div className="border border-[#EEEEEE] p-4">
+                <p className="text-[13px] font-medium text-[#171A20]">Developer</p>
+                <p className="mt-2 text-[13px] leading-[1.6] text-[#5C5E62]">
+                  Full project permissions: create projects, upload PDFs, manage entity types, and
+                  run extraction workflows.
+                </p>
+              </div>
+              <div className="border border-[#EEEEEE] p-4">
+                <p className="text-[13px] font-medium text-[#171A20]">Analyst</p>
+                <p className="mt-2 text-[13px] leading-[1.6] text-[#5C5E62]">
+                  Limited to labeling and reviewing pre-uploaded PDFs. Analysts can work inside the
+                  project without changing project setup.
+                </p>
+              </div>
+            </div>
 
             <Link
               to="/signup"
@@ -310,11 +328,11 @@ function PricingPage() {
             {[
               {
                 q: "When am I charged?",
-                a: "Stripe tallies your usage at the end of each calendar month and charges your saved payment method. You can monitor real-time usage in the billing dashboard.",
+                a: "Stripe charges the $5 workspace base subscription monthly and tallies metered model usage on the same billing cycle. You can monitor usage in the billing dashboard.",
               },
               {
                 q: "What if I don't add a payment method?",
-                a: "You can still upload PDFs and define entity types. LLM extraction is gated behind an active Stripe subscription with a saved payment method.",
+                a: "You can still explore the product, but usage-based extraction and the paid workspace plan are gated behind an active Stripe subscription with a saved payment method.",
               },
               {
                 q: "Can I choose which model to use?",
@@ -322,7 +340,7 @@ function PricingPage() {
               },
               {
                 q: "Is there a free trial?",
-                a: "Creating an account is free. You only start accruing costs when you run LLM extractions. Test the interface and demo with no payment information required.",
+                a: "Creating an account is free. Billing starts when you activate the $5/month workspace subscription and begin running usage-based extraction.",
               },
               {
                 q: "How do I cancel?",

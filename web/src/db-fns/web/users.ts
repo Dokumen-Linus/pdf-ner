@@ -1,11 +1,13 @@
 import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm/sql"
+import { eq, or, sql } from "drizzle-orm/sql"
 import { z } from "zod"
 import { db } from "@/db/client"
 import { users } from "@/db/schemas/web/users"
 
 // ** CREATE **
 export const CreateUserSchema = z.object({
+  id: z.string().uuid().optional(),
+  authUserId: z.string().optional(),
   email: z.email(),
   displayName: z.string().nullable().optional(),
   firstName: z.string().nullable().optional(),
@@ -51,6 +53,22 @@ export const getUserByEmail = createServerFn({ method: "GET" })
     return user
   })
 
+export const getUserByAuthUserId = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ authUserId: z.string() }))
+  .handler(async ({ data }) => {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(or(eq(users.authUserId, data.authUserId), sql`${users.id}::text = ${data.authUserId}`))
+      .limit(1)
+
+    if (!user) {
+      throw new Error("User not found")
+    }
+
+    return user
+  })
+
 // ** UPDATE **
 // partial create schema with id required
 export const UpdateUserSchema = CreateUserSchema.partial().extend({
@@ -62,6 +80,24 @@ export const updateUser = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { id, ...updateData } = data
     const updatedUser = await db.update(users).set(updateData).where(eq(users.id, id))
+    if (updatedUser.rowCount === 0) {
+      throw new Error("User not found")
+    }
+    return { success: true }
+  })
+
+export const UpdateUserByAuthUserIdSchema = CreateUserSchema.partial().extend({
+  authUserId: z.string(),
+})
+
+export const updateUserByAuthUserId = createServerFn({ method: "POST" })
+  .inputValidator(UpdateUserByAuthUserIdSchema)
+  .handler(async ({ data }) => {
+    const { authUserId, ...updateData } = data
+    const updatedUser = await db
+      .update(users)
+      .set(updateData)
+      .where(or(eq(users.authUserId, authUserId), sql`${users.id}::text = ${authUserId}`))
     if (updatedUser.rowCount === 0) {
       throw new Error("User not found")
     }

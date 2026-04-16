@@ -29,13 +29,7 @@ export function useZoomGesture(documentId: string, options: ZoomGestureOptions =
       zoomProvides,
       options,
     })
-  }, [
-    viewportProvides,
-    zoomProvides,
-    documentId,
-    viewportElementRef,
-    options,
-  ])
+  }, [viewportProvides, zoomProvides, documentId, viewportElementRef, options])
 
   return { elementRef }
 }

@@ -74,7 +74,9 @@ describe.if(runTests)("Project Table Server Functions", () => {
     const firstProjectData = await getProjectById({ data: { id: firstProject.id } })
     expect(firstProjectData.bucketId).toBeDefined()
 
-    const secondProject = await createProject({ data: { name: "Second Project", ownerId: testOwnerId } })
+    const secondProject = await createProject({
+      data: { name: "Second Project", ownerId: testOwnerId },
+    })
     const secondProjectData = await getProjectById({ data: { id: secondProject.id } })
 
     expect(secondProjectData.bucketId).toBe(firstProjectData.bucketId)

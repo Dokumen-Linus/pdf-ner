@@ -4,7 +4,7 @@ import { z } from "zod"
 import { db } from "@/db/client"
 import { pdfs } from "@/db/schemas/web/pdfs"
 import { users } from "@/db/schemas/web/users"
-import { requirePdfOwnership, requireUserId } from "../api/_helpers.server"
+import { requirePdfAccess, requirePdfOwnership, requireUserId } from "../api/_helpers.server"
 
 // Stale threshold in seconds. Clients must heartbeat faster than this.
 // 120s window / 30s heartbeat = 4 missed heartbeats before steal.
@@ -37,6 +37,7 @@ export const createPdf = createServerFn({ method: "POST" })
 export const getPdfById = createServerFn({ method: "GET" })
   .inputValidator((data: { id: string }) => data)
   .handler(async ({ data }) => {
+    await requirePdfAccess(data.id, "label")
     const pdf = await db.select().from(pdfs).where(eq(pdfs.id, data.id))
     if (pdf.length === 0) {
       throw new Error("PDF not found")
@@ -96,13 +97,11 @@ export const upsertPdfLabels = createServerFn({ method: "POST" })
       .values({
         id: data.id,
         labeledEntities: data.labeledEntities,
-        uploadedBy: userId,
       })
       .onConflictDoUpdate({
         target: pdfs.id,
         set: {
           labeledEntities: data.labeledEntities,
-          uploadedBy: userId,
         },
       })
     return { success: true }

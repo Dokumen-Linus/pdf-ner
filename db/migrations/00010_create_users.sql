@@ -8,9 +8,14 @@ CREATE TABLE web.users (
   employer TEXT,
   job_title TEXT,
   avatar_url TEXT,
+  auth_user_id TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+CREATE UNIQUE INDEX users_auth_user_id_uidx
+  ON web.users (auth_user_id)
+  WHERE auth_user_id IS NOT NULL;
 
 CREATE TRIGGER users_updated_at
 BEFORE UPDATE ON web.users

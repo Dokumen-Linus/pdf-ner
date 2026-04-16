@@ -736,7 +736,11 @@ export class DocumentManagerPlugin extends BasePlugin<
     )
   }
 
-  private handleLoadError(documentId: string, error: { reason: PdfErrorReason }, context: string): void {
+  private handleLoadError(
+    documentId: string,
+    error: { reason: PdfErrorReason },
+    context: string,
+  ): void {
     const errorMessage = error.reason?.message || "Failed to load document"
 
     this.logger.error("DocumentManagerPlugin", context, "Failed to load document", error)

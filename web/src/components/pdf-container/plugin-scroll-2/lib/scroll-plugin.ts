@@ -7,8 +7,8 @@ import {
   Unsubscribe,
 } from "@embedpdf/core"
 import { PdfPageObjectWithRotatedSize, Rect, Rotation, transformSize } from "@embedpdf/models"
-import { ViewportCapability, ViewportMetrics, ViewportPlugin } from "../../plugin-viewport-2"
 import { InteractionManagerPlugin } from "../../plugin-interaction-manager-2"
+import { ViewportCapability, ViewportMetrics, ViewportPlugin } from "../../plugin-viewport-2"
 import {
   cleanupScrollState,
   initScrollState,

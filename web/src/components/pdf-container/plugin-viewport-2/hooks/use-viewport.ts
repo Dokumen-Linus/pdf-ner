@@ -1,7 +1,7 @@
 import { RefObject, useContext, useEffect, useState } from "react"
 import { useCapability, usePlugin } from "@embedpdf/core/react"
-import { GateChangeEvent, ScrollActivity, ViewportPlugin } from "../lib"
 import { ViewportElementContext } from "../context"
+import { GateChangeEvent, ScrollActivity, ViewportPlugin } from "../lib"
 
 export const useViewportPlugin = () => usePlugin<ViewportPlugin>(ViewportPlugin.id)
 export const useViewportCapability = () => useCapability<ViewportPlugin>(ViewportPlugin.id)

@@ -12,8 +12,8 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
-import { authClient } from "@/lib/auth-client"
 import { m } from "@/integrations/paraglide/messages.js"
+import { authClient } from "@/lib/auth-client"
 
 export const Route = createFileRoute("/_auth/signin")({
   validateSearch: z.object({

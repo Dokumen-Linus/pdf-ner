@@ -48,29 +48,32 @@ export function useLabellingLock({
   const isLockLostRef = useRef(false)
   const releasedRef = useRef<string | null>(null)
 
-  const releaseLockBestEffort = useCallback((documentId: string, currentUserId: string) => {
-    const releaseKey = `${documentId}:${currentUserId}`
-    if (releasedRef.current === releaseKey) return
-    releasedRef.current = releaseKey
+  const releaseLockBestEffort = useCallback(
+    (documentId: string, currentUserId: string) => {
+      const releaseKey = `${documentId}:${currentUserId}`
+      if (releasedRef.current === releaseKey) return
+      releasedRef.current = releaseKey
 
-    try {
-      if (typeof navigator !== "undefined" && navigator.sendBeacon) {
-        const payload = new Blob([JSON.stringify({ pdfId: documentId, userId: currentUserId })], {
-          type: "application/json",
-        })
-        navigator.sendBeacon(releaseBeaconPath, payload)
-        return
+      try {
+        if (typeof navigator !== "undefined" && navigator.sendBeacon) {
+          const payload = new Blob([JSON.stringify({ pdfId: documentId, userId: currentUserId })], {
+            type: "application/json",
+          })
+          navigator.sendBeacon(releaseBeaconPath, payload)
+          return
+        }
+      } catch {
+        // Fall through to the server-function release below.
       }
-    } catch {
-      // Fall through to the server-function release below.
-    }
 
-    void releaseLabellingLock({ data: { pdfId: documentId, userId: currentUserId } }).catch(
-      (err) => {
-        console.warn("[use-labelling-lock] release failed", err)
-      },
-    )
-  }, [releaseBeaconPath])
+      void releaseLabellingLock({ data: { pdfId: documentId, userId: currentUserId } }).catch(
+        (err) => {
+          console.warn("[use-labelling-lock] release failed", err)
+        },
+      )
+    },
+    [releaseBeaconPath],
+  )
 
   // Keep the ref in sync so the interval callback reads the latest value
   // without us needing to tear down + recreate the interval on every flip.

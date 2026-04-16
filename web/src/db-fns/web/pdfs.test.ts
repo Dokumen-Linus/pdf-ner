@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test"
 import { eq, sql } from "drizzle-orm"
+import { setAuthenticated } from "~/tests/bun-test-setup/mocks"
 import { db } from "@/db/client"
-import { workersPdfs } from "@/db/schemas/workers/pdfs"
 import { pdfs } from "@/db/schemas/web/pdfs"
 import { projects } from "@/db/schemas/web/projects"
 import { users } from "@/db/schemas/web/users"
-import { setAuthenticated } from "~/tests/bun-test-setup/mocks"
+import { workersPdfs } from "@/db/schemas/workers/pdfs"
 import { getAllWorkersPdfs } from "../workers/pdfs"
 import {
   acquireLabellingLock,
