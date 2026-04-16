@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useMemo, useSyncExternalStore } from "react"
 import { useCapability, usePlugin } from "@embedpdf/core/react"
 import { initialDocumentState, ZoomDocumentState, ZoomPlugin } from "../lib"
 
@@ -11,24 +11,22 @@ export const useZoomPlugin = () => usePlugin<ZoomPlugin>(ZoomPlugin.id)
  */
 export const useZoom = (documentId: string) => {
   const { provides } = useZoomCapability()
-  const [state, setState] = useState<ZoomDocumentState>(initialDocumentState)
+  const scope = useMemo(() => provides?.forDocument(documentId), [provides, documentId])
 
-  useEffect(() => {
-    if (!provides) return
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => scope?.onStateChange(() => onStoreChange()) ?? (() => {}),
+    [scope],
+  )
 
-    const scope = provides.forDocument(documentId)
+  const getSnapshot = useCallback(
+    (): ZoomDocumentState => scope?.getState() ?? initialDocumentState,
+    [scope],
+  )
 
-    // Get initial state
-    setState(scope.getState())
-
-    // Subscribe to state changes
-    return scope.onStateChange((newState) => {
-      setState(newState)
-    })
-  }, [provides, documentId])
+  const state = useSyncExternalStore(subscribe, getSnapshot, () => initialDocumentState)
 
   return {
     state,
-    provides: provides?.forDocument(documentId) ?? null,
+    provides: scope ?? null,
   }
 }

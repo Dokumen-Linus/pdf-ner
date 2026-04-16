@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useSyncExternalStore } from "react"
 import { useCapability, usePlugin } from "@embedpdf/core/react"
 import { ScrollPlugin, ScrollScope } from "../lib"
 
@@ -16,30 +16,29 @@ interface UseScrollReturn {
 
 export const useScroll = (documentId: string): UseScrollReturn => {
   const { provides } = useScrollCapability()
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
 
-  useEffect(() => {
-    if (!provides || !documentId) return
+  const subscribe = useCallback(
+    (onStoreChange: () => void) =>
+      provides?.onPageChange((event) => {
+        if (event.documentId === documentId) onStoreChange()
+      }) ?? (() => {}),
+    [provides, documentId],
+  )
 
-    const scope = provides.forDocument(documentId)
-    setCurrentPage(scope.getCurrentPage())
-    setTotalPages(scope.getTotalPages())
+  const currentPage = useSyncExternalStore(
+    subscribe,
+    () => provides?.forDocument(documentId)?.getCurrentPage() ?? 1,
+    () => 1,
+  )
 
-    return provides.onPageChange((event) => {
-      if (event.documentId === documentId) {
-        setCurrentPage(event.pageNumber)
-        setTotalPages(event.totalPages)
-      }
-    })
-  }, [provides, documentId])
+  const totalPages = useSyncExternalStore(
+    subscribe,
+    () => provides?.forDocument(documentId)?.getTotalPages() ?? 1,
+    () => 1,
+  )
 
   return {
-    // New format (preferred)
     provides: provides?.forDocument(documentId) ?? null,
-    state: {
-      currentPage,
-      totalPages,
-    },
+    state: { currentPage, totalPages },
   }
 }

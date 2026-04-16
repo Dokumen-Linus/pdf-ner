@@ -1,7 +1,14 @@
-import { RefObject, useContext, useEffect, useState } from "react"
+import {
+  RefObject,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react"
 import { useCapability, usePlugin } from "@embedpdf/core/react"
 import { ViewportElementContext } from "../context"
-import { GateChangeEvent, ScrollActivity, ViewportPlugin } from "../lib"
+import { ScrollActivity, ViewportPlugin } from "../lib"
 
 export const useViewportPlugin = () => usePlugin<ViewportPlugin>(ViewportPlugin.id)
 export const useViewportCapability = () => useCapability<ViewportPlugin>(ViewportPlugin.id)
@@ -21,21 +28,18 @@ export const useViewportElement = (): RefObject<HTMLDivElement | null> | null =>
  */
 export const useIsViewportGated = (documentId: string) => {
   const { provides } = useViewportCapability()
-  const [isGated, setIsGated] = useState(provides?.isGated(documentId) ?? false)
 
-  useEffect(() => {
-    if (!provides) return
-
-    // Set initial state
-    setIsGated(provides.isGated(documentId))
-
-    // Subscribe to gate state changes
-    return provides.onGateChange((event: GateChangeEvent) => {
-      if (event.documentId === documentId) {
-        setIsGated(event.isGated)
-      }
-    })
-  }, [provides, documentId])
+  const isGated = useSyncExternalStore(
+    useCallback(
+      (onStoreChange: () => void) =>
+        provides?.onGateChange((event) => {
+          if (event.documentId === documentId) onStoreChange()
+        }) ?? (() => {}),
+      [provides, documentId],
+    ),
+    () => provides?.isGated(documentId) ?? false,
+    () => false,
+  )
 
   return isGated
 }

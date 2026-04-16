@@ -1,5 +1,5 @@
 import { BasePlugin, createScopedEmitter, PluginRegistry, REFRESH_PAGES } from "@embedpdf/core"
-import { ignore, PdfErrorReason, Task } from "@embedpdf/models"
+import { ignore, PdfErrorCode, PdfErrorReason, Task } from "@embedpdf/models"
 import { RenderCapability, RenderPlugin } from "../../plugin-render-2"
 import { ScrollCapability, ScrollPlugin } from "../../plugin-scroll-2"
 import {
@@ -129,7 +129,7 @@ export class ThumbnailPlugin extends BasePlugin<
     if (taskCache) {
       taskCache.forEach((task) => {
         task.abort({
-          code: "cancelled" as any,
+          code: PdfErrorCode.Cancelled,
           message: "Document closed",
         })
       })
@@ -411,7 +411,7 @@ export class ThumbnailPlugin extends BasePlugin<
     this.taskCaches.forEach((cache) => {
       cache.forEach((task) => {
         task.abort({
-          code: "cancelled" as any,
+          code: PdfErrorCode.Cancelled,
           message: "Plugin destroyed",
         })
       })

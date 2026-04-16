@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useSyncExternalStore } from "react"
 import { useCapability, usePlugin } from "@embedpdf/core/react"
 import { initialSearchDocumentState, SearchDocumentState, SearchPlugin, SearchScope } from "../lib"
 
@@ -12,23 +12,23 @@ export const useSearch = (
   provides: SearchScope | null
 } => {
   const { provides } = useSearchCapability()
-  const [searchState, setSearchState] = useState<SearchDocumentState>(initialSearchDocumentState)
 
   const scope = useMemo(() => provides?.forDocument(documentId), [provides, documentId])
 
-  useEffect(() => {
-    if (!scope) {
-      setSearchState(initialSearchDocumentState)
-      return
-    }
-    // Set initial state
-    setSearchState(scope.getState())
-    // Subscribe to changes
-    return scope.onStateChange((state) => setSearchState(state))
-  }, [scope])
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => scope?.onStateChange(() => onStoreChange()) ?? (() => {}),
+    [scope],
+  )
+
+  const getSnapshot = useCallback(
+    (): SearchDocumentState => scope?.getState() ?? initialSearchDocumentState,
+    [scope],
+  )
+
+  const state = useSyncExternalStore(subscribe, getSnapshot, () => initialSearchDocumentState)
 
   return {
-    state: searchState,
+    state,
     provides: scope ?? null,
   }
 }

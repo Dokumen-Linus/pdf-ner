@@ -18,7 +18,7 @@ export default async function setupDOM() {
 
   // Suppress jsdom navigation warnings
   const originalConsoleError = console.error
-  console.error = (...args: any[]) => {
+  console.error = (...args: Parameters<typeof console.error>) => {
     const message = args[0]?.toString?.() || args[0]
     if (message?.includes?.("navigation to another Document")) {
       return
@@ -26,7 +26,7 @@ export default async function setupDOM() {
     originalConsoleError(...args)
   }
   const originalConsoleWarn = console.warn
-  console.warn = (...args: any[]) => {
+  console.warn = (...args: Parameters<typeof console.warn>) => {
     const message = args[0]?.toString?.() || args[0]
     if (message?.includes?.("navigation to another Document")) {
       return
