@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, useRouter } from "@tanstack/react-router"
 import { EditIcon, LoaderCircleIcon, SaveIcon, Trash2Icon, XIcon } from "lucide-react"
@@ -19,7 +19,6 @@ import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { getUserByEmail, updateUser } from "@/db-fns/web/users"
-import { UploadButton } from "@/integrations/uploadthing/components-hooks"
 import { m } from "@/integrations/paraglide/messages.js"
 
 type ProfileUser = Awaited<ReturnType<typeof getUserByEmail>>
@@ -217,6 +216,52 @@ function ProfilePage() {
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false)
   const [uploadFailure, setUploadFailure] = useState<string | null>(null)
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !profile) return
+
+    if (file.size > 2 * 1024 * 1024) {
+      setUploadFailure(m.profile_msg_upload_too_large())
+      e.target.value = ""
+      return
+    }
+
+    setIsUploading(true)
+    try {
+      const res = await fetch("/api/avatar-upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": file.type,
+          "Content-Length": String(file.size),
+          "X-Filename": encodeURIComponent(file.name),
+        },
+        body: file,
+      })
+
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({ detail: "Upload failed" }))) as {
+          detail?: string
+        }
+        setUploadFailure(toUserUploadErrorMessage({ message: body.detail }))
+        return
+      }
+
+      const { avatarUrl } = (await res.json()) as { avatarUrl: string }
+      form.setFieldValue("avatarUrl", avatarUrl)
+      setProfile({ ...profile, avatarUrl })
+      setAvatarLoadFailed(false)
+      setUploadFailure(null)
+      setIsUploadModalOpen(false)
+    } catch (err) {
+      setUploadFailure(toUserUploadErrorMessage(err))
+    } finally {
+      setIsUploading(false)
+      e.target.value = ""
+    }
+  }
 
   useEffect(() => {
     setProfile(loadedUser)
@@ -318,13 +363,13 @@ function ProfilePage() {
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 sm:px-6">
         <div className="space-y-1">
           <h1 className="text-3xl font-semibold tracking-tight">{m.profile_title()}</h1>
-          <p className="text-sm text-muted-foreground">
-            {m.profile_error_empty_description()}
-          </p>
+          <p className="text-sm text-muted-foreground">{m.profile_error_empty_description()}</p>
         </div>
         <Card>
           <CardContent className="pt-6">
-            <Button onClick={() => void router.invalidate()}>{m.profile_error_empty_retry()}</Button>
+            <Button onClick={() => void router.invalidate()}>
+              {m.profile_error_empty_retry()}
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -345,9 +390,7 @@ function ProfilePage() {
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <div className="space-y-1">
         <h1 className="text-3xl font-semibold tracking-tight">{m.profile_title()}</h1>
-        <p className="text-sm text-muted-foreground">
-          {m.profile_description()}
-        </p>
+        <p className="text-sm text-muted-foreground">{m.profile_description()}</p>
       </div>
 
       <Card className="overflow-hidden border-border/80 shadow-sm">
@@ -392,7 +435,9 @@ function ProfilePage() {
                   ) : (
                     <SaveIcon className="mr-2 h-4 w-4" />
                   )}
-                  {form.state.isSubmitting ? m.profile_save_button_loading() : m.profile_save_button()}
+                  {form.state.isSubmitting
+                    ? m.profile_save_button_loading()
+                    : m.profile_save_button()}
                 </Button>
               </>
             )}
@@ -435,67 +480,37 @@ function ProfilePage() {
             {isEditing && (
               <div className="space-y-2">
                 <AlertDialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-                    <AlertDialogTrigger asChild>
-                      <Button type="button" className="w-full">
-                        {m.profile_avatar_upload_button()}
-                      </Button>
-                    </AlertDialogTrigger>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" className="w-full">
+                      {m.profile_avatar_upload_button()}
+                    </Button>
+                  </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>{m.profile_avatar_upload_modal_title()}</AlertDialogTitle>
                       <AlertDialogDescription className="space-y-2 text-sm">
-                        <span className="block">
-                          {m.profile_avatar_upload_modal_description()}
-                        </span>
+                        <span className="block">{m.profile_avatar_upload_modal_description()}</span>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="space-y-2">
-                      <UploadButton
-                        endpoint="avatarUploader"
-                        appearance={{
-                          button:
-                            "w-full rounded-md bg-primary text-primary-foreground hover:bg-primary/90 ut-readying:bg-primary/90 ut-uploading:cursor-not-allowed ut-uploading:bg-primary/80",
-                          container: "w-full",
-                          allowedContent: "text-xs text-muted-foreground",
-                        }}
-                        onClientUploadComplete={(files) => {
-                          const uploadedFile = files[0]
-                          const uploadedUrl = uploadedFile?.ufsUrl
-                          if (!uploadedUrl) {
-                            setUploadFailure(
-                              "Upload finished, but we couldn't read the file URL. Please try uploading again.",
-                            )
-                            return
-                          }
-                          void (async () => {
-                            try {
-                              await updateUser({
-                                data: {
-                                  id: profile.id,
-                                  avatarUrl: uploadedUrl,
-                                },
-                              })
-                              form.setFieldValue("avatarUrl", uploadedUrl)
-                              setProfile({
-                                ...profile,
-                                avatarUrl: uploadedUrl,
-                              })
-                              setAvatarLoadFailed(false)
-                              setUploadFailure(null)
-                              setIsUploadModalOpen(false)
-                            } catch {
-                              setUploadFailure(
-                                "Upload succeeded, but we couldn't save it to your profile. Please click Save and try again.",
-                              )
-                            }
-                          })()
-                        }}
-                        onUploadError={(error) => {
-                          const friendlyMessage = toUserUploadErrorMessage(error)
-                          setUploadFailure(friendlyMessage)
-                          setSaveError(friendlyMessage)
-                        }}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        className="hidden"
+                        onChange={handleAvatarFileChange}
                       />
+                      <Button
+                        type="button"
+                        className="w-full"
+                        disabled={isUploading}
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        {isUploading && <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />}
+                        {isUploading
+                          ? m.profile_save_button_loading()
+                          : m.profile_avatar_upload_button()}
+                      </Button>
                     </div>
                     <AlertDialogFooter>
                       <AlertDialogCancel>{m.projects_docs_upload_modal_close()}</AlertDialogCancel>
@@ -698,9 +713,7 @@ function ProfilePage() {
             </div>
 
             {isEditing && (
-              <p className="text-xs text-muted-foreground">
-                {m.profile_edit_footer()}
-              </p>
+              <p className="text-xs text-muted-foreground">{m.profile_edit_footer()}</p>
             )}
           </form>
         </CardContent>
