@@ -1,16 +1,9 @@
-"""Download all files from
-https://github.com/TanStack/router/tree/main/docs/start/framework/react/guide
-into ./tanstack-start-guide/ next to this script.
-
-Uses only the stdlib. Recurses into subfolders.
-"""
-
 from __future__ import annotations
 
 import json
+from pathlib import Path
 import sys
 import urllib.request
-from pathlib import Path
 
 OWNER = "TanStack"
 REPO = "router"
@@ -18,7 +11,7 @@ REF = "main"
 SRC_PATH = "docs/start/framework/react/guide"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-DEST_DIR = SCRIPT_DIR / "tanstack-start-guide"
+DEST_DIR = SCRIPT_DIR / "guide"
 
 
 def gh_get(url: str) -> bytes:
