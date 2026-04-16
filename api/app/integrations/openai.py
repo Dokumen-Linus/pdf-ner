@@ -1,4 +1,4 @@
-from dokumen_llm_shared import LLMResponseData, call_openai
+from dokumen_llm_providers import LLMResponseData, call_openai
 
 
 async def call_openai_async(*args, **kwargs) -> LLMResponseData:

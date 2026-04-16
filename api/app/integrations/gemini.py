@@ -1,4 +1,4 @@
-from dokumen_llm_shared import LLMResponseData, call_google_genai
+from dokumen_llm_providers import LLMResponseData, call_google_genai
 
 
 async def call_google_ai_async(*args, **kwargs) -> LLMResponseData:

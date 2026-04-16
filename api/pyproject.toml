@@ -9,7 +9,7 @@ dependencies = [
   "anthropic",
   "openai",
   "google-genai",
-  "dokumen-llm-shared",
+  "dokumen-llm-providers",
   "redis",
   "celery",
   "boto3",
@@ -73,4 +73,4 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 
 [tool.uv.sources]
-dokumen-llm-shared = { path = "../llm_shared" }
+dokumen-llm-providers = { path = "../packages/llm_providers" }

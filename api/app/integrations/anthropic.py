@@ -1,4 +1,4 @@
-from dokumen_llm_shared import LLMResponseData, call_anthropic
+from dokumen_llm_providers import LLMResponseData, call_anthropic
 
 
 async def call_anthropic_async(*args, **kwargs) -> LLMResponseData:
