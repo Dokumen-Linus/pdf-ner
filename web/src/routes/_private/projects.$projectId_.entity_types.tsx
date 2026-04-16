@@ -45,10 +45,9 @@ import type { FoundDbEntityType, FoundStandardEntityType } from "@/db/types"
 
 const DATATYPES = ["int", "float", "alphanumeric", "alpha"] as const
 const SUBTYPES = ["highlight", "underline", "squiggly", "strikeout"] as const
-const ORIENTATIONS = ["any", "portrait", "landscape"] as const
 const HEX_COLOR_RE = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
 
-type Orientation = (typeof ORIENTATIONS)[number]
+type Orientation = "any" | "portrait" | "landscape"
 
 type ProjectSettingsValues = {
   name: string
@@ -333,12 +332,7 @@ function EntityTypesPage() {
       current.description !== lastSavedProject.description ||
       current.orientation !== lastSavedProject.orientation
     )
-  }, [
-    projectForm.state.values.name,
-    projectForm.state.values.description,
-    projectForm.state.values.orientation,
-    lastSavedProject,
-  ])
+  }, [projectForm.state.values, lastSavedProject])
 
   // Entity types form state
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -756,7 +750,20 @@ function EntityTypeRowCard({
   projectId: string
   stdEntityTypes: FoundStandardEntityType[]
   onRemove: () => void
-  form: ReactFormExtendedApi<FormValues, any, any, any, any, any, any, any, any, any, any, any>
+  form: ReactFormExtendedApi<
+    FormValues,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined
+  >
   registerNameRef: (el: HTMLInputElement | null) => void
 }) {
   const stdLabel = (id: number | null) => {

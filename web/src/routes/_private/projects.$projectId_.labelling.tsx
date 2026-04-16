@@ -57,7 +57,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
       throw new Error("Not authenticated")
     }
 
-    const [project, pdfsRaw, entityTypes, access] = await Promise.all([
+    const [project, pdfsRaw, access, entityTypes] = await Promise.all([
       getProjectById({ data: { id: params.projectId } }),
       getWorkersPdfsByProjectId({ data: { projectId: params.projectId } }),
       getCurrentProjectAccess({ data: { projectId: params.projectId } }),

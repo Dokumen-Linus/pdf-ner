@@ -1,7 +1,6 @@
-import { CSSProperties, HTMLAttributes, useEffect, useMemo, useState } from "react"
+import { CSSProperties, HTMLAttributes, useCallback, useMemo, useSyncExternalStore } from "react"
 import { useDocumentState } from "@embedpdf/core/react"
 import { useSearchCapability } from "../hooks"
-import { SearchResultState } from "../lib"
 
 type SearchLayoutProps = Omit<HTMLAttributes<HTMLDivElement>, "style"> & {
   documentId: string
@@ -22,7 +21,6 @@ export function SearchLayer({
   ...props
 }: SearchLayoutProps) {
   const { provides: searchProvides } = useSearchCapability()
-  const [searchResultState, setSearchResultState] = useState<SearchResultState | null>(null)
   const documentState = useDocumentState(documentId)
 
   const scope = useMemo(() => searchProvides?.forDocument(documentId), [searchProvides, documentId])
@@ -32,27 +30,24 @@ export function SearchLayer({
     return documentState?.scale ?? 1
   }, [scaleOverride, documentState?.scale])
 
-  useEffect(() => {
-    if (!scope) {
-      setSearchResultState(null)
-      return
-    }
-    // Set initial state
-    const currentState = scope.getState()
-    setSearchResultState({
-      results: currentState.results,
-      activeResultIndex: currentState.activeResultIndex,
-      showAllResults: currentState.showAllResults,
-      active: currentState.active,
-    })
-    // Subscribe to changes
-    return scope.onSearchResultStateChange((state) => {
-      setSearchResultState(state)
-    })
-  }, [scope])
+  const rawState = useSyncExternalStore(
+    useCallback(
+      (onStoreChange: () => void) => scope?.onStateChange(() => onStoreChange()) ?? (() => {}),
+      [scope],
+    ),
+    () => scope?.getState() ?? null,
+    () => null,
+  )
 
-  if (!searchResultState || !searchResultState.active) {
+  if (!rawState || !rawState.active) {
     return null
+  }
+
+  const searchResultState = {
+    results: rawState.results,
+    activeResultIndex: rawState.activeResultIndex,
+    showAllResults: rawState.showAllResults,
+    active: rawState.active,
   }
 
   // Filter results for current page while preserving original indices

@@ -64,7 +64,7 @@ export const viewportReducer: Reducer<ViewportState, ViewportAction> = (
 
     case CLEANUP_VIEWPORT_STATE: {
       const { documentId } = action.payload
-      const { [documentId]: removed, ...remainingDocs } = state.documents
+      const { [documentId]: _removed, ...remainingDocs } = state.documents
 
       // Also remove from active viewports if present
       const newActiveViewports = new Set(state.activeViewports)

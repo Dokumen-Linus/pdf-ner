@@ -1,6 +1,7 @@
 import {
   BasePlugin,
   closeDocument as closeDocumentAction,
+  CoreState,
   createBehaviorEmitter,
   createEmitter,
   DocumentState,
@@ -13,6 +14,7 @@ import {
   setDocumentError,
   setDocumentLoaded,
   startLoadingDocument,
+  StoreState,
   Unsubscribe,
   updateDocumentSecurity,
 } from "@embedpdf/core"
@@ -209,7 +211,10 @@ export class DocumentManagerPlugin extends BasePlugin<
     )
   }
 
-  protected override onCoreStoreUpdated(oldState: any, newState: any): void {
+  protected override onCoreStoreUpdated(
+    oldState: StoreState<CoreState>,
+    newState: StoreState<CoreState>,
+  ): void {
     // Emit order change event if order changed
     if (oldState.core.documentOrder !== newState.core.documentOrder) {
       this.documentOrderChanged$.emit({

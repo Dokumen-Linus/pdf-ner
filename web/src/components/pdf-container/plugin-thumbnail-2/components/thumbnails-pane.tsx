@@ -1,6 +1,14 @@
-import { CSSProperties, HTMLAttributes, ReactNode, useEffect, useRef, useState } from "react"
+import {
+  CSSProperties,
+  HTMLAttributes,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+} from "react"
 import { useThumbnailPlugin } from "../hooks"
-import { WindowState } from "../lib"
+import { ThumbMeta } from "../lib"
 
 type ThumbnailsProps = Omit<HTMLAttributes<HTMLDivElement>, "style" | "children"> & {
   /**
@@ -8,45 +16,28 @@ type ThumbnailsProps = Omit<HTMLAttributes<HTMLDivElement>, "style" | "children"
    */
   documentId: string
   style?: CSSProperties
-  children: (m: any) => ReactNode
+  children: (m: ThumbMeta) => ReactNode
 }
 
 export function ThumbnailsPane({ documentId, style, children, ...props }: ThumbnailsProps) {
   const { plugin: thumbnailPlugin } = useThumbnailPlugin()
   const viewportRef = useRef<HTMLDivElement>(null)
 
-  // Store window data along with the documentId it came from
-  const [windowData, setWindowData] = useState<{
-    window: WindowState | null
-    docId: string | null
-  }>({ window: null, docId: null })
+  // 1) subscribe to window updates via useSyncExternalStore (avoids synchronous setState in effect)
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      if (!thumbnailPlugin) return () => {}
+      const scope = thumbnailPlugin.provides().forDocument(documentId)
+      return scope.onWindow(() => onStoreChange())
+    },
+    [thumbnailPlugin, documentId],
+  )
 
-  // Only use the window if it matches the current documentId
-  const window = windowData.docId === documentId ? windowData.window : null
-
-  // 1) subscribe to window updates for this document
-  useEffect(() => {
-    if (!thumbnailPlugin) return
-    const scope = thumbnailPlugin.provides().forDocument(documentId)
-
-    // Get initial window state immediately on mount
-    const initialWindow = scope.getWindow()
-
-    if (initialWindow) {
-      setWindowData({ window: initialWindow, docId: documentId })
-    }
-
-    // Subscribe to future updates
-    const unsubscribe = scope.onWindow((newWindow) => {
-      setWindowData({ window: newWindow, docId: documentId })
-    })
-
-    // Clear state when documentId changes or component unmounts
-    return () => {
-      unsubscribe()
-      setWindowData({ window: null, docId: null })
-    }
-  }, [thumbnailPlugin, documentId])
+  const window = useSyncExternalStore(
+    subscribe,
+    () => thumbnailPlugin?.provides().forDocument(documentId)?.getWindow() ?? null,
+    () => null,
+  )
 
   // 2) keep plugin in sync while the user scrolls
   useEffect(() => {
@@ -82,15 +73,16 @@ export function ThumbnailsPane({ documentId, style, children, ...props }: Thumbn
   }, [window, thumbnailPlugin, documentId])
 
   // 4) let plugin drive scroll
+  const hasWindow = !!window
   useEffect(() => {
     const vp = viewportRef.current
-    if (!vp || !thumbnailPlugin || !window) return
+    if (!vp || !thumbnailPlugin || !hasWindow) return
 
     const scope = thumbnailPlugin.provides().forDocument(documentId)
     return scope.onScrollTo(({ top, behavior }) => {
       vp.scrollTo({ top, behavior })
     })
-  }, [thumbnailPlugin, documentId, !!window])
+  }, [thumbnailPlugin, documentId, hasWindow])
 
   const paddingY = thumbnailPlugin?.cfg.paddingY ?? 0
 

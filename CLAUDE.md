@@ -260,6 +260,8 @@ The database has multiple schemas with role-based access control:
 - **workers schema**: Worker tables, owned by `worker_owner`, read-only for `web_user`
 - **public schema**: Only for migration scripts and non-confidential tables
 
+The database has NOT been instantiated. Do not create new .sql to insert columns, modify the create_table.sql scripts directly. Do not create any backwards compatability.
+
 ## Web
 
 ### Architecture

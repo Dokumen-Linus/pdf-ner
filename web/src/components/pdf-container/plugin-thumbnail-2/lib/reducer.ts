@@ -41,7 +41,7 @@ export const thumbnailReducer: Reducer<ThumbnailState, ThumbnailAction> = (
 
     case CLEANUP_THUMBNAIL_STATE: {
       const documentId = action.payload
-      const { [documentId]: removed, ...remainingDocs } = state.documents
+      const { [documentId]: _removed, ...remainingDocs } = state.documents
       return {
         ...state,
         documents: remainingDocs,
