@@ -2,13 +2,13 @@
 
 > **Navigation aid.** This article shows WHERE things live (routes, models, files). Read actual source files before implementing new features or making changes.
 
-**pdf-ner** is a typescript project built with fastapi, using drizzle for data persistence, organized as a monorepo.
+**pdf-ner** is a typescript project built with fastapi, using drizzle for data persistence, organized as a microservices repo.
 
-**Workspaces:** `api` (`api`), `dokumen-web` (`web`)
+**Services:** `api` (`api`), `dokumen-web` (`web`)
 
 ## Scale
 
-12 API routes · 1 database models · 67 UI components · 17 library files · 11 middleware layers · 28 environment variables
+12 API routes · 1 database models · 70 UI components · 17 library files · 11 middleware layers · 28 environment variables
 
 ## Subsystems
 
@@ -24,7 +24,7 @@
 
 **Database:** drizzle, 1 models — see [database.md](./database.md)
 
-**UI:** 67 components (react) — see [ui.md](./ui.md)
+**UI:** 70 components (react) — see [ui.md](./ui.md)
 
 **Libraries:** 17 files — see [libraries.md](./libraries.md)
 
@@ -32,9 +32,9 @@
 
 Changes to these files have the widest blast radius across the codebase:
 
-- `web/src/components/pdf-container/plugin-viewport-2/index.ts` — imported by **14** files
+- `web/src/components/pdf-container/plugin-viewport-2/index.ts` — imported by **13** files
 - `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **10** files
-- `web/src/components/pdf-container/plugin-scroll-2/index.ts` — imported by **9** files
+- `web/src/components/pdf-container/plugin-scroll-2/index.ts` — imported by **8** files
 - `web/src/components/pdf-container/plugin-scroll-2/lib/types.ts` — imported by **7** files
 - `web/src/components/pdf-container/plugin-selection-2/lib/types.ts` — imported by **7** files
 - `web/src/db/schemas/web/projects.ts` — imported by **7** files
@@ -56,4 +56,4 @@ Changes to these files have the widest blast radius across the codebase:
 - _...2 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-04-14_
+_Back to [index.md](./index.md) · Generated 2026-04-16_

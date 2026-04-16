@@ -87,6 +87,8 @@
 - *(web)* Add plugin-thumbnail-2
 - *(api)* Get pdf url endpt
 - *(web)* BREAKING CHANGE add labelling page and documentManagerCapabiltiy in PluginStoreSync
+- *(web)* Work on improving pages
+- *(web)* Start demo page
 
 ### 🐛 Bug Fixes
 
@@ -147,6 +149,9 @@
 - *(web)* Update drizzle foreign keys
 - *(web)* Plugin-tiling-2, plugin-viewport-2
 - *(web)* Import error
+- *(web)* Import error
+- *(web)* Package.json
+- *(web)* Labeling client hydration error
 
 ### 💼 Other
 
@@ -252,6 +257,8 @@
 - Delete outdated s3 plan
 - *(web)* Add print manifests.json
 - *(web)* Readme
+- *(web)* Tanstack eslint
+- *(web)* Tanstack start
 
 ### ⚡ Performance
 
@@ -298,6 +305,7 @@
 - *(web)* Move to local document manager plugin
 - *(web)* Move to local plugin render, viewport, tiling
 - *(api)* Better abort on error for S3 creation #67
+- *(web)* Move functions server side
 
 ### 🎨 Styling
 
@@ -332,6 +340,8 @@
 - *(web)* Prettier header.tsx
 - *(web)* Add paraglide to eslint ignores
 - *(web)* Fix lint errors
+- *(web)* Add tanstack eslint plugin
+- Ruff
 
 ### 🧪 Testing
 
@@ -411,6 +421,13 @@
 - Add skill copies to gitignore
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add gitignore to llm_shared lib
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(llm)* Skills update
+- *(skills)* Remove angular, vue, svelte content
+- *(skills)* Copy_tanstack_skills.py
+- *(skills)* Remove vercel web design
 
 ### ◀️ Revert
 
@@ -420,3 +437,4 @@
 - Remove password auth
 - *(fe)* Remove storybook
 - *(web)* Tanstack update
+- *(web)* Remove selection menu from plugin-selection-2

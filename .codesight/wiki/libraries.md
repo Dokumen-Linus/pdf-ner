@@ -2,16 +2,15 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**17 library files** across 3 modules
+**17 library files** across 4 modules
 
-## Web (12 files)
+## Web (11 files)
 
 - `web/src/db-fns/web/annotations.ts` — LabellingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
-- `web/src/db-fns/api/_helpers.ts` — requireUserId, requireProjectOwnership, requirePdfOwnership, apiRequest
+- `web/src/db-fns/api/_helpers.server.ts` — requireUserId, requireProjectOwnership, requirePdfOwnership, apiRequest
 - `web/security/make_full_package_json.py` — strip_caret_tilde, collect_packages, main
 - `web/public/example-pdfs/federal-register/get_first_page.py` — extract_first_page, main
 - `web/src/db/rect.ts` — toEmbedRect, toEmbedRects
-- `web/src/db-fns/api/storage.ts` — createBucket, getPdfPresignedUrl
 - `web/src/hooks/mouse-events/use-double-press-props.ts` — useDoublePressProps
 - `web/src/hooks/shadcn-ui/use-mobile.ts` — useIsMobile
 - `web/src/hooks/use-labelling-lock.ts` — useLabellingLock
@@ -29,6 +28,10 @@
 
 - `llm_shared/dokumen_llm_shared/adapters.py` — call_openai, call_anthropic, call_google_genai
 - `llm_shared/dokumen_llm_shared/types.py` — LLMResponseData
+
+## Docs (1 files)
+
+- `docs/download_tanstack_guide.py` — gh_get, download_dir, main
 
 ---
 _Back to [overview.md](./overview.md)_
