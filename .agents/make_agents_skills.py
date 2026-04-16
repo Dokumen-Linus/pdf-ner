@@ -2,11 +2,7 @@ from pathlib import Path
 import shutil
 
 
-def copy_claude_skills_to_agents():
-    # Define source and destination paths
-    source_dir = Path("..\\.claude\\skills")
-    dest_dir = Path(".\\skills")
-
+def copy_claude_skills_to_agents(source_dir: Path, dest_dir: Path):
     # Convert to absolute paths for better debugging
     source_abs = source_dir.resolve()
     dest_abs = dest_dir.resolve()
@@ -50,6 +46,10 @@ def copy_claude_skills_to_agents():
 
 
 if __name__ == "__main__":
+    # Define source and destination paths
+    source_dir = Path("..\\.claude\\skills")
+    dest_dir = Path(".\\skills")
+
     print("🚀 Starting Claude skills → Agents skills copy...\n")
     success = copy_claude_skills_to_agents()
 

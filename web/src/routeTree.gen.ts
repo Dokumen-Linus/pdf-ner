@@ -13,10 +13,10 @@ import { Route as PublicRouteImport } from './routes/_public'
 import { Route as PrivateRouteImport } from './routes/_private'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
-import { Route as ApiUploadthingRouteImport } from './routes/api/uploadthing'
 import { Route as ApiReleaseLockRouteImport } from './routes/api/release-lock'
 import { Route as ApiPdfUploadRouteImport } from './routes/api/pdf-upload'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiAvatarUploadRouteImport } from './routes/api/avatar-upload'
 import { Route as PublicPricingRouteImport } from './routes/_public/pricing'
 import { Route as PublicDemoRouteImport } from './routes/_public/demo'
 import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
@@ -51,11 +51,6 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PublicRoute,
 } as any)
-const ApiUploadthingRoute = ApiUploadthingRouteImport.update({
-  id: '/api/uploadthing',
-  path: '/api/uploadthing',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiReleaseLockRoute = ApiReleaseLockRouteImport.update({
   id: '/api/release-lock',
   path: '/api/release-lock',
@@ -69,6 +64,11 @@ const ApiPdfUploadRoute = ApiPdfUploadRouteImport.update({
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAvatarUploadRoute = ApiAvatarUploadRouteImport.update({
+  id: '/api/avatar-upload',
+  path: '/api/avatar-upload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicPricingRoute = PublicPricingRouteImport.update({
@@ -168,10 +168,10 @@ export interface FileRoutesByFullPath {
   '/profile': typeof PrivateProfileRoute
   '/demo': typeof PublicDemoRoute
   '/pricing': typeof PublicPricingRoute
+  '/api/avatar-upload': typeof ApiAvatarUploadRoute
   '/api/chat': typeof ApiChatRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
   '/api/release-lock': typeof ApiReleaseLockRoute
-  '/api/uploadthing': typeof ApiUploadthingRoute
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/projects/': typeof PrivateProjectsIndexRoute
@@ -191,10 +191,10 @@ export interface FileRoutesByTo {
   '/profile': typeof PrivateProfileRoute
   '/demo': typeof PublicDemoRoute
   '/pricing': typeof PublicPricingRoute
+  '/api/avatar-upload': typeof ApiAvatarUploadRoute
   '/api/chat': typeof ApiChatRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
   '/api/release-lock': typeof ApiReleaseLockRoute
-  '/api/uploadthing': typeof ApiUploadthingRoute
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/projects': typeof PrivateProjectsIndexRoute
@@ -217,10 +217,10 @@ export interface FileRoutesById {
   '/_private/profile': typeof PrivateProfileRoute
   '/_public/demo': typeof PublicDemoRoute
   '/_public/pricing': typeof PublicPricingRoute
+  '/api/avatar-upload': typeof ApiAvatarUploadRoute
   '/api/chat': typeof ApiChatRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
   '/api/release-lock': typeof ApiReleaseLockRoute
-  '/api/uploadthing': typeof ApiUploadthingRoute
   '/_public/': typeof PublicIndexRoute
   '/_private/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -243,10 +243,10 @@ export interface FileRouteTypes {
     | '/profile'
     | '/demo'
     | '/pricing'
+    | '/api/avatar-upload'
     | '/api/chat'
     | '/api/pdf-upload'
     | '/api/release-lock'
-    | '/api/uploadthing'
     | '/projects/$projectId'
     | '/api/auth/$'
     | '/projects/'
@@ -266,10 +266,10 @@ export interface FileRouteTypes {
     | '/profile'
     | '/demo'
     | '/pricing'
+    | '/api/avatar-upload'
     | '/api/chat'
     | '/api/pdf-upload'
     | '/api/release-lock'
-    | '/api/uploadthing'
     | '/projects/$projectId'
     | '/api/auth/$'
     | '/projects'
@@ -291,10 +291,10 @@ export interface FileRouteTypes {
     | '/_private/profile'
     | '/_public/demo'
     | '/_public/pricing'
+    | '/api/avatar-upload'
     | '/api/chat'
     | '/api/pdf-upload'
     | '/api/release-lock'
-    | '/api/uploadthing'
     | '/_public/'
     | '/_private/projects/$projectId'
     | '/api/auth/$'
@@ -311,10 +311,10 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   PrivateRoute: typeof PrivateRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
+  ApiAvatarUploadRoute: typeof ApiAvatarUploadRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiPdfUploadRoute: typeof ApiPdfUploadRoute
   ApiReleaseLockRoute: typeof ApiReleaseLockRoute
-  ApiUploadthingRoute: typeof ApiUploadthingRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -348,13 +348,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/api/uploadthing': {
-      id: '/api/uploadthing'
-      path: '/api/uploadthing'
-      fullPath: '/api/uploadthing'
-      preLoaderRoute: typeof ApiUploadthingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/release-lock': {
       id: '/api/release-lock'
       path: '/api/release-lock'
@@ -374,6 +367,13 @@ declare module '@tanstack/react-router' {
       path: '/api/chat'
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/avatar-upload': {
+      id: '/api/avatar-upload'
+      path: '/api/avatar-upload'
+      fullPath: '/api/avatar-upload'
+      preLoaderRoute: typeof ApiAvatarUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public/pricing': {
@@ -558,10 +558,10 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   PrivateRoute: PrivateRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
+  ApiAvatarUploadRoute: ApiAvatarUploadRoute,
   ApiChatRoute: ApiChatRoute,
   ApiPdfUploadRoute: ApiPdfUploadRoute,
   ApiReleaseLockRoute: ApiReleaseLockRoute,
-  ApiUploadthingRoute: ApiUploadthingRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

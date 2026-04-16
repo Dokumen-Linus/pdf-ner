@@ -12,7 +12,6 @@ export const env = createEnv({
     RESEND_API_KEY: z.string(),
     FROM_EMAIL: z.email(),
     MY_EMAIL: z.email(),
-    UPLOADTHING_TOKEN: z.string(),
     STRIPE_SECRET_KEY: z.string(),
     API_URL: z.string(),
     API_KEY: z.string(),

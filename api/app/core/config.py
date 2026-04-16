@@ -25,6 +25,12 @@ class Settings(BaseSettings):
 
     STRIPE_SECRET_KEY: str
 
+    AVATARS_BUCKET: str
+    AVATARS_AWS_ACCESS_KEY_ID: str
+    AVATARS_AWS_SECRET_ACCESS_KEY: str
+    AVATARS_AWS_REGION: str = "us-east-1"
+    AVATARS_AWS_ENDPOINT_URL: str | None = None
+
     model_config = SettingsConfigDict(
         frozen=True,
         env_file=".env",

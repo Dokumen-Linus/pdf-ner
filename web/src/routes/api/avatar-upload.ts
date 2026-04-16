@@ -1,0 +1,90 @@
+// Avatar upload proxy. The browser POSTs the raw image as the request body
+// with the original filename as X-Filename. This handler authorizes the
+// request, pipes the body to FastAPI, then saves the returned public S3 URL
+// to web.users.avatar_url.
+
+import { createFileRoute } from "@tanstack/react-router"
+import { requireUserId } from "@/db-fns/api/_helpers.server"
+import { updateUser } from "@/db-fns/web/users"
+import { env } from "@/env.server"
+
+const MAX_BYTES = 2 * 1024 * 1024 // 2 MB
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"])
+
+function errorStatus(message: string): number {
+  if (message === "Unauthorized") return 401
+  return 500
+}
+
+export async function avatarUploadHandler({ request }: { request: Request }): Promise<Response> {
+  try {
+    const contentType = (request.headers.get("content-type") ?? "")
+      .split(";")[0]
+      .trim()
+      .toLowerCase()
+    if (!ALLOWED_IMAGE_TYPES.has(contentType)) {
+      return Response.json(
+        { detail: "Content-Type must be image/jpeg, image/png, image/webp, or image/gif" },
+        { status: 415 },
+      )
+    }
+
+    const contentLengthHeader = request.headers.get("content-length")
+    if (contentLengthHeader) {
+      const contentLength = Number(contentLengthHeader)
+      if (!Number.isFinite(contentLength) || contentLength <= 0) {
+        return Response.json({ detail: "Invalid Content-Length" }, { status: 400 })
+      }
+      if (contentLength > MAX_BYTES) {
+        return Response.json({ detail: "Image exceeds 2 MB limit" }, { status: 413 })
+      }
+    }
+
+    const userId = await requireUserId()
+
+    if (!request.body) {
+      return Response.json({ detail: "Request body is required" }, { status: 400 })
+    }
+
+    const forwardHeaders: Record<string, string> = {
+      "X-API-Key": env.API_KEY,
+      "Content-Type": contentType,
+    }
+    if (contentLengthHeader) forwardHeaders["Content-Length"] = contentLengthHeader
+    const filenameHeader = request.headers.get("x-filename")
+    if (filenameHeader) forwardHeaders["X-Filename"] = filenameHeader
+
+    const forwardInit: RequestInit & { duplex?: "half" } = {
+      method: "POST",
+      headers: forwardHeaders,
+      body: request.body,
+      duplex: "half",
+    }
+    const forwarded = await fetch(`${env.API_URL}/api/v1/avatar-storage/avatars`, forwardInit)
+
+    if (!forwarded.ok) {
+      const text = await forwarded.text()
+      return new Response(text, {
+        status: forwarded.status,
+        headers: { "Content-Type": forwarded.headers.get("content-type") ?? "application/json" },
+      })
+    }
+
+    const { avatar_url } = (await forwarded.json()) as { avatar_url: string }
+
+    await updateUser({ data: { id: userId, avatarUrl: avatar_url } })
+
+    return Response.json({ avatarUrl: avatar_url })
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : "Upload failed"
+    return Response.json({ detail }, { status: errorStatus(detail) })
+  }
+}
+
+export const Route = createFileRoute("/api/avatar-upload")({
+  server: {
+    handlers: {
+      POST: avatarUploadHandler,
+    },
+  },
+})

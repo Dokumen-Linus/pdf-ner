@@ -1,12 +1,3 @@
-"""
-make_full_package_json.py
-
-Reads every module in web/node_modules, extracts name and version from
-each package.json, then writes full_package.json by copying web/package.json
-(minus dependencies and devDependencies) with a single locked dependencies
-dict containing every discovered module.
-"""
-
 import json
 from pathlib import Path
 import re
