@@ -1,5 +1,5 @@
 ---
-name: start-server-core
+name: tanstack-start-server-core
 description: >-
   Server-side runtime for TanStack Start: createStartHandler,
   request/response utilities (getRequest, setResponseHeader,

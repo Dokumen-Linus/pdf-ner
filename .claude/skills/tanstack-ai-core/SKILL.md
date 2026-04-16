@@ -1,5 +1,5 @@
 ---
-name: ai-core
+name: tanstack-ai-core
 description: >
   Entry point for TanStack AI skills. Routes to chat-experience, tool-calling,
   media-generation, structured-outputs, adapter-configuration, ag-ui-protocol,
