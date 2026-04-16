@@ -1,1 +1,1 @@
-from dokumen_llm_shared import LLMResponseData
+from dokumen_llm_providers import LLMResponseData

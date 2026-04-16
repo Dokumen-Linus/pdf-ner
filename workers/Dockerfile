@@ -12,7 +12,7 @@ WORKDIR /src
 
 # Install dependencies first (layer caching)
 COPY workers/pyproject.toml workers/uv.lock ./workers/
-COPY llm_shared/ ./llm_shared/
+COPY packages/llm_providers/ ./packages/llm_providers/
 WORKDIR /src/workers
 RUN uv sync --no-dev --no-install-project --frozen
 

@@ -349,7 +349,7 @@ dependencies = [
     { name = "asyncpg" },
     { name = "boto3" },
     { name = "celery" },
-    { name = "dokumen-llm-shared" },
+    { name = "dokumen-llm-providers" },
     { name = "fastapi", extra = ["standard"] },
     { name = "google-genai" },
     { name = "openai" },
@@ -375,7 +375,7 @@ requires-dist = [
     { name = "boto3" },
     { name = "celery" },
     { name = "deptry", marker = "extra == 'dev'" },
-    { name = "dokumen-llm-shared", directory = "../llm_shared" },
+    { name = "dokumen-llm-providers", directory = "../packages/llm_providers" },
     { name = "fastapi", extras = ["standard"] },
     { name = "google-genai" },
     { name = "httpx", marker = "extra == 'dev'" },
@@ -391,9 +391,9 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [[package]]
-name = "dokumen-llm-shared"
+name = "dokumen-llm-providers"
 version = "0.0.0"
-source = { directory = "../llm_shared" }
+source = { directory = "../packages/llm_providers" }
 dependencies = [
     { name = "anthropic" },
     { name = "google-genai" },
