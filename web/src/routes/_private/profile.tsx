@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { getUserByEmail, updateUser } from "@/db-fns/web/users"
 import { m } from "@/integrations/paraglide/messages.js"
 
-type ProfileUser = Awaited<ReturnType<typeof getUserByEmail>>
+type ProfileUser = Awaited<ReturnType<typeof getUserByAuthUserId>>
 
 type ProfileFormValues = {
   displayName: string
@@ -192,11 +192,11 @@ function ProfilePageSkeleton() {
 export const Route = createFileRoute("/_private/profile")({
   loader: async ({ context }) => {
     try {
-      const email = context.session?.user?.email
-      if (!email) {
+      const authUserId = context.session?.user?.id
+      if (!authUserId) {
         return { user: null, loadError: "No authenticated session was found." }
       }
-      const user = await getUserByEmail({ data: { email } })
+      const user = await getUserByAuthUserId({ data: { authUserId } })
       return { user, loadError: null as string | null }
     } catch (error) {
       const message = toUserLoadErrorMessage(error)

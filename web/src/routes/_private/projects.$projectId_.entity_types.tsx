@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { type ReactFormExtendedApi, useForm } from "@tanstack/react-form"
+import { useForm, type ReactFormExtendedApi } from "@tanstack/react-form"
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { LoaderCircleIcon, PlusIcon, SaveIcon, Trash2Icon } from "lucide-react"
 import { ProjectTabs } from "@/components/project-tabs"
@@ -40,7 +40,7 @@ import {
   getEntityTypesByProjectId,
   updateEntityType,
 } from "@/db-fns/web/entity-types"
-import { getProjectById, updateProject } from "@/db-fns/web/projects"
+import { getCurrentProjectAccess, getProjectById, updateProject } from "@/db-fns/web/projects"
 import type { FoundDbEntityType, FoundStandardEntityType } from "@/db/types"
 
 const DATATYPES = ["int", "float", "alphanumeric", "alpha"] as const
@@ -223,11 +223,20 @@ export const Route = createFileRoute("/_private/projects/$projectId_/entity_type
           loadError: "Not authenticated",
         }
       }
-      const [project, entityTypes, stdEntityTypes] = await Promise.all([
+      const [project, access, entityTypes, stdEntityTypes] = await Promise.all([
         getProjectById({ data: { id: params.projectId } }),
+        getCurrentProjectAccess({ data: { projectId: params.projectId } }),
         getEntityTypesByProjectId({ data: { projectId: params.projectId } }),
         getAllStdEntityTypes(),
       ])
+      if (!access.canManage) {
+        return {
+          project: null,
+          entityTypes: [] as FoundDbEntityType[],
+          stdEntityTypes: [] as FoundStandardEntityType[],
+          loadError: "Only developers can manage entity types for this project.",
+        }
+      }
       return { project, entityTypes, stdEntityTypes, loadError: null as string | null }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)

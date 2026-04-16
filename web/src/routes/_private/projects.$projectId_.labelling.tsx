@@ -6,6 +6,7 @@ import { formatDistanceToNow } from "date-fns"
 import { FileTextIcon, LockIcon, SaveIcon } from "lucide-react"
 import { z } from "zod"
 import EntityTable from "@/components/entity-table/components/entity-table"
+import type { EntityType } from "@/components/entity-table/entity-type"
 import PDFContainerClient from "@/components/pdf-container/pdf-container-client"
 import { useLoadDbAnnotations } from "@/components/plugin-store/hooks/use-load-db-annotations"
 import usePluginStore from "@/components/plugin-store/hooks/use-plugin-store"
@@ -21,16 +22,15 @@ import {
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { getPdfPresignedUrl } from "@/db-fns/api/storage"
 import { saveAnnotationsByPdfId } from "@/db-fns/web/annotations"
+import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
 import {
   acquireLabellingLock,
   getPdfById,
   releaseLabellingLock,
   upsertPdfLabels,
 } from "@/db-fns/web/pdfs"
-import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
-import { getProjectById } from "@/db-fns/web/projects"
+import { getCurrentProjectAccess, getProjectById } from "@/db-fns/web/projects"
 import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
-import type { EntityType } from "@/components/entity-table/entity-type"
 import type { FoundWorkersPdf, LabeledEntitiesMap } from "@/db/types"
 import { useLabellingLock } from "@/hooks/use-labelling-lock"
 
@@ -53,17 +53,21 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
   validateSearch: LabellingSearchSchema,
   loaderDeps: ({ search }) => ({ pdfId: search.pdfId }),
   loader: async ({ params, deps, context }) => {
-    const userId = context.session?.user?.id
-    if (!userId) {
+    if (!context.session?.user?.id) {
       throw new Error("Not authenticated")
     }
 
-    const [project, pdfsRaw, entityTypes] = await Promise.all([
+    const [project, pdfsRaw, entityTypes, access] = await Promise.all([
       getProjectById({ data: { id: params.projectId } }),
       getWorkersPdfsByProjectId({ data: { projectId: params.projectId } }),
+      getCurrentProjectAccess({ data: { projectId: params.projectId } }),
       getEntityTypesByProjectId({ data: { projectId: params.projectId } }),
     ])
     const pdfs = pdfsRaw as FoundWorkersPdf[]
+
+    if (!access.canLabel) {
+      throw new Error("You do not have access to this project")
+    }
 
     const requestedPdfId = deps.pdfId
     const activePdfId =
@@ -81,12 +85,12 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
           | { locked: false }
           | { locked: true; lockedByName: string; lockedAt: Date | null }
           | null,
-        userId,
+        userId: access.userId,
       }
     }
 
     const lockResult = await acquireLabellingLock({
-      data: { pdfId: activePdfId, userId },
+      data: { pdfId: activePdfId, userId: access.userId },
     })
 
     if (!lockResult.acquired) {
@@ -102,7 +106,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
           lockedByName: lockResult.lockedByName ?? "another user",
           lockedAt: lockResult.lockedAt ?? null,
         },
-        userId,
+        userId: access.userId,
       }
     }
 
@@ -119,7 +123,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
       initialUrl: url,
       entityTypes,
       lockState: { locked: false as const },
-      userId,
+      userId: access.userId,
     }
   },
   pendingComponent: LabellingSkeleton,

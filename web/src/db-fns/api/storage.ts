@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 import { env } from "@/env.server"
-import { apiRequest, requirePdfOwnership, requireUserId } from "./_helpers.server"
+import { apiRequest, requirePdfAccess } from "./_helpers.server"
 
 // `lifecycle_applied` reflects whether the bucket received the
 // AbortIncompleteMultipartUpload lifecycle rule (orphan-parts safety net).
@@ -31,14 +31,13 @@ export const createBucket = createServerFn({ method: "POST" })
 export const getPdfPresignedUrl = createServerFn({ method: "GET" })
   .inputValidator(z.object({ pdfId: z.string().uuid() }))
   .handler(async ({ data }) => {
-    const userId = await requireUserId()
-    await requirePdfOwnership(data.pdfId, userId)
+    const access = await requirePdfAccess(data.pdfId, "label")
 
     const res: { url: string; expires_in: number; pdf_id: string } = await apiRequest(
       `/api/v1/pdf-storage/pdfs/${data.pdfId}/url`,
       {
         method: "GET",
-        headers: { "X-User-Id": userId },
+        headers: { "X-User-Id": access.ownerId },
       },
     )
     return { url: res.url, expiresIn: res.expires_in, pdfId: res.pdf_id }
