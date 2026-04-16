@@ -8,11 +8,12 @@
 
 ## Scale
 
-12 API routes · 1 database models · 70 UI components · 17 library files · 11 middleware layers · 28 environment variables
+13 API routes · 1 database models · 70 UI components · 19 library files · 17 middleware layers · 37 environment variables
 
 ## Subsystems
 
 - **[Payments](./payments.md)** — 2 routes — touches: db, payment
+- **[Avatars](./avatars.md)** — 1 routes — touches: upload
 - **[Buckets](./buckets.md)** — 1 routes — touches: auth, upload
 - **[Customer](./customer.md)** — 1 routes — touches: db, payment
 - **[Extract](./extract.md)** — 1 routes — touches: cache
@@ -26,7 +27,7 @@
 
 **UI:** 70 components (react) — see [ui.md](./ui.md)
 
-**Libraries:** 17 files — see [libraries.md](./libraries.md)
+**Libraries:** 19 files — see [libraries.md](./libraries.md)
 
 ## High-Impact Files
 
@@ -42,17 +43,17 @@ Changes to these files have the widest blast radius across the codebase:
 ## Required Environment Variables
 
 - `ANTHROPIC_API_KEY` — `workers/.env.example`
-- `API_KEY` — `api/tests/conftest.py`
-- `BASE_URL` — `web/src/integrations/sitemap.ts`
+- `API_KEY` — `infra/.env.example`
+- `AVATARS_AWS_ACCESS_KEY_ID` — `infra/.env.example`
+- `AVATARS_AWS_ENDPOINT_URL` — `infra/.env.example`
+- `AVATARS_AWS_SECRET_ACCESS_KEY` — `infra/.env.example`
+- `AVATARS_BUCKET` — `infra/.env.example`
 - `CI` — `web/playwright.config.ts`
-- `DATABASE_URL` — `web/tests/bun-test-setup/db-setup.ts`
 - `DEV` — `web/src/client.tsx`
 - `GOOGLE_AI_API_KEY` — `workers/.env.example`
 - `OPENAI_API_KEY` — `workers/.env.example`
 - `SSR` — `web/src/routes/_private.tsx`
 - `STRIPE_SECRET_KEY` — `workers/.env.example`
-- `TEST_DB` — `web/src/db/drizzle-client.test.ts`
-- `UPLOADTHING_TOKEN` — `infra/.env.example`
 - _...2 more_
 
 ---

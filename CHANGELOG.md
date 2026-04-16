@@ -89,6 +89,8 @@
 - *(web)* BREAKING CHANGE add labelling page and documentManagerCapabiltiy in PluginStoreSync
 - *(web)* Work on improving pages
 - *(web)* Start demo page
+- *(api)* Avatar_storage
+- *(web)* Migrate from uploadthing to avatar_url api #38
 
 ### 🐛 Bug Fixes
 
@@ -157,6 +159,7 @@
 
 - Run npm i
 - Removed invalid tsconfig rule
+- Add py scripts for file generation
 
 ### 🚜 Refactor
 
@@ -259,6 +262,7 @@
 - *(web)* Readme
 - *(web)* Tanstack eslint
 - *(web)* Tanstack start
+- *(web)* Tanstack-start-docs
 
 ### ⚡ Performance
 
@@ -422,12 +426,13 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add gitignore to llm_shared lib
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(llm)* Skills update
 - *(skills)* Remove angular, vue, svelte content
 - *(skills)* Copy_tanstack_skills.py
 - *(skills)* Remove vercel web design
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
 
