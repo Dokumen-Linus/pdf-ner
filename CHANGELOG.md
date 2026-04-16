@@ -211,6 +211,7 @@
 - *(api, wk)* Move LLM integrations to library
 - *(web)* Move chatbot-knowledge to public
 - *(web)* Remove use of npm-published plugin render, viewport, document-manager, tiling
+- Packages dir
 
 ### 📚 Documentation
 
@@ -433,6 +434,7 @@
 - *(skills)* Remove angular, vue, svelte content
 - *(skills)* Copy_tanstack_skills.py
 - *(skills)* Remove vercel web design
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]

@@ -27,10 +27,10 @@
 - `db/generate_roles_sh.py` — env_var_for_role, transform, main
 - `db/init/generate_roles_sh.py` — main
 
-## Llm_shared (2 files)
+## Llm_providers (2 files)
 
-- `llm_shared/dokumen_llm_shared/adapters.py` — call_openai, call_anthropic, call_google_genai
-- `llm_shared/dokumen_llm_shared/types.py` — LLMResponseData
+- `packages/llm_providers/dokumen_llm_providers/adapters.py` — call_openai, call_anthropic, call_google_genai
+- `packages/llm_providers/dokumen_llm_providers/types.py` — LLMResponseData
 
 ## Infra (1 files)
 
