@@ -350,6 +350,7 @@
 - *(web)* Fix lint errors
 - *(web)* Add tanstack eslint plugin
 - Ruff
+- *(web)* Prettier
 
 ### 🧪 Testing
 
@@ -439,6 +440,8 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(llm)* Allow claude git cmds
 
 ### ◀️ Revert
 

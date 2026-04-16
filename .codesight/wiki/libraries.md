@@ -7,7 +7,7 @@
 ## Web (13 files)
 
 - `web/src/db-fns/web/annotations.ts` — LabellingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
-- `web/src/db-fns/api/_helpers.server.ts` — requireUserId, requireProjectOwnership, requirePdfOwnership, apiRequest
+- `web/src/db-fns/api/_helpers.server.ts` — requireWorkspaceUser, requireUserId, getProjectAccessForCurrentUser, requireProjectAccess, requireProjectOwnership, requirePdfAccess, …
 - `web/scripts/generate_full_package_json.py` — strip_caret_tilde, collect_packages, main
 - `web/tanstack-start-docs/download_tanstack_guide.py` — gh_get, download_dir, main
 - `web/public/example-pdfs/federal-register/get_first_page.py` — extract_first_page, main

@@ -18,6 +18,7 @@ Read and edit these files when adding columns, creating migrations, or changing 
 - `web/src/db/schemas/web/projects.ts` — imported by **7** files
 - `/schemas.py` — imported by **6** files
 - `web/src/db/schemas/web/schema.ts` — imported by **6** files
+- `web/src/db/schemas/web/users.ts` — imported by **5** files
 
 ---
 _Back to [overview.md](./overview.md)_
