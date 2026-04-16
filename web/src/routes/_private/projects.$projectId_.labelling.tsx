@@ -27,8 +27,10 @@ import {
   releaseLabellingLock,
   upsertPdfLabels,
 } from "@/db-fns/web/pdfs"
+import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
 import { getProjectById } from "@/db-fns/web/projects"
 import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
+import type { EntityType } from "@/components/entity-table/entity-type"
 import type { FoundWorkersPdf, LabeledEntitiesMap } from "@/db/types"
 import { useLabellingLock } from "@/hooks/use-labelling-lock"
 
@@ -56,9 +58,10 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
       throw new Error("Not authenticated")
     }
 
-    const [project, pdfsRaw] = await Promise.all([
+    const [project, pdfsRaw, entityTypes] = await Promise.all([
       getProjectById({ data: { id: params.projectId } }),
       getWorkersPdfsByProjectId({ data: { projectId: params.projectId } }),
+      getEntityTypesByProjectId({ data: { projectId: params.projectId } }),
     ])
     const pdfs = pdfsRaw as FoundWorkersPdf[]
 
@@ -73,6 +76,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
         activePdfId: null,
         activePdfAnnotated: undefined,
         initialUrl: null,
+        entityTypes,
         lockState: null as
           | { locked: false }
           | { locked: true; lockedByName: string; lockedAt: Date | null }
@@ -92,6 +96,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
         activePdfId,
         activePdfAnnotated: undefined,
         initialUrl: null,
+        entityTypes,
         lockState: {
           locked: true as const,
           lockedByName: lockResult.lockedByName ?? "another user",
@@ -112,6 +117,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
       activePdfId,
       activePdfAnnotated: webPdf.annotated,
       initialUrl: url,
+      entityTypes,
       lockState: { locked: false as const },
       userId,
     }
@@ -124,9 +130,29 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
 function LabellingPage() {
   const router = useRouter()
   const navigate = useNavigate({ from: Route.fullPath })
-  const { project, pdfs, activePdfId, activePdfAnnotated, initialUrl, lockState, userId } =
-    Route.useLoaderData()
+  const {
+    project,
+    pdfs,
+    activePdfId,
+    activePdfAnnotated,
+    initialUrl,
+    entityTypes,
+    lockState,
+    userId,
+  } = Route.useLoaderData()
   const { projectId } = Route.useParams()
+  const entityTableTypes = useMemo<EntityType[]>(
+    () =>
+      entityTypes.map((entityType) => ({
+        name: entityType.name,
+        subtype: (entityType.subtype as EntityType["subtype"] | null) ?? "highlight",
+        color: entityType.color ?? "#FFEB3B",
+        opacity: entityType.opacity ?? 0.8,
+        unique: entityType.unique,
+        required: entityType.required,
+      })),
+    [entityTypes],
+  )
 
   const weHoldLock = lockState?.locked === false && Boolean(activePdfId)
   const { isLockLost, markLockLost, resetLockLost } = useLabellingLock({
@@ -441,7 +467,7 @@ function LabellingPage() {
         </div>
 
         <div className="w-96 shrink-0 overflow-y-auto border-l">
-          <EntityTable />
+          <EntityTable entityTypes={entityTableTypes} />
         </div>
       </div>
     </div>
