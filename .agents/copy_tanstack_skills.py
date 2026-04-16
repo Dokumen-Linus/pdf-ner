@@ -1,11 +1,10 @@
-import re
-import os
-import shutil
 from pathlib import Path
+import re
+import shutil
 
 PROJECT_ROOT = Path(r"C:\Users\zchar\Desktop\pdf-ner")
 NODE_MODULES = PROJECT_ROOT / "web" / "node_modules" / "@tanstack"
-SKILLS_DIR = PROJECT_ROOT / ".claude" / "skills"
+SKILLS_DIR = PROJECT_ROOT / ".agents" / "skills"
 
 SKIP_FOLDERS = ["lifecycle", "virtual-file-routes"]
 
