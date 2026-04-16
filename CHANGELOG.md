@@ -157,6 +157,7 @@
 - *(web)* Package.json
 - *(web)* Labeling client hydration error
 - Subscription changes
+- *(web)* Wrong variable order
 
 ### 💼 Other
 
@@ -267,6 +268,7 @@
 - *(web)* Tanstack eslint
 - *(web)* Tanstack start
 - *(web)* Tanstack-start-docs
+- *(db)* "development mode"
 
 ### ⚡ Performance
 
@@ -314,6 +316,7 @@
 - *(web)* Move to local plugin render, viewport, tiling
 - *(api)* Better abort on error for S3 creation #67
 - *(web)* Move functions server side
+- *(web)* PdfContainer linting and best react practices
 
 ### 🎨 Styling
 
@@ -442,6 +445,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(llm)* Allow claude git cmds
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
 
