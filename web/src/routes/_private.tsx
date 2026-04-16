@@ -39,10 +39,12 @@ function DashboardLayout() {
   const { sidebarOpen } = Route.useRouteContext()
   return (
     <SidebarProvider defaultOpen={sidebarOpen}>
-      <Header />
-      <main>
-        <Outlet />
-      </main>
+      <div className="flex min-h-svh w-full flex-col">
+        <Header />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+      </div>
     </SidebarProvider>
   )
 }

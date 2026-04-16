@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { z } from "zod"
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,
@@ -14,14 +15,20 @@ import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { createUser, deleteUserByEmail, getUserByEmail } from "@/db-fns/web/users"
 import { authClient } from "@/lib/auth-client"
+import { getPostVerificationRedirect } from "@/lib/auth-redirects"
 import { m } from "@/integrations/paraglide/messages.js"
 
 export const Route = createFileRoute("/_auth/signup")({
+  validateSearch: z.object({
+    redirect: z.string().optional(),
+  }),
   component: SignUpPage,
 })
 
 function SignUpPage() {
   const [isSuccess, setIsSuccess] = useState(false)
+  const { redirect } = Route.useSearch()
+  const verificationCallbackURL = getPostVerificationRedirect(redirect)
   const form = useForm({
     defaultValues: {
       email: "",
@@ -66,6 +73,7 @@ function SignUpPage() {
           email: value.email,
           password: value.password,
           name: `${value.firstName} ${value.lastName}`.trim(),
+          callbackURL: verificationCallbackURL,
         })
 
         if (authError) {
@@ -97,7 +105,7 @@ function SignUpPage() {
             <p className="text-sm text-muted-foreground mb-4">
               {m.auth_signup_success_content()}
             </p>
-            <Link to="/signin">
+            <Link to="/signin" search={redirect ? { redirect } : undefined}>
               <Button className="w-full">{m.auth_signup_success_button()}</Button>
             </Link>
             <p className="text-xs text-muted-foreground text-center mt-2">
@@ -308,7 +316,11 @@ function SignUpPage() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             {m.auth_signup_footer_text()}{" "}
-            <Link to="/signin" className="text-primary hover:underline">
+            <Link
+              to="/signin"
+              search={redirect ? { redirect } : undefined}
+              className="text-primary hover:underline"
+            >
               {m.auth_signup_footer_link()}
             </Link>
           </p>
