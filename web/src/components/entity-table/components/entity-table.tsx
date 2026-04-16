@@ -23,10 +23,14 @@ import {
 import { m } from "@/integrations/paraglide/messages.js"
 import ColorPicker from "../../custom/color-picker"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
+import type { EntityType } from "../entity-type"
 import useEntityTypeStore from "../hooks/use-entity-type-store"
-import initialEntityTypes from "../initial-entity-types"
 
-const EntityTable = () => {
+function entityTypesToRecord(entityTypes: EntityType[]) {
+  return Object.fromEntries(entityTypes.map((entityType) => [entityType.name, entityType]))
+}
+
+const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
   // annoState contains the whole AnnotationState
   // annoState?.byEntityType gives ET name -> array of UIDs of annotations
   // annoState?.byUid[uid].contents - text of annotation
@@ -35,12 +39,10 @@ const EntityTable = () => {
   // entityTypesByName is a record of name -> EntityType
   const { byName: entityTypesByName, setByName, patchEntityType } = useEntityTypeStore()
 
-  // set initial entity types
+  // Sync the table with the entity types provided by the page.
   useEffect(() => {
-    setByName(
-      Object.fromEntries(initialEntityTypes.map((entityType) => [entityType.name, entityType])),
-    )
-  }, [setByName])
+    setByName(entityTypesToRecord(entityTypes))
+  }, [entityTypes, setByName])
 
   // example usage of entityTypesByName
   // const entityTypeObject1 = entityTypesByName["Highlight"] as EntityType

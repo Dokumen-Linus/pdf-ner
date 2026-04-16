@@ -1,17 +1,8 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import {
-  BrainCircuitIcon,
-  CheckCircle2Icon,
-  FileTextIcon,
-  LayoutDashboardIcon,
-  Loader2Icon,
-  PlayIcon,
-  RotateCcwIcon,
-  SettingsIcon,
-  XCircleIcon,
-} from "lucide-react"
+import { CheckCircle2Icon, Loader2Icon, PlayIcon, RotateCcwIcon, XCircleIcon } from "lucide-react"
+import { ProjectTabs } from "@/components/project-tabs"
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,
@@ -140,36 +131,7 @@ function EngineeringPage() {
         </p>
       </div>
 
-      <div className="flex space-x-1 border-b pb-px overflow-x-auto">
-        <Link
-          to="/projects/$projectId"
-          params={{ projectId }}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
-        >
-          <SettingsIcon className="mr-2 h-4 w-4" />
-          Overview
-        </Link>
-        <Link
-          to="/projects/$projectId/dashboard"
-          params={{ projectId }}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
-        >
-          <LayoutDashboardIcon className="mr-2 h-4 w-4" />
-          Dashboard
-        </Link>
-        <Link
-          to="/projects/$projectId/documents"
-          params={{ projectId }}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-transparent px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/40 transition-all"
-        >
-          <FileTextIcon className="mr-2 h-4 w-4" />
-          Documents
-        </Link>
-        <div className="inline-flex items-center justify-center whitespace-nowrap rounded-t-lg border-b-2 border-primary bg-muted/40 px-4 py-2.5 text-sm font-medium text-foreground transition-all">
-          <BrainCircuitIcon className="mr-2 h-4 w-4 text-primary" />
-          Engineering
-        </div>
-      </div>
+      <ProjectTabs projectId={projectId} currentStep="engineering" />
 
       {/* Start optimization card */}
       {!taskId && (

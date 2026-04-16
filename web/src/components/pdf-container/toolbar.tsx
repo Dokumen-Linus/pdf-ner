@@ -1,20 +1,38 @@
 import { useExportCapability } from "@embedpdf/plugin-export/react"
 import { useRotateCapability } from "@embedpdf/plugin-rotate/react"
-import { Download, Redo2, RotateCcw, RotateCw, Trash2, Undo2, ZoomIn, ZoomOut } from "lucide-react"
+import { ArrowLeftRight, Download, Redo2, RotateCcw, RotateCw, Trash2, Undo2, ZoomIn, ZoomOut } from "lucide-react"
 import { m } from "@/integrations/paraglide/messages.js"
 import usePluginStore from "../plugin-store/hooks/use-plugin-store"
+import { useActiveDocument, useDocumentManagerCapability, useOpenDocuments } from "./plugin-document-manager-2"
 import { useZoomCapability } from "./plugin-zoom-2"
 
 const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
   const { provides: exportCapability } = useExportCapability()
   const { provides: zoomCapability } = useZoomCapability()
   const { provides: rotateCapability } = useRotateCapability()
+  const { provides: documentManagerCapability } = useDocumentManagerCapability()
+  const { activeDocumentId } = useActiveDocument()
+  const openDocuments = useOpenDocuments()
 
   const { annoCapability, annoState } = usePluginStore()
+
+  const activeDocumentIndex = openDocuments.findIndex((document) => document.id === activeDocumentId)
+  const nextDocument =
+    openDocuments.length < 2
+      ? null
+      : activeDocumentIndex === -1
+        ? openDocuments[0]
+        : openDocuments[(activeDocumentIndex + 1) % openDocuments.length]
 
   const handleDelete = () => {
     if (annoState?.selectedUid) {
       annoCapability?.deleteAnnotation(annoState.selectedUid)
+    }
+  }
+
+  const handleSwitchDocument = () => {
+    if (nextDocument) {
+      documentManagerCapability?.setActiveDocument(nextDocument.id)
     }
   }
 
@@ -77,6 +95,15 @@ const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
           </button>
         </>
       )}
+      <button
+        onClick={handleSwitchDocument}
+        disabled={!documentManagerCapability || !nextDocument}
+        className="inline-flex items-center gap-2 rounded-md bg-blue-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300"
+        title={nextDocument?.name ? `Switch to ${nextDocument.name}` : "Switch document"}
+      >
+        <ArrowLeftRight size={18} />
+        <span className="max-w-32 truncate">{nextDocument?.name ?? "Switch"}</span>
+      </button>
       <button
         onClick={() => exportCapability?.download()}
         disabled={!exportCapability}

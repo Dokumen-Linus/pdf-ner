@@ -1,5 +1,5 @@
 ---
-name: start-core
+name: tanstack-start-core
 description: >-
   Core overview for TanStack Start: tanstackStart() Vite plugin,
   getRouter() factory, root route document shell (HeadContent,

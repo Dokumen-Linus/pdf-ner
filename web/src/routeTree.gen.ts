@@ -32,6 +32,7 @@ import { Route as PrivateProjectsProjectIdEntity_typesRouteImport } from './rout
 import { Route as PrivateProjectsProjectIdEngineeringRouteImport } from './routes/_private/projects.$projectId_.engineering'
 import { Route as PrivateProjectsProjectIdDocumentsRouteImport } from './routes/_private/projects.$projectId_.documents'
 import { Route as PrivateProjectsProjectIdDashboardRouteImport } from './routes/_private/projects.$projectId_.dashboard'
+import { Route as PrivateProjectsProjectIdCheckingRouteImport } from './routes/_private/projects.$projectId_.checking'
 
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
@@ -151,6 +152,12 @@ const PrivateProjectsProjectIdDashboardRoute =
     path: '/projects/$projectId/dashboard',
     getParentRoute: () => PrivateRoute,
   } as any)
+const PrivateProjectsProjectIdCheckingRoute =
+  PrivateProjectsProjectIdCheckingRouteImport.update({
+    id: '/projects/$projectId_/checking',
+    path: '/projects/$projectId/checking',
+    getParentRoute: () => PrivateRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/projects/': typeof PrivateProjectsIndexRoute
+  '/projects/$projectId/checking': typeof PrivateProjectsProjectIdCheckingRoute
   '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
   '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/projects/$projectId/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
@@ -190,6 +198,7 @@ export interface FileRoutesByTo {
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/projects': typeof PrivateProjectsIndexRoute
+  '/projects/$projectId/checking': typeof PrivateProjectsProjectIdCheckingRoute
   '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
   '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/projects/$projectId/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
@@ -216,6 +225,7 @@ export interface FileRoutesById {
   '/_private/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_private/projects/': typeof PrivateProjectsIndexRoute
+  '/_private/projects/$projectId_/checking': typeof PrivateProjectsProjectIdCheckingRoute
   '/_private/projects/$projectId_/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
   '/_private/projects/$projectId_/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/_private/projects/$projectId_/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
@@ -240,6 +250,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId'
     | '/api/auth/$'
     | '/projects/'
+    | '/projects/$projectId/checking'
     | '/projects/$projectId/dashboard'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/engineering'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId'
     | '/api/auth/$'
     | '/projects'
+    | '/projects/$projectId/checking'
     | '/projects/$projectId/dashboard'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/engineering'
@@ -287,6 +299,7 @@ export interface FileRouteTypes {
     | '/_private/projects/$projectId'
     | '/api/auth/$'
     | '/_private/projects/'
+    | '/_private/projects/$projectId_/checking'
     | '/_private/projects/$projectId_/dashboard'
     | '/_private/projects/$projectId_/documents'
     | '/_private/projects/$projectId_/engineering'
@@ -468,6 +481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateProjectsProjectIdDashboardRouteImport
       parentRoute: typeof PrivateRoute
     }
+    '/_private/projects/$projectId_/checking': {
+      id: '/_private/projects/$projectId_/checking'
+      path: '/projects/$projectId/checking'
+      fullPath: '/projects/$projectId/checking'
+      preLoaderRoute: typeof PrivateProjectsProjectIdCheckingRouteImport
+      parentRoute: typeof PrivateRoute
+    }
   }
 }
 
@@ -490,6 +510,7 @@ interface PrivateRouteChildren {
   PrivateProfileRoute: typeof PrivateProfileRoute
   PrivateProjectsProjectIdRoute: typeof PrivateProjectsProjectIdRoute
   PrivateProjectsIndexRoute: typeof PrivateProjectsIndexRoute
+  PrivateProjectsProjectIdCheckingRoute: typeof PrivateProjectsProjectIdCheckingRoute
   PrivateProjectsProjectIdDashboardRoute: typeof PrivateProjectsProjectIdDashboardRoute
   PrivateProjectsProjectIdDocumentsRoute: typeof PrivateProjectsProjectIdDocumentsRoute
   PrivateProjectsProjectIdEngineeringRoute: typeof PrivateProjectsProjectIdEngineeringRoute
@@ -502,6 +523,7 @@ const PrivateRouteChildren: PrivateRouteChildren = {
   PrivateProfileRoute: PrivateProfileRoute,
   PrivateProjectsProjectIdRoute: PrivateProjectsProjectIdRoute,
   PrivateProjectsIndexRoute: PrivateProjectsIndexRoute,
+  PrivateProjectsProjectIdCheckingRoute: PrivateProjectsProjectIdCheckingRoute,
   PrivateProjectsProjectIdDashboardRoute:
     PrivateProjectsProjectIdDashboardRoute,
   PrivateProjectsProjectIdDocumentsRoute:

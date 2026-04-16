@@ -457,25 +457,9 @@ app.get("/api/protected", async (c) => {
 - User building with Next.js (App Router or Pages Router)
 - User needs middleware, Server Components, or API routes
 
-**Load `references/frameworks/nuxt.md` when**:
-- User building with Nuxt 3
-- User needs H3 handlers, composables, or server routes
-
 **Load `references/frameworks/remix.md` when**:
 - User building with Remix
 - User needs loader/action patterns or session handling
-
-**Load `references/frameworks/sveltekit.md` when**:
-- User building with SvelteKit
-- User needs hooks, load functions, or stores
-
-**Load `references/frameworks/api-frameworks.md` when**:
-- User building with Express, Fastify, NestJS, or Hono (non-Cloudflare)
-- User needs middleware or route configuration
-
-**Load `references/frameworks/expo-mobile.md` when**:
-- User building React Native or Expo app
-- User needs SecureStore, deep linking, or mobile auth
 
 ### Database Adapters
 
@@ -548,11 +532,7 @@ export const auth = betterAuth({
 
 ### Framework References (references/frameworks/)
 - **nextjs.md** - Next.js App/Pages Router integration
-- **nuxt.md** - Nuxt 3 with H3 and composables
 - **remix.md** - Remix loaders, actions, sessions
-- **sveltekit.md** - SvelteKit hooks and stores
-- **api-frameworks.md** - Express, Fastify, NestJS, Hono
-- **expo-mobile.md** - React Native and Expo
 
 ### Database References (references/databases/)
 - **postgresql.md** - PostgreSQL with Drizzle/Prisma, Neon/Supabase
