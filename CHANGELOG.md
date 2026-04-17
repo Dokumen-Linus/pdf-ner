@@ -98,6 +98,7 @@
 - *(web)* Annotate by searching
 - *(web)* Add search to Toolbar-dev
 - *(web)* Mode for full word selection
+- Scroll to selected annotation
 
 ### 🐛 Bug Fixes
 
@@ -451,6 +452,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(llm)* Allow claude git cmds
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
