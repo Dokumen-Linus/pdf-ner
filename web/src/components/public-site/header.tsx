@@ -106,6 +106,16 @@ export default function Header() {
             >
               Pricing
             </Link>
+            <Link
+              to="/about"
+              className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
+              activeProps={{
+                className:
+                  "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
+              }}
+            >
+              About
+            </Link>
           </nav>
 
           {/* Desktop Auth (Right) */}
@@ -264,6 +274,13 @@ export default function Header() {
             className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
           >
             Pricing
+          </Link>
+          <Link
+            to="/about"
+            onClick={() => setIsOpen(false)}
+            className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+          >
+            About
           </Link>
           {session ? (
             <>
