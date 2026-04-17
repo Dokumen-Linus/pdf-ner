@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react"
+import { FormEvent, useState } from "react"
 import { PdfAnnotationSubtype } from "@embedpdf/models"
 import { useExportCapability } from "@embedpdf/plugin-export/react"
 import { useRotateCapability } from "@embedpdf/plugin-rotate/react"
@@ -33,17 +33,13 @@ const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
   const { state: searchState, provides: searchScope } = useSearch(activeDocumentId ?? "")
 
   const { annoCapability, annoState } = usePluginStore()
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState(searchState.query)
 
   const handleDelete = () => {
     if (annoState?.selectedUid) {
       annoCapability?.deleteAnnotation(annoState.selectedUid)
     }
   }
-
-  useEffect(() => {
-    setSearchQuery(searchState.query)
-  }, [searchState.query])
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -232,7 +228,7 @@ const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
       <button
         onClick={() => {
           let patch: Partial<PdfTextMarkupAnnotationObject> = {}
-          patch.color = "red"
+          patch.strokeColor = "red"
           patch.opacity = 0.5
           patch.type = PdfAnnotationSubtype.HIGHLIGHT
           if (!annoState || !annoState.activeDocumentId) return
@@ -249,4 +245,5 @@ const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
     </div>
   )
 }
+
 export default Toolbar
