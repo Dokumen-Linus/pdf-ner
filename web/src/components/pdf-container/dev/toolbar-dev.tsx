@@ -16,9 +16,16 @@ import {
 import { m } from "@/integrations/paraglide/messages.js"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import type { PdfTextMarkupAnnotationObject, Subtype } from "../plugin-annotation-2"
+import ToolbarToggleButton from "../toolbar-toggle-button"
 import { useZoomCapability } from "../plugin-zoom-2"
 
-const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
+interface ToolbarProps {
+  canRotate: boolean
+  isSidebarOpen: boolean
+  onToggleSidebar: () => void
+}
+
+const Toolbar = ({ canRotate, isSidebarOpen, onToggleSidebar }: ToolbarProps) => {
   const { provides: exportCapability } = useExportCapability()
   const { provides: zoomCapability } = useZoomCapability()
   const { provides: rotateCapability } = useRotateCapability()
@@ -52,6 +59,10 @@ const Toolbar = ({ canRotate }: { canRotate: boolean }) => {
 
   return (
     <div className="mt-4 mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
+      <ToolbarToggleButton isSidebarOpen={isSidebarOpen} onToggleSidebar={onToggleSidebar} />
+
+      <div className="h-6 w-px bg-gray-200" />
+
       {tools.map((tool) => (
         <button
           key={tool.id}

@@ -202,6 +202,7 @@
   "pdf_toolbar_rotate_ccw": "Rotation antihoraire",
   "pdf_toolbar_rotate_cw": "Rotation horaire",
   "pdf_toolbar_download": "Télécharger le PDF annoté",
+  "pdf_toolbar_toggle_thumbnails": "Afficher ou masquer les miniatures",
   "pdf_toolbar_delete": "Supprimer l'annotation",
   "entity_table_col_subtype": "Sous-type",
   "entity_table_col_color": "Couleur",
