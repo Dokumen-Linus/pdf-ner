@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**70 components** (react)
+**71 components** (react)
 
 ## Components
 
@@ -72,6 +72,7 @@
 - **Route** — `web/src/routes/_private/projects.$projectId_.labelling.tsx`
 - **Route** — `web/src/routes/_private/projects.index.tsx`
 - **Route** — `web/src/routes/_private.tsx`
+- **Route** — `web/src/routes/_public/about.tsx`
 - **Route** — `web/src/routes/_public/demo.tsx`
 - **App** — `web/src/routes/_public/index.tsx`
 - **Route** — `web/src/routes/_public/pricing.tsx`

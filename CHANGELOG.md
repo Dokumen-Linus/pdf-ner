@@ -93,6 +93,7 @@
 - *(web)* Migrate from uploadthing to avatar_url api #38
 - *(web)* Auto-login after email verification
 - Fix profile page layout
+- *(web)* Placeholder about page
 
 ### 🐛 Bug Fixes
 
@@ -445,6 +446,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(llm)* Allow claude git cmds
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
