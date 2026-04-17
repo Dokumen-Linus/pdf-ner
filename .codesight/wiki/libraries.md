@@ -2,12 +2,13 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**20 library files** across 4 modules
+**27 library files** across 5 modules
 
-## Web (13 files)
+## Web (14 files)
 
 - `web/src/db-fns/web/annotations.ts` — LabellingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
 - `web/src/db-fns/api/_helpers.server.ts` — requireWorkspaceUser, requireUserId, getProjectAccessForCurrentUser, requireProjectAccess, requireProjectOwnership, requirePdfAccess, …
+- `web/src/observability/fetch.ts` — buildObservedHeaders, observedApiFetch, withObservedRequest, withObservedResponse
 - `web/scripts/generate_full_package_json.py` — strip_caret_tilde, collect_packages, main
 - `web/tanstack-start-docs/download_tanstack_guide.py` — gh_get, download_dir, main
 - `web/public/example-pdfs/federal-register/get_first_page.py` — extract_first_page, main
@@ -19,6 +20,15 @@
 - `web/src/lib/cookies/getCookie.ts` — getCookie
 - `web/src/lib/misc/uuid.ts` — isUuidV4
 - `web/src/lib/shadcn-ui/utils.ts` — cn
+
+## Otel_py (6 files)
+
+- `packages/otel_py/otel_py/instrumentation.py` — record_http_request, record_celery_task_event, record_llm_call, observe_postgres_operation, observe_redis_operation
+- `packages/otel_py/otel_py/context.py` — bind_context, clear_context, get_context, get_context_value
+- `packages/otel_py/otel_py/tracing.py` — extract_carrier, inject_carrier, trace_headers, start_span
+- `packages/otel_py/otel_py/logging.py` — configure_logging, JsonLogFormatter, PlainLogFormatter
+- `packages/otel_py/otel_py/metrics.py` — get_metrics_registry, MetricsRegistry
+- `packages/otel_py/otel_py/config.py` — ObservabilityConfig
 
 ## Db (4 files)
 

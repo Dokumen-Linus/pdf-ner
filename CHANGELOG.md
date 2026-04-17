@@ -99,6 +99,8 @@
 - *(web)* Add search to Toolbar-dev
 - *(web)* Mode for full word selection
 - Scroll to selected annotation
+- *(web)* Add observability
+- *(pacakges)* Otel_py
 
 ### 🐛 Bug Fixes
 
@@ -165,12 +167,14 @@
 - Subscription changes
 - *(web)* Wrong variable order
 - Deprecated color, remove synchronous state
+- *(web)* Form typing
 
 ### 💼 Other
 
 - Run npm i
 - Removed invalid tsconfig rule
 - Add py scripts for file generation
+- Add nginx proxy manager
 
 ### 🚜 Refactor
 
@@ -276,6 +280,7 @@
 - *(web)* Tanstack start
 - *(web)* Tanstack-start-docs
 - *(db)* "development mode"
+- *(packages)* Otel_py/README.md
 
 ### ⚡ Performance
 
@@ -324,6 +329,10 @@
 - *(api)* Better abort on error for S3 creation #67
 - *(web)* Move functions server side
 - *(web)* PdfContainer linting and best react practices
+- *(web)* Migrate from Resend to AWS SES #37
+- *(web)* Better tile-img.tsx react usage
+- *(api)* Use otel_py
+- *(wk)* Use otel_py
 
 ### 🎨 Styling
 
@@ -389,6 +398,7 @@
 - *(web)* Fix mocks/integration.test.ts
 - *(web)* New pdf uplaod
 - *(db)* Add script to setup db on windows
+- *(web)* Observability
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -452,6 +462,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(llm)* Allow claude git cmds
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]

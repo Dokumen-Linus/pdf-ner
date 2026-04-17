@@ -19,16 +19,18 @@ Structural map compiled from source code via AST. No LLM — deterministic, 200m
 - [Optimize-prompt](./optimize-prompt.md)
 - [Pdfs](./pdfs.md)
 - [Report-to-stripe](./report-to-stripe.md)
+- [Test_telemetry](./test_telemetry.md)
 - [Usage](./usage.md)
+- [Infra](./infra.md)
 - [Ui](./ui.md)
 - [Libraries](./libraries.md)
 
 ## Quick Stats
 
-- Routes: **13**
+- Routes: **18**
 - Models: **1**
-- Components: **72**
-- Env vars: **14** required, **23** with defaults
+- Components: **78**
+- Env vars: **21** required, **23** with defaults
 
 ## How to Use
 
@@ -55,4 +57,4 @@ These exist in your codebase but are **not** reflected in wiki articles:
 When in doubt, search the source. The wiki is a starting point, not a complete inventory.
 
 ---
-_Last compiled: 2026-04-17 · 15 articles · [codesight](https://github.com/Houseofmvps/codesight)_
+_Last compiled: 2026-04-17 · 17 articles · [codesight](https://github.com/Houseofmvps/codesight)_

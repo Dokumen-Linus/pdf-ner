@@ -8,7 +8,7 @@
 
 ## Scale
 
-13 API routes · 1 database models · 72 UI components · 20 library files · 19 middleware layers · 37 environment variables
+18 API routes · 1 database models · 78 UI components · 27 library files · 19 middleware layers · 44 environment variables
 
 ## Subsystems
 
@@ -21,13 +21,15 @@
 - **[Optimize-prompt](./optimize-prompt.md)** — 2 routes — touches: cache
 - **[Pdfs](./pdfs.md)** — 2 routes — touches: auth, upload
 - **[Report-to-stripe](./report-to-stripe.md)** — 1 routes — touches: db, payment
+- **[Test_telemetry](./test_telemetry.md)** — 1 routes — touches: cache
 - **[Usage](./usage.md)** — 1 routes — touches: db, payment
+- **[Infra](./infra.md)** — 4 routes — touches: db, cache
 
 **Database:** drizzle, 1 models — see [database.md](./database.md)
 
-**UI:** 72 components (react) — see [ui.md](./ui.md)
+**UI:** 78 components (react) — see [ui.md](./ui.md)
 
-**Libraries:** 20 files — see [libraries.md](./libraries.md)
+**Libraries:** 27 files — see [libraries.md](./libraries.md)
 
 ## High-Impact Files
 
@@ -36,9 +38,9 @@ Changes to these files have the widest blast radius across the codebase:
 - `web/src/components/pdf-container/plugin-viewport-2/index.ts` — imported by **13** files
 - `web/src/components/pdf-container/plugin-scroll-2/index.ts` — imported by **10** files
 - `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **10** files
+- `/config.py` — imported by **7** files
 - `web/src/components/pdf-container/plugin-scroll-2/lib/types.ts` — imported by **7** files
 - `web/src/components/pdf-container/plugin-selection-2/lib/types.ts` — imported by **7** files
-- `web/src/db/schemas/web/projects.ts` — imported by **7** files
 
 ## Required Environment Variables
 
@@ -48,13 +50,13 @@ Changes to these files have the widest blast radius across the codebase:
 - `AVATARS_AWS_ENDPOINT_URL` — `infra/.env.example`
 - `AVATARS_AWS_SECRET_ACCESS_KEY` — `infra/.env.example`
 - `AVATARS_BUCKET` — `infra/.env.example`
+- `AWS_ACCESS_KEY_ID` — `infra/.env.example`
+- `AWS_ENDPOINT_URL` — `infra/.env.example`
+- `AWS_SECRET_ACCESS_KEY` — `infra/.env.example`
 - `CI` — `web/playwright.config.ts`
+- `DEPLOYMENT` — `packages/otel_py/otel_py/config.py`
 - `DEV` — `web/src/client.tsx`
-- `GOOGLE_AI_API_KEY` — `workers/.env.example`
-- `OPENAI_API_KEY` — `workers/.env.example`
-- `SSR` — `web/src/routes/_private.tsx`
-- `STRIPE_SECRET_KEY` — `workers/.env.example`
-- _...2 more_
+- _...9 more_
 
 ---
 _Back to [index.md](./index.md) · Generated 2026-04-17_

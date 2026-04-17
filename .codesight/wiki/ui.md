@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**72 components** (react)
+**78 components** (react)
 
 ## Components
 
@@ -56,6 +56,11 @@
 - **ItemGroup** — props: className — `web/src/components/shadcn-ui/item.tsx`
 - **Kbd** — props: className — `web/src/components/shadcn-ui/kbd.tsx`
 - **Spinner** — props: className — `web/src/components/shadcn-ui/spinner.tsx`
+- **ContactAutoReply** — props: name — `web/src/emails/contact-auto-reply.tsx`
+- **ContactNotification** — props: name, email, message — `web/src/emails/contact-notification.tsx`
+- **OrganizationInvitation** — props: invitedByName, organizationName, url — `web/src/emails/organization-invitation.tsx`
+- **ResetPassword** — props: name, url — `web/src/emails/reset-password.tsx`
+- **VerifyEmail** — props: name, url — `web/src/emails/verify-email.tsx`
 - **Provider** — props: queryClient — `web/src/integrations/tanstack-query/root-provider.tsx`
 - **Route** — `web/src/routes/__root.tsx`
 - **Route** — `web/src/routes/_auth/signin.tsx`
@@ -74,6 +79,7 @@
 - **Route** — `web/src/routes/_private/projects.index.tsx`
 - **Route** — `web/src/routes/_private.tsx`
 - **Route** — `web/src/routes/_public/about.tsx`
+- **Route** — `web/src/routes/_public/contact.tsx`
 - **Route** — `web/src/routes/_public/demo.tsx`
 - **App** — `web/src/routes/_public/index.tsx`
 - **Route** — `web/src/routes/_public/pricing.tsx`
