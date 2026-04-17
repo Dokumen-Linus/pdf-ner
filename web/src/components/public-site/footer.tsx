@@ -23,6 +23,14 @@ export default function Footer() {
           </li>
           <li>
             <Link
+              to="/about"
+              className="text-[12px] font-medium text-[#D0D1D2] hover:text-[#FFFFFF] transition-colors"
+            >
+              About
+            </Link>
+          </li>
+          <li>
+            <Link
               to="/signin"
               className="text-[12px] font-medium text-[#D0D1D2] hover:text-[#FFFFFF] transition-colors"
             >
