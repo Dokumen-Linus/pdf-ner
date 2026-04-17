@@ -14,6 +14,7 @@ dependencies = [
   "celery",
   "boto3",
   "pypdfium2",
+  "otel-py",
 ]
 
 [project.optional-dependencies]
@@ -74,3 +75,4 @@ python_files = "test_*.py"
 
 [tool.uv.sources]
 dokumen-llm-providers = { path = "../packages/llm_providers" }
+otel-py = { path = "../packages/otel_py" }

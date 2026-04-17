@@ -7,6 +7,7 @@ from .core.config import settings
 from .core.exceptions import register_exception_handlers
 from .core.lifespan import lifespan
 from .core.middleware import RequestIDMiddleware, RequestLoggingMiddleware
+from .core.telemetry import telemetry_router
 
 app = FastAPI(
     lifespan=lifespan,
@@ -34,3 +35,4 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
+app.include_router(telemetry_router)
