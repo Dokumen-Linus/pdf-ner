@@ -8,7 +8,7 @@
 
 ## Scale
 
-13 API routes · 1 database models · 71 UI components · 20 library files · 19 middleware layers · 37 environment variables
+13 API routes · 1 database models · 72 UI components · 20 library files · 19 middleware layers · 37 environment variables
 
 ## Subsystems
 
@@ -25,7 +25,7 @@
 
 **Database:** drizzle, 1 models — see [database.md](./database.md)
 
-**UI:** 71 components (react) — see [ui.md](./ui.md)
+**UI:** 72 components (react) — see [ui.md](./ui.md)
 
 **Libraries:** 20 files — see [libraries.md](./libraries.md)
 
@@ -35,7 +35,7 @@ Changes to these files have the widest blast radius across the codebase:
 
 - `web/src/components/pdf-container/plugin-viewport-2/index.ts` — imported by **13** files
 - `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **10** files
-- `web/src/components/pdf-container/plugin-scroll-2/index.ts` — imported by **8** files
+- `web/src/components/pdf-container/plugin-scroll-2/index.ts` — imported by **9** files
 - `web/src/components/pdf-container/plugin-scroll-2/lib/types.ts` — imported by **7** files
 - `web/src/components/pdf-container/plugin-selection-2/lib/types.ts` — imported by **7** files
 - `web/src/db/schemas/web/projects.ts` — imported by **7** files

@@ -2,14 +2,14 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**71 components** (react)
+**72 components** (react)
 
 ## Components
 
 - **ColorPicker** — props: value, onChange — `web/src/components/custom/color-picker.tsx`
 - **EntityTable** — props: entityTypes — `web/src/components/entity-table/components/entity-table.tsx`
 - **NotFound** — `web/src/components/not-found.tsx`
-- **Toolbar** — props: canRotate — `web/src/components/pdf-container/dev/toolbar-dev.tsx`
+- **Toolbar** — props: canRotate, isSidebarOpen, onToggleSidebar — `web/src/components/pdf-container/dev/toolbar-dev.tsx`
 - **PDFContainerClient** — props: initalDocuments, author, exportName, canRotate — `web/src/components/pdf-container/pdf-container-client.tsx`
 - **PDFContainer** — props: initalDocuments, author, exportName, canRotate — `web/src/components/pdf-container/pdf-container.tsx`
 - **PDFLoading** — `web/src/components/pdf-container/pdf-loading.tsx`
@@ -42,7 +42,8 @@
 - **Viewport** — props: documentId — `web/src/components/pdf-container/plugin-viewport-2/components/viewport.tsx`
 - **ZoomGestureWrapper** — props: documentId, style, enablePinch, enableWheel — `web/src/components/pdf-container/plugin-zoom-2/components/zoom-gesture-wrapper.tsx`
 - **RotateWrapper** — props: enabled, documentId, pageIndex, style — `web/src/components/pdf-container/rotate-wrapper.tsx`
-- **Toolbar** — props: canRotate — `web/src/components/pdf-container/toolbar.tsx`
+- **ToolbarToggleButton** — props: isSidebarOpen, onToggleSidebar — `web/src/components/pdf-container/toolbar-toggle-button.tsx`
+- **Toolbar** — props: canRotate, isSidebarOpen, onToggleSidebar — `web/src/components/pdf-container/toolbar.tsx`
 - **PluginStoreTable** — `web/src/components/plugin-store/components/dev/plugin-store-table.tsx`
 - **ProjectTabs** — props: projectId, currentStep, variant — `web/src/components/project-tabs.tsx`
 - **Chatbot** — `web/src/components/public-site/chatbot.tsx`

@@ -94,6 +94,7 @@
 - *(web)* Auto-login after email verification
 - Fix profile page layout
 - *(web)* Placeholder about page
+- Add thumbnail sidebar
 - *(web)* Annotate by searching
 - *(web)* Add search to Toolbar-dev
 
@@ -449,6 +450,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(llm)* Allow claude git cmds
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
