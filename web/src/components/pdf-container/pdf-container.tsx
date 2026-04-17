@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useCallback, useRef, useState } from "react"
 import { createPluginRegistration } from "@embedpdf/core"
 import { EmbedPDF } from "@embedpdf/core/react"
 import { usePdfiumEngine } from "@embedpdf/engines/react"
@@ -24,6 +24,8 @@ import { RenderLayer, RenderPluginPackage } from "./plugin-render-2"
 import { Scroller, ScrollPluginPackage, ScrollStrategy } from "./plugin-scroll-2"
 import { SearchLayer, SearchPluginPackage } from "./plugin-search-2"
 import { SelectionPluginPackage, TextSelection } from "./plugin-selection-2"
+import Sidebar from "./sidebar"
+import { ThumbnailPluginPackage } from "./plugin-thumbnail-2"
 import { TilingLayer, TilingPluginPackage } from "./plugin-tiling-2"
 import { Viewport, ViewportPluginPackage } from "./plugin-viewport-2"
 import { ZoomGestureWrapper, ZoomMode, ZoomPluginPackage } from "./plugin-zoom-2"
@@ -46,6 +48,10 @@ export default function PDFContainer({
   canRotate = true,
 }: PDFContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarOpen((open) => !open)
+  }, [])
   const { engine, isLoading } = usePdfiumEngine({
     worker: true,
     logger: logger,
@@ -79,6 +85,10 @@ export default function PDFContainer({
               defaultStrategy: ScrollStrategy.Vertical,
             }),
             createPluginRegistration(RenderPluginPackage),
+            createPluginRegistration(ThumbnailPluginPackage, {
+              width: 120,
+              paddingY: 10,
+            }),
             // need to register Rotate even when canRotate is false
             createPluginRegistration(RotatePluginPackage),
             createPluginRegistration(InteractionManagerPluginPackage),
@@ -110,56 +120,65 @@ export default function PDFContainer({
                     isLoaded ? (
                       <GlobalPointerProvider documentId={activeDocumentId}>
                         <PluginStoreSync />
-                        <Toolbar canRotate={canRotate} />
-                        <Viewport
-                          documentId={activeDocumentId}
-                          className="h-full w-full flex-1 overflow-hidden bg-gray-100 select-none"
-                        >
-                          <ZoomGestureWrapper documentId={activeDocumentId}>
-                            <Scroller
+                        <div className="flex h-full min-h-0 flex-col">
+                          <Toolbar
+                            canRotate={canRotate}
+                            isSidebarOpen={isSidebarOpen}
+                            onToggleSidebar={toggleSidebar}
+                          />
+                          <div className="flex min-h-0 flex-1 overflow-hidden">
+                            {isSidebarOpen ? <Sidebar documentId={activeDocumentId} /> : null}
+                            <Viewport
                               documentId={activeDocumentId}
-                              renderPage={({ pageIndex }) => (
-                                <RotateWrapper
-                                  enabled={canRotate}
+                              className="h-full min-w-0 flex-1 overflow-hidden bg-gray-100 select-none"
+                            >
+                              <ZoomGestureWrapper documentId={activeDocumentId}>
+                                <Scroller
                                   documentId={activeDocumentId}
-                                  pageIndex={pageIndex}
-                                  style={{ backgroundColor: "#fff" }}
-                                >
-                                  <PagePointerProvider
-                                    documentId={activeDocumentId}
-                                    pageIndex={pageIndex}
-                                  >
-                                    {/* RenderLayer must go first */}
-                                    <RenderLayer
+                                  renderPage={({ pageIndex }) => (
+                                    <RotateWrapper
+                                      enabled={canRotate}
                                       documentId={activeDocumentId}
                                       pageIndex={pageIndex}
-                                      style={{ pointerEvents: "none" }}
-                                    />
-                                    <TilingLayer
-                                      documentId={activeDocumentId}
-                                      pageIndex={pageIndex}
-                                      style={{ pointerEvents: "none" }}
-                                    />
-                                    <TextSelection
-                                      documentId={activeDocumentId}
-                                      pageIndex={pageIndex}
-                                    />
-                                    <AnnotationLayer
-                                      documentId={activeDocumentId}
-                                      pageIndex={pageIndex}
-                                    />
-                                    <SearchLayer
-                                      documentId={activeDocumentId}
-                                      pageIndex={pageIndex}
-                                      highlightColor={"#FFFF00"}
-                                      activeHighlightColor={"#FFFF00"}
-                                    />
-                                  </PagePointerProvider>
-                                </RotateWrapper>
-                              )}
-                            />
-                          </ZoomGestureWrapper>
-                        </Viewport>
+                                      style={{ backgroundColor: "#fff" }}
+                                    >
+                                      <PagePointerProvider
+                                        documentId={activeDocumentId}
+                                        pageIndex={pageIndex}
+                                      >
+                                        {/* RenderLayer must go first */}
+                                        <RenderLayer
+                                          documentId={activeDocumentId}
+                                          pageIndex={pageIndex}
+                                          style={{ pointerEvents: "none" }}
+                                        />
+                                        <TilingLayer
+                                          documentId={activeDocumentId}
+                                          pageIndex={pageIndex}
+                                          style={{ pointerEvents: "none" }}
+                                        />
+                                        <TextSelection
+                                          documentId={activeDocumentId}
+                                          pageIndex={pageIndex}
+                                        />
+                                        <AnnotationLayer
+                                          documentId={activeDocumentId}
+                                          pageIndex={pageIndex}
+                                        />
+                                        <SearchLayer
+                                          documentId={activeDocumentId}
+                                          pageIndex={pageIndex}
+                                          highlightColor={"#FFFF00"}
+                                          activeHighlightColor={"#FFFF00"}
+                                        />
+                                      </PagePointerProvider>
+                                    </RotateWrapper>
+                                  )}
+                                />
+                              </ZoomGestureWrapper>
+                            </Viewport>
+                          </div>
+                        </div>
                       </GlobalPointerProvider>
                     ) : (
                       // <h1>DocumentContent loading</h1>

@@ -202,6 +202,7 @@
   "pdf_toolbar_rotate_ccw": "Rotate Counter Clockwise",
   "pdf_toolbar_rotate_cw": "Rotate Clockwise",
   "pdf_toolbar_download": "Download Annotated PDF",
+  "pdf_toolbar_toggle_thumbnails": "Toggle thumbnails",
   "pdf_toolbar_delete": "Delete Selected Annotation",
   "entity_table_col_subtype": "Subtype",
   "entity_table_col_color": "Color",
