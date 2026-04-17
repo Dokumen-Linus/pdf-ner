@@ -143,6 +143,13 @@ export interface EmptySpaceClickEvent {
 
 export interface EnableForModeOptions {
   /**
+   * The text selection granularity for this mode.
+   * `glyph` preserves the existing per-character behavior.
+   * `word` snaps selection to contiguous non-separator glyphs.
+   * @default "glyph"
+   */
+  selectionMode?: "glyph" | "word"
+  /**
    * Whether to show selection rects in the SelectionLayer.
    * @deprecated Use `showSelectionRects` instead.
    * @default true

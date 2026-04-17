@@ -12,8 +12,10 @@ import {
   Task,
 } from "@embedpdf/models"
 import {
+  EmbedPdfPointerEvent,
   InteractionManagerCapability,
   InteractionManagerPlugin,
+  PointerEventHandlersWithLifecycle,
 } from "../../plugin-interaction-manager-2"
 import {
   cachePageGeometry,
@@ -28,7 +30,10 @@ import {
   startSelection,
 } from "./actions"
 import { createMarqueeSelectionHandler } from "./handlers/marquee-selection.handler"
-import { createTextSelectionHandler } from "./handlers/text-selection.handler"
+import {
+  createTextSelectionHandler,
+  TextSelectionHandlerOptions,
+} from "./handlers/text-selection.handler"
 import { initialSelectionDocumentState } from "./reducer"
 import * as selector from "./selectors"
 import {
@@ -54,7 +59,13 @@ import {
   SelectionState,
   TextRetrievedEvent,
 } from "./types"
-import { rectsWithinSlice, sliceBounds } from "./utils"
+import {
+  compareGlyphPointers,
+  rectsWithinSlice,
+  sliceBounds,
+  wordBoundsAt,
+} from "./utils"
+import { createWordSelectionHandler } from "./handlers/word-selection.handler"
 
 export class SelectionPlugin extends BasePlugin<
   SelectionPluginConfig,
@@ -70,6 +81,11 @@ export class SelectionPlugin extends BasePlugin<
   /* interactive state, per document */
   private selecting = new Map<string, boolean>()
   private anchor = new Map<string, { page: number; index: number } | undefined>()
+  private anchorWord = new Map<
+    string,
+    { start: { page: number; index: number }; end: { page: number; index: number } } | undefined
+  >()
+  private selectionMode = new Map<string, "glyph" | "word">()
 
   /** Tracks the page a marquee drag started on, per document */
   private marqueePage = new Map<string, number>()
@@ -195,6 +211,8 @@ export class SelectionPlugin extends BasePlugin<
     this.pageCallbacks.set(documentId, new Map())
     this.selecting.set(documentId, false)
     this.anchor.set(documentId, undefined)
+    this.anchorWord.set(documentId, undefined)
+    this.selectionMode.set(documentId, "glyph")
   }
 
   protected override onDocumentClosed(documentId: string): void {
@@ -203,6 +221,8 @@ export class SelectionPlugin extends BasePlugin<
     this.pageCallbacks.delete(documentId)
     this.selecting.delete(documentId)
     this.anchor.delete(documentId)
+    this.anchorWord.delete(documentId)
+    this.selectionMode.delete(documentId)
     this.marqueePage.delete(documentId)
     this.selChange$.clearScope(documentId)
     this.textRetrieved$.clearScope(documentId)
@@ -342,8 +362,7 @@ export class SelectionPlugin extends BasePlugin<
       boundingRect: selector.selectBoundingRectForPage(docState, pageIndex),
     })
 
-    // Create text selection handler
-    const textHandler = createTextSelectionHandler({
+    const textSelectionHandlerOptions: TextSelectionHandlerOptions = {
       getGeometry: () => this.getDocumentState(documentId).geometry[pageIndex],
       isEnabled: (modeId) => {
         const config = enabledModes?.get(modeId)
@@ -360,12 +379,29 @@ export class SelectionPlugin extends BasePlugin<
           ? interactionScope.setCursor("selection-text", cursor, 10)
           : interactionScope.removeCursor("selection-text"),
       onEmptySpaceClick: (modeId) => this.emptySpaceClick$.emit(documentId, { pageIndex, modeId }),
-    })
+    }
+
+    const textHandler = createTextSelectionHandler(textSelectionHandlerOptions)
+    const wordHandler = createWordSelectionHandler(textSelectionHandlerOptions)
+    const pickTextHandler = (modeId: string) =>
+      this.getSelectionMode(documentId, modeId) === "word" ? wordHandler : textHandler
+
+    const selectionHandler: PointerEventHandlersWithLifecycle<EmbedPdfPointerEvent> = {
+      onPointerDown: (point: Position, evt: EmbedPdfPointerEvent, modeId: string) =>
+        pickTextHandler(modeId).onPointerDown?.(point, evt, modeId),
+      onPointerMove: (point: Position, evt: EmbedPdfPointerEvent, modeId: string) =>
+        pickTextHandler(modeId).onPointerMove?.(point, evt, modeId),
+      onPointerUp: (point: Position, evt: EmbedPdfPointerEvent, modeId: string) =>
+        pickTextHandler(modeId).onPointerUp?.(point, evt, modeId),
+      onPointerCancel: (point: Position, evt: EmbedPdfPointerEvent, modeId: string) =>
+        pickTextHandler(modeId).onPointerCancel?.(point, evt, modeId),
+      onHandlerActiveEnd: (modeId: string) => pickTextHandler(modeId).onHandlerActiveEnd?.(modeId),
+    }
 
     // Register text selection with registerAlways - any plugin can enable it for their mode
     const unregisterHandlers = this.interactionManagerCapability.registerAlways({
       scope: { type: "page", documentId, pageIndex },
-      handlers: textHandler,
+      handlers: selectionHandler,
     })
 
     // Return cleanup function
@@ -511,8 +547,27 @@ export class SelectionPlugin extends BasePlugin<
 
   /* ── selection state updates ───────────────────────────── */
   private beginSelection(documentId: string, page: number, index: number, modeId: string) {
+    const selectionMode = this.getSelectionMode(documentId, modeId)
     this.selecting.set(documentId, true)
-    this.anchor.set(documentId, { page, index })
+    this.selectionMode.set(documentId, selectionMode)
+
+    if (selectionMode === "word") {
+      const bounds = this.resolveWordBounds(documentId, page, index)
+      if (bounds) {
+        this.anchorWord.set(documentId, {
+          start: { page, index: bounds.start },
+          end: { page, index: bounds.end },
+        })
+        this.anchor.set(documentId, { page, index: bounds.start })
+      } else {
+        this.anchorWord.set(documentId, undefined)
+        this.anchor.set(documentId, { page, index })
+      }
+    } else {
+      this.anchorWord.set(documentId, undefined)
+      this.anchor.set(documentId, { page, index })
+    }
+
     this.dispatch(startSelection(documentId))
     this.beginSelection$.emit(documentId, { page, index, modeId })
   }
@@ -527,19 +582,39 @@ export class SelectionPlugin extends BasePlugin<
   private clearSelection(documentId: string, _modeId?: string) {
     this.selecting.set(documentId, false)
     this.anchor.set(documentId, undefined)
+    this.anchorWord.set(documentId, undefined)
+    this.selectionMode.set(documentId, "glyph")
     this.dispatch(clearSelection(documentId))
     this.selChange$.emit(documentId, null)
     this.notifyAllPages(documentId)
   }
 
-  private updateSelection(documentId: string, page: number, index: number, _modeId: string) {
+  private updateSelection(documentId: string, page: number, index: number, modeId: string) {
     if (!this.selecting.get(documentId) || !this.anchor.get(documentId)) return
 
-    const a = this.anchor.get(documentId)!
-    const forward = page > a.page || (page === a.page && index >= a.index)
+    const selectionMode = this.selectionMode.get(documentId) ?? this.getSelectionMode(documentId, modeId)
+    let start: { page: number; index: number }
+    let end: { page: number; index: number }
 
-    const start = forward ? a : { page, index }
-    const end = forward ? { page, index } : a
+    if (selectionMode === "word") {
+      const anchorWord = this.anchorWord.get(documentId)
+      if (!anchorWord) return
+
+      const currentBounds = this.resolveWordBounds(documentId, page, index)
+      if (!currentBounds) return
+
+      const currentWordEnd = { page, index: currentBounds.end }
+      const backward = compareGlyphPointers(currentWordEnd, anchorWord.start) < 0
+
+      start = backward ? { page, index: currentBounds.start } : anchorWord.start
+      end = backward ? anchorWord.end : currentWordEnd
+      this.anchor.set(documentId, backward ? anchorWord.end : anchorWord.start)
+    } else {
+      const a = this.anchor.get(documentId)!
+      const forward = page > a.page || (page === a.page && index >= a.index)
+      start = forward ? a : { page, index }
+      end = forward ? { page, index } : a
+    }
 
     const range = { start, end }
     this.dispatch(setSelection(documentId, range))
@@ -568,6 +643,17 @@ export class SelectionPlugin extends BasePlugin<
 
     this.dispatch(setRects(documentId, allRects))
     this.dispatch(setSlices(documentId, allSlices))
+  }
+
+  private getSelectionMode(documentId: string, modeId: string): "glyph" | "word" {
+    const config = this.enabledModesPerDoc.get(documentId)?.get(modeId)
+    return config?.selectionMode === "word" ? "word" : "glyph"
+  }
+
+  private resolveWordBounds(documentId: string, page: number, index: number) {
+    const geometry = this.getDocumentState(documentId).geometry[page]
+    if (!geometry) return null
+    return wordBoundsAt(geometry, index)
   }
 
   private getSelectedText(documentId: string): PdfTask<string[]> {

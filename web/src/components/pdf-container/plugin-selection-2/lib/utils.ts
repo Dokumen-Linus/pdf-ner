@@ -1,5 +1,8 @@
-import { PdfPageGeometry, Position, Rect } from "@embedpdf/models"
-import { SelectionRangeX } from "./types"
+import { PdfGlyphSlim, PdfPageGeometry, Position, Rect } from "@embedpdf/models"
+import { GlyphPointer, SelectionRangeX } from "./types"
+
+const GLYPH_FLAG_SPACE = 1
+const GLYPH_FLAG_EMPTY = 2
 
 /**
  * Hit-test helper using runs
@@ -27,6 +30,62 @@ export function glyphAt(geo: PdfPageGeometry, pt: Position) {
     }
   }
   return -1
+}
+
+export function compareGlyphPointers(a: GlyphPointer, b: GlyphPointer): number {
+  if (a.page !== b.page) {
+    return a.page - b.page
+  }
+
+  return a.index - b.index
+}
+
+export function isSeparatorGlyph(glyph: PdfGlyphSlim): boolean {
+  if ((glyph.flags & GLYPH_FLAG_EMPTY) !== 0) return true
+  if ((glyph.flags & GLYPH_FLAG_SPACE) !== 0) return true
+
+  if (glyph.width <= 0 || glyph.height <= 0) return true
+
+  const hasTightBounds = glyph.tightWidth !== undefined || glyph.tightHeight !== undefined
+  if (!hasTightBounds) return false
+
+  return (glyph.tightWidth ?? 0) <= 0 && (glyph.tightHeight ?? 0) <= 0
+}
+
+function glyphAtIndex(geo: PdfPageGeometry, glyphIndex: number): PdfGlyphSlim | null {
+  for (const run of geo.runs) {
+    const runStart = run.charStart
+    const runEnd = runStart + run.glyphs.length - 1
+
+    if (glyphIndex < runStart || glyphIndex > runEnd) continue
+    return run.glyphs[glyphIndex - runStart] ?? null
+  }
+
+  return null
+}
+
+export function wordBoundsAt(
+  geo: PdfPageGeometry,
+  glyphIndex: number,
+): { start: number; end: number } | null {
+  const glyph = glyphAtIndex(geo, glyphIndex)
+  if (!glyph || isSeparatorGlyph(glyph)) return null
+
+  let start = glyphIndex
+  while (true) {
+    const previousGlyph = glyphAtIndex(geo, start - 1)
+    if (!previousGlyph || isSeparatorGlyph(previousGlyph)) break
+    start--
+  }
+
+  let end = glyphIndex
+  while (true) {
+    const nextGlyph = glyphAtIndex(geo, end + 1)
+    if (!nextGlyph || isSeparatorGlyph(nextGlyph)) break
+    end++
+  }
+
+  return { start, end }
 }
 
 /**
