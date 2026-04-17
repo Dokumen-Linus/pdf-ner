@@ -9,7 +9,6 @@ export const env = createEnv({
     WEB_DATABASE_URL: z.string(),
     BETTER_AUTH_SECRET: z.string(),
     BETTER_AUTH_URL: z.url(),
-    RESEND_API_KEY: z.string(),
     FROM_EMAIL: z.email(),
     MY_EMAIL: z.email(),
     STRIPE_SECRET_KEY: z.string(),
