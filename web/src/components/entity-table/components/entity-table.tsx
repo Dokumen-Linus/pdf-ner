@@ -92,6 +92,28 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
   const activeDocumentId = annoState?.activeDocumentId ?? null
   const activeDoc = activeDocumentId ? annoState?.documents[activeDocumentId] : null
 
+  const focusEntityType = (entityTypeName: string) => {
+    activateEntityType(entityTypeName)
+
+    if (!activeDocumentId) return
+
+    const annotationId = activeDoc?.byEntityType?.[entityTypeName]?.[0]
+    const annotation = annotationId ? activeDoc?.byUid?.[annotationId] : null
+    if (!annotation) return
+
+    annoCapability?.selectAnnotation(annotation.id)
+    scrollCapability?.forDocument(activeDocumentId).scrollToPage({
+      pageNumber: annotation.pageIndex + 1,
+      pageCoordinates: {
+        x: annotation.rect.origin.x + annotation.rect.size.width / 2,
+        y: annotation.rect.origin.y + annotation.rect.size.height / 2,
+      },
+      alignX: 50,
+      alignY: 50,
+      behavior: "smooth",
+    })
+  }
+
   const setFeedback = (entityTypeName: string, value: string) => {
     startTransition(() => {
       setSearchFeedback((current) => ({
@@ -260,13 +282,13 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
                   }}
                 />
               </TableCell>
-              <TableCell className="cursor-pointer" onClick={() => activateEntityType(name)}>
+              <TableCell className="cursor-pointer" onClick={() => focusEntityType(name)}>
                 {name}
               </TableCell>
               <TableCell
                 className="cursor-pointer"
                 onClick={() => {
-                  activateEntityType(name)
+                  focusEntityType(name)
                 }}
               >
                 {isActive ? (

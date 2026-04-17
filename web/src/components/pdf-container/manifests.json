@@ -95,7 +95,9 @@
       "interaction-manager",
       "selection"
     ],
-    "optional": []
+    "optional": [
+      "scroll"
+    ]
   },
   {
     "name": "Export Plugin",

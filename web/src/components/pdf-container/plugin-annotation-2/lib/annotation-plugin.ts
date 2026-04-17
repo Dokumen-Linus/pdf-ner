@@ -18,6 +18,7 @@ import {
   InteractionManagerCapability,
   InteractionManagerPlugin,
 } from "../../plugin-interaction-manager-2"
+import { ScrollCapability, ScrollPlugin } from "../../plugin-scroll-2"
 import { SelectionCapability, SelectionPlugin } from "../../plugin-selection-2"
 import type { AnnotationAction } from "./actions"
 import {
@@ -47,6 +48,7 @@ export interface AnnotationPluginConfig extends BasePluginConfig {
   author?: string
   deactivateSubtypeAfterCreate?: boolean
   selectAfterCreate?: boolean
+  scrollToSelectedAnnotation?: boolean
 }
 
 // ***PLUGIN CAPABILITY***
@@ -92,6 +94,7 @@ export class AnnotationPlugin extends BasePlugin<
   public readonly config: AnnotationPluginConfig
   private readonly state$ = createBehaviorEmitter<AnnotationState>()
   private readonly interactionManager: InteractionManagerCapability | null
+  private readonly scrollCapability: ScrollCapability | null
   private readonly selection: SelectionCapability | null
 
   private timeline: Command[] = []
@@ -102,6 +105,7 @@ export class AnnotationPlugin extends BasePlugin<
     this.config = config
 
     this.selection = registry.getPlugin<SelectionPlugin>("selection")?.provides() ?? null
+    this.scrollCapability = registry.getPlugin<ScrollPlugin>("scroll")?.provides() ?? null
     this.interactionManager =
       registry.getPlugin<InteractionManagerPlugin>("interaction-manager")?.provides() ?? null
   }
@@ -267,6 +271,29 @@ export class AnnotationPlugin extends BasePlugin<
     }
     if (prev.activeSubtype && !next.activeSubtype) {
       this.interactionManager?.activateDefaultMode()
+    }
+
+    if (
+      this.config.scrollToSelectedAnnotation !== false &&
+      prev.selectedUid !== next.selectedUid &&
+      next.selectedUid &&
+      next.activeDocumentId
+    ) {
+      const annotation = next.documents[next.activeDocumentId]?.byUid[next.selectedUid]
+      if (annotation) {
+        this.scrollCapability
+          ?.forDocument(next.activeDocumentId)
+          .scrollToPage({
+            pageNumber: annotation.pageIndex + 1,
+            pageCoordinates: {
+              x: annotation.rect.origin.x + annotation.rect.size.width / 2,
+              y: annotation.rect.origin.y + annotation.rect.size.height / 2,
+            },
+            alignX: 50,
+            alignY: 50,
+            behavior: "smooth",
+          })
+      }
     }
 
     this.state$.emit(next)

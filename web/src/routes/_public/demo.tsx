@@ -15,8 +15,8 @@ function DemoPage() {
         <PDFContainer
           initalDocuments={[
             {
-              name: "Federal Register 2025-19982",
-              url: "https://raw.githubusercontent.com/optimalcharb/pdf-entity-labeling/cdc90a5392c72982e80c9bf08e330d7b05d29c5d/public/example-pdfs/federal-register/2025-19982_first_page.pdf",
+              name: "Federal Register 2025-21665",
+              url: "https://raw.githubusercontent.com/optimalcharb/pdf-entity-labeling/feaa8873a60883cf072a604383e6986f8ca82285/public/example-pdfs/federal-register/2025-21665.pdf",
             },
             {
               name: "Federal Register 2025-21665",
