@@ -7,6 +7,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { requireUserId } from "@/db-fns/api/_helpers.server"
 import { updateUser } from "@/db-fns/web/users"
 import { env } from "@/env.server"
+import { observedApiFetch } from "@/observability/fetch"
 
 const MAX_BYTES = 2 * 1024 * 1024 // 2 MB
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"])
@@ -60,7 +61,11 @@ export async function avatarUploadHandler({ request }: { request: Request }): Pr
       body: request.body,
       duplex: "half",
     }
-    const forwarded = await fetch(`${env.API_URL}/api/v1/avatar-storage/avatars`, forwardInit)
+    const forwarded = await observedApiFetch(
+      `${env.API_URL}/api/v1/avatar-storage/avatars`,
+      forwardInit,
+      request.headers,
+    )
 
     if (!forwarded.ok) {
       const text = await forwarded.text()

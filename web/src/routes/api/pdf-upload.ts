@@ -11,6 +11,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { requireProjectOwnership, requireUserId } from "@/db-fns/api/_helpers.server"
 import { env } from "@/env.server"
+import { observedApiFetch } from "@/observability/fetch"
 
 const MAX_BYTES = 50 * 1024 * 1024 // 50 MB, matches FastAPI and client cap.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -91,7 +92,7 @@ export async function uploadHandler({ request }: { request: Request }): Promise<
       body: request.body,
       duplex: "half",
     }
-    const forwarded = await fetch(forwardUrl, forwardInit)
+    const forwarded = await observedApiFetch(forwardUrl, forwardInit, request.headers)
 
     const bodyText = await forwarded.text()
     const contentType = forwarded.headers.get("content-type") ?? "application/json"
