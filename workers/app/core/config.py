@@ -12,6 +12,7 @@ class Environment(Enum):
 
 class Settings(BaseSettings):
     ENV: Environment = Environment.DEVELOPMENT
+    APP_VERSION: str = "0.0.0"
 
     REDIS_URL: str
     WORKERS_DATABASE_URL: str
