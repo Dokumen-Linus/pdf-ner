@@ -1,10 +1,13 @@
-import { useEffect } from "react"
+import { FormEvent, startTransition, useEffect, useState } from "react"
+import { boundingRect, SearchAllPagesResult, uuidV4 } from "@embedpdf/models"
 import { Highlighter, LineSquiggle, Strikethrough, Underline } from "lucide-react"
 import {
   PdfTextMarkupAnnotationObject,
   Subtype,
   subtypeToEnum,
 } from "@/components/pdf-container/plugin-annotation-2"
+import { Button } from "@/components/shadcn-ui/button"
+import { Input } from "@/components/shadcn-ui/input"
 import {
   Select,
   SelectContent,
@@ -30,14 +33,40 @@ function entityTypesToRecord(entityTypes: EntityType[]) {
   return Object.fromEntries(entityTypes.map((entityType) => [entityType.name, entityType]))
 }
 
+function createAnnotationFromSearchResult(
+  entityType: EntityType,
+  entityTypeName: string,
+  result: SearchAllPagesResult["results"][number],
+) {
+  const rect = boundingRect(result.rects)
+  if (!rect) return null
+
+  return {
+    type: subtypeToEnum(entityType.subtype),
+    color: entityType.color,
+    opacity: entityType.opacity,
+    rect,
+    segmentRects: result.rects,
+    pageIndex: result.pageIndex,
+    id: uuidV4(),
+    contents: result.context.match,
+    custom: {
+      entityType: entityTypeName,
+    },
+  } as PdfTextMarkupAnnotationObject
+}
+
 const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
   // annoState contains the whole AnnotationState
   // annoState?.byEntityType gives ET name -> array of UIDs of annotations
   // annoState?.byUid[uid].contents - text of annotation
-  const { annoState, annoCapability } = usePluginStore()
+  const { annoState, annoCapability, searchCapability, scrollCapability } = usePluginStore()
 
   // entityTypesByName is a record of name -> EntityType
   const { byName: entityTypesByName, setByName, patchEntityType } = useEntityTypeStore()
+  const [searchQueries, setSearchQueries] = useState<Record<string, string>>({})
+  const [searchFeedback, setSearchFeedback] = useState<Record<string, string>>({})
+  const [searchingEntityName, setSearchingEntityName] = useState<string | null>(null)
 
   // Sync the table with the entity types provided by the page.
   useEffect(() => {
@@ -60,6 +89,77 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
     })
   }
 
+  const activeDocumentId = annoState?.activeDocumentId ?? null
+  const activeDoc = activeDocumentId ? annoState?.documents[activeDocumentId] : null
+
+  const setFeedback = (entityTypeName: string, value: string) => {
+    startTransition(() => {
+      setSearchFeedback((current) => ({
+        ...current,
+        [entityTypeName]: value,
+      }))
+    })
+  }
+
+  const handleSearchCreate = async (entityTypeName: string, event?: FormEvent<HTMLFormElement>) => {
+    event?.preventDefault()
+
+    const entityType = entityTypesByName[entityTypeName]
+    const query = searchQueries[entityTypeName]?.trim() ?? ""
+
+    activateEntityType(entityTypeName)
+
+    if (!entityType || !activeDocumentId || !annoCapability || !searchCapability) {
+      setFeedback(entityTypeName, "Search is not ready yet.")
+      return
+    }
+
+    if (!query) {
+      setFeedback(entityTypeName, "Enter text to search for.")
+      return
+    }
+
+    setSearchingEntityName(entityTypeName)
+    setFeedback(entityTypeName, "")
+
+    try {
+      const searchScope = searchCapability.forDocument(activeDocumentId)
+      const result = await new Promise<SearchAllPagesResult>((resolve, reject) => {
+        searchScope.searchAllPages(query).wait(resolve, reject)
+      })
+
+      const firstMatch = result.results[0]
+      if (!firstMatch) {
+        setFeedback(entityTypeName, `No matches found for "${query}".`)
+        return
+      }
+
+      const annotation = createAnnotationFromSearchResult(entityType, entityTypeName, firstMatch)
+      if (!annotation) {
+        setFeedback(entityTypeName, "Could not create an annotation from that match.")
+        return
+      }
+
+      const existingAnnotationIds = activeDoc?.byEntityType?.[entityTypeName] || []
+      if (entityType.unique && existingAnnotationIds.length > 0) {
+        annoCapability.deleteAnnotations(existingAnnotationIds, activeDocumentId)
+      }
+
+      annoCapability.createAnnotation(annotation, activeDocumentId)
+      searchScope.setShowAllResults(false)
+      searchScope.goToResult(0)
+      scrollCapability
+        ?.forDocument(activeDocumentId)
+        .scrollToPage({ pageNumber: firstMatch.pageIndex + 1, behavior: "smooth", alignY: 15 })
+
+      setFeedback(entityTypeName, `Assigned the first match for "${query}".`)
+    } catch {
+      setFeedback(entityTypeName, "Search failed. Try selecting text instead.")
+    } finally {
+      setSearchingEntityName((current) => (current === entityTypeName ? null : current))
+    }
+  }
+
   return (
     <Table className="[&_th]:px-1.5 [&_td]:px-1.5 [&_th]:py-2.5 [&_td]:py-2">
       <TableHeader>
@@ -72,14 +172,13 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
       </TableHeader>
       <TableBody>
         {Object.entries(entityTypesByName).map(([name, entityType]) => {
-          const activeDoc = annoState?.activeDocumentId
-            ? annoState.documents[annoState.activeDocumentId]
-            : null
           const annotationUids = activeDoc?.byEntityType?.[name] || []
           const firstUid = annotationUids[0]
           const annotation = firstUid ? activeDoc?.byUid?.[firstUid] : null
           const annotationText = annotation?.contents || ""
           const isActive = annoState?.activeEntityType === name
+          const feedback = searchFeedback[name]
+          const isSearching = searchingEntityName === name
 
           return (
             <TableRow key={name}>
@@ -170,9 +269,49 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
                   activateEntityType(name)
                 }}
               >
-                {isActive
-                  ? m.entity_table_state_selecting()
-                  : annotationText || m.entity_table_state_empty()}
+                {isActive ? (
+                  <div className="flex min-w-0 flex-col gap-2">
+                    <div className="text-muted-foreground text-xs">Search or select text</div>
+                    <form
+                      className="flex items-center gap-2"
+                      onSubmit={(event) => {
+                        void handleSearchCreate(name, event)
+                      }}
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <Input
+                        value={searchQueries[name] ?? ""}
+                        placeholder="Find text in the PDF"
+                        className="h-8"
+                        onChange={(event) => {
+                          const value = event.target.value
+                          setSearchQueries((current) => ({
+                            ...current,
+                            [name]: value,
+                          }))
+                        }}
+                        onClick={(event) => event.stopPropagation()}
+                      />
+                      <Button
+                        type="submit"
+                        size="sm"
+                        variant="outline"
+                        disabled={isSearching}
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        {isSearching ? "Searching..." : "Search"}
+                      </Button>
+                    </form>
+                    <div className="text-muted-foreground text-xs">
+                      {feedback || "Or drag-select text directly in the PDF."}
+                    </div>
+                    {annotationText ? (
+                      <div className="truncate text-xs">{annotationText}</div>
+                    ) : null}
+                  </div>
+                ) : (
+                  annotationText || m.entity_table_state_empty()
+                )}
               </TableCell>
             </TableRow>
           )

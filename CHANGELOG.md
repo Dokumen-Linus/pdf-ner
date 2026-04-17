@@ -94,6 +94,8 @@
 - *(web)* Auto-login after email verification
 - Fix profile page layout
 - *(web)* Placeholder about page
+- *(web)* Annotate by searching
+- *(web)* Add search to Toolbar-dev
 
 ### 🐛 Bug Fixes
 
@@ -159,6 +161,7 @@
 - *(web)* Labeling client hydration error
 - Subscription changes
 - *(web)* Wrong variable order
+- Deprecated color, remove synchronous state
 
 ### 💼 Other
 
@@ -446,6 +449,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(llm)* Allow claude git cmds
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 

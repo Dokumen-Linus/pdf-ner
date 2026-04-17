@@ -1,22 +1,29 @@
+import { FormEvent, useState } from "react"
 import { PdfAnnotationSubtype } from "@embedpdf/models"
 import { useExportCapability } from "@embedpdf/plugin-export/react"
 import { useRotateCapability } from "@embedpdf/plugin-rotate/react"
 import {
+  ChevronLeft,
+  ChevronRight,
   Download,
   Highlighter,
   Redo2,
   RotateCcw,
   RotateCw,
+  Search,
   Trash2,
   Underline,
   Undo2,
   ZoomIn,
   ZoomOut,
 } from "lucide-react"
+import { Input } from "@/components/shadcn-ui/input"
 import { m } from "@/integrations/paraglide/messages.js"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import type { PdfTextMarkupAnnotationObject, Subtype } from "../plugin-annotation-2"
 import ToolbarToggleButton from "../toolbar-toggle-button"
+import { useActiveDocument } from "../plugin-document-manager-2"
+import { useSearch } from "../plugin-search-2"
 import { useZoomCapability } from "../plugin-zoom-2"
 
 interface ToolbarProps {
@@ -29,13 +36,24 @@ const Toolbar = ({ canRotate, isSidebarOpen, onToggleSidebar }: ToolbarProps) =>
   const { provides: exportCapability } = useExportCapability()
   const { provides: zoomCapability } = useZoomCapability()
   const { provides: rotateCapability } = useRotateCapability()
+  const { activeDocumentId } = useActiveDocument()
+  const { state: searchState, provides: searchScope } = useSearch(activeDocumentId ?? "")
 
   const { annoCapability, annoState } = usePluginStore()
+  const [searchQuery, setSearchQuery] = useState(searchState.query)
 
   const handleDelete = () => {
     if (annoState?.selectedUid) {
       annoCapability?.deleteAnnotation(annoState.selectedUid)
     }
+  }
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!searchScope) return
+    searchScope.setShowAllResults(false)
+    searchScope.startSearch()
+    searchScope.searchAllPages(searchQuery)
   }
 
   const tools = [
@@ -89,6 +107,59 @@ const Toolbar = ({ canRotate, isSidebarOpen, onToggleSidebar }: ToolbarProps) =>
           <tool.icon size={18} />
         </button>
       ))}
+
+      <div className="h-6 w-px bg-gray-200" />
+
+      <form className="flex items-center gap-2" onSubmit={handleSearchSubmit}>
+        <Input
+          value={searchQuery}
+          placeholder="Search PDF text"
+          className="h-8 w-52"
+          onChange={(event) => setSearchQuery(event.target.value)}
+        />
+        <button
+          type="submit"
+          disabled={!searchScope || searchState.loading}
+          className="rounded-md bg-gray-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-gray-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+          title="Search PDF text"
+        >
+          <Search size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={() => searchScope?.previousResult()}
+          disabled={!searchScope || searchState.total === 0}
+          className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+          title="Previous result"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={() => searchScope?.nextResult()}
+          disabled={!searchScope || searchState.total === 0}
+          className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+          title="Next result"
+        >
+          <ChevronRight size={18} />
+        </button>
+        <button
+          type="button"
+          onClick={() => searchScope?.setShowAllResults(!searchState.showAllResults)}
+          disabled={!searchScope || searchState.total === 0}
+          className="rounded-md bg-gray-100 px-3 py-1 text-xs font-medium transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+          title="Toggle all search highlights"
+        >
+          {searchState.showAllResults ? "All" : "One"}
+        </button>
+        <div className="min-w-18 text-xs text-gray-600">
+          {searchState.loading
+            ? "Searching..."
+            : searchState.total > 0
+              ? `${searchState.activeResultIndex + 1}/${searchState.total}`
+              : "0 results"}
+        </div>
+      </form>
 
       <div className="h-6 w-px bg-gray-200" />
 
@@ -168,7 +239,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, onToggleSidebar }: ToolbarProps) =>
       <button
         onClick={() => {
           let patch: Partial<PdfTextMarkupAnnotationObject> = {}
-          patch.color = "red"
+          patch.strokeColor = "red"
           patch.opacity = 0.5
           patch.type = PdfAnnotationSubtype.HIGHLIGHT
           if (!annoState || !annoState.activeDocumentId) return
@@ -185,4 +256,5 @@ const Toolbar = ({ canRotate, isSidebarOpen, onToggleSidebar }: ToolbarProps) =>
     </div>
   )
 }
+
 export default Toolbar
