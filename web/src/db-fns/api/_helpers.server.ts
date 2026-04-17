@@ -7,6 +7,7 @@ import { users } from "@/db/schemas/web/users"
 import { workersPdfs } from "@/db/schemas/workers/pdfs"
 import { env } from "@/env.server"
 import { auth } from "@/lib/auth"
+import { observedApiFetch } from "@/observability/fetch"
 
 const MANAGE_PROJECT_ROLES = new Set(["owner", "admin", "developer"])
 const LABEL_PROJECT_ROLES = new Set(["owner", "admin", "developer", "analyst"])
@@ -203,13 +204,17 @@ export async function requirePdfOwnership(pdfId: string, userId: string): Promis
 }
 
 export async function apiRequest(path: string, options: RequestInit = {}) {
-  const response = await fetch(`${env.API_URL}${path}`, {
-    ...options,
-    headers: {
-      "X-API-Key": env.API_KEY,
-      ...options.headers,
+  const response = await observedApiFetch(
+    `${env.API_URL}${path}`,
+    {
+      ...options,
+      headers: {
+        "X-API-Key": env.API_KEY,
+        ...options.headers,
+      },
     },
-  })
+    getRequestHeaders(),
+  )
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({ detail: response.statusText }))

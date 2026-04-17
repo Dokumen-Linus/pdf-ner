@@ -7,8 +7,8 @@
 #          S3 bucket (dokumen-web), IAM user with scoped S3 policy.
 #
 # Domain: dokumenai.dev (managed by Cloudflare)
-# SSL:    Cloudflare proxy (Full Strict) + Origin Certificate on EC2
-#         — no CloudFront needed, Cloudflare IS your CDN.
+# SSL:    Nginx Proxy Manager in Docker handles HTTP/HTTPS on EC2.
+#         Cloudflare remains optional as DNS/CDN in front of the instance.
 #
 # Prerequisites:
 #   - AWS CLI v2 installed and configured (aws configure)
@@ -105,7 +105,7 @@ echo ">>> 2. Creating security group..."
 
 SG_ID=$(aws ec2 create-security-group \
   --group-name dokumen-sg \
-  --description "Dokumen AI - SSH, HTTP, HTTPS" \
+  --description "Dokumen AI - SSH, HTTP, HTTPS, NPM admin" \
   --vpc-id "$VPC_ID" \
   --region "$AWS_REGION" \
   --query 'GroupId' --output text)
@@ -119,6 +119,10 @@ echo "    Allowed SSH (22) from $MY_IP"
 aws ec2 authorize-security-group-ingress --group-id "$SG_ID" --protocol tcp --port 80  --cidr 0.0.0.0/0 --region "$AWS_REGION" > /dev/null
 aws ec2 authorize-security-group-ingress --group-id "$SG_ID" --protocol tcp --port 443 --cidr 0.0.0.0/0 --region "$AWS_REGION" > /dev/null
 echo "    Allowed HTTP (80) and HTTPS (443) from 0.0.0.0/0"
+
+# Nginx Proxy Manager admin UI — your IP only
+aws ec2 authorize-security-group-ingress --group-id "$SG_ID" --protocol tcp --port 81 --cidr "$MY_IP" --region "$AWS_REGION" > /dev/null
+echo "    Allowed NPM admin UI (81) from $MY_IP"
 
 # NOTE: Ports 5432, 6379, 8000 are NOT exposed — Docker internal only.
 
@@ -323,7 +327,7 @@ SSH into your instance:
 CLOUDFLARE DNS SETUP (dokumenai.dev):
 
   Since your domain is on Cloudflare, you do NOT need CloudFront or ACM.
-  Cloudflare acts as your CDN, DDoS protection, and SSL terminator.
+  Cloudflare can sit in front of Nginx Proxy Manager as your DNS/CDN layer.
 
   1. Go to Cloudflare Dashboard → dokumenai.dev → DNS
 
@@ -334,28 +338,18 @@ CLOUDFLARE DNS SETUP (dokumenai.dev):
      A      @      $ELASTIC_IP     Proxied Auto
      A      www    $ELASTIC_IP     Proxied Auto
 
-  3. Go to SSL/TLS → Overview → set mode to "Full (Strict)"
+  3. Go to SSL/TLS → Overview → set mode to "Full" or "Full (Strict)"
+     after you have issued certificates in Nginx Proxy Manager.
 
-  4. Go to SSL/TLS → Origin Server → Create Certificate:
-     - Hostnames: dokumenai.dev, *.dokumenai.dev
-     - Validity: 15 years
-     - Download the Origin Certificate (.pem) and Private Key (.key)
+  4. In Nginx Proxy Manager:
+     - Open http://$ELASTIC_IP:81 from your allowed IP
+     - Log in to the admin UI
+     - Create a Proxy Host for dokumenai.dev (and www if needed)
+     - Forward to the Docker service name and port, e.g. `web:3000`
+     - Request a Let's Encrypt certificate from within NPM
 
-  5. On your EC2 instance, install the origin certificate:
-
-     sudo mkdir -p /etc/ssl/cloudflare
-     sudo nano /etc/ssl/cloudflare/origin.pem    # paste certificate
-     sudo nano /etc/ssl/cloudflare/origin.key     # paste private key
-     sudo chmod 600 /etc/ssl/cloudflare/origin.key
-
-  6. Update Nginx config to use the Cloudflare origin certificate
-     (replace the Let's Encrypt paths in DEPLOY.md step 6):
-
-     ssl_certificate     /etc/ssl/cloudflare/origin.pem;
-     ssl_certificate_key /etc/ssl/cloudflare/origin.key;
-
-  This is simpler than Let's Encrypt — no certbot, no renewal cron.
-  Cloudflare handles the browser-facing certificate automatically.
+  5. If you keep Cloudflare proxied, leave ports 80/443 open to the public
+     so HTTP validation and HTTPS traffic can reach Nginx Proxy Manager.
 
 ---------------------------------------------
 ENVIRONMENT VARIABLES TO SET:
@@ -375,8 +369,9 @@ NEXT STEPS:
   3. Clone the repo (DEPLOY.md step 3)
   4. Configure .env files (DEPLOY.md step 4)
   5. Build and start services (DEPLOY.md step 5)
-  6. Install Nginx + Cloudflare origin cert (see above)
+  6. Open Nginx Proxy Manager at http://$ELASTIC_IP:81 from $MY_IP
   7. Set up Cloudflare DNS records (see above)
+  8. Create proxy hosts and request certificates in NPM
 
 =============================================
 EOF

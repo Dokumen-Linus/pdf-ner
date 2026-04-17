@@ -19,6 +19,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiAvatarUploadRouteImport } from './routes/api/avatar-upload'
 import { Route as PublicPricingRouteImport } from './routes/_public/pricing'
 import { Route as PublicDemoRouteImport } from './routes/_public/demo'
+import { Route as PublicContactRouteImport } from './routes/_public/contact'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
 import { Route as PrivateBillingRouteImport } from './routes/_private/billing'
@@ -80,6 +81,11 @@ const PublicPricingRoute = PublicPricingRouteImport.update({
 const PublicDemoRoute = PublicDemoRouteImport.update({
   id: '/demo',
   path: '/demo',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicContactRoute = PublicContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => PublicRoute,
 } as any)
 const PublicAboutRoute = PublicAboutRouteImport.update({
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof PrivateBillingRoute
   '/profile': typeof PrivateProfileRoute
   '/about': typeof PublicAboutRoute
+  '/contact': typeof PublicContactRoute
   '/demo': typeof PublicDemoRoute
   '/pricing': typeof PublicPricingRoute
   '/api/avatar-upload': typeof ApiAvatarUploadRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/billing': typeof PrivateBillingRoute
   '/profile': typeof PrivateProfileRoute
   '/about': typeof PublicAboutRoute
+  '/contact': typeof PublicContactRoute
   '/demo': typeof PublicDemoRoute
   '/pricing': typeof PublicPricingRoute
   '/api/avatar-upload': typeof ApiAvatarUploadRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/_private/billing': typeof PrivateBillingRoute
   '/_private/profile': typeof PrivateProfileRoute
   '/_public/about': typeof PublicAboutRoute
+  '/_public/contact': typeof PublicContactRoute
   '/_public/demo': typeof PublicDemoRoute
   '/_public/pricing': typeof PublicPricingRoute
   '/api/avatar-upload': typeof ApiAvatarUploadRoute
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/profile'
     | '/about'
+    | '/contact'
     | '/demo'
     | '/pricing'
     | '/api/avatar-upload'
@@ -275,6 +285,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/profile'
     | '/about'
+    | '/contact'
     | '/demo'
     | '/pricing'
     | '/api/avatar-upload'
@@ -301,6 +312,7 @@ export interface FileRouteTypes {
     | '/_private/billing'
     | '/_private/profile'
     | '/_public/about'
+    | '/_public/contact'
     | '/_public/demo'
     | '/_public/pricing'
     | '/api/avatar-upload'
@@ -400,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo'
       preLoaderRoute: typeof PublicDemoRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/contact': {
+      id: '/_public/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof PublicContactRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_public/about': {
@@ -560,6 +579,7 @@ const PrivateRouteWithChildren =
 
 interface PublicRouteChildren {
   PublicAboutRoute: typeof PublicAboutRoute
+  PublicContactRoute: typeof PublicContactRoute
   PublicDemoRoute: typeof PublicDemoRoute
   PublicPricingRoute: typeof PublicPricingRoute
   PublicIndexRoute: typeof PublicIndexRoute
@@ -567,6 +587,7 @@ interface PublicRouteChildren {
 
 const PublicRouteChildren: PublicRouteChildren = {
   PublicAboutRoute: PublicAboutRoute,
+  PublicContactRoute: PublicContactRoute,
   PublicDemoRoute: PublicDemoRoute,
   PublicPricingRoute: PublicPricingRoute,
   PublicIndexRoute: PublicIndexRoute,

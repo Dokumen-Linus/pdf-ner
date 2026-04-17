@@ -20,6 +20,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.700.0",
     "@better-auth/core": "^1.6.2",
     "@embedpdf/core": "2.8.0",
     "@embedpdf/engines": "2.8.0",
@@ -55,6 +56,7 @@
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@react-email/components": "^0.0.36",
     "@stripe/react-stripe-js": "^6.1.0",
     "@stripe/stripe-js": "^9.2.0",
     "@t3-oss/env-core": "^0.13.11",
@@ -89,9 +91,9 @@
     "react-dom": "^19.2.5",
     "react-hook-form": "^7.71.1",
     "react-resizable-panels": "^4.5.9",
+    "react-email": "^4.0.0",
     "react-tweet": "^3.3.0",
     "recharts": "3.7.0",
-    "resend": "^6.9.1",
     "stripe": "^22.0.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.2.2",

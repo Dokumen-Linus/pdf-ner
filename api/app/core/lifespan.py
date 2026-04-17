@@ -11,11 +11,13 @@ from redis.asyncio import Redis
 
 from .config import settings
 from .logging import configure_logging
+from .telemetry import setup_api_telemetry
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     configure_logging()
+    setup_api_telemetry()
 
     limiter = anyio.to_thread.current_default_thread_limiter()
     limiter.total_tokens = 50

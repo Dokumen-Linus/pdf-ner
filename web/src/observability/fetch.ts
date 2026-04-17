@@ -1,0 +1,62 @@
+const REQUEST_ID_HEADER = "X-Request-ID"
+const TRACEPARENT_HEADER = "traceparent"
+const TRACE_ID_HEADER = "X-Trace-ID"
+
+export function buildObservedHeaders(
+  initHeaders?: HeadersInit,
+  sourceHeaders?: HeadersInit,
+): Headers {
+  const headers = new Headers(initHeaders)
+  const upstream = new Headers(sourceHeaders)
+
+  const requestId =
+    headers.get(REQUEST_ID_HEADER) ??
+    upstream.get(REQUEST_ID_HEADER) ??
+    crypto.randomUUID()
+  headers.set(REQUEST_ID_HEADER, requestId)
+
+  const traceparent = headers.get(TRACEPARENT_HEADER) ?? upstream.get(TRACEPARENT_HEADER)
+  if (traceparent) headers.set(TRACEPARENT_HEADER, traceparent)
+
+  const traceId = headers.get(TRACE_ID_HEADER) ?? upstream.get(TRACE_ID_HEADER)
+  if (traceId) headers.set(TRACE_ID_HEADER, traceId)
+
+  return headers
+}
+
+export async function observedApiFetch(
+  input: RequestInfo | URL,
+  init: RequestInit = {},
+  sourceHeaders?: HeadersInit,
+): Promise<Response> {
+  const headers = buildObservedHeaders(init.headers, sourceHeaders)
+  return fetch(input, {
+    ...init,
+    headers,
+  })
+}
+
+export function withObservedRequest(request: Request): { request: Request; requestId: string } {
+  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? crypto.randomUUID()
+  if (request.headers.has(REQUEST_ID_HEADER)) {
+    return { request, requestId }
+  }
+
+  const headers = new Headers(request.headers)
+  headers.set(REQUEST_ID_HEADER, requestId)
+
+  return {
+    request: new Request(request, { headers }),
+    requestId,
+  }
+}
+
+export function withObservedResponse(response: Response, requestId: string): Response {
+  const headers = new Headers(response.headers)
+  headers.set(REQUEST_ID_HEADER, requestId)
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  })
+}

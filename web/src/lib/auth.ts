@@ -9,7 +9,7 @@ import { db } from "../db/client"
 import { authMembers, authOrganizations, authTeamMembers, authTeams } from "../db/schemas/auth"
 import { users } from "../db/schemas/web/users"
 import { env } from "../env.server"
-import { resendClient } from "../integrations/resend"
+import { sendEmail } from "./email/send"
 
 const trustedOrigins = [
   env.BETTER_AUTH_URL,
@@ -188,34 +188,22 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        template: "reset-password",
+        props: { name: user.name, url },
+      })
+    },
   },
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      await resendClient.emails.send({
-        from: env.FROM_EMAIL,
+      await sendEmail({
         to: user.email,
-        subject: "Verify your email address",
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #333;">Welcome to Dokumen AI!</h2>
-            <p>Hi ${user.name || "there"},</p>
-            <p>Thank you for signing up! Please click the link below to verify your email address:</p>
-            <div style="margin: 30px 0;">
-              <a href="${url}" style="background-color: #007cba; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Verify Email Address
-              </a>
-            </div>
-            <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
-            <p style="word-break: break-all; color: #666;">${url}</p>
-            <p>This link will expire in 24 hours.</p>
-            <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-            <p style="color: #666; font-size: 12px;">
-              If you didn't create an account, you can safely ignore this email.
-            </p>
-          </div>
-        `,
+        template: "verify-email",
+        props: { name: user.name, url },
       })
     },
   },
@@ -239,6 +227,18 @@ export const auth = betterAuth({
         invitation: { modelName: "auth.invitation" },
         team: { modelName: "auth.team" },
         teamMember: { modelName: "auth.teamMember" },
+      },
+      async sendInvitationEmail(data) {
+        const acceptUrl = `${env.BETTER_AUTH_URL}/accept-invitation/${data.id}`
+        await sendEmail({
+          to: data.email,
+          template: "organization-invitation",
+          props: {
+            invitedByName: data.inviter.user.name,
+            organizationName: data.organization.name,
+            url: acceptUrl,
+          },
+        })
       },
     }),
     tanstackStartCookies(), // tanstackStartCookies must be the last plugin in the array

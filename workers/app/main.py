@@ -1,7 +1,11 @@
 from celery import Celery
 
 from .core.config import settings
+from .core.logging import configure_logging
+from .core.telemetry import register_celery_observability, setup_worker_telemetry
 
+configure_logging()
+setup_worker_telemetry()
 app = Celery("myapp", broker=settings.CELERY_BROKER_URL)
 
 app.config_from_object(settings, namespace="CELERY")
@@ -17,3 +21,5 @@ app.autodiscover_tasks(
         "app.domains.context_engineering",
     ]
 )
+
+register_celery_observability(app)

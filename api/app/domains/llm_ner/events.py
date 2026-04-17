@@ -1,6 +1,6 @@
 from celery.result import AsyncResult
 
-from app.core.messaging import celery_client
+from app.core.messaging import celery_client, celery_message_headers
 
 
 def dispatch_optimize_prompt(
@@ -14,6 +14,7 @@ def dispatch_optimize_prompt(
         "context_engineering.optimize_prompt",
         args=[project_id],
         kwargs={"max_iterations": max_iterations, "model": model},
+        headers=celery_message_headers(),
     )
     return result.id
 

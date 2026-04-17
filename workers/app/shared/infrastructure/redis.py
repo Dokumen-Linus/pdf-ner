@@ -1,8 +1,21 @@
-
+from pathlib import Path
+import sys
 from celery import current_app
 import redis.asyncio as redis
 
 from app.core.config import settings
+from app.core.telemetry import bind_worker_context
+
+_OBS_PATH = Path(__file__).resolve().parents[4] / "packages" / "otel_py"
+if str(_OBS_PATH) not in sys.path:
+    sys.path.insert(0, str(_OBS_PATH))
+
+from otel_py import observe_redis_operation  # noqa: E402
+
+
+def _redis_key_prefix(key: str) -> str:
+    prefix, _, _ = key.partition(":")
+    return prefix or key
 
 
 async def get_redis() -> redis.Redis:
@@ -28,19 +41,25 @@ async def close_redis() -> None:
 async def set_cache(key: str, value: str, ttl: int = 3600) -> None:
     """Set a value in Redis cache with TTL."""
     client = await get_redis()
-    await client.setex(key, ttl, value)
+    bind_worker_context(redis_key=key)
+    with observe_redis_operation("setex", key_prefix=_redis_key_prefix(key)):
+        await client.setex(key, ttl, value)
 
 
 async def get_cache(key: str) -> str | None:
     """Get a value from Redis cache."""
     client = await get_redis()
-    return await client.get(key)
+    bind_worker_context(redis_key=key)
+    with observe_redis_operation("get", key_prefix=_redis_key_prefix(key)):
+        return await client.get(key)
 
 
 async def delete_cache(key: str) -> bool:
     """Delete a key from Redis cache."""
     client = await get_redis()
-    result = await client.delete(key)
+    bind_worker_context(redis_key=key)
+    with observe_redis_operation("delete", key_prefix=_redis_key_prefix(key)):
+        result = await client.delete(key)
     return result > 0
 
 

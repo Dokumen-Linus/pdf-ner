@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { memo, useEffect, useMemo, useRef, useState } from "react"
 import { ignore, PdfErrorCode } from "@embedpdf/models"
 import { useTilingCapability } from "../hooks/use-tiling"
 import { Tile } from "../lib"
@@ -11,7 +11,7 @@ interface TileImgProps {
   scale: number
 }
 
-export function TileImg({ documentId, pageIndex, tile, dpr, scale }: TileImgProps) {
+function TileImgComponent({ documentId, pageIndex, tile, dpr, scale }: TileImgProps) {
   const { provides: tilingCapability } = useTilingCapability()
   const scope = useMemo(
     () => tilingCapability?.forDocument(documentId),
@@ -23,7 +23,7 @@ export function TileImg({ documentId, pageIndex, tile, dpr, scale }: TileImgProp
 
   const relativeScale = scale / tile.srcScale
 
-  /* kick off render exactly once per tile */
+  // Only restart the render task when the tile bitmap identity changes.
   useEffect(() => {
     if (tile.status === "ready" && urlRef.current) return // already done
     if (!scope) return
@@ -45,7 +45,7 @@ export function TileImg({ documentId, pageIndex, tile, dpr, scale }: TileImgProp
         })
       }
     }
-  }, [scope, pageIndex, tile.id]) // id includes scale, so unique
+  }, [scope, pageIndex, tile.id, dpr])
 
   const handleImageLoad = () => {
     if (urlRef.current) {
@@ -70,3 +70,13 @@ export function TileImg({ documentId, pageIndex, tile, dpr, scale }: TileImgProp
     />
   )
 }
+
+export const TileImg = memo(
+  TileImgComponent,
+  (prev, next) =>
+    prev.documentId === next.documentId &&
+    prev.pageIndex === next.pageIndex &&
+    prev.dpr === next.dpr &&
+    prev.scale === next.scale &&
+    prev.tile.id === next.tile.id,
+)

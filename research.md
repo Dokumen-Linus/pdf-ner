@@ -63,7 +63,6 @@
 ### Frontend Design
 
 - Google Stitch
-- Google Stich DESIGN.md set [VoltAgent](https://github.com/VoltAgent/awesome-design-md)
 
 ### Generate Images
 
@@ -159,8 +158,6 @@
 - [Home page scroll animation](https://www.builder.io/blog/3d-gsap)
 - [Python terminal inside browser](https://github.com/pyscript/pyscript)
 - [Kanaries/graphic-walker](https://github.com/Kanaries/graphic-walker)
-- [vercel/avatar](https://github.com/vercel/avatar)
-- [vercel/react-tweet](https://github.com/vercel/react-tweet)
 - [shadcn-image-cropper](https://github.com/sujjeee/shadcn-image-cropper)
 - sounds [soundcn](https://github.com/kapishdima/soundcn)
 - scheduling [planner](https://github.com/UretzkyZvi/planner)

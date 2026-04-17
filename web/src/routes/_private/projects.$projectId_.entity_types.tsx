@@ -342,7 +342,20 @@ function EntityTypesPage() {
     setLastSavedRows(initialRows)
   }, [initialRows])
 
-  const form = useForm({
+  const form = useForm<
+    FormValues,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined
+  >({
     defaultValues: { rows: initialRows } as FormValues,
     onSubmit: async ({ value }) => {
       setSaveError(null)
