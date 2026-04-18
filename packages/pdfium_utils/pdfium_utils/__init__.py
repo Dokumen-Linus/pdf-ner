@@ -167,3 +167,12 @@ def highlight_phrases(
     output_bytes = buf.getvalue()
 
     return output_bytes, results
+
+
+__all__ = [
+    "PhraseHighlightResult",
+    "draw_rect",
+    "find_text_objects",
+    "highlight_phrases",
+    "parse_hex_color",
+]

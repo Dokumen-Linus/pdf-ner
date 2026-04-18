@@ -1,10 +1,7 @@
 import io
-from uuid import UUID
 
 import pypdfium2
 import pytest
-
-from app.domains.pdf_utils.schemas import HighlightRequest
 
 
 @pytest.fixture
@@ -28,12 +25,3 @@ def three_page_pdf_bytes() -> bytes:
     doc.save(buf)
     doc.close()
     return buf.getvalue()
-
-
-@pytest.fixture
-def sample_request() -> HighlightRequest:
-    return HighlightRequest(
-        pdf_id=UUID("12345678-1234-5678-1234-567812345678"),
-        phrases={"hello": "#FF0000"},
-        output_key="output/highlighted.pdf",
-    )

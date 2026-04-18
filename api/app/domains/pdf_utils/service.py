@@ -3,11 +3,11 @@ from dataclasses import asdict
 import anyio
 import asyncpg
 import boto3
+from pdfium_utils import highlight_phrases
 
 from app.integrations import s3
 
 from . import repository
-from .pdfium_utils import highlight_phrases
 from .schemas import HighlightRequest, HighlightTask, PdfTask
 
 

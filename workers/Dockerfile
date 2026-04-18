@@ -13,6 +13,8 @@ WORKDIR /src
 # Install dependencies first (layer caching)
 COPY workers/pyproject.toml workers/uv.lock ./workers/
 COPY packages/llm_providers/ ./packages/llm_providers/
+COPY packages/otel_py/ ./packages/otel_py/
+COPY packages/pdfium_utils/ ./packages/pdfium_utils/
 WORKDIR /src/workers
 RUN uv sync --no-dev --no-install-project --frozen
 
