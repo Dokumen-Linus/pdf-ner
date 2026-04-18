@@ -10,9 +10,7 @@ export function buildObservedHeaders(
   const upstream = new Headers(sourceHeaders)
 
   const requestId =
-    headers.get(REQUEST_ID_HEADER) ??
-    upstream.get(REQUEST_ID_HEADER) ??
-    crypto.randomUUID()
+    headers.get(REQUEST_ID_HEADER) ?? upstream.get(REQUEST_ID_HEADER) ?? crypto.randomUUID()
   headers.set(REQUEST_ID_HEADER, requestId)
 
   const traceparent = headers.get(TRACEPARENT_HEADER) ?? upstream.get(TRACEPARENT_HEADER)
@@ -32,31 +30,6 @@ export async function observedApiFetch(
   const headers = buildObservedHeaders(init.headers, sourceHeaders)
   return fetch(input, {
     ...init,
-    headers,
-  })
-}
-
-export function withObservedRequest(request: Request): { request: Request; requestId: string } {
-  const requestId = request.headers.get(REQUEST_ID_HEADER) ?? crypto.randomUUID()
-  if (request.headers.has(REQUEST_ID_HEADER)) {
-    return { request, requestId }
-  }
-
-  const headers = new Headers(request.headers)
-  headers.set(REQUEST_ID_HEADER, requestId)
-
-  return {
-    request: new Request(request, { headers }),
-    requestId,
-  }
-}
-
-export function withObservedResponse(response: Response, requestId: string): Response {
-  const headers = new Headers(response.headers)
-  headers.set(REQUEST_ID_HEADER, requestId)
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
     headers,
   })
 }

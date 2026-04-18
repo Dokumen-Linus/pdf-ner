@@ -4,10 +4,9 @@
 // to web.users.avatar_url.
 
 import { createFileRoute } from "@tanstack/react-router"
-import { requireUserId } from "@/db-fns/api/_helpers.server"
+import { streamProxy } from "@/api-fns/api-stream-proxy.server"
+import { requireUserId } from "@/db-fns/api/authorization.server"
 import { updateUser } from "@/db-fns/web/users"
-import { env } from "@/env.server"
-import { observedApiFetch } from "@/observability/fetch"
 
 const MAX_BYTES = 2 * 1024 * 1024 // 2 MB
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"])
@@ -47,25 +46,16 @@ export async function avatarUploadHandler({ request }: { request: Request }): Pr
       return Response.json({ detail: "Request body is required" }, { status: 400 })
     }
 
-    const forwardHeaders: Record<string, string> = {
-      "X-API-Key": env.API_KEY,
-      "Content-Type": contentType,
-    }
+    const forwardHeaders: Record<string, string> = { "Content-Type": contentType }
     if (contentLengthHeader) forwardHeaders["Content-Length"] = contentLengthHeader
     const filenameHeader = request.headers.get("x-filename")
     if (filenameHeader) forwardHeaders["X-Filename"] = filenameHeader
 
-    const forwardInit: RequestInit & { duplex?: "half" } = {
-      method: "POST",
+    const forwarded = await streamProxy({
+      path: "/api/v1/avatar-storage/avatars",
+      request,
       headers: forwardHeaders,
-      body: request.body,
-      duplex: "half",
-    }
-    const forwarded = await observedApiFetch(
-      `${env.API_URL}/api/v1/avatar-storage/avatars`,
-      forwardInit,
-      request.headers,
-    )
+    })
 
     if (!forwarded.ok) {
       const text = await forwarded.text()
