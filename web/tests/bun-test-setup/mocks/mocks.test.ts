@@ -2,8 +2,10 @@
 // these tests verify the infrastructure works and serve as usage examples.
 
 import { describe, expect, it } from "bun:test"
+
 import { auth } from "@/lib/auth"
 import { authClient } from "@/lib/auth-client"
+
 import {
   resetMocks,
   setApiError,

@@ -1,5 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react"
 import { useCapability, usePlugin } from "@embedpdf/core/react"
+
 import { ScrollPlugin, ScrollScope } from "../lib"
 
 export const useScrollPlugin = () => usePlugin<ScrollPlugin>(ScrollPlugin.id)

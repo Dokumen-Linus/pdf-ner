@@ -1,4 +1,5 @@
 import { PluginPackage } from "@embedpdf/core"
+
 import { ThumbnailAction } from "./actions"
 import { manifest, THUMBNAIL_PLUGIN_ID } from "./manifest"
 import { initialState, thumbnailReducer } from "./reducer"

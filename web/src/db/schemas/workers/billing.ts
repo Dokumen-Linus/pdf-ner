@@ -1,6 +1,8 @@
 import { boolean, index, integer, numeric, text, timestamp, uuid } from "drizzle-orm/pg-core"
+
 import { projects } from "../web/projects"
 import { users } from "../web/users"
+
 import { workersSchema } from "./schema"
 
 export const llmUsage = workersSchema.table(

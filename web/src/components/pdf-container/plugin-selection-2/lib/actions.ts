@@ -1,5 +1,6 @@
 import { Action } from "@embedpdf/core"
 import { PdfPageGeometry, Rect } from "@embedpdf/models"
+
 import { SelectionDocumentState, SelectionRangeX } from "./types"
 
 export const INIT_SELECTION_STATE = "SELECTION/INIT_STATE"

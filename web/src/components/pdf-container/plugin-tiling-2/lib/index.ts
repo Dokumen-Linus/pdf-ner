@@ -1,4 +1,5 @@
 import { PluginPackage } from "@embedpdf/core"
+
 import { TilingAction } from "./actions"
 import { manifest, TILING_PLUGIN_ID } from "./manifest"
 import { initialState, tilingReducer } from "./reducer"

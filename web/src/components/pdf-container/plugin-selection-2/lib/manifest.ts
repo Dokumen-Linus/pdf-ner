@@ -1,4 +1,5 @@
 import { PluginManifest } from "@embedpdf/core"
+
 import { SelectionPluginConfig } from "./types"
 
 export const SELECTION_PLUGIN_ID = "selection"

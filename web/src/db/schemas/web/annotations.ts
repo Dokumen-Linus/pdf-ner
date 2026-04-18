@@ -1,8 +1,10 @@
 import { relations } from "drizzle-orm"
 import { integer, jsonb, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
-import type { StoredRect } from "../../types"
+
 import { pdfs } from "./pdfs"
 import { webSchema } from "./schema"
+
+import type { StoredRect } from "../../types"
 
 export const annotations = webSchema.table("annotations", {
   id: uuid("id").primaryKey(), // set in web app PDFContainer

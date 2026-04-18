@@ -1,6 +1,8 @@
 import { BasePluginConfig, EventHook } from "@embedpdf/core"
 import { PdfPageObjectWithRotatedSize, Rect, Rotation } from "@embedpdf/models"
+
 import { ViewportMetrics } from "../../plugin-viewport-2"
+
 import { VirtualItem } from "./types/virtual-item"
 
 export type ScrollBehavior = "instant" | "smooth" | "auto"

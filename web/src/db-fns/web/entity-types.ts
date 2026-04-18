@@ -1,9 +1,10 @@
 import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
-import { requireProjectAccess } from "@/db-fns/api/authorization.server"
+
 import { db } from "@/db/client"
 import { entityTypes } from "@/db/schemas/web/entity-types"
+import { requireProjectAccess } from "@/db-fns/api/authorization.server"
 
 // ** CREATE **
 export const CreateEntityTypeSchema = z.object({

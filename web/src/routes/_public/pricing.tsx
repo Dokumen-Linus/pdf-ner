@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { CheckIcon } from "lucide-react"
+
 import { getAllModels } from "@/db-fns/public/models"
+
 import type { FoundModel } from "@/db/types"
 
 type ProviderSlug = "anthropic" | "openai" | "google"
@@ -115,24 +117,24 @@ function PricingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
-      <section className="flex min-h-[50vh] flex-col items-center justify-center px-6 py-24 text-center bg-[#F4F4F4]">
-        <h1 className="text-[40px] font-medium leading-[1.2] text-[#171A20] tracking-normal mb-6 max-w-2xl">
+      <section className="flex min-h-[50vh] flex-col items-center justify-center bg-[#F4F4F4] px-6 py-24 text-center">
+        <h1 className="mb-6 max-w-2xl text-[40px] leading-[1.2] font-medium tracking-normal text-[#171A20]">
           Simple, usage-based pricing
         </h1>
-        <p className="text-[16px] font-normal leading-[1.6] text-[#393C41] max-w-xl mb-10">
+        <p className="mb-10 max-w-xl text-[16px] leading-[1.6] font-normal text-[#393C41]">
           Every workspace starts at $5/month, then usage is billed from the exact LLM tokens you
           consume. Developers manage projects and analysts focus on labeling and review.
         </p>
-        <div className="flex flex-col sm:flex-row items-center gap-4">
+        <div className="flex flex-col items-center gap-4 sm:flex-row">
           <Link
             to="/signup"
-            className="flex items-center justify-center min-h-10 w-full sm:w-50 rounded-[4px] bg-[#3E6AE1] px-4 text-[14px] font-medium text-white border-[3px] border-transparent transition-all duration-[330ms] hover:bg-[#2e52b5] focus:border-[#3E6AE1] focus:shadow-[inset_0_0_0_2px_white]"
+            className="flex min-h-10 w-full items-center justify-center rounded-[4px] border-[3px] border-transparent bg-[#3E6AE1] px-4 text-[14px] font-medium text-white transition-all duration-[330ms] hover:bg-[#2e52b5] focus:border-[#3E6AE1] focus:shadow-[inset_0_0_0_2px_white] sm:w-50"
           >
             Get started free
           </Link>
           <Link
             to="/signup"
-            className="flex items-center justify-center min-h-10 w-full sm:w-50 rounded-[4px] bg-white px-4 text-[14px] font-medium text-[#393C41] border-[3px] border-transparent transition-all duration-[330ms] hover:bg-[#F4F4F4]"
+            className="flex min-h-10 w-full items-center justify-center rounded-[4px] border-[3px] border-transparent bg-white px-4 text-[14px] font-medium text-[#393C41] transition-all duration-[330ms] hover:bg-[#F4F4F4] sm:w-50"
           >
             Try the demo
           </Link>
@@ -140,17 +142,17 @@ function PricingPage() {
       </section>
 
       {/* How it works */}
-      <section className="py-24 px-6 bg-white">
+      <section className="bg-white px-6 py-24">
         <div className="mx-auto max-w-4xl">
-          <h2 className="text-[32px] font-medium text-[#171A20] mb-4 text-center">
+          <h2 className="mb-4 text-center text-[32px] font-medium text-[#171A20]">
             How billing works
           </h2>
-          <p className="text-[16px] text-[#5C5E62] text-center mb-16 max-w-lg mx-auto">
+          <p className="mx-auto mb-16 max-w-lg text-center text-[16px] text-[#5C5E62]">
             Every LLM extraction call is metered by token count and reported to Stripe at the end of
             each billing period.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {[
               {
                 step: "01",
@@ -169,9 +171,9 @@ function PricingPage() {
               },
             ].map(({ step, title, body }) => (
               <div key={step} className="flex flex-col gap-3">
-                <span className="text-[14px] font-medium text-[#3E6AE1] font-mono">{step}</span>
+                <span className="font-mono text-[14px] font-medium text-[#3E6AE1]">{step}</span>
                 <h3 className="text-[17px] font-medium text-[#171A20]">{title}</h3>
-                <p className="text-[14px] font-normal text-[#5C5E62] leading-[1.6]">{body}</p>
+                <p className="text-[14px] leading-[1.6] font-normal text-[#5C5E62]">{body}</p>
               </div>
             ))}
           </div>
@@ -179,32 +181,32 @@ function PricingPage() {
       </section>
 
       {/* Subscription plan */}
-      <section className="py-24 px-6 bg-[#F4F4F4]">
+      <section className="bg-[#F4F4F4] px-6 py-24">
         <div className="mx-auto max-w-4xl">
-          <h2 className="text-[32px] font-medium text-[#171A20] mb-4 text-center">
+          <h2 className="mb-4 text-center text-[32px] font-medium text-[#171A20]">
             Base plan + metered usage
           </h2>
-          <p className="text-[16px] text-[#5C5E62] text-center mb-16 max-w-lg mx-auto">
+          <p className="mx-auto mb-16 max-w-lg text-center text-[16px] text-[#5C5E62]">
             Each workspace has a $5 monthly base subscription, and model usage is charged on top at
             the live rates below.
           </p>
 
           <div className="mx-auto max-w-md border border-[#EEEEEE] bg-white p-8">
             <div className="mb-6">
-              <p className="text-[14px] font-medium text-[#3E6AE1] mb-2">Workspace plan</p>
-              <p className="text-[40px] font-medium text-[#171A20] leading-none">
+              <p className="mb-2 text-[14px] font-medium text-[#3E6AE1]">Workspace plan</p>
+              <p className="text-[40px] leading-none font-medium text-[#171A20]">
                 $5
-                <span className="text-[16px] font-normal text-[#5C5E62] ml-1">/ month base</span>
+                <span className="ml-1 text-[16px] font-normal text-[#5C5E62]">/ month base</span>
               </p>
-              <p className="text-[14px] text-[#5C5E62] mt-2">
+              <p className="mt-2 text-[14px] text-[#5C5E62]">
                 + LLM usage metered from our live pricing table
               </p>
             </div>
 
-            <ul className="space-y-3 mb-8">
+            <ul className="mb-8 space-y-3">
               {PLAN_FEATURES.map((feature) => (
                 <li key={feature} className="flex items-start gap-3">
-                  <CheckIcon className="h-4 w-4 text-[#3E6AE1] mt-0.5 shrink-0" />
+                  <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
                   <span className="text-[14px] text-[#393C41]">{feature}</span>
                 </li>
               ))}
@@ -229,11 +231,11 @@ function PricingPage() {
 
             <Link
               to="/signup"
-              className="flex items-center justify-center min-h-10 w-full rounded-[4px] bg-[#3E6AE1] px-4 text-[14px] font-medium text-white border-[3px] border-transparent transition-all duration-[330ms] hover:bg-[#2e52b5]"
+              className="flex min-h-10 w-full items-center justify-center rounded-[4px] border-[3px] border-transparent bg-[#3E6AE1] px-4 text-[14px] font-medium text-white transition-all duration-[330ms] hover:bg-[#2e52b5]"
             >
               Create your account
             </Link>
-            <p className="text-[12px] text-[#8E8E8E] text-center mt-3">
+            <p className="mt-3 text-center text-[12px] text-[#8E8E8E]">
               Add a payment method after sign-up to activate extraction
             </p>
           </div>
@@ -241,10 +243,10 @@ function PricingPage() {
       </section>
 
       {/* Model pricing table */}
-      <section className="py-24 px-6 bg-white">
+      <section className="bg-white px-6 py-24">
         <div className="mx-auto max-w-4xl">
-          <h2 className="text-[32px] font-medium text-[#171A20] mb-4 text-center">Model pricing</h2>
-          <p className="text-[16px] text-[#5C5E62] text-center mb-16 max-w-lg mx-auto">
+          <h2 className="mb-4 text-center text-[32px] font-medium text-[#171A20]">Model pricing</h2>
+          <p className="mx-auto mb-16 max-w-lg text-center text-[16px] text-[#5C5E62]">
             The rates below are the exact values our workers use to compute your Stripe charges.
             Prices are per 1 million tokens.
           </p>
@@ -263,7 +265,7 @@ function PricingPage() {
             <div className="flex flex-col gap-8">
               {providerGroups.map((provider) => (
                 <div key={provider.slug}>
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="mb-3 flex items-center gap-2">
                     <span
                       className={`inline-flex items-center rounded-[4px] border px-2 py-0.5 text-[12px] font-medium ${provider.color} ${provider.bg} ${provider.border}`}
                     >
@@ -271,7 +273,7 @@ function PricingPage() {
                     </span>
                   </div>
 
-                  <div className="border border-[#EEEEEE] overflow-hidden">
+                  <div className="overflow-hidden border border-[#EEEEEE]">
                     <table className="w-full text-[14px]">
                       <thead>
                         <tr className="border-b border-[#EEEEEE] bg-[#F4F4F4]">
@@ -295,10 +297,10 @@ function PricingPage() {
                             <td className="px-4 py-3 font-mono text-[13px] text-[#393C41]">
                               {humanizeModelId(model.id)}
                             </td>
-                            <td className="px-4 py-3 text-right tabular-nums text-[#393C41]">
+                            <td className="px-4 py-3 text-right text-[#393C41] tabular-nums">
                               {formatUsd(model.usdPer1mInput)}
                             </td>
-                            <td className="px-4 py-3 text-right tabular-nums text-[#393C41]">
+                            <td className="px-4 py-3 text-right text-[#393C41] tabular-nums">
                               {formatUsd(model.usdPer1mOutput)}
                             </td>
                           </tr>
@@ -311,16 +313,16 @@ function PricingPage() {
             </div>
           )}
 
-          <p className="text-[12px] text-[#8E8E8E] mt-6 text-center">
+          <p className="mt-6 text-center text-[12px] text-[#8E8E8E]">
             Rates are read live from our billing table and match what workers charge per request.
           </p>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="py-24 px-6 bg-[#F4F4F4]">
+      <section className="bg-[#F4F4F4] px-6 py-24">
         <div className="mx-auto max-w-2xl">
-          <h2 className="text-[32px] font-medium text-[#171A20] mb-16 text-center">
+          <h2 className="mb-16 text-center text-[32px] font-medium text-[#171A20]">
             Common questions
           </h2>
 
@@ -348,8 +350,8 @@ function PricingPage() {
               },
             ].map(({ q, a }) => (
               <div key={q} className="py-6">
-                <p className="text-[14px] font-medium text-[#171A20] mb-2">{q}</p>
-                <p className="text-[14px] font-normal text-[#5C5E62] leading-[1.6]">{a}</p>
+                <p className="mb-2 text-[14px] font-medium text-[#171A20]">{q}</p>
+                <p className="text-[14px] leading-[1.6] font-normal text-[#5C5E62]">{a}</p>
               </div>
             ))}
           </div>
@@ -357,14 +359,14 @@ function PricingPage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="py-32 px-6 flex flex-col items-center justify-center text-center bg-white min-h-[40vh]">
-        <h2 className="text-[40px] font-medium text-[#171A20] mb-6">Start extracting today</h2>
-        <p className="text-[16px] font-normal text-[#393C41] mb-10 max-w-md">
+      <section className="flex min-h-[40vh] flex-col items-center justify-center bg-white px-6 py-32 text-center">
+        <h2 className="mb-6 text-[40px] font-medium text-[#171A20]">Start extracting today</h2>
+        <p className="mb-10 max-w-md text-[16px] font-normal text-[#393C41]">
           Create an account, upload your first PDF, and add a payment method in under five minutes.
         </p>
         <Link
           to="/signup"
-          className="rounded-[4px] bg-[#3E6AE1] px-16 py-3 flex items-center justify-center text-[14px] font-medium text-white transition-all duration-[330ms] hover:bg-[#2e52b5]"
+          className="flex items-center justify-center rounded-[4px] bg-[#3E6AE1] px-16 py-3 text-[14px] font-medium text-white transition-all duration-[330ms] hover:bg-[#2e52b5]"
         >
           Create your account
         </Link>

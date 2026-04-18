@@ -1,4 +1,5 @@
 import { PluginManifest } from "@embedpdf/core"
+
 import { RenderPluginConfig } from "./types"
 
 export const RENDER_PLUGIN_ID = "render"

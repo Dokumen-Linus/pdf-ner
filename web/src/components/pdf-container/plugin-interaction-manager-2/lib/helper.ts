@@ -1,4 +1,5 @@
 import { Position } from "@embedpdf/models"
+
 import { EmbedPdfPointerEvent, PointerEventHandlers } from "./types"
 
 export function mergeHandlers(list: PointerEventHandlers[]): PointerEventHandlers {

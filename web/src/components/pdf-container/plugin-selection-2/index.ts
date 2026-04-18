@@ -1,4 +1,5 @@
 import { createPluginPackage } from "@embedpdf/core"
+
 import { CopyToClipboard } from "./components"
 import { SelectionPluginPackage as BaseSelectionPluginPackage } from "./lib"
 

@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router"
+
 import { m } from "@/integrations/paraglide/messages.js"
+
 import { Button } from "./shadcn-ui/button"
 
 export function NotFound() {

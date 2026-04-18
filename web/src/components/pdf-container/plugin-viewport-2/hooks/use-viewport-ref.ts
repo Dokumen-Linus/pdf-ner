@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef } from "react"
+
 import { useViewportPlugin } from "./use-viewport"
 
 export function useViewportRef(documentId: string) {

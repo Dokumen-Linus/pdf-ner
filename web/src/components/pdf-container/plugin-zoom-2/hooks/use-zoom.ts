@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react"
 import { useCapability, usePlugin } from "@embedpdf/core/react"
+
 import { initialDocumentState, ZoomDocumentState, ZoomPlugin } from "../lib"
 
 export const useZoomCapability = () => useCapability<ZoomPlugin>(ZoomPlugin.id)

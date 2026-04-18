@@ -11,8 +11,11 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react"
+
 import { m } from "@/integrations/paraglide/messages.js"
+
 import usePluginStore from "../plugin-store/hooks/use-plugin-store"
+
 import {
   useActiveDocument,
   useDocumentManagerCapability,

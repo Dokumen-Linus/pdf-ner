@@ -5,6 +5,7 @@ import {
   Listener,
   PluginRegistry,
 } from "@embedpdf/core"
+
 import {
   addViewportGate,
   cleanupViewportState,

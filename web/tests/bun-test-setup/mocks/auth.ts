@@ -7,6 +7,7 @@
 // and the next getSession() call reflects the change.
 
 import { mock } from "bun:test"
+
 import { authState } from "./state"
 
 // ─── Installers ───────────────────────────────────────────────────────────────

@@ -1,4 +1,5 @@
 import { PluginManifest } from "@embedpdf/core"
+
 import { TilingPluginConfig } from "./types"
 
 export const TILING_PLUGIN_ID = "tiling"

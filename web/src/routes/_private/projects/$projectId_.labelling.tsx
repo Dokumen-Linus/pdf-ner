@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { PdfAnnotationSubtype } from "@embedpdf/models"
 import { createFileRoute, Link, useHydrated, useNavigate, useRouter } from "@tanstack/react-router"
-import type { ErrorComponentProps } from "@tanstack/router-core"
+import { PdfAnnotationSubtype } from "@embedpdf/models"
 import { formatDistanceToNow } from "date-fns"
 import { FileTextIcon, LockIcon, SaveIcon } from "lucide-react"
 import { z } from "zod"
+
 import { getPdfPresignedUrl } from "@/api-fns/storage"
 import EntityTable from "@/components/entity-table/components/entity-table"
-import type { EntityType } from "@/components/entity-table/entity-type"
 import PDFContainerClient from "@/components/pdf-container/pdf-container-client"
 import { useLoadDbAnnotations } from "@/components/plugin-store/hooks/use-load-db-annotations"
 import usePluginStore from "@/components/plugin-store/hooks/use-plugin-store"
@@ -31,8 +30,11 @@ import {
 } from "@/db-fns/web/pdfs"
 import { getCurrentProjectAccess, getProjectById } from "@/db-fns/web/projects"
 import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
-import type { FoundWorkersPdf, LabeledEntitiesMap } from "@/db/types"
 import { useLabellingLock } from "@/hooks/use-labelling-lock"
+
+import type { ErrorComponentProps } from "@tanstack/router-core"
+import type { EntityType } from "@/components/entity-table/entity-type"
+import type { FoundWorkersPdf, LabeledEntitiesMap } from "@/db/types"
 
 const LabellingSearchSchema = z.object({
   pdfId: z.string().uuid().optional(),
@@ -412,7 +414,7 @@ function LabellingPage() {
 
         <div className="flex items-center gap-3">
           {saveState.state === "saving" && (
-            <span className="text-xs text-muted-foreground">Saving...</span>
+            <span className="text-muted-foreground text-xs">Saving...</span>
           )}
           {saveState.state === "saved" && (
             <span className="text-xs text-emerald-600">
@@ -420,7 +422,7 @@ function LabellingPage() {
             </span>
           )}
           {saveState.state === "error" && (
-            <span className="text-xs text-destructive">{saveState.message}</span>
+            <span className="text-destructive text-xs">{saveState.message}</span>
           )}
           <Button
             size="sm"
@@ -434,7 +436,7 @@ function LabellingPage() {
       </div>
 
       {isLockLost && (
-        <div className="flex items-center justify-between gap-2 border-b border-destructive/40 bg-destructive/5 px-4 py-2 text-sm">
+        <div className="border-destructive/40 bg-destructive/5 flex items-center justify-between gap-2 border-b px-4 py-2 text-sm">
           <span className="text-destructive">
             Your editing session expired because another user took over. Unsaved changes cannot be
             saved.
@@ -446,7 +448,7 @@ function LabellingPage() {
       )}
 
       <div className="flex flex-1 overflow-hidden">
-        <div className="w-64 shrink-0 overflow-y-auto border-r bg-muted/20">
+        <div className="bg-muted/20 w-64 shrink-0 overflow-y-auto border-r">
           <SidebarPdfList
             pdfs={pdfs}
             activePdfId={activePdfId}
@@ -464,7 +466,7 @@ function LabellingPage() {
               canRotate={false}
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
               Select a PDF from the sidebar.
             </div>
           )}
@@ -517,9 +519,9 @@ function SidebarPdfList({
               } ${isSwitching ? "opacity-50" : ""}`}
             >
               <FileTextIcon className="mt-0.5 h-4 w-4 shrink-0" />
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="truncate font-medium">{pdf.name ?? "untitled.pdf"}</div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-muted-foreground text-xs">
                   {pdf.createdAt ? <ClientDate value={pdf.createdAt} /> : "date unknown"}
                 </div>
               </div>
@@ -543,7 +545,7 @@ function LabellingRouteError({ error, reset }: ErrorComponentProps) {
           <CardTitle className="text-destructive">Unable to open labeller</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">{message}</p>
+          <p className="text-muted-foreground text-sm">{message}</p>
           <div className="flex gap-2">
             <Button
               onClick={() => {

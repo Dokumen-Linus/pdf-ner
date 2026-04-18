@@ -3,11 +3,12 @@ import {
   BrainCircuitIcon,
   FileTextIcon,
   LayoutDashboardIcon,
+  type LucideIcon,
   PencilIcon,
   ShieldCheckIcon,
   TagIcon,
-  type LucideIcon,
 } from "lucide-react"
+
 import { Badge } from "@/components/shadcn-ui/badge"
 import {
   Tooltip,
@@ -156,7 +157,7 @@ function ProjectTabItem({
     <span
       aria-hidden="true"
       className={cn(
-        "inline-flex items-center justify-center rounded-full tabular-nums font-semibold",
+        "inline-flex items-center justify-center rounded-full font-semibold tabular-nums",
         numberSize,
         active
           ? "bg-primary text-primary-foreground"

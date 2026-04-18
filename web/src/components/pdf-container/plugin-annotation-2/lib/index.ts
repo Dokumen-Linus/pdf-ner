@@ -1,5 +1,5 @@
 export * from "./annotation-plugin"
 export * from "./plugin-package"
-export type { AnnotationState, AnnotationDocumentState } from "./state"
+export type { AnnotationDocumentState, AnnotationState } from "./state"
 export { subtypeToEnum } from "./types"
 export type { PdfTextMarkupAnnotationObject, Subtype } from "./types"

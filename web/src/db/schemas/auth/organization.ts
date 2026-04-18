@@ -1,4 +1,5 @@
 import { boolean, text, timestamp } from "drizzle-orm/pg-core"
+
 import { authSchema } from "./schema"
 
 export const authUsers = authSchema.table("user", {

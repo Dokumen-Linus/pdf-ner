@@ -6,9 +6,11 @@ import {
   REFRESH_PAGES,
   RefreshPagesAction,
 } from "@embedpdf/core"
+
 import { RenderCapability, RenderPlugin } from "../../plugin-render-2"
 import { ScrollCapability, ScrollEvent, ScrollMetrics, ScrollPlugin } from "../../plugin-scroll-2"
 import { ViewportCapability, ViewportPlugin } from "../../plugin-viewport-2"
+
 import { cleanupTilingState, initTilingState, markTileStatus, updateVisibleTiles } from "./actions"
 import { initialTilingDocumentState } from "./reducer"
 import {

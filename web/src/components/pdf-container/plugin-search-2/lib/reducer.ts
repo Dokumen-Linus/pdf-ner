@@ -1,5 +1,6 @@
 import { Reducer } from "@embedpdf/core"
 import { MatchFlag } from "@embedpdf/models"
+
 import {
   APPEND_SEARCH_RESULTS,
   CLEANUP_SEARCH_STATE,

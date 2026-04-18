@@ -1,4 +1,5 @@
 import { Reducer } from "@embedpdf/core"
+
 import {
   CLEANUP_THUMBNAIL_STATE,
   INIT_THUMBNAIL_STATE,

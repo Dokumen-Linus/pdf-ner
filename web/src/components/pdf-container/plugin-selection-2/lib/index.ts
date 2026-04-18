@@ -1,4 +1,5 @@
 import { PluginPackage } from "@embedpdf/core"
+
 import { SelectionAction } from "./actions"
 import { manifest, SELECTION_PLUGIN_ID } from "./manifest"
 import { initialState, selectionReducer } from "./reducer"

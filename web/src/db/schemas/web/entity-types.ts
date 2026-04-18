@@ -1,6 +1,8 @@
 import { relations } from "drizzle-orm"
 import { bigint, boolean, integer, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
+
 import { stdEntityTypes } from "../public/std-entity-types"
+
 import { projects } from "./projects"
 import { webSchema } from "./schema"
 

@@ -1,4 +1,5 @@
 import { PluginManifest } from "@embedpdf/core"
+
 import { InteractionManagerPluginConfig } from "./types"
 
 export const INTERACTION_MANAGER_PLUGIN_ID = "interaction-manager"

@@ -1,7 +1,9 @@
 import { CSSProperties, HTMLAttributes, ReactNode, useCallback, useEffect, useRef } from "react"
 import { useDocumentState } from "@embedpdf/core/react"
 import { Position, restorePosition, transformSize } from "@embedpdf/models"
+
 import { useInteractionManagerCapability, useIsPageExclusive } from "../hooks"
+
 import { createPointerProvider } from "./utils"
 
 interface PagePointerProviderProps extends HTMLAttributes<HTMLDivElement> {

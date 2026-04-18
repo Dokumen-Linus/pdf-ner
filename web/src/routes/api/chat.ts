@@ -1,8 +1,10 @@
 import { readdir, readFile } from "fs/promises"
 import { join } from "path"
+
 import { chat, toServerSentEventsResponse } from "@tanstack/ai"
 import { createOpenaiChat } from "@tanstack/ai-openai"
 import { createFileRoute } from "@tanstack/react-router"
+
 import { env } from "@/env.server"
 
 async function getChatbotKnowledge() {

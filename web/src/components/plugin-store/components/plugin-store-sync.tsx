@@ -1,4 +1,5 @@
 import { useEffect } from "react"
+
 import { useAnnotationCapability } from "../../pdf-container/plugin-annotation-2"
 import { useDocumentManagerCapability } from "../../pdf-container/plugin-document-manager-2"
 import { useScrollCapability } from "../../pdf-container/plugin-scroll-2"

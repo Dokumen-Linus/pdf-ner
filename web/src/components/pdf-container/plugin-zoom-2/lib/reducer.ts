@@ -1,4 +1,5 @@
 import { Reducer } from "@embedpdf/core"
+
 import {
   CLEANUP_ZOOM_STATE,
   INIT_ZOOM_STATE,

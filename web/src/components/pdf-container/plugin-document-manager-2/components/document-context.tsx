@@ -1,5 +1,6 @@
 import { ReactNode, useCallback } from "react"
 import { DocumentState } from "@embedpdf/core"
+
 import { useActiveDocument, useDocumentManagerCapability, useOpenDocuments } from "../hooks"
 
 export interface TabActions {

@@ -1,5 +1,6 @@
 import { Action } from "@embedpdf/core"
 import { MatchFlag, SearchResult } from "@embedpdf/models"
+
 import { SearchDocumentState } from "./types"
 
 // Action Types

@@ -1,4 +1,5 @@
 import { PluginPackage } from "@embedpdf/core"
+
 import { SearchAction } from "./actions"
 import { manifest, SEARCH_PLUGIN_ID } from "./manifest"
 import { initialSearchDocumentState, initialState, searchReducer } from "./reducer"
@@ -20,4 +21,4 @@ export const SearchPluginPackage: PluginPackage<
 export { SearchPlugin } from "./search-plugin"
 export * from "./types"
 export * from "./manifest"
-export { initialState, initialSearchDocumentState }
+export { initialSearchDocumentState, initialState }

@@ -1,4 +1,5 @@
 import { Action } from "@embedpdf/core"
+
 import { ThumbnailDocumentState, WindowState } from "./types"
 
 // Document lifecycle

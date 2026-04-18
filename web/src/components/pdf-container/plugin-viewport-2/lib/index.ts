@@ -1,4 +1,5 @@
 import { PluginPackage } from "@embedpdf/core"
+
 import { ViewportAction } from "./actions"
 import { manifest, VIEWPORT_PLUGIN_ID } from "./manifest"
 import { initialState, viewportReducer } from "./reducer"

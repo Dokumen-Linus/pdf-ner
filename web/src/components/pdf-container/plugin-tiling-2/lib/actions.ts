@@ -1,4 +1,5 @@
 import { Action } from "@embedpdf/core"
+
 import { Tile, TileStatus, TilingDocumentState } from "./types"
 
 export const INIT_TILING_STATE = "TILING/INIT_STATE"

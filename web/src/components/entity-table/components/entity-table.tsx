@@ -1,6 +1,7 @@
 import { FormEvent, startTransition, useEffect, useState } from "react"
 import { boundingRect, SearchAllPagesResult, uuidV4 } from "@embedpdf/models"
 import { Highlighter, LineSquiggle, Strikethrough, Underline } from "lucide-react"
+
 import {
   PdfTextMarkupAnnotationObject,
   Subtype,
@@ -24,10 +25,12 @@ import {
   TableRow,
 } from "@/components/shadcn-ui/table"
 import { m } from "@/integrations/paraglide/messages.js"
+
 import ColorPicker from "../../custom/color-picker"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
-import type { EntityType } from "../entity-type"
 import useEntityTypeStore from "../hooks/use-entity-type-store"
+
+import type { EntityType } from "../entity-type"
 
 function entityTypesToRecord(entityTypes: EntityType[]) {
   return Object.fromEntries(entityTypes.map((entityType) => [entityType.name, entityType]))
@@ -183,7 +186,7 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
   }
 
   return (
-    <Table className="[&_th]:px-1.5 [&_td]:px-1.5 [&_th]:py-2.5 [&_td]:py-2">
+    <Table className="[&_td]:px-1.5 [&_td]:py-2 [&_th]:px-1.5 [&_th]:py-2.5">
       <TableHeader>
         <TableRow>
           <TableHead>{m.entity_table_col_subtype()}</TableHead>

@@ -11,6 +11,7 @@ import {
   RefreshCwIcon,
   UploadIcon,
 } from "lucide-react"
+
 import { ProjectTabs } from "@/components/project-tabs"
 import {
   AlertDialog,
@@ -42,8 +43,9 @@ import {
 } from "@/components/shadcn-ui/table"
 import { getCurrentProjectAccess, getProjectById } from "@/db-fns/web/projects"
 import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
-import type { FoundWorkersPdf } from "@/db/types"
 import { m } from "@/integrations/paraglide/messages.js"
+
+import type { FoundWorkersPdf } from "@/db/types"
 
 function DocumentsSkeleton() {
   return (
@@ -159,7 +161,7 @@ function DocumentsPage() {
             <CardTitle className="text-destructive">{m.projects_docs_error_title()}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {loadError || m.projects_docs_error_not_found()}
             </p>
             <Button onClick={() => void router.invalidate()}>
@@ -212,7 +214,7 @@ function DocumentsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-semibold tracking-tight">{project.name}</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {project.description || "No description provided."}
           </p>
         </div>
@@ -245,9 +247,9 @@ function DocumentsPage() {
                   {m.projects_docs_upload_modal_description()}
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <div className="py-4 space-y-4">
+              <div className="space-y-4 py-4">
                 <div
-                  className="flex cursor-pointer flex-col items-center gap-3 rounded-lg border-2 border-dashed border-border/60 bg-muted/20 p-8 transition-colors hover:bg-muted/30"
+                  className="border-border/60 bg-muted/20 hover:bg-muted/30 flex cursor-pointer flex-col items-center gap-3 rounded-lg border-2 border-dashed p-8 transition-colors"
                   onClick={() => fileInputRef.current?.click()}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click()
@@ -255,16 +257,16 @@ function DocumentsPage() {
                   role="button"
                   tabIndex={0}
                 >
-                  <FileUp className="h-10 w-10 text-muted-foreground" />
+                  <FileUp className="text-muted-foreground h-10 w-10" />
                   {selectedFile ? (
                     <div className="text-center">
                       <p className="text-sm font-medium">{selectedFile.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {m.projects_docs_upload_modal_placeholder()}
                     </p>
                   )}
@@ -278,15 +280,15 @@ function DocumentsPage() {
                 />
 
                 {uploadErrorMessage && (
-                  <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3">
-                    <p className="text-sm font-medium text-destructive">{uploadErrorMessage}</p>
+                  <div className="border-destructive/20 bg-destructive/10 rounded-md border p-3">
+                    <p className="text-destructive text-sm font-medium">{uploadErrorMessage}</p>
                   </div>
                 )}
 
                 {uploadMutation.isPending && (
                   <div className="space-y-1">
                     <Progress value={uploadProgress} />
-                    <p className="text-right text-xs tabular-nums text-muted-foreground">
+                    <p className="text-muted-foreground text-right text-xs tabular-nums">
                       {uploadProgress}%
                     </p>
                   </div>
@@ -318,15 +320,15 @@ function DocumentsPage() {
             </AlertDialogContent>
           </AlertDialog>
         ) : (
-          <p className="max-w-sm text-right text-sm text-muted-foreground">
+          <p className="text-muted-foreground max-w-sm text-right text-sm">
             Analysts can review and label PDFs here, but only developers can upload files.
           </p>
         )}
       </div>
 
       {!project.bucketId && (
-        <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3">
-          <p className="text-sm text-destructive">{m.projects_docs_no_bucket_error()}</p>
+        <div className="border-destructive/20 bg-destructive/10 rounded-md border p-3">
+          <p className="text-destructive text-sm">{m.projects_docs_no_bucket_error()}</p>
         </div>
       )}
 
@@ -351,21 +353,21 @@ function DocumentsPage() {
               {m.projects_docs_refresh_button()}
             </Button>
           </CardHeader>
-          <CardContent className="p-0 border-t">
+          <CardContent className="border-t p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader className="bg-muted/30">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="py-3 px-6 h-auto text-xs font-semibold uppercase tracking-wider">
+                    <TableHead className="h-auto px-6 py-3 text-xs font-semibold tracking-wider uppercase">
                       {m.projects_docs_table_col_name()}
                     </TableHead>
-                    <TableHead className="py-3 px-4 h-auto text-xs font-semibold uppercase tracking-wider text-center">
+                    <TableHead className="h-auto px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase">
                       {m.projects_docs_table_col_source()}
                     </TableHead>
-                    <TableHead className="py-3 px-4 h-auto text-xs font-semibold uppercase tracking-wider text-center">
+                    <TableHead className="h-auto px-4 py-3 text-center text-xs font-semibold tracking-wider uppercase">
                       {m.projects_docs_table_col_status()}
                     </TableHead>
-                    <TableHead className="py-3 px-6 h-auto text-xs font-semibold uppercase tracking-wider text-right">
+                    <TableHead className="h-auto px-6 py-3 text-right text-xs font-semibold tracking-wider uppercase">
                       {m.projects_docs_table_col_date()}
                     </TableHead>
                   </TableRow>
@@ -373,7 +375,7 @@ function DocumentsPage() {
                 <TableBody>
                   {sortedPdfs.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-40 text-center text-muted-foreground">
+                      <TableCell colSpan={4} className="text-muted-foreground h-40 text-center">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <UploadIcon className="h-8 w-8 opacity-20" />
                           <p>{m.projects_docs_list_empty()}</p>
@@ -391,7 +393,7 @@ function DocumentsPage() {
                           key={pdf.id}
                           className="group hover:bg-muted/20 transition-colors"
                         >
-                          <TableCell className="py-4 px-6 font-medium">
+                          <TableCell className="px-6 py-4 font-medium">
                             <Link
                               to="/projects/$projectId/labelling"
                               params={{ projectId }}
@@ -401,27 +403,27 @@ function DocumentsPage() {
                               {pdf.name}
                             </Link>
                           </TableCell>
-                          <TableCell className="py-4 px-4 text-center">
-                            <span className="capitalize px-2 py-1 rounded bg-muted/40 text-[11px] font-medium text-muted-foreground border border-border/40">
+                          <TableCell className="px-4 py-4 text-center">
+                            <span className="bg-muted/40 text-muted-foreground border-border/40 rounded border px-2 py-1 text-[11px] font-medium capitalize">
                               {pdf.extractMethod || "upload"}
                             </span>
                           </TableCell>
-                          <TableCell className="py-4 px-4">
+                          <TableCell className="px-4 py-4">
                             <div className="flex justify-center">
                               {pdf.isProcessed ? (
-                                <div className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                                <div className="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600">
                                   <CheckCircle2Icon className="mr-1 h-3 w-3" />
                                   {m.projects_docs_status_processed()}
                                 </div>
                               ) : (
-                                <div className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold bg-blue-500/10 text-blue-600 border-blue-500/20">
+                                <div className="inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 text-[11px] font-semibold text-blue-600">
                                   <Loader2Icon className="mr-1 h-3 w-3 animate-spin" />
                                   {m.projects_docs_status_processing()}
                                 </div>
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="py-4 px-6 text-right text-xs text-muted-foreground tabular-nums">
+                          <TableCell className="text-muted-foreground px-6 py-4 text-right text-xs tabular-nums">
                             {timestamp}
                           </TableCell>
                         </TableRow>

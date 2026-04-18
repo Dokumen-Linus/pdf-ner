@@ -1,5 +1,6 @@
 import { ChangeEvent, useEffect, useRef } from "react"
 import { PdfErrorReason, Task } from "@embedpdf/models"
+
 import { useDocumentManagerCapability, useDocumentManagerPlugin } from "../hooks"
 import { OpenDocumentResponse, OpenFileDialogOptions } from "../lib"
 

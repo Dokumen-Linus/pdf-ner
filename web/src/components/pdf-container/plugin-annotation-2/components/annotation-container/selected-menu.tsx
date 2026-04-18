@@ -1,6 +1,8 @@
 import { Rect } from "@embedpdf/models"
 import { Trash2 } from "lucide-react"
+
 import { useAnnotationCapability } from "../../hooks"
+
 import type { PdfTextMarkupAnnotationObject } from "../../lib/types"
 import type { MenuWrapperProps } from "./counter-rotate"
 

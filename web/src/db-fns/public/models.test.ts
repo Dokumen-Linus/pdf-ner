@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+
 import { getAllModels, getModelById, getModelsByProvider } from "./models"
 
 const runTests = process.env.TEST_DB === "true"

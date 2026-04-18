@@ -1,9 +1,11 @@
 import { relations } from "drizzle-orm"
 import { boolean, jsonb, timestamp, uuid } from "drizzle-orm/pg-core"
-import type { LabeledEntitiesMap } from "../../types"
+
 import { annotations } from "./annotations"
 import { webSchema } from "./schema"
 import { users } from "./users"
+
+import type { LabeledEntitiesMap } from "../../types"
 
 export const pdfs = webSchema.table("pdfs", {
   id: uuid("id").primaryKey(),

@@ -7,6 +7,7 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react"
+
 import { useThumbnailPlugin } from "../hooks"
 import { ThumbMeta } from "../lib"
 

@@ -10,6 +10,7 @@ import {
   UserIcon,
   X,
 } from "lucide-react"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,22 +61,22 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full transition-colors duration-300 bg-white border-b border-[#EEEEEE]">
+      <header className="sticky top-0 z-40 w-full border-b border-[#EEEEEE] bg-white transition-colors duration-300">
         <div className="mx-auto flex h-14 max-w-345.75 items-center justify-between px-6">
           {/* Logo (Left) */}
-          <Link to="/" className="flex shrink-0 items-center gap-3 group">
+          <Link to="/" className="group flex shrink-0 items-center gap-3">
             <img
               src={logoUrl}
               className="h-6 w-auto object-contain transition-transform"
               alt="Dokumen AI"
             />
-            <span className="text-[17px] font-bold tracking-[0.2em] uppercase text-[#171A20]">
+            <span className="text-[17px] font-bold tracking-[0.2em] text-[#171A20] uppercase">
               Dokumen<span className="text-[#3E6AE1]">AI</span>
             </span>
           </Link>
 
           {/* Desktop Nav (Center) */}
-          <nav className="hidden md:flex flex-1 items-center justify-center gap-2">
+          <nav className="hidden flex-1 items-center justify-center gap-2 md:flex">
             <Link
               to="/"
               className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
@@ -129,7 +130,7 @@ export default function Header() {
           </nav>
 
           {/* Desktop Auth (Right) */}
-          <div className="hidden md:flex shrink-0 items-center justify-end gap-2">
+          <div className="hidden shrink-0 items-center justify-end gap-2 md:flex">
             {session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -142,19 +143,19 @@ export default function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" sideOffset={8} className="w-48">
                   <DropdownMenuItem asChild>
-                    <Link to="/projects" className="flex items-center gap-2 cursor-pointer">
+                    <Link to="/projects" className="flex cursor-pointer items-center gap-2">
                       <FolderOpenIcon size={14} />
                       Projects
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
+                    <Link to="/profile" className="flex cursor-pointer items-center gap-2">
                       <UserIcon size={14} />
                       {m.nav_profile()}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/billing" className="flex items-center gap-2 cursor-pointer">
+                    <Link to="/billing" className="flex cursor-pointer items-center gap-2">
                       <CreditCardIcon size={14} />
                       Billing
                     </Link>
@@ -163,7 +164,7 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link
                       to="/signout"
-                      className="flex items-center gap-2 cursor-pointer text-[#5C5E62]"
+                      className="flex cursor-pointer items-center gap-2 text-[#5C5E62]"
                     >
                       <LogOutIcon size={14} />
                       {m.nav_signout()}
@@ -189,20 +190,20 @@ export default function Header() {
             )}
             <Popover>
               <PopoverTrigger asChild>
-                <button className="rounded-lg p-2 text-[#171A20] hover:bg-[#F4F4F4] transition-colors ml-1">
+                <button className="ml-1 rounded-lg p-2 text-[#171A20] transition-colors hover:bg-[#F4F4F4]">
                   <Languages size={18} />
                 </button>
               </PopoverTrigger>
               <PopoverContent
                 align="end"
                 sideOffset={8}
-                className="bg-white rounded-lg shadow-lg border border-[#EEEEEE] w-auto min-w-20 p-1"
+                className="w-auto min-w-20 rounded-lg border border-[#EEEEEE] bg-white p-1 shadow-lg"
               >
                 {locales.map((tag: string) => (
                   <button
                     key={tag}
                     onClick={() => handleLanguageChange(tag)}
-                    className={`w-full text-left uppercase px-3 py-1.5 text-sm rounded-md transition-colors ${
+                    className={`w-full rounded-md px-3 py-1.5 text-left text-sm uppercase transition-colors ${
                       tag === currentLocale
                         ? "bg-[#F4F4F4] font-semibold text-[#171A20]"
                         : "text-[#5C5E62] hover:bg-[#F4F4F4] hover:text-[#171A20]"
@@ -218,7 +219,7 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(true)}
-            className="md:hidden rounded-lg p-1.5 text-[#171A20] hover:bg-[#F4F4F4] transition-colors"
+            className="rounded-lg p-1.5 text-[#171A20] transition-colors hover:bg-[#F4F4F4] md:hidden"
             aria-label={m.common_aria_menu()}
           >
             <Menu size={20} />
@@ -228,29 +229,29 @@ export default function Header() {
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed inset-0 z-50 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        className={`fixed inset-0 z-50 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={() => setIsOpen(false)}
       />
       <aside
-        className={`fixed right-0 top-0 z-50 flex h-full w-80 flex-col bg-white shadow-[-8px_0_24px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 z-50 flex h-full w-80 flex-col bg-white shadow-[-8px_0_24px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex items-center justify-between p-4">
           <Popover>
             <PopoverTrigger asChild>
-              <button className="rounded-lg p-2 text-[#171A20] hover:bg-[#F4F4F4] transition-colors">
+              <button className="rounded-lg p-2 text-[#171A20] transition-colors hover:bg-[#F4F4F4]">
                 <Languages size={18} />
               </button>
             </PopoverTrigger>
             <PopoverContent
               align="start"
               sideOffset={8}
-              className="bg-white rounded-lg shadow-lg border border-[#EEEEEE] w-auto min-w-20 p-1"
+              className="w-auto min-w-20 rounded-lg border border-[#EEEEEE] bg-white p-1 shadow-lg"
             >
               {locales.map((tag: string) => (
                 <button
                   key={tag}
                   onClick={() => handleLanguageChange(tag)}
-                  className={`w-full text-left uppercase px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  className={`w-full rounded-md px-3 py-1.5 text-left text-sm uppercase transition-colors ${
                     tag === currentLocale
                       ? "bg-[#F4F4F4] font-semibold text-[#171A20]"
                       : "text-[#5C5E62] hover:bg-[#F4F4F4] hover:text-[#171A20]"
@@ -263,52 +264,52 @@ export default function Header() {
           </Popover>
           <button
             onClick={() => setIsOpen(false)}
-            className="rounded-lg p-2 text-[#171A20] hover:bg-[#F4F4F4] transition-colors"
+            className="rounded-lg p-2 text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
             aria-label={m.common_aria_close()}
           >
             <X size={20} />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-6 pb-6 pt-2 flex flex-col gap-4">
+        <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 pt-2 pb-6">
           <Link
             to="/"
             onClick={() => setIsOpen(false)}
-            className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+            className="text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
           >
             {m.nav_home()}
           </Link>
           <Link
             to="/pricing"
             onClick={() => setIsOpen(false)}
-            className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+            className="text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
           >
             Pricing
           </Link>
           <Link
             to="/about"
             onClick={() => setIsOpen(false)}
-            className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+            className="text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
           >
             About
           </Link>
           <Link
             to="/contact"
             onClick={() => setIsOpen(false)}
-            className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+            className="text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
           >
             Contact
           </Link>
           {session ? (
             <>
-              <div className="mt-4 border-t border-[#EEEEEE] pt-4 flex flex-col gap-4">
-                <p className="text-[12px] font-medium uppercase tracking-wide text-[#8E8E8E]">
+              <div className="mt-4 flex flex-col gap-4 border-t border-[#EEEEEE] pt-4">
+                <p className="text-[12px] font-medium tracking-wide text-[#8E8E8E] uppercase">
                   Account
                 </p>
                 <Link
                   to="/projects"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
                 >
                   <FolderOpenIcon size={16} />
                   Projects
@@ -316,7 +317,7 @@ export default function Header() {
                 <Link
                   to="/profile"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
                 >
                   <UserIcon size={16} />
                   {m.nav_profile()}
@@ -324,7 +325,7 @@ export default function Header() {
                 <Link
                   to="/billing"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors"
+                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
                 >
                   <CreditCardIcon size={16} />
                   Billing
@@ -332,7 +333,7 @@ export default function Header() {
                 <Link
                   to="/signout"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 text-[17px] font-medium text-[#5C5E62] hover:text-[#171A20] transition-colors mt-2"
+                  className="mt-2 flex items-center gap-2 text-[17px] font-medium text-[#5C5E62] transition-colors hover:text-[#171A20]"
                 >
                   <LogOutIcon size={16} />
                   {m.nav_signout()}
@@ -344,14 +345,14 @@ export default function Header() {
               <Link
                 to="/signin"
                 onClick={() => setIsOpen(false)}
-                className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors mt-4"
+                className="mt-4 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
               >
                 {m.nav_signin()}
               </Link>
               <Link
                 to="/signup"
                 onClick={() => setIsOpen(false)}
-                className="text-[17px] font-medium text-[#171A20] hover:text-[#393C41] transition-colors mt-2"
+                className="mt-2 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
               >
                 {m.nav_signup()}
               </Link>

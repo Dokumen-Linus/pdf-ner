@@ -1,5 +1,6 @@
 import { BasePluginConfig, EventHook } from "@embedpdf/core"
 import { PdfErrorReason, PdfPageObject, Rect, Rotation, Task } from "@embedpdf/models"
+
 import { PageVisibilityMetrics } from "../../plugin-scroll-2"
 
 export interface TilingPluginConfig extends BasePluginConfig {

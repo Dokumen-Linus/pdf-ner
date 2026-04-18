@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+
 import { createUser, deleteUser, getUserByEmail, getUserById, updateUser } from "./users"
 
 const runTests = process.env.TEST_DB === "true"

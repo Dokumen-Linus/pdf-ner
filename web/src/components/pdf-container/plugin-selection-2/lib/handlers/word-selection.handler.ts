@@ -1,9 +1,11 @@
 import { Position } from "@embedpdf/models"
+
 import {
   EmbedPdfPointerEvent,
   PointerEventHandlersWithLifecycle,
 } from "../../../plugin-interaction-manager-2"
 import { glyphAt, wordBoundsAt } from "../utils"
+
 import { TextSelectionHandlerOptions } from "./text-selection.handler"
 
 /**

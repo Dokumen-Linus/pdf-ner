@@ -1,4 +1,5 @@
 import { Action } from "@embedpdf/core"
+
 import { ViewportInputMetrics, ViewportScrollMetrics } from "./types"
 
 // Document lifecycle (state persistence)

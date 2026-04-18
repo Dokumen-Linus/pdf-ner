@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react"
 import { useCapability, usePlugin } from "@embedpdf/core/react"
+
 import { initialSearchDocumentState, SearchDocumentState, SearchPlugin, SearchScope } from "../lib"
 
 export const useSearchPlugin = () => usePlugin<SearchPlugin>(SearchPlugin.id)

@@ -1,4 +1,5 @@
 import { PluginManifest } from "@embedpdf/core"
+
 import { ViewportPluginConfig } from "./types"
 
 export const VIEWPORT_PLUGIN_ID = "viewport"

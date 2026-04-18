@@ -1,5 +1,7 @@
 import { Fragment } from "react"
+
 import { MarqueeSelectionStyle, TextSelectionStyle } from "../lib"
+
 import { MarqueeSelection } from "./marquee-selection"
 import { TextSelection } from "./text-selection"
 

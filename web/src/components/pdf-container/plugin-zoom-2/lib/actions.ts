@@ -1,4 +1,5 @@
 import { Action } from "@embedpdf/core"
+
 import { ZoomDocumentState, ZoomLevel } from "./types"
 
 // Document lifecycle

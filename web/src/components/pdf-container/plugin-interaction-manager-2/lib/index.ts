@@ -1,4 +1,5 @@
 import { PluginPackage } from "@embedpdf/core"
+
 import { InteractionManagerAction } from "./actions"
 import { InteractionManagerPlugin } from "./interaction-manager-plugin"
 import { INTERACTION_MANAGER_PLUGIN_ID, manifest } from "./manifest"

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useForm, type ReactFormExtendedApi } from "@tanstack/react-form"
+import { type ReactFormExtendedApi, useForm } from "@tanstack/react-form"
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { LoaderCircleIcon, PlusIcon, SaveIcon, Trash2Icon } from "lucide-react"
+
 import { ProjectTabs } from "@/components/project-tabs"
 import {
   AlertDialog,
@@ -41,6 +42,7 @@ import {
   updateEntityType,
 } from "@/db-fns/web/entity-types"
 import { getCurrentProjectAccess, getProjectById, updateProject } from "@/db-fns/web/projects"
+
 import type { FoundDbEntityType, FoundStandardEntityType } from "@/db/types"
 
 const DATATYPES = ["int", "float", "alphanumeric", "alpha"] as const
@@ -430,7 +432,7 @@ function EntityTypesPage() {
             <CardTitle className="text-destructive">Unable to load entity types</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground" aria-live="polite">
+            <p className="text-muted-foreground text-sm" aria-live="polite">
               {loadError || "Project not found."}
             </p>
             <Button onClick={() => void router.invalidate()}>Retry</Button>
@@ -449,7 +451,7 @@ function EntityTypesPage() {
         <h1 className="text-3xl font-semibold tracking-tight text-pretty" translate="no">
           {project.name}
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Define project settings and the entity types this project will extract and annotate.
         </p>
       </div>
@@ -477,7 +479,7 @@ function EntityTypesPage() {
               <div
                 role="alert"
                 aria-live="polite"
-                className="rounded-md border border-destructive/35 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+                className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm"
               >
                 {projectSaveError}
               </div>
@@ -540,7 +542,7 @@ function EntityTypesPage() {
                       <SelectItem value="landscape">Landscape</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     Default orientation hint for uploaded documents.
                   </p>
                 </div>
@@ -548,7 +550,7 @@ function EntityTypesPage() {
             </projectForm.Field>
 
             <div className="flex items-center justify-between pt-2">
-              <p className="text-xs text-muted-foreground" aria-live="polite">
+              <p className="text-muted-foreground text-xs" aria-live="polite">
                 {isProjectDirty ? "You have unsaved changes." : "All changes saved."}
               </p>
               <div className="flex gap-2">
@@ -585,7 +587,7 @@ function EntityTypesPage() {
       {/* ------ Form B: Entity Types ------ */}
       <div className="space-y-1 pt-2">
         <h2 className="text-xl font-semibold tracking-tight">Entity Types</h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Pick a standard entity as a starting point or create a custom one.
         </p>
       </div>
@@ -602,7 +604,7 @@ function EntityTypesPage() {
           <div
             role="alert"
             aria-live="polite"
-            className="rounded-md border border-destructive/35 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+            className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm"
           >
             {saveError}
           </div>
@@ -660,8 +662,8 @@ function EntityTypesPage() {
           )}
         </form.Field>
 
-        <div className="sticky bottom-4 flex items-center justify-between rounded-md border bg-background/95 p-3 shadow-sm backdrop-blur">
-          <p className="text-xs text-muted-foreground" aria-live="polite">
+        <div className="bg-background/95 sticky bottom-4 flex items-center justify-between rounded-md border p-3 shadow-sm backdrop-blur">
+          <p className="text-muted-foreground text-xs" aria-live="polite">
             {isEntitiesDirty ? "You have unsaved changes." : "All changes saved."}
           </p>
           <div className="flex gap-2">
@@ -735,7 +737,7 @@ function AddFromStandard({
       </SelectTrigger>
       <SelectContent>
         {stdEntityTypes.length === 0 ? (
-          <div className="px-2 py-1.5 text-sm text-muted-foreground">
+          <div className="text-muted-foreground px-2 py-1.5 text-sm">
             No standard entity types available.
           </div>
         ) : (
@@ -794,7 +796,7 @@ function EntityTypeRowCard({
           <CardTitle id={headingId} className="text-base">
             Entity Type #{index + 1}
             {form.state.values.rows[index]?.standardEntityTypeId != null && (
-              <span className="ml-2 text-xs font-normal text-muted-foreground">
+              <span className="text-muted-foreground ml-2 text-xs font-normal">
                 (standard: {stdLabel(form.state.values.rows[index]!.standardEntityTypeId)})
               </span>
             )}
@@ -830,7 +832,7 @@ function EntityTypeRowCard({
                 onChange={(e) => field.handleChange(e.target.value)}
                 placeholder="e.g. Invoice Number…"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Short label shown in the UI and used to tag spans in the PDF.
               </p>
             </div>
@@ -852,7 +854,7 @@ function EntityTypeRowCard({
                 onChange={(e) => field.handleChange(e.target.value)}
                 placeholder="Describe, in plain language, what counts as this entity…"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 A precise natural-language definition. The LLM uses this to decide what to extract.
               </p>
             </div>
@@ -875,7 +877,7 @@ function EntityTypeRowCard({
                 onChange={(e) => field.handleChange(e.target.value)}
                 placeholder={"One example per line, e.g.\nINV-12345\nINV-0001"}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 One example per line. A few high-quality examples significantly improve extraction.
               </p>
             </div>
@@ -896,7 +898,7 @@ function EntityTypeRowCard({
                 onChange={(e) => field.handleChange(e.target.value)}
                 placeholder="e.g. “INV-” followed by digits…"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Optional description of the expected surface form (pattern, prefix, length, etc.).
               </p>
             </div>
@@ -924,7 +926,7 @@ function EntityTypeRowCard({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Underlying data kind (int, float, alphanumeric, alpha). Constrains post-processing.
               </p>
             </div>
@@ -951,7 +953,7 @@ function EntityTypeRowCard({
                   <SelectItem value="false">No — may span multiple words</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Whether extracted values must be a single whitespace-delimited token.
               </p>
             </div>
@@ -975,7 +977,7 @@ function EntityTypeRowCard({
                 onChange={(e) => field.handleChange(e.target.value)}
                 placeholder="e.g. 10"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 If set, extracted values must have exactly this many characters.
               </p>
             </div>
@@ -993,7 +995,7 @@ function EntityTypeRowCard({
               />
               <div className="space-y-0.5">
                 <Label htmlFor={`unique-${index}`}>Unique</Label>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Only one instance of this entity type is expected per document.
                 </p>
               </div>
@@ -1012,7 +1014,7 @@ function EntityTypeRowCard({
               />
               <div className="space-y-0.5">
                 <Label htmlFor={`required-${index}`}>Required</Label>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Every document must contain at least one instance of this entity.
                 </p>
               </div>
@@ -1041,7 +1043,7 @@ function EntityTypeRowCard({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 How this entity is visualized in the PDF (highlight, underline, etc.).
               </p>
             </div>
@@ -1073,7 +1075,7 @@ function EntityTypeRowCard({
                   />
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Hex color used for the annotation (e.g. #ffcc00).
               </p>
             </div>
@@ -1099,7 +1101,7 @@ function EntityTypeRowCard({
                 onChange={(e) => field.handleChange(e.target.value)}
                 placeholder="0.0 – 1.0"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Annotation opacity between 0 (transparent) and 1 (opaque).
               </p>
             </div>

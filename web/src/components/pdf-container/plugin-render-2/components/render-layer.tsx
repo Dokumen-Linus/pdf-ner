@@ -1,8 +1,10 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react"
-import type { CSSProperties, HTMLAttributes } from "react"
 import { useDocumentState } from "@embedpdf/core/react"
 import { ignore, PdfErrorCode } from "@embedpdf/models"
+
 import { useRenderCapability } from "../hooks/use-render"
+
+import type { CSSProperties, HTMLAttributes } from "react"
 
 type RenderLayerProps = Omit<HTMLAttributes<HTMLImageElement>, "style"> & {
   /**

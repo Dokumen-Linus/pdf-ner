@@ -1,4 +1,5 @@
 import { PluginPackage } from "@embedpdf/core"
+
 import { DocumentManagerPlugin } from "./document-manager-plugin"
 import { DOCUMENT_MANAGER_PLUGIN_ID, manifest } from "./manifest"
 import { DocumentManagerPluginConfig } from "./types"

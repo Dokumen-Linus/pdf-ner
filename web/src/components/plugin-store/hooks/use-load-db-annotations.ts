@@ -1,14 +1,17 @@
 import { useEffect, useRef } from "react"
 import { PdfAnnotationSubtype } from "@embedpdf/models"
+
 import {
-  subtypeToEnum,
   type PdfTextMarkupAnnotationObject,
   type Subtype,
+  subtypeToEnum,
 } from "@/components/pdf-container/plugin-annotation-2"
-import { getAnnotationsByPdfId } from "@/db-fns/web/annotations"
 import { toEmbedRect, toEmbedRects } from "@/db/rect"
-import type { FoundDbAnnotation } from "@/db/types"
+import { getAnnotationsByPdfId } from "@/db-fns/web/annotations"
+
 import usePluginStore from "./use-plugin-store"
+
+import type { FoundDbAnnotation } from "@/db/types"
 
 // Converts a DB annotation row into the plugin's in-memory shape. Returns
 // null for rows whose subtype isn't one of the four text-markup kinds the

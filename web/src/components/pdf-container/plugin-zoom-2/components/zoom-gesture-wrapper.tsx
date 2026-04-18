@@ -1,4 +1,5 @@
 import { CSSProperties, HTMLAttributes, ReactNode, useMemo } from "react"
+
 import { useZoomGesture, ZoomGestureOptions } from "../hooks"
 
 type ZoomGestureWrapperProps = Omit<HTMLAttributes<HTMLDivElement>, "style"> & {

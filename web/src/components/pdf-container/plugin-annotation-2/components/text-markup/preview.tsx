@@ -1,8 +1,10 @@
-import { useEffect, useState, type ReactElement } from "react"
+import { type ReactElement, useEffect, useState } from "react"
 import { blendModeToCss, PdfAnnotationSubtype, PdfBlendMode, Rect } from "@embedpdf/models"
+
 import { useSelectionCapability } from "../../../plugin-selection-2"
 import { useAnnotationCapability } from "../../hooks"
 import { Subtype, subtypeToEnum } from "../../lib/types"
+
 import { Highlight } from "./highlight"
 import { Squiggly } from "./squiggly"
 import { Strikeout } from "./strikeout"

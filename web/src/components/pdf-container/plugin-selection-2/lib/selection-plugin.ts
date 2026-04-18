@@ -11,12 +11,14 @@ import {
   Rect,
   Task,
 } from "@embedpdf/models"
+
 import {
   EmbedPdfPointerEvent,
   InteractionManagerCapability,
   InteractionManagerPlugin,
   PointerEventHandlersWithLifecycle,
 } from "../../plugin-interaction-manager-2"
+
 import {
   cachePageGeometry,
   cleanupSelectionState,

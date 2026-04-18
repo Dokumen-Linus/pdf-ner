@@ -1,4 +1,5 @@
 import { HexColorPicker } from "react-colorful"
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn-ui/popover"
 
 interface ColorPickerProps {
@@ -11,12 +12,12 @@ const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
     <Popover>
       <PopoverTrigger asChild>
         <button
-          className="w-8 h-8 rounded-full border shadow-sm"
+          className="h-8 w-8 rounded-full border shadow-sm"
           style={{ backgroundColor: value }}
         />
       </PopoverTrigger>
 
-      <PopoverContent className="p-3 w-auto">
+      <PopoverContent className="w-auto p-3">
         <HexColorPicker color={value} onChange={onChange} />
       </PopoverContent>
     </Popover>

@@ -1,4 +1,5 @@
 import { PluginPackage } from "@embedpdf/core"
+
 import { manifest, RENDER_PLUGIN_ID } from "./manifest"
 import { RenderPlugin } from "./render-plugin"
 import { RenderPluginConfig } from "./types"

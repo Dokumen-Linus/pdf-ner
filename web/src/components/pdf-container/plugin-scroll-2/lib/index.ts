@@ -1,4 +1,5 @@
 import { PluginPackage } from "@embedpdf/core"
+
 import { ScrollAction } from "./actions"
 import { manifest, SCROLL_PLUGIN_ID } from "./manifest"
 import { initialState, scrollReducer } from "./reducer"

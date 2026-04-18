@@ -1,7 +1,7 @@
-import { getRequestHeaders } from "@tanstack/react-start/server";
+import { getRequestHeaders } from "@tanstack/react-start/server"
+
 import { env } from "@/env.server"
 import { observedApiFetch } from "@/lib/observability/fetch"
-
 
 export async function jsonCall(path: string, options: RequestInit = {}) {
   const response = await observedApiFetch(

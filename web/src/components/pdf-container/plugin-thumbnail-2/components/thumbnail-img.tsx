@@ -1,5 +1,6 @@
 import { CSSProperties, HTMLAttributes, useEffect, useRef, useState } from "react"
 import { ignore, PdfErrorCode } from "@embedpdf/models"
+
 import { useThumbnailCapability, useThumbnailPlugin } from "../hooks"
 import { ThumbMeta } from "../lib"
 

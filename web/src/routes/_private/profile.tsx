@@ -3,6 +3,7 @@ import { useForm } from "@tanstack/react-form"
 import { createFileRoute, useRouter } from "@tanstack/react-router"
 import { EditIcon, LoaderCircleIcon, SaveIcon, Trash2Icon, XIcon } from "lucide-react"
 import { z } from "zod"
+
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -166,7 +167,7 @@ function ProfilePageSkeleton() {
       </div>
       <Card>
         <CardContent className="grid gap-0 p-0 lg:grid-cols-[280px_1fr]">
-          <div className="space-y-6 border-b p-6 lg:border-b-0 lg:border-r">
+          <div className="space-y-6 border-b p-6 lg:border-r lg:border-b-0">
             <Skeleton className="h-24 w-24 rounded-full" />
             <div className="space-y-3">
               <Skeleton className="h-6 w-40" />
@@ -343,14 +344,14 @@ function ProfilePage() {
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 sm:px-6">
         <div className="space-y-1">
           <h1 className="text-3xl font-semibold tracking-tight">{m.profile_title()}</h1>
-          <p className="text-sm text-muted-foreground">{m.profile_error_load_description()}</p>
+          <p className="text-muted-foreground text-sm">{m.profile_error_load_description()}</p>
         </div>
         <Card className="border-destructive/40">
           <CardHeader>
             <CardTitle className="text-destructive">{m.profile_error_load_title()}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">{loadError}</p>
+            <p className="text-muted-foreground text-sm">{loadError}</p>
             <Button onClick={() => void router.invalidate()}>{m.profile_error_load_retry()}</Button>
           </CardContent>
         </Card>
@@ -363,7 +364,7 @@ function ProfilePage() {
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 sm:px-6">
         <div className="space-y-1">
           <h1 className="text-3xl font-semibold tracking-tight">{m.profile_title()}</h1>
-          <p className="text-sm text-muted-foreground">{m.profile_error_empty_description()}</p>
+          <p className="text-muted-foreground text-sm">{m.profile_error_empty_description()}</p>
         </div>
         <Card>
           <CardContent className="pt-6">
@@ -390,10 +391,10 @@ function ProfilePage() {
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <div className="space-y-1">
         <h1 className="text-3xl font-semibold tracking-tight">{m.profile_title()}</h1>
-        <p className="text-sm text-muted-foreground">{m.profile_description()}</p>
+        <p className="text-muted-foreground text-sm">{m.profile_description()}</p>
       </div>
 
-      <Card className="overflow-hidden border-border/80 shadow-sm">
+      <Card className="border-border/80 overflow-hidden shadow-sm">
         <CardHeader className="flex flex-col gap-3 border-b sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-xl">{m.profile_subtitle()}</CardTitle>
           <div className="flex gap-2">
@@ -445,8 +446,8 @@ function ProfilePage() {
         </CardHeader>
 
         <CardContent className="grid gap-0 p-0 lg:grid-cols-[300px_1fr]">
-          <aside className="space-y-5 border-b bg-muted/20 p-6 lg:border-b-0 lg:border-r">
-            <div className="relative h-24 w-24 overflow-hidden rounded-full border border-border/70 bg-muted">
+          <aside className="bg-muted/20 space-y-5 border-b p-6 lg:border-r lg:border-b-0">
+            <div className="border-border/70 bg-muted relative h-24 w-24 overflow-hidden rounded-full border">
               {!avatarLoadFailed && (
                 <img
                   src={avatarSrc}
@@ -474,7 +475,7 @@ function ProfilePage() {
 
             <div className="space-y-1">
               <h2 className="text-lg font-semibold">{activeDisplayName}</h2>
-              <p className="break-all text-sm text-muted-foreground">{profile.email}</p>
+              <p className="text-muted-foreground text-sm break-all">{profile.email}</p>
             </div>
 
             {isEditing && (
@@ -529,7 +530,7 @@ function ProfilePage() {
                   <Trash2Icon className="mr-2 h-4 w-4" />
                   {m.profile_avatar_remove_button()}
                 </Button>
-                {uploadFailure && <p className="text-xs text-destructive">{uploadFailure}</p>}
+                {uploadFailure && <p className="text-destructive text-xs">{uploadFailure}</p>}
               </div>
             )}
           </aside>
@@ -552,7 +553,7 @@ function ProfilePage() {
             }}
           >
             {(saveError || form.state.errorMap.onSubmit) && (
-              <div className="rounded-md border border-destructive/35 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+              <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
                 {saveError ??
                   (form.state.errorMap.onSubmit as { form?: string })?.form ??
                   "Could not save changes."}
@@ -574,7 +575,7 @@ function ProfilePage() {
                           onChange={(e) => handleChange(e.target.value)}
                         />
                         {state.meta.errors[0] && (
-                          <p className="text-xs text-destructive">{String(state.meta.errors[0])}</p>
+                          <p className="text-destructive text-xs">{String(state.meta.errors[0])}</p>
                         )}
                       </>
                     ) : (
@@ -582,7 +583,7 @@ function ProfilePage() {
                         {profile.displayName?.trim() ? (
                           profile.displayName
                         ) : (
-                          <span className="italic text-muted-foreground">
+                          <span className="text-muted-foreground italic">
                             {fallbackDisplayName}
                           </span>
                         )}
@@ -606,13 +607,13 @@ function ProfilePage() {
                           onChange={(e) => handleChange(e.target.value)}
                         />
                         {state.meta.errors[0] && (
-                          <p className="text-xs text-destructive">{String(state.meta.errors[0])}</p>
+                          <p className="text-destructive text-xs">{String(state.meta.errors[0])}</p>
                         )}
                       </>
                     ) : (
                       <p className="min-h-9 rounded-md border border-transparent px-0.5 py-2 text-sm">
                         {profile.firstName || (
-                          <span className="italic text-muted-foreground">Not set</span>
+                          <span className="text-muted-foreground italic">Not set</span>
                         )}
                       </p>
                     )}
@@ -634,13 +635,13 @@ function ProfilePage() {
                           onChange={(e) => handleChange(e.target.value)}
                         />
                         {state.meta.errors[0] && (
-                          <p className="text-xs text-destructive">{String(state.meta.errors[0])}</p>
+                          <p className="text-destructive text-xs">{String(state.meta.errors[0])}</p>
                         )}
                       </>
                     ) : (
                       <p className="min-h-9 rounded-md border border-transparent px-0.5 py-2 text-sm">
                         {profile.lastName || (
-                          <span className="italic text-muted-foreground">Not set</span>
+                          <span className="text-muted-foreground italic">Not set</span>
                         )}
                       </p>
                     )}
@@ -662,13 +663,13 @@ function ProfilePage() {
                           onChange={(e) => handleChange(e.target.value)}
                         />
                         {state.meta.errors[0] && (
-                          <p className="text-xs text-destructive">{String(state.meta.errors[0])}</p>
+                          <p className="text-destructive text-xs">{String(state.meta.errors[0])}</p>
                         )}
                       </>
                     ) : (
                       <p className="min-h-9 rounded-md border border-transparent px-0.5 py-2 text-sm">
                         {profile.employer || (
-                          <span className="italic text-muted-foreground">Not set</span>
+                          <span className="text-muted-foreground italic">Not set</span>
                         )}
                       </p>
                     )}
@@ -690,13 +691,13 @@ function ProfilePage() {
                           onChange={(e) => handleChange(e.target.value)}
                         />
                         {state.meta.errors[0] && (
-                          <p className="text-xs text-destructive">{String(state.meta.errors[0])}</p>
+                          <p className="text-destructive text-xs">{String(state.meta.errors[0])}</p>
                         )}
                       </>
                     ) : (
                       <p className="min-h-9 rounded-md border border-transparent px-0.5 py-2 text-sm">
                         {profile.jobTitle || (
-                          <span className="italic text-muted-foreground">Not set</span>
+                          <span className="text-muted-foreground italic">Not set</span>
                         )}
                       </p>
                     )}
@@ -706,14 +707,14 @@ function ProfilePage() {
 
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>{m.profile_field_email_label()}</Label>
-                <p className="min-h-9 rounded-md border border-dashed border-border/60 bg-muted/25 px-3 py-2 text-sm">
+                <p className="border-border/60 bg-muted/25 min-h-9 rounded-md border border-dashed px-3 py-2 text-sm">
                   {profile.email}
                 </p>
               </div>
             </div>
 
             {isEditing && (
-              <p className="text-xs text-muted-foreground">{m.profile_edit_footer()}</p>
+              <p className="text-muted-foreground text-xs">{m.profile_edit_footer()}</p>
             )}
           </form>
         </CardContent>

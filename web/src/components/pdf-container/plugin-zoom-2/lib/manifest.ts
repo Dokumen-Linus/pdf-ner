@@ -1,4 +1,5 @@
 import { PluginManifest } from "@embedpdf/core"
+
 import { ZoomMode, ZoomPluginConfig } from "./types"
 
 export const ZOOM_PLUGIN_ID = "zoom"

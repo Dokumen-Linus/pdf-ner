@@ -1,4 +1,5 @@
 import { PdfGlyphSlim, PdfPageGeometry, Position, Rect } from "@embedpdf/models"
+
 import { GlyphPointer, SelectionRangeX } from "./types"
 
 const GLYPH_FLAG_SPACE = 1

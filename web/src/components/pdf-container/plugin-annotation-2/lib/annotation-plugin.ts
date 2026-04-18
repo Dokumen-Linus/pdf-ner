@@ -14,13 +14,14 @@ import {
   Task,
   uuidV4,
 } from "@embedpdf/models"
+
 import {
   InteractionManagerCapability,
   InteractionManagerPlugin,
 } from "../../plugin-interaction-manager-2"
 import { ScrollCapability, ScrollPlugin } from "../../plugin-scroll-2"
 import { SelectionCapability, SelectionPlugin } from "../../plugin-selection-2"
-import type { AnnotationAction } from "./actions"
+
 import {
   batchCreateAnnotations,
   batchDeleteAnnotations,
@@ -36,9 +37,11 @@ import {
   setCreateAnnotationDefaults,
   updateAnnotation,
 } from "./actions"
-import type { AnnotationState } from "./state"
 import { initialDocumentState } from "./state"
 import { CommitType, subtypeToEnum } from "./types"
+
+import type { AnnotationAction } from "./actions"
+import type { AnnotationState } from "./state"
 import type { Command, Commit, PdfTextMarkupAnnotationObject, Subtype } from "./types"
 
 function ignore() {}

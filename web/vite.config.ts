@@ -1,11 +1,12 @@
 // import { fileURLToPath } from "node:url"
+import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import { paraglideVitePlugin } from "@inlang/paraglide-js"
 import tailwindcss from "@tailwindcss/vite"
-import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import viteReact from "@vitejs/plugin-react"
 import { generateSitemap } from "tanstack-router-sitemap"
 import { defineConfig } from "vite"
 import viteTsConfigPaths from "vite-tsconfig-paths"
+
 import { sitemap } from "./src/integrations/sitemap"
 
 const config = defineConfig({

@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from "react"
+
 import { m } from "@/integrations/paraglide/messages.js"
 
 type ErrorBoundaryProps = {

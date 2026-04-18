@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm"
 import { text, timestamp, uuid } from "drizzle-orm/pg-core"
+
 import { entityTypes } from "./entity-types"
 import { webSchema } from "./schema"
 import { users } from "./users"

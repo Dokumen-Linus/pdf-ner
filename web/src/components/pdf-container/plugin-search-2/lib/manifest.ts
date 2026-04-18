@@ -1,4 +1,5 @@
 import { PluginManifest } from "@embedpdf/core"
+
 import { SearchPluginConfig } from "./types"
 
 export const SEARCH_PLUGIN_ID = "search"

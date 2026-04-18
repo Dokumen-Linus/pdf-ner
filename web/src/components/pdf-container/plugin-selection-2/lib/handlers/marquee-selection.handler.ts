@@ -1,5 +1,6 @@
 import { clamp } from "@embedpdf/core"
 import { Position, Rect, Size } from "@embedpdf/models"
+
 import {
   EmbedPdfPointerEvent,
   PointerEventHandlersWithLifecycle,

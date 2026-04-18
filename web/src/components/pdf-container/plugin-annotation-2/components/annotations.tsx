@@ -1,5 +1,6 @@
 import { MouseEvent, TouchEvent, useCallback, useEffect, useMemo, useState } from "react"
 import { blendModeToCss, PdfAnnotationSubtype, PdfBlendMode } from "@embedpdf/models"
+
 import {
   EmbedPdfPointerEvent,
   PointerEventHandlers,
@@ -7,13 +8,15 @@ import {
 } from "../../plugin-interaction-manager-2"
 import { useSelectionCapability } from "../../plugin-selection-2"
 import { useAnnotationCapability } from "../hooks"
-import type { AnnotationDocumentState } from "../lib/state"
-import type { PdfTextMarkupAnnotationObject } from "../lib/types"
+
 import { AnnotationContainer, SelectionOutline } from "./annotation-container/annotation-container"
 import { Highlight } from "./text-markup/highlight"
 import { Squiggly } from "./text-markup/squiggly"
 import { Strikeout } from "./text-markup/strikeout"
 import { Underline } from "./text-markup/underline"
+
+import type { AnnotationDocumentState } from "../lib/state"
+import type { PdfTextMarkupAnnotationObject } from "../lib/types"
 
 function getAnnotationsByPageIndex(
   s: AnnotationDocumentState,

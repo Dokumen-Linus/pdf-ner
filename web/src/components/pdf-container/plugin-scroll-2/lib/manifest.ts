@@ -1,4 +1,5 @@
 import { PluginManifest } from "@embedpdf/core"
+
 import { ScrollPluginConfig, ScrollStrategy } from "./types"
 
 export const SCROLL_PLUGIN_ID = "scroll"

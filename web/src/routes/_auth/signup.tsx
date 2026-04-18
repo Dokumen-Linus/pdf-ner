@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { z } from "zod"
+
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,
@@ -91,18 +92,18 @@ function SignUpPage() {
 
   if (isSuccess) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4 my-8">
+      <div className="my-8 flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
         <Card className="w-full max-w-xl">
           <CardHeader>
             <CardTitle className="text-2xl">{m.auth_signup_success_title()}</CardTitle>
             <CardDescription>{m.auth_signup_success_description()}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">{m.auth_signup_success_content()}</p>
+            <p className="text-muted-foreground mb-4 text-sm">{m.auth_signup_success_content()}</p>
             <Link to="/signin" search={redirect ? { redirect } : undefined}>
               <Button className="w-full">{m.auth_signup_success_button()}</Button>
             </Link>
-            <p className="text-xs text-muted-foreground text-center mt-2">
+            <p className="text-muted-foreground mt-2 text-center text-xs">
               {m.auth_signup_success_footer()}
             </p>
           </CardContent>
@@ -112,7 +113,7 @@ function SignUpPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4 my-8">
+    <div className="my-8 flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
       <Card className="w-full max-w-xl">
         <CardHeader>
           <CardTitle className="text-2xl">{m.auth_signup_title()}</CardTitle>
@@ -143,7 +144,7 @@ function SignUpPage() {
                       onBlur={handleBlur}
                     />
                     {state.meta.errors.length > 0 && (
-                      <p className="text-sm font-medium text-destructive">
+                      <p className="text-destructive text-sm font-medium">
                         {state.meta.errors.join(", ")}
                       </p>
                     )}
@@ -165,7 +166,7 @@ function SignUpPage() {
                       onBlur={handleBlur}
                     />
                     {state.meta.errors.length > 0 && (
-                      <p className="text-sm font-medium text-destructive">
+                      <p className="text-destructive text-sm font-medium">
                         {state.meta.errors.join(", ")}
                       </p>
                     )}
@@ -228,7 +229,7 @@ function SignUpPage() {
                     onBlur={handleBlur}
                   />
                   {state.meta.errors.length > 0 && (
-                    <p className="text-sm font-medium text-destructive">
+                    <p className="text-destructive text-sm font-medium">
                       {state.meta.errors.join(", ")}
                     </p>
                   )}
@@ -262,7 +263,7 @@ function SignUpPage() {
                     onBlur={handleBlur}
                   />
                   {state.meta.errors.length > 0 && (
-                    <p className="text-sm font-medium text-destructive">
+                    <p className="text-destructive text-sm font-medium">
                       {state.meta.errors.join(", ")}
                     </p>
                   )}
@@ -285,7 +286,7 @@ function SignUpPage() {
                     onBlur={handleBlur}
                   />
                   {state.meta.errors.length > 0 && (
-                    <p className="text-sm font-medium text-destructive">
+                    <p className="text-destructive text-sm font-medium">
                       {state.meta.errors.join(", ")}
                     </p>
                   )}
@@ -296,7 +297,7 @@ function SignUpPage() {
               selector={(state) => [state.errorMap]}
               children={([errorMap]) =>
                 errorMap.onSubmit ? (
-                  <p className="text-sm font-medium text-destructive">
+                  <p className="text-destructive text-sm font-medium">
                     {(errorMap.onSubmit as { form?: string })?.form ?? String(errorMap.onSubmit)}
                   </p>
                 ) : null
@@ -308,7 +309,7 @@ function SignUpPage() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {m.auth_signup_footer_text()}{" "}
             <Link
               to="/signin"

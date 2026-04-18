@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+
 import { useInteractionManagerCapability } from "./use-interaction-manager"
 
 export function useIsPageExclusive(documentId: string) {

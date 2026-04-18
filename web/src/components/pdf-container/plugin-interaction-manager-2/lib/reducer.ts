@@ -1,4 +1,5 @@
 import { Reducer } from "@embedpdf/core"
+
 import {
   ACTIVATE_MODE,
   ADD_EXCLUSION_ATTRIBUTE,

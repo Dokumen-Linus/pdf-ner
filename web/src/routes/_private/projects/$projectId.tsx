@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { ChevronRightIcon } from "lucide-react"
+
 import { PROJECT_STEPS, ProjectTabs } from "@/components/project-tabs"
 import { Badge } from "@/components/shadcn-ui/badge"
 import { Button } from "@/components/shadcn-ui/button"
@@ -77,7 +78,7 @@ function ProjectHubPage() {
             <CardTitle className="text-destructive">{m.projects_details_error_title()}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground" aria-live="polite">
+            <p className="text-muted-foreground text-sm" aria-live="polite">
               {loadError || m.projects_details_error_not_found()}
             </p>
             <Button onClick={() => void router.invalidate()}>
@@ -98,7 +99,7 @@ function ProjectHubPage() {
         <h1 className="text-3xl font-semibold tracking-tight text-pretty" translate="no">
           {project.name}
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {project.description || "No description provided."}
         </p>
       </div>
@@ -116,7 +117,7 @@ function ProjectHubPage() {
               className={cn(
                 "h-full transition-colors",
                 isDisabled
-                  ? "border-dashed bg-muted/20"
+                  ? "bg-muted/20 border-dashed"
                   : "hover:border-primary/60 hover:bg-muted/30",
               )}
             >
@@ -132,7 +133,7 @@ function ProjectHubPage() {
                 >
                   {step.n}
                 </span>
-                <div className="flex-1 space-y-1 min-w-0">
+                <div className="min-w-0 flex-1 space-y-1">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <Icon
                       aria-hidden="true"
@@ -156,7 +157,7 @@ function ProjectHubPage() {
                 {!isDisabled && (
                   <ChevronRightIcon
                     aria-hidden="true"
-                    className="mt-1 h-5 w-5 shrink-0 text-muted-foreground"
+                    className="text-muted-foreground mt-1 h-5 w-5 shrink-0"
                   />
                 )}
               </CardHeader>
@@ -171,7 +172,7 @@ function ProjectHubPage() {
                 <Link
                   to={step.to}
                   params={{ projectId: project.id }}
-                  className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="focus-visible:ring-ring block rounded-xl focus-visible:ring-2 focus-visible:outline-none"
                 >
                   {cardInner}
                 </Link>

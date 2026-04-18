@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ShieldCheckIcon } from "lucide-react"
+
 import { ProjectTabs } from "@/components/project-tabs"
 import { Button } from "@/components/shadcn-ui/button"
 import {
@@ -58,7 +59,7 @@ function CheckingPage() {
             <CardTitle className="text-destructive">Error</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">{loadError || "Project not found."}</p>
+            <p className="text-muted-foreground text-sm">{loadError || "Project not found."}</p>
             <Button variant="outline" asChild>
               <Link to="/projects">Back to Projects</Link>
             </Button>
@@ -74,7 +75,7 @@ function CheckingPage() {
         <h1 className="text-3xl font-semibold tracking-tight text-pretty" translate="no">
           {project.name}
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {project.description || "No description provided."}
         </p>
       </div>
@@ -83,7 +84,7 @@ function CheckingPage() {
 
       <Card className="border-dashed">
         <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-          <ShieldCheckIcon className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+          <ShieldCheckIcon className="text-muted-foreground h-6 w-6" aria-hidden="true" />
           <div>
             <CardTitle>Checking</CardTitle>
             <CardDescription>
@@ -92,7 +93,7 @@ function CheckingPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">This step is not yet implemented.</p>
+          <p className="text-muted-foreground text-sm">This step is not yet implemented.</p>
         </CardContent>
       </Card>
     </div>

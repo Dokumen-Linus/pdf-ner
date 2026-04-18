@@ -10,10 +10,10 @@ function AboutPage() {
       <section className="bg-[#F4F4F4] px-6 py-24">
         <div className="mx-auto flex max-w-5xl flex-col gap-10 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
-            <p className="mb-4 text-[13px] font-semibold uppercase tracking-[0.18em] text-[#3E6AE1]">
+            <p className="mb-4 text-[13px] font-semibold tracking-[0.18em] text-[#3E6AE1] uppercase">
               About
             </p>
-            <h1 className="mb-6 text-[40px] font-medium leading-[1.15] text-[#171A20]">
+            <h1 className="mb-6 text-[40px] leading-[1.15] font-medium text-[#171A20]">
               Built to make PDF extraction feel clear, practical, and reliable.
             </h1>
             <p className="max-w-xl text-[16px] leading-[1.7] text-[#5C5E62]">

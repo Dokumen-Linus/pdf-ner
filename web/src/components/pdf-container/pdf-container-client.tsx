@@ -1,6 +1,8 @@
 import { lazy, Suspense } from "react"
 import { ClientOnly } from "@tanstack/react-router"
+
 import PDFLoading from "./pdf-loading"
+
 import type { InitialDocumentOptions } from "./plugin-document-manager-2"
 
 const LazyPDFContainer = lazy(() => import("./pdf-container"))

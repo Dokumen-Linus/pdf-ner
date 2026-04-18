@@ -1,4 +1,5 @@
 import { BasePlugin, PluginRegistry } from "@embedpdf/core"
+
 import {
   RenderCapability,
   RenderPageOptions,

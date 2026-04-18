@@ -1,8 +1,11 @@
 import { jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core"
-import type { JsonbRecord, JsonbValue } from "../../types"
+
 import { prompts } from "../api/prompts"
 import { projects } from "../web/projects"
+
 import { workersSchema } from "./schema"
+
+import type { JsonbRecord, JsonbValue } from "../../types"
 
 export const workersPdfs = workersSchema.table("pdfs", {
   id: uuid("id").primaryKey().defaultRandom(),

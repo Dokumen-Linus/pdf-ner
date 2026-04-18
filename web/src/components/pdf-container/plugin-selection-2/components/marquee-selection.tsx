@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useDocumentState } from "@embedpdf/core/react"
 import { Rect } from "@embedpdf/models"
+
 import { useSelectionPlugin } from "../hooks"
 
 interface MarqueeSelectionProps {

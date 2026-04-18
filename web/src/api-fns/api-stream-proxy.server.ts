@@ -1,6 +1,5 @@
-import { env } from "@/env.server";
+import { env } from "@/env.server"
 import { observedApiFetch } from "@/lib/observability/fetch"
-
 
 // Streaming passthrough to FastAPI. Unlike jsonCall (JSON RPC-style), this
 // pipes the inbound request body straight through with `duplex: "half"` so

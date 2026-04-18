@@ -5,10 +5,12 @@ import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { eq, or, sql } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/node-postgres"
 import { Pool } from "pg"
+
 import { db } from "../db/client"
 import { authMembers, authOrganizations, authTeamMembers, authTeams } from "../db/schemas/auth"
 import { users } from "../db/schemas/web/users"
 import { env } from "../env.server"
+
 import { sendEmail } from "./send-email"
 
 const trustedOrigins = [

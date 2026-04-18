@@ -1,4 +1,5 @@
 import { Reducer } from "@embedpdf/core"
+
 import {
   ADD_VIEWPORT_GATE,
   CLEANUP_VIEWPORT_STATE,

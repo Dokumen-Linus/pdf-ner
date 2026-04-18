@@ -1,9 +1,11 @@
 import { create } from "zustand"
 import { useShallow } from "zustand/react/shallow"
+
 import {
   AnnotationCapability,
   AnnotationState,
 } from "@/components/pdf-container/plugin-annotation-2"
+
 import type { DocumentManagerCapability } from "@/components/pdf-container/plugin-document-manager-2"
 import type { ScrollCapability } from "@/components/pdf-container/plugin-scroll-2"
 import type { SearchCapability } from "@/components/pdf-container/plugin-search-2"

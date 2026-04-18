@@ -1,5 +1,6 @@
 import { BasePluginConfig, EventHook } from "@embedpdf/core"
 import { Rect } from "@embedpdf/models"
+
 import { ViewportMetrics } from "../../plugin-viewport-2"
 
 /* ------------------------------------------------------------------ */

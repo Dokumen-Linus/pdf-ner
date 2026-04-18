@@ -7,6 +7,7 @@
 // helpers in ./index.
 
 import { mock } from "bun:test"
+
 import { authState } from "./state"
 
 // ─── Installers ───────────────────────────────────────────────────────────────

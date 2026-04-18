@@ -8,6 +8,7 @@ import {
   PdfTaskHelper,
   SearchAllPagesResult,
 } from "@embedpdf/models"
+
 import {
   appendSearchResults,
   cleanupSearchState,

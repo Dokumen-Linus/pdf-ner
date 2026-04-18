@@ -51,13 +51,33 @@ export default [
       ...importPlugin.configs.recommended.rules,
       ...startPlugin.configs["flat/recommended"][0].rules,
       ...prettierConfig.rules,
-      "react/react-in-jsx-scope": "off", // Not needed with new JSX transform
+      "react/react-in-jsx-scope": "off",
       "react/no-children-prop": ["error", { allowFunctions: true }],
-      "sort-imports": [
+      "sort-imports": "off",
+      "import/order": [
         "error",
         {
-          ignoreCase: true,
-          ignoreDeclarationSort: true,
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index", "type"],
+          pathGroups: [
+            { pattern: "react", group: "external", position: "before" },
+            { pattern: "react-dom", group: "external", position: "before" },
+            { pattern: "@tanstack/**", group: "external", position: "before" },
+            { pattern: "~/**", group: "internal", position: "before" },
+            { pattern: "@/**", group: "internal", position: "before" },
+            { pattern: "~/**", group: "type", position: "before" },
+            { pattern: "@/**", group: "type", position: "before" },
+          ],
+          pathGroupsExcludedImportTypes: ["builtin"],
+          distinctGroup: false,
+          "newlines-between": "always",
+          "newlines-between-types": "always",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+          sortTypesGroup: true,
+          named: true,
+          warnOnUnassignedImports: false,
         },
       ],
       "@typescript-eslint/explicit-module-boundary-types": "off",

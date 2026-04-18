@@ -1,4 +1,5 @@
 import { SESClient } from "@aws-sdk/client-ses"
+
 import { env } from "../env.server"
 
 export const sesClient = new SESClient({

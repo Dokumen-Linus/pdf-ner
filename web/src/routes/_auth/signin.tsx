@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { z } from "zod"
+
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,
@@ -50,7 +51,7 @@ function SignInPage() {
   })
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl">{m.auth_signin_title()}</CardTitle>
@@ -82,7 +83,7 @@ function SignInPage() {
                     onBlur={handleBlur}
                   />
                   {state.meta.errors.length > 0 && (
-                    <p className="text-sm font-medium text-destructive">
+                    <p className="text-destructive text-sm font-medium">
                       {state.meta.errors.join(", ")}
                     </p>
                   )}
@@ -106,7 +107,7 @@ function SignInPage() {
                     onBlur={handleBlur}
                   />
                   {state.meta.errors.length > 0 && (
-                    <p className="text-sm font-medium text-destructive">
+                    <p className="text-destructive text-sm font-medium">
                       {state.meta.errors.join(", ")}
                     </p>
                   )}
@@ -118,7 +119,7 @@ function SignInPage() {
               selector={(state) => [state.errorMap]}
               children={([errorMap]) =>
                 errorMap.onSubmit ? (
-                  <p className="text-sm font-medium text-destructive">
+                  <p className="text-destructive text-sm font-medium">
                     {(errorMap.onSubmit as { form?: string })?.form ?? String(errorMap.onSubmit)}
                   </p>
                 ) : null
@@ -131,7 +132,7 @@ function SignInPage() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {m.auth_signin_footer_text()}{" "}
             <Link
               to="/signup"

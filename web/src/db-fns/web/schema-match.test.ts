@@ -1,5 +1,12 @@
 import { describe, expect, it } from "bun:test"
 import { z } from "zod"
+
+import { CreateAnnotationSchema, UpdateAnnotationSchema } from "./annotations"
+import { CreateEntityTypeSchema, UpdateEntityTypeSchema } from "./entity-types"
+import { CreatePdfSchema, UpdatePdfSchema } from "./pdfs"
+import { CreateProjectSchema, UpdateProjectSchema } from "./projects"
+import { CreateUserSchema, UpdateUserSchema } from "./users"
+
 import type {
   DbAnnotationUpdate,
   DbEntityTypeUpdate,
@@ -12,11 +19,6 @@ import type {
   ProjectUpdate,
   UserUpdate,
 } from "../../db/types"
-import { CreateAnnotationSchema, UpdateAnnotationSchema } from "./annotations"
-import { CreateEntityTypeSchema, UpdateEntityTypeSchema } from "./entity-types"
-import { CreatePdfSchema, UpdatePdfSchema } from "./pdfs"
-import { CreateProjectSchema, UpdateProjectSchema } from "./projects"
-import { CreateUserSchema, UpdateUserSchema } from "./users"
 
 /**
  * These tests serve as a compile-time check to ensure that the Zod schemas

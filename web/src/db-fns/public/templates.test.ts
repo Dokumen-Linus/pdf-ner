@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+
 import { getAllTemplates, getTemplateById, getTemplatesByDocumentAtEnd } from "./templates"
 
 const runTests = process.env.TEST_DB === "true"

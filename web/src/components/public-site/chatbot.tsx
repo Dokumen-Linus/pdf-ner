@@ -3,6 +3,7 @@ import { fetchServerSentEvents } from "@tanstack/ai-client"
 import { useChat } from "@tanstack/ai-react"
 import { Bot, MessageSquare, Send, Sparkles, User, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
+
 import { m } from "@/integrations/paraglide/messages.js"
 import { cn } from "@/lib/shadcn-ui/utils"
 
@@ -29,7 +30,7 @@ export default function Chatbot() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed right-6 bottom-6 z-50">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -37,31 +38,31 @@ export default function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-16 right-0 w-87.5 sm:w-100 h-125 max-h-[calc(100vh-100px)] bg-white border border-[#E5E7EB] shadow-[0_12px_40px_rgba(0,0,0,0.12)] rounded-2xl flex flex-col overflow-hidden"
+            className="absolute right-0 bottom-16 flex h-125 max-h-[calc(100vh-100px)] w-87.5 flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_12px_40px_rgba(0,0,0,0.12)] sm:w-100"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#3E6AE1]" />
-                <span className="font-medium text-[15px]">{m.chatbot_header_title()}</span>
+                <Sparkles className="h-4 w-4 text-[#3E6AE1]" />
+                <span className="text-[15px] font-medium">{m.chatbot_header_title()}</span>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-white/10 rounded-md transition-colors"
+                className="rounded-md p-1 transition-colors hover:bg-white/10"
                 aria-label="Close Chat"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             {/* Messages */}
             <div
               ref={scrollRef}
-              className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-[#F8F9FA]"
+              className="flex flex-1 flex-col gap-4 overflow-y-auto bg-[#F8F9FA] p-4"
             >
               {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
-                  <Bot className="w-10 h-10 mb-3" />
+                <div className="flex h-full flex-col items-center justify-center text-center opacity-60">
+                  <Bot className="mb-3 h-10 w-10" />
                   <p className="text-[14px]">{m.chatbot_empty_state()}</p>
                 </div>
               ) : (
@@ -69,28 +70,28 @@ export default function Chatbot() {
                   <div
                     key={m.id}
                     className={cn(
-                      "flex gap-3 max-w-[85%]",
+                      "flex max-w-[85%] gap-3",
                       m.role === "user" ? "ml-auto flex-row-reverse" : "",
                     )}
                   >
                     <div
                       className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center shrink-0",
+                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
                         m.role === "user" ? "bg-[#3E6AE1] text-white" : "bg-black text-white",
                       )}
                     >
                       {m.role === "user" ? (
-                        <User className="w-4 h-4" />
+                        <User className="h-4 w-4" />
                       ) : (
-                        <Bot className="w-4 h-4" />
+                        <Bot className="h-4 w-4" />
                       )}
                     </div>
                     <div
                       className={cn(
                         "rounded-xl px-4 py-2.5 text-[14px] leading-relaxed",
                         m.role === "user"
-                          ? "bg-[#3E6AE1] text-white rounded-tr-sm"
-                          : "bg-white text-[#171A20] shadow-sm border border-[#E5E7EB] rounded-tl-sm whitespace-pre-wrap",
+                          ? "rounded-tr-sm bg-[#3E6AE1] text-white"
+                          : "rounded-tl-sm border border-[#E5E7EB] bg-white whitespace-pre-wrap text-[#171A20] shadow-sm",
                       )}
                     >
                       {m.parts.map((p, i) =>
@@ -101,35 +102,35 @@ export default function Chatbot() {
                 ))
               )}
               {isLoading && (
-                <div className="flex gap-3 max-w-[85%] animate-pulse">
-                  <div className="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4" />
+                <div className="flex max-w-[85%] animate-pulse gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black text-white">
+                    <Bot className="h-4 w-4" />
                   </div>
-                  <div className="bg-white border border-[#E5E7EB] rounded-xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5 h-10.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                  <div className="flex h-10.5 items-center gap-1.5 rounded-xl rounded-tl-sm border border-[#E5E7EB] bg-white px-4 py-3">
+                    <div className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-gray-400" />
                   </div>
                 </div>
               )}
             </div>
 
             {/* Input Form */}
-            <form onSubmit={onSubmit} className="p-3 bg-white border-t border-[#E5E7EB] flex gap-2">
+            <form onSubmit={onSubmit} className="flex gap-2 border-t border-[#E5E7EB] bg-white p-3">
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 type="text"
                 placeholder={m.chatbot_input_placeholder()}
-                className="flex-1 bg-[#F4F4F4] text-[14px] rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-[#3E6AE1]/20 transition-all border border-transparent focus:border-[#3E6AE1]/50"
+                className="flex-1 rounded-lg border border-transparent bg-[#F4F4F4] px-4 py-2 text-[14px] transition-all outline-none focus:border-[#3E6AE1]/50 focus:ring-2 focus:ring-[#3E6AE1]/20"
               />
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="bg-[#171A20] hover:bg-black text-white w-10 h-10 rounded-lg flex items-center justify-center disabled:opacity-50 transition-colors"
+                className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#171A20] text-white transition-colors hover:bg-black disabled:opacity-50"
                 aria-label="Send Message"
               >
-                <Send className="w-4 h-4 ml-0.5" />
+                <Send className="ml-0.5 h-4 w-4" />
               </button>
             </form>
           </motion.div>
@@ -138,13 +139,13 @@ export default function Chatbot() {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 bg-[#171A20] hover:bg-black shadow-lg shadow-black/20 rounded-full flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-[#171A20] shadow-lg shadow-black/20 transition-transform hover:scale-105 hover:bg-black active:scale-95"
         aria-label="Toggle Chat"
       >
         {isOpen ? (
-          <X className="w-6 h-6 text-white" />
+          <X className="h-6 w-6 text-white" />
         ) : (
-          <MessageSquare className="w-6 h-6 text-white" />
+          <MessageSquare className="h-6 w-6 text-white" />
         )}
       </button>
     </div>

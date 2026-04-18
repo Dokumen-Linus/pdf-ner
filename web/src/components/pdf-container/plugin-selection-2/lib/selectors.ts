@@ -1,4 +1,5 @@
 import { boundingRect, Rect } from "@embedpdf/models"
+
 import { FormattedSelection, SelectionDocumentState } from "./types"
 
 export function selectRectsForPage(state: SelectionDocumentState, page: number) {

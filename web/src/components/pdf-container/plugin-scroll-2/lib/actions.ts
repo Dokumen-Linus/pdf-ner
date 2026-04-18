@@ -1,4 +1,5 @@
 import { Action } from "@embedpdf/core"
+
 import { ScrollDocumentState, ScrollStrategy } from "./types"
 
 // Document lifecycle

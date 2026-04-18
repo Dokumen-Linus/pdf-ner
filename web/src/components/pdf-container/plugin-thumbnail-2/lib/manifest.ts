@@ -1,4 +1,5 @@
 import { PluginManifest } from "@embedpdf/core"
+
 import { ThumbnailPluginConfig } from "./types"
 
 export const THUMBNAIL_PLUGIN_ID = "thumbnail"

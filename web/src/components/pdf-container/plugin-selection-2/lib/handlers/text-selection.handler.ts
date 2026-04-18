@@ -1,4 +1,5 @@
 import { PdfPageGeometry, Position } from "@embedpdf/models"
+
 import {
   EmbedPdfPointerEvent,
   PointerEventHandlersWithLifecycle,

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+
 import { DEFAULT_POST_VERIFICATION_REDIRECT, getPostVerificationRedirect } from "./auth-redirects"
 
 describe("getPostVerificationRedirect", () => {

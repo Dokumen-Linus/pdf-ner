@@ -1,4 +1,5 @@
 import { Position } from "@embedpdf/models"
+
 import type {
   EmbedPdfPointerEvent,
   InteractionExclusionRules,

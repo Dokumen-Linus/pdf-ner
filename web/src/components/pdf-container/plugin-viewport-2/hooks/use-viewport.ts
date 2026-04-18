@@ -7,6 +7,7 @@ import {
   useSyncExternalStore,
 } from "react"
 import { useCapability, usePlugin } from "@embedpdf/core/react"
+
 import { ViewportElementContext } from "../context"
 import { ScrollActivity, ViewportPlugin } from "../lib"
 

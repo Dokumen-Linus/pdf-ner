@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+
 import EntityTable from "@/components/entity-table/components/entity-table"
 import PDFContainer from "@/components/pdf-container/pdf-container"
 import { m } from "@/integrations/paraglide/messages.js"
@@ -10,14 +11,10 @@ export const Route = createFileRoute("/_public/demo")({
 
 function DemoPage() {
   return (
-    <div className="flex flex-row h-screen w-full gap-4 p-4">
-      <div className="flex-1 h-full">
+    <div className="flex h-screen w-full flex-row gap-4 p-4">
+      <div className="h-full flex-1">
         <PDFContainer
           initalDocuments={[
-            {
-              name: "Federal Register 2025-21665",
-              url: "https://raw.githubusercontent.com/optimalcharb/pdf-entity-labeling/feaa8873a60883cf072a604383e6986f8ca82285/public/example-pdfs/federal-register/2025-21665.pdf",
-            },
             {
               name: "Federal Register 2025-21665",
               url: "https://raw.githubusercontent.com/optimalcharb/pdf-entity-labeling/feaa8873a60883cf072a604383e6986f8ca82285/public/example-pdfs/federal-register/2025-21665.pdf",
@@ -34,7 +31,7 @@ function DemoPage() {
           canRotate={false}
         />
       </div>
-      <div className="w-1/3 min-w-75 h-full overflow-auto">
+      <div className="h-full w-1/3 min-w-75 overflow-auto">
         <EntityTable entityTypes={demoEntityTypes} />
       </div>
     </div>

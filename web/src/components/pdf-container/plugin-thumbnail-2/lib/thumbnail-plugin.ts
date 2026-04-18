@@ -1,7 +1,9 @@
 import { BasePlugin, createScopedEmitter, PluginRegistry, REFRESH_PAGES } from "@embedpdf/core"
 import { ignore, PdfErrorCode, PdfErrorReason, Task } from "@embedpdf/models"
+
 import { RenderCapability, RenderPlugin } from "../../plugin-render-2"
 import { ScrollCapability, ScrollPlugin } from "../../plugin-scroll-2"
+
 import {
   cleanupThumbnailState,
   initThumbnailState,

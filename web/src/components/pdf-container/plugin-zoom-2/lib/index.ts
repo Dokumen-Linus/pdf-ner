@@ -1,4 +1,5 @@
 import { PluginPackage } from "@embedpdf/core"
+
 import { ZoomAction } from "./actions"
 import { manifest, ZOOM_PLUGIN_ID } from "./manifest"
 import { initialDocumentState, initialState, zoomReducer } from "./reducer"
@@ -16,4 +17,4 @@ export const ZoomPluginPackage: PluginPackage<ZoomPlugin, ZoomPluginConfig, Zoom
 export { ZoomPlugin } from "./zoom-plugin"
 export * from "./types"
 export * from "./manifest"
-export { initialState, initialDocumentState }
+export { initialDocumentState, initialState }

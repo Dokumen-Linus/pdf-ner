@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import { DocumentState } from "@embedpdf/core"
 import { useCapability, useCoreState, usePlugin } from "@embedpdf/core/react"
+
 import { DocumentManagerPlugin } from "../lib"
 
 export const useDocumentManagerPlugin = () =>

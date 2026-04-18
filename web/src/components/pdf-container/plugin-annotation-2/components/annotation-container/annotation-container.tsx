@@ -1,8 +1,11 @@
 import { CSSProperties, JSX, useEffect, useState } from "react"
+
 import { useDoublePressProps } from "../../../../../hooks/mouse-events/use-double-press-props"
-import type { PdfTextMarkupAnnotationObject } from "../../lib/types"
+
 import { CounterRotate } from "./counter-rotate"
 import { SelectedMenu } from "./selected-menu"
+
+import type { PdfTextMarkupAnnotationObject } from "../../lib/types"
 
 export interface SelectionOutline {
   color?: string

@@ -1,8 +1,9 @@
 import { useState } from "react"
+import { createFileRoute } from "@tanstack/react-router"
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
-import { createFileRoute } from "@tanstack/react-router"
 import { CreditCardIcon, LoaderCircleIcon, ZapIcon } from "lucide-react"
+
 import { Badge } from "@/components/shadcn-ui/badge"
 import { Button } from "@/components/shadcn-ui/button"
 import {
@@ -76,7 +77,7 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
       </CardHeader>
       <CardContent>
         <p className="text-2xl font-semibold tabular-nums">{value}</p>
-        {sub && <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>}
+        {sub && <p className="text-muted-foreground mt-0.5 text-xs">{sub}</p>}
       </CardContent>
     </Card>
   )
@@ -124,7 +125,7 @@ function PaymentForm() {
     <form onSubmit={(e) => void handleSubmit(e)} className="space-y-5">
       <PaymentElement />
       {error && (
-        <div className="rounded-md border border-destructive/35 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+        <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
           {error}
         </div>
       )}
@@ -144,7 +145,7 @@ function BillingPage() {
     <div className="mx-auto w-full max-w-4xl space-y-8 px-4 py-6 sm:px-6">
       <div className="space-y-1">
         <h1 className="text-3xl font-semibold tracking-tight">{m.billing_title()}</h1>
-        <p className="text-sm text-muted-foreground">{m.billing_description()}</p>
+        <p className="text-muted-foreground text-sm">{m.billing_description()}</p>
       </div>
 
       {/* Usage Summary */}
@@ -227,7 +228,7 @@ function BillingPage() {
         <Card className="border-border/80 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <ZapIcon className="h-5 w-5 text-muted-foreground" />
+              <ZapIcon className="text-muted-foreground h-5 w-5" />
               <CardTitle className="text-base">
                 {stripeCustomer?.stripeSubscriptionId
                   ? m.billing_sub_status_active()
@@ -242,7 +243,7 @@ function BillingPage() {
           </CardHeader>
           {stripeCustomer?.stripeSubscriptionId && (
             <CardContent>
-              <p className="font-mono text-xs text-muted-foreground">
+              <p className="text-muted-foreground font-mono text-xs">
                 ID: {stripeCustomer.stripeSubscriptionId}
               </p>
             </CardContent>
@@ -256,7 +257,7 @@ function BillingPage() {
         <Card className="border-border/80 shadow-sm">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <CreditCardIcon className="h-5 w-5 text-muted-foreground" />
+              <CreditCardIcon className="text-muted-foreground h-5 w-5" />
               <CardTitle className="text-base">{m.billing_payment_subtitle()}</CardTitle>
             </div>
             <CardDescription>{m.billing_payment_description()}</CardDescription>

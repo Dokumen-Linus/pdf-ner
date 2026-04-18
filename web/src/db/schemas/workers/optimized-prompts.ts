@@ -1,7 +1,10 @@
 import { jsonb, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
-import type { JsonbRecord } from "../../types"
+
 import { projects } from "../web/projects"
+
 import { workersSchema } from "./schema"
+
+import type { JsonbRecord } from "../../types"
 
 export const optimizedPrompts = workersSchema.table("optimized_prompts", {
   id: uuid("id").primaryKey().defaultRandom(),

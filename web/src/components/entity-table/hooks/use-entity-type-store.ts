@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
+
 import type { EntityType } from "../entity-type"
 
 // define state initial values and types

@@ -1,4 +1,5 @@
 import { Action } from "@embedpdf/core"
+
 import { InteractionDocumentState, InteractionExclusionRules } from "./types"
 
 // Document lifecycle

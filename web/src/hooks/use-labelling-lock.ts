@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
+
 import { heartbeatLabellingLock, releaseLabellingLock } from "@/db-fns/web/pdfs"
 
 // How often the client refreshes its lock on the server. Must be well under

@@ -1,5 +1,6 @@
 import { BasePluginConfig, EventHook } from "@embedpdf/core"
 import { PdfErrorReason, Task } from "@embedpdf/models"
+
 import type { ScrollBehavior } from "../../plugin-scroll-2"
 
 export interface ThumbnailPluginConfig extends BasePluginConfig {

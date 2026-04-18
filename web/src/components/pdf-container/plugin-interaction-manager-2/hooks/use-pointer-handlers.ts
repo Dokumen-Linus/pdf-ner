@@ -1,5 +1,6 @@
-import type { PointerEventHandlersWithLifecycle } from "../lib"
 import { useInteractionManagerCapability } from "./use-interaction-manager"
+
+import type { PointerEventHandlersWithLifecycle } from "../lib"
 
 interface UsePointerHandlersOptions {
   modeId?: string | string[]

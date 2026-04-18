@@ -1,6 +1,7 @@
+import { CommitType, PdfTextMarkupAnnotationObject, Subtype } from "./types"
+
 import type { Action, Reducer } from "@embedpdf/core"
 import type { AnnotationDocumentState, AnnotationState } from "./state"
-import { CommitType, PdfTextMarkupAnnotationObject, Subtype } from "./types"
 
 // ***ACTION CONSTANTS***
 // document lifecycle

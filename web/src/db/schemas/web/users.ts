@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm"
 import { text, timestamp, uuid } from "drizzle-orm/pg-core"
+
 import { projects } from "./projects"
 import { webSchema } from "./schema"
 

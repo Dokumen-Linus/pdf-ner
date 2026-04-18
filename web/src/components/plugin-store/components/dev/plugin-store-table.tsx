@@ -1,4 +1,5 @@
 import { m } from "@/integrations/paraglide/messages.js"
+
 import {
   Table,
   TableBody,

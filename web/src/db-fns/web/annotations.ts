@@ -1,10 +1,13 @@
 import { createServerFn } from "@tanstack/react-start"
 import { and, eq, inArray, sql } from "drizzle-orm"
 import { z } from "zod"
+
 import { db } from "@/db/client"
 import { annotations } from "@/db/schemas/web/annotations"
 import { pdfs } from "@/db/schemas/web/pdfs"
+
 import { requirePdfAccess, requirePdfOwnership, requireUserId } from "../api/authorization.server"
+
 import { LabeledEntitiesSchema, LABELLING_LOCK_STALE_SECONDS } from "./pdfs"
 
 // Zod mirror of the `StoredRect` JSONB shape in db/types.ts. Accepts either

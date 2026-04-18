@@ -1,4 +1,5 @@
 import { CoreState, Reducer } from "@embedpdf/core"
+
 import {
   CLEANUP_SCROLL_STATE,
   INIT_SCROLL_STATE,

@@ -4,11 +4,12 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Tooltip as RechartsTooltip,
   ResponsiveContainer,
+  Tooltip as RechartsTooltip,
   XAxis,
   YAxis,
 } from "recharts"
+
 import { ProjectTabs } from "@/components/project-tabs"
 import { Button } from "@/components/shadcn-ui/button"
 import {
@@ -42,7 +43,7 @@ function DashboardSkeleton() {
         <Skeleton className="h-32 rounded-xl" />
         <Skeleton className="h-32 rounded-xl" />
       </div>
-      <Skeleton className="h-96 rounded-xl w-full" />
+      <Skeleton className="h-96 w-full rounded-xl" />
     </div>
   )
 }
@@ -108,7 +109,7 @@ function DashboardPage() {
             <CardTitle className="text-destructive">{m.projects_dashboard_error_title()}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {loadError || m.projects_dashboard_error_not_found()}
             </p>
             <Button onClick={() => void router.invalidate()}>
@@ -127,7 +128,7 @@ function DashboardPage() {
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <div className="space-y-1">
         <h1 className="text-3xl font-semibold tracking-tight">{project.name}</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {project.description || "No description provided."}
         </p>
       </div>
@@ -135,14 +136,14 @@ function DashboardPage() {
       <ProjectTabs projectId={projectId} currentStep="dashboard" />
 
       {stats.totalDocuments === 0 ? (
-        <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed">
-          <div className="rounded-full bg-primary/10 p-4 mb-4">
-            <LayoutDashboardIcon className="h-8 w-8 text-primary" />
+        <Card className="flex flex-col items-center justify-center border-dashed p-12 text-center">
+          <div className="bg-primary/10 mb-4 rounded-full p-4">
+            <LayoutDashboardIcon className="text-primary h-8 w-8" />
           </div>
-          <h3 className="text-xl font-semibold tracking-tight mb-2">
+          <h3 className="mb-2 text-xl font-semibold tracking-tight">
             {m.projects_dashboard_empty_title()}
           </h3>
-          <p className="text-sm text-muted-foreground max-w-sm mb-6">
+          <p className="text-muted-foreground mb-6 max-w-sm text-sm">
             {m.projects_dashboard_empty_description()}
           </p>
         </Card>
@@ -154,11 +155,11 @@ function DashboardPage() {
                 <CardTitle className="text-sm font-medium">
                   {m.projects_dashboard_stats_docs_title()}
                 </CardTitle>
-                <FilesIcon className="h-4 w-4 text-muted-foreground" />
+                <FilesIcon className="text-muted-foreground h-4 w-4" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalDocuments}</div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {m.projects_dashboard_stats_docs_description()}
                 </p>
               </CardContent>
@@ -168,11 +169,11 @@ function DashboardPage() {
                 <CardTitle className="text-sm font-medium">
                   {m.projects_dashboard_stats_ann_title()}
                 </CardTitle>
-                <TagIcon className="h-4 w-4 text-muted-foreground" />
+                <TagIcon className="text-muted-foreground h-4 w-4" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalAnnotations}</div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {m.projects_dashboard_stats_ann_description()}
                 </p>
               </CardContent>
@@ -180,11 +181,11 @@ function DashboardPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{m.projects_list_title()}</CardTitle>
-                <SettingsIcon className="h-4 w-4 text-muted-foreground" />
+                <SettingsIcon className="text-muted-foreground h-4 w-4" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.entityTypeBreakdown.length}</div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {m.projects_dashboard_stats_types_description()}
                 </p>
               </CardContent>
@@ -238,7 +239,7 @@ function DashboardPage() {
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="flex h-62.5 items-center justify-center text-sm text-muted-foreground">
+                <div className="text-muted-foreground flex h-62.5 items-center justify-center text-sm">
                   {m.projects_dashboard_chart_empty()}
                 </div>
               )}

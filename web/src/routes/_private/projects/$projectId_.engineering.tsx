@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { CheckCircle2Icon, Loader2Icon, PlayIcon, RotateCcwIcon, XCircleIcon } from "lucide-react"
+
 import { getOptimizationStatus, startPromptOptimization } from "@/api-fns/engineering"
 import { ProjectTabs } from "@/components/project-tabs"
 import { Button } from "@/components/shadcn-ui/button"
@@ -111,7 +112,7 @@ function EngineeringPage() {
             <CardTitle className="text-destructive">Error</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">{loadError || "Project not found."}</p>
+            <p className="text-muted-foreground text-sm">{loadError || "Project not found."}</p>
             <Button onClick={() => void router.invalidate()}>Try again</Button>
             <Button variant="outline" asChild className="ml-2">
               <Link to="/projects">Back to Projects</Link>
@@ -126,7 +127,7 @@ function EngineeringPage() {
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
       <div className="space-y-1">
         <h1 className="text-3xl font-semibold tracking-tight">{project.name}</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {project.description || "No description provided."}
         </p>
       </div>
@@ -146,7 +147,7 @@ function EngineeringPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {startError && (
-              <div className="rounded-md border border-destructive/35 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+              <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
                 {startError}
               </div>
             )}
@@ -172,7 +173,7 @@ function EngineeringPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Loader2Icon className="h-5 w-5 animate-spin text-primary" />
+              <Loader2Icon className="text-primary h-5 w-5 animate-spin" />
               Optimization In Progress
             </CardTitle>
             <CardDescription>
@@ -195,7 +196,7 @@ function EngineeringPage() {
             </div>
 
             {status?.progress?.message && (
-              <p className="text-sm text-muted-foreground">{status.progress.message}</p>
+              <p className="text-muted-foreground text-sm">{status.progress.message}</p>
             )}
 
             {status?.progress?.details && (
@@ -217,15 +218,15 @@ function EngineeringPage() {
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-lg border p-4">
-                <p className="text-sm text-muted-foreground">Best F1 Score</p>
+                <p className="text-muted-foreground text-sm">Best F1 Score</p>
                 <p className="text-2xl font-bold">{(status.result.best_f1 * 100).toFixed(1)}%</p>
               </div>
               <div className="rounded-lg border p-4">
-                <p className="text-sm text-muted-foreground">Iterations Run</p>
+                <p className="text-muted-foreground text-sm">Iterations Run</p>
                 <p className="text-2xl font-bold">{status.result.iterations_run}</p>
               </div>
               <div className="rounded-lg border p-4">
-                <p className="text-sm text-muted-foreground">Prompt ID</p>
+                <p className="text-muted-foreground text-sm">Prompt ID</p>
                 <p className="truncate font-mono text-sm">{status.result.best_prompt_id}</p>
               </div>
             </div>
@@ -247,13 +248,13 @@ function EngineeringPage() {
       {taskId && status?.status === "FAILURE" && (
         <Card className="border-destructive/40">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
+            <CardTitle className="text-destructive flex items-center gap-2">
               <XCircleIcon className="h-5 w-5" />
               Optimization Failed
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-md border border-destructive/35 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+            <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
               {status.error || "An unknown error occurred."}
             </div>
             <Button
@@ -285,7 +286,7 @@ function ProgressDetails({
       <div className="grid gap-3 sm:grid-cols-3">
         {details.variant != null && (
           <div className="rounded-lg border p-3">
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {phase === "evaluating_variant" ? "Variant" : "Iteration"}
             </p>
             <p className="text-lg font-semibold">
@@ -296,7 +297,7 @@ function ProgressDetails({
         )}
         {details.iteration != null && (
           <div className="rounded-lg border p-3">
-            <p className="text-xs text-muted-foreground">Iteration</p>
+            <p className="text-muted-foreground text-xs">Iteration</p>
             <p className="text-lg font-semibold">
               {String(details.iteration)}/{String(details.max_iterations)}
             </p>
@@ -304,7 +305,7 @@ function ProgressDetails({
         )}
         {(details.f1 != null || details.refined_f1 != null) && (
           <div className="rounded-lg border p-3">
-            <p className="text-xs text-muted-foreground">F1 Score</p>
+            <p className="text-muted-foreground text-xs">F1 Score</p>
             <p className="text-lg font-semibold">
               {(Number(details.f1 ?? details.refined_f1) * 100).toFixed(1)}%
             </p>
@@ -312,7 +313,7 @@ function ProgressDetails({
         )}
         {details.best_f1 != null && (
           <div className="rounded-lg border p-3">
-            <p className="text-xs text-muted-foreground">Best F1</p>
+            <p className="text-muted-foreground text-xs">Best F1</p>
             <p className="text-lg font-semibold">{(Number(details.best_f1) * 100).toFixed(1)}%</p>
           </div>
         )}
@@ -324,11 +325,11 @@ function ProgressDetails({
     return (
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-lg border p-3">
-          <p className="text-xs text-muted-foreground">PDFs Loaded</p>
+          <p className="text-muted-foreground text-xs">PDFs Loaded</p>
           <p className="text-lg font-semibold">{String(details.pdfs_loaded)}</p>
         </div>
         <div className="rounded-lg border p-3">
-          <p className="text-xs text-muted-foreground">Entity Types</p>
+          <p className="text-muted-foreground text-xs">Entity Types</p>
           <p className="text-lg font-semibold">{String(details.entity_types_count)}</p>
         </div>
       </div>
@@ -340,7 +341,7 @@ function ProgressDetails({
       <div className="grid gap-3 sm:grid-cols-2">
         {details.iteration != null && (
           <div className="rounded-lg border p-3">
-            <p className="text-xs text-muted-foreground">Iteration</p>
+            <p className="text-muted-foreground text-xs">Iteration</p>
             <p className="text-lg font-semibold">
               {String(details.iteration)}/{String(details.max_iterations)}
             </p>
@@ -348,7 +349,7 @@ function ProgressDetails({
         )}
         {details.best_f1 != null && (
           <div className="rounded-lg border p-3">
-            <p className="text-xs text-muted-foreground">Best F1 So Far</p>
+            <p className="text-muted-foreground text-xs">Best F1 So Far</p>
             <p className="text-lg font-semibold">{(Number(details.best_f1) * 100).toFixed(1)}%</p>
           </div>
         )}

@@ -1,4 +1,5 @@
 import { PanelLeftIcon } from "lucide-react"
+
 import { m } from "@/integrations/paraglide/messages.js"
 
 interface ToolbarToggleButtonProps {

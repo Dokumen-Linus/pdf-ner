@@ -1,4 +1,5 @@
 import { Reducer } from "@embedpdf/core"
+
 import {
   CLEANUP_TILING_STATE,
   INIT_TILING_STATE,

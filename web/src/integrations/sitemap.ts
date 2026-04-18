@@ -1,4 +1,5 @@
 import { type Sitemap } from "tanstack-router-sitemap"
+
 import type { FileRouteTypes } from "@/routeTree.gen"
 
 type TRoutes = FileRouteTypes["fullPaths"]

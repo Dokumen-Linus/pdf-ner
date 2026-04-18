@@ -3,6 +3,7 @@ import { useForm } from "@tanstack/react-form"
 import { createFileRoute } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
+
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,
@@ -70,7 +71,7 @@ function ContactPage() {
   })
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle className="text-2xl">Contact</CardTitle>
@@ -80,7 +81,7 @@ function ContactPage() {
           {submitted ? (
             <div className="space-y-2">
               <p className="text-base font-medium">Thanks — check your inbox.</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 A confirmation has been sent to your email. I&apos;ll be in touch soon.
               </p>
             </div>
@@ -108,7 +109,7 @@ function ContactPage() {
                       onBlur={handleBlur}
                     />
                     {state.meta.errors.length > 0 && (
-                      <p className="text-sm font-medium text-destructive">
+                      <p className="text-destructive text-sm font-medium">
                         {state.meta.errors.join(", ")}
                       </p>
                     )}
@@ -136,7 +137,7 @@ function ContactPage() {
                       onBlur={handleBlur}
                     />
                     {state.meta.errors.length > 0 && (
-                      <p className="text-sm font-medium text-destructive">
+                      <p className="text-destructive text-sm font-medium">
                         {state.meta.errors.join(", ")}
                       </p>
                     )}
@@ -164,7 +165,7 @@ function ContactPage() {
                       onBlur={handleBlur}
                     />
                     {state.meta.errors.length > 0 && (
-                      <p className="text-sm font-medium text-destructive">
+                      <p className="text-destructive text-sm font-medium">
                         {state.meta.errors.join(", ")}
                       </p>
                     )}
@@ -176,7 +177,7 @@ function ContactPage() {
                 selector={(state) => [state.errorMap]}
                 children={([errorMap]) =>
                   errorMap.onSubmit ? (
-                    <p className="text-sm font-medium text-destructive">
+                    <p className="text-destructive text-sm font-medium">
                       {(errorMap.onSubmit as { form?: string })?.form ?? String(errorMap.onSubmit)}
                     </p>
                   ) : null

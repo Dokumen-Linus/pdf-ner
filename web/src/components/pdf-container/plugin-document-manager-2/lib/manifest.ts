@@ -1,4 +1,5 @@
 import { PluginManifest } from "@embedpdf/core"
+
 import { DocumentManagerPluginConfig } from "./types"
 
 export const DOCUMENT_MANAGER_PLUGIN_ID = "document-manager"

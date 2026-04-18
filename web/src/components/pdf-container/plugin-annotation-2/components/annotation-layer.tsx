@@ -1,9 +1,11 @@
 import { CSSProperties, HTMLAttributes, useMemo } from "react"
 import { useDocumentState } from "@embedpdf/core/react"
 import { Rotation } from "@embedpdf/models"
-import type { SelectionOutline } from "./annotation-container/annotation-container"
+
 import { Annotations } from "./annotations"
 import { TextMarkupPreview } from "./text-markup/preview"
+
+import type { SelectionOutline } from "./annotation-container/annotation-container"
 
 type AnnotationLayerProps = Omit<HTMLAttributes<HTMLDivElement>, "style"> & {
   documentId: string

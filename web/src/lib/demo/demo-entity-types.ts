@@ -1,5 +1,6 @@
-import type { EntityType } from "@/components/entity-table/entity-type"
 import { m } from "@/integrations/paraglide/messages.js"
+
+import type { EntityType } from "@/components/entity-table/entity-type"
 
 const demoETNames: Pick<EntityType, "name">[] = [
   { name: m.entity_type_register_id() },
