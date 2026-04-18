@@ -224,6 +224,8 @@
 - *(web)* Move chatbot-knowledge to public
 - *(web)* Remove use of npm-published plugin render, viewport, document-manager, tiling
 - Packages dir
+- *(web)* Make projects dir
+- *(web)* Rename email/send.tsx
 
 ### 📚 Documentation
 
@@ -281,6 +283,7 @@
 - *(web)* Tanstack-start-docs
 - *(db)* "development mode"
 - *(packages)* Otel_py/README.md
+- *(llm)* Update skill scripts and instructions
 
 ### ⚡ Performance
 
@@ -333,6 +336,7 @@
 - *(web)* Better tile-img.tsx react usage
 - *(api)* Use otel_py
 - *(wk)* Use otel_py
+- *(web)* Centralize and improve calls to fastapi
 
 ### 🎨 Styling
 
@@ -369,6 +373,7 @@
 - *(web)* Fix lint errors
 - *(web)* Add tanstack eslint plugin
 - Ruff
+- *(web)* Prettier
 - *(web)* Prettier
 
 ### 🧪 Testing
@@ -462,6 +467,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(llm)* Allow claude git cmds
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]

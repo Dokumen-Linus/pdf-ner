@@ -2,18 +2,21 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**27 library files** across 5 modules
+**30 library files** across 5 modules
 
-## Web (14 files)
+## Web (17 files)
 
 - `web/src/db-fns/web/annotations.ts` — LabellingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
-- `web/src/db-fns/api/_helpers.server.ts` — requireWorkspaceUser, requireUserId, getProjectAccessForCurrentUser, requireProjectAccess, requireProjectOwnership, requirePdfAccess, …
-- `web/src/observability/fetch.ts` — buildObservedHeaders, observedApiFetch, withObservedRequest, withObservedResponse
+- `web/src/db-fns/api/authorization.server.ts` — requireWorkspaceUser, requireUserId, getProjectAccessForCurrentUser, requireProjectAccess, requireProjectOwnership, requirePdfAccess, …
 - `web/scripts/generate_full_package_json.py` — strip_caret_tilde, collect_packages, main
 - `web/tanstack-start-docs/download_tanstack_guide.py` — gh_get, download_dir, main
 - `web/public/example-pdfs/federal-register/get_first_page.py` — extract_first_page, main
+- `web/src/api-fns/api-stream-proxy.server.ts` — streamProxy, StreamProxyOptions
 - `web/src/db/rect.ts` — toEmbedRect, toEmbedRects
 - `web/src/lib/auth-redirects.ts` — getPostVerificationRedirect, DEFAULT_POST_VERIFICATION_REDIRECT
+- `web/src/lib/observability/fetch.server.ts` — withObservedRequest, withObservedResponse
+- `web/src/lib/observability/fetch.ts` — buildObservedHeaders, observedApiFetch
+- `web/src/api-fns/api-json-call.server.ts` — jsonCall
 - `web/src/hooks/mouse-events/use-double-press-props.ts` — useDoublePressProps
 - `web/src/hooks/shadcn-ui/use-mobile.ts` — useIsMobile
 - `web/src/hooks/use-labelling-lock.ts` — useLabellingLock
