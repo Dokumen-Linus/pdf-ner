@@ -32,7 +32,7 @@ import { getCurrentProjectAccess, getProjectById } from "@/db-fns/web/projects"
 import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
 import { useLabellingLock } from "@/hooks/use-labelling-lock"
 
-import type { ErrorComponentProps } from "@tanstack/router-core"
+import type { ErrorComponentProps } from "@tanstack/react-router"
 import type { EntityType } from "@/components/entity-table/entity-type"
 import type { FoundWorkersPdf, LabeledEntitiesMap } from "@/db/types"
 

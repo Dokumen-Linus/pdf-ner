@@ -62,8 +62,9 @@
     "@t3-oss/env-core": "^0.13.11",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/ai": "^0.10.2",
-    "@tanstack/ai-openai": "^0.7.4",
-    "@tanstack/ai-react": "^0.7.10",
+    "@tanstack/ai-client": "^0.7.0",
+    "@tanstack/ai-openai": "^0.7.0",
+    "@tanstack/ai-react": "^0.7.0",
     "@tanstack/react-devtools": "^0.7.11",
     "@tanstack/react-form": "^1.28.0",
     "@tanstack/react-query": "^5.90.21",
@@ -91,7 +92,6 @@
     "react-dom": "^19.2.5",
     "react-hook-form": "^7.71.1",
     "react-resizable-panels": "^4.5.9",
-    "react-email": "^4.0.0",
     "react-tweet": "^3.3.0",
     "recharts": "3.7.0",
     "stripe": "^22.0.1",
@@ -104,7 +104,6 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
     "@playwright/test": "^1.59.1",
     "@tanstack/eslint-plugin-start": "^0.0.1",
     "@testing-library/dom": "^10.4.1",
