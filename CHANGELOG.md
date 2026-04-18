@@ -101,6 +101,7 @@
 - Scroll to selected annotation
 - *(web)* Add observability
 - *(pacakges)* Otel_py
+- *(pkg)* Move pdfium_utils.py into package #86
 
 ### 🐛 Bug Fixes
 
@@ -337,6 +338,7 @@
 - *(api)* Use otel_py
 - *(wk)* Use otel_py
 - *(web)* Centralize and improve calls to fastapi
+- *(web)* Depcheck
 
 ### 🎨 Styling
 
@@ -375,6 +377,7 @@
 - Ruff
 - *(web)* Prettier
 - *(web)* Prettier
+- *(web)* Move import order from prettier to eslint to work with VSCode extension
 
 ### 🧪 Testing
 
@@ -467,6 +470,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(llm)* Allow claude git cmds
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]

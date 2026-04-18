@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**30 library files** across 5 modules
+**31 library files** across 6 modules
 
 ## Web (17 files)
 
@@ -48,6 +48,10 @@
 ## Infra (1 files)
 
 - `infra/generate_env_example.py` — main
+
+## Pdfium_utils (1 files)
+
+- `packages/pdfium_utils/pdfium_utils/__init__.py` — find_text_objects, parse_hex_color, highlight_phrases, PhraseHighlightResult
 
 ---
 _Back to [overview.md](./overview.md)_
