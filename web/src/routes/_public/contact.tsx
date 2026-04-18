@@ -27,7 +27,7 @@ export const submitContactForm = createServerFn({ method: "POST" })
   .inputValidator((data: ContactInput) => contactSchema.parse(data))
   .handler(async ({ data }) => {
     const { env } = await import("@/env.server")
-    const { sendEmail } = await import("@/lib/email/send")
+    const { sendEmail } = await import("@/lib/send-email")
 
     await sendEmail({
       to: data.email,

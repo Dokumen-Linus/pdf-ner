@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
-import { apiRequest, requireProjectOwnership, requireUserId } from "./_helpers.server"
+import { requireProjectOwnership, requireUserId } from "@/db-fns/api/authorization.server"
+import { jsonCall } from "./api-json-call.server"
 
 export const startPromptOptimization = createServerFn({ method: "POST" })
   .inputValidator(
@@ -14,7 +15,7 @@ export const startPromptOptimization = createServerFn({ method: "POST" })
     const userId = await requireUserId()
     await requireProjectOwnership(data.projectId, userId)
 
-    return apiRequest("/api/v1/llm-ner/optimize-prompt", {
+    return jsonCall("/api/v1/llm-ner/optimize-prompt", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -32,11 +33,9 @@ export const getOptimizationStatus = createServerFn({ method: "GET" })
     }),
   )
   .handler(async ({ data }) => {
-    // Require authentication
     const userId = await requireUserId()
 
-    // Fetch status (includes project_id for ownership check)
-    const res = (await apiRequest(`/api/v1/llm-ner/optimize-prompt/${data.taskId}/status`)) as {
+    const res = (await jsonCall(`/api/v1/llm-ner/optimize-prompt/${data.taskId}/status`)) as {
       task_id: string
       status: string
       project_id: string | null
@@ -54,7 +53,6 @@ export const getOptimizationStatus = createServerFn({ method: "GET" })
       error?: string
     }
 
-    // Verify ownership — reject if task has no associated project or user doesn't own it
     if (!res.project_id) {
       throw new Error("Task not found or expired")
     }

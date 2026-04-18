@@ -1,10 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
-import {
-  buildObservedHeaders,
-  observedApiFetch,
-  withObservedRequest,
-  withObservedResponse,
-} from "./fetch"
+import { buildObservedHeaders, observedApiFetch } from "./fetch"
+import { withObservedRequest, withObservedResponse } from "./fetch.server"
 
 describe("buildObservedHeaders", () => {
   it("reuses upstream request ids and trace headers", () => {
@@ -130,6 +126,33 @@ describe("request/response wrappers", () => {
     expect(observed.request).not.toBe(request)
     expect(observed.requestId).toBeTruthy()
     expect(observed.request.headers.get("X-Request-ID")).toBe(observed.requestId)
+  })
+
+  it("preserves method and body when rebuilding a request with observed headers", async () => {
+    const request = new Request("http://test.local/foo", {
+      method: "POST",
+      body: JSON.stringify({ hello: "world" }),
+      headers: { "Content-Type": "application/json" },
+    })
+
+    const observed = withObservedRequest(request)
+
+    expect(observed.request.method).toBe("POST")
+    expect(observed.request.headers.get("Content-Type")).toBe("application/json")
+    expect(await observed.request.text()).toBe(JSON.stringify({ hello: "world" }))
+  })
+
+  it("does not copy navigate mode into RequestInit when rebuilding a request", () => {
+    const request = new Request("http://test.local/foo")
+    Object.defineProperty(request, "mode", {
+      configurable: true,
+      value: "navigate",
+    })
+
+    const observed = withObservedRequest(request)
+
+    expect(observed.request.headers.get("X-Request-ID")).toBe(observed.requestId)
+    expect(observed.request.url).toBe("http://test.local/foo")
   })
 
   it("generates a unique request id per call when none is provided", () => {

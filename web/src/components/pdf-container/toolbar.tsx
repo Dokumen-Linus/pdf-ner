@@ -18,8 +18,8 @@ import {
   useDocumentManagerCapability,
   useOpenDocuments,
 } from "./plugin-document-manager-2"
-import ToolbarToggleButton from "./toolbar-toggle-button"
 import { useZoomCapability } from "./plugin-zoom-2"
+import ToolbarToggleButton from "./toolbar-toggle-button"
 
 interface ToolbarProps {
   canRotate: boolean

@@ -1,27 +1,27 @@
 import { SendEmailCommand } from "@aws-sdk/client-ses"
 import { render } from "@react-email/components"
 import ContactAutoReply, {
-  type ContactAutoReplyProps,
   subject as contactAutoReplySubject,
-} from "../../emails/contact-auto-reply"
+} from "../emails/contact-auto-reply"
+import type { ContactAutoReplyProps } from "../emails/contact-auto-reply"
 import ContactNotification, {
-  type ContactNotificationProps,
   subject as contactNotificationSubject,
-} from "../../emails/contact-notification"
+} from "../emails/contact-notification"
+import type { ContactNotificationProps } from "../emails/contact-notification"
 import OrganizationInvitation, {
-  type OrganizationInvitationProps,
   subject as organizationInvitationSubject,
-} from "../../emails/organization-invitation"
+} from "../emails/organization-invitation"
+import type { OrganizationInvitationProps } from "../emails/organization-invitation"
 import ResetPassword, {
-  type ResetPasswordProps,
   subject as resetPasswordSubject,
-} from "../../emails/reset-password"
+} from "../emails/reset-password"
+import type { ResetPasswordProps } from "../emails/reset-password"
 import VerifyEmail, {
-  type VerifyEmailProps,
   subject as verifyEmailSubject,
-} from "../../emails/verify-email"
-import { env } from "../../env.server"
-import { sesClient } from "../../integrations/ses"
+} from "../emails/verify-email"
+import type { VerifyEmailProps } from "../emails/verify-email"
+import { env } from "../env.server"
+import { sesClient } from "../integrations/ses"
 
 type TemplateMap = {
   "verify-email": VerifyEmailProps
@@ -69,9 +69,7 @@ export type SendEmailArgs<K extends TemplateKey> = {
   subjectOverride?: string
 }
 
-export async function sendEmail<K extends TemplateKey>(
-  args: SendEmailArgs<K>
-): Promise<void> {
+export async function sendEmail<K extends TemplateKey>(args: SendEmailArgs<K>): Promise<void> {
   const entry = registry[args.template]
   const html = await entry.render(args.props)
   const toAddresses = Array.isArray(args.to) ? args.to : [args.to]
@@ -90,6 +88,6 @@ export async function sendEmail<K extends TemplateKey>(
         Subject: { Charset: "UTF-8", Data: args.subjectOverride ?? entry.subject },
         Body: { Html: { Charset: "UTF-8", Data: html } },
       },
-    })
+    }),
   )
 }

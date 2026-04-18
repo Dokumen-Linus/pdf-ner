@@ -7,7 +7,7 @@
 // Best-effort: the server-side 2-minute stale expiry is the real backstop.
 
 import { createFileRoute } from "@tanstack/react-router"
-import { requireUserId } from "@/db-fns/api/_helpers.server"
+import { requireUserId } from "@/db-fns/api/authorization.server"
 import { releaseLabellingLock } from "@/db-fns/web/pdfs"
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

@@ -57,13 +57,8 @@ function AboutPage() {
               ["Label", "Mark the entities you want once and reuse them across projects."],
               ["Extract", "Run models, compare outputs, and export structured results."],
             ].map(([title, body], index) => (
-              <div
-                key={title}
-                className="flex gap-4 border border-[#EEEEEE] bg-[#FAFAFA] p-5"
-              >
-                <span className="text-[13px] font-semibold text-[#3E6AE1]">
-                  0{index + 1}
-                </span>
+              <div key={title} className="flex gap-4 border border-[#EEEEEE] bg-[#FAFAFA] p-5">
+                <span className="text-[13px] font-semibold text-[#3E6AE1]">0{index + 1}</span>
                 <div>
                   <h3 className="mb-1 text-[16px] font-medium text-[#171A20]">{title}</h3>
                   <p className="text-[14px] leading-[1.6] text-[#5C5E62]">{body}</p>

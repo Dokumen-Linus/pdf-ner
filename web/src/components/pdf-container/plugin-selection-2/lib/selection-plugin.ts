@@ -34,6 +34,7 @@ import {
   createTextSelectionHandler,
   TextSelectionHandlerOptions,
 } from "./handlers/text-selection.handler"
+import { createWordSelectionHandler } from "./handlers/word-selection.handler"
 import { initialSelectionDocumentState } from "./reducer"
 import * as selector from "./selectors"
 import {
@@ -59,13 +60,7 @@ import {
   SelectionState,
   TextRetrievedEvent,
 } from "./types"
-import {
-  compareGlyphPointers,
-  rectsWithinSlice,
-  sliceBounds,
-  wordBoundsAt,
-} from "./utils"
-import { createWordSelectionHandler } from "./handlers/word-selection.handler"
+import { compareGlyphPointers, rectsWithinSlice, sliceBounds, wordBoundsAt } from "./utils"
 
 export class SelectionPlugin extends BasePlugin<
   SelectionPluginConfig,
@@ -592,7 +587,8 @@ export class SelectionPlugin extends BasePlugin<
   private updateSelection(documentId: string, page: number, index: number, modeId: string) {
     if (!this.selecting.get(documentId) || !this.anchor.get(documentId)) return
 
-    const selectionMode = this.selectionMode.get(documentId) ?? this.getSelectionMode(documentId, modeId)
+    const selectionMode =
+      this.selectionMode.get(documentId) ?? this.getSelectionMode(documentId, modeId)
     let start: { page: number; index: number }
     let end: { page: number; index: number }
 

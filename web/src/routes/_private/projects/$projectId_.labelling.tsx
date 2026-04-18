@@ -5,6 +5,7 @@ import type { ErrorComponentProps } from "@tanstack/router-core"
 import { formatDistanceToNow } from "date-fns"
 import { FileTextIcon, LockIcon, SaveIcon } from "lucide-react"
 import { z } from "zod"
+import { getPdfPresignedUrl } from "@/api-fns/storage"
 import EntityTable from "@/components/entity-table/components/entity-table"
 import type { EntityType } from "@/components/entity-table/entity-type"
 import PDFContainerClient from "@/components/pdf-container/pdf-container-client"
@@ -20,7 +21,6 @@ import {
   CardTitle,
 } from "@/components/shadcn-ui/card"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
-import { getPdfPresignedUrl } from "@/db-fns/api/storage"
 import { saveAnnotationsByPdfId } from "@/db-fns/web/annotations"
 import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
 import {

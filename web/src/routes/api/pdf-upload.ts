@@ -9,9 +9,8 @@
 //   2. Byte-counting during the FastAPI stream (source of truth).
 
 import { createFileRoute } from "@tanstack/react-router"
-import { requireProjectOwnership, requireUserId } from "@/db-fns/api/_helpers.server"
-import { env } from "@/env.server"
-import { observedApiFetch } from "@/observability/fetch"
+import { streamProxy } from "@/api-fns/api-stream-proxy.server"
+import { requireProjectOwnership, requireUserId } from "@/db-fns/api/authorization.server"
 
 const MAX_BYTES = 50 * 1024 * 1024 // 50 MB, matches FastAPI and client cap.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -65,34 +64,17 @@ export async function uploadHandler({ request }: { request: Request }): Promise<
       return Response.json({ detail: "request body is required" }, { status: 400 })
     }
 
-    // Forward the raw body stream to FastAPI. project_id/bucket_id ride
-    // in the query string so we never have to parse the body here. The
-    // `duplex: "half"` option is required by the fetch spec when the
-    // request body is a stream.
     const filenameHeader = request.headers.get("x-filename") ?? ""
-    const forwardHeaders: Record<string, string> = {
-      "X-API-Key": env.API_KEY,
-      "Content-Type": "application/pdf",
-    }
+    const forwardHeaders: Record<string, string> = { "Content-Type": "application/pdf" }
     if (contentLengthHeader) forwardHeaders["Content-Length"] = contentLengthHeader
     if (filenameHeader) forwardHeaders["X-Filename"] = filenameHeader
 
-    const forwardUrl =
-      `${env.API_URL}/api/v1/pdf-storage/pdfs` +
-      `?project_id=${encodeURIComponent(projectId)}` +
-      `&bucket_id=${encodeURIComponent(bucketId)}`
-
-    // `duplex: "half"` is required by the fetch spec when the request
-    // body is a stream. The runtime (Node/undici) supports it, but it
-    // is not yet in the lib.dom fetch init type — cast via an
-    // extension type rather than suppressing the error.
-    const forwardInit: RequestInit & { duplex?: "half" } = {
-      method: "POST",
+    const forwarded = await streamProxy({
+      path: "/api/v1/pdf-storage/pdfs",
+      request,
       headers: forwardHeaders,
-      body: request.body,
-      duplex: "half",
-    }
-    const forwarded = await observedApiFetch(forwardUrl, forwardInit, request.headers)
+      query: { project_id: projectId, bucket_id: bucketId },
+    })
 
     const bodyText = await forwarded.text()
     const contentType = forwarded.headers.get("content-type") ?? "application/json"
