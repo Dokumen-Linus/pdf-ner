@@ -1,8 +1,8 @@
 import { useEffect } from "react"
 import { useAnnotationCapability } from "../../pdf-container/plugin-annotation-2"
 import { useDocumentManagerCapability } from "../../pdf-container/plugin-document-manager-2"
-import { useSearchCapability } from "../../pdf-container/plugin-search-2"
 import { useScrollCapability } from "../../pdf-container/plugin-scroll-2"
+import { useSearchCapability } from "../../pdf-container/plugin-search-2"
 import { useSelectionCapability } from "../../pdf-container/plugin-selection-2"
 import usePluginStore from "../hooks/use-plugin-store"
 

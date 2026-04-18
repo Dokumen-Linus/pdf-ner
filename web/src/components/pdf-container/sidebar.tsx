@@ -1,5 +1,5 @@
 import { useScroll } from "./plugin-scroll-2"
-import { ThumbnailsPane, ThumbImg } from "./plugin-thumbnail-2"
+import { ThumbImg, ThumbnailsPane } from "./plugin-thumbnail-2"
 
 interface SidebarProps {
   documentId: string

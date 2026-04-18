@@ -24,12 +24,12 @@ import { RenderLayer, RenderPluginPackage } from "./plugin-render-2"
 import { Scroller, ScrollPluginPackage, ScrollStrategy } from "./plugin-scroll-2"
 import { SearchLayer, SearchPluginPackage } from "./plugin-search-2"
 import { SelectionPluginPackage, TextSelection } from "./plugin-selection-2"
-import Sidebar from "./sidebar"
 import { ThumbnailPluginPackage } from "./plugin-thumbnail-2"
 import { TilingLayer, TilingPluginPackage } from "./plugin-tiling-2"
 import { Viewport, ViewportPluginPackage } from "./plugin-viewport-2"
 import { ZoomGestureWrapper, ZoomMode, ZoomPluginPackage } from "./plugin-zoom-2"
 import RotateWrapper from "./rotate-wrapper"
+import Sidebar from "./sidebar"
 import Toolbar from "./toolbar"
 
 interface PDFContainerProps {

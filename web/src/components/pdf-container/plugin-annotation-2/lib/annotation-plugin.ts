@@ -281,18 +281,16 @@ export class AnnotationPlugin extends BasePlugin<
     ) {
       const annotation = next.documents[next.activeDocumentId]?.byUid[next.selectedUid]
       if (annotation) {
-        this.scrollCapability
-          ?.forDocument(next.activeDocumentId)
-          .scrollToPage({
-            pageNumber: annotation.pageIndex + 1,
-            pageCoordinates: {
-              x: annotation.rect.origin.x + annotation.rect.size.width / 2,
-              y: annotation.rect.origin.y + annotation.rect.size.height / 2,
-            },
-            alignX: 50,
-            alignY: 50,
-            behavior: "smooth",
-          })
+        this.scrollCapability?.forDocument(next.activeDocumentId).scrollToPage({
+          pageNumber: annotation.pageIndex + 1,
+          pageCoordinates: {
+            x: annotation.rect.origin.x + annotation.rect.size.width / 2,
+            y: annotation.rect.origin.y + annotation.rect.size.height / 2,
+          },
+          alignX: 50,
+          alignY: 50,
+          behavior: "smooth",
+        })
       }
     }
 

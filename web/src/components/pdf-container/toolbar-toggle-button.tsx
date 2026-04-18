@@ -15,9 +15,7 @@ export default function ToolbarToggleButton({
       type="button"
       onClick={onToggleSidebar}
       className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
-        isSidebarOpen
-          ? "bg-blue-500 text-white hover:bg-blue-600"
-          : "bg-gray-100 hover:bg-gray-200"
+        isSidebarOpen ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-gray-100 hover:bg-gray-200"
       }`}
       title={m.pdf_toolbar_toggle_thumbnails()}
       aria-label={m.pdf_toolbar_toggle_thumbnails()}

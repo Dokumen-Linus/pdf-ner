@@ -21,10 +21,10 @@ import { Input } from "@/components/shadcn-ui/input"
 import { m } from "@/integrations/paraglide/messages.js"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import type { PdfTextMarkupAnnotationObject, Subtype } from "../plugin-annotation-2"
-import ToolbarToggleButton from "../toolbar-toggle-button"
 import { useActiveDocument } from "../plugin-document-manager-2"
 import { useSearch } from "../plugin-search-2"
 import { useZoomCapability } from "../plugin-zoom-2"
+import ToolbarToggleButton from "../toolbar-toggle-button"
 
 interface ToolbarProps {
   canRotate: boolean

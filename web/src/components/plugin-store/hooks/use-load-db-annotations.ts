@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react"
 import { PdfAnnotationSubtype } from "@embedpdf/models"
 import {
+  subtypeToEnum,
   type PdfTextMarkupAnnotationObject,
   type Subtype,
-  subtypeToEnum,
 } from "@/components/pdf-container/plugin-annotation-2"
 import { getAnnotationsByPdfId } from "@/db-fns/web/annotations"
 import { toEmbedRect, toEmbedRects } from "@/db/rect"

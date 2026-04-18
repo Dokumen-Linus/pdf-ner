@@ -1,4 +1,4 @@
-import { type ReactElement, useEffect, useState } from "react"
+import { useEffect, useState, type ReactElement } from "react"
 import { blendModeToCss, PdfAnnotationSubtype, PdfBlendMode, Rect } from "@embedpdf/models"
 import { useSelectionCapability } from "../../../plugin-selection-2"
 import { useAnnotationCapability } from "../../hooks"

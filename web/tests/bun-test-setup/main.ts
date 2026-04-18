@@ -63,7 +63,7 @@ mock.module("@tanstack/react-start/server", () => ({
 
 // createBucket makes an HTTP call to the API server, which is not running in tests.
 // Return a fake bucket_id so createProject doesn't fail during CRUD tests.
-mock.module("@/db-fns/api/storage", () => ({
+mock.module("@/api-fns/storage", () => ({
   createBucket: async (name: string) => ({ bucket_id: crypto.randomUUID(), name }),
 }))
 
