@@ -12,8 +12,8 @@ dependencies = [
   "redis",
   "celery",
   "boto3",
+  "pdfium-utils",
   "pillow",
-  "pypdfium2",
   "pytesseract",
   "otel-py",
 ]
@@ -75,4 +75,5 @@ python_files = "test_*.py"
 
 [tool.uv.sources]
 dokumen-llm-providers = { path = "../packages/llm_providers" }
+pdfium-utils = { path = "../packages/pdfium_utils" }
 otel-py = { path = "../packages/otel_py" }
