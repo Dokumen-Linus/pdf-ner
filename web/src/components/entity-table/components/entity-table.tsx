@@ -76,6 +76,13 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
     setByName(entityTypesToRecord(entityTypes))
   }, [entityTypes, setByName])
 
+  // Reset search state when switching documents
+  useEffect(() => {
+    setSearchQueries({})
+    setSearchFeedback({})
+    setSearchingEntityName(null)
+  }, [annoState?.activeDocumentId])
+
   // example usage of entityTypesByName
   // const entityTypeObject1 = entityTypesByName["Highlight"] as EntityType
   // const entityTypeNames: string[] = Object.keys(entityTypesByName)
