@@ -6,7 +6,7 @@ import shutil
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 NODE_MODULES = PROJECT_ROOT / "web" / "node_modules" / "@tanstack"
-SKILLS_DIR = PROJECT_ROOT / ".agents" / "skills"
+SKILLS_DIR = PROJECT_ROOT / ".kilo" / "skills"
 
 SKIP_FOLDERS = {"lifecycle", "virtual-file-routes"}
 

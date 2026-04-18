@@ -22,7 +22,6 @@ skill-lock.json
 skills-lock.json
 .agents/skills
 .kilo/skills
-.kilo/package-lock.json
 
 # claude log
 .claude/command.log
