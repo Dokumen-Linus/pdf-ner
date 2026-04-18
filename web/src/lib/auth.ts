@@ -9,7 +9,7 @@ import { db } from "../db/client"
 import { authMembers, authOrganizations, authTeamMembers, authTeams } from "../db/schemas/auth"
 import { users } from "../db/schemas/web/users"
 import { env } from "../env.server"
-import { sendEmail } from "./email/send"
+import { sendEmail } from "./send-email"
 
 const trustedOrigins = [
   env.BETTER_AUTH_URL,

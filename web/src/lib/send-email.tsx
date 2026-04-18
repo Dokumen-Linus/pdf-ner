@@ -2,26 +2,26 @@ import { SendEmailCommand } from "@aws-sdk/client-ses"
 import { render } from "@react-email/components"
 import ContactAutoReply, {
   subject as contactAutoReplySubject,
-  type ContactAutoReplyProps,
-} from "../../emails/contact-auto-reply"
+} from "../emails/contact-auto-reply"
+import type { ContactAutoReplyProps } from "../emails/contact-auto-reply"
 import ContactNotification, {
   subject as contactNotificationSubject,
-  type ContactNotificationProps,
-} from "../../emails/contact-notification"
+} from "../emails/contact-notification"
+import type { ContactNotificationProps } from "../emails/contact-notification"
 import OrganizationInvitation, {
   subject as organizationInvitationSubject,
-  type OrganizationInvitationProps,
-} from "../../emails/organization-invitation"
+} from "../emails/organization-invitation"
+import type { OrganizationInvitationProps } from "../emails/organization-invitation"
 import ResetPassword, {
   subject as resetPasswordSubject,
-  type ResetPasswordProps,
-} from "../../emails/reset-password"
+} from "../emails/reset-password"
+import type { ResetPasswordProps } from "../emails/reset-password"
 import VerifyEmail, {
   subject as verifyEmailSubject,
-  type VerifyEmailProps,
-} from "../../emails/verify-email"
-import { env } from "../../env.server"
-import { sesClient } from "../../integrations/ses"
+} from "../emails/verify-email"
+import type { VerifyEmailProps } from "../emails/verify-email"
+import { env } from "../env.server"
+import { sesClient } from "../integrations/ses"
 
 type TemplateMap = {
   "verify-email": VerifyEmailProps
