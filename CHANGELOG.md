@@ -169,6 +169,7 @@
 - *(web)* Wrong variable order
 - Deprecated color, remove synchronous state
 - *(web)* Form typing
+- *(web)* Sync EntityTable and activeDocumentId
 
 ### 💼 Other
 
@@ -479,6 +480,8 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Remove @claude from github.com
 
 ### ◀️ Revert
 
