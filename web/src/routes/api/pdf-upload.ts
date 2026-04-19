@@ -11,7 +11,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 
 import { streamProxy } from "@/api-fns/api-stream-proxy.server"
-import { requireProjectOwnership, requireUserId } from "@/db-fns/api/authorization.server"
+import { requireProjectOwnership, requireUserId } from "@/lib/authorization.server"
 
 const MAX_BYTES = 50 * 1024 * 1024 // 50 MB, matches FastAPI and client cap.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

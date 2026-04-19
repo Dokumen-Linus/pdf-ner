@@ -1,4 +1,4 @@
-\restrict KWHhclXdQbLm77ST5WiGH2nzIHvXabcImJoWDwyOksUeMX9b0DiaxTE0fSpgFCH
+\restrict rOVP2M7RueaNZhBJ2zj6ccCfv3Bb7VCfIeagB8FcQR9XFZ5lgAhXJiXXszif8kO
 
 -- Dumped from database version 18.1
 -- Dumped by pg_dump version 18.1
@@ -62,6 +62,21 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: aws_buckets; Type: TABLE; Schema: api; Owner: -
+--
+
+CREATE TABLE api.aws_buckets (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name text NOT NULL,
+    region text DEFAULT 'us-east-1'::text NOT NULL,
+    access_key_id text NOT NULL,
+    secret_access_key text NOT NULL,
+    endpoint_url text,
+    created_at timestamp with time zone DEFAULT now()
+);
+
+
+--
 -- Name: pdfs; Type: TABLE; Schema: api; Owner: -
 --
 
@@ -87,85 +102,6 @@ CREATE TABLE api.prompts (
 
 
 --
--- Name: std_entity_types; Type: TABLE; Schema: api; Owner: -
---
-
-CREATE TABLE api.std_entity_types (
-    id bigint NOT NULL,
-    short_name text NOT NULL,
-    long_name text NOT NULL,
-    category text NOT NULL,
-    definition text NOT NULL,
-    examples text[],
-    format_description text,
-    datatype text,
-    regex text,
-    exact_length integer,
-    single_word boolean,
-    created_at timestamp with time zone DEFAULT now(),
-    updated_at timestamp with time zone DEFAULT now(),
-    CONSTRAINT std_entity_types_datatype_check CHECK ((datatype = ANY (ARRAY['int'::text, 'float'::text, 'alphanumeric'::text, 'alpha'::text])))
-);
-
-
---
--- Name: std_entity_types_id_seq; Type: SEQUENCE; Schema: api; Owner: -
---
-
-ALTER TABLE api.std_entity_types ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME api.std_entity_types_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: templates; Type: TABLE; Schema: api; Owner: -
---
-
-CREATE TABLE api.templates (
-    id bigint NOT NULL,
-    txt text NOT NULL,
-    inserts text[] NOT NULL,
-    document_at_end boolean DEFAULT true NOT NULL,
-    created_at timestamp with time zone DEFAULT now(),
-    updated_at timestamp with time zone DEFAULT now()
-);
-
-
---
--- Name: templates_id_seq; Type: SEQUENCE; Schema: api; Owner: -
---
-
-ALTER TABLE api.templates ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
-    SEQUENCE NAME api.templates_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: aws_buckets; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.aws_buckets (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    name text NOT NULL,
-    region text DEFAULT 'us-east-1'::text NOT NULL,
-    access_key_id text NOT NULL,
-    secret_access_key text NOT NULL,
-    endpoint_url text,
-    created_at timestamp with time zone DEFAULT now()
-);
-
-
---
 -- Name: models; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -187,6 +123,70 @@ CREATE TABLE public.models (
 
 CREATE TABLE public.schema_migrations (
     version character varying NOT NULL
+);
+
+
+--
+-- Name: std_entity_types; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.std_entity_types (
+    id bigint NOT NULL,
+    short_name text NOT NULL,
+    long_name text NOT NULL,
+    category text NOT NULL,
+    definition text NOT NULL,
+    examples text[],
+    format_description text,
+    datatype text,
+    regex text,
+    exact_length integer,
+    single_word boolean,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT std_entity_types_datatype_check CHECK ((datatype = ANY (ARRAY['int'::text, 'float'::text, 'alphanumeric'::text, 'alpha'::text])))
+);
+
+
+--
+-- Name: std_entity_types_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.std_entity_types ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.std_entity_types_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: templates; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.templates (
+    id bigint NOT NULL,
+    txt text NOT NULL,
+    inserts text[] NOT NULL,
+    document_at_end boolean DEFAULT true NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+
+--
+-- Name: templates_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.templates ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.templates_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
 );
 
 
@@ -249,9 +249,12 @@ CREATE TABLE web.entity_types (
 
 CREATE TABLE web.pdfs (
     id uuid NOT NULL,
+    annotated boolean DEFAULT false NOT NULL,
     labeled_entities jsonb,
     uploaded_by uuid,
-    first_viewed_at timestamp with time zone DEFAULT now()
+    first_viewed_at timestamp with time zone DEFAULT now(),
+    locked_by uuid,
+    locked_at timestamp with time zone
 );
 
 
@@ -262,13 +265,14 @@ CREATE TABLE web.pdfs (
 CREATE TABLE web.projects (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     owner_id uuid NOT NULL,
+    team_id text,
     name text NOT NULL,
     description text,
+    bucket_id uuid,
     color_presets text[],
     orientation text DEFAULT 'any'::text NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
-    bucket_id uuid,
     CONSTRAINT projects_orientation_check CHECK ((orientation = ANY (ARRAY['any'::text, 'portrait'::text, 'landscape'::text])))
 );
 
@@ -282,12 +286,13 @@ CREATE TABLE web.users (
     email text NOT NULL,
     first_name text,
     last_name text,
+    display_name text,
     employer text,
     job_title text,
     avatar_url text,
+    auth_user_id text,
     created_at timestamp with time zone DEFAULT now(),
-    updated_at timestamp with time zone DEFAULT now(),
-    display_name text
+    updated_at timestamp with time zone DEFAULT now()
 );
 
 
@@ -379,6 +384,22 @@ CREATE TABLE workers.stripe_customers (
 
 
 --
+-- Name: aws_buckets aws_buckets_name_key; Type: CONSTRAINT; Schema: api; Owner: -
+--
+
+ALTER TABLE ONLY api.aws_buckets
+    ADD CONSTRAINT aws_buckets_name_key UNIQUE (name);
+
+
+--
+-- Name: aws_buckets aws_buckets_pkey; Type: CONSTRAINT; Schema: api; Owner: -
+--
+
+ALTER TABLE ONLY api.aws_buckets
+    ADD CONSTRAINT aws_buckets_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: pdfs pdfs_pkey; Type: CONSTRAINT; Schema: api; Owner: -
 --
 
@@ -395,38 +416,6 @@ ALTER TABLE ONLY api.prompts
 
 
 --
--- Name: std_entity_types std_entity_types_pkey; Type: CONSTRAINT; Schema: api; Owner: -
---
-
-ALTER TABLE ONLY api.std_entity_types
-    ADD CONSTRAINT std_entity_types_pkey PRIMARY KEY (id);
-
-
---
--- Name: templates templates_pkey; Type: CONSTRAINT; Schema: api; Owner: -
---
-
-ALTER TABLE ONLY api.templates
-    ADD CONSTRAINT templates_pkey PRIMARY KEY (id);
-
-
---
--- Name: aws_buckets aws_buckets_name_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.aws_buckets
-    ADD CONSTRAINT aws_buckets_name_key UNIQUE (name);
-
-
---
--- Name: aws_buckets aws_buckets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.aws_buckets
-    ADD CONSTRAINT aws_buckets_pkey PRIMARY KEY (id);
-
-
---
 -- Name: models models_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -440,6 +429,22 @@ ALTER TABLE ONLY public.models
 
 ALTER TABLE ONLY public.schema_migrations
     ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+
+
+--
+-- Name: std_entity_types std_entity_types_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.std_entity_types
+    ADD CONSTRAINT std_entity_types_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: templates templates_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.templates
+    ADD CONSTRAINT templates_pkey PRIMARY KEY (id);
 
 
 --
@@ -539,6 +544,20 @@ ALTER TABLE ONLY workers.stripe_customers
 
 
 --
+-- Name: idx_web_pdfs_locked_at; Type: INDEX; Schema: web; Owner: -
+--
+
+CREATE INDEX idx_web_pdfs_locked_at ON web.pdfs USING btree (locked_at) WHERE (locked_by IS NOT NULL);
+
+
+--
+-- Name: users_auth_user_id_uidx; Type: INDEX; Schema: web; Owner: -
+--
+
+CREATE UNIQUE INDEX users_auth_user_id_uidx ON web.users USING btree (auth_user_id) WHERE (auth_user_id IS NOT NULL);
+
+
+--
 -- Name: llm_usage_created_at_idx; Type: INDEX; Schema: workers; Owner: -
 --
 
@@ -567,17 +586,17 @@ CREATE TRIGGER prompts_updated_at BEFORE UPDATE ON api.prompts FOR EACH ROW EXEC
 
 
 --
--- Name: std_entity_types std_entity_types_updated_at; Type: TRIGGER; Schema: api; Owner: -
+-- Name: std_entity_types std_entity_types_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER std_entity_types_updated_at BEFORE UPDATE ON api.std_entity_types FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER std_entity_types_updated_at BEFORE UPDATE ON public.std_entity_types FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
--- Name: templates templates_updated_at; Type: TRIGGER; Schema: api; Owner: -
+-- Name: templates templates_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER templates_updated_at BEFORE UPDATE ON api.templates FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TRIGGER templates_updated_at BEFORE UPDATE ON public.templates FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
@@ -636,7 +655,7 @@ ALTER TABLE ONLY api.prompts
 --
 
 ALTER TABLE ONLY api.prompts
-    ADD CONSTRAINT prompts_template_id_fkey FOREIGN KEY (template_id) REFERENCES api.templates(id) ON DELETE CASCADE;
+    ADD CONSTRAINT prompts_template_id_fkey FOREIGN KEY (template_id) REFERENCES public.templates(id) ON DELETE SET NULL;
 
 
 --
@@ -660,15 +679,15 @@ ALTER TABLE ONLY web.entity_types
 --
 
 ALTER TABLE ONLY web.entity_types
-    ADD CONSTRAINT entity_types_standard_entity_type_id_fkey FOREIGN KEY (standard_entity_type_id) REFERENCES api.std_entity_types(id) ON DELETE CASCADE;
+    ADD CONSTRAINT entity_types_standard_entity_type_id_fkey FOREIGN KEY (standard_entity_type_id) REFERENCES public.std_entity_types(id) ON DELETE SET NULL;
 
 
 --
--- Name: pdfs pdfs_id_fkey; Type: FK CONSTRAINT; Schema: web; Owner: -
+-- Name: pdfs pdfs_locked_by_fkey; Type: FK CONSTRAINT; Schema: web; Owner: -
 --
 
 ALTER TABLE ONLY web.pdfs
-    ADD CONSTRAINT pdfs_id_fkey FOREIGN KEY (id) REFERENCES workers.pdfs(id) ON DELETE CASCADE;
+    ADD CONSTRAINT pdfs_locked_by_fkey FOREIGN KEY (locked_by) REFERENCES web.users(id) ON DELETE SET NULL;
 
 
 --
@@ -676,15 +695,7 @@ ALTER TABLE ONLY web.pdfs
 --
 
 ALTER TABLE ONLY web.pdfs
-    ADD CONSTRAINT pdfs_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES web.users(id) ON DELETE CASCADE;
-
-
---
--- Name: projects projects_bucket_id_fkey; Type: FK CONSTRAINT; Schema: web; Owner: -
---
-
-ALTER TABLE ONLY web.projects
-    ADD CONSTRAINT projects_bucket_id_fkey FOREIGN KEY (bucket_id) REFERENCES public.aws_buckets(id);
+    ADD CONSTRAINT pdfs_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES web.users(id) ON DELETE SET NULL;
 
 
 --
@@ -720,14 +731,6 @@ ALTER TABLE ONLY workers.optimized_prompts
 
 
 --
--- Name: pdfs pdfs_bucket_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
---
-
-ALTER TABLE ONLY workers.pdfs
-    ADD CONSTRAINT pdfs_bucket_id_fkey FOREIGN KEY (bucket_id) REFERENCES public.aws_buckets(id);
-
-
---
 -- Name: pdfs pdfs_project_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
 --
 
@@ -740,7 +743,7 @@ ALTER TABLE ONLY workers.pdfs
 --
 
 ALTER TABLE ONLY workers.pdfs
-    ADD CONSTRAINT pdfs_prompt_id_fkey FOREIGN KEY (prompt_id) REFERENCES api.prompts(id) ON DELETE CASCADE;
+    ADD CONSTRAINT pdfs_prompt_id_fkey FOREIGN KEY (prompt_id) REFERENCES api.prompts(id) ON DELETE SET NULL;
 
 
 --
@@ -763,7 +766,7 @@ ALTER TABLE ONLY workers.stripe_customers
 -- PostgreSQL database dump complete
 --
 
-\unrestrict KWHhclXdQbLm77ST5WiGH2nzIHvXabcImJoWDwyOksUeMX9b0DiaxTE0fSpgFCH
+\unrestrict rOVP2M7RueaNZhBJ2zj6ccCfv3Bb7VCfIeagB8FcQR9XFZ5lgAhXJiXXszif8kO
 
 
 --
@@ -773,18 +776,16 @@ ALTER TABLE ONLY workers.stripe_customers
 INSERT INTO public.schema_migrations (version) VALUES
     ('00002'),
     ('00010'),
-    ('00011'),
+    ('00018'),
     ('00020'),
     ('00030'),
     ('00031'),
     ('00040'),
     ('00041'),
-    ('00049'),
     ('00050'),
     ('00051'),
     ('00060'),
     ('00070'),
     ('00080'),
     ('00090'),
-    ('00091'),
-    ('00092');
+    ('00091');

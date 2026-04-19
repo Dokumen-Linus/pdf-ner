@@ -6,7 +6,11 @@ import { db } from "@/db/client"
 import { pdfs } from "@/db/schemas/web/pdfs"
 import { users } from "@/db/schemas/web/users"
 
-import { requirePdfAccess, requirePdfOwnership, requireUserId } from "../api/authorization.server"
+import {
+  requirePdfAccess,
+  requirePdfOwnership,
+  requireUserId,
+} from "../../lib/authorization.server"
 
 // Stale threshold in seconds. Clients must heartbeat faster than this.
 // 120s window / 30s heartbeat = 4 missed heartbeats before steal.

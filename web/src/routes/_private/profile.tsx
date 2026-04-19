@@ -19,8 +19,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn-ui
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
+import { getOrganizationByUserId, getTeamsByOrganizationId } from "@/db-fns/web/organizations"
 import { getUserByAuthUserId, updateUser } from "@/db-fns/web/users"
 import { m } from "@/integrations/paraglide/messages.js"
+import { authClient } from "@/lib/auth-client"
 
 type ProfileUser = Awaited<ReturnType<typeof getUserByAuthUserId>>
 
@@ -195,13 +197,26 @@ export const Route = createFileRoute("/_private/profile")({
     try {
       const authUserId = context.session?.user?.id
       if (!authUserId) {
-        return { user: null, loadError: "No authenticated session was found." }
+        return {
+          user: null,
+          organization: null,
+          teams: [],
+          loadError: "No authenticated session was found.",
+        }
       }
       const user = await getUserByAuthUserId({ data: { authUserId } })
-      return { user, loadError: null as string | null }
+
+      let organization = null
+      let teams: any[] = []
+      organization = await getOrganizationByUserId({ data: { userId: authUserId } })
+      if (organization?.id) {
+        teams = await getTeamsByOrganizationId({ data: { organizationId: organization.id } })
+      }
+
+      return { user, organization, teams, loadError: null as string | null }
     } catch (error) {
       const message = toUserLoadErrorMessage(error)
-      return { user: null, loadError: message }
+      return { user: null, organization: null, teams: [], loadError: message }
     }
   },
   pendingComponent: ProfilePageSkeleton,
@@ -210,14 +225,23 @@ export const Route = createFileRoute("/_private/profile")({
 
 function ProfilePage() {
   const router = useRouter()
-  const { user: loadedUser, loadError } = Route.useLoaderData()
+  const {
+    user: loadedUser,
+    loadError,
+    organization: loadedOrganization,
+    teams: loadedTeams,
+  } = Route.useLoaderData()
   const [profile, setProfile] = useState<ProfileUser | null>(loadedUser)
+  const [organization, setOrganization] = useState(loadedOrganization)
+  const [teams, setTeams] = useState(loadedTeams)
   const [isEditing, setIsEditing] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false)
   const [uploadFailure, setUploadFailure] = useState<string | null>(null)
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false)
+  const [teamCreationError, setTeamCreationError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -266,7 +290,9 @@ function ProfilePage() {
 
   useEffect(() => {
     setProfile(loadedUser)
-  }, [loadedUser])
+    setOrganization(loadedOrganization)
+    setTeams(loadedTeams)
+  }, [loadedUser, loadedOrganization, loadedTeams])
 
   const form = useForm({
     defaultValues: profile ? toFormValues(profile) : EMPTY_PROFILE_FORM_VALUES,
@@ -375,6 +401,27 @@ function ProfilePage() {
         </Card>
       </div>
     )
+  }
+
+  const handleCreateOrganization = async () => {
+    if (!profile) return
+    try {
+      const orgName = profile.displayName?.trim() || getEmailPrefix(profile.email)
+      const slug = orgName.toLowerCase().replace(/\s+/g, "-")
+      await authClient.organization.create({
+        name: orgName,
+        slug,
+      })
+      await router.invalidate()
+    } catch (error) {
+      console.error("Failed to create organization:", error)
+    }
+  }
+
+  const handleCreateTeam = async () => {
+    // Team creation will be implemented through a server function
+    // For now, this is a placeholder
+    console.log("Team creation coming soon")
   }
 
   const fallbackDisplayName = getLegacyName(profile)
@@ -719,6 +766,78 @@ function ProfilePage() {
           </form>
         </CardContent>
       </Card>
+
+      {!organization ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Create an Organization</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground text-sm">
+              You don't have an organization yet. Create one to start managing teams and projects.
+            </p>
+            <Button onClick={handleCreateOrganization}>Create Organization</Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Organization</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-xs font-semibold">Name</Label>
+                <p className="text-sm">{organization.name}</p>
+              </div>
+              {organization.description && (
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground text-xs font-semibold">Description</Label>
+                  <p className="text-sm">{organization.description}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">Teams</CardTitle>
+              <Button size="sm" onClick={handleCreateTeam} disabled={isCreatingTeam}>
+                {isCreatingTeam ? <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Create Team
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {teamCreationError && (
+                <div className="border-destructive/35 bg-destructive/5 text-destructive mb-4 rounded-md border px-3 py-2 text-sm">
+                  {teamCreationError}
+                </div>
+              )}
+              {teams && teams.length > 0 ? (
+                <div className="space-y-2">
+                  {teams.map((team) => (
+                    <div
+                      key={team.id}
+                      className="border-border/60 flex items-center justify-between rounded-md border px-3 py-2"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{team.name}</p>
+                        {team.description && (
+                          <p className="text-muted-foreground text-xs">{team.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">
+                  No teams yet. Create one to get started.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   )
 }

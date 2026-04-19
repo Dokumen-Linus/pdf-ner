@@ -1,7 +1,7 @@
 -- migrate:up
 CREATE TABLE web.users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
   first_name TEXT,
   last_name TEXT,
   display_name TEXT,
@@ -9,6 +9,7 @@ CREATE TABLE web.users (
   job_title TEXT,
   avatar_url TEXT,
   auth_user_id TEXT,
+  organization_id TEXT REFERENCES auth.organization(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

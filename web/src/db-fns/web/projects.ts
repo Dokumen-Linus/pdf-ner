@@ -11,12 +11,18 @@ import {
   getProjectAccessForCurrentUser,
   requireProjectAccess,
   requireWorkspaceUser,
-} from "@/db-fns/api/authorization.server"
+} from "@/lib/authorization.server"
+
+const MANAGE_TEAM_ROLE_FILTER = or(
+  eq(authMembers.role, "owner"),
+  eq(authMembers.role, "admin"),
+  eq(authMembers.role, "developer"),
+)
 
 // ** CREATE **
 export const CreateProjectSchema = z.object({
   name: z.string(),
-  ownerId: z.string(),
+  ownerId: z.string().optional(),
   teamId: z.string().optional(),
   description: z.string().optional(),
   colorPresets: z.array(z.string()).optional(),
@@ -28,35 +34,57 @@ export const createProject = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const workspaceUser = await requireWorkspaceUser()
 
-    if (data.ownerId && data.ownerId !== workspaceUser.userId) {
-      throw new Error("Cannot create a project for another user")
+    const membershipFilters = [
+      eq(authTeamMembers.userId, workspaceUser.authUserId),
+      MANAGE_TEAM_ROLE_FILTER,
+    ]
+    if (data.teamId) {
+      membershipFilters.push(eq(authTeamMembers.teamId, data.teamId))
     }
 
-    const effectiveTeamId =
-      data.teamId ??
-      (
-        await db
-          .select({ teamId: authTeamMembers.teamId })
-          .from(authTeamMembers)
-          .innerJoin(authTeams, eq(authTeams.id, authTeamMembers.teamId))
-          .where(eq(authTeamMembers.userId, workspaceUser.authUserId))
-          .orderBy(authTeams.createdAt)
-          .limit(1)
-      )[0]?.teamId
+    const [teamMembership] = await db
+      .select({ teamId: authTeamMembers.teamId })
+      .from(authTeamMembers)
+      .innerJoin(authTeams, eq(authTeams.id, authTeamMembers.teamId))
+      .innerJoin(
+        authMembers,
+        and(
+          eq(authMembers.organizationId, authTeams.organizationId),
+          eq(authMembers.userId, workspaceUser.authUserId),
+        ),
+      )
+      .where(and(...membershipFilters))
+      .orderBy(authTeams.createdAt)
+      .limit(1)
 
-    // Reuse the bucket from an existing project if the user already has one
+    if (data.teamId && !teamMembership) {
+      throw new Error("You do not have access to this team")
+    }
+
+    const effectiveTeamId = data.teamId ?? teamMembership?.teamId ?? null
+
+    // Reuse the bucket from an existing project in the same ownership scope.
+    const bucketScopeFilter =
+      effectiveTeamId != null
+        ? eq(projects.teamId, effectiveTeamId)
+        : eq(projects.ownerId, workspaceUser.userId)
+
     const [existingWithBucket] = await db
       .select({ bucketId: projects.bucketId })
       .from(projects)
-      .where(and(eq(projects.ownerId, workspaceUser.userId), isNotNull(projects.bucketId)))
+      .where(and(bucketScopeFilter, isNotNull(projects.bucketId)))
       .limit(1)
 
     const [project] = await db
       .insert(projects)
       .values({
-        ...data,
+        name: data.name,
+        description: data.description,
+        colorPresets: data.colorPresets,
+        orientation: data.orientation,
+        // Keep the creator as the stable owner record even for team-linked projects.
         ownerId: workspaceUser.userId,
-        teamId: effectiveTeamId,
+        teamId: effectiveTeamId ?? null,
       })
       .returning({ id: projects.id })
 
@@ -128,7 +156,7 @@ export const getAccessibleProjects = createServerFn({ method: "GET" })
         updatedAt: projects.updatedAt,
       })
       .from(projects)
-      .innerJoin(users, eq(users.id, projects.ownerId))
+      .leftJoin(users, eq(users.id, projects.ownerId))
       .leftJoin(authTeams, eq(authTeams.id, projects.teamId))
       .leftJoin(
         authMembers,

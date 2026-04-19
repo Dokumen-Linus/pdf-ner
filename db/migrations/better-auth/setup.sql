@@ -1,3 +1,20 @@
+create table "auth"."user" ("id" text not null primary key, "name" text not null, "email" text not null unique, "emailVerified" boolean not null, "image" text, "createdAt" timestamptz default CURRENT_TIMESTAMP not null, "updatedAt" timestamptz default CURRENT_TIMESTAMP not null);
+
+create table "auth"."session" ("id" text not null primary key, "expiresAt" timestamptz not null, "token" text not null unique, "createdAt" timestamptz default CURRENT_TIMESTAMP not null, "updatedAt" timestamptz not null, "ipAddress" text, "userAgent" text, "userId" text not null references "auth"."user" ("id") on delete cascade);
+
+create table "auth"."account" ("id" text not null primary key, "accountId" text not null, "providerId" text not null, "userId" text not null references "auth"."user" ("id") on delete cascade, "accessToken" text, "refreshToken" text, "idToken" text, "accessTokenExpiresAt" timestamptz, "refreshTokenExpiresAt" timestamptz, "scope" text, "password" text, "createdAt" timestamptz default CURRENT_TIMESTAMP not null, "updatedAt" timestamptz not null);
+
+create table "auth"."verification" ("id" text not null primary key, "identifier" text not null, "value" text not null, "expiresAt" timestamptz not null, "createdAt" timestamptz default CURRENT_TIMESTAMP not null, "updatedAt" timestamptz default CURRENT_TIMESTAMP not null);
+
+-- maybe should be named session_userId_idx
+create index "auth_session_userId_idx" on "auth"."session" ("userId");
+
+-- maybe should be named account_userId_idx
+create index "auth_account_userId_idx" on "auth"."account" ("userId");
+
+-- maybe should be named verification_identifier_idx
+create index "auth_verification_identifier_idx" on "auth"."verification" ("identifier");
+
 alter table "auth"."session" add column "activeOrganizationId" text;
 
 alter table "auth"."session" add column "activeTeamId" text;
@@ -27,7 +44,5 @@ create index "auth_member_userId_idx" on "auth"."member" ("userId");
 create index "auth_invitation_organizationId_idx" on "auth"."invitation" ("organizationId");
 
 create index "auth_invitation_email_idx" on "auth"."invitation" ("email");
-
-ALTER TABLE web.projects ADD CONSTRAINT projects_team_id_fkey FOREIGN KEY (team_id) REFERENCES "auth"."team"("id") ON DELETE SET NULL;
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA auth TO auth_role;

@@ -1,5 +1,5 @@
 import { getRequestHeaders } from "@tanstack/react-start/server"
-import { and, eq, or, sql } from "drizzle-orm/sql"
+import { and, eq, or, sql } from "drizzle-orm"
 
 import { db } from "@/db/client"
 import { authMembers, authTeamMembers, authTeams } from "@/db/schemas/auth"
@@ -21,7 +21,7 @@ type ProjectAccessMode = "read" | "label" | "manage"
 
 export type ProjectAccessContext = WorkspaceUserContext & {
   projectId: string
-  ownerId: string
+  ownerId: string | null
   teamId: string | null
   organizationId: string | null
   role: string | null
@@ -104,7 +104,7 @@ async function getProjectAccessContextForUser(
       teamMemberId: authTeamMembers.id,
     })
     .from(projects)
-    .innerJoin(users, eq(users.id, projects.ownerId))
+    .leftJoin(users, eq(users.id, projects.ownerId))
     .leftJoin(authTeams, eq(authTeams.id, projects.teamId))
     .leftJoin(
       authMembers,

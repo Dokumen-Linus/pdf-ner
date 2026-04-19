@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 
-import { requireProjectOwnership, requireUserId } from "@/db-fns/api/authorization.server"
+import { requireProjectOwnership, requireUserId } from "@/lib/authorization.server"
 
 import { jsonCall } from "./api-json-call.server"
 

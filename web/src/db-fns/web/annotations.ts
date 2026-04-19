@@ -6,7 +6,11 @@ import { db } from "@/db/client"
 import { annotations } from "@/db/schemas/web/annotations"
 import { pdfs } from "@/db/schemas/web/pdfs"
 
-import { requirePdfAccess, requirePdfOwnership, requireUserId } from "../api/authorization.server"
+import {
+  requirePdfAccess,
+  requirePdfOwnership,
+  requireUserId,
+} from "../../lib/authorization.server"
 
 import { LabeledEntitiesSchema, LABELLING_LOCK_STALE_SECONDS } from "./pdfs"
 
