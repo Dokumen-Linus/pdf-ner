@@ -26,15 +26,22 @@ import "./bun-test-extensions.d.ts"
 
 mock.module("@tanstack/react-start", () => ({
   createServerFn: (_opts?: { method?: string }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let _validator: any = null
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const builder: any = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       inputValidator(v: any) {
         _validator = v
         return builder
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       handler(handlerFn: any) {
-        return async (callArgs?: { data?: any }) => {
+        return async (
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          callArgs?: { data?: any }
+        ) => {
           let validatedData = callArgs?.data
 
           if (_validator != null) {
