@@ -19,7 +19,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn-ui
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
+import { Textarea } from "@/components/shadcn-ui/textarea"
 import { getOrganizationByUserId, getTeamsByOrganizationId } from "@/db-fns/web/organizations"
+import { createTeam, updateTeam } from "@/db-fns/web/teams"
 import { getUserByAuthUserId, updateUser } from "@/db-fns/web/users"
 import { m } from "@/integrations/paraglide/messages.js"
 import { authClient } from "@/lib/auth-client"
@@ -75,6 +77,15 @@ const getEmailPrefix = (email: string) => {
   const prefix = email.split("@")[0] ?? ""
   return prefix.trim()
 }
+
+const toSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
 
 const getLegacyName = (user: ProfileUser) => {
   if (user.displayName?.trim()) return user.displayName.trim()
@@ -240,8 +251,11 @@ function ProfilePage() {
   const [uploadFailure, setUploadFailure] = useState<string | null>(null)
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [organizationCreationError, setOrganizationCreationError] = useState<string | null>(null)
   const [isCreatingTeam, setIsCreatingTeam] = useState(false)
   const [teamCreationError, setTeamCreationError] = useState<string | null>(null)
+  const [newTeamName, setNewTeamName] = useState("")
+  const [newTeamDescription, setNewTeamDescription] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -292,6 +306,7 @@ function ProfilePage() {
     setProfile(loadedUser)
     setOrganization(loadedOrganization)
     setTeams(loadedTeams)
+    setOrganizationCreationError(null)
   }, [loadedUser, loadedOrganization, loadedTeams])
 
   const form = useForm({
@@ -405,23 +420,68 @@ function ProfilePage() {
 
   const handleCreateOrganization = async () => {
     if (!profile) return
+    setOrganizationCreationError(null)
     try {
       const orgName = profile.displayName?.trim() || getEmailPrefix(profile.email)
-      const slug = orgName.toLowerCase().replace(/\s+/g, "-")
-      await authClient.organization.create({
+      const slugBase = toSlug(orgName) || "organization"
+      const slug = `${slugBase}-${profile.id.slice(0, 8).toLowerCase()}`
+      const { error } = await authClient.organization.create({
         name: orgName,
         slug,
       })
+      if (error) {
+        setOrganizationCreationError(error.message || "Failed to create organization")
+        return
+      }
       await router.invalidate()
     } catch (error) {
-      console.error("Failed to create organization:", error)
+      setOrganizationCreationError(
+        error instanceof Error ? error.message : "Failed to create organization",
+      )
     }
   }
 
   const handleCreateTeam = async () => {
-    // Team creation will be implemented through a server function
-    // For now, this is a placeholder
-    console.log("Team creation coming soon")
+    if (!organization) {
+      setTeamCreationError("Create an organization before creating a team.")
+      return
+    }
+
+    const trimmedName = newTeamName.trim()
+    const trimmedDescription = newTeamDescription.trim()
+
+    if (!trimmedName) {
+      setTeamCreationError("Team name is required.")
+      return
+    }
+
+    setIsCreatingTeam(true)
+    setTeamCreationError(null)
+    try {
+      const data = await createTeam({
+        data: {
+          name: trimmedName,
+          organizationId: organization.id,
+        },
+      })
+
+      if (data?.id && trimmedDescription) {
+        await updateTeam({
+          data: {
+            id: data.id,
+            description: trimmedDescription,
+          },
+        })
+      }
+
+      setNewTeamName("")
+      setNewTeamDescription("")
+      await router.invalidate()
+    } catch (error) {
+      setTeamCreationError(error instanceof Error ? error.message : "Failed to create team")
+    } finally {
+      setIsCreatingTeam(false)
+    }
   }
 
   const fallbackDisplayName = getLegacyName(profile)
@@ -776,6 +836,11 @@ function ProfilePage() {
             <p className="text-muted-foreground text-sm">
               You don't have an organization yet. Create one to start managing teams and projects.
             </p>
+            {organizationCreationError && (
+              <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
+                {organizationCreationError}
+              </div>
+            )}
             <Button onClick={handleCreateOrganization}>Create Organization</Button>
           </CardContent>
         </Card>
@@ -802,12 +867,36 @@ function ProfilePage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg">Teams</CardTitle>
-              <Button size="sm" onClick={handleCreateTeam} disabled={isCreatingTeam}>
-                {isCreatingTeam ? <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Create Team
-              </Button>
             </CardHeader>
             <CardContent>
+              <div className="mb-6 space-y-3 rounded-md border p-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-team-name">Team name</Label>
+                  <Input
+                    id="new-team-name"
+                    value={newTeamName}
+                    onChange={(e) => setNewTeamName(e.target.value)}
+                    placeholder="e.g. Operations"
+                    disabled={isCreatingTeam}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-team-description">Description</Label>
+                  <Textarea
+                    id="new-team-description"
+                    value={newTeamDescription}
+                    onChange={(e) => setNewTeamDescription(e.target.value)}
+                    placeholder="Optional team description"
+                    disabled={isCreatingTeam}
+                  />
+                </div>
+                <Button size="sm" onClick={handleCreateTeam} disabled={isCreatingTeam}>
+                  {isCreatingTeam ? (
+                    <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  Create Team
+                </Button>
+              </div>
               {teamCreationError && (
                 <div className="border-destructive/35 bg-destructive/5 text-destructive mb-4 rounded-md border px-3 py-2 text-sm">
                   {teamCreationError}

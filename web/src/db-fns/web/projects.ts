@@ -134,6 +134,10 @@ export const getProjectByName = createServerFn({ method: "GET" })
 export const getProjectsByOwnerId = createServerFn({ method: "GET" })
   .inputValidator((data: { ownerId: string }) => data)
   .handler(async ({ data }) => {
+    const workspaceUser = await requireWorkspaceUser()
+    if (data.ownerId !== workspaceUser.userId) {
+      throw new Error("You do not have access to this user's projects")
+    }
     const userProjects = await db.select().from(projects).where(eq(projects.ownerId, data.ownerId))
     return userProjects
   })
@@ -211,6 +215,36 @@ export const getCurrentProjectAccess = createServerFn({ method: "GET" })
 export const getProjectsByTeamId = createServerFn({ method: "GET" })
   .inputValidator((data: { teamId: string }) => data)
   .handler(async ({ data }) => {
+    const workspaceUser = await requireWorkspaceUser()
+    const [teamMembership] = await db
+      .select({ teamId: authTeamMembers.teamId })
+      .from(authTeamMembers)
+      .innerJoin(authTeams, eq(authTeams.id, authTeamMembers.teamId))
+      .innerJoin(
+        authMembers,
+        and(
+          eq(authMembers.organizationId, authTeams.organizationId),
+          eq(authMembers.userId, workspaceUser.authUserId),
+        ),
+      )
+      .where(
+        and(
+          eq(authTeamMembers.teamId, data.teamId),
+          eq(authTeamMembers.userId, workspaceUser.authUserId),
+          or(
+            eq(authMembers.role, "owner"),
+            eq(authMembers.role, "admin"),
+            eq(authMembers.role, "developer"),
+            eq(authMembers.role, "analyst"),
+          ),
+        ),
+      )
+      .limit(1)
+
+    if (!teamMembership) {
+      throw new Error("You do not have access to this team's projects")
+    }
+
     const teamProjects = await db.select().from(projects).where(eq(projects.teamId, data.teamId))
     return teamProjects
   })
