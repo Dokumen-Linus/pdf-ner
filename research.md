@@ -60,18 +60,12 @@
 - [jau123/MeiGen-AI-Design-MCP](https://github.com/jau123/MeiGen-AI-Design-MCP)
 - [millonoco/react-doctor](https://github.com/millionco/react-doctor)
 
-### Frontend Design
+### Generate Assets
 
-- Google Stitch
-
-### Generate Images
-
-- Gemini
+- Frontend design: Google Stitch
+- Images: Gemini
 - SVG Icons: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
-
-## Deployment
-
-- [aws-doctor](https://github.com/elC0mpa/aws-doctor)
+- Videos: https://github.com/heygen-com/hyperframes
 
 ## Frontend links
 
@@ -83,7 +77,7 @@
 
 ### Colors
 
-- **[DESIGN.md set](https://getdesign.md/)**
+- [DESIGN.md set](https://getdesign.md/)
 - [TailColors](https://tailcolors.com/)
 - [Hex Color Codes](https://html-color.codes/)
 - generators for complimentary hex codes [Coolors](https://coolors.co/) (no acct required), [Atmos](https://atmos.style/) (requires free acct)
@@ -92,7 +86,7 @@
 
 - [shadcn/ui all components](https://ui.shadcn.com/docs/components)
 - [official blocks](https://ui.shadcn.com/blocks)
-- **add themes [shadcn/studio](https://shadcnstudio.com/components)**
+- add themes [shadcn/studio](https://shadcnstudio.com/components)
 - official charts [docs0](https://ui.shadcn.com/docs/components/radix/chart), [docs1](https://ui.shadcn.com/charts/area)
 - blocks [shadcnspace](https://shadcnspace.com/)
 - blocks [Creative Tim UI](https://www.creative-tim.com/ui/blocks)
@@ -101,6 +95,7 @@
 
 ### Generic React + Tailwind Components
 
+- **[Cult UI](https://github.com/nolly-studio/cult-ui)**
 - [Material UI (MUI)](https://mui.com/material-ui/getting-started/), css styling [MUI System](https://mui.com/system/getting-started/)
 - [Ant Design](https://ant.design/components/overview/)
 - [Hexta UI](https://www.hextaui.com/)
@@ -115,7 +110,6 @@
 - [Joy UI](https://mui.com/joy-ui/getting-started/)
 - [Elastic UI (EUI)](https://eui.elastic.co/docs/components/)
 - [Magic UI](https://github.com/magicuidesign/magicui)
-- **[Cult UI](https://github.com/nolly-studio/cult-ui)**
 - [Page UI](https://github.com/danmindru/page-ui)
 - [Syntax UI](https://github.com/SyntaxUI/syntaxui)
 - [Jolly UI](https://github.com/jolbol1/jolly-ui)
@@ -124,7 +118,7 @@
 - [Farm UI](https://github.com/kinfe123/farm-ui)
 - [Tark UI](https://www.tarkui.com/)
 - [Gray UI CRM](https://github.com/Jason-uxui/gray-ui-crm/tree/main/components)
-- list of many libraries [shadcn0ui directory](https://ui.shadcn.com/docs/directory)
+- list of many libraries [shadcn-ui directory](https://ui.shadcn.com/docs/directory)
 
 ### Headless Components
 
@@ -224,12 +218,9 @@
 
 - Guide [HichemTab-tech/react-shared-states](https://github.com/HichemTab-tech/react-shared-states)
 
-### Fetching
-
-- [axios/axios](https://github.com/axios/axios)
-
 ### Cloud Security
 
+- [aws-doctor](https://github.com/elC0mpa/aws-doctor)
 - AWS security checks [cloudsploit](https://cloudsploit.com/)
 - Server Management boilerplate [coollabsio/coolify](https://github.com/coollabsio/coolify)
 - Self-hosted CDN [leandromoreira/cdn-up-and-running](https://github.com/leandromoreira/cdn-up-and-running)
@@ -239,12 +230,6 @@
 - [supercheck](https://github.com/supercheck-io/supercheck)
 - [OWASP/Nettacker](https://github.com/OWASP/Nettacker)
 - scan for vulernabilities [Sirius](https://github.com/SiriusScan/Sirius)
-
-### WAF
-
-- [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler)
-- [bunkerity/bunkerweb](https://github.com/bunkerity/bunkerweb)
-- [evertramos/nginx-proxy-automation](https://github.com/evertramos/nginx-proxy-automation)
 
 ### Frontend Testing (besides Bun, Playwright)
 
@@ -257,12 +242,6 @@
 - [Stripe](https://stripe.com/)
 - self-hosted alternative [Lago](https://getlago.com/docs/welcome)
 
-### File Upload
-
-- uploadthing
-- self-hosted [chibisafe](https://github.com/chibisafe/chibisafe)
-- AWS S3 only
-
 ### Emails
 
 - [React Email AWS SES](https://react-email.mintlify.dev/docs/integrations/aws-ses)
@@ -273,22 +252,18 @@
 
 ## Backend links
 
-### PDF pre-saved text extraction
+### Text Extraction
 
-- [pypdfium2-team/pypdfium2](https://github.com/pypdfium2-team/pypdfium2/tree/main), [PyPDFium2 docs](https://pypdfium2.readthedocs.io/en/stable/index.html)
-- [pymupdf/PyMuPDF4LLM](https://github.com/pymupdf/PyMuPDF4LLM), [PyMuPDF4LLM docs](https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/index.html), [PyMuPDF4LLM API](https://pymupdf.readthedocs.io/en/latest/pymupdf4llm/api.html#pymupdf4llm-api)
-- [jsvine/pdfplumber](https://github.com/jsvine/pdfplumber)
-- [Immutablemike/pypdf2](https://github.com/Immutablemike/pypdf2), [docs](https://pypdf.readthedocs.io/en/latest/)
+- [pypdfium2-team/pypdfium2](https://github.com/pypdfium2-team/pypdfium2), [PyPDFium2 docs](https://pypdfium2.readthedocs.io/en/stable/index.html)
+- [Firecrawl](https://docs.firecrawl.dev/features/document-parsing)
 - [microsoft/markitdown](https://github.com/microsoft/markitdown)
-- [Pymupdf](https://github.com/pymupdf/PyMuPDF)
+- [PyMupdf](https://github.com/pymupdf/PyMuPDF) and its extensions (LLM and Layout)
 - [marker](https://github.com/vikparuchuri/marker)
 
-### Traditional Engines for OCR
+### Tesseract
 
 - [tesseract-ocr/tesseract](https://github.com/tesseract-ocr/tesseract)
 - [madmaze/pytesseract](https://github.com/madmaze/pytesseract)
-- [naptha/tesseract.js](https://github.com/naptha/tesseract.js)
-- Tesseract python cli [ocrmypdf/OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF)
 
 ### SLMs for OCR
 
@@ -301,8 +276,8 @@
 
 ### LLMs for OCR
 
-- **[deepseek-ai/DeepSeek-OCR](https://github.com/deepseek-ai/DeepSeek-OCR)**
-- **[allenai/olmocr](https://github.com/allenai/olmocr)**
+- [deepseek-ai/DeepSeek-OCR](https://github.com/deepseek-ai/DeepSeek-OCR)
+- [allenai/olmocr](https://github.com/allenai/olmocr)
 - LLM checking trad OCR [Dicklesworthstone/llm_aided_ocr](https://github.com/Dicklesworthstone/llm_aided_ocr)
 
 ### Orchestrator of OCR options
@@ -312,16 +287,6 @@
 ### Convert to PDF
 
 - [cyanfish/naps2](https://github.com/cyanfish/naps2)
-
-### PDF encryption and signatures
-
-- [flamecorcloud/signature-one](https://github.com/flamecorecloud/signature-one/)
-- [documenso](https://github.com/documenso/documenso)
-
-### LLMs for NER
-
-- **[google/langextract](https://github.com/google/langextract)**
-- **[NanoNets/docstrange](https://github.com/NanoNets/docstrange)**
 
 ### SLMs for NER
 
@@ -338,17 +303,18 @@
 - [Ner4All Case Study](https://drezil.de/Writing/ner4all-case-study.html)
 - [LLM assisted SLM training](https://aclanthology.org/2025.alp-1.21.pdf)
 
-### Prompt Eng
+### SLMs for PII NER
 
-- [Matt Pocock X](https://x.com/mattpocockuk/status/1958179930262356032)
-- [Hunyuan-PromptEnhancer/PromptEnhancer](https://github.com/Hunyuan-PromptEnhancer/PromptEnhancer)
-- [promptslab/Promptify](https://github.com/promptslab/Promptify)
-- [Context Engineering research](https://github.com/Meirtz/Awesome-Context-Engineering)
+- [microsoft/presidio](https://github.com/microsoft/presidio)
 
-### LLM Memory
+### LLMs for NER
 
-- Supermemory
-- [MemoriLabs/Memori](https://github.com/MemoriLabs/Memori)
+- **[google/langextract](https://github.com/google/langextract)**
+- **[NanoNets/docstrange](https://github.com/NanoNets/docstrange)**
+
+### Context Eng
+
+- [Awesome Context Engineering](https://github.com/Meirtz/Awesome-Context-Engineering)
 
 ### Local hosting LLMs
 
@@ -364,59 +330,31 @@
 - [stanfordnlp/dspy](https://github.com/stanfordnlp/dspy)
 - [huggingface/peft](https://github.com/huggingface/peft)
 
-### LLM Security
+### FastAPI
 
-- [Trusted-AI/adversarial-robustness-toolbox](https://github.com/Trusted-AI/adversarial-robustness-toolbox)
-
-### LLM Observability
-
-- [traceloop/openllmetry](https://github.com/traceloop/openllmetry)
-
-### SLMs for PII Redaction
-
-- [microsoft/presidio](https://github.com/microsoft/presidio)
-
-### **FastAPI**
-
-- Using Uvicorn
 - [FastAPI docs](https://fastapi.tiangolo.com/)
-- FastAPI quickstart [fastapi/fastapi-new](https://github.com/fastapi/fastapi-new)
-- FastAPI boilerplate [fastapi/full-stack-fastapi-template](https://github.com/fastapi/full-stack-fastapi-template)
-- [agronholm/anyio](https://github.com/agronholm/anyio), [docs AnyIO](https://anyio.readthedocs.io/en/stable/threads.html#adjusting-the-default-maximum-worker-thread-count)
+- [agronholm/anyio](https://github.com/agronholm/anyio), [docs](https://anyio.readthedocs.io/en/stable/threads.html#adjusting-the-default-maximum-worker-thread-count)
 - [encode/httpx](https://github.com/encode/httpx), [docs](https://www.python-httpx.org/), examples [Kludex/fastapi-tips](https://github.com/Kludex/fastapi-tips)
-- [APIs on AWS Lambda](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-create-api-as-simple-proxy-for-lambda.html)
 - Best practices [Kludex/fastapi-tips](https://github.com/Kludex/fastapi-tips)
 - Useful videos [15 FastAPI Best Practices For Production](https://www.youtube.com/watch?v=kmJz8w5ij8Y), [Best Way to Deploy FastAPI in Production](https://www.youtube.com/watch?v=zIFqjwuK7Yg), [How FastAPI Handles Requests Behind the Scenes](https://www.youtube.com/watch?v=tGD3653BrZ8&t=50s)
-
-### FastAPI - Unfiltered
-
-Links to repos and tools that might be helpful in API dev, but I haven't checled that these are directly relevant. They may cover Messaging, telemetry, Caching, Containerization. LLMs should ignore.
-
 - AnyIO add-on [fastapi/asyncer](https://github.com/fastapi/asyncer), [docs](https://asyncer.tiangolo.com/)
-- Cache [Redis docs](https://redis.io/docs/latest/)
-- Redis + FastAPI [long2ice/fastapi-cache](https://github.com/long2ice/fastapi-cache)
-- Redis + FastAPI [madkote/fastapi-plugins](https://github.com/madkote/fastapi-plugins)
-- Redis + FastAPI [aio-libs/aiocache](https://github.com/aio-libs/aiocache)
-- spaCy [microsoft/cookiecutter-spacy-fastapi](https://github.com/microsoft/cookiecutter-spacy-fastapi)
+
+### API Telemetry
+
 - Observability [apitally/apitally-py](https://github.com/apitally/apitally-py)
-- Monitoring [API Toolkit](https://apitoolkit.io/)
-- [OpenTelemetry docs](https://opentelemetry.io/docs/)
 - Telemetry [umami-software/umami](https://github.com/umami-software/umami)
-- Debugging [tracetest](https://github.com/kubeshop/tracetest/)
-- Testing [healthchecks/healthchecks](https://github.com/healthchecks/healthchecks)
 
-### FastAPI - Not Relevant
+### API Testing
 
-Links to repos that aren't relevant to my current project but could give me brainstorming ideas. LLMs should ignore.
+- [tracetest](https://github.com/kubeshop/tracetest/)
+- [healthchecks/healthchecks](https://github.com/healthchecks/healthchecks)
 
-- FastAPI + MCP Servers [tadata-org/fastapi_mcp](https://github.com/tadata-org/fastapi_mcp)
-- K8s boilerplate [kubernetes-sigs/kubespray](https://github.com/kubernetes-sigs/kubespray)
-- Kafka Boilerplate [StefanoFrusone/kafka-zero-to-production](https://github.com/StefanoFrusone/kafka-zero-to-production)
-- Audits [caido/caido](https://github.com/caido/caido)
-- [public-apis/public-apis](https://github.com/public-apis/public-apis)
+### FastAPI Examples
 
-### Examples of other FastAPIs
-
+- Redis example [long2ice/fastapi-cache](https://github.com/long2ice/fastapi-cache)
+- Redis example [madkote/fastapi-plugins](https://github.com/madkote/fastapi-plugins)
+- Redis example [aio-libs/aiocache](https://github.com/aio-libs/aiocache)
+- spaCy example [microsoft/cookiecutter-spacy-fastapi](https://github.com/microsoft/cookiecutter-spacy-fastapi)
 - [lm-sys/FastChat](https://github.com/lm-sys/FastChat)
 - [Lightning-AI/pytorch-lightning](https://github.com/Lightning-AI/pytorch-lightning)
 - [QuivrHQ/quivr](https://github.com/QuivrHQ/quivr)
@@ -431,14 +369,6 @@ Links to repos that aren't relevant to my current project but could give me brai
 - LLMs [567-labs/instructor](https://github.com/567-labs/instructor)
 - Pydantic Settings + AWS Secrets [okube-ai/settus](https://github.com/okube-ai/settus)
 - Visualization [drivendataorg/erdantic](https://github.com/drivendataorg/erdantic)
-
-### PostgreSQL Vector Search
-
-- [pgsemantic](https://github.com/varmabudharaju/pgsemantic)
-
-### Task Queues
-
-- [celery/celery](https://github.com/celery/celery), [docs](https://docs.celeryq.dev/)
 
 ### Parallel Processing
 
@@ -456,9 +386,10 @@ Links to repos that aren't relevant to my current project but could give me brai
 
 ## DB links
 
-### Database Search
+### PostgreSQL Search
 
-- PostgreSQL [paradedb](https://github.com/paradedb/paradedb)
+- [pgsemantic](https://github.com/varmabudharaju/pgsemantic)
+- [paradedb](https://github.com/paradedb/paradedb)
 
 ### Database Schema Visualization
 

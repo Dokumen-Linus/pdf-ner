@@ -6,6 +6,8 @@ import {
   fetchState,
   helpersState,
   type MockAuthCallResult,
+  type MockCreateTeamArgs,
+  type MockCreateTeamResult,
   type MockFetchResponse,
   type MockRoute,
   type MockSession,
@@ -69,6 +71,13 @@ export function setSignUpResult(result: MockAuthCallResult): void {
 /** Configure what authClient.signOut() resolves to on the next call. */
 export function setSignOutResult(result: MockAuthCallResult): void {
   authState.signOutResult = result
+}
+
+/** Override the function the mocked auth.api.createTeam() calls. */
+export function setCreateTeamHandler(
+  fn: (args?: MockCreateTeamArgs) => Promise<MockCreateTeamResult>,
+): void {
+  authState.createTeam = fn
 }
 
 // ─── Fetch / API helpers ──────────────────────────────────────────────────────
@@ -188,6 +197,8 @@ export function resetMocks(): void {
 export type {
   MockAuthCallResult,
   MockAuthError,
+  MockCreateTeamArgs,
+  MockCreateTeamResult,
   MockFetchResponse,
   MockSession,
   MockSessionRecord,
