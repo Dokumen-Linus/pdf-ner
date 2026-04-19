@@ -25,6 +25,12 @@ export function installAuthMock(): void {
         getSession: async (_opts?: { headers?: Headers | Record<string, string> }) => {
           return authState.session
         },
+        createTeam: async (opts?: {
+          headers?: Headers | Record<string, string>
+          body?: { name: string; organizationId?: string }
+        }) => {
+          return authState.createTeam(opts)
+        },
       },
     },
   }))

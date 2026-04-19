@@ -1,119 +1,334 @@
-import { describe, expect, it } from "bun:test"
+import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 
 import {
   createProject,
   deleteProject,
+  getAccessibleProjects,
+  getCurrentProjectAccess,
   getProjectById,
   getProjectByName,
   getProjectsByOwnerId,
+  getProjectsByTeamId,
   updateProject,
 } from "./projects"
+import {
+  authenticateAs,
+  cleanupFixtures,
+  createFixtureTracker,
+  seedOrganization,
+  seedOrganizationMember,
+  seedProject,
+  seedTeam,
+  seedTeamMember,
+  seedUser,
+} from "./test-fixtures"
 
 const runTests = process.env.TEST_DB === "true"
 
 describe.if(runTests)("Project Table Server Functions", () => {
-  const testName = "Test Project"
+  let tracker = createFixtureTracker()
 
-  it("should handle the full project lifecycle (CRUD)", async () => {
-    // --- CREATE ---
-    const createInput = {
-      name: testName,
-      colorPresets: ["#ff0000", "#00ff00"],
-      orientation: "portrait" as const,
-    }
-    const createOutput = await createProject({ data: createInput })
-    expect(createOutput.id).toBeUuid()
-
-    // --- READ (by name to get the created project) ---
-    const projectsByName = await getProjectByName({ data: { name: testName } })
-    expect(projectsByName).toBeDefined()
-    expect(projectsByName.name).toBe(testName)
-    expect(projectsByName.ownerId).toBeDefined()
-    const projectId = projectsByName.id
-
-    // --- READ (by id) ---
-    const projectById = await getProjectById({ data: { id: projectId } })
-    expect(projectById).toBeDefined()
-    expect(projectById.id).toBe(projectId)
-    expect(projectById.name).toBe(testName)
-
-    // --- READ (by ownerId) ---
-    const projectsByOwnerId = await getProjectsByOwnerId({
-      data: { ownerId: projectsByName.ownerId! },
-    })
-    expect(projectsByOwnerId).toBeDefined()
-    expect(projectsByOwnerId.length).toBeGreaterThan(0)
-
-    // --- UPDATE ---
-    const updateInput = {
-      id: projectId,
-      name: "Updated Project Name",
-      colorPresets: ["#0000ff", "#ffff00"],
-    }
-    const updateOutput = await updateProject({ data: updateInput })
-    expect(updateOutput.success).toBe(true)
-
-    const updatedProject = await getProjectById({ data: { id: projectId } })
-    expect(updatedProject.name).toBe("Updated Project Name")
-    expect(updatedProject.colorPresets).toEqual(["#0000ff", "#ffff00"])
-
-    // --- DELETE ---
-    const deleteOutput = await deleteProject({ data: { id: projectId } })
-    expect(deleteOutput.success).toBe(true)
-
-    // Verify deletion
-    await expect(getProjectById({ data: { id: projectId } })).rejects.toThrow("Project not found")
+  beforeEach(() => {
+    tracker = createFixtureTracker()
   })
 
-  it("should reuse the existing bucket when user already has a project", async () => {
-    const createInput = {
-      name: "First Project",
-    }
-    const firstProject = await createProject({ data: createInput })
-    const firstProjectData = await getProjectById({ data: { id: firstProject.id } })
-    expect(firstProjectData.bucketId).toBeDefined()
-
-    const secondProject = await createProject({
-      data: { name: "Second Project" },
-    })
-    const secondProjectData = await getProjectById({ data: { id: secondProject.id } })
-
-    expect(secondProjectData.bucketId).toBe(firstProjectData.bucketId)
-
-    // Cleanup
-    await deleteProject({ data: { id: firstProject.id } })
-    await deleteProject({ data: { id: secondProject.id } })
+  afterEach(async () => {
+    await cleanupFixtures(tracker)
   })
 
-  describe("Validation and Error Handling", () => {
-    it("throws error for empty name in createProject", async () => {
-      const input = {
-        name: "", // empty name should fail
-      }
-      await expect(createProject({ data: input })).rejects.toThrow()
+  it("handles the personal project lifecycle for the authenticated owner", async () => {
+    const label = `project-personal-${crypto.randomUUID().slice(0, 8)}`
+    const user = await seedUser(tracker, { label })
+    authenticateAs(user)
+
+    const created = await createProject({
+      data: {
+        name: `${label}-created`,
+        description: "Personal project",
+        colorPresets: ["#ff0000", "#00ff00"],
+        orientation: "portrait",
+      },
+    })
+    tracker.projectIds.push(created.id)
+
+    const createdById = await getProjectById({ data: { id: created.id } })
+    expect(createdById.id).toBe(created.id)
+    expect(createdById.ownerId).toBe(user.webUserId)
+    expect(createdById.teamId).toBeNull()
+    expect(createdById.bucketId).toBeUuid()
+    expect(createdById.orientation).toBe("portrait")
+
+    const createdByName = await getProjectByName({ data: { name: `${label}-created` } })
+    expect(createdByName.id).toBe(created.id)
+
+    const projectsByOwner = await getProjectsByOwnerId({
+      data: { ownerId: user.webUserId },
+    })
+    expect(projectsByOwner.some((project) => project.id === created.id)).toBe(true)
+
+    const updateResult = await updateProject({
+      data: {
+        id: created.id,
+        name: `${label}-updated`,
+        colorPresets: ["#0000ff"],
+      },
+    })
+    expect(updateResult.success).toBe(true)
+
+    const updatedProject = await getProjectById({ data: { id: created.id } })
+    expect(updatedProject.name).toBe(`${label}-updated`)
+    expect(updatedProject.colorPresets).toEqual(["#0000ff"])
+
+    const deleteResult = await deleteProject({ data: { id: created.id } })
+    expect(deleteResult.success).toBe(true)
+
+    await expect(getProjectById({ data: { id: created.id } })).rejects.toThrow("Project not found")
+  })
+
+  it("auto-selects the caller's manageable team when creating an org-scoped project", async () => {
+    const label = `project-auto-team-${crypto.randomUUID().slice(0, 8)}`
+    const user = await seedUser(tracker, { label })
+    const { organizationId } = await seedOrganization(tracker, { label })
+    const { teamId } = await seedTeam(tracker, { label, organizationId })
+    await seedOrganizationMember(tracker, {
+      organizationId,
+      authUserId: user.authUserId,
+      role: "developer",
+    })
+    await seedTeamMember(tracker, { teamId, authUserId: user.authUserId })
+    authenticateAs(user)
+
+    const created = await createProject({
+      data: {
+        name: `${label}-created`,
+      },
+    })
+    tracker.projectIds.push(created.id)
+
+    const project = await getProjectById({ data: { id: created.id } })
+    expect(project.ownerId).toBe(user.webUserId)
+    expect(project.teamId).toBe(teamId)
+  })
+
+  it("reuses buckets within the same personal workspace", async () => {
+    const label = `project-personal-bucket-${crypto.randomUUID().slice(0, 8)}`
+    const user = await seedUser(tracker, { label })
+    authenticateAs(user)
+
+    const first = await createProject({ data: { name: `${label}-one` } })
+    const second = await createProject({ data: { name: `${label}-two` } })
+    tracker.projectIds.push(first.id, second.id)
+
+    const firstProject = await getProjectById({ data: { id: first.id } })
+    const secondProject = await getProjectById({ data: { id: second.id } })
+
+    expect(firstProject.teamId).toBeNull()
+    expect(secondProject.teamId).toBeNull()
+    expect(secondProject.bucketId).toBe(firstProject.bucketId)
+  })
+
+  it("reuses buckets within the same team workspace", async () => {
+    const label = `project-team-bucket-${crypto.randomUUID().slice(0, 8)}`
+    const user = await seedUser(tracker, { label })
+    const { organizationId } = await seedOrganization(tracker, { label })
+    const { teamId } = await seedTeam(tracker, { label, organizationId })
+    await seedOrganizationMember(tracker, {
+      organizationId,
+      authUserId: user.authUserId,
+      role: "owner",
+    })
+    await seedTeamMember(tracker, { teamId, authUserId: user.authUserId })
+    authenticateAs(user)
+
+    const first = await createProject({ data: { name: `${label}-one`, teamId } })
+    const second = await createProject({ data: { name: `${label}-two`, teamId } })
+    tracker.projectIds.push(first.id, second.id)
+
+    const firstProject = await getProjectById({ data: { id: first.id } })
+    const secondProject = await getProjectById({ data: { id: second.id } })
+
+    expect(firstProject.teamId).toBe(teamId)
+    expect(secondProject.teamId).toBe(teamId)
+    expect(secondProject.bucketId).toBe(firstProject.bucketId)
+  })
+
+  it("rejects team-scoped creation when the caller is not allowed to manage that team", async () => {
+    const label = `project-inaccessible-team-${crypto.randomUUID().slice(0, 8)}`
+    const user = await seedUser(tracker, { label: `${label}-actor` })
+    const owner = await seedUser(tracker, { label: `${label}-owner` })
+    const { organizationId } = await seedOrganization(tracker, { label })
+    const { teamId } = await seedTeam(tracker, { label, organizationId })
+    await seedOrganizationMember(tracker, {
+      organizationId,
+      authUserId: owner.authUserId,
+      role: "owner",
+    })
+    await seedTeamMember(tracker, { teamId, authUserId: owner.authUserId })
+    authenticateAs(user)
+
+    await expect(
+      createProject({
+        data: {
+          name: `${label}-created`,
+          teamId,
+        },
+      }),
+    ).rejects.toThrow("You do not have access to this team")
+  })
+
+  it("denies reading projects for another owner id", async () => {
+    const label = `project-owner-deny-${crypto.randomUUID().slice(0, 8)}`
+    const actor = await seedUser(tracker, { label: `${label}-actor` })
+    const otherUser = await seedUser(tracker, { label: `${label}-other` })
+    authenticateAs(actor)
+
+    await expect(
+      getProjectsByOwnerId({
+        data: { ownerId: otherUser.webUserId },
+      }),
+    ).rejects.toThrow("You do not have access to this user's projects")
+  })
+
+  it("allows analyst team members to list team projects and exposes read-only access flags", async () => {
+    const label = `project-analyst-read-${crypto.randomUUID().slice(0, 8)}`
+    const owner = await seedUser(tracker, { label: `${label}-owner` })
+    const analyst = await seedUser(tracker, { label: `${label}-analyst` })
+    const { organizationId } = await seedOrganization(tracker, { label })
+    const { teamId } = await seedTeam(tracker, { label, organizationId })
+    await seedOrganizationMember(tracker, {
+      organizationId,
+      authUserId: owner.authUserId,
+      role: "owner",
+    })
+    await seedOrganizationMember(tracker, {
+      organizationId,
+      authUserId: analyst.authUserId,
+      role: "analyst",
+    })
+    await seedTeamMember(tracker, { teamId, authUserId: owner.authUserId })
+    await seedTeamMember(tracker, { teamId, authUserId: analyst.authUserId })
+    const seededProject = await seedProject(tracker, {
+      ownerId: owner.webUserId,
+      teamId,
+      name: `${label}-seeded`,
+      bucketId: crypto.randomUUID(),
     })
 
-    it("throws 'Project not found' for non-existent ID", async () => {
-      const fakeId = "00000000-0000-0000-0000-000000000000"
-      await expect(getProjectById({ data: { id: fakeId } })).rejects.toThrow("Project not found")
+    authenticateAs(analyst)
+
+    const teamProjects = await getProjectsByTeamId({ data: { teamId } })
+    expect(teamProjects.some((project) => project.id === seededProject.projectId)).toBe(true)
+
+    const access = await getCurrentProjectAccess({
+      data: { projectId: seededProject.projectId },
+    })
+    expect(access.role).toBe("analyst")
+    expect(access.canRead).toBe(true)
+    expect(access.canLabel).toBe(true)
+    expect(access.canManage).toBe(false)
+    expect(access.teamId).toBe(teamId)
+    expect(access.organizationId).toBe(organizationId)
+
+    await expect(
+      updateProject({
+        data: {
+          id: seededProject.projectId,
+          name: `${label}-updated`,
+        },
+      }),
+    ).rejects.toThrow("You do not have access to this project")
+
+    await expect(deleteProject({ data: { id: seededProject.projectId } })).rejects.toThrow(
+      "You do not have access to this project",
+    )
+  })
+
+  it("lists only accessible personal and team projects", async () => {
+    const label = `project-accessible-${crypto.randomUUID().slice(0, 8)}`
+    const actor = await seedUser(tracker, { label: `${label}-actor` })
+    const teammate = await seedUser(tracker, { label: `${label}-teammate` })
+    const outsider = await seedUser(tracker, { label: `${label}-outsider` })
+    const { organizationId } = await seedOrganization(tracker, { label })
+    const { teamId } = await seedTeam(tracker, { label, organizationId })
+    const { teamId: otherTeamId } = await seedTeam(tracker, {
+      label: `${label}-other`,
+      organizationId,
     })
 
-    it("throws 'Project not found' for non-existent name", async () => {
-      await expect(getProjectByName({ data: { name: "Non-existent Project" } })).rejects.toThrow(
-        "Project not found",
-      )
+    await seedOrganizationMember(tracker, {
+      organizationId,
+      authUserId: actor.authUserId,
+      role: "developer",
+    })
+    await seedOrganizationMember(tracker, {
+      organizationId,
+      authUserId: teammate.authUserId,
+      role: "owner",
+    })
+    await seedOrganizationMember(tracker, {
+      organizationId,
+      authUserId: outsider.authUserId,
+      role: "owner",
     })
 
-    it("throws 'Project not found' when updating non-existent project", async () => {
-      const fakeId = "00000000-0000-0000-0000-000000000000"
-      await expect(updateProject({ data: { id: fakeId, name: "New Name" } })).rejects.toThrow(
-        "Project not found",
-      )
+    await seedTeamMember(tracker, { teamId, authUserId: actor.authUserId })
+    await seedTeamMember(tracker, { teamId, authUserId: teammate.authUserId })
+    await seedTeamMember(tracker, { teamId: otherTeamId, authUserId: outsider.authUserId })
+
+    const personalProject = await seedProject(tracker, {
+      ownerId: actor.webUserId,
+      name: `${label}-personal`,
+      bucketId: crypto.randomUUID(),
+    })
+    const teamProject = await seedProject(tracker, {
+      ownerId: teammate.webUserId,
+      teamId,
+      name: `${label}-team`,
+      bucketId: crypto.randomUUID(),
+    })
+    await seedProject(tracker, {
+      ownerId: outsider.webUserId,
+      teamId: otherTeamId,
+      name: `${label}-hidden`,
+      bucketId: crypto.randomUUID(),
     })
 
-    it("throws 'Project not found' when deleting non-existent project", async () => {
-      const fakeId = "00000000-0000-0000-0000-000000000000"
-      await expect(deleteProject({ data: { id: fakeId } })).rejects.toThrow("Project not found")
+    authenticateAs(actor)
+
+    const accessibleProjects = await getAccessibleProjects()
+    const accessibleIds = new Set(accessibleProjects.map((project) => project.id))
+
+    expect(accessibleIds.has(personalProject.projectId)).toBe(true)
+    expect(accessibleIds.has(teamProject.projectId)).toBe(true)
+    expect(accessibleProjects.some((project) => project.name === `${label}-hidden`)).toBe(false)
+  })
+
+  describe("Error handling", () => {
+    it("throws for unknown ids and names", async () => {
+      const label = `project-errors-${crypto.randomUUID().slice(0, 8)}`
+      const user = await seedUser(tracker, { label })
+      authenticateAs(user)
+
+      await expect(
+        getProjectById({ data: { id: "00000000-0000-0000-0000-000000000000" } }),
+      ).rejects.toThrow("Project not found")
+      await expect(
+        getProjectByName({ data: { name: `${label}-missing` } }),
+      ).rejects.toThrow("Project not found")
+      await expect(
+        updateProject({
+          data: {
+            id: "00000000-0000-0000-0000-000000000000",
+            name: `${label}-updated`,
+          },
+        }),
+      ).rejects.toThrow("Project not found")
+      await expect(
+        deleteProject({ data: { id: "00000000-0000-0000-0000-000000000000" } }),
+      ).rejects.toThrow("Project not found")
+      await expect(
+        getProjectsByTeamId({ data: { teamId: "00000000-0000-0000-0000-000000000000" } }),
+      ).rejects.toThrow("You do not have access to this team's projects")
     })
   })
 })
