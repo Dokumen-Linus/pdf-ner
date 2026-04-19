@@ -4,7 +4,7 @@ import { z } from "zod"
 
 import { db } from "@/db/client"
 import { workersPdfs } from "@/db/schemas/workers/pdfs"
-import { requirePdfAccess, requireProjectAccess } from "@/db-fns/api/authorization.server"
+import { requirePdfAccess, requireProjectAccess } from "@/lib/authorization.server"
 
 export const getWorkersPdfById = createServerFn({ method: "GET" })
   .inputValidator((data: { id: string }) => data)

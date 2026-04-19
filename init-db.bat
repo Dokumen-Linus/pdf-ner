@@ -7,7 +7,7 @@ echo ========================================
 echo.
 
 :: 1. Initialize PostgreSQL data directory
-echo [1/6] Initializing database cluster...
+echo [1/7] Initializing database cluster...
 initdb -D .\pgdata
 if %errorlevel% neq 0 (
     echo ERROR: initdb failed!
@@ -16,7 +16,7 @@ if %errorlevel% neq 0 (
 )
 
 :: 2. Start PostgreSQL server
-echo [2/6] Starting PostgreSQL server...
+echo [2/7] Starting PostgreSQL server...
 pg_ctl -D .\pgdata -l logfile start
 if %errorlevel% neq 0 (
     echo ERROR: Failed to start PostgreSQL!
@@ -28,14 +28,14 @@ if %errorlevel% neq 0 (
 timeout /t 3 /nobreak >nul
 
 :: 3. Create the database
-echo [3/6] Creating database "dokumen"...
+echo [3/7] Creating database "dokumen"...
 createdb dokumen
 if %errorlevel% neq 0 (
     echo WARNING: createdb returned error (database may already exist)
 )
 
 :: 4. Run initial SQL script
-echo [4/6] Running initial migration _init.sql...
+echo [4/7] Running initial migration _init.sql...
 psql -d dokumen -f db\migrations\_init.sql
 if %errorlevel% neq 0 (
     echo ERROR: Failed to run _init.sql
@@ -43,20 +43,22 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-:: 5. Run dbmate migrations
-echo [5/6] Running dbmate migrations...
+:: 5. Run Better Auth migration before numbered dbmate migrations
+echo [5/7] Running better-auth migration...
+psql -f .\db\migrations\better-auth\setup.sql -d dokumen
+if %errorlevel% neq 0 (
+    echo ERROR: Better Auth migration failed!
+    pause
+    exit /b 1
+)
+
+:: 6. Run dbmate migrations
+echo [6/7] Running dbmate migrations...
 dbmate --url "postgres://owner_role:...@localhost:5432/dokumen?sslmode=disable" --migrations-dir=db\migrations up
 if %errorlevel% neq 0 (
     echo ERROR: dbmate migrations failed!
     pause
     exit /b 1
-)
-
-:: 6. Run better-auth specific migration
-echo [6/6] Running better-auth migration...
-psql -f .\db\migrations\better-auth\2025-12-22T03-27-15.344Z.sql -d dokumen
-if %errorlevel% neq 0 (
-    echo WARNING: better-auth migration returned error (file may not exist or already applied)
 )
 
 :: 7. Run all seed files

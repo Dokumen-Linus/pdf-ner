@@ -1,6 +1,8 @@
 export * from "./annotations"
 export * from "./entity-types"
+export * from "./organizations"
 export * from "./pdfs"
 export * from "./projects"
 export { webSchema } from "./schema"
+export * from "./teams"
 export * from "./users"

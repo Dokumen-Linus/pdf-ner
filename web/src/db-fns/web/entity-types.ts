@@ -4,7 +4,7 @@ import { z } from "zod"
 
 import { db } from "@/db/client"
 import { entityTypes } from "@/db/schemas/web/entity-types"
-import { requireProjectAccess } from "@/db-fns/api/authorization.server"
+import { requireProjectAccess } from "@/lib/authorization.server"
 
 // ** CREATE **
 export const CreateEntityTypeSchema = z.object({

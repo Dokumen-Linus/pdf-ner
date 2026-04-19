@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 
-import { requirePdfAccess } from "@/db-fns/api/authorization.server"
 import { env } from "@/env.server"
+import { requirePdfAccess } from "@/lib/authorization.server"
 
 import { jsonCall } from "./api-json-call.server"
 
@@ -40,7 +40,7 @@ export const getPdfPresignedUrl = createServerFn({ method: "GET" })
       `/api/v1/pdf-storage/pdfs/${data.pdfId}/url`,
       {
         method: "GET",
-        headers: { "X-User-Id": access.ownerId },
+        headers: { "X-User-Id": access.ownerId ?? access.userId },
       },
     )
     return { url: res.url, expiresIn: res.expires_in, pdfId: res.pdf_id }

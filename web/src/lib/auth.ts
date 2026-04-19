@@ -8,6 +8,7 @@ import { Pool } from "pg"
 
 import { db } from "../db/client"
 import { authMembers, authOrganizations, authTeamMembers, authTeams } from "../db/schemas/auth"
+import { organizations, webTeams } from "../db/schemas/web"
 import { users } from "../db/schemas/web/users"
 import { env } from "../env.server"
 
@@ -150,6 +151,10 @@ async function ensureDefaultWorkspaceForUser(user: BetterAuthUserRecord) {
       createdAt,
     })
   })
+
+  await db.insert(organizations).values({ id: organizationId, createdAt })
+  await db.insert(webTeams).values({ id: teamId, organizationId, createdAt })
+  await db.update(users).set({ organizationId }).where(eq(users.id, user.id))
 }
 
 export const auth = betterAuth({
@@ -229,6 +234,21 @@ export const auth = betterAuth({
         invitation: { modelName: "auth.invitation" },
         team: { modelName: "auth.team" },
         teamMember: { modelName: "auth.teamMember" },
+      },
+      organizationHooks: {
+        afterCreateOrganization: async ({ organization }) => {
+          await db.insert(organizations).values({
+            id: organization.id,
+            createdAt: new Date(organization.createdAt),
+          })
+        },
+        afterCreateTeam: async ({ team }) => {
+          await db.insert(webTeams).values({
+            id: team.id,
+            organizationId: team.organizationId,
+            createdAt: new Date(team.createdAt),
+          })
+        },
       },
       async sendInvitationEmail(data) {
         const acceptUrl = `${env.BETTER_AUTH_URL}/accept-invitation/${data.id}`

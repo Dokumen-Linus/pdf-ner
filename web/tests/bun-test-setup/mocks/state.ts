@@ -39,6 +39,22 @@ export type MockAuthCallResult<T = { success: boolean }> = {
   error: MockAuthError | null
 }
 
+export type MockCreateTeamArgs = {
+  headers?: Headers | Record<string, string>
+  body?: {
+    name: string
+    organizationId?: string
+  }
+}
+
+export type MockCreateTeamResult = {
+  id: string
+  name: string
+  organizationId: string
+  createdAt: Date
+  updatedAt?: Date
+}
+
 export type MockFetchResponse = {
   status?: number
   json?: unknown
@@ -61,6 +77,7 @@ export type AuthMockState = {
   signInResult: MockAuthCallResult
   signUpResult: MockAuthCallResult
   signOutResult: MockAuthCallResult
+  createTeam: (args?: MockCreateTeamArgs) => Promise<MockCreateTeamResult>
 }
 
 function defaultAuthState(): AuthMockState {
@@ -69,6 +86,11 @@ function defaultAuthState(): AuthMockState {
     signInResult: { data: { success: true }, error: null },
     signUpResult: { data: { success: true }, error: null },
     signOutResult: { data: { success: true }, error: null },
+    createTeam: async () => {
+      throw new Error(
+        "[test mocks] auth.api.createTeam was called without a configured mock handler.",
+      )
+    },
   }
 }
 

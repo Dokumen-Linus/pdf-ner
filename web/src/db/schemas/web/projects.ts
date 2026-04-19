@@ -3,14 +3,13 @@ import { text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { entityTypes } from "./entity-types"
 import { webSchema } from "./schema"
+import { webTeams } from "./teams"
 import { users } from "./users"
 
 export const projects = webSchema.table("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
-  ownerId: uuid("owner_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  teamId: text("team_id"),
+  ownerId: uuid("owner_id").references(() => users.id, { onDelete: "set null" }),
+  teamId: text("team_id").references(() => webTeams.id, { onDelete: "set null" }),
   name: text("name").notNull(),
   description: text("description"),
   bucketId: uuid("bucket_id"),

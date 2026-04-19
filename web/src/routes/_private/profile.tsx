@@ -19,8 +19,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn-ui
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
+import { Textarea } from "@/components/shadcn-ui/textarea"
+import { getOrganizationByUserId, getTeamsByOrganizationId } from "@/db-fns/web/organizations"
+import { createTeam, updateTeam } from "@/db-fns/web/teams"
 import { getUserByAuthUserId, updateUser } from "@/db-fns/web/users"
 import { m } from "@/integrations/paraglide/messages.js"
+import { authClient } from "@/lib/auth-client"
 
 type ProfileUser = Awaited<ReturnType<typeof getUserByAuthUserId>>
 
@@ -73,6 +77,15 @@ const getEmailPrefix = (email: string) => {
   const prefix = email.split("@")[0] ?? ""
   return prefix.trim()
 }
+
+const toSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
 
 const getLegacyName = (user: ProfileUser) => {
   if (user.displayName?.trim()) return user.displayName.trim()
@@ -195,13 +208,26 @@ export const Route = createFileRoute("/_private/profile")({
     try {
       const authUserId = context.session?.user?.id
       if (!authUserId) {
-        return { user: null, loadError: "No authenticated session was found." }
+        return {
+          user: null,
+          organization: null,
+          teams: [],
+          loadError: "No authenticated session was found.",
+        }
       }
       const user = await getUserByAuthUserId({ data: { authUserId } })
-      return { user, loadError: null as string | null }
+
+      let organization = null
+      let teams: any[] = []
+      organization = await getOrganizationByUserId({ data: { userId: authUserId } })
+      if (organization?.id) {
+        teams = await getTeamsByOrganizationId({ data: { organizationId: organization.id } })
+      }
+
+      return { user, organization, teams, loadError: null as string | null }
     } catch (error) {
       const message = toUserLoadErrorMessage(error)
-      return { user: null, loadError: message }
+      return { user: null, organization: null, teams: [], loadError: message }
     }
   },
   pendingComponent: ProfilePageSkeleton,
@@ -210,14 +236,26 @@ export const Route = createFileRoute("/_private/profile")({
 
 function ProfilePage() {
   const router = useRouter()
-  const { user: loadedUser, loadError } = Route.useLoaderData()
+  const {
+    user: loadedUser,
+    loadError,
+    organization: loadedOrganization,
+    teams: loadedTeams,
+  } = Route.useLoaderData()
   const [profile, setProfile] = useState<ProfileUser | null>(loadedUser)
+  const [organization, setOrganization] = useState(loadedOrganization)
+  const [teams, setTeams] = useState(loadedTeams)
   const [isEditing, setIsEditing] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false)
   const [uploadFailure, setUploadFailure] = useState<string | null>(null)
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [organizationCreationError, setOrganizationCreationError] = useState<string | null>(null)
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false)
+  const [teamCreationError, setTeamCreationError] = useState<string | null>(null)
+  const [newTeamName, setNewTeamName] = useState("")
+  const [newTeamDescription, setNewTeamDescription] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -266,7 +304,10 @@ function ProfilePage() {
 
   useEffect(() => {
     setProfile(loadedUser)
-  }, [loadedUser])
+    setOrganization(loadedOrganization)
+    setTeams(loadedTeams)
+    setOrganizationCreationError(null)
+  }, [loadedUser, loadedOrganization, loadedTeams])
 
   const form = useForm({
     defaultValues: profile ? toFormValues(profile) : EMPTY_PROFILE_FORM_VALUES,
@@ -375,6 +416,72 @@ function ProfilePage() {
         </Card>
       </div>
     )
+  }
+
+  const handleCreateOrganization = async () => {
+    if (!profile) return
+    setOrganizationCreationError(null)
+    try {
+      const orgName = profile.displayName?.trim() || getEmailPrefix(profile.email)
+      const slugBase = toSlug(orgName) || "organization"
+      const slug = `${slugBase}-${profile.id.slice(0, 8).toLowerCase()}`
+      const { error } = await authClient.organization.create({
+        name: orgName,
+        slug,
+      })
+      if (error) {
+        setOrganizationCreationError(error.message || "Failed to create organization")
+        return
+      }
+      await router.invalidate()
+    } catch (error) {
+      setOrganizationCreationError(
+        error instanceof Error ? error.message : "Failed to create organization",
+      )
+    }
+  }
+
+  const handleCreateTeam = async () => {
+    if (!organization) {
+      setTeamCreationError("Create an organization before creating a team.")
+      return
+    }
+
+    const trimmedName = newTeamName.trim()
+    const trimmedDescription = newTeamDescription.trim()
+
+    if (!trimmedName) {
+      setTeamCreationError("Team name is required.")
+      return
+    }
+
+    setIsCreatingTeam(true)
+    setTeamCreationError(null)
+    try {
+      const data = await createTeam({
+        data: {
+          name: trimmedName,
+          organizationId: organization.id,
+        },
+      })
+
+      if (data?.id && trimmedDescription) {
+        await updateTeam({
+          data: {
+            id: data.id,
+            description: trimmedDescription,
+          },
+        })
+      }
+
+      setNewTeamName("")
+      setNewTeamDescription("")
+      await router.invalidate()
+    } catch (error) {
+      setTeamCreationError(error instanceof Error ? error.message : "Failed to create team")
+    } finally {
+      setIsCreatingTeam(false)
+    }
   }
 
   const fallbackDisplayName = getLegacyName(profile)
@@ -719,6 +826,107 @@ function ProfilePage() {
           </form>
         </CardContent>
       </Card>
+
+      {!organization ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Create an Organization</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground text-sm">
+              You don't have an organization yet. Create one to start managing teams and projects.
+            </p>
+            {organizationCreationError && (
+              <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
+                {organizationCreationError}
+              </div>
+            )}
+            <Button onClick={handleCreateOrganization}>Create Organization</Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Organization</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-xs font-semibold">Name</Label>
+                <p className="text-sm">{organization.name}</p>
+              </div>
+              {organization.description && (
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground text-xs font-semibold">Description</Label>
+                  <p className="text-sm">{organization.description}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">Teams</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-6 space-y-3 rounded-md border p-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-team-name">Team name</Label>
+                  <Input
+                    id="new-team-name"
+                    value={newTeamName}
+                    onChange={(e) => setNewTeamName(e.target.value)}
+                    placeholder="e.g. Operations"
+                    disabled={isCreatingTeam}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="new-team-description">Description</Label>
+                  <Textarea
+                    id="new-team-description"
+                    value={newTeamDescription}
+                    onChange={(e) => setNewTeamDescription(e.target.value)}
+                    placeholder="Optional team description"
+                    disabled={isCreatingTeam}
+                  />
+                </div>
+                <Button size="sm" onClick={handleCreateTeam} disabled={isCreatingTeam}>
+                  {isCreatingTeam ? (
+                    <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  Create Team
+                </Button>
+              </div>
+              {teamCreationError && (
+                <div className="border-destructive/35 bg-destructive/5 text-destructive mb-4 rounded-md border px-3 py-2 text-sm">
+                  {teamCreationError}
+                </div>
+              )}
+              {teams && teams.length > 0 ? (
+                <div className="space-y-2">
+                  {teams.map((team) => (
+                    <div
+                      key={team.id}
+                      className="border-border/60 flex items-center justify-between rounded-md border px-3 py-2"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{team.name}</p>
+                        {team.description && (
+                          <p className="text-muted-foreground text-xs">{team.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">
+                  No teams yet. Create one to get started.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   )
 }
