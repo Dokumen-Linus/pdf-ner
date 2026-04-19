@@ -102,6 +102,8 @@
 - *(web)* Add observability
 - *(pacakges)* Otel_py
 - *(pkg)* Move pdfium_utils.py into package #86
+- Link web.users, organizations, teams to better auth and add to authorization.server.ts
+- *(web)* Update org, team, and project creation in profile.tsx and projects/index.tsx
 
 ### 🐛 Bug Fixes
 
@@ -286,6 +288,7 @@
 - *(db)* "development mode"
 - *(packages)* Otel_py/README.md
 - *(llm)* Update skill scripts and instructions
+- *(web)* Auth
 
 ### ⚡ Performance
 
@@ -408,6 +411,8 @@
 - *(web)* New pdf uplaod
 - *(db)* Add script to setup db on windows
 - *(web)* Observability
+- *(web)* Teams and orgs
+- *(web)* Allow any in bun-test-setup
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -482,6 +487,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Remove @claude from github.com
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
 
