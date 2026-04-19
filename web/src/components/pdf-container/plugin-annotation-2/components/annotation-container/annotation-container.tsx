@@ -1,4 +1,4 @@
-import { CSSProperties, JSX, useEffect, useState } from "react"
+import { CSSProperties, JSX } from "react"
 
 import { useDoublePressProps } from "../../../../../hooks/mouse-events/use-double-press-props"
 
@@ -49,14 +49,9 @@ export function AnnotationContainer({
     ...selectionOutline,
   }
 
-  const [preview, setPreview] = useState<PdfTextMarkupAnnotationObject>(annotation)
-  const currentObject = preview ? { ...annotation, ...preview } : annotation
+  const currentObject = annotation
 
   const doubleProps = useDoublePressProps(onDoubleClick)
-
-  useEffect(() => {
-    setPreview(annotation)
-  }, [annotation])
 
   return (
     <div data-no-interaction>

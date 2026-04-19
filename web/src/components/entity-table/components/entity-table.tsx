@@ -60,34 +60,52 @@ function createAnnotationFromSearchResult(
 }
 
 const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
-  // annoState contains the whole AnnotationState
-  // annoState?.byEntityType gives ET name -> array of UIDs of annotations
-  // annoState?.byUid[uid].contents - text of annotation
-  const { annoState, annoCapability, searchCapability, scrollCapability } = usePluginStore()
+  const pluginStore = usePluginStore()
+  const { annoState, annoCapability, searchCapability, scrollCapability } = pluginStore
 
-  // entityTypesByName is a record of name -> EntityType
   const { byName: entityTypesByName, setByName, patchEntityType } = useEntityTypeStore()
-  const [searchQueries, setSearchQueries] = useState<Record<string, string>>({})
-  const [searchFeedback, setSearchFeedback] = useState<Record<string, string>>({})
-  const [searchingEntityName, setSearchingEntityName] = useState<string | null>(null)
 
-  // Sync the table with the entity types provided by the page.
   useEffect(() => {
     setByName(entityTypesToRecord(entityTypes))
   }, [entityTypes, setByName])
 
-  // Reset search state when switching documents
-  useEffect(() => {
-    setSearchQueries({})
-    setSearchFeedback({})
-    setSearchingEntityName(null)
-  }, [annoState?.activeDocumentId])
+  const activeDocumentId = annoState?.activeDocumentId ?? null
 
-  // example usage of entityTypesByName
-  // const entityTypeObject1 = entityTypesByName["Highlight"] as EntityType
-  // const entityTypeNames: string[] = Object.keys(entityTypesByName)
+  return (
+    <EntityTableDocumentRows
+      key={activeDocumentId ?? "no-document"}
+      annoState={annoState ?? null}
+      annoCapability={annoCapability}
+      searchCapability={searchCapability}
+      scrollCapability={scrollCapability}
+      entityTypesByName={entityTypesByName}
+      patchEntityType={patchEntityType}
+    />
+  )
+}
 
-  // uses annoCapability to set the default attributes for an annotation that the user creates
+function EntityTableDocumentRows({
+  annoState,
+  annoCapability,
+  searchCapability,
+  scrollCapability,
+  entityTypesByName,
+  patchEntityType,
+}: {
+  annoState: ReturnType<typeof usePluginStore>["annoState"] | null
+  annoCapability: ReturnType<typeof usePluginStore>["annoCapability"]
+  searchCapability: ReturnType<typeof usePluginStore>["searchCapability"]
+  scrollCapability: ReturnType<typeof usePluginStore>["scrollCapability"]
+  entityTypesByName: Record<string, EntityType>
+  patchEntityType: ReturnType<typeof useEntityTypeStore>["patchEntityType"]
+}) {
+  const [searchQueries, setSearchQueries] = useState<Record<string, string>>({})
+  const [searchFeedback, setSearchFeedback] = useState<Record<string, string>>({})
+  const [searchingEntityName, setSearchingEntityName] = useState<string | null>(null)
+
+  const activeDocumentId = annoState?.activeDocumentId ?? null
+  const activeDoc = activeDocumentId ? annoState?.documents[activeDocumentId] : null
+
   const activateEntityType = (entityTypeName: string) => {
     const entityType = entityTypesByName[entityTypeName]
     if (!entityType) return
@@ -98,9 +116,6 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
       opacity: entityType.opacity,
     })
   }
-
-  const activeDocumentId = annoState?.activeDocumentId ?? null
-  const activeDoc = activeDocumentId ? annoState?.documents[activeDocumentId] : null
 
   const focusEntityType = (entityTypeName: string) => {
     activateEntityType(entityTypeName)
@@ -218,21 +233,18 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
                 <Select
                   value={entityType.subtype}
                   onValueChange={(value) => {
-                    // change EntityTypeStore so next activation will use new subtype
                     patchEntityType(name, {
                       subtype: value as Subtype,
                     })
-                    // change PluginStore so activeSubtype matches the change if deactiveSubtypeAfterCreate is false
                     if (annoState?.activeEntityType === name) {
                       annoCapability?.setCreateAnnotationDefaults({
                         subtype: value as Subtype,
                       })
                     }
-                    // use PluginStore to change existing annotations of this ET
-                    const activeDoc = annoState?.activeDocumentId
+                    const currentDocument = annoState?.activeDocumentId
                       ? annoState.documents[annoState.activeDocumentId]
                       : null
-                    const annoIds = activeDoc?.byEntityType?.[name] || []
+                    const annoIds = currentDocument?.byEntityType?.[name] || []
                     annoCapability?.updateAnnotations(
                       annoIds.map((id) => ({
                         id,
@@ -266,21 +278,18 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
                 <ColorPicker
                   value={entityType.color}
                   onChange={(color) => {
-                    // change EntityTypeStore so next ET activation will use new color
                     patchEntityType(name, {
                       color,
                     })
-                    // change PluginStore so activeColor matches the change
                     if (annoState?.activeEntityType === name) {
                       annoCapability?.setCreateAnnotationDefaults({
                         color,
                       })
                     }
-                    // use PluginStore to change existing annotations of this ET
-                    const activeDoc = annoState?.activeDocumentId
+                    const currentDocument = annoState?.activeDocumentId
                       ? annoState.documents[annoState.activeDocumentId]
                       : null
-                    const annoIds = activeDoc?.byEntityType?.[name] || []
+                    const annoIds = currentDocument?.byEntityType?.[name] || []
                     annoCapability?.updateAnnotations(
                       annoIds.map((id) => ({
                         id,
@@ -352,4 +361,5 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
     </Table>
   )
 }
+
 export default EntityTable
