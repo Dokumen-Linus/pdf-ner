@@ -3,7 +3,6 @@ import { createPluginRegistration } from "@embedpdf/core"
 import { EmbedPDF } from "@embedpdf/core/react"
 import { usePdfiumEngine } from "@embedpdf/engines/react"
 import { AllLogger, ConsoleLogger, PerfLogger } from "@embedpdf/models"
-import { ExportPluginPackage } from "@embedpdf/plugin-export/react"
 import { RotatePluginPackage } from "@embedpdf/plugin-rotate/react"
 
 // import { env } from "../../env.client"
@@ -17,6 +16,7 @@ import {
   DocumentManagerPluginPackage,
   InitialDocumentOptions,
 } from "./plugin-document-manager-2"
+import { ExportPluginPackage } from "./plugin-export-2"
 import {
   GlobalPointerProvider,
   InteractionManagerPluginPackage,
@@ -37,7 +37,6 @@ import Toolbar from "./toolbar"
 interface PDFContainerProps {
   initalDocuments: InitialDocumentOptions[]
   author?: string
-  exportName?: string
   canRotate?: boolean
 }
 
@@ -46,7 +45,6 @@ const logger = new AllLogger([new ConsoleLogger(), new PerfLogger()])
 export default function PDFContainer({
   initalDocuments,
   author = "anonymous",
-  exportName = "labeled.pdf",
   canRotate = true,
 }: PDFContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -103,9 +101,7 @@ export default function PDFContainer({
             // need to register Annotation after InteractionManager, Seletion
             createPluginRegistration(AnnotationPluginPackage, { author }),
             // need to register Export after Annotation
-            createPluginRegistration(ExportPluginPackage, {
-              defaultFileName: exportName,
-            }),
+            createPluginRegistration(ExportPluginPackage),
             // need to register Zoom after InteractionManager, Viewport, Scroll
             createPluginRegistration(ZoomPluginPackage, {
               defaultZoomLevel: ZoomMode.Automatic,
