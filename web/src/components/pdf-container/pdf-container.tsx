@@ -1,9 +1,8 @@
-import { useCallback, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { createPluginRegistration } from "@embedpdf/core"
 import { EmbedPDF } from "@embedpdf/core/react"
 import { usePdfiumEngine } from "@embedpdf/engines/react"
 import { AllLogger, ConsoleLogger, PerfLogger } from "@embedpdf/models"
-import { RotatePluginPackage } from "@embedpdf/plugin-rotate/react"
 
 import PluginStoreSync from "../plugin-store/components/plugin-store-sync"
 
@@ -22,6 +21,7 @@ import {
   PagePointerProvider,
 } from "./plugin-interaction-manager-2"
 import { RenderLayer, RenderPluginPackage } from "./plugin-render-2"
+import { RotatePluginPackage } from "./plugin-rotate-2"
 import { Scroller, ScrollPluginPackage, ScrollStrategy } from "./plugin-scroll-2"
 import { SearchLayer, SearchPluginPackage } from "./plugin-search-2"
 import { SelectionPluginPackage, TextSelection } from "./plugin-selection-2"
@@ -48,9 +48,6 @@ export default function PDFContainer({
 }: PDFContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const toggleSidebar = useCallback(() => {
-    setIsSidebarOpen((open) => !open)
-  }, [])
   const { engine, isLoading } = usePdfiumEngine({
     worker: true,
     logger: logger,
@@ -122,7 +119,7 @@ export default function PDFContainer({
                           <Toolbar
                             canRotate={canRotate}
                             isSidebarOpen={isSidebarOpen}
-                            onToggleSidebar={toggleSidebar}
+                            setIsSidebarOpen={setIsSidebarOpen}
                           />
                           <div className="flex min-h-0 flex-1 overflow-hidden">
                             {isSidebarOpen ? <Sidebar documentId={activeDocumentId} /> : null}
