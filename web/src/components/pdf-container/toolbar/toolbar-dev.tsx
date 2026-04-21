@@ -1,3 +1,5 @@
+// extended version of Toolbar to add buttons that test functionality but won't be exposed to the user
+
 import { FormEvent, useState } from "react"
 import { PdfAnnotationSubtype } from "@embedpdf/models"
 import { useExportCapability } from "@embedpdf/plugin-export/react"
@@ -25,7 +27,8 @@ import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import { useActiveDocument } from "../plugin-document-manager-2"
 import { useSearch } from "../plugin-search-2"
 import { useZoomCapability } from "../plugin-zoom-2"
-import ToolbarToggleButton from "../toolbar-toggle-button"
+
+import ToolbarToggleButton from "./toolbar-toggle-button"
 
 import type { PdfTextMarkupAnnotationObject, Subtype } from "../plugin-annotation-2"
 

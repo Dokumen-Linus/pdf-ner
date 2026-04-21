@@ -5,12 +5,11 @@ import { usePdfiumEngine } from "@embedpdf/engines/react"
 import { AllLogger, ConsoleLogger, PerfLogger } from "@embedpdf/models"
 import { RotatePluginPackage } from "@embedpdf/plugin-rotate/react"
 
-// import { env } from "../../env.client"
 import PluginStoreSync from "../plugin-store/components/plugin-store-sync"
 
-// import Toolbar from "./dev/toolbar-dev"
 import PDFLoading from "./pdf-loading"
 import { AnnotationLayer, AnnotationPluginPackage } from "./plugin-annotation-2"
+import { BookmarkPluginPackage } from "./plugin-bookmark-2"
 import {
   DocumentContent,
   DocumentManagerPluginPackage,
@@ -100,6 +99,7 @@ export default function PDFContainer({
             createPluginRegistration(SelectionPluginPackage),
             // need to register Annotation after InteractionManager, Seletion
             createPluginRegistration(AnnotationPluginPackage, { author }),
+            createPluginRegistration(BookmarkPluginPackage),
             // need to register Export after Annotation
             createPluginRegistration(ExportPluginPackage),
             // need to register Zoom after InteractionManager, Viewport, Scroll

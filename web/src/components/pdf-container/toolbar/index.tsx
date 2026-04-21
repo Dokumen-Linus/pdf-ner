@@ -14,14 +14,14 @@ import {
 
 import { m } from "@/integrations/paraglide/messages.js"
 
-import usePluginStore from "../plugin-store/hooks/use-plugin-store"
-
+import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import {
   useActiveDocument,
   useDocumentManagerCapability,
   useOpenDocuments,
-} from "./plugin-document-manager-2"
-import { useZoomCapability } from "./plugin-zoom-2"
+} from "../plugin-document-manager-2"
+import { useZoomCapability } from "../plugin-zoom-2"
+
 import ToolbarToggleButton from "./toolbar-toggle-button"
 
 interface ToolbarProps {
