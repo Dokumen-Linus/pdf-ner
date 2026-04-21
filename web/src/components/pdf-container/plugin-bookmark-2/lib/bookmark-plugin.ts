@@ -20,6 +20,8 @@ export class BookmarkPlugin extends BasePlugin<BasePluginConfig, BookmarkCapabil
     return {
       // Active document operations
       getBookmarks: () => this.getBookmarks(),
+      setBookmarks: (bookmarks) => this.setBookmarks(bookmarks),
+      addBookmarks: (bookmarks) => this.addBookmarks(bookmarks),
 
       // Document-scoped operations
       forDocument: (documentId: string) => this.createBookmarkScope(documentId),
@@ -33,6 +35,8 @@ export class BookmarkPlugin extends BasePlugin<BasePluginConfig, BookmarkCapabil
   private createBookmarkScope(documentId: string): BookmarkScope {
     return {
       getBookmarks: () => this.getBookmarks(documentId),
+      setBookmarks: (bookmarks) => this.setBookmarks(bookmarks, documentId),
+      addBookmarks: (bookmarks) => this.addBookmarks(bookmarks, documentId),
     }
   }
 
@@ -51,5 +55,36 @@ export class BookmarkPlugin extends BasePlugin<BasePluginConfig, BookmarkCapabil
     }
 
     return this.engine.getBookmarks(coreDoc.document)
+  }
+
+  private setBookmarks(
+    bookmarks: PdfBookmarkObject[],
+    documentId?: string,
+  ): Task<boolean, PdfErrorReason> {
+    const id = documentId ?? this.getActiveDocumentId()
+    const coreDoc = this.coreState.core.documents[id]
+
+    if (!coreDoc?.document) {
+      throw new Error(`Document ${id} not loaded`)
+    }
+
+    return this.engine.setBookmarks(coreDoc.document, bookmarks)
+  }
+
+  private async addBookmarks(
+    bookmarks: PdfBookmarkObject[],
+    documentId?: string,
+  ): Promise<boolean> {
+    const id = documentId ?? this.getActiveDocumentId()
+    const coreDoc = this.coreState.core.documents[id]
+
+    if (!coreDoc?.document) {
+      throw new Error(`Document ${id} not loaded`)
+    }
+
+    const existing = await this.engine.getBookmarks(coreDoc.document).toPromise()
+    return this.engine
+      .setBookmarks(coreDoc.document, [...existing.bookmarks, ...bookmarks])
+      .toPromise()
   }
 }
