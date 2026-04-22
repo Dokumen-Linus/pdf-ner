@@ -35,7 +35,7 @@ export const rotateReducer: Reducer<RotateState, RotateAction> = (state = initia
 
     case CLEANUP_ROTATE_STATE: {
       const documentId = action.payload
-      const { [documentId]: removed, ...remainingDocs } = state.documents
+      const { [documentId]: _removed, ...remainingDocs } = state.documents
       return {
         ...state,
         documents: remainingDocs,

@@ -288,7 +288,7 @@ function EntityTypesPageContent({
   projectId,
 }: {
   router: ReturnType<typeof useRouter>
-  project: Awaited<ReturnType<typeof getProjectById>>
+  project: Awaited<ReturnType<typeof getProjectById>> | null
   entityTypes: FoundDbEntityType[]
   stdEntityTypes: FoundStandardEntityType[]
   loadError: string | null

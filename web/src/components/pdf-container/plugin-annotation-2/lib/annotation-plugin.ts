@@ -40,6 +40,7 @@ import {
 import { initialDocumentState } from "./state"
 import { CommitType, subtypeToEnum } from "./types"
 
+import type { EntityType } from "../../../entity-table/entity-type"
 import type { AnnotationAction } from "./actions"
 import type { AnnotationState } from "./state"
 import type { Command, Commit, PdfTextMarkupAnnotationObject, Subtype } from "./types"
@@ -52,11 +53,15 @@ export interface AnnotationPluginConfig extends BasePluginConfig {
   deactivateSubtypeAfterCreate?: boolean
   selectAfterCreate?: boolean
   scrollToSelectedAnnotation?: boolean
+  allEntityTypes: EntityType[]
 }
 
 // ***PLUGIN CAPABILITY***
 export interface AnnotationCapability {
   onStateChange: EventHook<AnnotationState>
+  getState: () => AnnotationState
+
+  getAllEntityTypes: () => EntityType[]
 
   selectAnnotation: (annotationId: string) => void
   deselectAnnotation: () => void
@@ -230,6 +235,8 @@ export class AnnotationPlugin extends BasePlugin<
   protected buildCapability(): AnnotationCapability {
     return {
       onStateChange: this.state$.on,
+      getState: () => this.state,
+      getAllEntityTypes: () => this.config.allEntityTypes,
       selectAnnotation: (id) => this.dispatch(selectAnnotation(id)),
       deselectAnnotation: () => this.dispatch(deselectAnnotation()),
       setCreateAnnotationDefaults: (defaults) =>

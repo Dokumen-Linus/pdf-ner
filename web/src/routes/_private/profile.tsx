@@ -20,15 +20,18 @@ import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { Textarea } from "@/components/shadcn-ui/textarea"
-import { getOrganizationByUserId, getTeamsByOrganizationId } from "@/db-fns/web/organizations"
+import {
+  getCurrentUserOrganization,
+  getCurrentUserTeamsByOrganization,
+} from "@/db-fns/web/organizations"
 import { createTeam, updateTeam } from "@/db-fns/web/teams"
 import { getUserByAuthUserId, updateUser } from "@/db-fns/web/users"
 import { m } from "@/integrations/paraglide/messages.js"
 import { authClient } from "@/lib/auth-client"
 
 type ProfileUser = Awaited<ReturnType<typeof getUserByAuthUserId>>
-type ProfileOrganization = Awaited<ReturnType<typeof getOrganizationByUserId>>
-type ProfileTeams = Awaited<ReturnType<typeof getTeamsByOrganizationId>>
+type ProfileOrganization = Awaited<ReturnType<typeof getCurrentUserOrganization>>
+type ProfileTeams = Awaited<ReturnType<typeof getCurrentUserTeamsByOrganization>>
 
 type ProfileFormValues = {
   displayName: string
@@ -221,9 +224,11 @@ export const Route = createFileRoute("/_private/profile")({
 
       let organization: ProfileOrganization = null
       let teams: ProfileTeams = []
-      organization = await getOrganizationByUserId({ data: { userId: authUserId } })
+      organization = await getCurrentUserOrganization()
       if (organization?.id) {
-        teams = await getTeamsByOrganizationId({ data: { organizationId: organization.id } })
+        teams = await getCurrentUserTeamsByOrganization({
+          data: { organizationId: organization.id },
+        })
       }
 
       return { user, organization, teams, loadError: null as string | null }
@@ -853,7 +858,8 @@ function ProfilePageContent({
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              You don&apos;t have an organization yet. Create one to start managing teams and projects.
+              You don&apos;t have an organization yet. Create one to start managing teams and
+              projects.
             </p>
             {organizationCreationError && (
               <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">

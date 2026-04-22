@@ -62,24 +62,24 @@ describe.if(runTests)("web.pdfs labelling lock", () => {
       .where(sql`${pdfs.id} = ${f.pdfId}`)
 
     try {
-      setAuthenticated({ id: f.userAId })
+      setAuthenticated({ id: f.userAId! })
 
       // userA acquires the lock.
       const firstAcquire = await acquireLabellingLock({
-        data: { pdfId: f.pdfId, userId: f.userAId },
+        data: { pdfId: f.pdfId, userId: f.userAId! },
       })
       expect(firstAcquire.acquired).toBe(true)
 
       // userA re-acquires — same-user acquire is idempotent (refresh).
       const sameUserAcquire = await acquireLabellingLock({
-        data: { pdfId: f.pdfId, userId: f.userAId },
+        data: { pdfId: f.pdfId, userId: f.userAId! },
       })
       expect(sameUserAcquire.acquired).toBe(true)
 
       // userB tries to acquire — must be refused. Fresh lock, not stale.
-      setAuthenticated({ id: f.userBId })
+      setAuthenticated({ id: f.userBId! })
       const userBAttempt = await acquireLabellingLock({
-        data: { pdfId: f.pdfId, userId: f.userBId },
+        data: { pdfId: f.pdfId, userId: f.userBId! },
       }).catch((error) => error)
       expect(userBAttempt).toBeInstanceOf(Error)
       if (userBAttempt instanceof Error) {
@@ -87,38 +87,38 @@ describe.if(runTests)("web.pdfs labelling lock", () => {
       }
 
       // userA heartbeats — still holds.
-      setAuthenticated({ id: f.userAId })
+      setAuthenticated({ id: f.userAId! })
       const heartbeatA = await heartbeatLabellingLock({
-        data: { pdfId: f.pdfId, userId: f.userAId },
+        data: { pdfId: f.pdfId, userId: f.userAId! },
       })
       expect(heartbeatA.stillHeld).toBe(true)
 
       // userB heartbeats — correctly fails (they don't hold it).
-      setAuthenticated({ id: f.userBId })
+      setAuthenticated({ id: f.userBId! })
       const heartbeatB = await heartbeatLabellingLock({
-        data: { pdfId: f.pdfId, userId: f.userBId },
+        data: { pdfId: f.pdfId, userId: f.userBId! },
       }).catch((error) => error)
       expect(heartbeatB).toBeInstanceOf(Error)
 
       // userB tries to release — correctly fails (not theirs to release).
-      setAuthenticated({ id: f.userBId })
+      setAuthenticated({ id: f.userBId! })
       const badRelease = await releaseLabellingLock({
-        data: { pdfId: f.pdfId, userId: f.userBId },
+        data: { pdfId: f.pdfId, userId: f.userBId! },
       }).catch((error) => error)
       expect(badRelease).toBeInstanceOf(Error)
 
       // userA releases.
-      setAuthenticated({ id: f.userAId })
+      setAuthenticated({ id: f.userAId! })
       const goodRelease = await releaseLabellingLock({
-        data: { pdfId: f.pdfId, userId: f.userAId },
+        data: { pdfId: f.pdfId, userId: f.userAId! },
       })
       expect(goodRelease.released).toBe(true)
 
       // Cross-project callers stay blocked even after release.
-      setAuthenticated({ id: f.userBId })
+      setAuthenticated({ id: f.userBId! })
       await expect(
         acquireLabellingLock({
-          data: { pdfId: f.pdfId, userId: f.userBId },
+          data: { pdfId: f.pdfId, userId: f.userBId! },
         }),
       ).rejects.toThrow("You do not have access to this project")
     } finally {
@@ -146,23 +146,23 @@ describe.if(runTests)("web.pdfs labelling lock", () => {
       .where(sql`${pdfs.id} = ${f.pdfId}`)
 
     try {
-      setAuthenticated({ id: f.userAId })
+      setAuthenticated({ id: f.userAId! })
       await expect(
         acquireLabellingLock({
-          data: { pdfId: f.pdfId, userId: f.userBId },
+          data: { pdfId: f.pdfId, userId: f.userBId! },
         }),
       ).rejects.toThrow("Cannot act as another user")
 
-      setAuthenticated({ id: f.userAId })
+      setAuthenticated({ id: f.userAId! })
       const stolen = await acquireLabellingLock({
-        data: { pdfId: f.pdfId, userId: f.userAId },
+        data: { pdfId: f.pdfId, userId: f.userAId! },
       })
       expect(stolen.acquired).toBe(true)
 
-      setAuthenticated({ id: f.userAId })
+      setAuthenticated({ id: f.userAId! })
       await expect(
         heartbeatLabellingLock({
-          data: { pdfId: f.pdfId, userId: f.userBId },
+          data: { pdfId: f.pdfId, userId: f.userBId! },
         }),
       ).rejects.toThrow("Cannot act as another user")
     } finally {

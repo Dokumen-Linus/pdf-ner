@@ -33,8 +33,11 @@ import RotateWrapper from "./rotate-wrapper"
 import Sidebar from "./sidebar"
 import Toolbar from "./toolbar"
 
+import type { EntityType } from "../entity-table/entity-type"
+
 interface PDFContainerProps {
   initalDocuments: InitialDocumentOptions[]
+  allEntityTypes: EntityType[]
   author?: string
   canRotate?: boolean
 }
@@ -43,6 +46,7 @@ const logger = new AllLogger([new ConsoleLogger(), new PerfLogger()])
 
 export default function PDFContainer({
   initalDocuments,
+  allEntityTypes,
   author = "anonymous",
   canRotate = true,
 }: PDFContainerProps) {
@@ -95,7 +99,7 @@ export default function PDFContainer({
             }),
             createPluginRegistration(SelectionPluginPackage),
             // need to register Annotation after InteractionManager, Seletion
-            createPluginRegistration(AnnotationPluginPackage, { author }),
+            createPluginRegistration(AnnotationPluginPackage, { author, allEntityTypes }),
             createPluginRegistration(BookmarkPluginPackage),
             // need to register Export after Annotation
             createPluginRegistration(ExportPluginPackage),

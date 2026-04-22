@@ -30,7 +30,9 @@ import ColorPicker from "../../custom/color-picker"
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import useEntityTypeStore from "../hooks/use-entity-type-store"
 
+import type { PluginStore } from "../../plugin-store/hooks/use-plugin-store"
 import type { EntityType } from "../entity-type"
+import type { EntityTypeStore } from "../hooks/use-entity-type-store"
 
 function entityTypesToRecord(entityTypes: EntityType[]) {
   return Object.fromEntries(entityTypes.map((entityType) => [entityType.name, entityType]))
@@ -92,12 +94,12 @@ function EntityTableDocumentRows({
   entityTypesByName,
   patchEntityType,
 }: {
-  annoState: ReturnType<typeof usePluginStore>["annoState"] | null
-  annoCapability: ReturnType<typeof usePluginStore>["annoCapability"]
-  searchCapability: ReturnType<typeof usePluginStore>["searchCapability"]
-  scrollCapability: ReturnType<typeof usePluginStore>["scrollCapability"]
+  annoState: PluginStore["annoState"]
+  annoCapability: PluginStore["annoCapability"]
+  searchCapability: PluginStore["searchCapability"]
+  scrollCapability: PluginStore["scrollCapability"]
   entityTypesByName: Record<string, EntityType>
-  patchEntityType: ReturnType<typeof useEntityTypeStore>["patchEntityType"]
+  patchEntityType: EntityTypeStore["patchEntityType"]
 }) {
   const [searchQueries, setSearchQueries] = useState<Record<string, string>>({})
   const [searchFeedback, setSearchFeedback] = useState<Record<string, string>>({})
@@ -246,7 +248,7 @@ function EntityTableDocumentRows({
                       : null
                     const annoIds = currentDocument?.byEntityType?.[name] || []
                     annoCapability?.updateAnnotations(
-                      annoIds.map((id) => ({
+                      annoIds.map((id: string) => ({
                         id,
                         patch: {
                           type: subtypeToEnum(value as Subtype),
@@ -255,10 +257,10 @@ function EntityTableDocumentRows({
                     )
                   }}
                 >
-                  <SelectTrigger className="w-17.5">
+                  <SelectTrigger className="w-17.5 bg-white">
                     <SelectValue placeholder={entityType.subtype} />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white">
                     <SelectItem value="highlight">
                       <Highlighter className="w-10" />
                     </SelectItem>
@@ -291,7 +293,7 @@ function EntityTableDocumentRows({
                       : null
                     const annoIds = currentDocument?.byEntityType?.[name] || []
                     annoCapability?.updateAnnotations(
-                      annoIds.map((id) => ({
+                      annoIds.map((id: string) => ({
                         id,
                         patch: {
                           color,

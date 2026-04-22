@@ -25,6 +25,7 @@ function DemoPage() {
               autoActivate: false,
             },
           ]}
+          allEntityTypes={demoEntityTypes}
           canRotate={false}
         />
       </div>
