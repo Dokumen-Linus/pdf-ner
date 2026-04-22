@@ -23,7 +23,7 @@ import {
 } from "@/components/shadcn-ui/select"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { Textarea } from "@/components/shadcn-ui/textarea"
-import { getOrganizationByUserId } from "@/db-fns/web/organizations"
+import { getCurrentUserOrganization } from "@/db-fns/web/organizations"
 import { createProject, getProjectsByOwnerId, getProjectsByTeamId } from "@/db-fns/web/projects"
 import { getCurrentUserTeamsByOrganizationId } from "@/db-fns/web/teams"
 import { getUserByAuthUserId } from "@/db-fns/web/users"
@@ -32,7 +32,7 @@ import { m } from "@/integrations/paraglide/messages.js"
 import type { FoundProject } from "@/db/types"
 
 type ProjectUser = Awaited<ReturnType<typeof getUserByAuthUserId>>
-type ProjectOrganization = Awaited<ReturnType<typeof getOrganizationByUserId>>
+type ProjectOrganization = Awaited<ReturnType<typeof getCurrentUserOrganization>>
 type ProjectTeam = Awaited<ReturnType<typeof getCurrentUserTeamsByOrganizationId>>[number]
 
 const ProjectsSearchSchema = z.object({
@@ -73,7 +73,7 @@ export const Route = createFileRoute("/_private/projects/")({
       }
 
       const user = await getUserByAuthUserId({ data: { authUserId } })
-      const organization = await getOrganizationByUserId({ data: { userId: authUserId } })
+      const organization = await getCurrentUserOrganization()
       const teams = organization?.id
         ? ((await getCurrentUserTeamsByOrganizationId({
             data: { organizationId: organization.id },
@@ -83,7 +83,11 @@ export const Route = createFileRoute("/_private/projects/")({
       const requestedTeamId = ProjectsSearchSchema.parse(location.search).teamId
       const validTeamIds = new Set(teams.map((team) => team.id))
       const selectedTeamId =
-        teams.length > 0 ? (requestedTeamId && validTeamIds.has(requestedTeamId) ? requestedTeamId : teams[0]!.id) : null
+        teams.length > 0
+          ? requestedTeamId && validTeamIds.has(requestedTeamId)
+            ? requestedTeamId
+            : teams[0]!.id
+          : null
 
       const projects = selectedTeamId
         ? ((await getProjectsByTeamId({ data: { teamId: selectedTeamId } })) as FoundProject[])
@@ -280,7 +284,11 @@ function ProjectsPage() {
             )}
 
             <Button type="submit" disabled={isCreatingProject || !canCreateProject || !user}>
-              {isCreatingProject ? <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" /> : <PlusIcon className="mr-2 h-4 w-4" />}
+              {isCreatingProject ? (
+                <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <PlusIcon className="mr-2 h-4 w-4" />
+              )}
               {isCreatingProject ? "Creating project..." : m.projects_list_create_button()}
             </Button>
           </form>

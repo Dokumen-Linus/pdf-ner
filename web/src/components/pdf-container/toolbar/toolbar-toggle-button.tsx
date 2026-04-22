@@ -2,19 +2,20 @@ import { PanelLeftIcon } from "lucide-react"
 
 import { m } from "@/integrations/paraglide/messages.js"
 
+import type { Dispatch, SetStateAction } from "react"
+
 interface ToolbarToggleButtonProps {
   isSidebarOpen: boolean
-  onToggleSidebar: () => void
+  setIsSidebarOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export default function ToolbarToggleButton({
-  isSidebarOpen,
-  onToggleSidebar,
-}: ToolbarToggleButtonProps) {
+export default function ToolbarToggleButton({ isSidebarOpen, setIsSidebarOpen }: ToolbarToggleButtonProps) {
   return (
     <button
       type="button"
-      onClick={onToggleSidebar}
+      onClick={() => {
+        setIsSidebarOpen((open) => !open)
+      }}
       className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
         isSidebarOpen ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-gray-100 hover:bg-gray-200"
       }`}

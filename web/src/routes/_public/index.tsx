@@ -32,7 +32,7 @@ const CursorIcon = () => (
   </svg>
 )
 
-export default function App() {
+function App() {
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
       {/* Hero Section - 100vh */}

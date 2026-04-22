@@ -1,7 +1,7 @@
+// extended version of Toolbar to add buttons that test functionality but won't be exposed to the user
+
 import { FormEvent, useState } from "react"
 import { PdfAnnotationSubtype } from "@embedpdf/models"
-import { useExportCapability } from "@embedpdf/plugin-export/react"
-import { useRotateCapability } from "@embedpdf/plugin-rotate/react"
 import {
   ChevronLeft,
   ChevronRight,
@@ -23,19 +23,23 @@ import { m } from "@/integrations/paraglide/messages.js"
 
 import usePluginStore from "../../plugin-store/hooks/use-plugin-store"
 import { useActiveDocument } from "../plugin-document-manager-2"
+import { useExportCapability } from "../plugin-export-2"
+import { useRotateCapability } from "../plugin-rotate-2"
 import { useSearch } from "../plugin-search-2"
 import { useZoomCapability } from "../plugin-zoom-2"
-import ToolbarToggleButton from "../toolbar-toggle-button"
 
+import ToolbarToggleButton from "./toolbar-toggle-button"
+
+import type { Dispatch, SetStateAction } from "react"
 import type { PdfTextMarkupAnnotationObject, Subtype } from "../plugin-annotation-2"
 
 interface ToolbarProps {
   canRotate: boolean
   isSidebarOpen: boolean
-  onToggleSidebar: () => void
+  setIsSidebarOpen: Dispatch<SetStateAction<boolean>>
 }
 
-const Toolbar = ({ canRotate, isSidebarOpen, onToggleSidebar }: ToolbarProps) => {
+const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) => {
   const { provides: exportCapability } = useExportCapability()
   const { provides: zoomCapability } = useZoomCapability()
   const { provides: rotateCapability } = useRotateCapability()
@@ -80,7 +84,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, onToggleSidebar }: ToolbarProps) =>
 
   return (
     <div className="mt-4 mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
-      <ToolbarToggleButton isSidebarOpen={isSidebarOpen} onToggleSidebar={onToggleSidebar} />
+      <ToolbarToggleButton isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
 
       <div className="h-6 w-px bg-gray-200" />
 

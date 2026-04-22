@@ -1,28 +1,27 @@
-import { useCallback, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { createPluginRegistration } from "@embedpdf/core"
 import { EmbedPDF } from "@embedpdf/core/react"
 import { usePdfiumEngine } from "@embedpdf/engines/react"
 import { AllLogger, ConsoleLogger, PerfLogger } from "@embedpdf/models"
-import { ExportPluginPackage } from "@embedpdf/plugin-export/react"
-import { RotatePluginPackage } from "@embedpdf/plugin-rotate/react"
 
-// import { env } from "../../env.client"
 import PluginStoreSync from "../plugin-store/components/plugin-store-sync"
 
-// import Toolbar from "./dev/toolbar-dev"
 import PDFLoading from "./pdf-loading"
 import { AnnotationLayer, AnnotationPluginPackage } from "./plugin-annotation-2"
+import { BookmarkPluginPackage } from "./plugin-bookmark-2"
 import {
   DocumentContent,
   DocumentManagerPluginPackage,
   InitialDocumentOptions,
 } from "./plugin-document-manager-2"
+import { ExportPluginPackage } from "./plugin-export-2"
 import {
   GlobalPointerProvider,
   InteractionManagerPluginPackage,
   PagePointerProvider,
 } from "./plugin-interaction-manager-2"
 import { RenderLayer, RenderPluginPackage } from "./plugin-render-2"
+import { RotatePluginPackage } from "./plugin-rotate-2"
 import { Scroller, ScrollPluginPackage, ScrollStrategy } from "./plugin-scroll-2"
 import { SearchLayer, SearchPluginPackage } from "./plugin-search-2"
 import { SelectionPluginPackage, TextSelection } from "./plugin-selection-2"
@@ -34,10 +33,12 @@ import RotateWrapper from "./rotate-wrapper"
 import Sidebar from "./sidebar"
 import Toolbar from "./toolbar"
 
+import type { EntityType } from "../entity-table/entity-type"
+
 interface PDFContainerProps {
   initalDocuments: InitialDocumentOptions[]
+  allEntityTypes: EntityType[]
   author?: string
-  exportName?: string
   canRotate?: boolean
 }
 
@@ -45,15 +46,12 @@ const logger = new AllLogger([new ConsoleLogger(), new PerfLogger()])
 
 export default function PDFContainer({
   initalDocuments,
+  allEntityTypes,
   author = "anonymous",
-  exportName = "labeled.pdf",
   canRotate = true,
 }: PDFContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const toggleSidebar = useCallback(() => {
-    setIsSidebarOpen((open) => !open)
-  }, [])
   const { engine, isLoading } = usePdfiumEngine({
     worker: true,
     logger: logger,
@@ -101,11 +99,10 @@ export default function PDFContainer({
             }),
             createPluginRegistration(SelectionPluginPackage),
             // need to register Annotation after InteractionManager, Seletion
-            createPluginRegistration(AnnotationPluginPackage, { author }),
+            createPluginRegistration(AnnotationPluginPackage, { author, allEntityTypes }),
+            createPluginRegistration(BookmarkPluginPackage),
             // need to register Export after Annotation
-            createPluginRegistration(ExportPluginPackage, {
-              defaultFileName: exportName,
-            }),
+            createPluginRegistration(ExportPluginPackage),
             // need to register Zoom after InteractionManager, Viewport, Scroll
             createPluginRegistration(ZoomPluginPackage, {
               defaultZoomLevel: ZoomMode.Automatic,
@@ -126,7 +123,7 @@ export default function PDFContainer({
                           <Toolbar
                             canRotate={canRotate}
                             isSidebarOpen={isSidebarOpen}
-                            onToggleSidebar={toggleSidebar}
+                            setIsSidebarOpen={setIsSidebarOpen}
                           />
                           <div className="flex min-h-0 flex-1 overflow-hidden">
                             {isSidebarOpen ? <Sidebar documentId={activeDocumentId} /> : null}

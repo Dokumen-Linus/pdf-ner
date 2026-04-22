@@ -68,67 +68,74 @@ export const getCurrentUserTeamsByOrganizationId = createServerFn({ method: "GET
     }))
   })
 
-export async function getTeamById({ data }: { data: { id: string } }) {
-  const workspaceUser = await requireWorkspaceUser()
+export const getTeamById = createServerFn({ method: "GET" })
+  .inputValidator((data: { id: string }) => data)
+  .handler(async ({ data }) => {
+    const workspaceUser = await requireWorkspaceUser()
 
-  const [row] = await db
-    .select({
-      webTeam: webTeams,
-      authTeam: authTeams,
-    })
-    .from(webTeams)
-    .innerJoin(authTeams, eq(authTeams.id, webTeams.id))
-    .innerJoin(
-      authTeamMembers,
-      and(
-        eq(authTeamMembers.teamId, webTeams.id),
-        eq(authTeamMembers.userId, workspaceUser.authUserId),
-      ),
-    )
-    .where(eq(webTeams.id, data.id))
-    .limit(1)
+    const [row] = await db
+      .select({
+        webTeam: webTeams,
+        authTeam: authTeams,
+      })
+      .from(webTeams)
+      .innerJoin(authTeams, eq(authTeams.id, webTeams.id))
+      .innerJoin(
+        authTeamMembers,
+        and(
+          eq(authTeamMembers.teamId, webTeams.id),
+          eq(authTeamMembers.userId, workspaceUser.authUserId),
+        ),
+      )
+      .where(eq(webTeams.id, data.id))
+      .limit(1)
 
-  if (!row) return null
-  return {
-    ...row.webTeam,
-    name: row.authTeam.name,
-  }
-}
+    if (!row) return null
+    return {
+      ...row.webTeam,
+      name: row.authTeam.name,
+    }
+  })
 
-export async function updateTeam({ data }: { data: { id: string; description?: string | null } }) {
-  const workspaceUser = await requireWorkspaceUser()
+export const updateTeam = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: string; description?: string | null }) => data)
+  .handler(async ({ data }) => {
+    const workspaceUser = await requireWorkspaceUser()
 
-  const [manageableTeam] = await db
-    .select({ id: webTeams.id })
-    .from(webTeams)
-    .innerJoin(authTeams, eq(authTeams.id, webTeams.id))
-    .innerJoin(
-      authTeamMembers,
-      and(
-        eq(authTeamMembers.teamId, webTeams.id),
-        eq(authTeamMembers.userId, workspaceUser.authUserId),
-      ),
-    )
-    .innerJoin(
-      authMembers,
-      and(
-        eq(authMembers.organizationId, authTeams.organizationId),
-        eq(authMembers.userId, workspaceUser.authUserId),
-        MANAGE_TEAM_ROLE_FILTER,
-      ),
-    )
-    .where(eq(webTeams.id, data.id))
-    .limit(1)
+    const [manageableTeam] = await db
+      .select({ id: webTeams.id })
+      .from(webTeams)
+      .innerJoin(authTeams, eq(authTeams.id, webTeams.id))
+      .innerJoin(
+        authTeamMembers,
+        and(
+          eq(authTeamMembers.teamId, webTeams.id),
+          eq(authTeamMembers.userId, workspaceUser.authUserId),
+        ),
+      )
+      .innerJoin(
+        authMembers,
+        and(
+          eq(authMembers.organizationId, authTeams.organizationId),
+          eq(authMembers.userId, workspaceUser.authUserId),
+          MANAGE_TEAM_ROLE_FILTER,
+        ),
+      )
+      .where(eq(webTeams.id, data.id))
+      .limit(1)
 
-  if (!manageableTeam) {
-    throw new Error("Team not found or you do not have access to manage it")
-  }
+    if (!manageableTeam) {
+      throw new Error("Team not found or you do not have access to manage it")
+    }
 
-  const result = await db.update(webTeams).set({ description: data.description }).where(eq(webTeams.id, data.id))
+    const result = await db
+      .update(webTeams)
+      .set({ description: data.description })
+      .where(eq(webTeams.id, data.id))
 
-  if (result.rowCount === 0) {
-    throw new Error("Team not found")
-  }
+    if (result.rowCount === 0) {
+      throw new Error("Team not found")
+    }
 
-  return { success: true }
-}
+    return { success: true }
+  })

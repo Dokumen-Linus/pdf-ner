@@ -3,6 +3,7 @@ import { AnnotationPlugin, AnnotationPluginConfig } from "./annotation-plugin"
 import { AnnotationState, initialState } from "./state"
 
 import type { PluginManifest, PluginPackage } from "@embedpdf/core"
+import type { EntityType } from "@/components/entity-table/entity-type"
 
 // ***ID***
 export const ANNOTATION_PLUGIN_ID = "annotation"
@@ -20,6 +21,7 @@ const manifest: PluginManifest<AnnotationPluginConfig> = {
     deactivateSubtypeAfterCreate: true,
     selectAfterCreate: true,
     scrollToSelectedAnnotation: true,
+    allEntityTypes: [] as EntityType[],
   },
 }
 

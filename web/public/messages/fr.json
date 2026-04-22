@@ -229,8 +229,6 @@
   "entity_type_contact_name": "Nom du Contact",
   "entity_type_contact_position": "Poste du Contact",
   "entity_type_contact_email": "Email du Contact",
-  "demo_author_fallback": "anonyme",
-  "demo_export_name": "annoté_2025-19982_première_page.pdf",
   "pdf_toolbar_dev_highlight": "surligner",
   "pdf_toolbar_dev_underline": "souligner",
   "pdf_toolbar_dev_red_highlights_tooltip": "Transformer toutes les annotations en surlignages rouges",

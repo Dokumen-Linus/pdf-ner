@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, useRouter } from "@tanstack/react-router"
 import { EditIcon, LoaderCircleIcon, SaveIcon, Trash2Icon, XIcon } from "lucide-react"
@@ -20,13 +20,18 @@ import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { Textarea } from "@/components/shadcn-ui/textarea"
-import { getOrganizationByUserId, getTeamsByOrganizationId } from "@/db-fns/web/organizations"
+import {
+  getCurrentUserOrganization,
+  getCurrentUserTeamsByOrganization,
+} from "@/db-fns/web/organizations"
 import { createTeam, updateTeam } from "@/db-fns/web/teams"
 import { getUserByAuthUserId, updateUser } from "@/db-fns/web/users"
 import { m } from "@/integrations/paraglide/messages.js"
 import { authClient } from "@/lib/auth-client"
 
 type ProfileUser = Awaited<ReturnType<typeof getUserByAuthUserId>>
+type ProfileOrganization = Awaited<ReturnType<typeof getCurrentUserOrganization>>
+type ProfileTeams = Awaited<ReturnType<typeof getCurrentUserTeamsByOrganization>>
 
 type ProfileFormValues = {
   displayName: string
@@ -217,11 +222,13 @@ export const Route = createFileRoute("/_private/profile")({
       }
       const user = await getUserByAuthUserId({ data: { authUserId } })
 
-      let organization = null
-      let teams: any[] = []
-      organization = await getOrganizationByUserId({ data: { userId: authUserId } })
+      let organization: ProfileOrganization = null
+      let teams: ProfileTeams = []
+      organization = await getCurrentUserOrganization()
       if (organization?.id) {
-        teams = await getTeamsByOrganizationId({ data: { organizationId: organization.id } })
+        teams = await getCurrentUserTeamsByOrganization({
+          data: { organizationId: organization.id },
+        })
       }
 
       return { user, organization, teams, loadError: null as string | null }
@@ -236,15 +243,41 @@ export const Route = createFileRoute("/_private/profile")({
 
 function ProfilePage() {
   const router = useRouter()
-  const {
-    user: loadedUser,
-    loadError,
-    organization: loadedOrganization,
-    teams: loadedTeams,
-  } = Route.useLoaderData()
+  const { user, loadError, organization, teams } = Route.useLoaderData()
+
+  const profilePageKey = JSON.stringify({
+    userId: user?.id ?? null,
+    userAvatarUrl: user?.avatarUrl ?? null,
+    organizationId: organization?.id ?? null,
+    teamIds: teams.map((team) => team.id),
+  })
+
+  return (
+    <ProfilePageContent
+      key={profilePageKey}
+      router={router}
+      loadedUser={user}
+      loadError={loadError}
+      loadedOrganization={organization}
+      loadedTeams={teams}
+    />
+  )
+}
+
+function ProfilePageContent({
+  router,
+  loadedUser,
+  loadError,
+  loadedOrganization,
+  loadedTeams,
+}: {
+  router: ReturnType<typeof useRouter>
+  loadedUser: ProfileUser | null
+  loadError: string | null
+  loadedOrganization: ProfileOrganization
+  loadedTeams: ProfileTeams
+}) {
   const [profile, setProfile] = useState<ProfileUser | null>(loadedUser)
-  const [organization, setOrganization] = useState(loadedOrganization)
-  const [teams, setTeams] = useState(loadedTeams)
   const [isEditing, setIsEditing] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false)
@@ -257,6 +290,8 @@ function ProfilePage() {
   const [newTeamName, setNewTeamName] = useState("")
   const [newTeamDescription, setNewTeamDescription] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const organization = loadedOrganization
+  const teams = loadedTeams
 
   const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -301,13 +336,6 @@ function ProfilePage() {
       e.target.value = ""
     }
   }
-
-  useEffect(() => {
-    setProfile(loadedUser)
-    setOrganization(loadedOrganization)
-    setTeams(loadedTeams)
-    setOrganizationCreationError(null)
-  }, [loadedUser, loadedOrganization, loadedTeams])
 
   const form = useForm({
     defaultValues: profile ? toFormValues(profile) : EMPTY_PROFILE_FORM_VALUES,
@@ -372,13 +400,12 @@ function ProfilePage() {
     },
   })
 
-  useEffect(() => {
-    if (!profile) return
-    form.reset(toFormValues(profile))
+  const resetProfileEditor = (nextProfile: ProfileUser) => {
+    form.reset(toFormValues(nextProfile))
     setSaveError(null)
     setAvatarLoadFailed(false)
     setUploadFailure(null)
-  }, [form, profile])
+  }
 
   if (loadError) {
     return (
@@ -510,8 +537,7 @@ function ProfilePage() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setSaveError(null)
-                  form.reset(toFormValues(profile))
+                  resetProfileEditor(profile)
                   setIsEditing(true)
                 }}
               >
@@ -524,8 +550,7 @@ function ProfilePage() {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    form.reset(toFormValues(profile))
-                    setSaveError(null)
+                    resetProfileEditor(profile)
                     setIsEditing(false)
                   }}
                   disabled={form.state.isSubmitting}
@@ -653,8 +678,7 @@ function ProfilePage() {
             onKeyDown={(e) => {
               if (e.key === "Escape" && isEditing && !form.state.isSubmitting) {
                 e.preventDefault()
-                form.reset(toFormValues(profile))
-                setSaveError(null)
+                resetProfileEditor(profile)
                 setIsEditing(false)
               }
             }}
@@ -834,7 +858,8 @@ function ProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              You don't have an organization yet. Create one to start managing teams and projects.
+              You don&apos;t have an organization yet. Create one to start managing teams and
+              projects.
             </p>
             {organizationCreationError && (
               <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
