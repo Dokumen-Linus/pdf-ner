@@ -2,16 +2,15 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**78 components** (react)
+**80 components** (react)
 
 ## Components
 
 - **ColorPicker** — props: value, onChange — `web/src/components/custom/color-picker.tsx`
 - **EntityTable** — props: entityTypes — `web/src/components/entity-table/components/entity-table.tsx`
 - **NotFound** — `web/src/components/not-found.tsx`
-- **Toolbar** — props: canRotate, isSidebarOpen, onToggleSidebar — `web/src/components/pdf-container/dev/toolbar-dev.tsx`
-- **PDFContainerClient** — props: initalDocuments, author, exportName, canRotate — `web/src/components/pdf-container/pdf-container-client.tsx`
-- **PDFContainer** — props: initalDocuments, author, exportName, canRotate — `web/src/components/pdf-container/pdf-container.tsx`
+- **PDFContainerClient** — props: initalDocuments, allEntityTypes, author, exportName, canRotate — `web/src/components/pdf-container/pdf-container-client.tsx`
+- **PDFContainer** — props: initalDocuments, allEntityTypes, author, canRotate — `web/src/components/pdf-container/pdf-container.tsx`
 - **PDFLoading** — `web/src/components/pdf-container/pdf-loading.tsx`
 - **AnnotationContainer** — props: documentId, scale, rotation, annotation, isSelected, onDoubleClick, onSelect, selectionOutline, style — `web/src/components/pdf-container/plugin-annotation-2/components/annotation-container/annotation-container.tsx`
 - **CounterRotate** — props: rect, rotation — `web/src/components/pdf-container/plugin-annotation-2/components/annotation-container/counter-rotate.tsx`
@@ -26,9 +25,11 @@
 - **DocumentContent** — props: documentState, isLoading, isError, isLoaded — `web/src/components/pdf-container/plugin-document-manager-2/components/document-content.tsx`
 - **DocumentContext** — props: documentStates, activeDocumentId, actions — `web/src/components/pdf-container/plugin-document-manager-2/components/document-context.tsx`
 - **FilePicker** — `web/src/components/pdf-container/plugin-document-manager-2/components/file-picker.tsx`
+- **Download** — `web/src/components/pdf-container/plugin-export-2/components/download.tsx`
 - **GlobalPointerProvider** — props: documentId, style — `web/src/components/pdf-container/plugin-interaction-manager-2/components/global-pointer-provider.tsx`
 - **PagePointerProvider** — props: documentId, pageIndex, rotation, scale, convertEventToPoint, style — `web/src/components/pdf-container/plugin-interaction-manager-2/components/page-pointer-provider.tsx`
 - **RenderLayer** — props: documentId, pageIndex, scale, dpr, style — `web/src/components/pdf-container/plugin-render-2/components/render-layer.tsx`
+- **Rotate** — props: documentId, pageIndex, rotation, scale, style — `web/src/components/pdf-container/plugin-rotate-2/components/rotate.tsx`
 - **Scroller** — props: documentId, renderPage — `web/src/components/pdf-container/plugin-scroll-2/components/scroller.tsx`
 - **SearchLayer** — props: documentId, pageIndex, scale, style, highlightColor, activeHighlightColor — `web/src/components/pdf-container/plugin-search-2/components/search-layer.tsx`
 - **CopyToClipboard** — `web/src/components/pdf-container/plugin-selection-2/components/copy-to-clipboard.tsx`
@@ -42,8 +43,9 @@
 - **Viewport** — props: documentId — `web/src/components/pdf-container/plugin-viewport-2/components/viewport.tsx`
 - **ZoomGestureWrapper** — props: documentId, style, enablePinch, enableWheel — `web/src/components/pdf-container/plugin-zoom-2/components/zoom-gesture-wrapper.tsx`
 - **RotateWrapper** — props: enabled, documentId, pageIndex, style — `web/src/components/pdf-container/rotate-wrapper.tsx`
-- **ToolbarToggleButton** — props: isSidebarOpen, onToggleSidebar — `web/src/components/pdf-container/toolbar-toggle-button.tsx`
-- **Toolbar** — props: canRotate, isSidebarOpen, onToggleSidebar — `web/src/components/pdf-container/toolbar.tsx`
+- **Toolbar** — props: canRotate, isSidebarOpen, setIsSidebarOpen — `web/src/components/pdf-container/toolbar/index.tsx`
+- **Toolbar** — props: canRotate, isSidebarOpen, setIsSidebarOpen — `web/src/components/pdf-container/toolbar/toolbar-dev.tsx`
+- **ToolbarToggleButton** — props: isSidebarOpen, setIsSidebarOpen — `web/src/components/pdf-container/toolbar/toolbar-toggle-button.tsx`
 - **PluginStoreTable** — `web/src/components/plugin-store/components/dev/plugin-store-table.tsx`
 - **ProjectTabs** — props: projectId, currentStep, variant — `web/src/components/project-tabs.tsx`
 - **Chatbot** — `web/src/components/public-site/chatbot.tsx`
@@ -81,7 +83,7 @@
 - **Route** — `web/src/routes/_public/about.tsx`
 - **Route** — `web/src/routes/_public/contact.tsx`
 - **Route** — `web/src/routes/_public/demo.tsx`
-- **App** — `web/src/routes/_public/index.tsx`
+- **Route** — `web/src/routes/_public/index.tsx`
 - **Route** — `web/src/routes/_public/pricing.tsx`
 - **Route** — `web/src/routes/_public.tsx`
 

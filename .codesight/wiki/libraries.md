@@ -2,20 +2,18 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**34 library files** across 6 modules
+**32 library files** across 6 modules
 
-## Web (20 files)
+## Web (18 files)
 
 - `web/src/db-fns/web/annotations.ts` — LabellingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
 - `web/src/db-fns/web/test-fixtures.ts` — createFixtureTracker, cleanupFixtures, seedUser, seedOrganization, seedOrganizationMember, seedTeam, …
 - `web/src/lib/authorization.server.ts` — requireWorkspaceUser, requireUserId, getProjectAccessForCurrentUser, requireProjectAccess, requireProjectOwnership, requirePdfAccess, …
-- `web/src/db-fns/web/teams.ts` — getTeamById, updateTeam, CreateTeamSchema, createTeam, getCurrentUserTeamsByOrganizationId
 - `web/scripts/generate_full_package_json.py` — strip_caret_tilde, collect_packages, main
 - `web/tanstack-start-docs/download_tanstack_guide.py` — gh_get, download_dir, main
 - `web/public/example-pdfs/federal-register/get_first_page.py` — extract_first_page, main
 - `web/src/api-fns/api-stream-proxy.server.ts` — streamProxy, StreamProxyOptions
 - `web/src/db/rect.ts` — toEmbedRect, toEmbedRects
-- `web/src/db-fns/web/organizations.ts` — getOrganizationByUserId, getTeamsByOrganizationId
 - `web/src/lib/auth-redirects.ts` — getPostVerificationRedirect, DEFAULT_POST_VERIFICATION_REDIRECT
 - `web/src/lib/observability/fetch.server.ts` — withObservedRequest, withObservedResponse
 - `web/src/lib/observability/fetch.ts` — buildObservedHeaders, observedApiFetch

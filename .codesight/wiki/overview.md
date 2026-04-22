@@ -8,7 +8,7 @@
 
 ## Scale
 
-18 API routes · 1 database models · 78 UI components · 34 library files · 20 middleware layers · 44 environment variables
+18 API routes · 1 database models · 80 UI components · 32 library files · 20 middleware layers · 44 environment variables
 
 ## Subsystems
 
@@ -27,20 +27,20 @@
 
 **Database:** drizzle, 1 models — see [database.md](./database.md)
 
-**UI:** 78 components (react) — see [ui.md](./ui.md)
+**UI:** 80 components (react) — see [ui.md](./ui.md)
 
-**Libraries:** 34 files — see [libraries.md](./libraries.md)
+**Libraries:** 32 files — see [libraries.md](./libraries.md)
 
 ## High-Impact Files
 
 Changes to these files have the widest blast radius across the codebase:
 
 - `web/src/components/pdf-container/plugin-viewport-2/index.ts` — imported by **13** files
+- `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **11** files
 - `web/src/components/pdf-container/plugin-scroll-2/index.ts` — imported by **10** files
-- `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **10** files
 - `web/src/db/schemas/web/schema.ts` — imported by **8** files
 - `/config.py` — imported by **7** files
-- `web/src/components/pdf-container/plugin-scroll-2/lib/types.ts` — imported by **7** files
+- `web/src/components/pdf-container/plugin-annotation-2/index.ts` — imported by **7** files
 
 ## Required Environment Variables
 
@@ -59,4 +59,4 @@ Changes to these files have the widest blast radius across the codebase:
 - _...9 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-04-19_
+_Back to [index.md](./index.md) · Generated 2026-04-22_
