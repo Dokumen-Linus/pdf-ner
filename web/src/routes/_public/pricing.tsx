@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router"
 import { CheckIcon } from "lucide-react"
 
 import { getAllModels } from "@/db-fns/public/models"
+import { m } from "@/integrations/paraglide/messages.js"
 
 import type { FoundModel } from "@/db/types"
 
@@ -42,17 +43,6 @@ const PROVIDER_DISPLAY: Record<ProviderSlug, ProviderDisplay> = {
 // The three values above mirror the CHECK constraint on public.models.provider
 // (db/migrations/00091_create_models.sql). Unknown providers are filtered out.
 const PROVIDER_ORDER: ProviderSlug[] = ["anthropic", "openai", "google"]
-
-const PLAN_FEATURES = [
-  "Workspace starts at $5/month",
-  "Unlimited PDF uploads",
-  "Custom entity type definitions",
-  "Multi-model NER extraction",
-  "Annotation export (JSON, CSV)",
-  "Role-based project organization",
-  "Usage dashboard with cost breakdown",
-  "Stripe-managed billing",
-]
 
 // Price comes back from Drizzle `numeric(10,4)` as a string like "15.0000".
 // Format to 2 decimals for display. Keep the raw string as source of truth.
@@ -113,30 +103,66 @@ export const Route = createFileRoute("/_public/pricing")({
 
 function PricingPage() {
   const { providerGroups, loadError } = Route.useLoaderData()
+  const [pricingUnavailableBefore, pricingUnavailableAfter = ""] = m.pricing_live_unavailable({
+    email: "__EMAIL__",
+  }).split("__EMAIL__")
+  const planFeatures = [
+    m.pricing_feature_1(),
+    m.pricing_feature_2(),
+    m.pricing_feature_3(),
+    m.pricing_feature_4(),
+    m.pricing_feature_5(),
+    m.pricing_feature_6(),
+    m.pricing_feature_7(),
+    m.pricing_feature_8(),
+  ]
+  const pricingSteps = [
+    {
+      step: "01",
+      title: m.pricing_step_1_title(),
+      body: m.pricing_step_1_body(),
+    },
+    {
+      step: "02",
+      title: m.pricing_step_2_title(),
+      body: m.pricing_step_2_body(),
+    },
+    {
+      step: "03",
+      title: m.pricing_step_3_title(),
+      body: m.pricing_step_3_body(),
+    },
+  ]
+  const faqItems = [
+    { q: m.pricing_faq_q1(), a: m.pricing_faq_a1() },
+    { q: m.pricing_faq_q2(), a: m.pricing_faq_a2() },
+    { q: m.pricing_faq_q3(), a: m.pricing_faq_a3() },
+    { q: m.pricing_faq_q4(), a: m.pricing_faq_a4() },
+    { q: m.pricing_faq_q5(), a: m.pricing_faq_a5() },
+  ]
 
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
       <section className="flex min-h-[50vh] flex-col items-center justify-center bg-[#F4F4F4] px-6 py-24 text-center">
         <h1 className="mb-6 max-w-2xl text-[40px] leading-[1.2] font-medium tracking-normal text-[#171A20]">
-          Simple, usage-based pricing
+          {m.pricing_hero_title()}
         </h1>
         <p className="mb-10 max-w-xl text-[16px] leading-[1.6] font-normal text-[#393C41]">
-          Every workspace starts at $5/month, then usage is billed from the exact LLM tokens you
-          consume. Developers manage projects and analysts focus on labeling and review.
+          {m.pricing_hero_description()}
         </p>
         <div className="flex flex-col items-center gap-4 sm:flex-row">
           <Link
             to="/signup"
             className="flex min-h-10 w-full items-center justify-center rounded-[4px] border-[3px] border-transparent bg-[#3E6AE1] px-4 text-[14px] font-medium text-white transition-all duration-[330ms] hover:bg-[#2e52b5] focus:border-[#3E6AE1] focus:shadow-[inset_0_0_0_2px_white] sm:w-50"
           >
-            Get started free
+            {m.pricing_hero_cta_primary()}
           </Link>
           <Link
             to="/signup"
             className="flex min-h-10 w-full items-center justify-center rounded-[4px] border-[3px] border-transparent bg-white px-4 text-[14px] font-medium text-[#393C41] transition-all duration-[330ms] hover:bg-[#F4F4F4] sm:w-50"
           >
-            Try the demo
+            {m.pricing_hero_cta_secondary()}
           </Link>
         </div>
       </section>
@@ -145,31 +171,14 @@ function PricingPage() {
       <section className="bg-white px-6 py-24">
         <div className="mx-auto max-w-4xl">
           <h2 className="mb-4 text-center text-[32px] font-medium text-[#171A20]">
-            How billing works
+            {m.pricing_how_title()}
           </h2>
           <p className="mx-auto mb-16 max-w-lg text-center text-[16px] text-[#5C5E62]">
-            Every LLM extraction call is metered by token count and reported to Stripe at the end of
-            each billing period.
+            {m.pricing_how_description()}
           </p>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {[
-              {
-                step: "01",
-                title: "Upload & annotate",
-                body: "Upload your PDFs and define the entity types you want to extract. Label a handful of examples to guide the model.",
-              },
-              {
-                step: "02",
-                title: "Extract with LLMs",
-                body: "Dokumen sends your documents to your chosen model. Input and output tokens are recorded at the exact rate in our billing table.",
-              },
-              {
-                step: "03",
-                title: "Pay for what you use",
-                body: "At the end of the month Stripe bills a $5 workspace base fee plus the token usage accumulated by your extraction runs.",
-              },
-            ].map(({ step, title, body }) => (
+            {pricingSteps.map(({ step, title, body }) => (
               <div key={step} className="flex flex-col gap-3">
                 <span className="font-mono text-[14px] font-medium text-[#3E6AE1]">{step}</span>
                 <h3 className="text-[17px] font-medium text-[#171A20]">{title}</h3>
@@ -184,27 +193,30 @@ function PricingPage() {
       <section className="bg-[#F4F4F4] px-6 py-24">
         <div className="mx-auto max-w-4xl">
           <h2 className="mb-4 text-center text-[32px] font-medium text-[#171A20]">
-            Base plan + metered usage
+            {m.pricing_plan_title()}
           </h2>
           <p className="mx-auto mb-16 max-w-lg text-center text-[16px] text-[#5C5E62]">
-            Each workspace has a $5 monthly base subscription, and model usage is charged on top at
-            the live rates below.
+            {m.pricing_plan_description()}
           </p>
 
           <div className="mx-auto max-w-md border border-[#EEEEEE] bg-white p-8">
             <div className="mb-6">
-              <p className="mb-2 text-[14px] font-medium text-[#3E6AE1]">Workspace plan</p>
+              <p className="mb-2 text-[14px] font-medium text-[#3E6AE1]">
+                {m.pricing_plan_label()}
+              </p>
               <p className="text-[40px] leading-none font-medium text-[#171A20]">
                 $5
-                <span className="ml-1 text-[16px] font-normal text-[#5C5E62]">/ month base</span>
+                <span className="ml-1 text-[16px] font-normal text-[#5C5E62]">
+                  {m.pricing_plan_price_suffix()}
+                </span>
               </p>
               <p className="mt-2 text-[14px] text-[#5C5E62]">
-                + LLM usage metered from our live pricing table
+                {m.pricing_plan_metered_note()}
               </p>
             </div>
 
             <ul className="mb-8 space-y-3">
-              {PLAN_FEATURES.map((feature) => (
+              {planFeatures.map((feature) => (
                 <li key={feature} className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
                   <span className="text-[14px] text-[#393C41]">{feature}</span>
@@ -214,17 +226,19 @@ function PricingPage() {
 
             <div className="mb-8 grid gap-4 sm:grid-cols-2">
               <div className="border border-[#EEEEEE] p-4">
-                <p className="text-[13px] font-medium text-[#171A20]">Developer</p>
+                <p className="text-[13px] font-medium text-[#171A20]">
+                  {m.pricing_role_developer_title()}
+                </p>
                 <p className="mt-2 text-[13px] leading-[1.6] text-[#5C5E62]">
-                  Full project permissions: create projects, upload PDFs, manage entity types, and
-                  run extraction workflows.
+                  {m.pricing_role_developer_body()}
                 </p>
               </div>
               <div className="border border-[#EEEEEE] p-4">
-                <p className="text-[13px] font-medium text-[#171A20]">Analyst</p>
+                <p className="text-[13px] font-medium text-[#171A20]">
+                  {m.pricing_role_analyst_title()}
+                </p>
                 <p className="mt-2 text-[13px] leading-[1.6] text-[#5C5E62]">
-                  Limited to labeling and reviewing pre-uploaded PDFs. Analysts can work inside the
-                  project without changing project setup.
+                  {m.pricing_role_analyst_body()}
                 </p>
               </div>
             </div>
@@ -233,10 +247,10 @@ function PricingPage() {
               to="/signup"
               className="flex min-h-10 w-full items-center justify-center rounded-[4px] border-[3px] border-transparent bg-[#3E6AE1] px-4 text-[14px] font-medium text-white transition-all duration-[330ms] hover:bg-[#2e52b5]"
             >
-              Create your account
+              {m.pricing_create_account_cta()}
             </Link>
             <p className="mt-3 text-center text-[12px] text-[#8E8E8E]">
-              Add a payment method after sign-up to activate extraction
+              {m.pricing_payment_note()}
             </p>
           </div>
         </div>
@@ -245,20 +259,21 @@ function PricingPage() {
       {/* Model pricing table */}
       <section className="bg-white px-6 py-24">
         <div className="mx-auto max-w-4xl">
-          <h2 className="mb-4 text-center text-[32px] font-medium text-[#171A20]">Model pricing</h2>
+          <h2 className="mb-4 text-center text-[32px] font-medium text-[#171A20]">
+            {m.pricing_models_title()}
+          </h2>
           <p className="mx-auto mb-16 max-w-lg text-center text-[16px] text-[#5C5E62]">
-            The rates below are the exact values our workers use to compute your Stripe charges.
-            Prices are per 1 million tokens.
+            {m.pricing_models_description()}
           </p>
 
           {loadError || providerGroups.length === 0 ? (
             <div className="mx-auto max-w-md border border-[#EEEEEE] bg-[#F4F4F4] p-6 text-center">
               <p className="text-[14px] text-[#393C41]">
-                Live pricing is temporarily unavailable. Contact{" "}
+                {pricingUnavailableBefore}
                 <a href="mailto:sales@dokumen.ai" className="text-[#3E6AE1] underline">
                   sales@dokumen.ai
                 </a>{" "}
-                for current rates.
+                {pricingUnavailableAfter}
               </p>
             </div>
           ) : (
@@ -277,12 +292,14 @@ function PricingPage() {
                     <table className="w-full text-[14px]">
                       <thead>
                         <tr className="border-b border-[#EEEEEE] bg-[#F4F4F4]">
-                          <th className="px-4 py-3 text-left font-medium text-[#171A20]">Model</th>
-                          <th className="px-4 py-3 text-right font-medium text-[#171A20]">
-                            Input / 1M tokens
+                          <th className="px-4 py-3 text-left font-medium text-[#171A20]">
+                            {m.pricing_table_model()}
                           </th>
                           <th className="px-4 py-3 text-right font-medium text-[#171A20]">
-                            Output / 1M tokens
+                            {m.pricing_table_input()}
+                          </th>
+                          <th className="px-4 py-3 text-right font-medium text-[#171A20]">
+                            {m.pricing_table_output()}
                           </th>
                         </tr>
                       </thead>
@@ -314,7 +331,7 @@ function PricingPage() {
           )}
 
           <p className="mt-6 text-center text-[12px] text-[#8E8E8E]">
-            Rates are read live from our billing table and match what workers charge per request.
+            {m.pricing_models_note()}
           </p>
         </div>
       </section>
@@ -323,32 +340,11 @@ function PricingPage() {
       <section className="bg-[#F4F4F4] px-6 py-24">
         <div className="mx-auto max-w-2xl">
           <h2 className="mb-16 text-center text-[32px] font-medium text-[#171A20]">
-            Common questions
+            {m.pricing_faq_title()}
           </h2>
 
           <div className="flex flex-col divide-y divide-[#EEEEEE]">
-            {[
-              {
-                q: "When am I charged?",
-                a: "Stripe charges the $5 workspace base subscription monthly and tallies metered model usage on the same billing cycle. You can monitor usage in the billing dashboard.",
-              },
-              {
-                q: "What if I don't add a payment method?",
-                a: "You can still explore the product, but usage-based extraction and the paid workspace plan are gated behind an active Stripe subscription with a saved payment method.",
-              },
-              {
-                q: "Can I choose which model to use?",
-                a: "Yes. Each extraction request lets you pick among the models listed above. Cheaper models are great for high-volume pipelines; larger models excel on complex documents.",
-              },
-              {
-                q: "Is there a free trial?",
-                a: "Creating an account is free. Billing starts when you activate the $5/month workspace subscription and begin running usage-based extraction.",
-              },
-              {
-                q: "How do I cancel?",
-                a: "You can cancel your subscription at any time from the billing page. Your account and all projects remain accessible; LLM extraction is paused until you resubscribe.",
-              },
-            ].map(({ q, a }) => (
+            {faqItems.map(({ q, a }) => (
               <div key={q} className="py-6">
                 <p className="mb-2 text-[14px] font-medium text-[#171A20]">{q}</p>
                 <p className="text-[14px] leading-[1.6] font-normal text-[#5C5E62]">{a}</p>
@@ -360,15 +356,17 @@ function PricingPage() {
 
       {/* Bottom CTA */}
       <section className="flex min-h-[40vh] flex-col items-center justify-center bg-white px-6 py-32 text-center">
-        <h2 className="mb-6 text-[40px] font-medium text-[#171A20]">Start extracting today</h2>
+        <h2 className="mb-6 text-[40px] font-medium text-[#171A20]">
+          {m.pricing_bottom_title()}
+        </h2>
         <p className="mb-10 max-w-md text-[16px] font-normal text-[#393C41]">
-          Create an account, upload your first PDF, and add a payment method in under five minutes.
+          {m.pricing_bottom_description()}
         </p>
         <Link
           to="/signup"
           className="flex items-center justify-center rounded-[4px] bg-[#3E6AE1] px-16 py-3 text-[14px] font-medium text-white transition-all duration-[330ms] hover:bg-[#2e52b5]"
         >
-          Create your account
+          {m.pricing_bottom_cta()}
         </Link>
       </section>
     </div>

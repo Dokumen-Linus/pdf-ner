@@ -105,7 +105,7 @@ export default function Header() {
                   "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
               }}
             >
-              Pricing
+              {m.nav_pricing()}
             </Link>
             <Link
               to="/about"
@@ -115,7 +115,7 @@ export default function Header() {
                   "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
               }}
             >
-              About
+              {m.nav_about()}
             </Link>
             <Link
               to="/contact"
@@ -125,7 +125,7 @@ export default function Header() {
                   "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
               }}
             >
-              Contact
+              {m.nav_contact()}
             </Link>
           </nav>
 
@@ -145,7 +145,7 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link to="/projects" className="flex cursor-pointer items-center gap-2">
                       <FolderOpenIcon size={14} />
-                      Projects
+                      {m.nav_projects()}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -157,7 +157,7 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link to="/billing" className="flex cursor-pointer items-center gap-2">
                       <CreditCardIcon size={14} />
-                      Billing
+                      {m.nav_billing()}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -284,27 +284,27 @@ export default function Header() {
             onClick={() => setIsOpen(false)}
             className="text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
           >
-            Pricing
+            {m.nav_pricing()}
           </Link>
           <Link
             to="/about"
             onClick={() => setIsOpen(false)}
             className="text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
           >
-            About
+            {m.nav_about()}
           </Link>
           <Link
             to="/contact"
             onClick={() => setIsOpen(false)}
             className="text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
           >
-            Contact
+            {m.nav_contact()}
           </Link>
           {session ? (
             <>
               <div className="mt-4 flex flex-col gap-4 border-t border-[#EEEEEE] pt-4">
                 <p className="text-[12px] font-medium tracking-wide text-[#8E8E8E] uppercase">
-                  Account
+                  {m.nav_account()}
                 </p>
                 <Link
                   to="/projects"
@@ -312,7 +312,7 @@ export default function Header() {
                   className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
                 >
                   <FolderOpenIcon size={16} />
-                  Projects
+                  {m.nav_projects()}
                 </Link>
                 <Link
                   to="/profile"
@@ -328,7 +328,7 @@ export default function Header() {
                   className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
                 >
                   <CreditCardIcon size={16} />
-                  Billing
+                  {m.nav_billing()}
                 </Link>
                 <Link
                   to="/signout"
