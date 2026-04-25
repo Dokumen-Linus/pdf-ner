@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, TypeAlias
+from typing import Any
 
-PdfSource: TypeAlias = str | Path
-ImageArray: TypeAlias = Any
+type PdfSource = str | Path
+type ImageArray = Any
+type ImageBytes = bytes
 
 
 @dataclass(slots=True)

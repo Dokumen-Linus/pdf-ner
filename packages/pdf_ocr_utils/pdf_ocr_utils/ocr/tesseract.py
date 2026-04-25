@@ -1,9 +1,12 @@
+from io import BytesIO
+
 import numpy as np
+from PIL import Image, UnidentifiedImageError
 import pytesseract
 from pytesseract import TesseractNotFoundError
 
 from pdf_ocr_utils.exceptions import OcrExecutionError
-from pdf_ocr_utils.types import ImageArray, OcrConfig
+from pdf_ocr_utils.types import ImageArray, ImageBytes, OcrConfig
 
 
 class TesseractOcrEngine:
@@ -24,6 +27,15 @@ class TesseractOcrEngine:
             return pytesseract.image_to_string(prepared_image, **kwargs)
         except (RuntimeError, OSError, TesseractNotFoundError) as exc:
             raise OcrExecutionError(str(exc)) from exc
+
+    def extract_text_from_image_bytes(self, image: ImageBytes) -> str:
+        try:
+            with Image.open(BytesIO(image)) as opened_image:
+                image_array = np.asarray(opened_image.convert("RGB"))
+        except (OSError, UnidentifiedImageError) as exc:
+            raise OcrExecutionError(str(exc)) from exc
+
+        return self.extract_text_from_array(image_array)
 
     @staticmethod
     def _prepare_image(image: np.ndarray) -> ImageArray:
