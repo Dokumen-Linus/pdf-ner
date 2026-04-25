@@ -27,7 +27,7 @@ export default function Footer() {
               to="/about"
               className="text-[12px] font-medium text-[#D0D1D2] transition-colors hover:text-[#FFFFFF]"
             >
-              About
+              {m.footer_about()}
             </Link>
           </li>
           <li>

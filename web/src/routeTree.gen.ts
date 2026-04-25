@@ -26,6 +26,7 @@ import { Route as PrivateBillingRouteImport } from './routes/_private/billing'
 import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
 import { Route as AuthSignoutRouteImport } from './routes/_auth/signout'
 import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
+import { Route as AuthErrorRouteImport } from './routes/_auth/error'
 import { Route as PrivateProjectsIndexRouteImport } from './routes/_private/projects/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PrivateProjectsProjectIdRouteImport } from './routes/_private/projects/$projectId'
@@ -118,6 +119,11 @@ const AuthSigninRoute = AuthSigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthErrorRoute = AuthErrorRouteImport.update({
+  id: '/error',
+  path: '/error',
+  getParentRoute: () => AuthRoute,
+} as any)
 const PrivateProjectsIndexRoute = PrivateProjectsIndexRouteImport.update({
   id: '/projects/',
   path: '/projects/',
@@ -173,6 +179,7 @@ const PrivateProjectsProjectIdCheckingRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
+  '/error': typeof AuthErrorRoute
   '/signin': typeof AuthSigninRoute
   '/signout': typeof AuthSignoutRoute
   '/signup': typeof AuthSignupRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
+  '/error': typeof AuthErrorRoute
   '/signin': typeof AuthSigninRoute
   '/signout': typeof AuthSignoutRoute
   '/signup': typeof AuthSignupRoute
@@ -226,6 +234,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_private': typeof PrivateRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
+  '/_auth/error': typeof AuthErrorRoute
   '/_auth/signin': typeof AuthSigninRoute
   '/_auth/signout': typeof AuthSignoutRoute
   '/_auth/signup': typeof AuthSignupRoute
@@ -254,6 +263,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/error'
     | '/signin'
     | '/signout'
     | '/signup'
@@ -279,6 +289,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/error'
     | '/signin'
     | '/signout'
     | '/signup'
@@ -306,6 +317,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_private'
     | '/_public'
+    | '/_auth/error'
     | '/_auth/signin'
     | '/_auth/signout'
     | '/_auth/signup'
@@ -463,6 +475,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSigninRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/error': {
+      id: '/_auth/error'
+      path: '/error'
+      fullPath: '/error'
+      preLoaderRoute: typeof AuthErrorRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_private/projects/': {
       id: '/_private/projects/'
       path: '/projects'
@@ -530,12 +549,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthRouteChildren {
+  AuthErrorRoute: typeof AuthErrorRoute
   AuthSigninRoute: typeof AuthSigninRoute
   AuthSignoutRoute: typeof AuthSignoutRoute
   AuthSignupRoute: typeof AuthSignupRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthErrorRoute: AuthErrorRoute,
   AuthSigninRoute: AuthSigninRoute,
   AuthSignoutRoute: AuthSignoutRoute,
   AuthSignupRoute: AuthSignupRoute,

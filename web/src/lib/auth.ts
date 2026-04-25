@@ -1,4 +1,6 @@
+import { i18n } from "@better-auth/i18n"
 import { betterAuth } from "better-auth"
+import { APIError, createAuthMiddleware, isAPIError } from "better-auth/api"
 import { haveIBeenPwned, organization } from "better-auth/plugins"
 import { defaultAc, ownerAc } from "better-auth/plugins/organization/access"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
@@ -12,6 +14,13 @@ import { organizations, webTeams } from "../db/schemas/web"
 import { users } from "../db/schemas/web/users"
 import { env } from "../env.server"
 
+import {
+  BETTER_AUTH_ERROR_REDIRECT_PATH,
+  BETTER_AUTH_LOCALE_COOKIE_NAME,
+  betterAuthApiErrorTranslations,
+  detectAuthLocaleFromHeaders,
+  getLocalizedAuthApiMessage,
+} from "./auth-i18n"
 import { sendEmail } from "./send-email"
 
 const trustedOrigins = [
@@ -67,6 +76,35 @@ function getDefaultWorkspaceName(user: BetterAuthUserRecord): string {
 
 function getDefaultWorkspaceSlug(user: BetterAuthUserRecord): string {
   return `workspace-${user.id.slice(0, 8).toLowerCase()}`
+}
+
+const betterAuthMessageI18nPlugin = {
+  id: "dokumen-better-auth-message-i18n",
+  version: "1.0.0",
+  hooks: {
+    after: [
+      {
+        matcher: () => true,
+        handler: createAuthMiddleware(async (ctx) => {
+          const returned = ctx.context.returned
+          if (!isAPIError(returned) || typeof returned.body?.code === "string") {
+            return
+          }
+
+          const locale = detectAuthLocaleFromHeaders(ctx.headers)
+          const translation = getLocalizedAuthApiMessage(returned.message, locale)
+          if (!translation || translation === returned.message) {
+            return
+          }
+
+          throw new APIError(returned.status, {
+            message: translation,
+            originalMessage: returned.message,
+          })
+        }),
+      },
+    ],
+  },
 }
 
 async function syncWebUserFromAuth(user: BetterAuthUserRecord) {
@@ -160,6 +198,9 @@ async function ensureDefaultWorkspaceForUser(user: BetterAuthUserRecord) {
 export const auth = betterAuth({
   database: authDatabase,
   trustedOrigins,
+  onAPIError: {
+    errorURL: BETTER_AUTH_ERROR_REDIRECT_PATH,
+  },
   advanced: {
     database: {
       generateId: () => crypto.randomUUID(),
@@ -215,10 +256,14 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    haveIBeenPwned({
-      customPasswordCompromisedMessage:
-        "Password likely has been compromised. Please choose a different password.",
+    i18n({
+      translations: betterAuthApiErrorTranslations,
+      defaultLocale: "en",
+      detection: ["cookie", "header"],
+      localeCookie: BETTER_AUTH_LOCALE_COOKIE_NAME,
     }),
+    betterAuthMessageI18nPlugin,
+    haveIBeenPwned(),
     organization({
       roles: {
         owner: ownerAc,

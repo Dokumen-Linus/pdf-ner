@@ -69,7 +69,7 @@ export const getCurrentUserTeamsByOrganizationId = createServerFn({ method: "GET
   })
 
 export const getTeamById = createServerFn({ method: "GET" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string().uuid() }))
   .handler(async ({ data }) => {
     const workspaceUser = await requireWorkspaceUser()
 
@@ -98,7 +98,7 @@ export const getTeamById = createServerFn({ method: "GET" })
   })
 
 export const updateTeam = createServerFn({ method: "POST" })
-  .inputValidator((data: { id: string; description?: string | null }) => data)
+  .inputValidator(z.object({ id: z.string().uuid(), description: z.string().nullable().optional() }))
   .handler(async ({ data }) => {
     const workspaceUser = await requireWorkspaceUser()
 

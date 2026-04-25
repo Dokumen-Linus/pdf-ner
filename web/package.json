@@ -22,6 +22,7 @@
   "dependencies": {
     "@aws-sdk/client-ses": "^3.700.0",
     "@better-auth/core": "^1.6.2",
+    "@better-auth/i18n": "^1.6.2",
     "@embedpdf/core": "2.8.0",
     "@embedpdf/engines": "2.8.0",
     "@embedpdf/models": "2.8.0",
