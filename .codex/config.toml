@@ -1,0 +1,19 @@
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+model_verbosity = "medium"
+
+approval_policy = "untrusted"
+sandbox_mode = "workspace-write"
+web_search = "cached"
+log_dir = "C:/Users/zchar/Desktop/pdf-ner/.codex/logs"
+
+[sandbox_workspace_write]
+writable_roots = ["C:/Users/zchar/Desktop/pdf-ner"]
+
+[features]
+codex_hooks = true
+fast_mode = false
+personality = false
+memories = false
+shell_snapshot = true
+shell_tool = true

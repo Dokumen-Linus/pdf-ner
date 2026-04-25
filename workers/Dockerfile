@@ -3,7 +3,7 @@ FROM python:3.13-slim AS build
 
 COPY --from=ghcr.io/astral-sh/uv:0.9.7 /uv /uvx /bin/
 
-# Tesseract build deps
+# Build deps for any wheels without prebuilt artifacts
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc libc-dev && \
     rm -rf /var/lib/apt/lists/*

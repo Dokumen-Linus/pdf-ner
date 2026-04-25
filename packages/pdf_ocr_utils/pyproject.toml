@@ -1,0 +1,19 @@
+[project]
+name = "pdf-ocr-utils"
+version = "0.0.0"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "numpy",
+  "pypdfium2",
+  "pytesseract",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["pdf_ocr_utils*"]
