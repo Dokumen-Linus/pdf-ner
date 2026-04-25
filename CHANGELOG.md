@@ -107,6 +107,8 @@
 - *(web)* AddBookmarks capability
 - *(web)* Add entityType and replace button to selected anno menu #12
 - *(pkg)* Add tesseract ocr with pdfium rendering
+- *(gpu)* Inital runpod workers
+- *(pkg)* Use runpod workers in pdf_ocr_utils
 
 ### 🐛 Bug Fixes
 
@@ -176,6 +178,7 @@
 - *(web)* Form typing
 - *(web)* Sync EntityTable and activeDocumentId
 - *(web)* Remove defaultFileName from export plugin #98
+- *(llm)* Add CLAUDE.md to .gitignore
 
 ### 💼 Other
 
@@ -298,6 +301,10 @@
 - *(llm)* Optimize AGENTS.md
 - *(llm)* Replace claude with codex, edit skill descriptions
 - *(llm)* Edit DESIGN.md
+- Research
+- *(llm)* Inactivate some skills
+- *(llm)* Reactivate some skills
+- *(llm)* Improve codex config and hooks
 
 ### ⚡ Performance
 
@@ -503,6 +510,9 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Add runpod ocr env vars to infra, api, workers
+- Fix generate_env_example.py to dynamically create from 4 truth sources
 
 ### ◀️ Revert
 

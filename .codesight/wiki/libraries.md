@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**37 library files** across 7 modules
+**42 library files** across 8 modules
 
 ## Web (18 files)
 
@@ -34,13 +34,14 @@
 - `packages/otel_py/otel_py/metrics.py` — get_metrics_registry, MetricsRegistry
 - `packages/otel_py/otel_py/config.py` — ObservabilityConfig
 
-## Pdf_ocr_utils (5 files)
+## Pdf_ocr_utils (6 files)
 
-- `packages/pdf_ocr_utils/pdf_ocr_utils/pipelines/extract.py` — extract_text_from_pdf, extract_text_from_pdf_by_page, RendererProtocol, OcrEngineProtocol
+- `packages/pdf_ocr_utils/pdf_ocr_utils/pipelines/extract.py` — extract_text_from_pdf, extract_text_from_pdf_by_page, extract_text_from_pdf_via_image_bytes, extract_text_from_pdf_by_page_via_image_bytes, RendererProtocol, OcrEngineProtocol, …
+- `packages/pdf_ocr_utils/pdf_ocr_utils/ocr/runpod.py` — make_runpod_ocr_client, extract_text_from_runpod_image_bytes, RunpodOcrEndpointConfig, RunpodOcrClient
 - `packages/pdf_ocr_utils/pdf_ocr_utils/exceptions.py` — PdfOcrError, PdfRenderError, OcrExecutionError
+- `packages/pdf_ocr_utils/pdf_ocr_utils/renderers/pdfium.py` — render_pdf_page_to_array, render_pdf_page_to_png_bytes, PdfiumRenderer
 - `packages/pdf_ocr_utils/pdf_ocr_utils/types.py` — RenderConfig, OcrConfig, PageTextResult
 - `packages/pdf_ocr_utils/pdf_ocr_utils/ocr/tesseract.py` — extract_text_from_array, TesseractOcrEngine
-- `packages/pdf_ocr_utils/pdf_ocr_utils/renderers/pdfium.py` — render_pdf_page_to_array, PdfiumRenderer
 
 ## Db (4 files)
 
@@ -49,6 +50,13 @@
 - `db/generate_roles_sh.py` — env_var_for_role, transform, main
 - `db/init/generate_roles_sh.py` — main
 
+## Gpu (4 files)
+
+- `gpu/shared/ocr.py` — resize_longest_dimension, image_to_base64_png, split_yaml_front_matter, read_png_image
+- `gpu/shared/runpod_http.py` — readiness_response, ensure_ready, normalize_text, run_app
+- `gpu/deepseek-ocr/app.py` — lifespan, ping, ocr
+- `gpu/olm-ocr2/app.py` — lifespan, ping, ocr
+
 ## Llm_providers (2 files)
 
 - `packages/llm_providers/dokumen_llm_providers/adapters.py` — call_openai, call_anthropic, call_google_genai
@@ -56,7 +64,7 @@
 
 ## Infra (1 files)
 
-- `infra/generate_env_example.py` — main
+- `infra/generate_env_example.py` — parse_env_file, parse_role_password_keys, normalize_value, generated_value, resolve_value, build_sections, …
 
 ## Pdfium_utils (1 files)
 
