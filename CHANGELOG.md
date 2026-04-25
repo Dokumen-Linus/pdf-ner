@@ -104,6 +104,7 @@
 - *(pkg)* Move pdfium_utils.py into package #86
 - Link web.users, organizations, teams to better auth and add to authorization.server.ts
 - *(web)* Update org, team, and project creation in profile.tsx and projects/index.tsx
+- Add better-auth i18n translations
 - *(web)* AddBookmarks capability
 - *(web)* Add entityType and replace button to selected anno menu #12
 - *(pkg)* Add tesseract ocr with pdfium rendering
@@ -177,6 +178,8 @@
 - Deprecated color, remove synchronous state
 - *(web)* Form typing
 - *(web)* Sync EntityTable and activeDocumentId
+- Function error causing cascading header issues
+- Missing header translation, i18n dependency
 - *(web)* Remove defaultFileName from export plugin #98
 - *(llm)* Add CLAUDE.md to .gitignore
 
@@ -513,6 +516,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add runpod ocr env vars to infra, api, workers
 - Fix generate_env_example.py to dynamically create from 4 truth sources
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
 

@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**80 components** (react)
+**81 components** (react)
 
 ## Components
 
@@ -65,6 +65,7 @@
 - **VerifyEmail** — props: name, url — `web/src/emails/verify-email.tsx`
 - **Provider** — props: queryClient — `web/src/integrations/tanstack-query/root-provider.tsx`
 - **Route** — `web/src/routes/__root.tsx`
+- **Route** — `web/src/routes/_auth/error.tsx`
 - **Route** — `web/src/routes/_auth/signin.tsx`
 - **Route** — `web/src/routes/_auth/signout.tsx`
 - **Route** — `web/src/routes/_auth/signup.tsx`
