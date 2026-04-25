@@ -9,6 +9,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - Do not delete code or comments you do not understand without approval
 - Prefer the simplest correct solution. Avoid abstractions unless clearly justified
 - If requirements or source files conflict, stop and surface the ambiguity
+- Never read or edit .env files. Always add new env vars to the relevant `.env.example`
 
 ## Work Loop
 - Read `.codesight/wiki/index.md`, `overview.md`, the relevant domain article, and the actual source files listed there before editing
