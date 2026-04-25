@@ -106,6 +106,7 @@
 - *(web)* Update org, team, and project creation in profile.tsx and projects/index.tsx
 - *(web)* AddBookmarks capability
 - *(web)* Add entityType and replace button to selected anno menu #12
+- *(pkg)* Add tesseract ocr with pdfium rendering
 
 ### 🐛 Bug Fixes
 
@@ -294,6 +295,9 @@
 - *(llm)* Update skill scripts and instructions
 - *(web)* Auth
 - *(llm)* Shorten CLAUDE.md
+- *(llm)* Optimize AGENTS.md
+- *(llm)* Replace claude with codex, edit skill descriptions
+- *(llm)* Edit DESIGN.md
 
 ### ⚡ Performance
 
@@ -496,6 +500,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Remove @claude from github.com
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 

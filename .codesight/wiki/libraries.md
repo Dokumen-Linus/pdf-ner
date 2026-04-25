@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**32 library files** across 6 modules
+**37 library files** across 7 modules
 
 ## Web (18 files)
 
@@ -33,6 +33,14 @@
 - `packages/otel_py/otel_py/logging.py` — configure_logging, JsonLogFormatter, PlainLogFormatter
 - `packages/otel_py/otel_py/metrics.py` — get_metrics_registry, MetricsRegistry
 - `packages/otel_py/otel_py/config.py` — ObservabilityConfig
+
+## Pdf_ocr_utils (5 files)
+
+- `packages/pdf_ocr_utils/pdf_ocr_utils/pipelines/extract.py` — extract_text_from_pdf, extract_text_from_pdf_by_page, RendererProtocol, OcrEngineProtocol
+- `packages/pdf_ocr_utils/pdf_ocr_utils/exceptions.py` — PdfOcrError, PdfRenderError, OcrExecutionError
+- `packages/pdf_ocr_utils/pdf_ocr_utils/types.py` — RenderConfig, OcrConfig, PageTextResult
+- `packages/pdf_ocr_utils/pdf_ocr_utils/ocr/tesseract.py` — extract_text_from_array, TesseractOcrEngine
+- `packages/pdf_ocr_utils/pdf_ocr_utils/renderers/pdfium.py` — render_pdf_page_to_array, PdfiumRenderer
 
 ## Db (4 files)
 

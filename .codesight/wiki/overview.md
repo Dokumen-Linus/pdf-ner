@@ -8,7 +8,7 @@
 
 ## Scale
 
-18 API routes · 1 database models · 80 UI components · 32 library files · 20 middleware layers · 44 environment variables
+18 API routes · 1 database models · 80 UI components · 37 library files · 20 middleware layers · 44 environment variables
 
 ## Subsystems
 
@@ -29,7 +29,7 @@
 
 **UI:** 80 components (react) — see [ui.md](./ui.md)
 
-**Libraries:** 32 files — see [libraries.md](./libraries.md)
+**Libraries:** 37 files — see [libraries.md](./libraries.md)
 
 ## High-Impact Files
 
@@ -59,4 +59,4 @@ Changes to these files have the widest blast radius across the codebase:
 - _...9 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-04-22_
+_Back to [index.md](./index.md) · Generated 2026-04-25_
