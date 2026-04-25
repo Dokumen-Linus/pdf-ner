@@ -1,22 +1,13 @@
 import json
 from pathlib import Path
+import sys
 import subprocess
 
-from _changed_files import executable, repo_root
+HOOK_DIR = Path(__file__).resolve().parent
+if str(HOOK_DIR) not in sys.path:
+    sys.path.insert(0, str(HOOK_DIR))
 
-
-def changed_files(root: Path) -> list[str]:
-    result = subprocess.run(
-        [executable("git"), "diff", "HEAD", "--name-only"],
-        cwd=root,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-        check=False,
-    )
-    if result.returncode != 0:
-        return []
-    return [Path(line.strip()).as_posix() for line in result.stdout.splitlines() if line.strip()]
+from _changed_files import executable, load_payload, paths_from_payload, repo_root
 
 
 def run(command: list[str], cwd: Path) -> bool:
@@ -28,8 +19,11 @@ def run(command: list[str], cwd: Path) -> bool:
 
 def main() -> int:
     root = repo_root()
-    changed = changed_files(root)
+    changed = paths_from_payload(load_payload())
     failed: list[str] = []
+
+    if not changed:
+        return 0
 
     if any(
         path.startswith("web/") and path.endswith((".ts", ".tsx")) and not path.endswith(".gen.ts")

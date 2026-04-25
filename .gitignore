@@ -24,6 +24,7 @@ pgdata/
 
 # Coding assistants
 .claude/
+CLAUDE.md
 .mcp.json
 **/settings.local.json
 .kilo/skills
