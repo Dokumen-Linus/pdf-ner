@@ -40,7 +40,7 @@ mock.module("@tanstack/react-start", () => ({
       handler(handlerFn: any) {
         return async (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          callArgs?: { data?: any }
+          callArgs?: { data?: any },
         ) => {
           let validatedData = callArgs?.data
 

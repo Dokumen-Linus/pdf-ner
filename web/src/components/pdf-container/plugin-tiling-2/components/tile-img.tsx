@@ -46,7 +46,7 @@ function TileImgComponent({ documentId, pageIndex, tile, dpr, scale }: TileImgPr
         })
       }
     }
-  }, [scope, pageIndex, tile.id, dpr])
+  }, [scope, pageIndex, tile, dpr])
 
   const handleImageLoad = () => {
     if (urlRef.current) {

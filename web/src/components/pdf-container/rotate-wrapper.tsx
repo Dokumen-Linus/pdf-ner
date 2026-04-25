@@ -1,5 +1,6 @@
 import { CSSProperties, HTMLAttributes, ReactNode } from "react"
-import { Rotate } from "@embedpdf/plugin-rotate/react"
+
+import { Rotate } from "./plugin-rotate-2"
 
 type RotateWrapperProps = Omit<HTMLAttributes<HTMLDivElement>, "style"> & {
   enabled: boolean

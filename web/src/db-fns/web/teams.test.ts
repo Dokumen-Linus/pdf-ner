@@ -2,12 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test"
 
 import { setCreateTeamHandler } from "~/tests/bun-test-setup/mocks"
 
-import {
-  createTeam,
-  getCurrentUserTeamsByOrganizationId,
-  getTeamById,
-  updateTeam,
-} from "./teams"
+import { createTeam, getCurrentUserTeamsByOrganizationId, getTeamById, updateTeam } from "./teams"
 import {
   authenticateAs,
   cleanupFixtures,

@@ -2,12 +2,6 @@
 
 History of `npx codesight --wiki` runs. Capped at 20 entries.
 
-## [2026-04-13 23:58:53] scan | 12 routes, 1 models, 67 components → 14 articles
-
-## [2026-04-14 00:51:44] scan | 12 routes, 1 models, 67 components → 14 articles
-
-## [2026-04-14 07:06:40] scan | 12 routes, 1 models, 68 components → 14 articles
-
 ## [2026-04-14 07:21:32] scan | 12 routes, 1 models, 68 components → 14 articles
 
 ## [2026-04-16 00:15:54] scan | 12 routes, 1 models, 70 components → 14 articles
@@ -41,3 +35,9 @@ History of `npx codesight --wiki` runs. Capped at 20 entries.
 ## [2026-04-18 23:32:44] scan | 18 routes, 1 models, 78 components → 17 articles
 
 ## [2026-04-19 03:23:15] scan | 18 routes, 1 models, 78 components → 17 articles
+
+## [2026-04-22 03:24:14] scan | 18 routes, 1 models, 80 components → 17 articles
+
+## [2026-04-25 16:00:59] scan | 18 routes, 1 models, 80 components → 17 articles
+
+## [2026-04-25 21:41:32] scan | 19 routes, 1 models, 80 components → 18 articles

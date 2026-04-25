@@ -1,35 +1,38 @@
-# python
-**/__pycache__/
-*.pyc
-**/.venv/
-**/.pytest_cache/
-**/.ruff_cache/
-**/*egg-info
-
-# javascript
-**/node_modules/
-
-# postgresql
-pgdata/
-logfile
-
-# commitlint
-node_modules/
-
-# coding LLM settings
-**/settings.local.json
-skill-lock.json
-skills-lock.json
-.agents/skills
-.kilo/skills
-
-# claude log
-.claude/command.log
-
-# base dir env
 .env
 
-nul
-**/nul
+*.log
+logfile
 
+nul
 .tmp*
+
+# Python
+__pycache__/
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+*.pyo
+*.pyd
+
+# JavaScript
+**/node_modules/
+node_modules/
+
+# PostgreSQL
+pgdata/
+
+# Coding assistants
+.claude/
+CLAUDE.md
+.mcp.json
+**/settings.local.json
+.kilo/skills
+.skill-lock.json
+skills-lock.json
+
+# Build
+build/
+dist/
+*.egg
+*.egg-info/

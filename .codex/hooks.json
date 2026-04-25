@@ -1,0 +1,53 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import pathlib, runpy, subprocess, sys; root = pathlib.Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], text=True).strip()); runpy.run_path(str(root / '.codex' / 'hooks' / sys.argv[1]), run_name='__main__')\" refresh_codesight.py",
+            "timeout": 120,
+            "statusMessage": "Refreshing Codesight wiki"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import pathlib, runpy, subprocess, sys; root = pathlib.Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], text=True).strip()); runpy.run_path(str(root / '.codex' / 'hooks' / sys.argv[1]), run_name='__main__')\" log_command.py",
+            "statusMessage": "Logging shell command"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(apply_patch|Edit|Write)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import pathlib, runpy, subprocess, sys; root = pathlib.Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], text=True).strip()); runpy.run_path(str(root / '.codex' / 'hooks' / sys.argv[1]), run_name='__main__')\" post_edit.py",
+            "statusMessage": "Formatting and checking edited files"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import pathlib, runpy, subprocess, sys; root = pathlib.Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], text=True).strip()); runpy.run_path(str(root / '.codex' / 'hooks' / sys.argv[1]), run_name='__main__')\" run_tests.py",
+            "timeout": 600,
+            "statusMessage": "Running changed-area tests"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -104,6 +104,11 @@
 - *(pkg)* Move pdfium_utils.py into package #86
 - Link web.users, organizations, teams to better auth and add to authorization.server.ts
 - *(web)* Update org, team, and project creation in profile.tsx and projects/index.tsx
+- *(web)* AddBookmarks capability
+- *(web)* Add entityType and replace button to selected anno menu #12
+- *(pkg)* Add tesseract ocr with pdfium rendering
+- *(gpu)* Inital runpod workers
+- *(pkg)* Use runpod workers in pdf_ocr_utils
 
 ### 🐛 Bug Fixes
 
@@ -172,6 +177,8 @@
 - Deprecated color, remove synchronous state
 - *(web)* Form typing
 - *(web)* Sync EntityTable and activeDocumentId
+- *(web)* Remove defaultFileName from export plugin #98
+- *(llm)* Add CLAUDE.md to .gitignore
 
 ### 💼 Other
 
@@ -230,6 +237,7 @@
 - Packages dir
 - *(web)* Make projects dir
 - *(web)* Rename email/send.tsx
+- *(web)* Move PDFContainer files
 
 ### 📚 Documentation
 
@@ -289,6 +297,14 @@
 - *(packages)* Otel_py/README.md
 - *(llm)* Update skill scripts and instructions
 - *(web)* Auth
+- *(llm)* Shorten CLAUDE.md
+- *(llm)* Optimize AGENTS.md
+- *(llm)* Replace claude with codex, edit skill descriptions
+- *(llm)* Edit DESIGN.md
+- Research
+- *(llm)* Inactivate some skills
+- *(llm)* Reactivate some skills
+- *(llm)* Improve codex config and hooks
 
 ### ⚡ Performance
 
@@ -343,6 +359,9 @@
 - *(wk)* Use otel_py
 - *(web)* Centralize and improve calls to fastapi
 - *(web)* Depcheck
+- React linting
+- *(web)* Move to plugin-bookmark-2
+- *(web)* Simplify sidebar use and move to plugin-rotate-2
 
 ### 🎨 Styling
 
@@ -382,6 +401,7 @@
 - *(web)* Prettier
 - *(web)* Prettier
 - *(web)* Move import order from prettier to eslint to work with VSCode extension
+- *(web)* Add public assets to use later
 
 ### 🧪 Testing
 
@@ -488,6 +508,11 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Remove @claude from github.com
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Add runpod ocr env vars to infra, api, workers
+- Fix generate_env_example.py to dynamically create from 4 truth sources
 
 ### ◀️ Revert
 
@@ -498,3 +523,4 @@
 - *(fe)* Remove storybook
 - *(web)* Tanstack update
 - *(web)* Remove selection menu from plugin-selection-2
+- *(web)* Return useRotatePlugin

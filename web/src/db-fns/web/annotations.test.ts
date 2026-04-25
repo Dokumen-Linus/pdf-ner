@@ -212,8 +212,8 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
       .where(sql`${pdfs.id} = ${f.pdfId}`)
 
     try {
-      setAuthenticated({ id: f.userAId })
-      await acquireLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId } })
+      setAuthenticated({ id: f.userAId! })
+      await acquireLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId! } })
 
       const initial = [
         {
@@ -244,7 +244,7 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
       const first = await saveAnnotationsByPdfId({
         data: {
           pdfId: f.pdfId,
-          userId: f.userAId,
+          userId: f.userAId!,
           annotations: initial,
           labeledEntities: { Title: ["one"], Date: ["two"] },
         },
@@ -278,7 +278,7 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
       await saveAnnotationsByPdfId({
         data: {
           pdfId: f.pdfId,
-          userId: f.userAId,
+          userId: f.userAId!,
           annotations: replacement,
           labeledEntities: { Agency: ["three"] },
         },
@@ -294,7 +294,7 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
       await saveAnnotationsByPdfId({
         data: {
           pdfId: f.pdfId,
-          userId: f.userAId,
+          userId: f.userAId!,
           annotations: [],
           labeledEntities: {},
         },
@@ -325,24 +325,24 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
 
     try {
       // userA holds the lock.
-      setAuthenticated({ id: f.userAId })
-      await acquireLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId } })
+      setAuthenticated({ id: f.userAId! })
+      await acquireLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId! } })
 
       // userB tries to save a project they do not own — reject before lock logic.
-      setAuthenticated({ id: f.userBId })
+      setAuthenticated({ id: f.userBId! })
       await expect(
         saveAnnotationsByPdfId({
           data: {
             pdfId: f.pdfId,
-            userId: f.userBId,
+            userId: f.userBId!,
             annotations: [],
             labeledEntities: {},
           },
         }),
       ).rejects.toThrow("You do not have access to this project")
     } finally {
-      setAuthenticated({ id: f.userAId })
-      await releaseLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId } })
+      setAuthenticated({ id: f.userAId! })
+      await releaseLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId! } })
     }
   })
 
@@ -361,12 +361,12 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
     try {
       // Even userA can't save — their own heartbeat is stale, meaning the lock
       // is logically forfeited. The app should treat it as "session expired".
-      setAuthenticated({ id: f.userAId })
+      setAuthenticated({ id: f.userAId! })
       await expect(
         saveAnnotationsByPdfId({
           data: {
             pdfId: f.pdfId,
-            userId: f.userAId,
+            userId: f.userAId!,
             annotations: [],
             labeledEntities: {},
           },
@@ -377,7 +377,7 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
         saveAnnotationsByPdfId({
           data: {
             pdfId: f.pdfId,
-            userId: f.userBId,
+            userId: f.userBId!,
             annotations: [],
             labeledEntities: {},
           },

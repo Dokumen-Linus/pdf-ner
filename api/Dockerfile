@@ -20,6 +20,10 @@ RUN uv sync --no-dev --frozen
 # ---- Runtime stage ----
 FROM python:3.13-slim AS runtime
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends tesseract-ocr && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN groupadd -g 1001 appgroup && \
     useradd -u 1001 -g appgroup -s /bin/false appuser
 

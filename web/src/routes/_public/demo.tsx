@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import EntityTable from "@/components/entity-table/components/entity-table"
 import PDFContainer from "@/components/pdf-container/pdf-container"
-import { m } from "@/integrations/paraglide/messages.js"
 import demoEntityTypes from "@/lib/demo/demo-entity-types"
 
 export const Route = createFileRoute("/_public/demo")({
@@ -16,18 +15,17 @@ function DemoPage() {
         <PDFContainer
           initalDocuments={[
             {
-              name: "Federal Register 2025-21665",
+              name: "Federal Register 2025-21665.pdf",
               url: "https://raw.githubusercontent.com/optimalcharb/pdf-entity-labeling/feaa8873a60883cf072a604383e6986f8ca82285/public/example-pdfs/federal-register/2025-21665.pdf",
               autoActivate: false,
             },
             {
-              name: "Federal Register 2025-21767",
+              name: "Federal Register 2025-21767.pdf",
               url: "https://raw.githubusercontent.com/optimalcharb/pdf-entity-labeling/master/public/example-pdfs/federal-register/2025-21767_first_page.pdf",
               autoActivate: false,
             },
           ]}
-          exportName={m.demo_export_name()}
-          author={m.demo_author_fallback()}
+          allEntityTypes={demoEntityTypes}
           canRotate={false}
         />
       </div>

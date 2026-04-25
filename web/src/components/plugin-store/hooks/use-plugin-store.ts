@@ -11,7 +11,7 @@ import type { ScrollCapability } from "@/components/pdf-container/plugin-scroll-
 import type { SearchCapability } from "@/components/pdf-container/plugin-search-2"
 import type { SelectionCapability } from "@/components/pdf-container/plugin-selection-2"
 
-interface PluginStore {
+export interface PluginStore {
   annoCapability: AnnotationCapability | null
   annoState: AnnotationState | null
   searchCapability: SearchCapability | null

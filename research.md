@@ -18,12 +18,6 @@
 
 ## Coding Agents
 
-### Paid Options
-
-- Claude Code
-- Codex
-- [MiniMax CLI](https://github.com/MiniMax-AI/cli)
-
 ### Free Options
 
 - GitHub Copilot
@@ -38,15 +32,6 @@
 - Cursor
 - Lovable
 - Replit
-
-### Essential Tools
-
-- [Browser Use](https://docs.browser-use.com/open-source/browser-use-cli)
-
-### Claude
-
-- [HouseofMVPs](https://github.com/Houseofmvps?tab=repositories)
-- monitor usage [claude-pulse](https://github.com/NoobyGains/claude-pulse)
 
 ### Skills
 
@@ -352,7 +337,6 @@
 ### FastAPI Examples
 
 - Redis example [long2ice/fastapi-cache](https://github.com/long2ice/fastapi-cache)
-- Redis example [madkote/fastapi-plugins](https://github.com/madkote/fastapi-plugins)
 - Redis example [aio-libs/aiocache](https://github.com/aio-libs/aiocache)
 - spaCy example [microsoft/cookiecutter-spacy-fastapi](https://github.com/microsoft/cookiecutter-spacy-fastapi)
 - [lm-sys/FastChat](https://github.com/lm-sys/FastChat)
@@ -394,13 +378,3 @@
 ### Database Schema Visualization
 
 - [oslabs-beta/SQLens](https://github.com/oslabs-beta/SQLens)
-
-### Private Data Sources
-
-- Microsoft email
-- Google email
-- OneDrive
-- Google Drive
-- Azure Blob
-- S3
-- GCS

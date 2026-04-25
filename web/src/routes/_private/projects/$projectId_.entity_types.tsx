@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { type ReactFormExtendedApi, useForm } from "@tanstack/react-form"
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
 import { LoaderCircleIcon, PlusIcon, SaveIcon, Trash2Icon } from "lucide-react"
@@ -258,6 +258,42 @@ function EntityTypesPage() {
   const { project, entityTypes, stdEntityTypes, loadError } = Route.useLoaderData()
   const { projectId } = Route.useParams()
 
+  const pageKey = JSON.stringify({
+    projectId,
+    projectName: project?.name ?? null,
+    projectDescription: project?.description ?? null,
+    projectOrientation: project?.orientation ?? null,
+    entityTypeIds: entityTypes.map((entityType) => entityType.id),
+  })
+
+  return (
+    <EntityTypesPageContent
+      key={pageKey}
+      router={router}
+      project={project}
+      entityTypes={entityTypes}
+      stdEntityTypes={stdEntityTypes}
+      loadError={loadError}
+      projectId={projectId}
+    />
+  )
+}
+
+function EntityTypesPageContent({
+  router,
+  project,
+  entityTypes,
+  stdEntityTypes,
+  loadError,
+  projectId,
+}: {
+  router: ReturnType<typeof useRouter>
+  project: Awaited<ReturnType<typeof getProjectById>> | null
+  entityTypes: FoundDbEntityType[]
+  stdEntityTypes: FoundStandardEntityType[]
+  loadError: string | null
+  projectId: string
+}) {
   const initialRows = useMemo(() => entityTypes.map(toRow), [entityTypes])
   const initialIds = useMemo(
     () => new Set(entityTypes.map((et: FoundDbEntityType) => et.id)),
@@ -281,10 +317,6 @@ function EntityTypesPage() {
   const [projectSaveError, setProjectSaveError] = useState<string | null>(null)
   const [lastSavedProject, setLastSavedProject] = useState<ProjectSettingsValues>(initialProject)
   const projectNameRef = useRef<HTMLInputElement | null>(null)
-
-  useEffect(() => {
-    setLastSavedProject(initialProject)
-  }, [initialProject])
 
   const projectForm = useForm({
     defaultValues: initialProject,
@@ -339,10 +371,6 @@ function EntityTypesPage() {
   // Entity types form state
   const [saveError, setSaveError] = useState<string | null>(null)
   const [lastSavedRows, setLastSavedRows] = useState<EntityTypeRow[]>(initialRows)
-
-  useEffect(() => {
-    setLastSavedRows(initialRows)
-  }, [initialRows])
 
   const form = useForm<
     FormValues,

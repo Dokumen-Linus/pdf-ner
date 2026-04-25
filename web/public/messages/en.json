@@ -323,8 +323,6 @@
   "entity_type_contact_name": "Contact Name",
   "entity_type_contact_position": "Contact Position",
   "entity_type_contact_email": "Contact Email",
-  "demo_author_fallback": "anonymous",
-  "demo_export_name": "labeled_2025-19982_first_page.pdf",
   "pdf_toolbar_dev_highlight": "highlight",
   "pdf_toolbar_dev_underline": "underline",
   "pdf_toolbar_dev_red_highlights_tooltip": "Turn all annotations into red highlights",

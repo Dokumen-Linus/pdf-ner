@@ -1,0 +1,24 @@
+model = "gpt-5.5"
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "xhigh"
+model_supports_reasoning_summaries = true
+model_reasoning_summary = "detailed"
+model_verbosity = "medium"
+
+hide_agent_reasoning = false
+show_raw_agent_reasoning = true
+disable_paste_burst = false
+
+web_search = "cached"
+log_dir = "C:/Users/zchar/Desktop/pdf-ner/.codex/logs"
+
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[features]
+codex_hooks = true
+fast_mode = false
+personality = false
+memories = false
+shell_snapshot = true
+shell_tool = true

@@ -10,7 +10,7 @@ const initialState = {
 }
 
 // define state actions
-type EntityTypeStore = typeof initialState & {
+export type EntityTypeStore = typeof initialState & {
   setByName: (byName: Record<string, EntityType>) => void
   patchEntityType: (name: string, patch: Partial<EntityType>) => void
   // fetchByName: () => Promise<void>

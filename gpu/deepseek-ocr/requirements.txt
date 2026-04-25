@@ -1,0 +1,5 @@
+fastapi[standard]
+pillow
+uvicorn[standard]
+anyio
+vllm

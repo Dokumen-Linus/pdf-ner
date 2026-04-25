@@ -9,6 +9,7 @@ const LazyPDFContainer = lazy(() => import("./pdf-container"))
 
 interface PDFContainerClientProps {
   initalDocuments: InitialDocumentOptions[]
+  allEntityTypes: import("@/components/entity-table/entity-type").EntityType[]
   author?: string
   exportName?: string
   canRotate?: boolean

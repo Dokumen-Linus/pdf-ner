@@ -461,6 +461,7 @@ function LabellingPage() {
           {activePdfId && initialUrl ? (
             <PDFContainerClient
               initalDocuments={[{ url: initialUrl, documentId: activePdfId }]}
+              allEntityTypes={entityTableTypes}
               author={userId ?? "anonymous"}
               exportName={`${project.name}-labeled.pdf`}
               canRotate={false}
