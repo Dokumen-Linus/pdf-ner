@@ -312,9 +312,9 @@ describe.if(runTests)("Project Table Server Functions", () => {
       await expect(
         getProjectById({ data: { id: "00000000-0000-0000-0000-000000000000" } }),
       ).rejects.toThrow("Project not found")
-      await expect(
-        getProjectByName({ data: { name: `${label}-missing` } }),
-      ).rejects.toThrow("Project not found")
+      await expect(getProjectByName({ data: { name: `${label}-missing` } })).rejects.toThrow(
+        "Project not found",
+      )
       await expect(
         updateProject({
           data: {

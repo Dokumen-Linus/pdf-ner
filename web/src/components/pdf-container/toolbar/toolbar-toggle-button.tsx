@@ -9,7 +9,10 @@ interface ToolbarToggleButtonProps {
   setIsSidebarOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export default function ToolbarToggleButton({ isSidebarOpen, setIsSidebarOpen }: ToolbarToggleButtonProps) {
+export default function ToolbarToggleButton({
+  isSidebarOpen,
+  setIsSidebarOpen,
+}: ToolbarToggleButtonProps) {
   return (
     <button
       type="button"

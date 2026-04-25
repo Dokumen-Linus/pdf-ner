@@ -44,8 +44,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 
 ### API Invariants
 - No ORM
-- Use router -> service -> repository
-- Only `repository.py` may execute SQL, using the passed `asyncpg` connection
+- Only `repository.py` may execute SQL, using the passed `asyncpg` connection passed router -> service -> repository
 - Do not define Python schemas for SQL tables; SQL execution is the source of truth for DB shape
 - Never set `response_model`
 - Avoid blocking code in async functions
@@ -54,7 +53,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - `service.py`, `repository.py`, `tasks.py`, and `events.py` should contain functions, not classes
 - Only define dataclasses in `schemas.py`
 - Import `settings`; do not call `get_settings()`
-- Do not pass `app.state` into services; expose explicit dependencies from `core.dependencies.py`
+- Do not pass `app.state` into services; expose explicit dependencies from `/core/dependencies.py`
 - No global variables; initialize shared state in lifespan/app state
 
 ### Worker Invariants
