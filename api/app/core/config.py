@@ -32,6 +32,13 @@ class Settings(BaseSettings):
     AVATARS_AWS_REGION: str = "us-east-1"
     AVATARS_AWS_ENDPOINT_URL: str | None = None
 
+    OCR_MODEL: str = "deepseek-ocr"
+    DEEPSEEK_OCR_RUNPOD_ENDPOINT_URL: str | None = None
+    OLM_OCR2_RUNPOD_ENDPOINT_URL: str | None = None
+    RUNPOD_API_KEY: str | None = None
+    OCR_RUNPOD_TIMEOUT_SECONDS: float = 60.0
+    OCR_RUNPOD_RETRIES: int = 0
+
     model_config = SettingsConfigDict(
         frozen=True,
         env_file=".env",
