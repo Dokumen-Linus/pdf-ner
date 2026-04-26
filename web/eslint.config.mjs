@@ -58,16 +58,58 @@ export default [
         {
           paths: [
             {
+              name: "@better-auth/drizzle-adapter",
+              message: "BetterAuth setup must interact with the database without an ORM.",
+            },
+            {
+              name: "@better-auth/mongo-adapter",
+              message: "BetterAuth setup must interact with the database without an ORM.",
+            },
+            {
+              name: "@better-auth/prisma-adapter",
+              message: "BetterAuth setup must interact with the database without an ORM.",
+            },
+            {
+              name: "@tanstack/router-generator",
+              message: "May not interact with the router generator directly.",
+            },
+            {
+              name: "@tanstack/router-plugin",
+              message: "Must use subpaths of @tanstack/react-start/plugin instead.",
+            },
+            {
+              name: "@tanstack/start-client-core",
+              message: "Import TanStack Start APIs through @tanstack/react-start or its subpaths.",
+            },
+            {
+              name: "@tanstack/start-fn-stubs",
+              message: "Import TanStack Start APIs through @tanstack/react-start or its subpaths.",
+            },
+            {
+              name: "@tanstack/start-plugin-core",
+              message: "Import TanStack Start APIs through @tanstack/react-start or its subpaths.",
+            },
+            {
               name: "@tanstack/start-server-core",
-              message:
-                "Import TanStack Start APIs through @tanstack/react-start or its React Start subpaths.",
+              message: "Import TanStack Start APIs through @tanstack/react-start or its subpaths.",
+            },
+            {
+              name: "@tanstack/start-storage-context",
+              message: "Import TanStack Start APIs through @tanstack/react-start or its subpaths.",
+            },
+            {
+              name: "@tanstack/virtual-file-routes",
+              message: "Import TanStack Start APIs through @tanstack/react-start or its subpaths.",
             },
           ],
           patterns: [
             {
-              group: ["@tanstack/start-server-core/*"],
-              message:
-                "Import TanStack Start APIs through @tanstack/react-start or its React Start subpaths.",
+              group: "@tanstack/start-client-core/*",
+              message: "Import TanStack Start APIs through @tanstack/react-start or its subpaths.",
+            },
+            {
+              group: "@tanstack/start-server-core/*",
+              message: "Import TanStack Start APIs through @tanstack/react-start or its subpaths.",
             },
           ],
         },
