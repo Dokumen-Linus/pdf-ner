@@ -24,8 +24,6 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     GOOGLE_AI_API_KEY: str
 
-    STRIPE_SECRET_KEY: str
-
     AVATARS_BUCKET: str
     AVATARS_AWS_ACCESS_KEY_ID: str
     AVATARS_AWS_SECRET_ACCESS_KEY: str

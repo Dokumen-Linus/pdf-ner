@@ -43,7 +43,10 @@ _TEST_API_KEY: str = os.environ["API_KEY"]
 def mock_anthropic_client():
     client = AsyncMock()
     client.messages.create = AsyncMock(
-        return_value=MagicMock(content=[MagicMock(text='{"field1": "value1"}')])
+        return_value=MagicMock(
+            content=[MagicMock(text='{"field1": "value1"}')],
+            usage=MagicMock(input_tokens=11, output_tokens=7),
+        )
     )
     return client
 
@@ -53,7 +56,8 @@ def mock_openai_client():
     client = AsyncMock()
     client.chat.completions.create = AsyncMock(
         return_value=MagicMock(
-            choices=[MagicMock(message=MagicMock(content='{"field1": "value1"}'))]
+            choices=[MagicMock(message=MagicMock(content='{"field1": "value1"}'))],
+            usage=MagicMock(prompt_tokens=11, completion_tokens=7),
         )
     )
     return client
@@ -63,7 +67,10 @@ def mock_openai_client():
 def mock_google_client():
     client = MagicMock()
     client.aio.models.generate_content = AsyncMock(
-        return_value=MagicMock(text='{"field1": "value1"}')
+        return_value=MagicMock(
+            text='{"field1": "value1"}',
+            usage_metadata=MagicMock(prompt_token_count=11, candidates_token_count=7),
+        )
     )
     return client
 

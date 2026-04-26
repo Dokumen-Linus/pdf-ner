@@ -1,3 +1,4 @@
+from decimal import Decimal
 import json
 import logging
 from uuid import UUID
@@ -5,16 +6,17 @@ from uuid import UUID
 import asyncpg
 from fastapi import HTTPException
 
-from app.domains.shared.repository import fetch_model_cost
+from app.domains.shared.schemas import LLMResponseData
 from app.integrations.anthropic import call_anthropic_async
 from app.integrations.gemini import call_google_ai_async
 from app.integrations.openai import call_openai_async
-from app.domains.shared.schemas import LLMResponseData
 
 from . import repository
 from .schemas import ExtractEntitiesRequest
 
 logger = logging.getLogger(__name__)
+
+SUPPORTED_PROVIDERS = {"anthropic", "gemini", "openai"}
 
 
 def build_prompt_from_template(
@@ -69,42 +71,6 @@ def validate_json(response_text: str) -> dict:
         raise HTTPException(status_code=422, detail="LLM response is not valid JSON") from None
 
 
-async def record_llm_usage(
-    conn: asyncpg.Connection,
-    user_id: UUID | None,
-    project_id: UUID | None,
-    provider: str,
-    model: str,
-    input_tokens: int,
-    output_tokens: int,
-) -> None:
-    """Insert one usage record into workers.llm_usage (api_user has INSERT grant)."""
-    cost = await fetch_model_cost(conn, model, input_tokens, output_tokens)
-    try:
-        await conn.execute(
-            """
-            INSERT INTO workers.llm_usage
-                (user_id, project_id, provider, model, source, input_tokens, output_tokens, cost_usd)
-            VALUES ($1, $2, $3, $4, 'api', $5, $6, $7)
-            """,
-            user_id,
-            project_id,
-            provider,
-            model,
-            input_tokens,
-            output_tokens,
-            cost,
-        )
-    except Exception:
-        logger.exception(
-            "Failed to record LLM usage: provider=%s model=%s in=%d out=%d",
-            provider,
-            model,
-            input_tokens,
-            output_tokens,
-        )
-
-
 async def extract_entities(
     conn: asyncpg.Connection,
     clients: dict,
@@ -115,6 +81,13 @@ async def extract_entities(
     if not project:
         logger.error("Project not found: %s", request.project_id)
         raise HTTPException(status_code=404, detail="Project not found")
+
+    model = await repository.fetch_available_model(conn, request.model)
+    if not model:
+        raise HTTPException(status_code=422, detail=f"Model is not available: {request.model}")
+    provider = model["provider"]
+    if provider not in SUPPORTED_PROVIDERS:
+        raise HTTPException(status_code=422, detail=f"Unsupported model provider: {provider}")
 
     entity_types = await repository.fetch_entity_types(conn, request.project_id)
     if not entity_types:
@@ -151,7 +124,7 @@ async def extract_entities(
     try:
         llm_usage: LLMResponseData = await call_llm(
             clients,
-            request.provider,
+            provider,
             request.model,
             system_prompt,
             document_text,
@@ -163,15 +136,34 @@ async def extract_entities(
         raise HTTPException(status_code=502, detail="LLM provider error") from None
 
     # Record usage (non-blocking best-effort)
-    await record_llm_usage(
-        conn,
-        request.user_id,
-        request.project_id,
-        request.provider,
-        request.model,
-        llm_usage.input_tokens,
-        llm_usage.output_tokens,
+    input_cost_usd = Decimal(
+        str(round((llm_usage.input_tokens * float(model["usd_per_1m_input"])) / 1_000_000, 8))
     )
+    output_cost_usd = Decimal(
+        str(round((llm_usage.output_tokens * float(model["usd_per_1m_output"])) / 1_000_000, 8))
+    )
+    billing_user_id = None if project["organization_id"] else project["owner_id"]
+    billing_organization_id = project["organization_id"]
+    try:
+        await repository.record_llm_usage(
+            conn,
+            actor_user_id=request.user_id,
+            project_id=request.project_id,
+            billing_user_id=billing_user_id,
+            billing_organization_id=billing_organization_id,
+            model=request.model,
+            input_tokens=llm_usage.input_tokens,
+            output_tokens=llm_usage.output_tokens,
+            input_cost_usd=input_cost_usd,
+            output_cost_usd=output_cost_usd,
+        )
+    except Exception:
+        logger.exception(
+            "Failed to record LLM usage: model=%s in=%d out=%d",
+            request.model,
+            llm_usage.input_tokens,
+            llm_usage.output_tokens,
+        )
 
     extracted = validate_json(llm_usage.text)
 

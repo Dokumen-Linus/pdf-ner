@@ -25,6 +25,7 @@ T = TypeVar("T", bound=BaseModel)
 # Cache Result
 # ============================================================================
 
+
 class CacheResult(Generic[T]):
     """Result of a cache operation."""
 
@@ -48,6 +49,7 @@ class CacheResult(Generic[T]):
 # ============================================================================
 # Cache Service
 # ============================================================================
+
 
 class CacheService(Generic[T]):
     """
@@ -349,6 +351,7 @@ class CacheService(Generic[T]):
 # Decorator for Method Caching
 # ============================================================================
 
+
 def cached(
     prefix: str,
     ttl: int = 300,
@@ -453,4 +456,5 @@ if __name__ == "__main__":
         await redis_client.close()
 
     import asyncio
+
     asyncio.run(main())

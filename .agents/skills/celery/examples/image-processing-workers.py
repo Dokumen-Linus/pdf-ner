@@ -56,9 +56,7 @@ logger = structlog.get_logger()
 celery_app = Celery("image_processing")
 celery_app.config_from_object("celery_config")
 
-redis_client = redis.from_url(
-    os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-)
+redis_client = redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379/0"))
 
 # Processing configuration
 THUMBNAIL_SIZES = {
@@ -571,10 +569,7 @@ def process_image_batch(
     ]
 
     # Create processing chains for each image
-    processing_tasks = [
-        process_single_image(img["url"], img["id"])
-        for img in images
-    ]
+    processing_tasks = [process_single_image(img["url"], img["id"]) for img in images]
 
     # Use chord: parallel processing + aggregation
     workflow = chord(
@@ -646,10 +641,7 @@ def get_image_progress(batch_id: str) -> dict:
     progress_key = f"batch_progress:{batch_id}"
     progress = redis_client.hgetall(progress_key)
 
-    return {
-        image_id.decode(): status.decode()
-        for image_id, status in progress.items()
-    }
+    return {image_id.decode(): status.decode() for image_id, status in progress.items()}
 
 
 # =============================================================================

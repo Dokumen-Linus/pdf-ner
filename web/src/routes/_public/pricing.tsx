@@ -6,7 +6,7 @@ import { m } from "@/integrations/paraglide/messages.js"
 
 import type { FoundModel } from "@/db/types"
 
-type ProviderSlug = "anthropic" | "openai" | "google"
+type ProviderSlug = "anthropic" | "openai" | "gemini"
 
 type ProviderDisplay = {
   slug: ProviderSlug
@@ -31,9 +31,9 @@ const PROVIDER_DISPLAY: Record<ProviderSlug, ProviderDisplay> = {
     bg: "bg-green-50",
     border: "border-green-200",
   },
-  google: {
-    slug: "google",
-    name: "Google",
+  gemini: {
+    slug: "gemini",
+    name: "Gemini",
     color: "text-blue-700",
     bg: "bg-blue-50",
     border: "border-blue-200",
@@ -41,8 +41,8 @@ const PROVIDER_DISPLAY: Record<ProviderSlug, ProviderDisplay> = {
 }
 
 // The three values above mirror the CHECK constraint on public.models.provider
-// (db/migrations/00091_create_models.sql). Unknown providers are filtered out.
-const PROVIDER_ORDER: ProviderSlug[] = ["anthropic", "openai", "google"]
+// (db/migrations/00005_create_models.sql). Unknown providers are filtered out.
+const PROVIDER_ORDER: ProviderSlug[] = ["anthropic", "openai", "gemini"]
 
 // Price comes back from Drizzle `numeric(10,4)` as a string like "15.0000".
 // Format to 2 decimals for display. Keep the raw string as source of truth.
@@ -103,9 +103,11 @@ export const Route = createFileRoute("/_public/pricing")({
 
 function PricingPage() {
   const { providerGroups, loadError } = Route.useLoaderData()
-  const [pricingUnavailableBefore, pricingUnavailableAfter = ""] = m.pricing_live_unavailable({
-    email: "__EMAIL__",
-  }).split("__EMAIL__")
+  const [pricingUnavailableBefore, pricingUnavailableAfter = ""] = m
+    .pricing_live_unavailable({
+      email: "__EMAIL__",
+    })
+    .split("__EMAIL__")
   const planFeatures = [
     m.pricing_feature_1(),
     m.pricing_feature_2(),
@@ -210,9 +212,7 @@ function PricingPage() {
                   {m.pricing_plan_price_suffix()}
                 </span>
               </p>
-              <p className="mt-2 text-[14px] text-[#5C5E62]">
-                {m.pricing_plan_metered_note()}
-              </p>
+              <p className="mt-2 text-[14px] text-[#5C5E62]">{m.pricing_plan_metered_note()}</p>
             </div>
 
             <ul className="mb-8 space-y-3">
@@ -330,9 +330,7 @@ function PricingPage() {
             </div>
           )}
 
-          <p className="mt-6 text-center text-[12px] text-[#8E8E8E]">
-            {m.pricing_models_note()}
-          </p>
+          <p className="mt-6 text-center text-[12px] text-[#8E8E8E]">{m.pricing_models_note()}</p>
         </div>
       </section>
 
@@ -356,9 +354,7 @@ function PricingPage() {
 
       {/* Bottom CTA */}
       <section className="flex min-h-[40vh] flex-col items-center justify-center bg-white px-6 py-32 text-center">
-        <h2 className="mb-6 text-[40px] font-medium text-[#171A20]">
-          {m.pricing_bottom_title()}
-        </h2>
+        <h2 className="mb-6 text-[40px] font-medium text-[#171A20]">{m.pricing_bottom_title()}</h2>
         <p className="mb-10 max-w-md text-[16px] font-normal text-[#393C41]">
           {m.pricing_bottom_description()}
         </p>

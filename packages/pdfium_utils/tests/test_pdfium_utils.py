@@ -1,6 +1,8 @@
 from unittest.mock import patch
 
 from pdfium_utils import (
+    extract_text,
+    extract_text_by_page,
     highlight_phrases,
     parse_hex_color,
 )
@@ -134,3 +136,56 @@ class TestHighlightPhrases:
 
         assert yes_result.found is True
         assert no_result.found is False
+
+
+class TestExtractText:
+    def test_extract_text_by_page_uses_pdfium_text_pages(self):
+        first_textpage = type(
+            "MockTextPage",
+            (),
+            {
+                "count_chars": lambda self: 5,
+                "get_text_range": lambda self, index, count: f"first:{index}:{count}",
+            },
+        )()
+        second_textpage = type(
+            "MockTextPage",
+            (),
+            {
+                "count_chars": lambda self: 6,
+                "get_text_range": lambda self, index, count: f"second:{index}:{count}",
+            },
+        )()
+        mock_pages = [
+            type("MockPage", (), {"get_textpage": lambda self: first_textpage})(),
+            type("MockPage", (), {"get_textpage": lambda self: second_textpage})(),
+        ]
+        mock_pdf = type(
+            "MockPdf",
+            (),
+            {
+                "__len__": lambda self: len(mock_pages),
+                "__getitem__": lambda self, index: mock_pages[index],
+                "close": lambda self: None,
+            },
+        )()
+
+        with patch("pdfium_utils.pypdfium2.PdfDocument", return_value=mock_pdf):
+            result = extract_text_by_page(b"pdf-bytes")
+
+        assert result == [
+            {"page_index": 0, "text": "first:0:5"},
+            {"page_index": 1, "text": "second:0:6"},
+        ]
+
+    def test_extract_text_joins_trimmed_page_text(self):
+        with patch(
+            "pdfium_utils.extract_text_by_page",
+            return_value=[
+                {"page_index": 0, "text": " first\n"},
+                {"page_index": 1, "text": "second  "},
+            ],
+        ):
+            result = extract_text(b"pdf-bytes")
+
+        assert result == "first\n\nsecond"

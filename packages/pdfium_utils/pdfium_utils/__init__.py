@@ -69,6 +69,28 @@ def parse_hex_color(hex_color: str) -> tuple[int, int, int]:
     )
 
 
+def extract_text_by_page(pdf_bytes: bytes) -> list[dict[str, str | int]]:
+    """Extract searchable PDF text as zero-indexed page results."""
+    pdf = pypdfium2.PdfDocument(pdf_bytes)
+    try:
+        results: list[dict[str, str | int]] = []
+        for page_index in range(len(pdf)):
+            page = pdf[page_index]
+            textpage = page.get_textpage()
+            char_count = textpage.count_chars()
+            text = textpage.get_text_range(0, char_count) if char_count else ""
+            results.append({"page_index": page_index, "text": text})
+        return results
+    finally:
+        pdf.close()
+
+
+def extract_text(pdf_bytes: bytes, separator: str = "\n\n") -> str:
+    """Extract searchable PDF text and join pages with a blank line."""
+    page_texts = [str(page["text"]).strip() for page in extract_text_by_page(pdf_bytes)]
+    return separator.join(page_texts).strip()
+
+
 def draw_rect(
     page,
     bounds: tuple[float, float, float, float],
@@ -172,6 +194,8 @@ def highlight_phrases(
 __all__ = [
     "PhraseHighlightResult",
     "draw_rect",
+    "extract_text",
+    "extract_text_by_page",
     "find_text_objects",
     "highlight_phrases",
     "parse_hex_color",

@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 
-import { requireProjectOwnership, requireUserId } from "@/lib/authorization.server"
+import { requireProjectPermission } from "@/lib/role-authorization.server"
 
 import { jsonCall } from "./api-json-call.server"
 
@@ -14,8 +14,7 @@ export const startPromptOptimization = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const userId = await requireUserId()
-    await requireProjectOwnership(data.projectId, userId)
+    await requireProjectPermission(data.projectId, "engineering")
 
     return jsonCall("/api/v1/llm-ner/optimize-prompt", {
       method: "POST",
@@ -35,8 +34,6 @@ export const getOptimizationStatus = createServerFn({ method: "GET" })
     }),
   )
   .handler(async ({ data }) => {
-    const userId = await requireUserId()
-
     const res = (await jsonCall(`/api/v1/llm-ner/optimize-prompt/${data.taskId}/status`)) as {
       task_id: string
       status: string
@@ -58,7 +55,7 @@ export const getOptimizationStatus = createServerFn({ method: "GET" })
     if (!res.project_id) {
       throw new Error("Task not found or expired")
     }
-    await requireProjectOwnership(res.project_id, userId)
+    await requireProjectPermission(res.project_id, "engineering")
 
     return res
   })

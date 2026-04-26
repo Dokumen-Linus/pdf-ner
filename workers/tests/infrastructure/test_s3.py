@@ -1,6 +1,6 @@
 """Tests for shared S3 infrastructure helpers."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 from uuid import UUID
 
 import pytest

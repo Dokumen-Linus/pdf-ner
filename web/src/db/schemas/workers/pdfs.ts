@@ -3,6 +3,7 @@ import { jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core"
 import { prompts } from "../api/prompts"
 import { projects } from "../web/projects"
 
+import { optimizedPrompts } from "./optimized-prompts"
 import { workersSchema } from "./schema"
 
 import type { JsonbRecord, JsonbValue } from "../../types"
@@ -26,6 +27,9 @@ export const workersPdfs = workersSchema.table("pdfs", {
   modelType: text("model_type"),
   model: text("model"),
   promptId: uuid("prompt_id").references(() => prompts.id, { onDelete: "set null" }),
+  optimizedPromptId: uuid("optimized_prompt_id").references(() => optimizedPrompts.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 })

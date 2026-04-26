@@ -48,9 +48,7 @@ async def ocr(request: Request) -> dict[str, Any]:
     ensure_ready(request)
     image = await read_png_image(
         request,
-        transform=lambda prepared: resize_longest_dimension(
-            prepared, TARGET_LONGEST_IMAGE_DIM
-        ),
+        transform=lambda prepared: resize_longest_dimension(prepared, TARGET_LONGEST_IMAGE_DIM),
     )
     result = await anyio.to_thread.run_sync(
         _generate_text,

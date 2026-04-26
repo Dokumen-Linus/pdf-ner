@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -11,6 +12,20 @@ class HighlightRequest(BaseModel):
         description='Mapping of phrase to hex color, e.g. {"hello": "#FF0000"}',
     )
     output_key: str = Field(min_length=1, description="S3 key for the highlighted PDF output")
+
+
+class ExtractTextRequest(BaseModel):
+    pdf_id: UUID
+    ocr_model: Literal["deepseek-ocr", "olm-ocr2"]
+
+
+class ExtractTextResponse(BaseModel):
+    pdf_id: UUID
+    full_text: str
+    text_by_page: dict
+    extract_method: str | None
+    source: Literal["metadata", "pdfium", "ocr"]
+    ocr_model: Literal["deepseek-ocr", "olm-ocr2"] | None = None
 
 
 @dataclass

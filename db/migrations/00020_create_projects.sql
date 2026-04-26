@@ -8,6 +8,8 @@ CREATE TABLE web.projects (
   bucket_id UUID,
   color_presets TEXT[], -- list of hex color code strings
   orientation TEXT NOT NULL DEFAULT 'any' CHECK (orientation IN ('any', 'portrait', 'landscape')),
+  ocr_method TEXT NOT NULL DEFAULT 'tesseract' CHECK (ocr_method IN ('tesseract', 'deepseek', 'olm')),
+  entity_extraction_model TEXT NOT NULL DEFAULT 'gpt-4o' REFERENCES public.models(id),
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   CONSTRAINT project_owner CHECK (owner_id IS NOT NULL OR team_id IS NOT NULL)

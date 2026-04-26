@@ -113,7 +113,7 @@ CREATE TABLE public.models (
     release_date timestamp with time zone NOT NULL,
     available_date timestamp with time zone DEFAULT now() NOT NULL,
     end_available_date timestamp with time zone,
-    CONSTRAINT models_provider_check CHECK ((provider = ANY (ARRAY['openai'::text, 'anthropic'::text, 'google'::text])))
+    CONSTRAINT models_provider_check CHECK ((provider = ANY (ARRAY['openai'::text, 'anthropic'::text, 'gemini'::text])))
 );
 
 
@@ -271,8 +271,11 @@ CREATE TABLE web.projects (
     bucket_id uuid,
     color_presets text[],
     orientation text DEFAULT 'any'::text NOT NULL,
+    ocr_method text DEFAULT 'tesseract'::text NOT NULL,
+    entity_extraction_model text DEFAULT 'gpt-4o'::text NOT NULL,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
+    CONSTRAINT projects_ocr_method_check CHECK ((ocr_method = ANY (ARRAY['tesseract'::text, 'deepseek'::text, 'olm'::text]))),
     CONSTRAINT projects_orientation_check CHECK ((orientation = ANY (ARRAY['any'::text, 'portrait'::text, 'landscape'::text])))
 );
 
@@ -304,7 +307,6 @@ CREATE TABLE workers.llm_usage (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     user_id uuid,
     project_id uuid,
-    provider text NOT NULL,
     model text NOT NULL,
     source text NOT NULL,
     task_name text,
@@ -348,6 +350,7 @@ CREATE TABLE workers.pdfs (
     model_type text,
     model text,
     prompt_id uuid,
+    optimized_prompt_id uuid,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
     CONSTRAINT pdfs_extract_method_check CHECK ((extract_method = ANY (ARRAY['pdfium'::text, 'tesseract'::text, 'olm'::text, 'deepseek'::text]))),
@@ -707,11 +710,27 @@ ALTER TABLE ONLY web.projects
 
 
 --
+-- Name: projects projects_entity_extraction_model_fkey; Type: FK CONSTRAINT; Schema: web; Owner: -
+--
+
+ALTER TABLE ONLY web.projects
+    ADD CONSTRAINT projects_entity_extraction_model_fkey FOREIGN KEY (entity_extraction_model) REFERENCES public.models(id);
+
+
+--
 -- Name: llm_usage llm_usage_project_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
 --
 
 ALTER TABLE ONLY workers.llm_usage
     ADD CONSTRAINT llm_usage_project_id_fkey FOREIGN KEY (project_id) REFERENCES web.projects(id) ON DELETE SET NULL;
+
+
+--
+-- Name: llm_usage llm_usage_model_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.llm_usage
+    ADD CONSTRAINT llm_usage_model_fkey FOREIGN KEY (model) REFERENCES public.models(id);
 
 
 --
@@ -747,6 +766,14 @@ ALTER TABLE ONLY workers.pdfs
 
 
 --
+-- Name: pdfs pdfs_optimized_prompt_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
+--
+
+ALTER TABLE ONLY workers.pdfs
+    ADD CONSTRAINT pdfs_optimized_prompt_id_fkey FOREIGN KEY (optimized_prompt_id) REFERENCES workers.optimized_prompts(id) ON DELETE SET NULL;
+
+
+--
 -- Name: prompt_evaluations prompt_evaluations_prompt_id_fkey; Type: FK CONSTRAINT; Schema: workers; Owner: -
 --
 
@@ -775,6 +802,7 @@ ALTER TABLE ONLY workers.stripe_customers
 
 INSERT INTO public.schema_migrations (version) VALUES
     ('00002'),
+    ('00005'),
     ('00010'),
     ('00018'),
     ('00020'),
@@ -787,5 +815,4 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('00060'),
     ('00070'),
     ('00080'),
-    ('00090'),
-    ('00091');
+    ('00090');

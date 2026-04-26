@@ -15,7 +15,7 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Progress } from "@/components/shadcn-ui/progress"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
-import { getProjectById } from "@/db-fns/web/projects"
+import { getCurrentProjectAccess, getProjectById } from "@/db-fns/web/projects"
 
 function EngineeringSkeleton() {
   return (
@@ -43,7 +43,13 @@ export const Route = createFileRoute("/_private/projects/$projectId_/engineering
         return { project: null, loadError: "Not authenticated" }
       }
 
-      const project = await getProjectById({ data: { id: params.projectId } })
+      const [project, access] = await Promise.all([
+        getProjectById({ data: { id: params.projectId } }),
+        getCurrentProjectAccess({ data: { projectId: params.projectId } }),
+      ])
+      if (access.subscriptionType !== "developer" || !access.canManage) {
+        return { project: null, loadError: "Only developers can run prompt engineering." }
+      }
       return { project, loadError: null }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)

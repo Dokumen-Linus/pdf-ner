@@ -2,7 +2,9 @@ from pathlib import Path
 import sys
 import time
 
-from dokumen_llm_providers import LLMResponseData, call_openai as _call_openai
+from dokumen_llm_providers import LLMResponseData
+from dokumen_llm_providers import call_openai as _call_openai
+from openai import AsyncOpenAI
 
 from app.core.logging import bind_worker_context
 
@@ -11,6 +13,8 @@ if str(_OBS_PATH) not in sys.path:
     sys.path.insert(0, str(_OBS_PATH))
 
 from otel_py import record_llm_call  # noqa: E402
+
+__all__ = ["AsyncOpenAI", "call_openai"]
 
 
 async def call_openai(*args, **kwargs) -> LLMResponseData:

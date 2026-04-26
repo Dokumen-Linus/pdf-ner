@@ -1,11 +1,10 @@
 import json
+from pathlib import Path
 import re
 import shutil
 import subprocess
 import sys
-from pathlib import Path
 from typing import Any
-
 
 PATCH_FILE_RE = re.compile(r"^\*\*\* (?:Add|Update|Delete) File: (.+)$", re.MULTILINE)
 

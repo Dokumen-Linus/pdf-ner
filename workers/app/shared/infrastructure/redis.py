@@ -1,5 +1,7 @@
 from pathlib import Path
 import sys
+from types import TracebackType
+from uuid import uuid4
 
 from celery import current_app
 import redis.asyncio as redis
@@ -62,6 +64,42 @@ async def delete_cache(key: str) -> bool:
     with observe_redis_operation("delete", key_prefix=_redis_key_prefix(key)):
         result = await client.delete(key)
     return result > 0
+
+
+class RedisLock:
+    """Small Redis SET NX lock with ownership-safe release."""
+
+    def __init__(self, key: str, ttl: int = 900) -> None:
+        self.key = key
+        self.ttl = ttl
+        self.token = str(uuid4())
+        self.acquired = False
+
+    async def __aenter__(self) -> "RedisLock":
+        client = await get_redis()
+        bind_worker_context(redis_key=self.key)
+        with observe_redis_operation("set", key_prefix=_redis_key_prefix(self.key)):
+            self.acquired = bool(await client.set(self.key, self.token, nx=True, ex=self.ttl))
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        tb: TracebackType | None,
+    ) -> None:
+        if not self.acquired:
+            return
+        client = await get_redis()
+        script = """
+        if redis.call("get", KEYS[1]) == ARGV[1] then
+            return redis.call("del", KEYS[1])
+        end
+        return 0
+        """
+        bind_worker_context(redis_key=self.key)
+        with observe_redis_operation("eval", key_prefix=_redis_key_prefix(self.key)):
+            await client.eval(script, 1, self.key, self.token)
 
 
 async def set_job_status(job_id: str, status: str, ttl: int = 86400) -> None:

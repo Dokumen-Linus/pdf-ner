@@ -49,13 +49,11 @@ celery_app.conf.broker_transport_options = {
     "priority_steps": list(range(10)),  # 0-9 priority levels (0=highest)
     "sep": ":",
     "queue_order_strategy": "priority",
-
     # Connection settings
     "visibility_timeout": 43200,  # 12 hours - for long-running tasks
     "socket_timeout": 30,
     "socket_connect_timeout": 30,
     "retry_on_timeout": True,
-
     # Health check interval
     "health_check_interval": 25,
 }
@@ -121,7 +119,6 @@ celery_app.conf.task_routes = {
     "app.tasks.bulk_*": {"queue": "low", "priority": 1},
     "app.tasks.send_*": {"queue": "notifications"},
     "app.tasks.analytics_*": {"queue": "analytics"},
-
     # Specific task routing
     "app.tasks.process_payment": {"queue": "high", "priority": 10},
     "app.tasks.generate_report": {"queue": "low", "priority": 0},

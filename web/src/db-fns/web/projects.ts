@@ -11,7 +11,8 @@ import {
   getProjectAccessForCurrentUser,
   requireProjectAccess,
   requireWorkspaceUser,
-} from "@/lib/authorization.server"
+} from "@/lib/project-authorization.server"
+import { requirePermission } from "@/lib/role-authorization.server"
 
 const MANAGE_TEAM_ROLE_FILTER = or(
   eq(authMembers.role, "owner"),
@@ -27,6 +28,8 @@ export const CreateProjectSchema = z.object({
   description: z.string().optional(),
   colorPresets: z.array(z.string()).optional(),
   orientation: z.enum(["any", "portrait", "landscape"]).optional(),
+  ocrMethod: z.enum(["tesseract", "deepseek", "olm"]).optional(),
+  entityExtractionModel: z.string().min(1).optional(),
 })
 
 export const createProject = createServerFn({ method: "POST" })
@@ -82,6 +85,8 @@ export const createProject = createServerFn({ method: "POST" })
         description: data.description,
         colorPresets: data.colorPresets,
         orientation: data.orientation,
+        ocrMethod: data.ocrMethod,
+        entityExtractionModel: data.entityExtractionModel,
         // Keep the creator as the stable owner record even for team-linked projects.
         ownerId: workspaceUser.userId,
         teamId: effectiveTeamId ?? null,
@@ -156,6 +161,8 @@ export const getAccessibleProjects = createServerFn({ method: "GET" })
         bucketId: projects.bucketId,
         colorPresets: projects.colorPresets,
         orientation: projects.orientation,
+        ocrMethod: projects.ocrMethod,
+        entityExtractionModel: projects.entityExtractionModel,
         createdAt: projects.createdAt,
         updatedAt: projects.updatedAt,
       })
@@ -207,6 +214,7 @@ export const getCurrentProjectAccess = createServerFn({ method: "GET" })
       isOwner: access.isOwner,
       userId: access.userId,
       authUserId: access.authUserId,
+      subscriptionType: access.subscriptionType,
       teamId: access.teamId,
       organizationId: access.organizationId,
     }
@@ -258,7 +266,8 @@ export const UpdateProjectSchema = CreateProjectSchema.partial().extend({
 export const updateProject = createServerFn({ method: "POST" })
   .inputValidator(UpdateProjectSchema)
   .handler(async ({ data }) => {
-    await requireProjectAccess(data.id, "manage")
+    const access = await requireProjectAccess(data.id, "manage")
+    requirePermission(access, "manage_project")
     const { id, ...updateData } = data
     const updatedProject = await db.update(projects).set(updateData).where(eq(projects.id, id))
     if (updatedProject.rowCount === 0) {
@@ -271,7 +280,8 @@ export const updateProject = createServerFn({ method: "POST" })
 export const deleteProject = createServerFn({ method: "POST" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
-    await requireProjectAccess(data.id, "manage")
+    const access = await requireProjectAccess(data.id, "manage")
+    requirePermission(access, "manage_project")
     const project = await db.delete(projects).where(eq(projects.id, data.id))
     if (project.rowCount === 0) {
       throw new Error("Project not found")

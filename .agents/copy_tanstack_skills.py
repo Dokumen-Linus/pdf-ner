@@ -8,7 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 NODE_MODULES = PROJECT_ROOT / "web" / "node_modules" / "@tanstack"
 SKILLS_DIR = PROJECT_ROOT / ".agents" / "skills"
 
-SKIP_FOLDERS = {"lifecycle", "virtual-file-routes"}
+SKIP_FOLDERS = {"lifecycle", "virtual-file-routes", "router-plugin"}
 
 NAME_LINE_PATTERN = re.compile(r"^(name:\s*)(\S+)(\s*)$")
 REQUIRES_INLINE_PATTERN = re.compile(r"^(requires:\s*)(\S+)(\s*)$")

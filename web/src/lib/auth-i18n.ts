@@ -59,7 +59,8 @@ const frApiErrorTranslations: AuthTranslationDictionary = {
   PASSWORD_TOO_SHORT: "Le mot de passe est trop court",
   PASSWORD_TOO_LONG: "Le mot de passe est trop long",
   USER_ALREADY_EXISTS: "Cet utilisateur existe deja.",
-  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "Cet utilisateur existe deja. Utilisez une autre adresse e-mail.",
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL:
+    "Cet utilisateur existe deja. Utilisez une autre adresse e-mail.",
   EMAIL_CAN_NOT_BE_UPDATED: "L'adresse e-mail ne peut pas etre modifiee",
   CREDENTIAL_ACCOUNT_NOT_FOUND: "Compte d'identification introuvable",
   SESSION_EXPIRED: "La session a expire. Reauthentifiez-vous pour effectuer cette action.",
@@ -97,8 +98,7 @@ const frApiErrorTranslations: AuthTranslationDictionary = {
   ORGANIZATION_ALREADY_EXISTS: "Cette organisation existe deja",
   ORGANIZATION_SLUG_ALREADY_TAKEN: "Ce slug d'organisation est deja utilise",
   ORGANIZATION_NOT_FOUND: "Organisation introuvable",
-  USER_IS_NOT_A_MEMBER_OF_THE_ORGANIZATION:
-    "L'utilisateur n'est pas membre de cette organisation",
+  USER_IS_NOT_A_MEMBER_OF_THE_ORGANIZATION: "L'utilisateur n'est pas membre de cette organisation",
   YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_ORGANIZATION:
     "Vous n'etes pas autorise a mettre a jour cette organisation",
   YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_ORGANIZATION:
@@ -108,16 +108,14 @@ const frApiErrorTranslations: AuthTranslationDictionary = {
     "L'utilisateur est deja membre de cette organisation",
   MEMBER_NOT_FOUND: "Membre introuvable",
   ROLE_NOT_FOUND: "Role introuvable",
-  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_TEAM:
-    "Vous n'etes pas autorise a creer une nouvelle equipe",
+  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_TEAM: "Vous n'etes pas autorise a creer une nouvelle equipe",
   TEAM_ALREADY_EXISTS: "Cette equipe existe deja",
   TEAM_NOT_FOUND: "Equipe introuvable",
   YOU_CANNOT_LEAVE_THE_ORGANIZATION_AS_THE_ONLY_OWNER:
     "Vous ne pouvez pas quitter l'organisation en tant qu'unique proprietaire",
   YOU_CANNOT_LEAVE_THE_ORGANIZATION_WITHOUT_AN_OWNER:
     "Vous ne pouvez pas quitter l'organisation sans proprietaire",
-  YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_MEMBER:
-    "Vous n'etes pas autorise a supprimer ce membre",
+  YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_MEMBER: "Vous n'etes pas autorise a supprimer ce membre",
   YOU_ARE_NOT_ALLOWED_TO_INVITE_USERS_TO_THIS_ORGANIZATION:
     "Vous n'etes pas autorise a inviter des utilisateurs dans cette organisation",
   USER_IS_ALREADY_INVITED_TO_THIS_ORGANIZATION:
@@ -134,21 +132,16 @@ const frApiErrorTranslations: AuthTranslationDictionary = {
   YOU_ARE_NOT_ALLOWED_TO_INVITE_USER_WITH_THIS_ROLE:
     "Vous n'etes pas autorise a inviter un utilisateur avec ce role",
   FAILED_TO_RETRIEVE_INVITATION: "Impossible de recuperer l'invitation",
-  YOU_HAVE_REACHED_THE_MAXIMUM_NUMBER_OF_TEAMS:
-    "Vous avez atteint le nombre maximal d'equipes",
+  YOU_HAVE_REACHED_THE_MAXIMUM_NUMBER_OF_TEAMS: "Vous avez atteint le nombre maximal d'equipes",
   UNABLE_TO_REMOVE_LAST_TEAM: "Impossible de supprimer la derniere equipe",
-  YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_MEMBER:
-    "Vous n'etes pas autorise a mettre a jour ce membre",
-  ORGANIZATION_MEMBERSHIP_LIMIT_REACHED:
-    "La limite de membres de l'organisation est atteinte",
+  YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_MEMBER: "Vous n'etes pas autorise a mettre a jour ce membre",
+  ORGANIZATION_MEMBERSHIP_LIMIT_REACHED: "La limite de membres de l'organisation est atteinte",
   YOU_ARE_NOT_ALLOWED_TO_CREATE_TEAMS_IN_THIS_ORGANIZATION:
     "Vous n'etes pas autorise a creer des equipes dans cette organisation",
   YOU_ARE_NOT_ALLOWED_TO_DELETE_TEAMS_IN_THIS_ORGANIZATION:
     "Vous n'etes pas autorise a supprimer des equipes dans cette organisation",
-  YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_TEAM:
-    "Vous n'etes pas autorise a mettre a jour cette equipe",
-  YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_TEAM:
-    "Vous n'etes pas autorise a supprimer cette equipe",
+  YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_TEAM: "Vous n'etes pas autorise a mettre a jour cette equipe",
+  YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_TEAM: "Vous n'etes pas autorise a supprimer cette equipe",
   INVITATION_LIMIT_REACHED: "La limite d'invitations est atteinte",
   TEAM_MEMBER_LIMIT_REACHED: "La limite de membres de l'equipe est atteinte",
   USER_IS_NOT_A_MEMBER_OF_THE_TEAM: "L'utilisateur n'est pas membre de cette equipe",
@@ -161,31 +154,24 @@ const frApiErrorTranslations: AuthTranslationDictionary = {
     "Vous n'etes pas autorise a retirer un membre de l'equipe",
   YOU_ARE_NOT_ALLOWED_TO_ACCESS_THIS_ORGANIZATION:
     "Vous n'etes pas autorise a acceder a cette organisation",
-  YOU_ARE_NOT_A_MEMBER_OF_THIS_ORGANIZATION:
-    "Vous n'etes pas membre de cette organisation",
+  YOU_ARE_NOT_A_MEMBER_OF_THIS_ORGANIZATION: "Vous n'etes pas membre de cette organisation",
   MISSING_AC_INSTANCE:
     "Le controle d'acces dynamique exige une instance AC predefinie dans le plugin d'authentification serveur. Consultez les journaux serveur pour plus d'informations.",
   YOU_MUST_BE_IN_AN_ORGANIZATION_TO_CREATE_A_ROLE:
     "Vous devez appartenir a une organisation pour creer un role",
-  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_ROLE:
-    "Vous n'etes pas autorise a creer un role",
-  YOU_ARE_NOT_ALLOWED_TO_UPDATE_A_ROLE:
-    "Vous n'etes pas autorise a mettre a jour un role",
-  YOU_ARE_NOT_ALLOWED_TO_DELETE_A_ROLE:
-    "Vous n'etes pas autorise a supprimer un role",
+  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_ROLE: "Vous n'etes pas autorise a creer un role",
+  YOU_ARE_NOT_ALLOWED_TO_UPDATE_A_ROLE: "Vous n'etes pas autorise a mettre a jour un role",
+  YOU_ARE_NOT_ALLOWED_TO_DELETE_A_ROLE: "Vous n'etes pas autorise a supprimer un role",
   YOU_ARE_NOT_ALLOWED_TO_READ_A_ROLE: "Vous n'etes pas autorise a lire un role",
-  YOU_ARE_NOT_ALLOWED_TO_LIST_A_ROLE:
-    "Vous n'etes pas autorise a lister les roles",
-  YOU_ARE_NOT_ALLOWED_TO_GET_A_ROLE:
-    "Vous n'etes pas autorise a recuperer un role",
+  YOU_ARE_NOT_ALLOWED_TO_LIST_A_ROLE: "Vous n'etes pas autorise a lister les roles",
+  YOU_ARE_NOT_ALLOWED_TO_GET_A_ROLE: "Vous n'etes pas autorise a recuperer un role",
   TOO_MANY_ROLES: "Cette organisation possede trop de roles",
   INVALID_RESOURCE: "La permission fournie inclut une ressource invalide",
   ROLE_NAME_IS_ALREADY_TAKEN: "Ce nom de role est deja utilise",
   CANNOT_DELETE_A_PRE_DEFINED_ROLE: "Impossible de supprimer un role predefini",
   ROLE_IS_ASSIGNED_TO_MEMBERS:
     "Impossible de supprimer un role attribue a des membres. Reattribuez d'abord ces membres a un autre role.",
-  PASSWORD_COMPROMISED:
-    "Le mot de passe saisi a ete compromis. Veuillez en choisir un autre.",
+  PASSWORD_COMPROMISED: "Le mot de passe saisi a ete compromis. Veuillez en choisir un autre.",
   ORGANIZATION_DELETION_DISABLED: "La suppression de l'organisation est desactivee",
 }
 
@@ -277,8 +263,7 @@ const enRedirectErrorTranslations: AuthTranslationDictionary = {
   unable_to_get_user_info: "Unable to get user info",
   unable_to_link_account: "Unable to link account",
   account_not_linked: "Account is not linked",
-  account_already_linked_to_different_user:
-    "Account is already linked to a different user",
+  account_already_linked_to_different_user: "Account is already linked to a different user",
   unsupported_response_type: "Unsupported response type",
   user_creation_failed: "User creation failed",
 }
@@ -314,8 +299,7 @@ const frRedirectErrorTranslations: AuthTranslationDictionary = {
   unable_to_get_user_info: "Impossible de recuperer les informations de l'utilisateur",
   unable_to_link_account: "Impossible de lier le compte",
   account_not_linked: "Le compte n'est pas lie",
-  account_already_linked_to_different_user:
-    "Le compte est deja lie a un autre utilisateur",
+  account_already_linked_to_different_user: "Le compte est deja lie a un autre utilisateur",
   unsupported_response_type: "Type de reponse non pris en charge",
   user_creation_failed: "La creation de l'utilisateur a echoue",
 }

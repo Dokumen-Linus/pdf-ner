@@ -10,8 +10,8 @@ INSERT INTO public.models (id, provider, usd_per_1m_input, usd_per_1m_output, re
 -- OpenAI
 ('gpt-4o',                     'openai',     2.50,  10.00,  '2024-05-13'),
 
--- Google
-('gemini-2.0-flash',           'google',     0.10,   0.40,  '2025-02-05')
+-- Gemini
+('gemini-2.0-flash',           'gemini',     0.10,   0.40,  '2025-02-05')
 
 ON CONFLICT (id) DO UPDATE SET
     provider          = EXCLUDED.provider,

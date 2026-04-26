@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 
-import type { FoundWorkersPdf, LlmUsage, StripeCustomer } from "../../db/types"
+import type { FoundWorkersPdf, LlmUsage, LlmUsageReportBatch } from "../../db/types"
 
 /**
  * Compile-time shape checks for workers schema Drizzle types.
@@ -15,29 +15,33 @@ describe("Workers Drizzle Schema Shape Checks", () => {
   it("LlmUsage should have expected workers.llm_usage fields", () => {
     type Expected = {
       id: string
-      userId: string | null
-      projectId: string | null
-      provider: string
-      model: string
+      projectId: string
+      actorUserId: string | null
+      billingUserId: string | null
+      billingOrganizationId: string | null
+      modelId: string
       source: string
       taskName: string | null
       inputTokens: number
       outputTokens: number
-      stripeReported: boolean
+      reportBatchId: string | null
     }
     const _: Expected = {} as LlmUsage
     expect(true).toBe(true)
   })
 
-  it("StripeCustomer should have expected workers.stripe_customers fields", () => {
+  it("LlmUsageReportBatch should have expected workers.llm_usage_report_batches fields", () => {
     type Expected = {
       id: string
-      userId: string
-      stripeCustomerId: string
-      stripeSubscriptionId: string | null
-      stripeSubscriptionItemId: string | null
+      billingUserId: string | null
+      billingOrganizationId: string | null
+      periodStart: Date
+      periodEnd: Date
+      usageCount: number
+      stripeUsageRecordId: string | null
+      status: string
     }
-    const _: Expected = {} as StripeCustomer
+    const _: Expected = {} as LlmUsageReportBatch
     expect(true).toBe(true)
   })
 
@@ -53,6 +57,7 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       modelType: string | null
       model: string | null
       promptId: string | null
+      optimizedPromptId: string | null
     }
     const _: Expected = {} as FoundWorkersPdf
     expect(true).toBe(true)
