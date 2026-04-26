@@ -182,6 +182,7 @@
 - Missing header translation, i18n dependency
 - *(web)* Remove defaultFileName from export plugin #98
 - *(llm)* Add CLAUDE.md to .gitignore
+- *(web)* Remove uploadthing token
 
 ### 💼 Other
 
@@ -241,6 +242,7 @@
 - *(web)* Make projects dir
 - *(web)* Rename email/send.tsx
 - *(web)* Move PDFContainer files
+- Move telemetry to logging.py in api and workers
 
 ### 📚 Documentation
 
@@ -517,6 +519,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add runpod ocr env vars to infra, api, workers
 - Fix generate_env_example.py to dynamically create from 4 truth sources
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
