@@ -1,10 +1,9 @@
 from celery import Celery
 
 from .core.config import settings
-from .core.logging import configure_logging
-from .core.telemetry import register_celery_observability, setup_worker_telemetry
+from .core.logging import config_worker_logging, register_celery_observability, setup_worker_telemetry
 
-configure_logging()
+config_worker_logging()
 setup_worker_telemetry()
 app = Celery("myapp", broker=settings.CELERY_BROKER_URL)
 

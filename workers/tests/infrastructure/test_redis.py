@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.core.telemetry import get_metrics_registry
+from app.core.logging import get_metrics_registry
 from app.shared.infrastructure import redis as redis_module
 
 

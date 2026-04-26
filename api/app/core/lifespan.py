@@ -10,13 +10,12 @@ from openai import AsyncOpenAI
 from redis.asyncio import Redis
 
 from .config import settings
-from .logging import configure_logging
-from .telemetry import setup_api_telemetry
+from .logging import config_api_logging, setup_api_telemetry
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    configure_logging()
+    config_api_logging()
     setup_api_telemetry()
 
     limiter = anyio.to_thread.current_default_thread_limiter()

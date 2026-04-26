@@ -4,7 +4,7 @@ import time
 
 from dokumen_llm_providers import LLMResponseData, call_openai as _call_openai
 
-from app.core.telemetry import bind_worker_context
+from app.core.logging import bind_worker_context
 
 _OBS_PATH = Path(__file__).resolve().parents[3] / "packages" / "otel_py"
 if str(_OBS_PATH) not in sys.path:

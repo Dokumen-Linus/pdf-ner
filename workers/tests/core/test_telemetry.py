@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from app.core.telemetry import (
+from app.core.logging import (
     _on_task_postrun,
     _on_task_prerun,
     _on_worker_ready,
