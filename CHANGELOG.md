@@ -365,6 +365,7 @@
 - React linting
 - *(web)* Move to plugin-bookmark-2
 - *(web)* Simplify sidebar use and move to plugin-rotate-2
+- Uniform imports in eslint rule
 
 ### 🎨 Styling
 
@@ -516,6 +517,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add runpod ocr env vars to infra, api, workers
 - Fix generate_env_example.py to dynamically create from 4 truth sources
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
