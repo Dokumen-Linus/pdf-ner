@@ -2,13 +2,12 @@ import json
 from pathlib import Path
 import sys
 
-HOOK_DIR = Path(__file__).resolve().parent
-if str(HOOK_DIR) not in sys.path:
-    sys.path.insert(0, str(HOOK_DIR))
-
 import format_on_edit
 import typecheck_on_edit
 
+HOOK_DIR = Path(__file__).resolve().parent
+if str(HOOK_DIR) not in sys.path:
+    sys.path.insert(0, str(HOOK_DIR))
 
 def main() -> int:
     try:
