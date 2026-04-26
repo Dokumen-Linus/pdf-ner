@@ -15,4 +15,3 @@ class ExtractedPagePayload(BaseModel):
 
 class ExtractedTextPayload(BaseModel):
     pages: list[ExtractedPagePayload]
-

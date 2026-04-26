@@ -80,9 +80,7 @@ function ContactPage() {
           {submitted ? (
             <div className="space-y-2">
               <p className="text-base font-medium">{m.contact_success_title()}</p>
-              <p className="text-muted-foreground text-sm">
-                {m.contact_success_description()}
-              </p>
+              <p className="text-muted-foreground text-sm">{m.contact_success_description()}</p>
             </div>
           ) : (
             <form
@@ -96,8 +94,7 @@ function ContactPage() {
               <form.Field
                 name="name"
                 validators={{
-                  onChange: ({ value }) =>
-                    !value?.trim() ? m.contact_name_required() : undefined,
+                  onChange: ({ value }) => (!value?.trim() ? m.contact_name_required() : undefined),
                 }}
                 children={({ state, handleChange, handleBlur }) => (
                   <div className="space-y-2">

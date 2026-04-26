@@ -8,6 +8,7 @@ Includes:
 - Test reordering
 - Timing reports
 """
+
 import pytest
 import time
 from typing import Callable, Generator
@@ -17,6 +18,7 @@ from datetime import datetime
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
+
 
 def pytest_configure(config):
     """Configure pytest at startup."""
@@ -39,6 +41,7 @@ def pytest_unconfigure(config):
 # TEST ORDERING
 # =============================================================================
 
+
 def pytest_collection_modifyitems(config, items):
     """Reorder tests: smoke first, slow last."""
     smoke_tests = []
@@ -60,6 +63,7 @@ def pytest_collection_modifyitems(config, items):
 # WORKER ISOLATION (pytest-xdist)
 # =============================================================================
 
+
 @pytest.fixture(scope="session")
 def worker_id(request) -> str:
     """Get worker ID for parallel test isolation."""
@@ -79,6 +83,7 @@ def db_name(worker_id: str) -> str:
 # =============================================================================
 # FACTORY FIXTURES
 # =============================================================================
+
 
 @pytest.fixture
 def user_factory(db_session) -> Generator[Callable, None, None]:
@@ -119,6 +124,7 @@ def user_factory(db_session) -> Generator[Callable, None, None]:
 # =============================================================================
 # TIMING PLUGIN
 # =============================================================================
+
 
 class SlowTestReporter:
     """Track and report slow tests."""

@@ -94,4 +94,3 @@ async def test_onedrive_watcher_uses_delta_link_and_materializes_files():
     assert result.cursor.value == {"delta_link": "https://graph.test/delta-token"}
     assert [doc.external_id for doc in result.documents] == ["item-1"]
     assert captured[0].url.path == "/v1.0/drives/drive-1/items/root/delta"
-

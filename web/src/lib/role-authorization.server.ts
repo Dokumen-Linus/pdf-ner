@@ -1,5 +1,6 @@
-import type { ProjectAccessContext } from "@/lib/project-authorization.server"
 import { requireProjectAccess } from "@/lib/project-authorization.server"
+
+import type { ProjectAccessContext } from "@/lib/project-authorization.server"
 
 export type AppPermission =
   | "billing"

@@ -58,7 +58,9 @@ class AzureBlobListener:
         )
 
     async def renew(self, subscription: dict) -> ListenerProvisioningPayload:
-        raise NotImplementedError("Azure Event Grid renewal should recreate/update the subscription")
+        raise NotImplementedError(
+            "Azure Event Grid renewal should recreate/update the subscription"
+        )
 
     async def disable(self, subscription: dict) -> None:
         payload = dict(subscription.get("provider_payload") or {})
@@ -78,6 +80,7 @@ class AzureBlobListener:
             if close_client:
                 await client.aclose()
 
-    async def normalize_event(self, subscription: dict, event_payload: dict) -> ListenerEventPayload:
+    async def normalize_event(
+        self, subscription: dict, event_payload: dict
+    ) -> ListenerEventPayload:
         return empty_event(subscription["id"], event_payload)
-

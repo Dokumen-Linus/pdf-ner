@@ -59,7 +59,9 @@ class S3Listener:
             existing.pop("ResponseMetadata", None)
             if isinstance(target_type, str) and target_type in existing:
                 existing[target_type] = [
-                    item for item in existing.get(target_type, []) if item.get("Id") != notification_id
+                    item
+                    for item in existing.get(target_type, [])
+                    if item.get("Id") != notification_id
                 ]
             client.put_bucket_notification_configuration(
                 Bucket=bucket,
@@ -68,7 +70,9 @@ class S3Listener:
 
         await anyio.to_thread.run_sync(_remove_notification)
 
-    async def normalize_event(self, subscription: dict, event_payload: dict) -> ListenerEventPayload:
+    async def normalize_event(
+        self, subscription: dict, event_payload: dict
+    ) -> ListenerEventPayload:
         return empty_event(subscription["id"], event_payload)
 
     @staticmethod
@@ -96,7 +100,9 @@ class S3Listener:
                 ]
             }
         else:
-            raise ValueError("S3 listener config requires queue_arn, topic_arn, or lambda_function_arn")
+            raise ValueError(
+                "S3 listener config requires queue_arn, topic_arn, or lambda_function_arn"
+            )
 
         item = next(iter(target.values()))[0]
         item["Id"] = notification_id
@@ -109,4 +115,3 @@ class S3Listener:
         if filters:
             item["Filter"] = {"Key": {"FilterRules": filters}}
         return target
-

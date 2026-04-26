@@ -24,4 +24,3 @@ class DocumentExtractionFailed(DomainEvent):
     run_id: UUID
     error_type: str
     error_message: str
-

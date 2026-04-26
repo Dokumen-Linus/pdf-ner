@@ -17,4 +17,3 @@ def join_page_text(pages: list[PageText]) -> str:
 
 def has_usable_text(text: str | None) -> bool:
     return bool(text and text.strip())
-

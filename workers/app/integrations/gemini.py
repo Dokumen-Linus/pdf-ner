@@ -44,4 +44,3 @@ async def call_google_genai(*args, **kwargs) -> LLMResponseData:
         success=True,
     )
     return response
-

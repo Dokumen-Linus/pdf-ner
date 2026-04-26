@@ -22,9 +22,7 @@ class CreateBucketRequest(BaseModel):
             r"^https://[\w.-]+\.amazonaws\.com(/.*)?$",
         ]
         if not any(re.match(p, v) for p in allowed):
-            raise ValueError(
-                "endpoint_url must be localhost, 127.0.0.1, or *.amazonaws.com"
-            )
+            raise ValueError("endpoint_url must be localhost, 127.0.0.1, or *.amazonaws.com")
         return v
 
 

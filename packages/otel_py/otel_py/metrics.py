@@ -14,8 +14,8 @@ def _freeze_labels(labels: Labels | None) -> tuple[tuple[str, str], ...]:
 class MetricsRegistry:
     def __init__(self) -> None:
         self._lock = Lock()
-        self._counters: defaultdict[str, defaultdict[tuple[tuple[str, str], ...], float]] = defaultdict(
-            lambda: defaultdict(float)
+        self._counters: defaultdict[str, defaultdict[tuple[tuple[str, str], ...], float]] = (
+            defaultdict(lambda: defaultdict(float))
         )
         self._gauges: defaultdict[str, dict[tuple[tuple[str, str], ...], float]] = defaultdict(dict)
         self._histograms: defaultdict[

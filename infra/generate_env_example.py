@@ -105,7 +105,9 @@ def resolve_value(
     raise KeyError(f"Missing {key} in sources: {joined_sources}")
 
 
-def build_sections(role_password_keys: list[str]) -> list[tuple[str, list[tuple[str, tuple[str, ...]]]]]:
+def build_sections(
+    role_password_keys: list[str],
+) -> list[tuple[str, list[tuple[str, tuple[str, ...]]]]]:
     return [
         (
             "# PostgreSQL superuser (for initial setup - usually provided by your PostgreSQL service/docker-compose)",
@@ -200,7 +202,9 @@ def validate_output_keys(
             problems.append(f"missing keys: {', '.join(missing_keys)}")
         if unexpected_keys:
             problems.append(f"unexpected keys: {', '.join(unexpected_keys)}")
-        raise ValueError("Section definitions are out of sync with source files: " + "; ".join(problems))
+        raise ValueError(
+            "Section definitions are out of sync with source files: " + "; ".join(problems)
+        )
 
 
 def render_env_example() -> str:

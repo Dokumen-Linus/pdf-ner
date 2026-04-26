@@ -28,7 +28,11 @@ class OneDriveWatcher:
         config = dict(connection.get("config") or {})
         access_token = require_config(config, "access_token")
         delta_url = (cursor or {}).get("delta_link")
-        url = delta_url if isinstance(delta_url, str) and delta_url else self._initial_delta_url(config)
+        url = (
+            delta_url
+            if isinstance(delta_url, str) and delta_url
+            else self._initial_delta_url(config)
+        )
 
         close_client = self.client is None
         client = self.client or httpx.AsyncClient(timeout=30.0)
@@ -67,4 +71,3 @@ class OneDriveWatcher:
             return f"{self.base_url}/drives/{drive_id}/items/{item_id}/delta"
         user_id = config.get("user_id", "me")
         return f"{self.base_url}/users/{user_id}/drive/items/{item_id}/delta"
-

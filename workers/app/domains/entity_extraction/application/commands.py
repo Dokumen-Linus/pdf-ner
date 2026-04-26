@@ -6,4 +6,3 @@ from uuid import UUID
 class ProcessDocumentSource:
     document_source_id: UUID
     optimized_prompt_id: UUID
-

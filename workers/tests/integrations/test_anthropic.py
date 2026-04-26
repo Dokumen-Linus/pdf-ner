@@ -28,4 +28,3 @@ class TestCallAnthropic:
 
         with pytest.raises(RuntimeError, match="provider down"):
             await call_anthropic(mock_client, "claude-3-5-sonnet", "system", "user")
-

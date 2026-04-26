@@ -94,6 +94,7 @@ Visualizes the endpoints exposed by the api and what file defines them
 - Typing: Pydantic [docs](https://docs.pydantic.dev/), [repo](https://github.com/pydantic/pydantic)
 - Environment variables: imported from .env in ./core/config.py, validated and accessed using [pydantic_settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
 - Package manager: uvicorn [uv](https://docs.astral.sh/uv/) to install dependencies in pyproject.toml
+- Formatting and linting: [ruff](https://docs.astral.sh/ruff/)
 - Dependency checker: [deptry](https://github.com/fpgmaas/deptry)
 
 ### Concurrent Programming Packages

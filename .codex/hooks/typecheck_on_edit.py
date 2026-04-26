@@ -9,6 +9,7 @@ HOOK_DIR = Path(__file__).resolve().parent
 if str(HOOK_DIR) not in sys.path:
     sys.path.insert(0, str(HOOK_DIR))
 
+
 def main(payload=None) -> int:
     root = repo_root()
     web_root = (root / "web").resolve()

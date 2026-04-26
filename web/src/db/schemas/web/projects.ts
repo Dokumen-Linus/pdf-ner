@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm"
 import { text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { models } from "../public/models"
+
 import { entityTypes } from "./entity-types"
 import { webSchema } from "./schema"
 import { webTeams } from "./teams"

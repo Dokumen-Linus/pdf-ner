@@ -134,7 +134,9 @@ async def test_postgres_materializer_creates_pdf_and_document_source():
     assert result.pdf_id == pdf_id
     assert result.is_new is True
     assert conn.fetchval_calls[0][1][1] == bucket_id
-    assert conn.fetchval_calls[0][1][2] == f"{project_id}/incoming/{connection_id}/file-1/invoice.pdf"
+    assert (
+        conn.fetchval_calls[0][1][2] == f"{project_id}/incoming/{connection_id}/file-1/invoice.pdf"
+    )
     assert "'queued'" in conn.fetchval_calls[1][0]
 
 

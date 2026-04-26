@@ -36,9 +36,7 @@ function normalizeSubscriptionType(value: string | null): WorkspaceUserContext["
   return value === "analyst" ? "analyst" : "developer"
 }
 
-async function resolveWorkspaceUserByAuthUserId(
-  authUserId: string,
-): Promise<WorkspaceUserContext> {
+async function resolveWorkspaceUserByAuthUserId(authUserId: string): Promise<WorkspaceUserContext> {
   const [user] = await db
     .select({
       userId: users.id,

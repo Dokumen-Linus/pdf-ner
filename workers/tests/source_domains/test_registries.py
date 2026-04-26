@@ -28,4 +28,3 @@ def test_extraction_task_args_are_serializable():
         str(document_source_id),
         str(optimized_prompt_id),
     )
-

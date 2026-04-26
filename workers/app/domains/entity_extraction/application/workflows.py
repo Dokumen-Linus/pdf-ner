@@ -98,7 +98,9 @@ async def process_document_source_workflow(
     if project is None:
         raise LookupError(f"Project not found: {document.project_id}")
 
-    model_metadata = await repo.fetch_available_model_metadata(conn, project.entity_extraction_model)
+    model_metadata = await repo.fetch_available_model_metadata(
+        conn, project.entity_extraction_model
+    )
     if model_metadata is None:
         raise ValueError(f"Model is not available: {project.entity_extraction_model}")
     if model_metadata.provider not in _SUPPORTED_PROVIDERS:
@@ -126,11 +128,17 @@ async def process_document_source_workflow(
 
     try:
         _report_progress(task, "text", "Extracting document text", 15)
-        full_text, text_by_page, extract_method = await _ensure_text(conn, document, project.ocr_method)
+        full_text, text_by_page, extract_method = await _ensure_text(
+            conn, document, project.ocr_method
+        )
 
-        _report_progress(task, "ner", "Extracting entities", 65, model=project.entity_extraction_model)
+        _report_progress(
+            task, "ner", "Extracting entities", 65, model=project.entity_extraction_model
+        )
         schema = services.build_json_schema(entity_types)
-        system_prompt = optimized_prompt or services.build_fallback_system_prompt(project, entity_types)
+        system_prompt = optimized_prompt or services.build_fallback_system_prompt(
+            project, entity_types
+        )
         llm_usage: LLMResponseData = await _call_llm_for_model(
             llm_clients,
             model_metadata.provider,
@@ -186,7 +194,11 @@ async def _ensure_text(
     ocr_method: str,
 ) -> tuple[str, dict, str]:
     if has_usable_text(document.full_text):
-        return document.full_text or "", {"pages": [{"page_index": 0, "text": document.full_text}]}, "metadata"
+        return (
+            document.full_text or "",
+            {"pages": [{"page_index": 0, "text": document.full_text}]},
+            "metadata",
+        )
 
     pdf_bytes, _filepath = await download_pdf_bytes(conn, document.pdf_id)
     pages = await ocr.extract_pdfium_pages(pdf_bytes)

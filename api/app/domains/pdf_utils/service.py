@@ -60,9 +60,7 @@ def _page_results_to_payload(page_results: list) -> dict:
 
 
 def _join_page_text(text_by_page: dict) -> str:
-    return "\n\n".join(
-        str(page.get("text", "")).strip() for page in text_by_page["pages"]
-    ).strip()
+    return "\n\n".join(str(page.get("text", "")).strip() for page in text_by_page["pages"]).strip()
 
 
 def _metadata_text_by_page(row: asyncpg.Record) -> dict:

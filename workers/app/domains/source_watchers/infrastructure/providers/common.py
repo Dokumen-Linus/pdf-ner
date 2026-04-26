@@ -44,4 +44,3 @@ async def get_json(
     if not isinstance(payload, dict):
         raise ValueError("Provider response must be a JSON object")
     return payload
-

@@ -102,4 +102,3 @@ class GoogleDriveWatcher:
         if drive_id is None:
             return {}
         return {"driveId": drive_id, "corpora": "drive"}
-

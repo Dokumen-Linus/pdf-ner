@@ -80,4 +80,3 @@ def _extract_ocr_pages_sync(pdf_bytes: bytes, ocr_method: str) -> list[PageText]
                 os.unlink(tmp_path)
             except FileNotFoundError:
                 pass
-

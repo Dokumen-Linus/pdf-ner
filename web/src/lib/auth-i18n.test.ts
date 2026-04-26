@@ -85,7 +85,9 @@ const betterAuthFixedEnglishMessages = new Set([
 
 describe("auth i18n catalog", () => {
   it("covers every Better Auth API error code used by this repo", () => {
-    const missing = [...betterAuthApiCodes].filter((code) => !betterAuthApiErrorTranslations.fr[code])
+    const missing = [...betterAuthApiCodes].filter(
+      (code) => !betterAuthApiErrorTranslations.fr[code],
+    )
     expect(missing).toEqual([])
   })
 
@@ -126,9 +128,7 @@ describe("auth i18n catalog", () => {
   })
 
   it("returns a localized redirect error when one exists", () => {
-    expect(getLocalizedAuthRedirectError("state_mismatch", "fr")).toBe(
-      "L'etat ne correspond pas",
-    )
+    expect(getLocalizedAuthRedirectError("state_mismatch", "fr")).toBe("L'etat ne correspond pas")
     expect(getLocalizedAuthRedirectError("state_mismatch", "en")).toBe("State mismatch")
     expect(getLocalizedAuthRedirectError("unknown_code", "fr")).toBeNull()
   })

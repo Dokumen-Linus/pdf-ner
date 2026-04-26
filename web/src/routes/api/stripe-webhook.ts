@@ -32,8 +32,11 @@ async function syncSubscription(subscription: Stripe.Subscription) {
     current_period_start?: number
     current_period_end?: number
   }
-  const { billing_kind: billingKind, user_id: userId, organization_id: organizationId } =
-    subscription.metadata
+  const {
+    billing_kind: billingKind,
+    user_id: userId,
+    organization_id: organizationId,
+  } = subscription.metadata
   const customerId =
     typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id
   const { developerItemId, analystItemId, usageItemId } = subscriptionItemIds(subscription)
@@ -66,8 +69,11 @@ async function syncSubscription(subscription: Stripe.Subscription) {
 }
 
 async function clearSubscription(subscription: Stripe.Subscription) {
-  const { billing_kind: billingKind, user_id: userId, organization_id: organizationId } =
-    subscription.metadata
+  const {
+    billing_kind: billingKind,
+    user_id: userId,
+    organization_id: organizationId,
+  } = subscription.metadata
   const values = {
     stripeSubscriptionId: null,
     stripeSubscriptionStatus: subscription.status,

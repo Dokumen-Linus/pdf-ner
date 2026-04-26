@@ -36,11 +36,16 @@ async def handle_renew_listener(cmd: RenewListener) -> dict:
         async with pool.acquire() as conn:
             subscription = await repo.fetch_subscription(conn, cmd.listener_subscription_id)
             if subscription is None:
-                raise LookupError(f"Listener subscription not found: {cmd.listener_subscription_id}")
+                raise LookupError(
+                    f"Listener subscription not found: {cmd.listener_subscription_id}"
+                )
             listener = provider_registry.registry.resolve(subscription["provider"])
             payload = await listener.renew(dict(subscription))
             await repo.update_subscription(conn, cmd.listener_subscription_id, payload)
-            return {"listener_subscription_id": str(cmd.listener_subscription_id), "status": "active"}
+            return {
+                "listener_subscription_id": str(cmd.listener_subscription_id),
+                "status": "active",
+            }
 
 
 async def handle_disable_listener(cmd: DisableListener) -> dict:
@@ -68,8 +73,9 @@ async def handle_listener_event(cmd: HandleListenerEvent) -> dict:
 
     enqueued = 0
     for document in event.documents:
-        args = extraction_task_args(document.document_source_id, subscription["optimized_prompt_id"])
+        args = extraction_task_args(
+            document.document_source_id, subscription["optimized_prompt_id"]
+        )
         process_document_source_task.delay(*args)
         enqueued += 1
     return {"enqueued": enqueued}
-

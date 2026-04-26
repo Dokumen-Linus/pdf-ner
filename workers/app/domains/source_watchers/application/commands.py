@@ -10,4 +10,3 @@ class DispatchDueWatchers:
 @dataclass(frozen=True)
 class PollSourceConnection:
     connection_id: UUID
-

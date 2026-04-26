@@ -69,9 +69,7 @@ function AboutPage() {
 
       <section className="border-t border-[#EEEEEE] bg-[#F9FAFB] px-6 py-24">
         <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-          <h2 className="mb-4 text-[32px] font-medium text-[#171A20]">
-            {m.about_founder_title()}
-          </h2>
+          <h2 className="mb-4 text-[32px] font-medium text-[#171A20]">{m.about_founder_title()}</h2>
           <p className="mb-10 max-w-xl text-[16px] leading-[1.7] text-[#5C5E62]">
             {m.about_founder_description()}
           </p>

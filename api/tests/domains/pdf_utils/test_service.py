@@ -306,7 +306,10 @@ class TestExtractText:
         mock_update = AsyncMock()
 
         with (
-            patch("app.domains.pdf_utils.repository.fetch_pdf", AsyncMock(return_value=sample_extract_row)),
+            patch(
+                "app.domains.pdf_utils.repository.fetch_pdf",
+                AsyncMock(return_value=sample_extract_row),
+            ),
             patch("boto3.client", return_value=MagicMock()),
             patch("app.integrations.s3.get_object_bytes", AsyncMock(return_value=b"pdf")),
             patch(
@@ -345,7 +348,10 @@ class TestExtractText:
         mock_conn = AsyncMock()
 
         with (
-            patch("app.domains.pdf_utils.repository.fetch_pdf", AsyncMock(return_value=sample_extract_row)),
+            patch(
+                "app.domains.pdf_utils.repository.fetch_pdf",
+                AsyncMock(return_value=sample_extract_row),
+            ),
             patch("boto3.client", return_value=MagicMock()),
             patch("app.integrations.s3.get_object_bytes", AsyncMock(return_value=b"pdf")),
             patch(
@@ -366,7 +372,10 @@ class TestExtractText:
         mock_update = AsyncMock()
 
         with (
-            patch("app.domains.pdf_utils.repository.fetch_pdf", AsyncMock(return_value=sample_extract_row)),
+            patch(
+                "app.domains.pdf_utils.repository.fetch_pdf",
+                AsyncMock(return_value=sample_extract_row),
+            ),
             patch("boto3.client", return_value=MagicMock()),
             patch("app.integrations.s3.get_object_bytes", AsyncMock(return_value=b"pdf")),
             patch(

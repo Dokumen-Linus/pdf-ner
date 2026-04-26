@@ -12,7 +12,9 @@ class SourceListener(Protocol):
 
     async def disable(self, subscription: dict) -> None: ...
 
-    async def normalize_event(self, subscription: dict, event_payload: dict) -> ListenerEventPayload: ...
+    async def normalize_event(
+        self, subscription: dict, event_payload: dict
+    ) -> ListenerEventPayload: ...
 
 
 class ListenerRegistry:
@@ -27,4 +29,3 @@ class ListenerRegistry:
             return self._listeners[provider]
         except KeyError as exc:
             raise LookupError(f"No source listener registered for provider '{provider}'") from exc
-

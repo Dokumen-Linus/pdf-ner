@@ -19,4 +19,3 @@ class ListenerEventPayload(BaseModel):
     listener_subscription_id: UUID
     documents: list[MaterializedDocumentPayload] = Field(default_factory=list)
     raw_event: dict = Field(default_factory=dict)
-

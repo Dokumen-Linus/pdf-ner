@@ -135,7 +135,9 @@ function BillingPage() {
             <CardTitle className="text-destructive">Billing unavailable</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm">{loadError ?? "Unable to load billing."}</p>
+            <p className="text-muted-foreground text-sm">
+              {loadError ?? "Unable to load billing."}
+            </p>
             <Button variant="outline" asChild>
               <Link to="/projects">Back to projects</Link>
             </Button>
@@ -168,7 +170,10 @@ function BillingPage() {
             value={formatCost(overview.totalCostUsd)}
             sub="Unreported usage is batched to Stripe."
           />
-          <StatCard label={m.billing_usage_calls_title()} value={overview.callCount.toLocaleString()} />
+          <StatCard
+            label={m.billing_usage_calls_title()}
+            value={overview.callCount.toLocaleString()}
+          />
           <StatCard label="Unreported" value={overview.unreportedCount.toLocaleString()} />
         </div>
       </section>

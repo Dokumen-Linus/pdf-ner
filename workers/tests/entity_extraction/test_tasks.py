@@ -32,4 +32,3 @@ def test_entity_extraction_task_rejects_invalid_uuid():
 
     with pytest.raises(ValueError):
         process_document_source_task.run("not-a-uuid", str(uuid4()))
-

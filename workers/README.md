@@ -69,11 +69,13 @@ source .venv/bin/activate
 3 Start Redis server
 
 Windows (with chocolatey):
+
 ```cmd
 redis-server
 ```
 
 Mac (with homebrew):
+
 ```cmd
 redis-server
 ```
@@ -94,6 +96,11 @@ celery -A app.main worker --loglevel=info --concurrency=4
 
 - Framework: [Celery](https://docs.celeryq.dev/en/stable/index.html)
 - Message Broker: [Redis](https://redis.io/)
+- Typing: Pydantic [docs](https://docs.pydantic.dev/), [repo](https://github.com/pydantic/pydantic)
+- Environment variables: imported from .env in ./core/config.py, validated and accessed using [pydantic_settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
+- Package manager: uvicorn [uv](https://docs.astral.sh/uv/) to install dependencies in pyproject.toml
+- Formatting and linting: [ruff](https://docs.astral.sh/ruff/)
+- Dependency checker: [deptry](https://github.com/fpgmaas/deptry)
 
 ## Workers Layout
 

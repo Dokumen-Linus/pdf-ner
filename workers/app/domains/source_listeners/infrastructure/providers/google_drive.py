@@ -74,6 +74,7 @@ class GoogleDriveListener:
             if close_client:
                 await client.aclose()
 
-    async def normalize_event(self, subscription: dict, event_payload: dict) -> ListenerEventPayload:
+    async def normalize_event(
+        self, subscription: dict, event_payload: dict
+    ) -> ListenerEventPayload:
         return empty_event(subscription["id"], event_payload)
-

@@ -18,4 +18,3 @@ class ListenerRenewed(DomainEvent):
 @dataclass(frozen=True)
 class ListenerDisabled(DomainEvent):
     listener_subscription_id: UUID
-

@@ -289,9 +289,7 @@ class TestPromptOptimizationWorkflow:
         conn.execute.assert_called_once()
 
     @pytest.mark.anyio
-    async def test_skips_pdf_with_no_full_text_and_logs_warning(
-        self, name_entity_type, caplog
-    ):
+    async def test_skips_pdf_with_no_full_text_and_logs_warning(self, name_entity_type, caplog):
         """PDFs with full_text=None that are successfully downloaded from S3 are skipped
         (text extraction not yet implemented) and a warning is logged."""
         import logging

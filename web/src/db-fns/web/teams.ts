@@ -98,7 +98,9 @@ export const getTeamById = createServerFn({ method: "GET" })
   })
 
 export const updateTeam = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ id: z.string().uuid(), description: z.string().nullable().optional() }))
+  .inputValidator(
+    z.object({ id: z.string().uuid(), description: z.string().nullable().optional() }),
+  )
   .handler(async ({ data }) => {
     const workspaceUser = await requireWorkspaceUser()
 

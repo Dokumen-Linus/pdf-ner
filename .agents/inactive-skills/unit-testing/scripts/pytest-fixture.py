@@ -13,13 +13,12 @@ from sqlalchemy.orm import Session, sessionmaker
 # DATABASE FIXTURES
 # ============================================================================
 
+
 @pytest.fixture(scope="session")
 def db_engine():
     """Session-scoped database engine (shared across all tests)."""
     engine = create_engine(
-        "sqlite:///:memory:",
-        echo=False,
-        connect_args={"check_same_thread": False}
+        "sqlite:///:memory:", echo=False, connect_args={"check_same_thread": False}
     )
     # TODO: Import your Base from models
     # Base.metadata.create_all(engine)
@@ -46,13 +45,11 @@ def db_session(db_engine) -> Generator[Session]:
 # ASYNC DATABASE FIXTURES
 # ============================================================================
 
+
 @pytest.fixture(scope="session")
 async def async_db_engine():
     """Async database engine for async tests."""
-    engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:",
-        echo=False
-    )
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
     yield engine
     await engine.dispose()
 
@@ -69,6 +66,7 @@ async def async_db_session(async_db_engine) -> AsyncGenerator[AsyncSession]:
 # ============================================================================
 # MOCK FIXTURES
 # ============================================================================
+
 
 @pytest.fixture
 def mock_redis():
@@ -94,13 +92,13 @@ def mock_http_client():
 # FACTORY FIXTURES
 # ============================================================================
 
+
 @pytest.fixture
 def user_factory(db_session):
     """Factory for creating test users."""
+
     def create_user(
-        email: str = "test@example.com",
-        name: str = "Test User",
-        is_active: bool = True
+        email: str = "test@example.com", name: str = "Test User", is_active: bool = True
     ):
         # TODO: Import your User model
         # user = User(email=email, name=name, is_active=is_active)
@@ -108,12 +106,14 @@ def user_factory(db_session):
         # db_session.commit()
         # return user
         return {"email": email, "name": name, "is_active": is_active}
+
     return create_user
 
 
 # ============================================================================
 # PARAMETERIZED FIXTURE EXAMPLE
 # ============================================================================
+
 
 @pytest.fixture(params=["admin", "moderator", "user"])
 def user_role(request):
@@ -125,10 +125,12 @@ def user_role(request):
 # CLEANUP FIXTURES
 # ============================================================================
 
+
 @pytest.fixture(autouse=True)
 def reset_environment():
     """Automatically reset environment between tests."""
     import os
+
     original_env = os.environ.copy()
     yield
     os.environ.clear()

@@ -54,9 +54,7 @@ logger = structlog.get_logger()
 celery_app = Celery("orders")
 celery_app.config_from_object("celery_config")
 
-redis_client = redis.from_url(
-    os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-)
+redis_client = redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379/0"))
 
 
 # =============================================================================
@@ -98,9 +96,7 @@ class Order(BaseModel):
 
     def model_post_init(self, __context: Any) -> None:
         if self.total_amount == 0:
-            self.total_amount = sum(
-                item.unit_price * item.quantity for item in self.items
-            )
+            self.total_amount = sum(item.unit_price * item.quantity for item in self.items)
 
 
 # =============================================================================
@@ -663,9 +659,7 @@ def _reserve_inventory_step(self, inventory_data: dict) -> dict:
 
     Uses self.replace() to delegate to the actual task without blocking.
     """
-    raise self.replace(
-        reserve_inventory.s(inventory_data["order_id"], inventory_data)
-    )
+    raise self.replace(reserve_inventory.s(inventory_data["order_id"], inventory_data))
 
 
 @celery_app.task(bind=True)
@@ -674,9 +668,7 @@ def _process_payment_step(self, reservation_data: dict) -> dict:
 
     Uses self.replace() to delegate to the actual task without blocking.
     """
-    raise self.replace(
-        process_payment.s(reservation_data["order_id"], reservation_data)
-    )
+    raise self.replace(process_payment.s(reservation_data["order_id"], reservation_data))
 
 
 @celery_app.task(bind=True)
@@ -685,9 +677,7 @@ def _create_fulfillment_step(self, payment_data: dict) -> dict:
 
     Uses self.replace() to delegate to the actual task without blocking.
     """
-    raise self.replace(
-        create_fulfillment.s(payment_data["order_id"], payment_data)
-    )
+    raise self.replace(create_fulfillment.s(payment_data["order_id"], payment_data))
 
 
 @celery_app.task(bind=True)
@@ -783,9 +773,7 @@ def _get_inventory_count(sku: str) -> int:
     return 100  # Replace with inventory service call
 
 
-def _create_inventory_reservation(
-    sku: str, quantity: int, order_id: str
-) -> str:
+def _create_inventory_reservation(sku: str, quantity: int, order_id: str) -> str:
     """Create inventory reservation."""
     return f"res_{uuid4().hex[:8]}"  # Replace with inventory service
 
@@ -858,9 +846,7 @@ def _update_order_status(order_id: str, status: OrderStatus) -> None:
     pass
 
 
-def _store_order_failure(
-    order_id: str, error: str, traceback: str
-) -> None:
+def _store_order_failure(order_id: str, error: str, traceback: str) -> None:
     """Store order failure for review."""
     pass
 
@@ -870,9 +856,7 @@ def _send_alert(message: str, severity: str, details: dict) -> None:
     pass
 
 
-def _track_order_completed(
-    order_id: str, total: Decimal, items: int
-) -> None:
+def _track_order_completed(order_id: str, total: Decimal, items: int) -> None:
     """Track completed order analytics."""
     pass
 

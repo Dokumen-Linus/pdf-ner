@@ -185,4 +185,3 @@ async def test_s3_listener_puts_bucket_notification_configuration():
         "NotificationConfiguration"
     ]
     assert notification["QueueConfigurations"][0]["QueueArn"].endswith(":queue")
-

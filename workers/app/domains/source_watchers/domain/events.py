@@ -9,4 +9,3 @@ class ChangesDiscovered(DomainEvent):
     source_connection_id: UUID
     discovered_count: int
     enqueued_count: int
-

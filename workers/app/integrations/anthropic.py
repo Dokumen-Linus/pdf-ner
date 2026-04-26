@@ -44,4 +44,3 @@ async def call_anthropic(*args, **kwargs) -> LLMResponseData:
         success=True,
     )
     return response
-

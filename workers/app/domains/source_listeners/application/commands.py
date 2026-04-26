@@ -21,4 +21,3 @@ class DisableListener:
 class HandleListenerEvent:
     listener_subscription_id: UUID
     event_payload: dict
-

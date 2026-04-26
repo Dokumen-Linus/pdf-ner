@@ -73,4 +73,3 @@ def _constraint_text(entity: EntityTypeInfo) -> str:
     if entity.std_regex:
         parts.append(f"pattern: {entity.std_regex}")
     return ", ".join(parts)
-

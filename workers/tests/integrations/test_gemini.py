@@ -26,8 +26,9 @@ class TestCallGoogleGenai:
     @pytest.mark.anyio
     async def test_records_and_reraises_provider_error(self):
         mock_client = MagicMock()
-        mock_client.aio.models.generate_content = AsyncMock(side_effect=RuntimeError("provider down"))
+        mock_client.aio.models.generate_content = AsyncMock(
+            side_effect=RuntimeError("provider down")
+        )
 
         with pytest.raises(RuntimeError, match="provider down"):
             await call_google_genai(mock_client, "gemini-2.0-flash", "system", "user")
-

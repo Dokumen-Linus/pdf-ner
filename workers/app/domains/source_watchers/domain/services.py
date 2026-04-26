@@ -26,4 +26,3 @@ class WatcherRegistry:
 
 def extraction_task_args(document_source_id: UUID, optimized_prompt_id: UUID) -> tuple[str, str]:
     return str(document_source_id), str(optimized_prompt_id)
-
