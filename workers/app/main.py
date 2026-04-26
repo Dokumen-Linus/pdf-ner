@@ -1,7 +1,11 @@
 from celery import Celery
 
 from .core.config import settings
-from .core.logging import config_worker_logging, register_celery_observability, setup_worker_telemetry
+from .core.logging import (
+    config_worker_logging,
+    register_celery_observability,
+    setup_worker_telemetry,
+)
 
 config_worker_logging()
 setup_worker_telemetry()
@@ -18,6 +22,9 @@ app.autodiscover_tasks(
     [
         "app.domains.billing",
         "app.domains.context_engineering",
+        "app.domains.entity_extraction",
+        "app.domains.source_listeners",
+        "app.domains.source_watchers",
     ]
 )
 

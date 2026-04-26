@@ -230,7 +230,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/entity_type
         getEntityTypesByProjectId({ data: { projectId: params.projectId } }),
         getAllStdEntityTypes(),
       ])
-      if (!access.canManage) {
+      if (access.subscriptionType !== "developer" || !access.canManage) {
         return {
           project: null,
           entityTypes: [] as FoundDbEntityType[],

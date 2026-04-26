@@ -11,7 +11,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 
 import { streamProxy } from "@/api-fns/api-stream-proxy.server"
-import { requireProjectOwnership, requireUserId } from "@/lib/authorization.server"
+import { requireProjectPermission } from "@/lib/role-authorization.server"
 
 const MAX_BYTES = 50 * 1024 * 1024 // 50 MB, matches FastAPI and client cap.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -58,8 +58,7 @@ export async function uploadHandler({ request }: { request: Request }): Promise<
       }
     }
 
-    const userId = await requireUserId()
-    await requireProjectOwnership(projectId, userId)
+    await requireProjectPermission(projectId, "upload_documents")
 
     if (!request.body) {
       return Response.json({ detail: "request body is required" }, { status: 400 })

@@ -1,4 +1,3 @@
-from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field, model_validator
@@ -15,7 +14,6 @@ class ExtractEntitiesRequest(BaseModel):
     template_id: int
     document_text: str = Field(default="")
     pdf_id: UUID | None = None
-    provider: Literal["anthropic", "gemini", "openai"]
     model: str = Field(min_length=1)
     user_id: UUID | None = None
 

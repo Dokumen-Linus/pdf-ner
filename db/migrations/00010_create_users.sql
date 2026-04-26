@@ -10,6 +10,14 @@ CREATE TABLE web.users (
   avatar_url TEXT,
   auth_user_id TEXT,
   organization_id TEXT REFERENCES auth.organization(id) ON DELETE SET NULL,
+  subscription_type TEXT NOT NULL DEFAULT 'developer' CHECK (subscription_type IN ('developer', 'analyst')),
+  stripe_customer_id TEXT UNIQUE,
+  stripe_subscription_id TEXT,
+  stripe_subscription_status TEXT,
+  stripe_developer_item_id TEXT,
+  stripe_usage_item_id TEXT,
+  stripe_current_period_start TIMESTAMPTZ,
+  stripe_current_period_end TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

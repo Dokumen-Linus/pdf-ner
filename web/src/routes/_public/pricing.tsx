@@ -6,7 +6,7 @@ import { m } from "@/integrations/paraglide/messages.js"
 
 import type { FoundModel } from "@/db/types"
 
-type ProviderSlug = "anthropic" | "openai" | "google"
+type ProviderSlug = "anthropic" | "openai" | "gemini"
 
 type ProviderDisplay = {
   slug: ProviderSlug
@@ -31,9 +31,9 @@ const PROVIDER_DISPLAY: Record<ProviderSlug, ProviderDisplay> = {
     bg: "bg-green-50",
     border: "border-green-200",
   },
-  google: {
-    slug: "google",
-    name: "Google",
+  gemini: {
+    slug: "gemini",
+    name: "Gemini",
     color: "text-blue-700",
     bg: "bg-blue-50",
     border: "border-blue-200",
@@ -41,8 +41,8 @@ const PROVIDER_DISPLAY: Record<ProviderSlug, ProviderDisplay> = {
 }
 
 // The three values above mirror the CHECK constraint on public.models.provider
-// (db/migrations/00091_create_models.sql). Unknown providers are filtered out.
-const PROVIDER_ORDER: ProviderSlug[] = ["anthropic", "openai", "google"]
+// (db/migrations/00005_create_models.sql). Unknown providers are filtered out.
+const PROVIDER_ORDER: ProviderSlug[] = ["anthropic", "openai", "gemini"]
 
 // Price comes back from Drizzle `numeric(10,4)` as a string like "15.0000".
 // Format to 2 decimals for display. Keep the raw string as source of truth.

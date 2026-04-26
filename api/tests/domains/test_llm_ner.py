@@ -131,15 +131,25 @@ class TestExtractEntities:
     ):
         """Verify successful extraction with valid input."""
         project_id = uuid4()
+        owner_id = uuid4()
         prompt_id = uuid4()
 
         mock_conn = AsyncMock()
         mock_conn.fetchrow = AsyncMock(
             side_effect=[
-                {"id": project_id, "description": "Test project"},
+                {
+                    "id": project_id,
+                    "description": "Test project",
+                    "owner_id": owner_id,
+                    "organization_id": None,
+                },
+                {
+                    "id": "gpt-4o",
+                    "provider": "openai",
+                    "usd_per_1m_input": 2.5,
+                    "usd_per_1m_output": 10,
+                },
                 sample_template,
-                # fetch_model_cost: None triggers fallback-to-zero path
-                None,
             ]
         )
         mock_conn.fetch = AsyncMock(return_value=sample_entity_types)
@@ -150,7 +160,6 @@ class TestExtractEntities:
             project_id=project_id,
             template_id=1,
             document_text="Test document content",
-            provider="openai",
             model="gpt-4o",
         )
 
@@ -159,6 +168,9 @@ class TestExtractEntities:
         assert result["prompt_id"] == str(prompt_id)
         assert "extracted" in result
         assert result["extracted"] == {"field1": "value1"}
+        insert_sql = mock_conn.execute.await_args.args[0]
+        assert "provider" not in insert_sql
+        assert "model_id" in insert_sql
 
     @pytest.mark.anyio
     async def test_returns_404_for_missing_project(self, mock_clients):
@@ -170,7 +182,6 @@ class TestExtractEntities:
             project_id=uuid4(),
             template_id=1,
             document_text="Test",
-            provider="openai",
             model="gpt-4o",
         )
 
@@ -181,6 +192,73 @@ class TestExtractEntities:
         assert "Project not found" in exc_info.value.detail
 
     @pytest.mark.anyio
+    async def test_returns_422_for_missing_model(self, mock_clients):
+        """Verify unavailable model fails before LLM call."""
+        project_id = uuid4()
+        mock_conn = AsyncMock()
+        mock_conn.fetchrow = AsyncMock(
+            side_effect=[
+                {
+                    "id": project_id,
+                    "description": "Test project",
+                    "owner_id": uuid4(),
+                    "organization_id": None,
+                },
+                None,
+            ]
+        )
+
+        request = ExtractEntitiesRequest(
+            project_id=project_id,
+            template_id=1,
+            document_text="Test",
+            model="missing-model",
+        )
+
+        with pytest.raises(HTTPException) as exc_info:
+            await service.extract_entities(mock_conn, mock_clients, request)
+
+        assert exc_info.value.status_code == 422
+        assert "Model is not available" in exc_info.value.detail
+        mock_clients["openai"].chat.completions.create.assert_not_called()
+
+    @pytest.mark.anyio
+    async def test_returns_422_for_unsupported_model_provider(self, mock_clients):
+        """Verify unsupported provider in public.models fails before LLM call."""
+        project_id = uuid4()
+        mock_conn = AsyncMock()
+        mock_conn.fetchrow = AsyncMock(
+            side_effect=[
+                {
+                    "id": project_id,
+                    "description": "Test project",
+                    "owner_id": uuid4(),
+                    "organization_id": None,
+                },
+                {
+                    "id": "custom-model",
+                    "provider": "custom",
+                    "usd_per_1m_input": 1,
+                    "usd_per_1m_output": 1,
+                },
+            ]
+        )
+
+        request = ExtractEntitiesRequest(
+            project_id=project_id,
+            template_id=1,
+            document_text="Test",
+            model="custom-model",
+        )
+
+        with pytest.raises(HTTPException) as exc_info:
+            await service.extract_entities(mock_conn, mock_clients, request)
+
+        assert exc_info.value.status_code == 422
+        assert "Unsupported model provider" in exc_info.value.detail
+        mock_clients["openai"].chat.completions.create.assert_not_called()
+
+    @pytest.mark.anyio
     async def test_returns_404_for_missing_template(self, mock_clients, sample_entity_types):
         """Verify 404 when template not found."""
         project_id = uuid4()
@@ -188,7 +266,18 @@ class TestExtractEntities:
         mock_conn = AsyncMock()
         mock_conn.fetchrow = AsyncMock(
             side_effect=[
-                {"id": project_id, "description": "Test"},
+                {
+                    "id": project_id,
+                    "description": "Test",
+                    "owner_id": uuid4(),
+                    "organization_id": None,
+                },
+                {
+                    "id": "gpt-4o",
+                    "provider": "openai",
+                    "usd_per_1m_input": 2.5,
+                    "usd_per_1m_output": 10,
+                },
                 None,  # template not found
             ]
         )
@@ -198,7 +287,6 @@ class TestExtractEntities:
             project_id=project_id,
             template_id=999,
             document_text="Test",
-            provider="openai",
             model="gpt-4o",
         )
 
@@ -214,14 +302,28 @@ class TestExtractEntities:
         project_id = uuid4()
 
         mock_conn = AsyncMock()
-        mock_conn.fetchrow = AsyncMock(return_value={"id": project_id, "description": "Test"})
+        mock_conn.fetchrow = AsyncMock(
+            side_effect=[
+                {
+                    "id": project_id,
+                    "description": "Test",
+                    "owner_id": uuid4(),
+                    "organization_id": None,
+                },
+                {
+                    "id": "gpt-4o",
+                    "provider": "openai",
+                    "usd_per_1m_input": 2.5,
+                    "usd_per_1m_output": 10,
+                },
+            ]
+        )
         mock_conn.fetch = AsyncMock(return_value=[])  # empty entity types
 
         request = ExtractEntitiesRequest(
             project_id=project_id,
             template_id=1,
             document_text="Test",
-            provider="openai",
             model="gpt-4o",
         )
 
@@ -245,11 +347,20 @@ class TestExtractEntities:
         # fetchrow: project, then template; fetchrow for fetch_pdf_text
         mock_conn.fetchrow = AsyncMock(
             side_effect=[
-                {"id": project_id, "description": "Test project"},
+                {
+                    "id": project_id,
+                    "description": "Test project",
+                    "owner_id": uuid4(),
+                    "organization_id": None,
+                },
+                {
+                    "id": "gpt-4o",
+                    "provider": "openai",
+                    "usd_per_1m_input": 2.5,
+                    "usd_per_1m_output": 10,
+                },
                 sample_template,
                 {"full_text": extracted_text},  # fetch_pdf_text
-                # fetch_model_cost: None triggers fallback-to-zero path
-                None,
             ]
         )
         mock_conn.fetch = AsyncMock(return_value=sample_entity_types)
@@ -260,7 +371,6 @@ class TestExtractEntities:
             project_id=project_id,
             template_id=1,
             pdf_id=pdf_id,
-            provider="openai",
             model="gpt-4o",
         )
 
@@ -282,7 +392,18 @@ class TestExtractEntities:
         mock_conn = AsyncMock()
         mock_conn.fetchrow = AsyncMock(
             side_effect=[
-                {"id": project_id, "description": "Test project"},
+                {
+                    "id": project_id,
+                    "description": "Test project",
+                    "owner_id": uuid4(),
+                    "organization_id": None,
+                },
+                {
+                    "id": "gpt-4o",
+                    "provider": "openai",
+                    "usd_per_1m_input": 2.5,
+                    "usd_per_1m_output": 10,
+                },
                 sample_template,
                 None,  # fetch_pdf_text returns None
             ]
@@ -293,7 +414,6 @@ class TestExtractEntities:
             project_id=project_id,
             template_id=1,
             pdf_id=pdf_id,
-            provider="openai",
             model="gpt-4o",
         )
 
@@ -314,7 +434,18 @@ class TestExtractEntities:
         mock_conn = AsyncMock()
         mock_conn.fetchrow = AsyncMock(
             side_effect=[
-                {"id": project_id, "description": "Test project"},
+                {
+                    "id": project_id,
+                    "description": "Test project",
+                    "owner_id": uuid4(),
+                    "organization_id": None,
+                },
+                {
+                    "id": "gpt-4o",
+                    "provider": "openai",
+                    "usd_per_1m_input": 2.5,
+                    "usd_per_1m_output": 10,
+                },
                 sample_template,
                 {"full_text": "   "},  # whitespace only
             ]
@@ -325,7 +456,6 @@ class TestExtractEntities:
             project_id=project_id,
             template_id=1,
             pdf_id=pdf_id,
-            provider="openai",
             model="gpt-4o",
         )
 
@@ -345,22 +475,10 @@ class TestExtractEntitiesRequestSchema:
             project_id=uuid4(),
             template_id=1,
             document_text="Test document",
-            provider="openai",
             model="gpt-4o",
         )
 
-        assert request.provider == "openai"
-
-    def test_invalid_provider_rejected(self):
-        """Verify invalid provider is rejected by Pydantic."""
-        with pytest.raises(ValueError):
-            ExtractEntitiesRequest(
-                project_id=uuid4(),
-                template_id=1,
-                document_text="Test",
-                provider="invalid_provider",
-                model="model",
-            )
+        assert request.model == "gpt-4o"
 
     def test_requires_text_or_pdf_id(self):
         """Verify ValidationError when neither document_text nor pdf_id is provided."""
@@ -368,7 +486,6 @@ class TestExtractEntitiesRequestSchema:
             ExtractEntitiesRequest(
                 project_id=uuid4(),
                 template_id=1,
-                provider="openai",
                 model="gpt-4o",
                 # no document_text, no pdf_id
             )
@@ -382,7 +499,6 @@ class TestExtractEntitiesRequestSchema:
             project_id=uuid4(),
             template_id=1,
             pdf_id=uuid4(),
-            provider="openai",
             model="gpt-4o",
         )
 

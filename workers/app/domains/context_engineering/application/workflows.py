@@ -6,7 +6,9 @@ from typing import Any
 
 import asyncpg
 from openai import AsyncOpenAI
+
 from app.domains.billing.infrastructure.repository import record_llm_usage
+from app.domains.billing.application.workflows import report_usage_to_stripe
 from app.integrations.openai import call_openai
 from app.shared.domain.LLMResponseData import LLMResponseData
 from app.shared.infrastructure.s3 import download_pdf_bytes
@@ -201,7 +203,6 @@ async def prompt_optimization_workflow(
         )
         await record_llm_usage(
             conn,
-            provider="openai",
             model=cmd.refinement_model,
             input_tokens=llm_usage.input_tokens,
             output_tokens=llm_usage.output_tokens,
@@ -271,6 +272,7 @@ async def prompt_optimization_workflow(
         conn, cmd.project_id, best_candidate.system_prompt
     )
     await repo.insert_evaluation(conn, prompt_id, best_f1, per_entity_scores)
+    await report_usage_to_stripe(cmd.project_id)
 
     return {
         "best_prompt_id": str(prompt_id),

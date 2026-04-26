@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from uuid import UUID
 
 from app.main import app
 
@@ -9,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(name="billing.report_usage_to_stripe", bind=True, max_retries=3)
-def report_usage_to_stripe_task(self):
+def report_usage_to_stripe_task(self, project_id: str | None = None):
     """Batch-report all unreported LLM usage to Stripe metered billing."""
     try:
-        result = asyncio.run(report_usage_to_stripe())
+        result = asyncio.run(report_usage_to_stripe(UUID(project_id) if project_id else None))
         logger.info(
             "Stripe usage reported: reported=%d skipped=%d",
             result["reported"],

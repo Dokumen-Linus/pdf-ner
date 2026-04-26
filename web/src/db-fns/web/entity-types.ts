@@ -4,7 +4,8 @@ import { z } from "zod"
 
 import { db } from "@/db/client"
 import { entityTypes } from "@/db/schemas/web/entity-types"
-import { requireProjectAccess } from "@/lib/authorization.server"
+import { requireProjectAccess } from "@/lib/project-authorization.server"
+import { requirePermission } from "@/lib/role-authorization.server"
 
 // ** CREATE **
 export const CreateEntityTypeSchema = z.object({
@@ -27,7 +28,8 @@ export const CreateEntityTypeSchema = z.object({
 export const createEntityType = createServerFn({ method: "POST" })
   .inputValidator(CreateEntityTypeSchema)
   .handler(async ({ data }) => {
-    await requireProjectAccess(data.projectId, "manage")
+    const access = await requireProjectAccess(data.projectId, "manage")
+    requirePermission(access, "manage_entity_types")
     const [entityType] = await db.insert(entityTypes).values(data).returning({ id: entityTypes.id })
     return { id: entityType.id }
   })
@@ -72,7 +74,8 @@ export const updateEntityType = createServerFn({ method: "POST" })
     if (!existing) {
       throw new Error("Entity type not found")
     }
-    await requireProjectAccess(existing.projectId, "manage")
+    const access = await requireProjectAccess(existing.projectId, "manage")
+    requirePermission(access, "manage_entity_types")
     const updatedEntityType = await db
       .update(entityTypes)
       .set(updateData)
@@ -95,7 +98,8 @@ export const deleteEntityType = createServerFn({ method: "POST" })
     if (!existing) {
       throw new Error("Entity type not found")
     }
-    await requireProjectAccess(existing.projectId, "manage")
+    const access = await requireProjectAccess(existing.projectId, "manage")
+    requirePermission(access, "manage_entity_types")
     const entityType = await db.delete(entityTypes).where(eq(entityTypes.id, data.id))
     if (entityType.rowCount === 0) {
       throw new Error("Entity type not found")

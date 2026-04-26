@@ -1,7 +1,7 @@
 -- migrate:up
 CREATE TABLE public.models (
     id TEXT PRIMARY KEY,
-    provider TEXT NOT NULL CHECK (provider IN ('openai', 'anthropic', 'google')),
+    provider TEXT NOT NULL CHECK (provider IN ('openai', 'anthropic', 'gemini')),
     usd_per_1m_input NUMERIC(10, 4) NOT NULL,
     usd_per_1m_output NUMERIC(10, 4) NOT NULL,
     release_date TIMESTAMPTZ NOT NULL,

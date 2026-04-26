@@ -219,7 +219,7 @@ function DocumentsPage() {
           </p>
         </div>
 
-        {access?.canManage ? (
+        {access?.subscriptionType === "developer" && access.canManage ? (
           <AlertDialog
             open={isUploadOpen}
             onOpenChange={(open) => {
