@@ -1,10 +1,11 @@
 from pathlib import Path
 import sys
+
 from celery import current_app
 import redis.asyncio as redis
 
 from app.core.config import settings
-from app.core.telemetry import bind_worker_context
+from app.core.logging import bind_worker_context
 
 _OBS_PATH = Path(__file__).resolve().parents[4] / "packages" / "otel_py"
 if str(_OBS_PATH) not in sys.path:

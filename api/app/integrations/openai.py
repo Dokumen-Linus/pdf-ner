@@ -2,7 +2,7 @@ import time
 
 from dokumen_llm_providers import LLMResponseData, call_openai
 
-from app.core.telemetry import bind_request_context
+from app.core.logging import bind_request_context
 
 import sys
 from pathlib import Path

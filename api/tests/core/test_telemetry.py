@@ -5,7 +5,7 @@ import httpx
 import pytest
 
 from app.core.middleware import RequestIDMiddleware, RequestLoggingMiddleware
-from app.core.telemetry import get_metrics_registry, telemetry_router
+from app.core.logging import get_metrics_registry, telemetry_router
 
 
 @pytest.fixture
