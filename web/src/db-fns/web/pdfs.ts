@@ -41,7 +41,7 @@ export const createPdf = createServerFn({ method: "POST" })
 
 // ** READ **
 export const getPdfById = createServerFn({ method: "GET" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     await requirePdfAccess(data.id, "label")
     const pdf = await db.select().from(pdfs).where(eq(pdfs.id, data.id))
@@ -70,7 +70,7 @@ export const updatePdf = createServerFn({ method: "POST" })
 
 // ** DELETE **
 export const deletePdf = createServerFn({ method: "POST" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const pdf = await db.delete(pdfs).where(eq(pdfs.id, data.id))
     if (pdf.rowCount === 0) {

@@ -6,7 +6,7 @@ import { db } from "@/db/client"
 import { stdEntityTypes } from "@/db/schemas/public/std-entity-types"
 
 export const getStdEntityTypeById = createServerFn({ method: "GET" })
-  .inputValidator((data: { id: number }) => data)
+  .inputValidator(z.object({ id: z.number() }))
   .handler(async ({ data }) => {
     const [stdEntityType] = await db
       .select()
@@ -34,7 +34,7 @@ export const getStdEntityTypeByShortName = createServerFn({ method: "GET" })
   })
 
 export const getAllStdEntityTypes = createServerFn({ method: "GET" })
-  .inputValidator(() => ({}))
+  .inputValidator(z.void())
   .handler(async () => {
     const stdEntityTypesList = await db.select().from(stdEntityTypes)
     return stdEntityTypesList

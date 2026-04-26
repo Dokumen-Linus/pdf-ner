@@ -7,7 +7,7 @@ import { workersPdfs } from "@/db/schemas/workers/pdfs"
 import { requirePdfAccess, requireProjectAccess } from "@/lib/authorization.server"
 
 export const getWorkersPdfById = createServerFn({ method: "GET" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     await requirePdfAccess(data.id, "label")
     const [pdf] = await db.select().from(workersPdfs).where(eq(workersPdfs.id, data.id)).limit(1)
@@ -18,13 +18,13 @@ export const getWorkersPdfById = createServerFn({ method: "GET" })
   })
 
 export const getAllWorkersPdfs = createServerFn({ method: "GET" })
-  .inputValidator(() => ({}))
+  .inputValidator(z.void())
   .handler(async () => {
     return db.select().from(workersPdfs)
   })
 
 export const getWorkersPdfIdsByProjectId = createServerFn({ method: "GET" })
-  .inputValidator((data: { projectId: string }) => data)
+  .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")
     return db
@@ -34,7 +34,7 @@ export const getWorkersPdfIdsByProjectId = createServerFn({ method: "GET" })
   })
 
 export const getWorkersPdfsCountByProjectId = createServerFn({ method: "GET" })
-  .inputValidator((data: { projectId: string }) => data)
+  .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")
     const [result] = await db
@@ -45,7 +45,7 @@ export const getWorkersPdfsCountByProjectId = createServerFn({ method: "GET" })
   })
 
 export const getWorkersPdfsByProjectId = createServerFn({ method: "GET" })
-  .inputValidator((data: { projectId: string }) => data)
+  .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")
     return db.select().from(workersPdfs).where(eq(workersPdfs.projectId, data.projectId))

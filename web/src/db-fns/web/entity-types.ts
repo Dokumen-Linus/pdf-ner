@@ -34,7 +34,7 @@ export const createEntityType = createServerFn({ method: "POST" })
 
 // ** READ **
 export const getEntityTypeById = createServerFn({ method: "GET" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const entityType = await db.select().from(entityTypes).where(eq(entityTypes.id, data.id))
     if (entityType.length === 0) {
@@ -44,7 +44,7 @@ export const getEntityTypeById = createServerFn({ method: "GET" })
   })
 
 export const getEntityTypesByProjectId = createServerFn({ method: "GET" })
-  .inputValidator((data: { projectId: string }) => data)
+  .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")
     const entityTypesList = await db
@@ -85,7 +85,7 @@ export const updateEntityType = createServerFn({ method: "POST" })
 
 // ** DELETE **
 export const deleteEntityType = createServerFn({ method: "POST" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const [existing] = await db
       .select({ projectId: entityTypes.projectId })

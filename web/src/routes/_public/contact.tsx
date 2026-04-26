@@ -23,10 +23,8 @@ const contactSchema = z.object({
   message: z.string().trim().min(10, "Message must be at least 10 characters").max(5000),
 })
 
-type ContactInput = z.infer<typeof contactSchema>
-
 export const submitContactForm = createServerFn({ method: "POST" })
-  .inputValidator((data: ContactInput) => contactSchema.parse(data))
+  .inputValidator(contactSchema)
   .handler(async ({ data }) => {
     const { env } = await import("@/env.server")
     const { sendEmail } = await import("@/lib/send-email")

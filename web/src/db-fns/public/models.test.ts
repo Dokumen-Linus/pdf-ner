@@ -7,14 +7,14 @@ const runTests = process.env.TEST_DB === "true"
 describe.if(runTests)("Public Models Read-Only Functions", () => {
   describe("getAllModels", () => {
     it("returns an array of models", async () => {
-      const result = await getAllModels({ data: {} })
+      const result = await getAllModels()
       expect(Array.isArray(result)).toBe(true)
     })
   })
 
   describe("getModelById", () => {
     it("returns a model when it exists", async () => {
-      const allModels = await getAllModels({ data: {} })
+      const allModels = await getAllModels()
       if (allModels.length > 0) {
         const firstModel = allModels[0]
         const result = await getModelById({ data: { id: firstModel.id } })

@@ -176,7 +176,7 @@ describe.if(runTests)("web.pdfs labelling lock", () => {
 
 describe.if(runTests)("web.pdfs label upsert", () => {
   it("upserts labeled_entities JSONB on the pdf row", async () => {
-    const allPdfs = await getAllWorkersPdfs({ data: {} })
+    const allPdfs = await getAllWorkersPdfs()
     if (allPdfs.length === 0) {
       console.warn("[pdfs.test] skipping upsertPdfLabels test — no workers.pdfs rows")
       return
