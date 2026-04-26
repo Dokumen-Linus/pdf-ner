@@ -54,7 +54,7 @@ export const createAnnotation = createServerFn({ method: "POST" })
 
 // ** READ **
 export const getAnnotationById = createServerFn({ method: "GET" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const annotation = await db.select().from(annotations).where(eq(annotations.id, data.id))
     if (annotation.length === 0) {
@@ -64,7 +64,7 @@ export const getAnnotationById = createServerFn({ method: "GET" })
   })
 
 export const getAnnotationsByPdfId = createServerFn({ method: "GET" })
-  .inputValidator((data: { pdfId: string }) => data)
+  .inputValidator(z.object({ pdfId: z.string() }))
   .handler(async ({ data }) => {
     await requirePdfAccess(data.pdfId, "label")
     const pdfAnnotations = await db
@@ -75,7 +75,7 @@ export const getAnnotationsByPdfId = createServerFn({ method: "GET" })
   })
 
 export const getAnnotationsByPdfIds = createServerFn({ method: "GET" })
-  .inputValidator((data: { pdfIds: string[] }) => data)
+  .inputValidator(z.object({ pdfIds: z.array(z.string()) }))
   .handler(async ({ data }) => {
     if (data.pdfIds.length === 0) return []
     return db
@@ -89,7 +89,7 @@ export const getAnnotationsByPdfIds = createServerFn({ method: "GET" })
   })
 
 export const getAnnotationsBySubtype = createServerFn({ method: "GET" })
-  .inputValidator((data: { subtype: string }) => data)
+  .inputValidator(z.object({ subtype: z.string() }))
   .handler(async ({ data }) => {
     const subtypeAnnotations = await db
       .select()
@@ -120,7 +120,7 @@ export const updateAnnotation = createServerFn({ method: "POST" })
 
 // ** DELETE **
 export const deleteAnnotation = createServerFn({ method: "POST" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const annotation = await db.delete(annotations).where(eq(annotations.id, data.id))
     if (annotation.rowCount === 0) {

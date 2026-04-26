@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 import { getRequestHeaders } from "@tanstack/react-start/server"
 import { and, eq } from "drizzle-orm"
+import { z } from "zod"
 
 import { db } from "@/db/client"
 import { authMembers, authOrganizations, authTeams } from "@/db/schemas/auth"
@@ -39,7 +40,7 @@ export const getCurrentUserOrganization = createServerFn({ method: "GET" }).hand
 })
 
 export const getCurrentUserTeamsByOrganization = createServerFn({ method: "GET" })
-  .inputValidator((data: { organizationId: string }) => data)
+  .inputValidator(z.object({ organizationId: z.string() }))
   .handler(async ({ data }) => {
     const userId = await requireUserId()
 

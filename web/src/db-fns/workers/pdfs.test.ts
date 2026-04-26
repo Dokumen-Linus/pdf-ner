@@ -14,14 +14,14 @@ const runTests = process.env.TEST_DB === "true"
 describe.if(runTests)("Workers PDFs Read-Only Functions", () => {
   describe("getAllWorkersPdfs", () => {
     it("returns an array of workers PDFs", async () => {
-      const result = await getAllWorkersPdfs({ data: {} })
+      const result = await getAllWorkersPdfs()
       expect(Array.isArray(result)).toBe(true)
     })
   })
 
   describe("getWorkersPdfById", () => {
     it("returns a workers PDF when it exists", async () => {
-      const allPdfs = await getAllWorkersPdfs({ data: {} })
+      const allPdfs = await getAllWorkersPdfs()
       if (allPdfs.length > 0) {
         const firstPdf = allPdfs[0]
         const result = await getWorkersPdfById({ data: { id: firstPdf.id } })
@@ -40,7 +40,7 @@ describe.if(runTests)("Workers PDFs Read-Only Functions", () => {
 
   describe("getWorkersPdfsByProjectId", () => {
     it("returns an array of workers PDFs for a project", async () => {
-      const allPdfs = await getAllWorkersPdfs({ data: {} })
+      const allPdfs = await getAllWorkersPdfs()
       if (allPdfs.length > 0) {
         const projectId = allPdfs[0].projectId
         const result = await getWorkersPdfsByProjectId({ data: { projectId } })
@@ -62,7 +62,7 @@ describe.if(runTests)("Workers PDFs Read-Only Functions", () => {
 
   describe("getWorkersPdfsByName", () => {
     it("returns an array of workers PDFs with matching name", async () => {
-      const allPdfs = await getAllWorkersPdfs({ data: {} })
+      const allPdfs = await getAllWorkersPdfs()
       const pdfWithName = allPdfs.find((p) => p.name !== null)
       if (pdfWithName) {
         const result = await getWorkersPdfsByName({ data: { name: pdfWithName.name! } })
@@ -85,7 +85,7 @@ describe.if(runTests)("Workers PDFs Read-Only Functions", () => {
 
   describe("getWorkersPdfsByExtractMethod", () => {
     it("returns an array of workers PDFs with matching extract method", async () => {
-      const allPdfs = await getAllWorkersPdfs({ data: {} })
+      const allPdfs = await getAllWorkersPdfs()
       const pdfWithMethod = allPdfs.find((p) => p.extractMethod !== null)
       if (pdfWithMethod) {
         const result = await getWorkersPdfsByExtractMethod({
@@ -110,7 +110,7 @@ describe.if(runTests)("Workers PDFs Read-Only Functions", () => {
 
   describe("getWorkersPdfsByModelType", () => {
     it("returns an array of workers PDFs with matching model type", async () => {
-      const allPdfs = await getAllWorkersPdfs({ data: {} })
+      const allPdfs = await getAllWorkersPdfs()
       const pdfWithModelType = allPdfs.find((p) => p.modelType !== null)
       if (pdfWithModelType) {
         const result = await getWorkersPdfsByModelType({

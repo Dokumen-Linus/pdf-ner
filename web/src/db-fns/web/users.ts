@@ -35,7 +35,7 @@ export const createUser = createServerFn({ method: "POST" })
 
 // ** READ **
 export const getUserById = createServerFn({ method: "GET" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const [user] = await db.select().from(users).where(eq(users.id, data.id)).limit(1)
     if (!user) {
@@ -107,7 +107,7 @@ export const updateUserByAuthUserId = createServerFn({ method: "POST" })
 
 // ** DELETE **
 export const deleteUser = createServerFn({ method: "POST" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const user = await db.delete(users).where(eq(users.id, data.id))
     if (user.rowCount === 0) {

@@ -7,14 +7,14 @@ const runTests = process.env.TEST_DB === "true"
 describe.if(runTests)("API PDFs Read-Only Functions", () => {
   describe("getAllApiPdfs", () => {
     it("returns an array of API PDFs", async () => {
-      const result = await getAllApiPdfs({ data: {} })
+      const result = await getAllApiPdfs()
       expect(Array.isArray(result)).toBe(true)
     })
   })
 
   describe("getApiPdfById", () => {
     it("returns an API PDF when it exists", async () => {
-      const allPdfs = await getAllApiPdfs({ data: {} })
+      const allPdfs = await getAllApiPdfs()
       if (allPdfs.length > 0) {
         const firstPdf = allPdfs[0]
         const result = await getApiPdfById({ data: { id: firstPdf.id } })

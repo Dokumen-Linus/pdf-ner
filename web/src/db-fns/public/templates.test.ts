@@ -7,14 +7,14 @@ const runTests = process.env.TEST_DB === "true"
 describe.if(runTests)("Public Templates Read-Only Functions", () => {
   describe("getAllTemplates", () => {
     it("returns an array of templates", async () => {
-      const result = await getAllTemplates({ data: {} })
+      const result = await getAllTemplates()
       expect(Array.isArray(result)).toBe(true)
     })
   })
 
   describe("getTemplateById", () => {
     it("returns a template when it exists", async () => {
-      const allTemplates = await getAllTemplates({ data: {} })
+      const allTemplates = await getAllTemplates()
       if (allTemplates.length > 0) {
         const firstTemplate = allTemplates[0]
         const result = await getTemplateById({ data: { id: firstTemplate.id } })

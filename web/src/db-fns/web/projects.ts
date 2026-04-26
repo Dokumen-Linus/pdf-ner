@@ -111,7 +111,7 @@ export const createProject = createServerFn({ method: "POST" })
 
 // ** READ **
 export const getProjectById = createServerFn({ method: "GET" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.id, "read")
     const project = await db.select().from(projects).where(eq(projects.id, data.id))
@@ -122,7 +122,7 @@ export const getProjectById = createServerFn({ method: "GET" })
   })
 
 export const getProjectByName = createServerFn({ method: "GET" })
-  .inputValidator((data: { name: string }) => data)
+  .inputValidator(z.object({ name: z.string() }))
   .handler(async ({ data }) => {
     const project = await db.select().from(projects).where(eq(projects.name, data.name))
     if (project.length === 0) {
@@ -132,7 +132,7 @@ export const getProjectByName = createServerFn({ method: "GET" })
   })
 
 export const getProjectsByOwnerId = createServerFn({ method: "GET" })
-  .inputValidator((data: { ownerId: string }) => data)
+  .inputValidator(z.object({ ownerId: z.string() }))
   .handler(async ({ data }) => {
     const workspaceUser = await requireWorkspaceUser()
     if (data.ownerId !== workspaceUser.userId) {
@@ -143,7 +143,7 @@ export const getProjectsByOwnerId = createServerFn({ method: "GET" })
   })
 
 export const getAccessibleProjects = createServerFn({ method: "GET" })
-  .inputValidator(() => ({}))
+  .inputValidator(z.void())
   .handler(async () => {
     const workspaceUser = await requireWorkspaceUser()
     return db
@@ -195,7 +195,7 @@ export const getAccessibleProjects = createServerFn({ method: "GET" })
   })
 
 export const getCurrentProjectAccess = createServerFn({ method: "GET" })
-  .inputValidator((data: { projectId: string }) => data)
+  .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     const access = await getProjectAccessForCurrentUser(data.projectId)
     return {
@@ -213,7 +213,7 @@ export const getCurrentProjectAccess = createServerFn({ method: "GET" })
   })
 
 export const getProjectsByTeamId = createServerFn({ method: "GET" })
-  .inputValidator((data: { teamId: string }) => data)
+  .inputValidator(z.object({ teamId: z.string() }))
   .handler(async ({ data }) => {
     const workspaceUser = await requireWorkspaceUser()
     const [teamMembership] = await db
@@ -269,7 +269,7 @@ export const updateProject = createServerFn({ method: "POST" })
 
 // ** DELETE **
 export const deleteProject = createServerFn({ method: "POST" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.id, "manage")
     const project = await db.delete(projects).where(eq(projects.id, data.id))

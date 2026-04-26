@@ -53,6 +53,25 @@ export default [
       ...prettierConfig.rules,
       "react/react-in-jsx-scope": "off",
       "react/no-children-prop": ["error", { allowFunctions: true }],
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@tanstack/start-server-core",
+              message:
+                "Import TanStack Start APIs through @tanstack/react-start or its React Start subpaths.",
+            },
+          ],
+          patterns: [
+            {
+              group: ["@tanstack/start-server-core/*"],
+              message:
+                "Import TanStack Start APIs through @tanstack/react-start or its React Start subpaths.",
+            },
+          ],
+        },
+      ],
       "sort-imports": "off",
       "import/order": [
         "error",

@@ -12,14 +12,14 @@ const runTests = process.env.TEST_DB === "true"
 describe.if(runTests)("API Prompts Read-Only Functions", () => {
   describe("getAllPrompts", () => {
     it("returns an array of prompts", async () => {
-      const result = await getAllPrompts({ data: {} })
+      const result = await getAllPrompts()
       expect(Array.isArray(result)).toBe(true)
     })
   })
 
   describe("getPromptById", () => {
     it("returns a prompt when it exists", async () => {
-      const allPrompts = await getAllPrompts({ data: {} })
+      const allPrompts = await getAllPrompts()
       if (allPrompts.length > 0) {
         const firstPrompt = allPrompts[0]
         const result = await getPromptById({ data: { id: firstPrompt.id } })
@@ -37,7 +37,7 @@ describe.if(runTests)("API Prompts Read-Only Functions", () => {
 
   describe("getPromptsByProjectId", () => {
     it("returns an array of prompts for a project", async () => {
-      const allPrompts = await getAllPrompts({ data: {} })
+      const allPrompts = await getAllPrompts()
       if (allPrompts.length > 0) {
         const projectId = allPrompts[0].projectId
         const result = await getPromptsByProjectId({ data: { projectId } })
@@ -59,7 +59,7 @@ describe.if(runTests)("API Prompts Read-Only Functions", () => {
 
   describe("getPromptsByTemplateId", () => {
     it("returns an array of prompts for a template", async () => {
-      const allPrompts = await getAllPrompts({ data: {} })
+      const allPrompts = await getAllPrompts()
       const promptWithTemplate = allPrompts.find((p) => p.templateId !== null)
       if (promptWithTemplate) {
         const result = await getPromptsByTemplateId({

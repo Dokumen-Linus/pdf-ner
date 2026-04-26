@@ -12,14 +12,14 @@ const runTests = process.env.TEST_DB === "true"
 describe.if(runTests)("Public Standard Entity Types Read-Only Functions", () => {
   describe("getAllStdEntityTypes", () => {
     it("returns an array of standard entity types", async () => {
-      const result = await getAllStdEntityTypes({ data: {} })
+      const result = await getAllStdEntityTypes()
       expect(Array.isArray(result)).toBe(true)
     })
   })
 
   describe("getStdEntityTypeById", () => {
     it("returns a standard entity type when it exists", async () => {
-      const allTypes = await getAllStdEntityTypes({ data: {} })
+      const allTypes = await getAllStdEntityTypes()
       if (allTypes.length > 0) {
         const firstType = allTypes[0]
         const result = await getStdEntityTypeById({ data: { id: firstType.id } })
@@ -39,7 +39,7 @@ describe.if(runTests)("Public Standard Entity Types Read-Only Functions", () => 
 
   describe("getStdEntityTypeByShortName", () => {
     it("returns a standard entity type when it exists", async () => {
-      const allTypes = await getAllStdEntityTypes({ data: {} })
+      const allTypes = await getAllStdEntityTypes()
       if (allTypes.length > 0) {
         const firstType = allTypes[0]
         const result = await getStdEntityTypeByShortName({

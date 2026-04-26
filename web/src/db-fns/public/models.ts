@@ -6,7 +6,7 @@ import { db } from "@/db/client"
 import { models } from "@/db/schemas/public/models"
 
 export const getModelById = createServerFn({ method: "GET" })
-  .inputValidator((data: { id: string }) => data)
+  .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const [model] = await db.select().from(models).where(eq(models.id, data.id)).limit(1)
     if (!model) {
@@ -16,7 +16,7 @@ export const getModelById = createServerFn({ method: "GET" })
   })
 
 export const getAllModels = createServerFn({ method: "GET" })
-  .inputValidator(() => ({}))
+  .inputValidator(z.void())
   .handler(async () => {
     const modelsList = await db.select().from(models)
     return modelsList
