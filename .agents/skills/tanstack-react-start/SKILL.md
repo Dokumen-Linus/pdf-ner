@@ -1,10 +1,6 @@
 ---
 name: tanstack-react-start
-description: >-
-  React bindings for TanStack Start: createStart, StartClient,
-  StartServer, React-specific imports, re-exports from
-  @tanstack/react-router, full project setup with React, useServerFn
-  hook.
+description: Use when planning around the React-specific bindings for TanStack Start: createStart, StartClient StartServer, React-specific imports, re-exports from @tanstack/react-router
 type: framework
 library: tanstack-start
 library_version: '1.166.2'

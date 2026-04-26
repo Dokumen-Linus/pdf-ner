@@ -1,6 +1,6 @@
 ---
 name: tanstack-devtools-bidirectional
-description: Two-way event patterns between devtools panel and application. App-to-devtools observation, devtools-to-app commands, time-travel debugging with snapshots and revert. structuredClone for snapshot safety, distinct event suffixes for observation vs commands, serializable payloads only.
+description: Use to plan two-way event patterns between devtools panel and application. Use when creating app-to-devtools observation, devtools-to-app commands, time-travel debugging with snapshots and revert. structuredClone for snapshot safety, distinct event suffixes for observation vs commands, serializable payloads only.
 type: core
 library: '@tanstack/devtools-event-client'
 library_version: '0.10.12'

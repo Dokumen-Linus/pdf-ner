@@ -1,6 +1,6 @@
 ---
 name: tanstack-query-best-practices
-description: TanStack Query (React Query) best practices for data fetching, caching, mutations, and server state management. Activate when building data-driven React applications with server state.
+description: Use when implementing TanStack Query (React Query) best practices for data fetching, caching, mutations, and server state management
 ---
 
 # TanStack Query Best Practices
