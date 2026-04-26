@@ -1,13 +1,6 @@
 ---
 name: tanstack-start-core
 description: Use for advanced Tanstack Start code
-type: core
-library: tanstack-start
-library_version: '1.166.2'
-sources:
-  - TanStack/router:docs/start/framework/react/build-from-scratch.md
-  - TanStack/router:docs/start/framework/react/quick-start.md
-  - TanStack/router:docs/start/framework/react/guide/routing.md
 ---
 
 # TanStack Start Core

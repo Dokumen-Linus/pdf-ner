@@ -1,15 +1,6 @@
 ---
 name: tanstack-start-server-core
-description: Use when plan needs createStartHandler,
-  request/response utilities (getRequest, setResponseHeader,
-  setCookie, getCookie, useSession), three-phase request handling,
-  AsyncLocalStorage context
-type: core
-library: tanstack-start
-library_version: '1.166.2'
-sources:
-  - TanStack/router:packages/start-server-core/src
-  - TanStack/router:docs/start/framework/react/guide/server-entry-point.md
+description: Use when plan needs createStartHandler, request/response utilities (getRequest, setResponseHeader, setCookie, getCookie, useSession), three-phase request handling, AsyncLocalStorage context
 ---
 
 # Start Server Core (`@tanstack/start-server-core`)

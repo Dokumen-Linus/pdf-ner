@@ -1,9 +1,6 @@
 ---
 name: tanstack-router-core
-description: Use when planning around TanStack Router's core concepts: route trees, createRouter, createRoute, createRootRoute, createRootRouteWithContext, addChildren, Register type declaration, route matching, route sorting, file naming conventions
-type: core
-library: tanstack-router
-library_version: '1.166.2'
+description: Use when planning around TanStack Router's core concepts - route trees, createRouter, createRoute, createRootRoute, createRootRouteWithContext, addChildren, Register type declaration, route matching, route sorting, file naming conventions
 ---
 
 # TanStack Router Core

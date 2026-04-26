@@ -1,15 +1,6 @@
 ---
 name: tanstack-react-start
-description: Use when planning around the React-specific bindings for TanStack Start: createStart, StartClient StartServer, React-specific imports, re-exports from @tanstack/react-router
-type: framework
-library: tanstack-start
-library_version: '1.166.2'
-framework: react
-requires:
-  - tanstack-start-core
-sources:
-  - TanStack/router:packages/react-start/src
-  - TanStack/router:docs/start/framework/react/build-from-scratch.md
+description: Use when planning around the React-specific bindings for TanStack Start, createStart, StartClient StartServer, React-specific imports, re-exports from @tanstack/react-router
 ---
 
 # React Start (`@tanstack/react-start`)
