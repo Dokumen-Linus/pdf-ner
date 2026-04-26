@@ -2,14 +2,15 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**43 library files** across 8 modules
+**44 library files** across 8 modules
 
-## Web (19 files)
+## Web (20 files)
 
 - `web/src/db-fns/web/annotations.ts` — LabellingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
 - `web/src/lib/auth-i18n.ts` — normalizeAuthLocale, detectAuthLocaleFromHeaders, getLocalizedAuthApiMessage, getAuthErrorPageCopy, getLocalizedAuthRedirectError, AuthLocale, …
 - `web/src/db-fns/web/test-fixtures.ts` — createFixtureTracker, cleanupFixtures, seedUser, seedOrganization, seedOrganizationMember, seedTeam, …
-- `web/src/lib/authorization.server.ts` — requireWorkspaceUser, requireUserId, getProjectAccessForCurrentUser, requireProjectAccess, requireProjectOwnership, requirePdfAccess, …
+- `web/src/lib/project-authorization.server.ts` — requireWorkspaceUser, requireUserId, getProjectAccessForCurrentUser, requireProjectAccess, requireProjectOwnership, requirePdfAccess, …
+- `web/src/lib/role-authorization.server.ts` — canUsePermission, requirePermission, requireProjectPermission, AppPermission
 - `web/scripts/generate_full_package_json.py` — strip_caret_tilde, collect_packages, main
 - `web/tanstack-start-docs/download_tanstack_guide.py` — gh_get, download_dir, main
 - `web/public/example-pdfs/federal-register/get_first_page.py` — extract_first_page, main
@@ -69,7 +70,7 @@
 
 ## Pdfium_utils (1 files)
 
-- `packages/pdfium_utils/pdfium_utils/__init__.py` — find_text_objects, parse_hex_color, highlight_phrases, PhraseHighlightResult
+- `packages/pdfium_utils/pdfium_utils/__init__.py` — find_text_objects, parse_hex_color, extract_text_by_page, extract_text, highlight_phrases, PhraseHighlightResult
 
 ---
 _Back to [overview.md](./overview.md)_

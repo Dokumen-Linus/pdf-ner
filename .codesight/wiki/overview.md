@@ -8,29 +8,26 @@
 
 ## Scale
 
-19 API routes · 1 database models · 81 UI components · 43 library files · 22 middleware layers · 60 environment variables
+15 API routes · 1 database models · 81 UI components · 44 library files · 22 middleware layers · 60 environment variables
 
 ## Subsystems
 
-- **[Payments](./payments.md)** — 2 routes — touches: db, payment
 - **[Avatars](./avatars.md)** — 1 routes — touches: upload
 - **[Buckets](./buckets.md)** — 1 routes — touches: auth, upload
-- **[Customer](./customer.md)** — 1 routes — touches: db, payment
 - **[Extract](./extract.md)** — 1 routes — touches: cache
+- **[Extract-text](./extract-text.md)** — 1 routes
 - **[Highlight](./highlight.md)** — 1 routes
 - **[Ocr](./ocr.md)** — 1 routes — touches: auth, cache
 - **[Optimize-prompt](./optimize-prompt.md)** — 2 routes — touches: cache
 - **[Pdfs](./pdfs.md)** — 2 routes — touches: auth, upload
-- **[Report-to-stripe](./report-to-stripe.md)** — 1 routes — touches: db, payment
 - **[Test_telemetry](./test_telemetry.md)** — 1 routes — touches: cache
-- **[Usage](./usage.md)** — 1 routes — touches: db, payment
 - **[Infra](./infra.md)** — 4 routes — touches: db, cache
 
 **Database:** drizzle, 1 models — see [database.md](./database.md)
 
 **UI:** 81 components (react) — see [ui.md](./ui.md)
 
-**Libraries:** 43 files — see [libraries.md](./libraries.md)
+**Libraries:** 44 files — see [libraries.md](./libraries.md)
 
 ## High-Impact Files
 
@@ -39,9 +36,9 @@ Changes to these files have the widest blast radius across the codebase:
 - `web/src/components/pdf-container/plugin-viewport-2/index.ts` — imported by **13** files
 - `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **11** files
 - `web/src/components/pdf-container/plugin-scroll-2/index.ts` — imported by **10** files
+- `///application/schemas.py` — imported by **10** files
 - `web/src/db/schemas/web/schema.ts` — imported by **8** files
-- `/config.py` — imported by **7** files
-- `web/src/components/pdf-container/plugin-annotation-2/index.ts` — imported by **7** files
+- `/common.py` — imported by **8** files
 
 ## Required Environment Variables
 
