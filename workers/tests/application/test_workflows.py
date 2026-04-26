@@ -14,8 +14,6 @@ from app.domains.context_engineering.application.workflows import (
 )
 from app.domains.context_engineering.domain.entities import (
     EvaluationResult,
-    LabeledAnnotation,
-    LabeledPdf,
     PromptCandidate,
 )
 from app.domains.context_engineering.domain.value_objects import F1Score

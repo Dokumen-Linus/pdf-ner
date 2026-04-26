@@ -2,9 +2,9 @@ from pathlib import Path
 import sys
 import time
 
+from anthropic import AsyncAnthropic
 from dokumen_llm_providers import LLMResponseData
-from dokumen_llm_providers import call_openai as _call_openai
-from openai import AsyncOpenAI
+from dokumen_llm_providers import call_anthropic as _call_anthropic
 
 from app.core.logging import bind_worker_context
 
@@ -14,18 +14,18 @@ if str(_OBS_PATH) not in sys.path:
 
 from otel_py import record_llm_call  # noqa: E402
 
-__all__ = ["AsyncOpenAI", "call_openai"]
+__all__ = ["AsyncAnthropic", "call_anthropic"]
 
 
-async def call_openai(*args, **kwargs) -> LLMResponseData:
+async def call_anthropic(*args, **kwargs) -> LLMResponseData:
     model = kwargs.get("model") or (args[1] if len(args) > 1 else "unknown")
-    bind_worker_context(llm_provider="openai", llm_model=model)
+    bind_worker_context(llm_provider="anthropic", llm_model=model)
     start = time.perf_counter()
     try:
-        response = await _call_openai(*args, **kwargs)
+        response = await _call_anthropic(*args, **kwargs)
     except Exception as exc:
         record_llm_call(
-            provider="openai",
+            provider="anthropic",
             model=model,
             prompt_tokens=None,
             completion_tokens=None,
@@ -36,7 +36,7 @@ async def call_openai(*args, **kwargs) -> LLMResponseData:
         raise
 
     record_llm_call(
-        provider="openai",
+        provider="anthropic",
         model=model,
         prompt_tokens=response.input_tokens,
         completion_tokens=response.output_tokens,
@@ -44,3 +44,4 @@ async def call_openai(*args, **kwargs) -> LLMResponseData:
         success=True,
     )
     return response
+
