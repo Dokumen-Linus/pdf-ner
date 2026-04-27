@@ -104,11 +104,11 @@ export default [
           ],
           patterns: [
             {
-              group: "@tanstack/start-client-core/*",
+              group: ["@tanstack/start-client-core/*"],
               message: "Import TanStack Start APIs through @tanstack/react-start or its subpaths.",
             },
             {
-              group: "@tanstack/start-server-core/*",
+              group: ["@tanstack/start-server-core/*"],
               message: "Import TanStack Start APIs through @tanstack/react-start or its subpaths.",
             },
           ],
