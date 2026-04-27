@@ -2,11 +2,11 @@ from unittest.mock import AsyncMock
 from uuid import uuid4
 
 from fastapi import HTTPException
+from pydantic import ValidationError
 import pytest
 
 from app.domains.llm_ner import service
 from app.domains.llm_ner.schemas import ExtractEntitiesRequest
-from pydantic import ValidationError
 
 
 class TestBuildPrompt:
@@ -520,7 +520,7 @@ class TestOptimizePromptAuthorization:
             "/api/v1/llm-ner/optimize-prompt",
             json={
                 "project_id": str(uuid4()),
-                "max_iterations": 5,
+                "max_cost_usd": "1.00",
                 "model": "gpt-4o",
             },
         )
@@ -545,7 +545,7 @@ class TestOptimizePromptAuthorization:
             "/api/v1/llm-ner/optimize-prompt",
             json={
                 "project_id": str(project_id),
-                "max_iterations": 5,
+                "max_cost_usd": "1.00",
                 "model": "gpt-4o",
             },
         )

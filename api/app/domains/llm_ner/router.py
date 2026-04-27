@@ -35,7 +35,7 @@ async def optimize_prompt(
 
     task_id = events.dispatch_optimize_prompt(
         project_id=str(request_data.project_id),
-        max_iterations=request_data.max_iterations,
+        max_cost_usd=request_data.max_cost_usd,
         model=request_data.model,
     )
 

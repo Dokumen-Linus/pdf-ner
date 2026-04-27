@@ -3,18 +3,20 @@ from __future__ import annotations
 import json
 import logging
 from typing import Any
+from uuid import UUID
 
 import asyncpg
 from openai import AsyncOpenAI
 
-from app.domains.billing.infrastructure.repository import record_llm_usage
 from app.domains.billing.application.workflows import report_usage_to_stripe
+from app.domains.billing.infrastructure.repository import record_llm_usage
 from app.integrations.openai import call_openai
 from app.shared.domain.LLMResponseData import LLMResponseData
 from app.shared.infrastructure.s3 import download_pdf_bytes
 
 from ..domain import services
 from ..domain.entities import EntityTypeInfo, EvaluationResult, LabeledPdf, PromptCandidate
+from ..domain.value_objects import CostBudget
 from ..infrastructure import repositories as repo
 from .commands import OptimizePrompt
 
@@ -40,6 +42,19 @@ def _report_progress(
     )
 
 
+def _budget_details(budget: CostBudget) -> dict[str, str]:
+    return {
+        "cost_usd": str(budget.spent_cost_usd),
+        "max_cost_usd": str(budget.max_cost_usd),
+        "remaining_cost_usd": str(budget.remaining_cost_usd),
+    }
+
+
+def _budget_percent(budget: CostBudget, floor: int = 10, ceiling: int = 95) -> int:
+    ratio = min(float(budget.spent_cost_usd / budget.max_cost_usd), 1.0)
+    return min(ceiling, max(floor, floor + int(ratio * (ceiling - floor))))
+
+
 async def prompt_optimization_workflow(
     conn: asyncpg.Connection,
     openai_client: AsyncOpenAI,
@@ -48,8 +63,12 @@ async def prompt_optimization_workflow(
 ) -> dict:
     """Main optimization loop.
 
-    Returns dict with best_prompt_id, best_f1, iterations_run.
+    Returns dict with best_prompt_id, best_f1, iterations_run, cost_usd, and stop_reason.
     """
+    budget = CostBudget(max_cost_usd=cmd.max_cost_usd)
+    stop_reason = "completed"
+    iterations_run = 0
+
     # 1. Fetch project data
     project = await repo.fetch_project(conn, cmd.project_id)
     if not project:
@@ -122,74 +141,105 @@ async def prompt_optimization_workflow(
     # 4. Evaluate each variant, pick best
     best_candidate: PromptCandidate | None = None
     best_f1 = -1.0
+    eval_results: list[EvaluationResult] = []
 
     for var_idx, system_prompt in enumerate(variants):
+        if budget.is_exhausted:
+            stop_reason = "max_cost_reached"
+            break
+
         full_prompt = system_prompt
         if few_shot_text:
             full_prompt = system_prompt + "\n\n" + few_shot_text
 
         candidate = PromptCandidate(system_prompt=full_prompt, iteration=0)
         eval_results = await _evaluate_prompt_on_pdfs(
+            conn,
             openai_client,
             candidate,
             eval_pdfs,
             json_schema,
             entity_types,
             cmd.model,
+            project_id=cmd.project_id,
+            budget=budget,
         )
+        if not eval_results:
+            stop_reason = "max_cost_reached"
+            break
         avg_f1 = sum(r.overall_f1 for r in eval_results) / max(len(eval_results), 1)
         candidate.overall_f1 = avg_f1
         logger.info("Variant %d F1: %.4f", var_idx, avg_f1)
 
-        variant_percent = 15 + (var_idx * 30 // max(len(variants) - 1, 1))
+        variant_percent = max(
+            15 + (var_idx * 30 // max(len(variants) - 1, 1)),
+            _budget_percent(budget, floor=15, ceiling=45),
+        )
         _report_progress(
             task,
             "evaluating_variant",
-            f"Evaluated variant {var_idx + 1}/{len(variants)} — F1: {avg_f1:.3f}",
+            f"Evaluated variant {var_idx + 1}/{len(variants)} - F1: {avg_f1:.3f}",
             variant_percent,
             variant=var_idx + 1,
             total_variants=len(variants),
             f1=round(avg_f1, 4),
+            **_budget_details(budget),
         )
 
         if avg_f1 > best_f1:
             best_f1 = avg_f1
             best_candidate = candidate
 
+    if best_candidate is None:
+        raise ValueError("Cost budget exhausted before any prompt could be evaluated")
+
     # 5. Iterative refinement
-    for iteration in range(1, cmd.max_iterations + 1):
-        iter_base_pct = 50 + (iteration - 1) * 45 // max(cmd.max_iterations, 1)
+    iteration = 0
+    while not budget.is_exhausted:
+        iteration += 1
+        iter_base_pct = _budget_percent(budget, floor=50, ceiling=95)
         _report_progress(
             task,
             "evaluating_current",
-            f"Iteration {iteration}/{cmd.max_iterations} — evaluating current best",
+            f"Iteration {iteration} - evaluating current best",
             iter_base_pct,
             iteration=iteration,
-            max_iterations=cmd.max_iterations,
             best_f1=round(best_f1, 4),
+            **_budget_details(budget),
         )
 
         eval_results = await _evaluate_prompt_on_pdfs(
+            conn,
             openai_client,
             best_candidate,
             eval_pdfs,
             json_schema,
             entity_types,
             cmd.model,
+            project_id=cmd.project_id,
+            budget=budget,
         )
+        if not eval_results:
+            stop_reason = "max_cost_reached"
+            break
 
         error_analysis = services.build_error_analysis(eval_results, entity_types)
         if not error_analysis.strip():
             logger.info("No errors to fix at iteration %d. Stopping.", iteration)
+            stop_reason = "no_errors"
+            break
+
+        if budget.is_exhausted:
+            stop_reason = "max_cost_reached"
             break
 
         _report_progress(
             task,
             "generating_refinement",
-            f"Iteration {iteration}/{cmd.max_iterations} — generating refined prompt",
-            iter_base_pct + 15 // max(cmd.max_iterations, 1),
+            f"Iteration {iteration} - generating refined prompt",
+            _budget_percent(budget, floor=55, ceiling=95),
             iteration=iteration,
-            max_iterations=cmd.max_iterations,
+            **_budget_details(budget),
         )
 
         refinement_meta_prompt = services.build_refinement_prompt(
@@ -201,7 +251,7 @@ async def prompt_optimization_workflow(
             "You are a prompt engineering expert.",
             refinement_meta_prompt,
         )
-        await record_llm_usage(
+        usage_cost = await record_llm_usage(
             conn,
             model=cmd.refinement_model,
             input_tokens=llm_usage.input_tokens,
@@ -209,16 +259,27 @@ async def prompt_optimization_workflow(
             project_id=cmd.project_id,
             task_name=_TASK_NAME,
         )
+        budget.add_usage(usage_cost)
+
+        if budget.is_exhausted:
+            stop_reason = "max_cost_reached"
+            break
 
         refined_candidate = PromptCandidate(system_prompt=llm_usage.text, iteration=iteration)
         refined_results = await _evaluate_prompt_on_pdfs(
+            conn,
             openai_client,
             refined_candidate,
             eval_pdfs,
             json_schema,
             entity_types,
             cmd.model,
+            project_id=cmd.project_id,
+            budget=budget,
         )
+        if not refined_results:
+            stop_reason = "max_cost_reached"
+            break
         refined_f1 = sum(r.overall_f1 for r in refined_results) / max(len(refined_results), 1)
         refined_candidate.overall_f1 = refined_f1
         refined_candidate.scores = {
@@ -234,14 +295,15 @@ async def prompt_optimization_workflow(
         _report_progress(
             task,
             "iteration_evaluated",
-            f"Iteration {iteration}/{cmd.max_iterations} — refined F1: {refined_f1:.3f}",
-            iter_base_pct + 30 // max(cmd.max_iterations, 1),
+            f"Iteration {iteration} - refined F1: {refined_f1:.3f}",
+            _budget_percent(budget, floor=60, ceiling=95),
             iteration=iteration,
-            max_iterations=cmd.max_iterations,
             refined_f1=round(refined_f1, 4),
             best_f1=round(best_f1, 4),
+            **_budget_details(budget),
         )
 
+        iterations_run = iteration
         improvement = refined_f1 - best_f1
         if refined_f1 > best_f1:
             best_f1 = refined_f1
@@ -254,7 +316,11 @@ async def prompt_optimization_workflow(
                 improvement,
                 cmd.convergence_threshold,
             )
+            stop_reason = "converged"
             break
+
+    if budget.is_exhausted and stop_reason == "completed":
+        stop_reason = "max_cost_reached"
 
     # 6. Store best prompt and scores
     _report_progress(
@@ -263,6 +329,8 @@ async def prompt_optimization_workflow(
         "Saving optimized prompt and evaluation scores",
         98,
         best_f1=round(best_f1, 4),
+        stop_reason=stop_reason,
+        **_budget_details(budget),
     )
 
     per_entity_scores = {et.name: _avg_score(eval_results, et.name) for et in entity_types}
@@ -277,21 +345,31 @@ async def prompt_optimization_workflow(
     return {
         "best_prompt_id": str(prompt_id),
         "best_f1": best_f1,
-        "iterations_run": best_candidate.iteration,
+        "iterations_run": iterations_run,
+        "cost_usd": str(budget.spent_cost_usd),
+        "max_cost_usd": str(budget.max_cost_usd),
+        "stop_reason": stop_reason,
     }
 
 
 async def _evaluate_prompt_on_pdfs(
+    conn: asyncpg.Connection,
     openai_client: AsyncOpenAI,
     candidate: PromptCandidate,
     eval_pdfs: list[LabeledPdf],
     json_schema: dict,
     entity_types: list[EntityTypeInfo],
     model: str,
+    *,
+    project_id: UUID,
+    budget: CostBudget,
 ) -> list[EvaluationResult]:
     """Run NER with the candidate prompt on each eval PDF and evaluate."""
     results: list[EvaluationResult] = []
     for pdf in eval_pdfs:
+        if budget.is_exhausted:
+            break
+
         llm_usage: LLMResponseData = await call_openai(
             openai_client,
             model,
@@ -300,6 +378,15 @@ async def _evaluate_prompt_on_pdfs(
             schema=json_schema,
             schema_name="ner_extraction",
         )
+        usage_cost = await record_llm_usage(
+            conn,
+            model=model,
+            input_tokens=llm_usage.input_tokens,
+            output_tokens=llm_usage.output_tokens,
+            project_id=project_id,
+            task_name=_TASK_NAME,
+        )
+        budget.add_usage(usage_cost)
         try:
             predicted = json.loads(llm_usage.text)
         except json.JSONDecodeError:

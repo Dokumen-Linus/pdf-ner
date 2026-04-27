@@ -1,5 +1,4 @@
-"""Tests for domain entities: EntityTypeInfo, LabeledPdf, PromptCandidate, EvaluationResult."""
-
+from decimal import Decimal
 from uuid import uuid4
 
 from app.domains.context_engineering.domain.entities import (
@@ -8,7 +7,7 @@ from app.domains.context_engineering.domain.entities import (
     LabeledPdf,
     PromptCandidate,
 )
-from app.domains.context_engineering.domain.value_objects import F1Score
+from app.domains.context_engineering.domain.value_objects import CostBudget, F1Score
 
 
 class TestEntityTypeInfo:
@@ -136,3 +135,19 @@ class TestPromptCandidate:
         )
         assert pc.scores["name"] == score
         assert pc.overall_f1 == 0.85
+
+
+class TestCostBudget:
+    def test_add_usage_and_remaining(self):
+        budget = CostBudget(max_cost_usd=Decimal("1.00"))
+        budget.add_usage(Decimal("0.25"))
+
+        assert budget.spent_cost_usd == Decimal("0.25")
+        assert budget.remaining_cost_usd == Decimal("0.75")
+        assert not budget.is_exhausted
+
+    def test_exhausted_at_cap(self):
+        budget = CostBudget(max_cost_usd=Decimal("1.00"), spent_cost_usd=Decimal("1.00"))
+
+        assert budget.is_exhausted
+        assert budget.remaining_cost_usd == Decimal("0")

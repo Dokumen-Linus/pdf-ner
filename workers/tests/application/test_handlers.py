@@ -1,5 +1,3 @@
-"""Tests for application command handlers."""
-
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4

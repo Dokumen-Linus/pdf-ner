@@ -1,8 +1,7 @@
 import logging
 import time
+from typing import Any
 from uuid import UUID
-
-import stripe
 
 from app.core.config import settings
 from app.shared.infrastructure.db import get_pool
@@ -13,7 +12,9 @@ from ..infrastructure.repository import create_report_batch_and_link_usage, get_
 logger = logging.getLogger(__name__)
 
 
-def _get_stripe() -> stripe.Stripe:
+def _get_stripe() -> Any:
+    import stripe
+
     return stripe.Stripe(settings.STRIPE_SECRET_KEY)
 
 
@@ -36,6 +37,8 @@ async def report_usage_to_stripe(project_id: UUID | None = None) -> dict:
                 continue
 
             try:
+                import stripe
+
                 record = client.subscription_items.create_usage_record(
                     batch["stripe_usage_item_id"],
                     quantity=usage_units,

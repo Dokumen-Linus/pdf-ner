@@ -1,5 +1,3 @@
-"""Tests for shared time infrastructure: SystemClock and FrozenClock."""
-
 from datetime import UTC, datetime
 
 import pytest

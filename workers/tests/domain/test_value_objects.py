@@ -1,5 +1,3 @@
-"""Tests for domain value objects: F1Score and EntityMatch."""
-
 import pytest
 
 from app.domains.context_engineering.domain.value_objects import EntityMatch, F1Score

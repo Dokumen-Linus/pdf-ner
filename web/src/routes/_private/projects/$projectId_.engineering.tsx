@@ -97,7 +97,7 @@ function EngineeringPage() {
     setStartError(null)
     try {
       const result = await startPromptOptimization({
-        data: { projectId, maxIterations: 5, model: "gpt-4o" },
+        data: { projectId, maxCostUsd: 1, model: "gpt-4o" },
       })
       setTaskId(result.task_id)
     } catch (error) {
@@ -222,13 +222,17 @@ function EngineeringPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-4">
               <div className="rounded-lg border p-4">
                 <p className="text-muted-foreground text-sm">Best F1 Score</p>
                 <p className="text-2xl font-bold">{(status.result.best_f1 * 100).toFixed(1)}%</p>
               </div>
               <div className="rounded-lg border p-4">
-                <p className="text-muted-foreground text-sm">Iterations Run</p>
+                <p className="text-muted-foreground text-sm">Cost Used</p>
+                <p className="text-2xl font-bold">${Number(status.result.cost_usd).toFixed(2)}</p>
+              </div>
+              <div className="rounded-lg border p-4">
+                <p className="text-muted-foreground text-sm">Refinements Run</p>
                 <p className="text-2xl font-bold">{status.result.iterations_run}</p>
               </div>
               <div className="rounded-lg border p-4">
@@ -297,15 +301,21 @@ function ProgressDetails({
             </p>
             <p className="text-lg font-semibold">
               {String(details.variant ?? details.iteration)}/
-              {String(details.total_variants ?? details.max_iterations)}
+              {String(details.total_variants ?? "?")}
             </p>
           </div>
         )}
         {details.iteration != null && (
           <div className="rounded-lg border p-3">
             <p className="text-muted-foreground text-xs">Iteration</p>
+            <p className="text-lg font-semibold">{String(details.iteration)}</p>
+          </div>
+        )}
+        {details.cost_usd != null && (
+          <div className="rounded-lg border p-3">
+            <p className="text-muted-foreground text-xs">Cost</p>
             <p className="text-lg font-semibold">
-              {String(details.iteration)}/{String(details.max_iterations)}
+              ${Number(details.cost_usd).toFixed(2)} / ${Number(details.max_cost_usd).toFixed(2)}
             </p>
           </div>
         )}
@@ -348,8 +358,14 @@ function ProgressDetails({
         {details.iteration != null && (
           <div className="rounded-lg border p-3">
             <p className="text-muted-foreground text-xs">Iteration</p>
+            <p className="text-lg font-semibold">{String(details.iteration)}</p>
+          </div>
+        )}
+        {details.cost_usd != null && (
+          <div className="rounded-lg border p-3">
+            <p className="text-muted-foreground text-xs">Cost</p>
             <p className="text-lg font-semibold">
-              {String(details.iteration)}/{String(details.max_iterations)}
+              ${Number(details.cost_usd).toFixed(2)} / ${Number(details.max_cost_usd).toFixed(2)}
             </p>
           </div>
         )}
