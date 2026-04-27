@@ -110,6 +110,11 @@
 - *(pkg)* Add tesseract ocr with pdfium rendering
 - *(gpu)* Inital runpod workers
 - *(pkg)* Use runpod workers in pdf_ocr_utils
+- *(api)* Text_extract endpoint using pdfium or runpod model
+- *(wk)* Extity_extraction domain for worker runs of full ocr+ner processing
+- *(wk)* Source_listeners domain
+- *(wk)* Source_watchers domain
+- Implement two roles and comprehensive usage billing rules
 
 ### 🐛 Bug Fixes
 
@@ -183,6 +188,9 @@
 - *(web)* Remove defaultFileName from export plugin #98
 - *(llm)* Add CLAUDE.md to .gitignore
 - *(web)* Remove uploadthing token
+- *(llm)* Posttooluse hook
+- *(llm)* Skills
+- *(wk)* Db edits to go with new domains
 
 ### 💼 Other
 
@@ -310,6 +318,8 @@
 - *(llm)* Inactivate some skills
 - *(llm)* Reactivate some skills
 - *(llm)* Improve codex config and hooks
+- *(llm)* Remove codesight hook and ruff
+- *(llm)* Shorten tanstack skills description
 
 ### ⚡ Performance
 
@@ -408,6 +418,8 @@
 - *(web)* Prettier
 - *(web)* Move import order from prettier to eslint to work with VSCode extension
 - *(web)* Add public assets to use later
+- Apply formatters
+- *(web)* Add to restricted imports
 
 ### 🧪 Testing
 
@@ -519,6 +531,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add runpod ocr env vars to infra, api, workers
 - Fix generate_env_example.py to dynamically create from 4 truth sources
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
