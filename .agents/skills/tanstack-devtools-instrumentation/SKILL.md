@@ -1,17 +1,6 @@
 ---
 name: tanstack-devtools-instrumentation
-description: Analyze library codebase for critical architecture and debugging points, add strategic event emissions. Identify middleware boundaries, state transitions, lifecycle hooks. Consolidate events (1 not 15), debounce high-frequency updates, DRY shared payload fields, guard emit() for production. Transparent server/client event bridging.
-type: core
-library: '@tanstack/devtools-event-client'
-library_version: '0.10.12'
-requires: tanstack-devtools-event-client
-sources:
-  - packages/event-bus-client/src/plugin.ts
-  - packages/event-bus/src/client/client.ts
-  - packages/event-bus/src/server/server.ts
-  - packages/devtools-client/src/index.ts
-  - docs/building-custom-plugins.md
-  - docs/bidirectional-communication.md
+description: Analyze library codebase for critical architecture and debugging points, add strategic event emissions. Identify middleware boundaries, state transitions, lifecycle hooks. Consolidate events, debounce high-frequency updates, DRY shared payload fields, guard emit() for production. Transparent server/client event bridging.
 ---
 
 # tanstack-devtools-instrumentation

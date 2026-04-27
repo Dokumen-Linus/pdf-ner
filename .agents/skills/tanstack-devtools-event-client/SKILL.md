@@ -1,13 +1,6 @@
 ---
 name: tanstack-devtools-event-client
 description: Create typed EventClient for a library. Define event maps with typed payloads, pluginId auto-prepend namespacing, emit()/on()/onAll()/onAllPluginEvents() API. Connection lifecycle (5 retries, 300ms), event queuing, enabled/disabled state, SSR fallbacks, singleton pattern. Unique pluginId requirement to avoid event collisions.
-type: core
-library: '@tanstack/devtools-event-client'
-library_version: '0.10.12'
-sources:
-  - packages/event-bus-client/src/plugin.ts
-  - docs/event-system.md
-  - docs/building-custom-plugins.md
 ---
 
 # tanstack-devtools-event-client
