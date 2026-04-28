@@ -12,21 +12,6 @@ function unixToDate(value: unknown): Date | null {
   return typeof value === "number" ? new Date(value * 1000) : null
 }
 
-function subscriptionItemIds(subscription: Stripe.Subscription) {
-  let developerItemId: string | null = null
-  let analystItemId: string | null = null
-  let usageItemId: string | null = null
-
-  for (const item of subscription.items.data) {
-    const priceId = typeof item.price === "string" ? item.price : item.price.id
-    if (priceId === env.STRIPE_DEVELOPER_PRICE_ID) developerItemId = item.id
-    if (priceId === env.STRIPE_ANALYST_PRICE_ID) analystItemId = item.id
-    if (priceId === env.STRIPE_USAGE_PRICE_ID) usageItemId = item.id
-  }
-
-  return { developerItemId, analystItemId, usageItemId }
-}
-
 async function syncSubscription(subscription: Stripe.Subscription) {
   const subscriptionPeriods = subscription as unknown as {
     current_period_start?: number
@@ -39,27 +24,18 @@ async function syncSubscription(subscription: Stripe.Subscription) {
   } = subscription.metadata
   const customerId =
     typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id
-  const { developerItemId, analystItemId, usageItemId } = subscriptionItemIds(subscription)
 
   const values = {
     stripeCustomerId: customerId,
     stripeSubscriptionId: subscription.id,
     stripeSubscriptionStatus: subscription.status,
-    stripeDeveloperItemId: developerItemId,
-    stripeUsageItemId: usageItemId,
     stripeCurrentPeriodStart: unixToDate(subscriptionPeriods.current_period_start),
     stripeCurrentPeriodEnd: unixToDate(subscriptionPeriods.current_period_end),
     updatedAt: new Date(),
   }
 
   if (billingKind === "organization" && organizationId) {
-    await db
-      .update(organizations)
-      .set({
-        ...values,
-        stripeAnalystItemId: analystItemId,
-      })
-      .where(eq(organizations.id, organizationId))
+    await db.update(organizations).set(values).where(eq(organizations.id, organizationId))
     return
   }
 
@@ -77,21 +53,13 @@ async function clearSubscription(subscription: Stripe.Subscription) {
   const values = {
     stripeSubscriptionId: null,
     stripeSubscriptionStatus: subscription.status,
-    stripeDeveloperItemId: null,
-    stripeUsageItemId: null,
     stripeCurrentPeriodStart: null,
     stripeCurrentPeriodEnd: null,
     updatedAt: new Date(),
   }
 
   if (billingKind === "organization" && organizationId) {
-    await db
-      .update(organizations)
-      .set({
-        ...values,
-        stripeAnalystItemId: null,
-      })
-      .where(eq(organizations.id, organizationId))
+    await db.update(organizations).set(values).where(eq(organizations.id, organizationId))
     return
   }
 

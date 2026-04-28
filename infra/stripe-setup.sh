@@ -3,7 +3,7 @@
 # Dokumen AI - Stripe Billing Setup
 # =============================================================================
 #
-# Creates the Stripe Prices expected by BILLING.md and the web billing flow:
+# Creates the Stripe Meter and Prices expected by BILLING.md and the web billing flow:
 #   - Developer subscription seat: $10/month
 #   - Analyst subscription seat:   $5/month
 #   - LLM usage metered price:      $0.000001 per reported unit
@@ -24,9 +24,7 @@
 #   STRIPE_SECRET_KEY=sk_test_... bash infra/stripe-setup.sh
 #
 # Notes:
-#   - Uses Stripe API version 2024-06-20 by default because the current worker
-#     reports usage with subscription_items.create_usage_record, the legacy
-#     metered usage API.
+#   - Uses Stripe API version 2025-02-24.acacia or later to support Billing Meters.
 #   - Prices are immutable in Stripe. To change amounts, create new lookup keys
 #     below and update web/.env.local with the new Price IDs.
 # =============================================================================
@@ -37,11 +35,12 @@ set -euo pipefail
 # Configuration
 # -----------------------------------------------------------------------------
 CURRENCY="${CURRENCY:-usd}"
-STRIPE_API_VERSION="${STRIPE_API_VERSION:-2024-06-20}"
+STRIPE_API_VERSION="${STRIPE_API_VERSION:-2025-02-24.acacia}"
 
 DEVELOPER_LOOKUP_KEY="${DEVELOPER_LOOKUP_KEY:-dokumen_developer_monthly_v1}"
 ANALYST_LOOKUP_KEY="${ANALYST_LOOKUP_KEY:-dokumen_analyst_monthly_v1}"
 USAGE_LOOKUP_KEY="${USAGE_LOOKUP_KEY:-dokumen_llm_usage_microdollar_v1}"
+USAGE_METER_EVENT_NAME="${USAGE_METER_EVENT_NAME:-dokumen_llm_usage}"
 
 DEVELOPER_PRODUCT_NAME="${DEVELOPER_PRODUCT_NAME:-Dokumen AI Developer Subscription}"
 ANALYST_PRODUCT_NAME="${ANALYST_PRODUCT_NAME:-Dokumen AI Analyst Subscription}"
@@ -120,7 +119,35 @@ create_or_get_fixed_price() {
     -d "metadata[billing_contract]=BILLING.md" | jq -r '.id'
 }
 
+find_meter_by_event_name() {
+  local event_name="$1"
+
+  stripe_call billing meters list \
+    --status=active \
+    --limit=1 | jq -r --arg name "$event_name" '.data[] | select(.event_name == $name) | .id // empty'
+}
+
+create_or_get_meter() {
+  local existing_meter_id
+  existing_meter_id="$(find_meter_by_event_name "$USAGE_METER_EVENT_NAME")"
+  if [ -n "$existing_meter_id" ]; then
+    echo "Reusing meter: $existing_meter_id" >&2
+    printf '%s\n' "$existing_meter_id"
+    return
+  fi
+
+  echo "Creating billing meter..." >&2
+  stripe_call billing meters create \
+    -d "display_name=$USAGE_PRODUCT_NAME" \
+    -d "event_name=$USAGE_METER_EVENT_NAME" \
+    -d "default_aggregation[formula]=sum" \
+    -d "customer_mapping[event_payload_key]=stripe_customer_id" \
+    -d "customer_mapping[type]=by_id" \
+    -d "value_settings[event_payload_key]=value" | jq -r '.id'
+}
+
 create_or_get_usage_price() {
+  local meter_id="$1"
   local existing_price_id
   existing_price_id="$(find_price_by_lookup_key "$USAGE_LOOKUP_KEY")"
   if [ -n "$existing_price_id" ]; then
@@ -135,6 +162,7 @@ create_or_get_usage_price() {
     -d "unit_amount_decimal=$USAGE_UNIT_AMOUNT_DECIMAL_CENTS" \
     -d "recurring[interval]=month" \
     -d "recurring[usage_type]=metered" \
+    -d "recurring[meter]=$meter_id" \
     -d "product_data[name]=$USAGE_PRODUCT_NAME" \
     -d "product_data[unit_label]=microUSD" \
     -d "lookup_key=$USAGE_LOOKUP_KEY" \
@@ -159,6 +187,7 @@ echo "Stripe API version: $STRIPE_API_VERSION"
 echo "Developer price:    \$$(format_cents "$DEVELOPER_UNIT_AMOUNT_CENTS")/month"
 echo "Analyst price:      \$$(format_cents "$ANALYST_UNIT_AMOUNT_CENTS")/month"
 echo "Usage price:        $USAGE_UNIT_AMOUNT_DECIMAL_CENTS cents per microdollar unit"
+echo "Meter event name:   $USAGE_METER_EVENT_NAME"
 echo "============================================="
 echo ""
 
@@ -174,7 +203,8 @@ ANALYST_PRICE_ID="$(create_or_get_fixed_price \
   "$ANALYST_UNIT_AMOUNT_CENTS" \
   "analyst")"
 
-USAGE_PRICE_ID="$(create_or_get_usage_price)"
+USAGE_METER_ID="$(create_or_get_meter)"
+USAGE_PRICE_ID="$(create_or_get_usage_price "$USAGE_METER_ID")"
 
 echo ""
 echo "Add these values to web/.env.local:"
@@ -185,4 +215,10 @@ STRIPE_ANALYST_PRICE_ID=$ANALYST_PRICE_ID
 STRIPE_USAGE_PRICE_ID=$USAGE_PRICE_ID
 ENV
 echo ""
-echo "The workers service only needs STRIPE_SECRET_KEY for usage reporting."
+echo "Add this value to workers/.env.local:"
+echo ""
+cat <<ENV
+STRIPE_METER_EVENT_NAME=$USAGE_METER_EVENT_NAME
+ENV
+echo ""
+echo "The workers service needs STRIPE_SECRET_KEY and STRIPE_METER_EVENT_NAME for usage reporting."

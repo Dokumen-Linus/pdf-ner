@@ -1,7 +1,7 @@
 import logging
 import time
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from app.core.config import settings
 from app.shared.infrastructure.db import get_pool
@@ -36,24 +36,28 @@ async def report_usage_to_stripe(project_id: UUID | None = None) -> dict:
                 skipped += 1
                 continue
 
+            identifier = str(uuid4())
             try:
                 import stripe
 
-                record = client.subscription_items.create_usage_record(
-                    batch["stripe_usage_item_id"],
-                    quantity=usage_units,
+                client.billing.meter_events.create(
+                    event_name=settings.STRIPE_METER_EVENT_NAME,
+                    identifier=identifier,
+                    payload={
+                        "stripe_customer_id": batch["stripe_customer_id"],
+                        "value": str(usage_units),
+                    },
                     timestamp=int(time.time()),
-                    action="increment",
                 )
                 await create_report_batch_and_link_usage(
                     conn,
                     batch=batch,
-                    stripe_usage_record_id=record.id,
+                    stripe_meter_event_identifier=identifier,
                 )
                 reported += 1
             except stripe.StripeError:
                 logger.exception(
-                    "Stripe usage record failed for billing target user=%s org=%s",
+                    "Stripe meter event failed for billing target user=%s org=%s",
                     batch["billing_user_id"],
                     batch["billing_organization_id"],
                 )

@@ -31,7 +31,7 @@ CREATE TABLE workers.llm_usage_report_batches (
     input_tokens BIGINT NOT NULL DEFAULT 0,
     output_tokens BIGINT NOT NULL DEFAULT 0,
     cost_usd NUMERIC(12, 8) NOT NULL DEFAULT 0,
-    stripe_usage_record_id TEXT,
+    stripe_meter_event_identifier TEXT,
     status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'reported', 'failed')),
     error_message TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),

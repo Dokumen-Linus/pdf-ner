@@ -19,8 +19,6 @@ export const users = webSchema.table("users", {
   stripeCustomerId: text("stripe_customer_id").unique(),
   stripeSubscriptionId: text("stripe_subscription_id"),
   stripeSubscriptionStatus: text("stripe_subscription_status"),
-  stripeDeveloperItemId: text("stripe_developer_item_id"),
-  stripeUsageItemId: text("stripe_usage_item_id"),
   stripeCurrentPeriodStart: timestamp("stripe_current_period_start", { withTimezone: true }),
   stripeCurrentPeriodEnd: timestamp("stripe_current_period_end", { withTimezone: true }),
   createdAt: timestamp("created_at").defaultNow(),

@@ -19,7 +19,7 @@ export const llmUsageReportBatches = workersSchema.table(
     inputTokens: bigint("input_tokens", { mode: "number" }).notNull().default(0),
     outputTokens: bigint("output_tokens", { mode: "number" }).notNull().default(0),
     costUsd: numeric("cost_usd", { precision: 12, scale: 8 }).notNull().default("0"),
-    stripeUsageRecordId: text("stripe_usage_record_id"),
+    stripeMeterEventIdentifier: text("stripe_meter_event_identifier"),
     status: text("status").notNull().default("pending"),
     errorMessage: text("error_message"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

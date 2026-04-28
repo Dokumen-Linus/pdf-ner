@@ -44,7 +44,7 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       periodStart: Date
       periodEnd: Date
       usageCount: number
-      stripeUsageRecordId: string | null
+      stripeMeterEventIdentifier: string | null
       status: string
     }
     const _: Expected = {} as LlmUsageReportBatch

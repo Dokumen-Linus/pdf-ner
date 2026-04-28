@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     GOOGLE_AI_API_KEY: str
 
     STRIPE_SECRET_KEY: str
+    STRIPE_METER_EVENT_NAME: str = "dokumen_llm_usage"
 
     OCR_MODEL: str = "deepseek-ocr"
     DEEPSEEK_OCR_RUNPOD_ENDPOINT_URL: str | None = None

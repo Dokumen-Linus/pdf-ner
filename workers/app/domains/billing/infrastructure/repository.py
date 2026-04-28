@@ -105,7 +105,7 @@ async def get_unreported_batches(
     project_id: UUID | None = None,
     limit: int = 5000,
 ):
-    """Fetch unreported usage grouped by billing target + Stripe usage item."""
+    """Fetch unreported usage grouped by billing target + Stripe customer."""
     project_filter = "AND u.project_id = $2" if project_id is not None else ""
     args = [limit]
     if project_id is not None:
@@ -116,7 +116,7 @@ async def get_unreported_batches(
         SELECT
             u.billing_user_id,
             u.billing_organization_id,
-            COALESCE(wu.stripe_usage_item_id, wo.stripe_usage_item_id) AS stripe_usage_item_id,
+            COALESCE(wu.stripe_customer_id, wo.stripe_customer_id) AS stripe_customer_id,
             ARRAY_AGG(u.id ORDER BY u.created_at) AS usage_ids,
             MIN(u.created_at) AS period_start,
             MAX(u.created_at) AS period_end,
@@ -129,8 +129,8 @@ async def get_unreported_batches(
         LEFT JOIN web.organizations wo ON wo.id = u.billing_organization_id
         WHERE u.report_batch_id IS NULL
           {project_filter}
-          AND COALESCE(wu.stripe_usage_item_id, wo.stripe_usage_item_id) IS NOT NULL
-        GROUP BY u.billing_user_id, u.billing_organization_id, stripe_usage_item_id
+          AND COALESCE(wu.stripe_customer_id, wo.stripe_customer_id) IS NOT NULL
+        GROUP BY u.billing_user_id, u.billing_organization_id, stripe_customer_id
         ORDER BY period_start
         LIMIT $1
         """,
@@ -142,7 +142,7 @@ async def create_report_batch_and_link_usage(
     conn: asyncpg.Connection,
     *,
     batch: asyncpg.Record,
-    stripe_usage_record_id: str,
+    stripe_meter_event_identifier: str,
 ) -> UUID:
     async with conn.transaction():
         batch_id = await conn.fetchval(
@@ -150,7 +150,7 @@ async def create_report_batch_and_link_usage(
             INSERT INTO workers.llm_usage_report_batches
                 (billing_user_id, billing_organization_id, period_start, period_end,
                  usage_count, input_tokens, output_tokens, cost_usd,
-                 stripe_usage_record_id, status, reported_at)
+                 stripe_meter_event_identifier, status, reported_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'reported', now())
             RETURNING id
             """,
@@ -162,7 +162,7 @@ async def create_report_batch_and_link_usage(
             batch["total_input_tokens"],
             batch["total_output_tokens"],
             batch["total_cost_usd"],
-            stripe_usage_record_id,
+            stripe_meter_event_identifier,
         )
         await conn.execute(
             """

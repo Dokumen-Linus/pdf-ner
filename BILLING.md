@@ -101,15 +101,15 @@ batch contains:
 - usage count,
 - input and output token totals,
 - total cost,
-- Stripe usage record ID,
+- Stripe meter event identifier,
 - status and timestamps.
 
 Batch reporting flow:
 
 1. Select unreported `llm_usage` rows where `report_batch_id IS NULL`.
-2. Group by billing target and Stripe metered subscription item.
+2. Group by billing target and Stripe customer.
 3. Convert total USD cost to the metered quantity expected by the Stripe price.
-4. Create one Stripe usage record for the aggregate.
+4. Create one Stripe meter event for the aggregate.
 5. Insert a `llm_usage_report_batches` row.
 6. Link all included `llm_usage` rows to that batch.
 
@@ -131,8 +131,6 @@ For personal billing, subscription fields live on `web.users`:
 - `stripe_customer_id`
 - `stripe_subscription_id`
 - `stripe_subscription_status`
-- `stripe_developer_item_id`
-- `stripe_usage_item_id`
 - current period timestamps
 
 For organization billing, subscription fields live on `web.organizations`:
@@ -140,9 +138,6 @@ For organization billing, subscription fields live on `web.organizations`:
 - `stripe_customer_id`
 - `stripe_subscription_id`
 - `stripe_subscription_status`
-- `stripe_developer_item_id`
-- `stripe_analyst_item_id`
-- `stripe_usage_item_id`
 - current period timestamps
 
 The app should use local database state for authorization and UI. It should not
@@ -240,8 +235,8 @@ Personal project:
 2. LLM call runs for that project.
 3. Usage row stores `project_id`, `actor_user_id`, `billing_user_id`, model ID,
    tokens, and cost snapshots.
-4. Weekly batch reports that user's aggregate usage to the user's Stripe
-   metered item.
+4. Weekly batch reports that user's aggregate usage to Stripe as a meter
+   event.
 
 Organization project:
 
@@ -249,8 +244,8 @@ Organization project:
 2. LLM call runs for that project.
 3. Usage row stores `project_id`, optional `actor_user_id`,
    `billing_organization_id`, model ID, tokens, and cost snapshots.
-4. Weekly or task-end batch reports that organization's aggregate usage to the
-   organization Stripe metered item.
+4. Weekly or task-end batch reports that organization's aggregate usage to
+   Stripe as a meter event.
 
 Long-running Celery workflow:
 

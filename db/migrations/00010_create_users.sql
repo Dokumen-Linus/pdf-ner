@@ -14,8 +14,6 @@ CREATE TABLE web.users (
   stripe_customer_id TEXT UNIQUE,
   stripe_subscription_id TEXT,
   stripe_subscription_status TEXT,
-  stripe_developer_item_id TEXT,
-  stripe_usage_item_id TEXT,
   stripe_current_period_start TIMESTAMPTZ,
   stripe_current_period_end TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
