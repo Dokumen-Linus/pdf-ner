@@ -130,7 +130,13 @@ def build_sections(
                 ("MY_EMAIL", ("web",)),
             ],
         ),
-        ("# Stripe", [("STRIPE_SECRET_KEY", ("web", "api", "workers"))]),
+        ("# Stripe", [
+            ("STRIPE_SECRET_KEY", ("web", "api", "workers")),
+            ("STRIPE_WEBHOOK_SECRET", ("web",)),
+            ("STRIPE_DEVELOPER_PRICE_ID", ("web",)),
+            ("STRIPE_ANALYST_PRICE_ID", ("web",)),
+            ("STRIPE_USAGE_PRICE_ID", ("web",)),
+        ]),
         (
             "# Workers (workers/.env.local.example)",
             [
@@ -177,7 +183,6 @@ def build_sections(
                 ("AUTH_DATABASE_URL", ("web",)),
                 ("WEB_DATABASE_URL", ("web",)),
                 ("BASE_URL", ("web",)),
-                ("UPLOADTHING_TOKEN", ("web",)),
             ],
         ),
         (
