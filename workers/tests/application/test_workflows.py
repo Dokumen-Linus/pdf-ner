@@ -228,7 +228,10 @@ class TestPromptOptimizationWorkflow:
     @pytest.mark.anyio
     async def test_raises_on_no_entity_types(self):
         conn = AsyncMock()
-        conn.fetchrow.return_value = {"id": PROJECT_ID, "name": "Test", "description": "desc"}
+        conn.fetchrow.side_effect = [
+            {"id": PROJECT_ID, "name": "Test", "description": "desc"},
+            {"provider": "openai"},
+        ]
         conn.fetch.return_value = []  # no entity types
         client = AsyncMock()
 
@@ -239,7 +242,10 @@ class TestPromptOptimizationWorkflow:
     @pytest.mark.anyio
     async def test_raises_on_no_labeled_pdfs(self, name_entity_type):
         conn = AsyncMock()
-        conn.fetchrow.return_value = {"id": PROJECT_ID, "name": "Test", "description": "desc"}
+        conn.fetchrow.side_effect = [
+            {"id": PROJECT_ID, "name": "Test", "description": "desc"},
+            {"provider": "openai"},
+        ]
         # First fetch returns entity types, second returns empty (no pdfs)
         entity_row = {
             "name": name_entity_type.name,
@@ -255,6 +261,7 @@ class TestPromptOptimizationWorkflow:
             "std_examples": name_entity_type.std_examples,
             "std_format_description": name_entity_type.std_format_description,
             "std_regex": name_entity_type.std_regex,
+            "entity_type_id": name_entity_type.entity_type_id,
         }
         # fetch_entity_types_with_std calls conn.fetch once, fetch_labeled_pdfs calls it again
         conn.fetch.side_effect = [[entity_row], []]
@@ -270,11 +277,14 @@ class TestPromptOptimizationWorkflow:
     ):
         """Full workflow that converges after initial variant evaluation."""
         conn = AsyncMock()
-        conn.fetchrow.return_value = {
-            "id": PROJECT_ID,
-            "name": "Test Project",
-            "description": "Test invoices",
-        }
+        conn.fetchrow.side_effect = [
+            {
+                "id": PROJECT_ID,
+                "name": "Test Project",
+                "description": "Test invoices",
+            },
+            {"provider": "openai"},
+        ]
 
         # Build entity type rows
         entity_rows = []
@@ -294,6 +304,7 @@ class TestPromptOptimizationWorkflow:
                     "std_examples": et.std_examples,
                     "std_format_description": et.std_format_description,
                     "std_regex": et.std_regex,
+                    "entity_type_id": et.entity_type_id,
                 }
             )
 
@@ -328,6 +339,7 @@ class TestPromptOptimizationWorkflow:
                     {
                         "pdf_id": ann.pdf_id,
                         "custom_entity_type": ann.entity_type_name,
+                        "entity_type_id": ann.entity_type_id,
                         "contents": ann.labeled_text,
                         "page_index": ann.page_index,
                     }
@@ -366,23 +378,24 @@ class TestPromptOptimizationWorkflow:
         assert "best_prompt_id" in result
         assert "best_f1" in result
         assert "iterations_run" in result
-        assert result["cost_usd"] == "0.04"
+        assert result["cost_usd"] == "0.07"
         assert result["max_cost_usd"] == "1.00"
         assert result["stop_reason"] == "no_errors"
         assert result["best_prompt_id"] == str(PROMPT_ID)
-        # insert_optimized_prompt was called
-        conn.fetchval.assert_called_once()
-        # insert_evaluation was called
-        conn.execute.assert_called_once()
+        assert result["llm_call_count"] == 7
+        assert conn.fetchval.call_count == 2
+        assert conn.executemany.await_count == 1
 
     @pytest.mark.anyio
     async def test_skips_pdf_with_no_full_text_and_logs_warning(self, name_entity_type, caplog):
-        """PDFs with full_text=None that are successfully downloaded from S3 are skipped
-        (text extraction not yet implemented) and a warning is logged."""
+        """PDFs with full_text=None are skipped and logged without S3 fallback."""
         import logging
 
         conn = AsyncMock()
-        conn.fetchrow.return_value = {"id": PROJECT_ID, "name": "Test", "description": "desc"}
+        conn.fetchrow.side_effect = [
+            {"id": PROJECT_ID, "name": "Test", "description": "desc"},
+            {"provider": "openai"},
+        ]
 
         entity_row = {
             "name": name_entity_type.name,
@@ -398,6 +411,7 @@ class TestPromptOptimizationWorkflow:
             "std_examples": name_entity_type.std_examples,
             "std_format_description": name_entity_type.std_format_description,
             "std_regex": name_entity_type.std_regex,
+            "entity_type_id": name_entity_type.entity_type_id,
         }
 
         # One PDF with no full_text
@@ -414,6 +428,7 @@ class TestPromptOptimizationWorkflow:
             {
                 "pdf_id": PDF_ID_1,
                 "custom_entity_type": "full_name",
+                "entity_type_id": name_entity_type.entity_type_id,
                 "contents": "John Smith",
                 "page_index": 0,
             },
@@ -423,24 +438,20 @@ class TestPromptOptimizationWorkflow:
         client = AsyncMock()
         cmd = OptimizePrompt(project_id=PROJECT_ID)
 
-        with patch(
-            "app.domains.context_engineering.application.workflows.download_pdf_bytes"
-        ) as mock_dl:
-            mock_dl.return_value = (b"raw pdf bytes", "uploads/doc1.pdf")
-            with caplog.at_level(logging.WARNING):
-                with pytest.raises(ValueError, match="No labeled PDFs with usable text"):
-                    await prompt_optimization_workflow(conn, client, cmd)
+        with caplog.at_level(logging.ERROR):
+            with pytest.raises(ValueError, match="No labeled PDFs with usable text"):
+                await prompt_optimization_workflow(conn, client, cmd)
 
-        # download_pdf_bytes was called for the PDF with no full_text
-        mock_dl.assert_awaited_once_with(conn, PDF_ID_1)
-        # A warning was logged about text extraction not being implemented
-        assert any("not yet implemented" in r.message for r in caplog.records)
+        assert any("no saved full_text" in r.exc_text for r in caplog.records if r.exc_text)
 
     @pytest.mark.anyio
     async def test_uses_full_text_from_db_when_present(self, name_entity_type):
         """PDFs that already have full_text do NOT trigger download_pdf_bytes."""
         conn = AsyncMock()
-        conn.fetchrow.return_value = {"id": PROJECT_ID, "name": "Test", "description": "desc"}
+        conn.fetchrow.side_effect = [
+            {"id": PROJECT_ID, "name": "Test", "description": "desc"},
+            {"provider": "openai"},
+        ]
 
         entity_row = {
             "name": name_entity_type.name,
@@ -456,6 +467,7 @@ class TestPromptOptimizationWorkflow:
             "std_examples": name_entity_type.std_examples,
             "std_format_description": name_entity_type.std_format_description,
             "std_regex": name_entity_type.std_regex,
+            "entity_type_id": name_entity_type.entity_type_id,
         }
 
         pdf_rows = [
@@ -471,6 +483,7 @@ class TestPromptOptimizationWorkflow:
             {
                 "pdf_id": PDF_ID_1,
                 "custom_entity_type": "full_name",
+                "entity_type_id": name_entity_type.entity_type_id,
                 "contents": "John Smith",
                 "page_index": 0,
             },
@@ -483,21 +496,15 @@ class TestPromptOptimizationWorkflow:
             choices=[MagicMock(message=MagicMock(content=json.dumps({"full_name": "John Smith"})))]
         )
 
-        with patch(
-            "app.domains.context_engineering.application.workflows.download_pdf_bytes"
-        ) as mock_dl:
-            cmd = OptimizePrompt(project_id=PROJECT_ID, max_cost_usd=Decimal("1.00"))
-            with (
-                patch(
-                    "app.domains.context_engineering.application.workflows.record_llm_usage",
-                    new=AsyncMock(return_value=Decimal("0.01")),
-                ),
-                patch(
-                    "app.domains.context_engineering.application.workflows.report_usage_to_stripe",
-                    new=AsyncMock(return_value={"reported": 1, "skipped": 0}),
-                ),
-            ):
-                await prompt_optimization_workflow(conn, mock_client, cmd)
-
-        # download_pdf_bytes must NOT have been called since full_text was present
-        mock_dl.assert_not_awaited()
+        cmd = OptimizePrompt(project_id=PROJECT_ID, max_cost_usd=Decimal("1.00"))
+        with (
+            patch(
+                "app.domains.context_engineering.application.workflows.record_llm_usage",
+                new=AsyncMock(return_value=Decimal("0.01")),
+            ),
+            patch(
+                "app.domains.context_engineering.application.workflows.report_usage_to_stripe",
+                new=AsyncMock(return_value={"reported": 1, "skipped": 0}),
+            ),
+        ):
+            await prompt_optimization_workflow(conn, mock_client, cmd)

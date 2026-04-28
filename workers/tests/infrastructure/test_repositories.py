@@ -237,10 +237,10 @@ class TestInsertEvaluation:
             "ssn": F1Score(1.0, 1.0, 1.0),
         }
         await insert_evaluation(conn, PROMPT_ID, 0.925, scores)
-        conn.execute.assert_awaited_once()
+        conn.fetchval.assert_awaited_once()
 
         # Verify the JSON argument
-        call_args = conn.execute.call_args[0]
+        call_args = conn.fetchval.call_args[0]
         scores_json = json.loads(call_args[3])
         assert scores_json["name"]["precision"] == 0.9
         assert scores_json["ssn"]["f1"] == 1.0
@@ -248,8 +248,9 @@ class TestInsertEvaluation:
     @pytest.mark.anyio
     async def test_passes_prompt_id_and_f1(self):
         conn = AsyncMock()
+        conn.fetchval.return_value = PROMPT_ID
         scores = {"name": F1Score(0.5, 0.5, 0.5)}
         await insert_evaluation(conn, PROMPT_ID, 0.5, scores)
-        call_args = conn.execute.call_args[0]
+        call_args = conn.fetchval.call_args[0]
         assert call_args[1] == PROMPT_ID
         assert call_args[2] == 0.5

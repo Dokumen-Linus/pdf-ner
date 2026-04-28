@@ -17,8 +17,10 @@ from app.domains.context_engineering.domain.services import (
     _partial_match,
     build_base_system_prompt,
     build_error_analysis,
+    build_final_run_metrics,
     build_json_schema,
     build_refinement_prompt,
+    evaluate_final_pdf_predictions,
     evaluate_predictions,
     format_few_shot_examples,
     generate_prompt_variants,
@@ -434,6 +436,59 @@ class TestEvaluatePredictions:
     def test_empty_entity_types_gives_zero(self, labeled_pdf_1):
         result = evaluate_predictions({}, labeled_pdf_1.ground_truth, [])
         assert result.overall_f1 == 0.0
+
+
+class TestFinalRunMetrics:
+    def test_unique_mismatch_uses_single_pair_row(self, name_entity_type, labeled_pdf_1):
+        result = evaluate_final_pdf_predictions(
+            labeled_pdf_1,
+            {"full_name": "Jane Doe"},
+            [name_entity_type],
+        )
+
+        assert result.is_fully_correct is False
+        assert len(result.pairs) == 1
+        assert result.pairs[0].labelled_value == "John Smith"
+        assert result.pairs[0].predicted_value == "Jane Doe"
+
+    def test_non_unique_unmatched_values_are_split(self, phone_entity_type, labeled_pdf_1):
+        result = evaluate_final_pdf_predictions(
+            labeled_pdf_1,
+            {"phone_numbers": ["555-1234", "555-9999"]},
+            [phone_entity_type],
+        )
+
+        assert result.matched_counts["phone_numbers"] == 1
+        assert result.false_positive_counts["phone_numbers"] == 1
+        assert result.false_negative_counts["phone_numbers"] == 1
+        assert any(pair.labelled_value is None for pair in result.pairs)
+        assert any(pair.predicted_value is None for pair in result.pairs)
+
+    def test_builds_unique_and_non_unique_metrics(self, entity_types, labeled_pdf_1):
+        final_result = evaluate_final_pdf_predictions(
+            labeled_pdf_1,
+            {
+                "full_name": "John Smith",
+                "ssn": "wrong",
+                "phone_numbers": ["555-1234", "555-9999"],
+            },
+            entity_types,
+        )
+
+        metrics = build_final_run_metrics(
+            [final_result],
+            entity_types,
+            labeled_pdf_count=2,
+            skipped_pdf_count=1,
+        )
+
+        assert metrics["evaluated_pdf_count"] == 1
+        assert metrics["skipped_pdf_count"] == 1
+        assert metrics["pdf_accuracy"] == 0.0
+        assert metrics["entity_type_metrics"]["full_name"]["accuracy"] == 1.0
+        assert metrics["entity_type_metrics"]["phone_numbers"]["tpr"] == 0.5
+        assert metrics["entity_type_metrics"]["phone_numbers"]["fppp"] == 1.0
+        assert metrics["entity_type_metrics"]["phone_numbers"]["fnr"] == 0.5
 
 
 class TestBuildErrorAnalysis:

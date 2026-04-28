@@ -1,5 +1,7 @@
-import { jsonb, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { bigint, index, integer, jsonb, numeric, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
+import { models } from "../public/models"
+import { entityTypes } from "../web/entity-types"
 import { projects } from "../web/projects"
 
 import { workersSchema } from "./schema"
@@ -22,5 +24,37 @@ export const promptEvaluations = workersSchema.table("prompt_evaluations", {
     .references(() => optimizedPrompts.id, { onDelete: "cascade" }),
   overallF1: real("overall_f1").notNull(),
   perEntityScores: jsonb("per_entity_scores").$type<JsonbRecord>().notNull(),
+  modelId: text("model_id").references(() => models.id),
+  labeledPdfCount: integer("labeled_pdf_count"),
+  evaluatedPdfCount: integer("evaluated_pdf_count"),
+  skippedPdfCount: integer("skipped_pdf_count"),
+  pdfsFullyCorrect: integer("pdfs_fully_correct"),
+  pdfAccuracy: real("pdf_accuracy"),
+  entityTypeMetrics: jsonb("entity_type_metrics").$type<JsonbRecord>(),
+  llmCallCount: integer("llm_call_count"),
+  costUsd: numeric("cost_usd", { precision: 12, scale: 8 }),
+  iterationsRun: integer("iterations_run"),
+  stopReason: text("stop_reason"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 })
+
+export const contextEngPreds = workersSchema.table(
+  "context_eng_preds",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey(),
+    promptEvaluationId: uuid("prompt_evaluation_id")
+      .notNull()
+      .references(() => promptEvaluations.id, { onDelete: "cascade" }),
+    pdfId: uuid("pdf_id").notNull(),
+    entityTypeId: uuid("entity_type_id")
+      .notNull()
+      .references(() => entityTypes.id, { onDelete: "restrict" }),
+    labelledValue: text("labelled_value"),
+    predictedValue: text("predicted_value"),
+  },
+  (t) => [
+    index("context_eng_preds_prompt_evaluation_id_idx").on(t.promptEvaluationId),
+    index("context_eng_preds_pdf_id_idx").on(t.pdfId),
+    index("context_eng_preds_entity_type_id_idx").on(t.entityTypeId),
+  ],
+)

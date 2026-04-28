@@ -27,6 +27,9 @@ PDF_ID_1 = UUID("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
 PDF_ID_2 = UUID("cccccccc-cccc-cccc-cccc-cccccccccccc")
 PDF_ID_3 = UUID("dddddddd-dddd-dddd-dddd-dddddddddddd")
 PROMPT_ID = UUID("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee")
+ENTITY_TYPE_ID_1 = UUID("11111111-1111-1111-1111-111111111111")
+ENTITY_TYPE_ID_2 = UUID("22222222-2222-2222-2222-222222222222")
+ENTITY_TYPE_ID_3 = UUID("33333333-3333-3333-3333-333333333333")
 
 
 # ─── Entity Type Fixtures ────────────────────────────────────────────────
@@ -48,6 +51,7 @@ def name_entity_type() -> EntityTypeInfo:
         std_examples=["Alice Johnson"],
         std_format_description=None,
         std_regex=None,
+        entity_type_id=ENTITY_TYPE_ID_1,
     )
 
 
@@ -67,6 +71,7 @@ def ssn_entity_type() -> EntityTypeInfo:
         std_examples=["123-45-6789"],
         std_format_description="XXX-XX-XXXX",
         std_regex=r"\d{3}-\d{2}-\d{4}",
+        entity_type_id=ENTITY_TYPE_ID_2,
     )
 
 
@@ -82,6 +87,7 @@ def phone_entity_type() -> EntityTypeInfo:
         exact_length=None,
         unique=False,
         required=False,
+        entity_type_id=ENTITY_TYPE_ID_3,
     )
 
 
@@ -97,6 +103,7 @@ def amount_entity_type() -> EntityTypeInfo:
         exact_length=None,
         unique=True,
         required=True,
+        entity_type_id=UUID("44444444-4444-4444-4444-444444444444"),
     )
 
 
@@ -112,6 +119,7 @@ def count_entity_type() -> EntityTypeInfo:
         exact_length=None,
         unique=True,
         required=True,
+        entity_type_id=UUID("55555555-5555-5555-5555-555555555555"),
     )
 
 
@@ -130,6 +138,7 @@ def labeled_annotation_1() -> LabeledAnnotation:
         entity_type_name="full_name",
         labeled_text="John Smith",
         page_index=0,
+        entity_type_id=ENTITY_TYPE_ID_1,
     )
 
 
@@ -140,6 +149,7 @@ def labeled_annotation_2() -> LabeledAnnotation:
         entity_type_name="ssn",
         labeled_text="123-45-6789",
         page_index=1,
+        entity_type_id=ENTITY_TYPE_ID_2,
     )
 
 
@@ -150,6 +160,7 @@ def labeled_annotation_3() -> LabeledAnnotation:
         entity_type_name="phone_numbers",
         labeled_text="555-1234",
         page_index=0,
+        entity_type_id=ENTITY_TYPE_ID_3,
     )
 
 
@@ -160,6 +171,7 @@ def labeled_annotation_4() -> LabeledAnnotation:
         entity_type_name="phone_numbers",
         labeled_text="555-5678",
         page_index=1,
+        entity_type_id=ENTITY_TYPE_ID_3,
     )
 
 
@@ -192,18 +204,21 @@ def labeled_pdf_2() -> LabeledPdf:
                 entity_type_name="full_name",
                 labeled_text="Jane Doe",
                 page_index=0,
+                entity_type_id=ENTITY_TYPE_ID_1,
             ),
             LabeledAnnotation(
                 pdf_id=PDF_ID_2,
                 entity_type_name="ssn",
                 labeled_text="987-65-4321",
                 page_index=0,
+                entity_type_id=ENTITY_TYPE_ID_2,
             ),
             LabeledAnnotation(
                 pdf_id=PDF_ID_2,
                 entity_type_name="phone_numbers",
                 labeled_text="555-0000",
                 page_index=0,
+                entity_type_id=ENTITY_TYPE_ID_3,
             ),
         ],
     )
@@ -221,12 +236,14 @@ def labeled_pdf_3() -> LabeledPdf:
                 entity_type_name="full_name",
                 labeled_text="Alice Johnson",
                 page_index=0,
+                entity_type_id=ENTITY_TYPE_ID_1,
             ),
             LabeledAnnotation(
                 pdf_id=PDF_ID_3,
                 entity_type_name="ssn",
                 labeled_text="111-22-3333",
                 page_index=0,
+                entity_type_id=ENTITY_TYPE_ID_2,
             ),
         ],
     )
