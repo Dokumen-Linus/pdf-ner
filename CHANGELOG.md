@@ -115,6 +115,8 @@
 - *(wk)* Source_listeners domain
 - *(wk)* Source_watchers domain
 - Implement two roles and comprehensive usage billing rules
+- *(wk)* End context_engineering after hitting usage cost instead of after max_iterations #124
+- *(wk)* Create domain for evaluating Tesseract and Runpod models for a specific project #94
 
 ### 🐛 Bug Fixes
 
@@ -191,6 +193,7 @@
 - *(llm)* Posttooluse hook
 - *(llm)* Skills
 - *(wk)* Db edits to go with new domains
+- *(web)* Eslint config
 
 ### 💼 Other
 
@@ -320,6 +323,7 @@
 - *(llm)* Improve codex config and hooks
 - *(llm)* Remove codesight hook and ruff
 - *(llm)* Shorten tanstack skills description
+- *(llm)* Shorten skills descriptions
 
 ### ⚡ Performance
 
@@ -535,6 +539,8 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Add to gitignore
 
 ### ◀️ Revert
 
