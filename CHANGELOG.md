@@ -117,6 +117,8 @@
 - Implement two roles and comprehensive usage billing rules
 - *(wk)* End context_engineering after hitting usage cost instead of after max_iterations #124
 - *(wk)* Create domain for evaluating Tesseract and Runpod models for a specific project #94
+- *(wk)* Create domain for evaluating Tesseract and Runpod models for a specific project #94
+- *(wk)* Context engineering run metrics
 
 ### 🐛 Bug Fixes
 
@@ -194,6 +196,7 @@
 - *(llm)* Skills
 - *(wk)* Db edits to go with new domains
 - *(web)* Eslint config
+- *(wk)* Ocr_evaluation throws by-pdf errors
 
 ### 💼 Other
 
@@ -541,6 +544,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add to gitignore
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
 
