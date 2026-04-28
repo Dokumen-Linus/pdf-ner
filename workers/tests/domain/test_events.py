@@ -1,5 +1,3 @@
-"""Tests for domain events."""
-
 from uuid import uuid4
 
 from app.domains.context_engineering.domain.events import (

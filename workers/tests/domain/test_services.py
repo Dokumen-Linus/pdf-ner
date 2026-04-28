@@ -1,5 +1,3 @@
-"""Tests for domain services: JSON schema, prompt engineering, and evaluation."""
-
 import json
 
 import pytest

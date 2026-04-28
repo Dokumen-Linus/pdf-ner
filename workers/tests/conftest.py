@@ -1,5 +1,3 @@
-"""Shared test fixtures for the workers test suite."""
-
 import os
 
 # Set required env vars before any app imports

@@ -1,10 +1,12 @@
+from decimal import Decimal
+
 from celery.result import AsyncResult
 
 from app.core.messaging import celery_client, celery_message_headers
 
 
 def dispatch_optimize_prompt(
-    project_id: str, max_iterations: int = 5, model: str = "gpt-4o"
+    project_id: str, max_cost_usd: Decimal = Decimal("1.00"), model: str = "gpt-4o"
 ) -> str:
     """Send optimize_prompt task to the workers queue via Celery.
 
@@ -13,7 +15,7 @@ def dispatch_optimize_prompt(
     result = celery_client.send_task(
         "context_engineering.optimize_prompt",
         args=[project_id],
-        kwargs={"max_iterations": max_iterations, "model": model},
+        kwargs={"max_cost_usd": str(max_cost_usd), "model": model},
         headers=celery_message_headers(),
     )
     return result.id

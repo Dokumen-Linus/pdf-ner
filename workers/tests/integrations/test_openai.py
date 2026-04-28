@@ -1,5 +1,3 @@
-"""Tests for OpenAI integration wrapper."""
-
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest

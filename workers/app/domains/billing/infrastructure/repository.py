@@ -59,9 +59,10 @@ async def record_llm_usage(
     project_id: UUID,
     actor_user_id: UUID | None = None,
     task_name: str | None = None,
-) -> None:
+) -> Decimal:
     """Insert one billable LLM usage event. Stripe reporting is batch-only."""
     input_cost, output_cost = await fetch_model_costs(conn, model, input_tokens, output_tokens)
+    total_cost = input_cost + output_cost
     target = await fetch_project_billing_target(conn, project_id)
     billing_organization_id = target["organization_id"]
     billing_user_id = None if billing_organization_id else target["owner_id"]
@@ -85,7 +86,7 @@ async def record_llm_usage(
             output_tokens,
             input_cost,
             output_cost,
-            input_cost + output_cost,
+            total_cost,
         )
     except Exception:
         logger.exception(
@@ -95,6 +96,7 @@ async def record_llm_usage(
             input_tokens,
             output_tokens,
         )
+    return total_cost
 
 
 async def get_unreported_batches(

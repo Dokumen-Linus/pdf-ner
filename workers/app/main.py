@@ -23,6 +23,7 @@ app.autodiscover_tasks(
         "app.domains.billing",
         "app.domains.context_engineering",
         "app.domains.entity_extraction",
+        "app.domains.ocr_evaluation",
         "app.domains.source_listeners",
         "app.domains.source_watchers",
     ]

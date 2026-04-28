@@ -5,6 +5,7 @@ as `self` automatically. We use task.run() which also auto-injects self,
 or we use task.apply() for testing retry behavior.
 """
 
+from decimal import Decimal
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -48,7 +49,7 @@ class TestOptimizePromptTask:
             "iterations_run": 1,
         }
 
-        task.run(str(PROJECT_ID), max_iterations=10, model="gpt-4o-mini")
+        task.run(str(PROJECT_ID), max_cost_usd="2.50", model="gpt-4o-mini")
         mock_asyncio_run.assert_called_once()
 
     @patch(f"{MODULE}.asyncio.run")
@@ -88,7 +89,7 @@ class TestOptimizePromptTask:
     @patch(f"{MODULE}.asyncio.run")
     @patch(f"{MODULE}.handle_optimize_prompt")
     def test_default_parameters(self, mock_handler, mock_asyncio_run, task):
-        """Verify default max_iterations and model when not specified."""
+        """Verify default max_cost_usd and model when not specified."""
         mock_asyncio_run.return_value = {
             "best_prompt_id": "x",
             "best_f1": 0.5,
@@ -99,5 +100,19 @@ class TestOptimizePromptTask:
         # Inspect the coroutine that was passed to asyncio.run
         handler_coroutine_call = mock_handler.call_args
         cmd = handler_coroutine_call[0][0]
-        assert cmd.max_iterations == 5
+        assert cmd.max_cost_usd == Decimal("1.00")
         assert cmd.model == "gpt-4o"
+
+    @patch(f"{MODULE}.asyncio.run")
+    @patch(f"{MODULE}.handle_optimize_prompt")
+    def test_passes_cost_cap_to_command(self, mock_handler, mock_asyncio_run, task):
+        mock_asyncio_run.return_value = {
+            "best_prompt_id": "x",
+            "best_f1": 0.5,
+            "iterations_run": 1,
+        }
+
+        task.run(str(PROJECT_ID), max_cost_usd="3.25")
+
+        cmd = mock_handler.call_args[0][0]
+        assert cmd.max_cost_usd == Decimal("3.25")

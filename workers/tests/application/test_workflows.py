@@ -1,5 +1,4 @@
-"""Tests for prompt optimization workflows."""
-
+from decimal import Decimal
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
@@ -16,7 +15,7 @@ from app.domains.context_engineering.domain.entities import (
     EvaluationResult,
     PromptCandidate,
 )
-from app.domains.context_engineering.domain.value_objects import F1Score
+from app.domains.context_engineering.domain.value_objects import CostBudget, F1Score
 from tests.conftest import PDF_ID_1, PROJECT_ID, PROMPT_ID
 
 BUCKET_ID = uuid4()
@@ -96,14 +95,29 @@ class TestEvaluatePromptOnPdfs:
 
         candidate = PromptCandidate(system_prompt="test prompt", iteration=0)
         json_schema = {"type": "object", "properties": {}}
+        conn = AsyncMock()
+        budget = CostBudget(max_cost_usd=Decimal("1.00"))
 
-        results = await _evaluate_prompt_on_pdfs(
-            mock_client, candidate, [labeled_pdf_1], json_schema, entity_types, "gpt-4o"
-        )
+        with patch(
+            "app.domains.context_engineering.application.workflows.record_llm_usage",
+            new=AsyncMock(return_value=Decimal("0.01")),
+        ):
+            results = await _evaluate_prompt_on_pdfs(
+                conn,
+                mock_client,
+                candidate,
+                [labeled_pdf_1],
+                json_schema,
+                entity_types,
+                "gpt-4o",
+                project_id=PROJECT_ID,
+                budget=budget,
+            )
 
         assert len(results) == 1
         assert results[0].overall_f1 == 1.0
         assert mock_client.chat.completions.create.call_count == 1
+        assert budget.spent_cost_usd == Decimal("0.01")
 
     @pytest.mark.anyio
     async def test_handles_invalid_json(self, entity_types, labeled_pdf_1):
@@ -113,9 +127,23 @@ class TestEvaluatePromptOnPdfs:
         )
 
         candidate = PromptCandidate(system_prompt="test", iteration=0)
-        results = await _evaluate_prompt_on_pdfs(
-            mock_client, candidate, [labeled_pdf_1], {}, entity_types, "gpt-4o"
-        )
+        conn = AsyncMock()
+        budget = CostBudget(max_cost_usd=Decimal("1.00"))
+        with patch(
+            "app.domains.context_engineering.application.workflows.record_llm_usage",
+            new=AsyncMock(return_value=Decimal("0.01")),
+        ):
+            results = await _evaluate_prompt_on_pdfs(
+                conn,
+                mock_client,
+                candidate,
+                [labeled_pdf_1],
+                {},
+                entity_types,
+                "gpt-4o",
+                project_id=PROJECT_ID,
+                budget=budget,
+            )
 
         assert len(results) == 1
         # Invalid JSON -> empty predictions -> low F1
@@ -129,12 +157,58 @@ class TestEvaluatePromptOnPdfs:
         )
 
         candidate = PromptCandidate(system_prompt="test", iteration=0)
-        results = await _evaluate_prompt_on_pdfs(
-            mock_client, candidate, [labeled_pdf_1, labeled_pdf_2], {}, entity_types, "gpt-4o"
-        )
+        conn = AsyncMock()
+        budget = CostBudget(max_cost_usd=Decimal("1.00"))
+        with patch(
+            "app.domains.context_engineering.application.workflows.record_llm_usage",
+            new=AsyncMock(return_value=Decimal("0.01")),
+        ):
+            results = await _evaluate_prompt_on_pdfs(
+                conn,
+                mock_client,
+                candidate,
+                [labeled_pdf_1, labeled_pdf_2],
+                {},
+                entity_types,
+                "gpt-4o",
+                project_id=PROJECT_ID,
+                budget=budget,
+            )
 
         assert len(results) == 2
         assert mock_client.chat.completions.create.call_count == 2
+
+    @pytest.mark.anyio
+    async def test_stops_before_next_pdf_when_budget_is_exhausted(
+        self, entity_types, labeled_pdf_1, labeled_pdf_2
+    ):
+        mock_client = AsyncMock()
+        mock_client.chat.completions.create.return_value = MagicMock(
+            choices=[MagicMock(message=MagicMock(content="{}"))]
+        )
+
+        candidate = PromptCandidate(system_prompt="test", iteration=0)
+        conn = AsyncMock()
+        budget = CostBudget(max_cost_usd=Decimal("0.01"))
+        with patch(
+            "app.domains.context_engineering.application.workflows.record_llm_usage",
+            new=AsyncMock(return_value=Decimal("0.01")),
+        ):
+            results = await _evaluate_prompt_on_pdfs(
+                conn,
+                mock_client,
+                candidate,
+                [labeled_pdf_1, labeled_pdf_2],
+                {},
+                entity_types,
+                "gpt-4o",
+                project_id=PROJECT_ID,
+                budget=budget,
+            )
+
+        assert len(results) == 1
+        assert budget.is_exhausted
+        assert mock_client.chat.completions.create.call_count == 1
 
 
 # ─── prompt_optimization_workflow ────────────────────────────────────────
@@ -276,12 +350,25 @@ class TestPromptOptimizationWorkflow:
 
         conn.fetchval.return_value = PROMPT_ID
 
-        cmd = OptimizePrompt(project_id=PROJECT_ID, max_iterations=2)
-        result = await prompt_optimization_workflow(conn, mock_client, cmd)
+        cmd = OptimizePrompt(project_id=PROJECT_ID, max_cost_usd=Decimal("1.00"))
+        with (
+            patch(
+                "app.domains.context_engineering.application.workflows.record_llm_usage",
+                new=AsyncMock(return_value=Decimal("0.01")),
+            ),
+            patch(
+                "app.domains.context_engineering.application.workflows.report_usage_to_stripe",
+                new=AsyncMock(return_value={"reported": 1, "skipped": 0}),
+            ),
+        ):
+            result = await prompt_optimization_workflow(conn, mock_client, cmd)
 
         assert "best_prompt_id" in result
         assert "best_f1" in result
         assert "iterations_run" in result
+        assert result["cost_usd"] == "0.04"
+        assert result["max_cost_usd"] == "1.00"
+        assert result["stop_reason"] == "no_errors"
         assert result["best_prompt_id"] == str(PROMPT_ID)
         # insert_optimized_prompt was called
         conn.fetchval.assert_called_once()
@@ -399,8 +486,18 @@ class TestPromptOptimizationWorkflow:
         with patch(
             "app.domains.context_engineering.application.workflows.download_pdf_bytes"
         ) as mock_dl:
-            cmd = OptimizePrompt(project_id=PROJECT_ID, max_iterations=1)
-            await prompt_optimization_workflow(conn, mock_client, cmd)
+            cmd = OptimizePrompt(project_id=PROJECT_ID, max_cost_usd=Decimal("1.00"))
+            with (
+                patch(
+                    "app.domains.context_engineering.application.workflows.record_llm_usage",
+                    new=AsyncMock(return_value=Decimal("0.01")),
+                ),
+                patch(
+                    "app.domains.context_engineering.application.workflows.report_usage_to_stripe",
+                    new=AsyncMock(return_value={"reported": 1, "skipped": 0}),
+                ),
+            ):
+                await prompt_optimization_workflow(conn, mock_client, cmd)
 
         # download_pdf_bytes must NOT have been called since full_text was present
         mock_dl.assert_not_awaited()

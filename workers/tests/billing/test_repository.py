@@ -1,3 +1,4 @@
+from decimal import Decimal
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
@@ -19,7 +20,7 @@ async def test_record_llm_usage_inserts_model_without_provider():
     )
     conn.execute = AsyncMock()
 
-    await record_llm_usage(
+    cost = await record_llm_usage(
         conn,
         model="gpt-4o",
         input_tokens=100,
@@ -31,3 +32,4 @@ async def test_record_llm_usage_inserts_model_without_provider():
     insert_sql = conn.execute.await_args.args[0]
     assert "provider" not in insert_sql
     assert "model_id" in insert_sql
+    assert cost == Decimal("0.00075")
