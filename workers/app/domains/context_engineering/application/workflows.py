@@ -497,32 +497,36 @@ async def _evaluate_prompt_on_pdfs(
         if budget.is_exhausted:
             break
 
-        llm_usage: LLMResponseData = await call_openai(
-            openai_client,
-            model,
-            candidate.system_prompt,
-            pdf.full_text or "",
-            schema=json_schema,
-            schema_name="ner_extraction",
-        )
-        usage_cost = await record_llm_usage(
-            conn,
-            model=model,
-            input_tokens=llm_usage.input_tokens,
-            output_tokens=llm_usage.output_tokens,
-            project_id=project_id,
-            task_name=_TASK_NAME,
-        )
-        budget.add_usage(usage_cost)
         try:
-            predicted = json.loads(llm_usage.text)
-        except json.JSONDecodeError:
-            logger.warning("Invalid JSON from LLM for PDF %s", pdf.pdf_id)
-            predicted = {}
+            llm_usage: LLMResponseData = await call_openai(
+                openai_client,
+                model,
+                candidate.system_prompt,
+                pdf.full_text or "",
+                schema=json_schema,
+                schema_name="ner_extraction",
+            )
+            usage_cost = await record_llm_usage(
+                conn,
+                model=model,
+                input_tokens=llm_usage.input_tokens,
+                output_tokens=llm_usage.output_tokens,
+                project_id=project_id,
+                task_name=_TASK_NAME,
+            )
+            budget.add_usage(usage_cost)
+            try:
+                predicted = json.loads(llm_usage.text)
+            except json.JSONDecodeError:
+                logger.warning("Invalid JSON from LLM for PDF %s", pdf.pdf_id)
+                predicted = {}
 
-        result = services.evaluate_predictions(predicted, pdf.ground_truth, entity_types)
-        result.prompt_candidate = candidate
-        results.append(result)
+            result = services.evaluate_predictions(predicted, pdf.ground_truth, entity_types)
+            result.prompt_candidate = candidate
+            results.append(result)
+        except Exception as exc:
+            logger.warning("Failed to evaluate prompt for pdf=%s: %s", pdf.pdf_id, exc, exc_info=True)
+            continue
 
     return results
 
