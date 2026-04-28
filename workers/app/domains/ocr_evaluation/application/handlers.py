@@ -15,6 +15,5 @@ async def handle_evaluate_project_ocr(
     task: Any | None = None,
 ) -> dict:
     pool = await get_pool()
-    async with pool.acquire() as conn:
-        client = GeminiClient(api_key=settings.GOOGLE_AI_API_KEY)
-        return await evaluate_project_ocr_workflow(conn, client, cmd, task=task)
+    client = GeminiClient(api_key=settings.GOOGLE_AI_API_KEY)
+    return await evaluate_project_ocr_workflow(pool, client, cmd, task=task)

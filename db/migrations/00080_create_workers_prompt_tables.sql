@@ -11,9 +11,35 @@ CREATE TABLE workers.prompt_evaluations (
     prompt_id UUID NOT NULL REFERENCES workers.optimized_prompts (id) ON DELETE CASCADE,
     overall_f1 REAL NOT NULL,
     per_entity_scores JSONB NOT NULL,
+    model_id TEXT REFERENCES public.models (id),
+    labeled_pdf_count INTEGER,
+    evaluated_pdf_count INTEGER,
+    skipped_pdf_count INTEGER,
+    pdfs_fully_correct INTEGER,
+    pdf_accuracy REAL,
+    entity_type_metrics JSONB,
+    llm_call_count INTEGER,
+    cost_usd NUMERIC(12, 8),
+    iterations_run INTEGER,
+    stop_reason TEXT,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE workers.context_eng_preds (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
+    prompt_evaluation_id UUID NOT NULL REFERENCES workers.prompt_evaluations (id) ON DELETE CASCADE,
+    pdf_id UUID NOT NULL REFERENCES workers.pdfs (id) ON DELETE CASCADE,
+    entity_type_id UUID NOT NULL REFERENCES web.entity_types (id) ON DELETE RESTRICT,
+    labelled_value TEXT,
+    predicted_value TEXT
+);
+
+CREATE INDEX context_eng_preds_prompt_evaluation_id_idx
+    ON workers.context_eng_preds(prompt_evaluation_id);
+CREATE INDEX context_eng_preds_pdf_id_idx ON workers.context_eng_preds(pdf_id);
+CREATE INDEX context_eng_preds_entity_type_id_idx ON workers.context_eng_preds(entity_type_id);
+
 -- migrate:down
+DROP TABLE workers.context_eng_preds;
 DROP TABLE workers.prompt_evaluations;
 DROP TABLE workers.optimized_prompts;

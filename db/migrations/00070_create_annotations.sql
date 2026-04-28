@@ -6,6 +6,7 @@ CREATE TABLE web.annotations (
   rect JSONB NOT NULL,
   segment_rects JSONB NOT NULL,
   page_index INTEGER NOT NULL,
+  entity_type_id UUID NOT NULL REFERENCES web.entity_types (id) ON DELETE RESTRICT,
   color TEXT,
   opacity REAL,
   contents TEXT,

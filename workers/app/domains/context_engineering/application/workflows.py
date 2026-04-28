@@ -12,10 +12,16 @@ from app.domains.billing.application.workflows import report_usage_to_stripe
 from app.domains.billing.infrastructure.repository import record_llm_usage
 from app.integrations.openai import call_openai
 from app.shared.domain.LLMResponseData import LLMResponseData
-from app.shared.infrastructure.s3 import download_pdf_bytes
 
 from ..domain import services
-from ..domain.entities import EntityTypeInfo, EvaluationResult, LabeledPdf, PromptCandidate
+from ..domain.entities import (
+    EntityTypeInfo,
+    EvaluationResult,
+    FinalPdfEvaluation,
+    FinalPredictionPair,
+    LabeledPdf,
+    PromptCandidate,
+)
 from ..domain.value_objects import CostBudget
 from ..infrastructure import repositories as repo
 from .commands import OptimizePrompt
@@ -68,11 +74,18 @@ async def prompt_optimization_workflow(
     budget = CostBudget(max_cost_usd=cmd.max_cost_usd)
     stop_reason = "completed"
     iterations_run = 0
+    llm_call_count = 0
 
     # 1. Fetch project data
     project = await repo.fetch_project(conn, cmd.project_id)
     if not project:
         raise ValueError(f"Project not found: {cmd.project_id}")
+
+    model_provider = await repo.fetch_model_provider(conn, cmd.model)
+    if model_provider is None:
+        raise ValueError(f"Model is not available: {cmd.model}")
+    if model_provider != "openai":
+        raise ValueError(f"Context engineering requires an OpenAI model, got: {model_provider}")
 
     entity_types = await repo.fetch_entity_types_with_std(conn, cmd.project_id)
     if not entity_types:
@@ -82,29 +95,8 @@ async def prompt_optimization_workflow(
     if not labeled_pdfs:
         raise ValueError(f"No labeled PDFs for project: {cmd.project_id}")
 
-    # For PDFs without extracted text, attempt S3 download.
-    # PDFs that fail download or have no text are skipped.
-    usable_pdfs: list[LabeledPdf] = []
-    for pdf in labeled_pdfs:
-        if pdf.full_text is not None:
-            usable_pdfs.append(pdf)
-            continue
-        try:
-            _data, _filepath = await download_pdf_bytes(conn, pdf.pdf_id)
-            logger.warning(
-                "PDF %s: downloaded from S3 (key=%s) but text extraction from raw bytes "
-                "not yet implemented — skipping",
-                pdf.pdf_id,
-                _filepath,
-            )
-        except Exception as exc:
-            logger.warning(
-                "PDF %s: S3 download failed — skipping (error=%s)",
-                pdf.pdf_id,
-                exc,
-                exc_info=True,
-            )
-    labeled_pdfs = usable_pdfs
+    labeled_pdf_count = len(labeled_pdfs)
+    labeled_pdfs, skipped_pdf_count = _usable_labeled_pdfs(labeled_pdfs)
 
     if not labeled_pdfs:
         raise ValueError(f"No labeled PDFs with usable text for project: {cmd.project_id}")
@@ -164,6 +156,7 @@ async def prompt_optimization_workflow(
             project_id=cmd.project_id,
             budget=budget,
         )
+        llm_call_count += len(eval_results)
         if not eval_results:
             stop_reason = "max_cost_reached"
             break
@@ -219,6 +212,7 @@ async def prompt_optimization_workflow(
             project_id=cmd.project_id,
             budget=budget,
         )
+        llm_call_count += len(eval_results)
         if not eval_results:
             stop_reason = "max_cost_reached"
             break
@@ -247,19 +241,20 @@ async def prompt_optimization_workflow(
         )
         llm_usage: LLMResponseData = await call_openai(
             openai_client,
-            cmd.refinement_model,
+            cmd.model,
             "You are a prompt engineering expert.",
             refinement_meta_prompt,
         )
         usage_cost = await record_llm_usage(
             conn,
-            model=cmd.refinement_model,
+            model=cmd.model,
             input_tokens=llm_usage.input_tokens,
             output_tokens=llm_usage.output_tokens,
             project_id=cmd.project_id,
             task_name=_TASK_NAME,
         )
         budget.add_usage(usage_cost)
+        llm_call_count += 1
 
         if budget.is_exhausted:
             stop_reason = "max_cost_reached"
@@ -277,6 +272,7 @@ async def prompt_optimization_workflow(
             project_id=cmd.project_id,
             budget=budget,
         )
+        llm_call_count += len(refined_results)
         if not refined_results:
             stop_reason = "max_cost_reached"
             break
@@ -333,23 +329,154 @@ async def prompt_optimization_workflow(
         **_budget_details(budget),
     )
 
-    per_entity_scores = {et.name: _avg_score(eval_results, et.name) for et in entity_types}
-    best_candidate.scores = per_entity_scores
-
     prompt_id = await repo.insert_optimized_prompt(
         conn, cmd.project_id, best_candidate.system_prompt
     )
-    await repo.insert_evaluation(conn, prompt_id, best_f1, per_entity_scores)
+    final_results, final_eval_results, final_pairs, final_llm_calls, final_skipped_count = (
+        await _evaluate_final_prompt_on_pdfs(
+            conn,
+            openai_client,
+            best_candidate,
+            labeled_pdfs,
+            json_schema,
+            entity_types,
+            cmd.model,
+            project_id=cmd.project_id,
+            prompt_id=prompt_id,
+            budget=budget,
+        )
+    )
+    llm_call_count += final_llm_calls
+    skipped_pdf_count += final_skipped_count
+    final_metrics = services.build_final_run_metrics(
+        final_results,
+        entity_types,
+        labeled_pdf_count=labeled_pdf_count,
+        skipped_pdf_count=skipped_pdf_count,
+    )
+    per_entity_scores = {et.name: _avg_score(final_eval_results, et.name) for et in entity_types}
+    final_f1 = (
+        sum(r.overall_f1 for r in final_eval_results) / len(final_eval_results)
+        if final_eval_results
+        else 0.0
+    )
+    best_candidate.scores = per_entity_scores
+
+    evaluation_id = await repo.insert_evaluation(
+        conn,
+        prompt_id,
+        final_f1,
+        per_entity_scores,
+        model_id=cmd.model,
+        labeled_pdf_count=final_metrics["labeled_pdf_count"],
+        evaluated_pdf_count=final_metrics["evaluated_pdf_count"],
+        skipped_pdf_count=final_metrics["skipped_pdf_count"],
+        pdfs_fully_correct=final_metrics["pdfs_fully_correct"],
+        pdf_accuracy=final_metrics["pdf_accuracy"],
+        entity_type_metrics=final_metrics["entity_type_metrics"],
+        llm_call_count=llm_call_count,
+        cost_usd=budget.spent_cost_usd,
+        iterations_run=iterations_run,
+        stop_reason=stop_reason,
+    )
+    await repo.insert_context_engineering_predictions(conn, evaluation_id, final_pairs)
     await report_usage_to_stripe(cmd.project_id)
 
     return {
         "best_prompt_id": str(prompt_id),
-        "best_f1": best_f1,
+        "best_f1": final_f1,
         "iterations_run": iterations_run,
         "cost_usd": str(budget.spent_cost_usd),
         "max_cost_usd": str(budget.max_cost_usd),
         "stop_reason": stop_reason,
+        "prompt_evaluation_id": str(evaluation_id),
+        "llm_call_count": llm_call_count,
+        "pdf_accuracy": final_metrics["pdf_accuracy"],
     }
+
+
+def _usable_labeled_pdfs(labeled_pdfs: list[LabeledPdf]) -> tuple[list[LabeledPdf], int]:
+    usable: list[LabeledPdf] = []
+    skipped_count = 0
+    for pdf in labeled_pdfs:
+        try:
+            if not pdf.full_text or not pdf.full_text.strip():
+                raise ValueError("labeled PDF has no saved full_text")
+            if not any(annotation.labeled_text.strip() for annotation in pdf.annotations):
+                raise ValueError("labeled PDF has no usable annotation text")
+        except ValueError:
+            skipped_count += 1
+            logger.exception("Skipping labeled PDF %s during context engineering", pdf.pdf_id)
+            continue
+        usable.append(pdf)
+    return usable, skipped_count
+
+
+async def _evaluate_final_prompt_on_pdfs(
+    conn: asyncpg.Connection,
+    openai_client: AsyncOpenAI,
+    candidate: PromptCandidate,
+    labeled_pdfs: list[LabeledPdf],
+    json_schema: dict,
+    entity_types: list[EntityTypeInfo],
+    model: str,
+    *,
+    project_id: UUID,
+    prompt_id: UUID,
+    budget: CostBudget,
+) -> tuple[list[FinalPdfEvaluation], list[EvaluationResult], list[FinalPredictionPair], int, int]:
+    final_results: list[FinalPdfEvaluation] = []
+    eval_results: list[EvaluationResult] = []
+    pairs: list[FinalPredictionPair] = []
+    llm_call_count = 0
+    skipped_count = 0
+
+    for pdf in labeled_pdfs:
+        try:
+            llm_usage: LLMResponseData = await call_openai(
+                openai_client,
+                model,
+                candidate.system_prompt,
+                pdf.full_text or "",
+                schema=json_schema,
+                schema_name="ner_extraction",
+            )
+            llm_call_count += 1
+            usage_cost = await record_llm_usage(
+                conn,
+                model=model,
+                input_tokens=llm_usage.input_tokens,
+                output_tokens=llm_usage.output_tokens,
+                project_id=project_id,
+                task_name=_TASK_NAME,
+            )
+            budget.add_usage(usage_cost)
+            try:
+                predicted = json.loads(llm_usage.text)
+            except json.JSONDecodeError:
+                logger.warning("Invalid final-run JSON from LLM for PDF %s", pdf.pdf_id)
+                predicted = {}
+
+            await repo.update_pdf_final_predictions(
+                conn,
+                pdf_id=pdf.pdf_id,
+                optimized_prompt_id=prompt_id,
+                model=model,
+                predicted=predicted,
+            )
+            eval_result = services.evaluate_predictions(predicted, pdf.ground_truth, entity_types)
+            eval_result.prompt_candidate = candidate
+            final_result = services.evaluate_final_pdf_predictions(pdf, predicted, entity_types)
+        except Exception:
+            skipped_count += 1
+            logger.exception("Skipping final context engineering result for PDF %s", pdf.pdf_id)
+            continue
+
+        eval_results.append(eval_result)
+        final_results.append(final_result)
+        pairs.extend(final_result.pairs)
+
+    return final_results, eval_results, pairs, llm_call_count, skipped_count
 
 
 async def _evaluate_prompt_on_pdfs(

@@ -24,6 +24,7 @@ class EntityTypeInfo:
     std_examples: list[str] = field(default_factory=list)
     std_format_description: str | None = None
     std_regex: str | None = None
+    entity_type_id: UUID | None = None
 
     @property
     def best_definition(self) -> str:
@@ -48,6 +49,7 @@ class LabeledAnnotation:
     entity_type_name: str  # custom_entity_type
     labeled_text: str  # contents
     page_index: int
+    entity_type_id: UUID | None = None
 
 
 @dataclass
@@ -91,3 +93,27 @@ class EvaluationResult:
     overall_partial_match_rate: float
     overall_f1: float
     errors: list[EntityMatch]  # only mismatches
+
+
+@dataclass(frozen=True)
+class FinalPredictionPair:
+    """One final-run label/prediction row for persistence."""
+
+    pdf_id: UUID
+    entity_type_id: UUID
+    labelled_value: str | None
+    predicted_value: str | None
+
+
+@dataclass(frozen=True)
+class FinalPdfEvaluation:
+    """Final prompt evaluation and persistence rows for one PDF."""
+
+    pdf_id: UUID
+    is_fully_correct: bool
+    pairs: list[FinalPredictionPair]
+    entity_matches: dict[str, bool]
+    labelled_counts: dict[str, int]
+    matched_counts: dict[str, int]
+    false_positive_counts: dict[str, int]
+    false_negative_counts: dict[str, int]

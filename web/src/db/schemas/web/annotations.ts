@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm"
 import { integer, jsonb, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
+import { entityTypes } from "./entity-types"
 import { pdfs } from "./pdfs"
 import { webSchema } from "./schema"
 
@@ -15,6 +16,9 @@ export const annotations = webSchema.table("annotations", {
   rect: jsonb("rect").$type<StoredRect>().notNull(),
   segmentRects: jsonb("segment_rects").$type<StoredRect[]>().notNull(),
   pageIndex: integer("page_index").notNull(),
+  entityTypeId: uuid("entity_type_id")
+    .notNull()
+    .references(() => entityTypes.id, { onDelete: "restrict" }),
   color: text("color"),
   opacity: real("opacity"),
   contents: text("contents"),
@@ -29,5 +33,9 @@ export const annotationsRelations = relations(annotations, ({ one }) => ({
   pdf: one(pdfs, {
     fields: [annotations.pdfId],
     references: [pdfs.id],
+  }),
+  entityType: one(entityTypes, {
+    fields: [annotations.entityTypeId],
+    references: [entityTypes.id],
   }),
 }))

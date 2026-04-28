@@ -2,7 +2,14 @@ from __future__ import annotations
 
 import json
 
-from .entities import EntityTypeInfo, EvaluationResult, LabeledPdf, PromptCandidate
+from .entities import (
+    EntityTypeInfo,
+    EvaluationResult,
+    FinalPdfEvaluation,
+    FinalPredictionPair,
+    LabeledPdf,
+    PromptCandidate,
+)
 from .value_objects import EntityMatch, F1Score
 
 # ─── 1. JSON Schema Builder ────────────────────────────────────────────
@@ -288,6 +295,176 @@ def evaluate_predictions(
     )
 
 
+def evaluate_final_pdf_predictions(
+    pdf: LabeledPdf,
+    predicted: dict,
+    entity_types: list[EntityTypeInfo],
+) -> FinalPdfEvaluation:
+    """Build final-run metric details and persistence rows for one PDF."""
+    pairs: list[FinalPredictionPair] = []
+    entity_matches: dict[str, bool] = {}
+    labelled_counts: dict[str, int] = {}
+    matched_counts: dict[str, int] = {}
+    false_positive_counts: dict[str, int] = {}
+    false_negative_counts: dict[str, int] = {}
+
+    for et in entity_types:
+        if et.entity_type_id is None:
+            raise ValueError(f"Entity type has no id: {et.name}")
+
+        labelled_values = _normalise_values(pdf.ground_truth.get(et.name, []))
+        predicted_values = _normalise_prediction_values(predicted.get(et.name))
+        if et.unique and len(labelled_values) > 1:
+            raise ValueError(
+                f"Unique entity type {et.name!r} has multiple labels for PDF {pdf.pdf_id}"
+            )
+
+        if et.unique:
+            labelled_value = labelled_values[0] if labelled_values else None
+            predicted_value = predicted_values[0] if predicted_values else None
+            is_match = (
+                len(predicted_values) <= 1
+                and (
+                    (labelled_value is None and predicted_value is None)
+                    or (
+                        labelled_value is not None
+                        and predicted_value is not None
+                        and _exact_match(predicted_value, labelled_value)
+                    )
+                )
+            )
+            entity_matches[et.name] = is_match
+            labelled_counts[et.name] = len(labelled_values)
+            matched_counts[et.name] = 1 if is_match and labelled_value is not None else 0
+            false_positive_counts[et.name] = 1 if predicted_value is not None and not is_match else 0
+            false_negative_counts[et.name] = 1 if labelled_value is not None and not is_match else 0
+            if labelled_value is not None or predicted_value is not None:
+                pairs.append(
+                    FinalPredictionPair(
+                        pdf_id=pdf.pdf_id,
+                        entity_type_id=et.entity_type_id,
+                        labelled_value=labelled_value,
+                        predicted_value=predicted_value,
+                    )
+                )
+            continue
+
+        matched, unmatched_labels, unmatched_predictions = _pair_exact_matches(
+            labelled_values,
+            predicted_values,
+        )
+        entity_matches[et.name] = not unmatched_labels and not unmatched_predictions
+        labelled_counts[et.name] = len(labelled_values)
+        matched_counts[et.name] = len(matched)
+        false_positive_counts[et.name] = len(unmatched_predictions)
+        false_negative_counts[et.name] = len(unmatched_labels)
+
+        for labelled_value, predicted_value in matched:
+            pairs.append(
+                FinalPredictionPair(
+                    pdf_id=pdf.pdf_id,
+                    entity_type_id=et.entity_type_id,
+                    labelled_value=labelled_value,
+                    predicted_value=predicted_value,
+                )
+            )
+        for labelled_value in unmatched_labels:
+            pairs.append(
+                FinalPredictionPair(
+                    pdf_id=pdf.pdf_id,
+                    entity_type_id=et.entity_type_id,
+                    labelled_value=labelled_value,
+                    predicted_value=None,
+                )
+            )
+        for predicted_value in unmatched_predictions:
+            pairs.append(
+                FinalPredictionPair(
+                    pdf_id=pdf.pdf_id,
+                    entity_type_id=et.entity_type_id,
+                    labelled_value=None,
+                    predicted_value=predicted_value,
+                )
+            )
+
+    return FinalPdfEvaluation(
+        pdf_id=pdf.pdf_id,
+        is_fully_correct=all(entity_matches.values()) if entity_types else False,
+        pairs=pairs,
+        entity_matches=entity_matches,
+        labelled_counts=labelled_counts,
+        matched_counts=matched_counts,
+        false_positive_counts=false_positive_counts,
+        false_negative_counts=false_negative_counts,
+    )
+
+
+def build_final_run_metrics(
+    final_results: list[FinalPdfEvaluation],
+    entity_types: list[EntityTypeInfo],
+    *,
+    labeled_pdf_count: int,
+    skipped_pdf_count: int,
+) -> dict:
+    evaluated_pdf_count = len(final_results)
+    pdfs_fully_correct = sum(1 for result in final_results if result.is_fully_correct)
+    entity_type_metrics: dict[str, dict] = {}
+
+    for et in entity_types:
+        if et.unique:
+            correct_pdf_count = sum(
+                1 for result in final_results if result.entity_matches.get(et.name, False)
+            )
+            entity_type_metrics[et.name] = {
+                "unique": True,
+                "labeled_pdf_count": evaluated_pdf_count,
+                "correct_pdf_count": correct_pdf_count,
+                "accuracy": correct_pdf_count / evaluated_pdf_count
+                if evaluated_pdf_count
+                else None,
+            }
+            continue
+
+        labelled_entity_count = sum(
+            result.labelled_counts.get(et.name, 0) for result in final_results
+        )
+        true_positive_count = sum(
+            result.matched_counts.get(et.name, 0) for result in final_results
+        )
+        false_positive_count = sum(
+            result.false_positive_counts.get(et.name, 0) for result in final_results
+        )
+        false_negative_count = sum(
+            result.false_negative_counts.get(et.name, 0) for result in final_results
+        )
+        entity_type_metrics[et.name] = {
+            "unique": False,
+            "labeled_pdf_count": evaluated_pdf_count,
+            "labeled_entity_count": labelled_entity_count,
+            "true_positive_count": true_positive_count,
+            "false_positive_count": false_positive_count,
+            "false_negative_count": false_negative_count,
+            "tpr": true_positive_count / labelled_entity_count
+            if labelled_entity_count
+            else None,
+            "fppp": false_positive_count / evaluated_pdf_count if evaluated_pdf_count else None,
+            "fnr": false_negative_count / labelled_entity_count
+            if labelled_entity_count
+            else None,
+        }
+
+    return {
+        "labeled_pdf_count": labeled_pdf_count,
+        "evaluated_pdf_count": evaluated_pdf_count,
+        "skipped_pdf_count": skipped_pdf_count,
+        "pdfs_fully_correct": pdfs_fully_correct,
+        "pdf_accuracy": pdfs_fully_correct / evaluated_pdf_count
+        if evaluated_pdf_count
+        else None,
+        "entity_type_metrics": entity_type_metrics,
+    }
+
+
 def build_error_analysis(
     results: list[EvaluationResult],
     entity_types: list[EntityTypeInfo],
@@ -341,3 +518,40 @@ def _count_matches(predicted: list[str], ground_truth: list[str]) -> tuple[int, 
                     break
 
     return exact, partial
+
+
+def _normalise_value(value: str) -> str:
+    return str(value).strip()
+
+
+def _normalise_values(values: list[str]) -> list[str]:
+    return [normalised for value in values if (normalised := _normalise_value(value))]
+
+
+def _normalise_prediction_values(raw_value) -> list[str]:
+    if raw_value is None:
+        return []
+    if isinstance(raw_value, list):
+        return [normalised for value in raw_value if (normalised := _normalise_value(value))]
+    normalised = _normalise_value(raw_value)
+    return [normalised] if normalised else []
+
+
+def _pair_exact_matches(
+    labelled_values: list[str],
+    predicted_values: list[str],
+) -> tuple[list[tuple[str, str]], list[str], list[str]]:
+    matched: list[tuple[str, str]] = []
+    unmatched_labels = list(labelled_values)
+    unmatched_predictions: list[str] = []
+
+    for predicted_value in predicted_values:
+        for index, labelled_value in enumerate(unmatched_labels):
+            if _exact_match(predicted_value, labelled_value):
+                matched.append((labelled_value, predicted_value))
+                unmatched_labels.pop(index)
+                break
+        else:
+            unmatched_predictions.append(predicted_value)
+
+    return matched, unmatched_labels, unmatched_predictions

@@ -34,6 +34,7 @@ type AnnotationRecord = {
 
 describe.if(runTests)("Annotation Table Server Functions", () => {
   const testPdfId = "00000000-0000-0000-0000-000000000001"
+  const testEntityTypeId = "00000000-0000-0000-0000-000000000101"
   const testSubtype = "highlight"
   const testRect = { x: 0, y: 0, width: 100, height: 50 }
   const testSegmentRects = [{ x: 0, y: 0, width: 50, height: 25 }]
@@ -47,6 +48,7 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
       rect: testRect,
       segmentRects: testSegmentRects,
       pageIndex: 0,
+      entityTypeId: testEntityTypeId,
       color: "#ffff00",
       opacity: 0.5,
       contents: "Test annotation",
@@ -130,6 +132,7 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
         rect: testRect,
         segmentRects: testSegmentRects,
         pageIndex: 0,
+        entityTypeId: testEntityTypeId,
       }
       await expect(createAnnotation({ data: input })).rejects.toThrow()
     })
@@ -142,6 +145,7 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
         rect: testRect,
         segmentRects: testSegmentRects,
         pageIndex: -1, // negative page index should fail
+        entityTypeId: testEntityTypeId,
       }
       await expect(createAnnotation({ data: input })).rejects.toThrow()
     })

@@ -4,7 +4,9 @@ import { z } from "zod"
 
 import { db } from "@/db/client"
 import { annotations } from "@/db/schemas/web/annotations"
+import { entityTypes } from "@/db/schemas/web/entity-types"
 import { pdfs } from "@/db/schemas/web/pdfs"
+import { workersPdfs } from "@/db/schemas/workers/pdfs"
 
 import {
   requirePdfAccess,
@@ -35,6 +37,7 @@ export const CreateAnnotationSchema = z.object({
   rect: StoredRectSchema,
   segmentRects: z.array(StoredRectSchema),
   pageIndex: z.number().int().min(0, "Page index must be non-negative"),
+  entityTypeId: z.string().uuid(),
   color: z.string().optional(),
   opacity: z.number().min(0).max(1).optional(),
   contents: z.string().optional(),
@@ -82,6 +85,7 @@ export const getAnnotationsByPdfIds = createServerFn({ method: "GET" })
       .select({
         id: annotations.id,
         customEntityType: annotations.customEntityType,
+        entityTypeId: annotations.entityTypeId,
         subtype: annotations.subtype,
       })
       .from(annotations)
@@ -142,7 +146,11 @@ export const deleteAnnotation = createServerFn({ method: "POST" })
 export const SaveAnnotationsSchema = z.object({
   pdfId: z.string(),
   userId: z.string().optional(),
-  annotations: z.array(CreateAnnotationSchema),
+  annotations: z.array(
+    CreateAnnotationSchema.omit({ entityTypeId: true }).extend({
+      entityTypeId: z.string().uuid().optional(),
+    }),
+  ),
   labeledEntities: LabeledEntitiesSchema.optional(),
 })
 
@@ -179,6 +187,39 @@ export const saveAnnotationsByPdfId = createServerFn({ method: "POST" })
         throw new LabellingLockLostError()
       }
 
+      const [workersPdf] = await tx
+        .select({ projectId: workersPdfs.projectId })
+        .from(workersPdfs)
+        .where(eq(workersPdfs.id, data.pdfId))
+        .limit(1)
+      if (!workersPdf) {
+        throw new Error("Workers PDF not found")
+      }
+
+      const projectEntityTypes = await tx
+        .select({ id: entityTypes.id, name: entityTypes.name })
+        .from(entityTypes)
+        .where(eq(entityTypes.projectId, workersPdf.projectId))
+      const entityTypeById = new Map(projectEntityTypes.map((et) => [et.id, et]))
+      const entityTypeByName = new Map(projectEntityTypes.map((et) => [et.name, et]))
+      const resolvedAnnotations = data.annotations.map((annotation) => {
+        const resolved = annotation.entityTypeId
+          ? entityTypeById.get(annotation.entityTypeId)
+          : annotation.customEntityType
+            ? entityTypeByName.get(annotation.customEntityType)
+            : undefined
+
+        if (!resolved) {
+          throw new Error("Annotation entity type is invalid for this project")
+        }
+
+        return {
+          ...annotation,
+          entityTypeId: resolved.id,
+          customEntityType: annotation.customEntityType ?? resolved.name,
+        }
+      })
+
       // Refresh the lock's heartbeat as a side effect of a successful save —
       // saving is activity, so resetting the stale timer is correct. Also
       // update the `annotated` fast-path flag so future loads of this pdf
@@ -188,14 +229,14 @@ export const saveAnnotationsByPdfId = createServerFn({ method: "POST" })
         .set({
           labeledEntities: data.labeledEntities ?? null,
           lockedAt: sql`now()`,
-          annotated: data.annotations.length > 0,
+          annotated: resolvedAnnotations.length > 0,
         })
         .where(and(eq(pdfs.id, data.pdfId), eq(pdfs.lockedBy, userId)))
 
       await tx.delete(annotations).where(eq(annotations.pdfId, data.pdfId))
 
-      if (data.annotations.length > 0) {
-        await tx.insert(annotations).values(data.annotations)
+      if (resolvedAnnotations.length > 0) {
+        await tx.insert(annotations).values(resolvedAnnotations)
       }
     })
 

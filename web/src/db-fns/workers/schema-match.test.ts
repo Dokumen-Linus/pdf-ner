@@ -1,6 +1,12 @@
 import { describe, expect, it } from "bun:test"
 
-import type { FoundWorkersPdf, LlmUsage, LlmUsageReportBatch } from "../../db/types"
+import type {
+  FoundContextEngPred,
+  FoundPromptEvaluation,
+  FoundWorkersPdf,
+  LlmUsage,
+  LlmUsageReportBatch,
+} from "../../db/types"
 
 /**
  * Compile-time shape checks for workers schema Drizzle types.
@@ -60,6 +66,42 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       optimizedPromptId: string | null
     }
     const _: Expected = {} as FoundWorkersPdf
+    expect(true).toBe(true)
+  })
+
+  it("FoundPromptEvaluation should have expected final metric fields", () => {
+    type Expected = {
+      id: string
+      promptId: string
+      overallF1: number
+      perEntityScores: Record<string, unknown>
+      modelId: string | null
+      labeledPdfCount: number | null
+      evaluatedPdfCount: number | null
+      skippedPdfCount: number | null
+      pdfsFullyCorrect: number | null
+      pdfAccuracy: number | null
+      entityTypeMetrics: Record<string, unknown> | null
+      llmCallCount: number | null
+      costUsd: string | null
+      iterationsRun: number | null
+      stopReason: string | null
+      createdAt: Date | null
+    }
+    const _: Expected = {} as FoundPromptEvaluation
+    expect(true).toBe(true)
+  })
+
+  it("FoundContextEngPred should have expected workers.context_eng_preds fields", () => {
+    type Expected = {
+      id: number
+      promptEvaluationId: string
+      pdfId: string
+      entityTypeId: string
+      labelledValue: string | null
+      predictedValue: string | null
+    }
+    const _: Expected = {} as FoundContextEngPred
     expect(true).toBe(true)
   })
 })
