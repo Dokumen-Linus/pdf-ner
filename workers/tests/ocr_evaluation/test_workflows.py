@@ -38,7 +38,7 @@ async def test_workflow_rejects_non_gemini_model():
         ),
     ):
         with pytest.raises(ValueError, match="available Gemini model"):
-            await workflows.evaluate_project_ocr_workflow(conn, object(), cmd)
+            await workflows.evaluate_project_ocr_workflow(_make_pool_mock(conn), object(), cmd)
 
 
 @pytest.mark.anyio
@@ -104,7 +104,7 @@ async def test_workflow_scores_pages_and_persists_recommendation():
         patch.object(workflows.repo, "insert_page_evaluation", new=AsyncMock()) as insert_page,
         patch.object(workflows.repo, "complete_run", new=AsyncMock()) as complete_run,
     ):
-        result = await workflows.evaluate_project_ocr_workflow(conn, object(), cmd)
+        result = await workflows.evaluate_project_ocr_workflow(_make_pool_mock(conn), object(), cmd)
 
     assert result["recommendation"] == "tesseract"
     assert result["judge_model"] == "gemini-2.0-flash"
