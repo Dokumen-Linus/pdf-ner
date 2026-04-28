@@ -37,8 +37,8 @@ Changes to these files have the widest blast radius across the codebase:
 - `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **11** files
 - `web/src/components/pdf-container/plugin-scroll-2/index.ts` — imported by **10** files
 - `///application/schemas.py` — imported by **10** files
+- `//infrastructure.py` — imported by **9** files
 - `web/src/db/schemas/web/schema.ts` — imported by **8** files
-- `/common.py` — imported by **8** files
 
 ## Required Environment Variables
 
@@ -57,4 +57,4 @@ Changes to these files have the widest blast radius across the codebase:
 - _...22 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-04-26_
+_Back to [index.md](./index.md) · Generated 2026-04-28_
