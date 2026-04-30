@@ -6,8 +6,8 @@ from .api import api_router
 from .core.config import settings
 from .core.exceptions import register_exception_handlers
 from .core.lifespan import lifespan
+from .core.logging import telemetry_router
 from .core.middleware import RequestIDMiddleware, RequestLoggingMiddleware
-from .core.telemetry import telemetry_router
 
 app = FastAPI(
     lifespan=lifespan,
