@@ -134,7 +134,9 @@ function ProjectsPage() {
     : organization
       ? "No team selected"
       : "Personal workspace"
-  const canCreateProject = !organization || selectedTeam != null
+  const canCreateProjectForRole =
+    user?.role === "individual" || user?.role === "admin" || user?.role === "developer"
+  const canCreateProject = canCreateProjectForRole && (!organization || selectedTeam != null)
 
   const handleTeamChange = async (nextTeamId: string) => {
     setCreateError(null)
@@ -210,6 +212,7 @@ function ProjectsPage() {
         <p className="text-muted-foreground text-sm">{m.projects_list_description()}</p>
       </div>
 
+      {canCreateProjectForRole && (
       <Card>
         <CardHeader className="space-y-4">
           <div className="space-y-1">
@@ -294,6 +297,7 @@ function ProjectsPage() {
           </form>
         </CardContent>
       </Card>
+      )}
 
       {projects.length === 0 ? (
         <Card className="border-dashed">

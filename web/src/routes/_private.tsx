@@ -15,6 +15,31 @@ const getServerSession = createServerFn({ method: "GET" }).handler(async () => {
   return auth.api.getSession({ headers })
 })
 
+const getPaymentGate = createServerFn({ method: "GET" }).handler(async () => {
+  const { eq } = await import("drizzle-orm")
+  const { db } = await import("@/db/client")
+  const { organizations, users } = await import("@/db/schemas/web")
+  const { requireWorkspaceUser } = await import("@/lib/project-authorization.server")
+  const user = await requireWorkspaceUser()
+  if (user.accountRole === "individual") {
+    return {
+      ready: user.hasPaymentMethod && user.billingStatus !== "payment_required",
+    }
+  }
+  const [row] = await db
+    .select({
+      billingStatus: organizations.billingStatus,
+      stripePaymentMethodId: organizations.stripePaymentMethodId,
+    })
+    .from(users)
+    .innerJoin(organizations, eq(organizations.id, users.organizationId))
+    .where(eq(users.id, user.userId))
+    .limit(1)
+  return {
+    ready: Boolean(row?.stripePaymentMethodId) && row?.billingStatus !== "payment_required",
+  }
+})
+
 export const Route = createFileRoute("/_private")({
   beforeLoad: async ({ location }) => {
     let session
@@ -30,6 +55,15 @@ export const Route = createFileRoute("/_private")({
         to: "/signin",
         search: { redirect: location.href },
       })
+    }
+    if (location.pathname !== "/billing") {
+      const gate = await getPaymentGate()
+      if (!gate.ready) {
+        throw redirect({
+          to: "/billing",
+          search: { redirect: location.href },
+        })
+      }
     }
     return { session, sidebarOpen: getCookie("sidebar_state", "true") === "true" }
   },

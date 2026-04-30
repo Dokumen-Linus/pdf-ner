@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { integer, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { projects } from "./projects"
 import { webSchema } from "./schema"
@@ -15,12 +15,14 @@ export const users = webSchema.table("users", {
   jobTitle: text("job_title"),
   avatarUrl: text("avatar_url"),
   organizationId: text("organization_id"),
-  subscriptionType: text("subscription_type").notNull().default("developer"),
+  role: text("role").notNull().default("individual"),
+  billingStartedAt: timestamp("billing_started_at", { withTimezone: true }),
+  nextPaymentAt: timestamp("next_payment_at", { withTimezone: true }),
+  lastPaymentAt: timestamp("last_payment_at", { withTimezone: true }),
+  billingStatus: text("billing_status").notNull().default("payment_required"),
+  billingFailureCount: integer("billing_failure_count").notNull().default(0),
   stripeCustomerId: text("stripe_customer_id").unique(),
-  stripeSubscriptionId: text("stripe_subscription_id"),
-  stripeSubscriptionStatus: text("stripe_subscription_status"),
-  stripeCurrentPeriodStart: timestamp("stripe_current_period_start", { withTimezone: true }),
-  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end", { withTimezone: true }),
+  stripePaymentMethodId: text("stripe_payment_method_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 })

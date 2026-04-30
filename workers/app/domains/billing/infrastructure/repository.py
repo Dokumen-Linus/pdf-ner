@@ -1,177 +1,235 @@
-from decimal import Decimal
-import logging
+from __future__ import annotations
+
+from decimal import ROUND_HALF_UP, Decimal
 from uuid import UUID
 
 import asyncpg
 
-logger = logging.getLogger(__name__)
+BASE_PRICE_CENTS = 1000
 
 
-async def fetch_model_costs(
-    conn: asyncpg.Connection,
-    model: str,
-    input_tokens: int,
-    output_tokens: int,
-) -> tuple[Decimal, Decimal]:
-    """Look up model pricing from public.models and compute input/output USD snapshots."""
-    row = await conn.fetchrow(
-        """
-        SELECT usd_per_1m_input, usd_per_1m_output
-        FROM public.models
-        WHERE id = $1
-          AND (end_available_date IS NULL OR end_available_date > now())
-        """,
-        model,
-    )
-    if not row:
-        logger.warning("Model not found in public.models: %s - cost recorded as 0", model)
-        return Decimal("0"), Decimal("0")
-
-    input_cost = (input_tokens * float(row["usd_per_1m_input"])) / 1_000_000
-    output_cost = (output_tokens * float(row["usd_per_1m_output"])) / 1_000_000
-    return Decimal(str(round(input_cost, 8))), Decimal(str(round(output_cost, 8)))
+def usd_to_cents(value: Decimal) -> int:
+    return int((value * Decimal("100")).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
 
-async def fetch_project_billing_target(
-    conn: asyncpg.Connection,
-    project_id: UUID,
-) -> asyncpg.Record:
-    row = await conn.fetchrow(
-        """
-        SELECT p.owner_id, t.organization_id
-        FROM web.projects p
-        LEFT JOIN web.teams t ON t.id = p.team_id
-        WHERE p.id = $1
-        """,
-        project_id,
-    )
-    if not row:
-        raise ValueError(f"Project not found: {project_id}")
-    return row
-
-
-async def record_llm_usage(
-    conn: asyncpg.Connection,
-    *,
-    model: str,
-    input_tokens: int,
-    output_tokens: int,
-    project_id: UUID,
-    actor_user_id: UUID | None = None,
-    task_name: str | None = None,
-) -> Decimal:
-    """Insert one billable LLM usage event. Stripe reporting is batch-only."""
-    input_cost, output_cost = await fetch_model_costs(conn, model, input_tokens, output_tokens)
-    total_cost = input_cost + output_cost
-    target = await fetch_project_billing_target(conn, project_id)
-    billing_organization_id = target["organization_id"]
-    billing_user_id = None if billing_organization_id else target["owner_id"]
-
-    try:
-        await conn.execute(
-            """
-            INSERT INTO workers.llm_usage
-                (actor_user_id, project_id, billing_user_id, billing_organization_id,
-                 model_id, source, task_name, input_tokens, output_tokens,
-                 input_cost_usd, output_cost_usd, cost_usd)
-            VALUES ($1, $2, $3, $4, $5, 'worker', $6, $7, $8, $9, $10, $11)
-            """,
-            actor_user_id,
-            project_id,
-            billing_user_id,
-            billing_organization_id,
-            model,
-            task_name,
-            input_tokens,
-            output_tokens,
-            input_cost,
-            output_cost,
-            total_cost,
-        )
-    except Exception:
-        logger.exception(
-            "Failed to record worker LLM usage: model=%s project=%s in=%d out=%d",
-            model,
-            project_id,
-            input_tokens,
-            output_tokens,
-        )
-    return total_cost
-
-
-async def get_unreported_batches(
-    conn: asyncpg.Connection,
-    *,
-    project_id: UUID | None = None,
-    limit: int = 5000,
-):
-    """Fetch unreported usage grouped by billing target + Stripe customer."""
-    project_filter = "AND u.project_id = $2" if project_id is not None else ""
-    args = [limit]
-    if project_id is not None:
-        args.append(project_id)
-
+async def fetch_due_individuals(conn: asyncpg.Connection, *, limit: int) -> list[asyncpg.Record]:
     return await conn.fetch(
-        f"""
-        SELECT
-            u.billing_user_id,
-            u.billing_organization_id,
-            COALESCE(wu.stripe_customer_id, wo.stripe_customer_id) AS stripe_customer_id,
-            ARRAY_AGG(u.id ORDER BY u.created_at) AS usage_ids,
-            MIN(u.created_at) AS period_start,
-            MAX(u.created_at) AS period_end,
-            COUNT(*)::int AS usage_count,
-            COALESCE(SUM(u.cost_usd), 0) AS total_cost_usd,
-            COALESCE(SUM(u.input_tokens), 0)::bigint AS total_input_tokens,
-            COALESCE(SUM(u.output_tokens), 0)::bigint AS total_output_tokens
-        FROM workers.llm_usage u
-        LEFT JOIN web.users wu ON wu.id = u.billing_user_id
-        LEFT JOIN web.organizations wo ON wo.id = u.billing_organization_id
-        WHERE u.report_batch_id IS NULL
-          {project_filter}
-          AND COALESCE(wu.stripe_customer_id, wo.stripe_customer_id) IS NOT NULL
-        GROUP BY u.billing_user_id, u.billing_organization_id, stripe_customer_id
-        ORDER BY period_start
+        """
+        SELECT id, stripe_customer_id, stripe_payment_method_id, billing_failure_count,
+               billing_started_at, last_payment_at, next_payment_at
+        FROM web.users
+        WHERE role = 'individual'
+          AND billing_status IN ('active', 'past_due')
+          AND stripe_customer_id IS NOT NULL
+          AND stripe_payment_method_id IS NOT NULL
+          AND next_payment_at <= now()
+        ORDER BY next_payment_at
         LIMIT $1
+        FOR UPDATE SKIP LOCKED
         """,
-        *args,
+        limit,
     )
 
 
-async def create_report_batch_and_link_usage(
+async def fetch_due_organizations(conn: asyncpg.Connection, *, limit: int) -> list[asyncpg.Record]:
+    return await conn.fetch(
+        """
+        SELECT id, n_users, stripe_customer_id, stripe_payment_method_id, billing_failure_count,
+               billing_started_at, last_payment_at, next_payment_at
+        FROM web.organizations
+        WHERE billing_status IN ('active', 'past_due')
+          AND stripe_customer_id IS NOT NULL
+          AND stripe_payment_method_id IS NOT NULL
+          AND next_payment_at <= now()
+        ORDER BY next_payment_at
+        LIMIT $1
+        FOR UPDATE SKIP LOCKED
+        """,
+        limit,
+    )
+
+
+async def sum_individual_usage(
     conn: asyncpg.Connection,
     *,
-    batch: asyncpg.Record,
-    stripe_meter_event_identifier: str,
-) -> UUID:
+    user_id: UUID,
+    period_start,
+    period_end,
+) -> asyncpg.Record:
+    return await conn.fetchrow(
+        """
+        SELECT COALESCE(SUM(u.cost_usd), 0) AS usage_cost_usd,
+               COUNT(u.id)::int AS llm_usage_count
+        FROM workers.llm_usage u
+        INNER JOIN web.projects p ON p.id = u.project_id
+        WHERE p.owner_id = $1
+          AND p.team_id IS NULL
+          AND u.created_at >= $2
+          AND u.created_at < $3
+        """,
+        user_id,
+        period_start,
+        period_end,
+    )
+
+
+async def sum_organization_usage(
+    conn: asyncpg.Connection,
+    *,
+    organization_id: str,
+    period_start,
+    period_end,
+) -> asyncpg.Record:
+    return await conn.fetchrow(
+        """
+        SELECT COALESCE(SUM(u.cost_usd), 0) AS usage_cost_usd,
+               COUNT(u.id)::int AS llm_usage_count
+        FROM workers.llm_usage u
+        INNER JOIN web.projects p ON p.id = u.project_id
+        INNER JOIN web.teams t ON t.id = p.team_id
+        WHERE t.organization_id = $1
+          AND u.created_at >= $2
+          AND u.created_at < $3
+        """,
+        organization_id,
+        period_start,
+        period_end,
+    )
+
+
+async def create_charge_attempt(
+    conn: asyncpg.Connection,
+    *,
+    account_type: str,
+    account_id: str,
+    period_start,
+    period_end,
+    base_amount_cents: int,
+    usage_cost_usd: Decimal,
+    llm_usage_count: int,
+    stripe_customer_id: str,
+    stripe_payment_method_id: str,
+    idempotency_key: str,
+) -> asyncpg.Record:
+    usage_amount_cents = usd_to_cents(usage_cost_usd)
+    total_amount_cents = base_amount_cents + usage_amount_cents
+    return await conn.fetchrow(
+        """
+        INSERT INTO workers.billing_charge_attempts
+            (account_type, user_id, organization_id, period_start, period_end,
+             base_amount_cents, usage_amount_cents, total_amount_cents, usage_cost_usd,
+             llm_usage_count, stripe_customer_id, stripe_payment_method_id, idempotency_key)
+        VALUES ($1, CASE WHEN $1 = 'individual' THEN $2::uuid ELSE NULL END,
+                CASE WHEN $1 = 'organization' THEN $2::text ELSE NULL END,
+                $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        ON CONFLICT (idempotency_key) DO UPDATE
+        SET idempotency_key = EXCLUDED.idempotency_key
+        RETURNING id, total_amount_cents
+        """,
+        account_type,
+        account_id,
+        period_start,
+        period_end,
+        base_amount_cents,
+        usage_amount_cents,
+        total_amount_cents,
+        usage_cost_usd,
+        llm_usage_count,
+        stripe_customer_id,
+        stripe_payment_method_id,
+        idempotency_key,
+    )
+
+
+async def mark_charge_success(
+    conn: asyncpg.Connection,
+    *,
+    attempt_id: UUID,
+    account_type: str,
+    account_id: str,
+    payment_intent_id: str,
+) -> None:
     async with conn.transaction():
-        batch_id = await conn.fetchval(
-            """
-            INSERT INTO workers.llm_usage_report_batches
-                (billing_user_id, billing_organization_id, period_start, period_end,
-                 usage_count, input_tokens, output_tokens, cost_usd,
-                 stripe_meter_event_identifier, status, reported_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'reported', now())
-            RETURNING id
-            """,
-            batch["billing_user_id"],
-            batch["billing_organization_id"],
-            batch["period_start"],
-            batch["period_end"],
-            batch["usage_count"],
-            batch["total_input_tokens"],
-            batch["total_output_tokens"],
-            batch["total_cost_usd"],
-            stripe_meter_event_identifier,
-        )
         await conn.execute(
             """
-            UPDATE workers.llm_usage
-            SET report_batch_id = $2
-            WHERE id = ANY($1::uuid[])
-              AND report_batch_id IS NULL
+            UPDATE workers.billing_charge_attempts
+            SET status = 'succeeded', stripe_payment_intent_id = $2, charged_at = now()
+            WHERE id = $1
             """,
-            list(batch["usage_ids"]),
-            batch_id,
+            attempt_id,
+            payment_intent_id,
         )
-        return batch_id
+        if account_type == "individual":
+            await conn.execute(
+                """
+                UPDATE web.users
+                SET billing_status = 'active',
+                    billing_failure_count = 0,
+                    last_payment_at = now(),
+                    next_payment_at = now() + interval '1 month',
+                    updated_at = now()
+                WHERE id = $1::uuid
+                """,
+                account_id,
+            )
+        else:
+            await conn.execute(
+                """
+                UPDATE web.organizations
+                SET billing_status = 'active',
+                    billing_failure_count = 0,
+                    last_payment_at = now(),
+                    next_payment_at = now() + interval '1 month',
+                    updated_at = now()
+                WHERE id = $1
+                """,
+                account_id,
+            )
+
+
+async def mark_charge_failure(
+    conn: asyncpg.Connection,
+    *,
+    attempt_id: UUID,
+    account_type: str,
+    account_id: str,
+    error_message: str,
+    retry_after,
+) -> None:
+    async with conn.transaction():
+        await conn.execute(
+            """
+            UPDATE workers.billing_charge_attempts
+            SET status = 'failed', error_message = $2, retry_after = $3
+            WHERE id = $1
+            """,
+            attempt_id,
+            error_message[:1000],
+            retry_after,
+        )
+        if account_type == "individual":
+            await conn.execute(
+                """
+                UPDATE web.users
+                SET billing_status = 'past_due',
+                    billing_failure_count = billing_failure_count + 1,
+                    next_payment_at = $2,
+                    updated_at = now()
+                WHERE id = $1::uuid
+                """,
+                account_id,
+                retry_after,
+            )
+        else:
+            await conn.execute(
+                """
+                UPDATE web.organizations
+                SET billing_status = 'past_due',
+                    billing_failure_count = billing_failure_count + 1,
+                    next_payment_at = $2,
+                    updated_at = now()
+                WHERE id = $1
+                """,
+                account_id,
+                retry_after,
+            )

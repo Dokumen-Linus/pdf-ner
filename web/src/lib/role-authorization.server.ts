@@ -13,26 +13,33 @@ export type AppPermission =
   | "view_outputs"
 
 export function canUsePermission(access: ProjectAccessContext, permission: AppPermission) {
-  const isDeveloper = access.subscriptionType === "developer" && access.canManage
-  const isAnalyst = access.subscriptionType === "analyst" && access.canLabel
+  const canManageWork =
+    (access.accountRole === "individual" ||
+      access.accountRole === "admin" ||
+      access.accountRole === "developer") &&
+    access.canManage
+  const canAnalyze = access.accountRole === "analyst" && access.canLabel
 
   switch (permission) {
     case "billing":
+      return (
+        (access.accountRole === "individual" || access.accountRole === "admin") && access.canManage
+      )
     case "manage_project":
     case "upload_documents":
     case "manage_entity_types":
     case "engineering":
-      return isDeveloper
+      return canManageWork
     case "label_documents":
     case "check_documents":
     case "view_outputs":
-      return isDeveloper || isAnalyst
+      return canManageWork || canAnalyze
   }
 }
 
 export function requirePermission(access: ProjectAccessContext, permission: AppPermission) {
   if (!canUsePermission(access, permission)) {
-    throw new Error("Your subscription or role does not allow this action")
+    throw new Error("Your account role does not allow this action")
   }
   return access
 }

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 import { useForm } from "@tanstack/react-form"
-import { createFileRoute, useRouter } from "@tanstack/react-router"
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { EditIcon, LoaderCircleIcon, SaveIcon, Trash2Icon, XIcon } from "lucide-react"
 import { z } from "zod"
 
@@ -26,8 +26,8 @@ import {
 } from "@/db-fns/web/organizations"
 import { createTeam, updateTeam } from "@/db-fns/web/teams"
 import { getUserByAuthUserId, updateUser } from "@/db-fns/web/users"
+import { inviteOrganizationUser, upgradeIndividualToOrganization } from "@/db-fns/web/billing"
 import { m } from "@/integrations/paraglide/messages.js"
-import { authClient } from "@/lib/auth-client"
 
 type ProfileUser = Awaited<ReturnType<typeof getUserByAuthUserId>>
 type ProfileOrganization = Awaited<ReturnType<typeof getCurrentUserOrganization>>
@@ -82,15 +82,6 @@ const getEmailPrefix = (email: string) => {
   const prefix = email.split("@")[0] ?? ""
   return prefix.trim()
 }
-
-const toSlug = (value: string) =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "")
 
 const getLegacyName = (user: ProfileUser) => {
   if (user.displayName?.trim()) return user.displayName.trim()
@@ -285,10 +276,17 @@ function ProfilePageContent({
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [organizationCreationError, setOrganizationCreationError] = useState<string | null>(null)
+  const [isUpgradingAccount, setIsUpgradingAccount] = useState(false)
   const [isCreatingTeam, setIsCreatingTeam] = useState(false)
   const [teamCreationError, setTeamCreationError] = useState<string | null>(null)
   const [newTeamName, setNewTeamName] = useState("")
   const [newTeamDescription, setNewTeamDescription] = useState("")
+  const [inviteEmail, setInviteEmail] = useState("")
+  const [inviteRole, setInviteRole] = useState<"admin" | "developer" | "analyst">("developer")
+  const [inviteTeamId, setInviteTeamId] = useState("")
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null)
+  const [isInviting, setIsInviting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const organization = loadedOrganization
   const teams = loadedTeams
@@ -448,23 +446,41 @@ function ProfilePageContent({
   const handleCreateOrganization = async () => {
     if (!profile) return
     setOrganizationCreationError(null)
+    setIsUpgradingAccount(true)
     try {
-      const orgName = profile.displayName?.trim() || getEmailPrefix(profile.email)
-      const slugBase = toSlug(orgName) || "organization"
-      const slug = `${slugBase}-${profile.id.slice(0, 8).toLowerCase()}`
-      const { error } = await authClient.organization.create({
-        name: orgName,
-        slug,
-      })
-      if (error) {
-        setOrganizationCreationError(error.message || "Failed to create organization")
-        return
-      }
+      await upgradeIndividualToOrganization()
       await router.invalidate()
     } catch (error) {
       setOrganizationCreationError(
-        error instanceof Error ? error.message : "Failed to create organization",
+        error instanceof Error ? error.message : "Failed to upgrade account",
       )
+    } finally {
+      setIsUpgradingAccount(false)
+    }
+  }
+
+  const handleInviteUser = async () => {
+    if (!inviteTeamId && teams.length > 0) {
+      setInviteError("Choose at least one team for the invitation.")
+      return
+    }
+    setInviteError(null)
+    setInviteSuccess(null)
+    setIsInviting(true)
+    try {
+      await inviteOrganizationUser({
+        data: {
+          email: inviteEmail,
+          role: inviteRole,
+          teamIds: [inviteTeamId || teams[0]?.id || ""].filter(Boolean),
+        },
+      })
+      setInviteSuccess("Invitation sent.")
+      setInviteEmail("")
+    } catch (error) {
+      setInviteError(error instanceof Error ? error.message : "Failed to send invitation")
+    } finally {
+      setIsInviting(false)
     }
   }
 
@@ -520,6 +536,10 @@ function ProfilePageContent({
   const avatarSrc = activeAvatarUrl || generatedAvatarUrl
   const avatarHue = generatedSeed.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360
   const initials = getProfileInitials(profile, activeDisplayName)
+  const canManageBilling = profile.role === "individual" || profile.role === "admin"
+  const canViewProjects = true
+  const canManageOrganization = profile.role === "admin"
+  const canInviteUsers = profile.role === "admin" && organization && teams.length > 0
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
@@ -608,6 +628,20 @@ function ProfilePageContent({
             <div className="space-y-1">
               <h2 className="text-lg font-semibold">{activeDisplayName}</h2>
               <p className="text-muted-foreground text-sm break-all">{profile.email}</p>
+              <p className="text-muted-foreground text-xs capitalize">{profile.role} account</p>
+            </div>
+
+            <div className="space-y-2">
+              {canViewProjects && (
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/projects">Projects</Link>
+                </Button>
+              )}
+              {canManageBilling && (
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/billing">Payment methods</Link>
+                </Button>
+              )}
             </div>
 
             {isEditing && (
@@ -851,25 +885,30 @@ function ProfilePageContent({
         </CardContent>
       </Card>
 
-      {!organization ? (
+      {!organization && profile.role === "individual" && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Create an Organization</CardTitle>
+            <CardTitle className="text-lg">Upgrade to Organization</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              You don&apos;t have an organization yet. Create one to start managing teams and
-              projects.
+              Upgrade your individual account to create an organization, a Default team, and move
+              your projects to that team.
             </p>
             {organizationCreationError && (
               <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
                 {organizationCreationError}
               </div>
             )}
-            <Button onClick={handleCreateOrganization}>Create Organization</Button>
+            <Button onClick={handleCreateOrganization} disabled={isUpgradingAccount}>
+              {isUpgradingAccount && <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />}
+              Upgrade Account
+            </Button>
           </CardContent>
         </Card>
-      ) : (
+      )}
+
+      {organization && (
         <>
           <Card>
             <CardHeader>
@@ -894,35 +933,37 @@ function ProfilePageContent({
               <CardTitle className="text-lg">Teams</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="mb-6 space-y-3 rounded-md border p-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="new-team-name">Team name</Label>
-                  <Input
-                    id="new-team-name"
-                    value={newTeamName}
-                    onChange={(e) => setNewTeamName(e.target.value)}
-                    placeholder="e.g. Operations"
-                    disabled={isCreatingTeam}
-                  />
+              {canManageOrganization && (
+                <div className="mb-6 space-y-3 rounded-md border p-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="new-team-name">Team name</Label>
+                    <Input
+                      id="new-team-name"
+                      value={newTeamName}
+                      onChange={(e) => setNewTeamName(e.target.value)}
+                      placeholder="e.g. Operations"
+                      disabled={isCreatingTeam}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="new-team-description">Description</Label>
+                    <Textarea
+                      id="new-team-description"
+                      value={newTeamDescription}
+                      onChange={(e) => setNewTeamDescription(e.target.value)}
+                      placeholder="Optional team description"
+                      disabled={isCreatingTeam}
+                    />
+                  </div>
+                  <Button size="sm" onClick={handleCreateTeam} disabled={isCreatingTeam}>
+                    {isCreatingTeam ? (
+                      <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                    ) : null}
+                    Create Team
+                  </Button>
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="new-team-description">Description</Label>
-                  <Textarea
-                    id="new-team-description"
-                    value={newTeamDescription}
-                    onChange={(e) => setNewTeamDescription(e.target.value)}
-                    placeholder="Optional team description"
-                    disabled={isCreatingTeam}
-                  />
-                </div>
-                <Button size="sm" onClick={handleCreateTeam} disabled={isCreatingTeam}>
-                  {isCreatingTeam ? (
-                    <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Create Team
-                </Button>
-              </div>
-              {teamCreationError && (
+              )}
+              {teamCreationError && canManageOrganization && (
                 <div className="border-destructive/35 bg-destructive/5 text-destructive mb-4 rounded-md border px-3 py-2 text-sm">
                   {teamCreationError}
                 </div>
@@ -950,6 +991,71 @@ function ProfilePageContent({
               )}
             </CardContent>
           </Card>
+
+          {canInviteUsers && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Invite User</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {inviteError && (
+                  <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
+                    {inviteError}
+                  </div>
+                )}
+                {inviteSuccess && (
+                  <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+                    {inviteSuccess}
+                  </div>
+                )}
+                <div className="grid gap-3 sm:grid-cols-[1fr_150px]">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="invite-email">Email</Label>
+                    <Input
+                      id="invite-email"
+                      type="email"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="invite-role">Role</Label>
+                    <select
+                      id="invite-role"
+                      className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                      value={inviteRole}
+                      onChange={(e) =>
+                        setInviteRole(e.target.value as "admin" | "developer" | "analyst")
+                      }
+                    >
+                      <option value="admin">Admin</option>
+                      <option value="developer">Developer</option>
+                      <option value="analyst">Analyst</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="invite-team">Team</Label>
+                  <select
+                    id="invite-team"
+                    className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                    value={inviteTeamId || teams[0]?.id || ""}
+                    onChange={(e) => setInviteTeamId(e.target.value)}
+                  >
+                    {teams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <Button onClick={handleInviteUser} disabled={isInviting || !inviteEmail.trim()}>
+                  {isInviting && <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />}
+                  Send Invitation
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
     </div>

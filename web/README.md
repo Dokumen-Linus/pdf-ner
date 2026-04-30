@@ -80,7 +80,7 @@ The database schemas are defined in:
 - Projects: own the main functionality of the site including web.projects (project description) web.entity_types (the features to extract) and workers.pdfs (the files to extract from)
 - Project ownership: projects are owned by a user if the user is not part of an organization otherwise they are owned by team (users are recommended to be in organizations)
 - Authorization: use the require* functions in ./src/lib/authorization.server.ts, often needed to call api-fns or db-fns to ensure users are confined to their projects and db rows
-- Billing: [Stripe Payments](https://docs.stripe.com/payments) using both [Stripe.js](https://docs.stripe.com/js) in the local API and [stripe-python](https://github.com/stripe/stripe-python) in the backend FastAPI
+- Billing: database-recorded account charges with Stripe used only for SetupIntent, PaymentIntent, Customer, and saved payment method processing
 
 ## Tech Stack
 

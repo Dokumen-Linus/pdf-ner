@@ -88,8 +88,6 @@ async def record_llm_usage(
     *,
     actor_user_id: UUID | None,
     project_id: UUID,
-    billing_user_id: UUID | None,
-    billing_organization_id: str | None,
     model: str,
     input_tokens: int,
     output_tokens: int,
@@ -100,15 +98,12 @@ async def record_llm_usage(
     await conn.execute(
         """
         INSERT INTO workers.llm_usage
-            (actor_user_id, project_id, billing_user_id, billing_organization_id,
-             model_id, source, input_tokens, output_tokens,
+            (actor_user_id, project_id, model_id, source, input_tokens, output_tokens,
              input_cost_usd, output_cost_usd, cost_usd)
-        VALUES ($1, $2, $3, $4, $5, 'api', $6, $7, $8, $9, $10)
+        VALUES ($1, $2, $3, 'api', $4, $5, $6, $7, $8)
         """,
         actor_user_id,
         project_id,
-        billing_user_id,
-        billing_organization_id,
         model,
         input_tokens,
         output_tokens,

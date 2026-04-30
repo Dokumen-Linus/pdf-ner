@@ -368,10 +368,6 @@ class TestPromptOptimizationWorkflow:
                 "app.domains.context_engineering.application.workflows.record_llm_usage",
                 new=AsyncMock(return_value=Decimal("0.01")),
             ),
-            patch(
-                "app.domains.context_engineering.application.workflows.report_usage_to_stripe",
-                new=AsyncMock(return_value={"reported": 1, "skipped": 0}),
-            ),
         ):
             result = await prompt_optimization_workflow(conn, mock_client, cmd)
 
@@ -501,10 +497,6 @@ class TestPromptOptimizationWorkflow:
             patch(
                 "app.domains.context_engineering.application.workflows.record_llm_usage",
                 new=AsyncMock(return_value=Decimal("0.01")),
-            ),
-            patch(
-                "app.domains.context_engineering.application.workflows.report_usage_to_stripe",
-                new=AsyncMock(return_value={"reported": 1, "skipped": 0}),
             ),
         ):
             await prompt_optimization_workflow(conn, mock_client, cmd)

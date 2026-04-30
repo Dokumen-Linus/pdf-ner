@@ -132,10 +132,6 @@ def build_sections(
         ),
         ("# Stripe", [
             ("STRIPE_SECRET_KEY", ("web", "api", "workers")),
-            ("STRIPE_WEBHOOK_SECRET", ("web",)),
-            ("STRIPE_DEVELOPER_PRICE_ID", ("web",)),
-            ("STRIPE_ANALYST_PRICE_ID", ("web",)),
-            ("STRIPE_USAGE_PRICE_ID", ("web",)),
         ]),
         (
             "# Workers (workers/.env.local.example)",

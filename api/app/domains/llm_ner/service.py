@@ -142,15 +142,11 @@ async def extract_entities(
     output_cost_usd = Decimal(
         str(round((llm_usage.output_tokens * float(model["usd_per_1m_output"])) / 1_000_000, 8))
     )
-    billing_user_id = None if project["organization_id"] else project["owner_id"]
-    billing_organization_id = project["organization_id"]
     try:
         await repository.record_llm_usage(
             conn,
             actor_user_id=request.user_id,
             project_id=request.project_id,
-            billing_user_id=billing_user_id,
-            billing_organization_id=billing_organization_id,
             model=request.model,
             input_tokens=llm_usage.input_tokens,
             output_tokens=llm_usage.output_tokens,

@@ -8,8 +8,7 @@ from uuid import UUID
 import asyncpg
 from openai import AsyncOpenAI
 
-from app.domains.billing.application.workflows import report_usage_to_stripe
-from app.domains.billing.infrastructure.repository import record_llm_usage
+from app.domains.llm_usage.infrastructure.repository import record_llm_usage
 from app.integrations.openai import call_openai
 from app.shared.domain.LLMResponseData import LLMResponseData
 
@@ -380,8 +379,6 @@ async def prompt_optimization_workflow(
         stop_reason=stop_reason,
     )
     await repo.insert_context_engineering_predictions(conn, evaluation_id, final_pairs)
-    await report_usage_to_stripe(cmd.project_id)
-
     return {
         "best_prompt_id": str(prompt_id),
         "best_f1": final_f1,

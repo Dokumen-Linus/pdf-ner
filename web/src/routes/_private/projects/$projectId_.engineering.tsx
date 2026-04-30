@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/engineering
         getProjectById({ data: { id: params.projectId } }),
         getCurrentProjectAccess({ data: { projectId: params.projectId } }),
       ])
-      if (access.subscriptionType !== "developer" || !access.canManage) {
+      if (access.accountRole === "analyst" || !access.canManage) {
         return { project: null, loadError: "Only developers can run prompt engineering." }
       }
       return { project, loadError: null }

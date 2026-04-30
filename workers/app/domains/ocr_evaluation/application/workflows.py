@@ -6,7 +6,7 @@ from typing import Any
 
 import asyncpg
 
-from app.domains.billing.infrastructure.repository import record_llm_usage
+from app.domains.llm_usage.infrastructure.repository import record_llm_usage
 from app.integrations.gemini import call_google_genai
 from app.shared.domain.LLMResponseData import LLMResponseData
 from app.shared.infrastructure.s3 import download_pdf_bytes
@@ -128,7 +128,7 @@ async def _evaluate_project_ocr_run(
 
         except Exception as exc:
             logger.warning("Failed to process pdf=%s: %s", pdf.pdf_id, exc, exc_info=True)
-            
+
             # Record a failed page evaluation so the error is tracked
             evaluation = PageEvaluation(
                 pdf_id=pdf.pdf_id,

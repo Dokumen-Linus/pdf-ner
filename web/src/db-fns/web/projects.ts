@@ -214,7 +214,7 @@ export const getCurrentProjectAccess = createServerFn({ method: "GET" })
       isOwner: access.isOwner,
       userId: access.userId,
       authUserId: access.authUserId,
-      subscriptionType: access.subscriptionType,
+      accountRole: access.accountRole,
       teamId: access.teamId,
       organizationId: access.organizationId,
     }
