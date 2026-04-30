@@ -100,15 +100,16 @@ def replace_markdown_links(
     def replacer(match: re.Match[str]) -> str:
         label = match.group(1)
         target = match.group(2)
-        linked_skill_name = resolve_linked_skill_name(current_skill_name, target)
-        if not linked_skill_name or linked_skill_name not in skill_paths:
-            return match.group(0)
-
-        new_label = skill_name_mapping.get(label, label)
-        new_target = to_markdown_relative_path(
-            source_file=skill_paths[current_skill_name],
-            target_file=skill_paths[linked_skill_name],
-        )
+        # Strip /SKILL.md from label if present
+        old_label = label
+        if old_label.endswith("/SKILL.md"):
+            old_label = old_label[: -len("/SKILL.md")]
+        new_label_base = skill_name_mapping.get(old_label, old_label)
+        if label.endswith("/SKILL.md"):
+            new_label = new_label_base + "/SKILL.md"
+        else:
+            new_label = new_label_base
+        new_target = f"../{new_label_base}/SKILL.md"
         return f"[{new_label}]({new_target})"
 
     return MARKDOWN_LINK_PATTERN.sub(replacer, line)
@@ -233,13 +234,154 @@ def rewrite_skill_markdown(
     return True
 
 
-def rewrite_copied_skills(copied_skill_dirs: list[Path]):
-    skill_name_mapping, skill_paths = build_skill_index(copied_skill_dirs)
+def flatten_and_modify_skills(copied_skill_dirs: list[Path], old_to_new_mapping: dict):
+    skill_paths = {}  # old_name -> new_md_path
+    skill_name_mapping = {}  # old_name -> new_name
 
-    print("\nRewriting copied SKILL.md files...")
+    print("\nFlattening and modifying SKILL.md files...")
     for skill_md in iter_skill_markdown_files(copied_skill_dirs):
-        if rewrite_skill_markdown(skill_md, skill_name_mapping, skill_paths):
-            print(f"  Rewrote {skill_md.relative_to(PROJECT_ROOT)}")
+        # Skip skills originally in router-core/auth-and-guards and router-core/ssr
+        if 'auth-and-guards' in str(skill_md) or 'ssr' in str(skill_md):
+            print(f"  Skipping {skill_md.relative_to(PROJECT_ROOT)}")
+            continue
+        content = skill_md.read_text(encoding="utf-8")
+        match = re.search(r"^name:\s*(\S+)\s*$", content, re.MULTILINE)
+        if not match:
+            continue
+        old_name = match.group(1)
+        new_name = "tanstack-" + re.sub(r"[_/\\]", "-", old_name)
+        old_to_new_mapping[old_name] = new_name  # initial, will update later
+
+        # Find frontmatter
+        frontmatter_match = re.search(r"^---\n(.*?)\n---", content, re.DOTALL)
+        if not frontmatter_match:
+            continue
+        frontmatter = frontmatter_match.group(1)
+
+        lines = frontmatter.splitlines()
+        new_front_lines = []
+        has_name = False
+        has_desc = False
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            stripped = line.strip()
+            if stripped.startswith("name:"):
+                new_front_lines.append(f"name: {new_name}")
+                has_name = True
+                i += 1
+            elif stripped.startswith("description:"):
+                # collect description lines
+                desc_lines = [line]
+                i += 1
+                while i < len(lines) and lines[i].strip() and not re.match(r"^\w+:", lines[i]):
+                    desc_lines.append(lines[i])
+                    i += 1
+                new_front_lines.extend(desc_lines)
+                has_desc = True
+            else:
+                i += 1  # skip other lines
+        if not has_name or not has_desc:
+            continue
+        new_frontmatter = "\n".join(new_front_lines)
+        new_content = re.sub(
+            r"^---\n.*?\n---", f"---\n{new_frontmatter}\n---", content, flags=re.DOTALL
+        )
+
+        # Create new dir and write
+        new_dir = SKILLS_DIR / new_name
+        new_dir.mkdir(exist_ok=True)
+        new_md = new_dir / "SKILL.md"
+        new_md.write_text(new_content, encoding="utf-8")
+
+        skill_paths[old_name] = new_md
+        skill_name_mapping[old_name] = new_name
+        print(
+            f"  Moved and modified {skill_md.relative_to(PROJECT_ROOT)} -> {new_md.relative_to(PROJECT_ROOT)}"
+        )
+
+    # Update skill_paths to use new names as keys
+    skill_paths = {skill_name_mapping[old]: path for old, path in skill_paths.items()}
+
+    # Remove old copied dirs, but keep main dirs with SKILL.md
+    for d in copied_skill_dirs:
+        if d.exists():
+            skill_md = d / "SKILL.md"
+            if skill_md.exists():
+                # main dir, remove all subdirs
+                for sub in d.iterdir():
+                    if sub.is_dir():
+                        shutil.rmtree(sub)
+            else:
+                shutil.rmtree(d)
+
+    # Rewrite links in the new files
+    print("\nRewriting links in flattened SKILL.md files...")
+    for new_name, md_path in skill_paths.items():
+        if rewrite_skill_markdown(md_path, skill_name_mapping, skill_paths):
+            print(f"  Rewrote {md_path.relative_to(PROJECT_ROOT)}")
+
+
+def rename_and_update(old_to_new_mapping):
+    print("\nRenaming directories and updating names/links by removing '-core'...")
+    renamed = {}
+    for d in SKILLS_DIR.iterdir():
+        if d.is_dir() and "-core" in d.name:
+            new_name = d.name.replace("-core", "")
+            new_d = SKILLS_DIR / new_name
+            if new_d.exists():
+                shutil.rmtree(new_d)
+            d.rename(new_d)
+            renamed[d.name] = new_name
+            print(f"  Renamed {d.name} -> {new_name}")
+
+    # Update name in SKILL.md
+    for md in SKILLS_DIR.glob("**/SKILL.md"):
+        content = md.read_text(encoding="utf-8")
+        updated = re.sub(
+            r"^(name:\s*)(.+)$",
+            lambda m: m.group(1) + m.group(2).replace("-core", ""),
+            content,
+            flags=re.MULTILINE,
+        )
+        if updated != content:
+            md.write_text(updated, encoding="utf-8")
+            print(f"  Updated name in {md.relative_to(PROJECT_ROOT)}")
+
+    # Update the old_to_new_mapping for renamed dirs
+    for old_hier, initial_new in old_to_new_mapping.items():
+        if initial_new in renamed:
+            old_to_new_mapping[old_hier] = renamed[initial_new]
+
+    # Update links
+    for md in SKILLS_DIR.glob("**/SKILL.md"):
+        content = md.read_text(encoding="utf-8")
+        updated = content
+        for old, new in renamed.items():
+            updated = updated.replace(f"../{old}/", f"../{new}/")
+            updated = updated.replace(f"[{old}/SKILL.md]", f"[{new}/SKILL.md]")
+        if updated != content:
+            md.write_text(updated, encoding="utf-8")
+            print(f"  Updated links in {md.relative_to(PROJECT_ROOT)}")
+
+
+def replace_old_names_in_content(old_to_new_mapping):
+    print("\nReplacing old hierarchical names in SKILL.md content...")
+    for md in SKILLS_DIR.glob("**/SKILL.md"):
+        content = md.read_text(encoding="utf-8")
+        updated = content
+        for old, new in old_to_new_mapping.items():
+            updated = updated.replace(old, new)
+        if updated != content:
+            md.write_text(updated, encoding="utf-8")
+            print(f"  Replaced in {md.relative_to(PROJECT_ROOT)}")
+
+
+def rewrite_copied_skills(copied_skill_dirs: list[Path]):
+    old_to_new_mapping = {}
+    flatten_and_modify_skills(copied_skill_dirs, old_to_new_mapping)
+    rename_and_update(old_to_new_mapping)
+    replace_old_names_in_content(old_to_new_mapping)
 
 
 def copy_skills_folder(package_name: str, source_skills: Path) -> list[Path]:
