@@ -11,7 +11,12 @@ import { requireWorkspaceUser } from "@/lib/project-authorization.server"
 import { getStripe } from "@/lib/stripe.server"
 
 type AccountTarget =
-  | { type: "individual"; userId: string; customerId: string | null; paymentMethodId: string | null }
+  | {
+      type: "individual"
+      userId: string
+      customerId: string | null
+      paymentMethodId: string | null
+    }
   | {
       type: "organization"
       organizationId: string
@@ -37,7 +42,10 @@ async function requireAccountTarget(): Promise<AccountTarget> {
     .limit(1)
 
   if (!row) throw new Error("User profile not found")
-  if ((row.role === "admin" || row.role === "developer" || row.role === "analyst") && row.organizationId) {
+  if (
+    (row.role === "admin" || row.role === "developer" || row.role === "analyst") &&
+    row.organizationId
+  ) {
     if (row.role !== "admin") throw new Error("Only admins can manage organization payment methods")
     return {
       type: "organization",
@@ -182,18 +190,28 @@ export const setDefaultPaymentMethod = createServerFn({ method: "POST" })
     const target = await requireAccountTarget()
     const customerId = await ensureStripeCustomer(target)
     const method = await getStripe().paymentMethods.retrieve(data.paymentMethodId)
-    const methodCustomer = typeof method.customer === "string" ? method.customer : method.customer?.id
-    if (methodCustomer !== customerId) throw new Error("Payment method does not belong to this account")
+    const methodCustomer =
+      typeof method.customer === "string" ? method.customer : method.customer?.id
+    if (methodCustomer !== customerId)
+      throw new Error("Payment method does not belong to this account")
 
     if (target.type === "individual") {
       await db
         .update(users)
-        .set({ stripePaymentMethodId: data.paymentMethodId, billingStatus: "active", updatedAt: new Date() })
+        .set({
+          stripePaymentMethodId: data.paymentMethodId,
+          billingStatus: "active",
+          updatedAt: new Date(),
+        })
         .where(eq(users.id, target.userId))
     } else {
       await db
         .update(organizations)
-        .set({ stripePaymentMethodId: data.paymentMethodId, billingStatus: "active", updatedAt: new Date() })
+        .set({
+          stripePaymentMethodId: data.paymentMethodId,
+          billingStatus: "active",
+          updatedAt: new Date(),
+        })
         .where(eq(organizations.id, target.organizationId))
     }
     return { success: true }
@@ -229,7 +247,12 @@ export const upgradeIndividualToOrganization = createServerFn({ method: "POST" }
     const teamId = crypto.randomUUID()
     const createdAt = new Date()
     const orgName = user.displayName?.trim() || user.email.split("@")[0] || "Organization"
-    const slug = `${orgName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "organization"}-${organizationId.slice(0, 8)}`
+    const slug = `${
+      orgName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || "organization"
+    }-${organizationId.slice(0, 8)}`
 
     await db.transaction(async (tx) => {
       await tx.insert(authOrganizations).values({
@@ -318,7 +341,9 @@ export const inviteOrganizationUser = createServerFn({ method: "POST" })
     const teams = await db
       .select({ id: webTeams.id })
       .from(webTeams)
-      .where(and(eq(webTeams.organizationId, admin.organizationId), inArray(webTeams.id, data.teamIds)))
+      .where(
+        and(eq(webTeams.organizationId, admin.organizationId), inArray(webTeams.id, data.teamIds)),
+      )
     if (teams.length !== data.teamIds.length) throw new Error("One or more teams are invalid")
 
     const headers = getRequestHeaders()

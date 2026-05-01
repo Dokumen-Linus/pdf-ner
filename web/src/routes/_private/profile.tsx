@@ -20,13 +20,13 @@ import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { Textarea } from "@/components/shadcn-ui/textarea"
+import { inviteOrganizationUser, upgradeIndividualToOrganization } from "@/db-fns/web/billing"
 import {
   getCurrentUserOrganization,
   getCurrentUserTeamsByOrganization,
 } from "@/db-fns/web/organizations"
 import { createTeam, updateTeam } from "@/db-fns/web/teams"
 import { getUserByAuthUserId, updateUser } from "@/db-fns/web/users"
-import { inviteOrganizationUser, upgradeIndividualToOrganization } from "@/db-fns/web/billing"
 import { m } from "@/integrations/paraglide/messages.js"
 
 type ProfileUser = Awaited<ReturnType<typeof getUserByAuthUserId>>

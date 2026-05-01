@@ -312,8 +312,7 @@ function ProgressDetails({
               {phase === "evaluating_variant" ? "Variant" : "Iteration"}
             </p>
             <p className="text-lg font-semibold">
-              {String(details.variant ?? details.iteration)}/
-              {String(details.total_variants ?? "?")}
+              {String(details.variant ?? details.iteration)}/{String(details.total_variants ?? "?")}
             </p>
           </div>
         )}

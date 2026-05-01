@@ -15,8 +15,8 @@ import { models } from "../public/models"
 import { templates } from "../public/templates"
 import { entityTypes } from "../web/entity-types"
 import { projects } from "../web/projects"
-import { workersPdfs } from "./pdfs"
 
+import { workersPdfs } from "./pdfs"
 import { workersSchema } from "./schema"
 
 import type { JsonbRecord } from "../../types"

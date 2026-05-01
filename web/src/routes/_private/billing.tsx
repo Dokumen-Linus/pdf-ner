@@ -1,17 +1,17 @@
 import { useMemo, useState } from "react"
+import { createFileRoute, useRouter } from "@tanstack/react-router"
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
-import { createFileRoute, useRouter } from "@tanstack/react-router"
 import { CreditCardIcon, LoaderCircleIcon, Trash2Icon } from "lucide-react"
 import { z } from "zod"
 
 import { Button } from "@/components/shadcn-ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn-ui/card"
 import {
-  detachPaymentMethod,
-  getBillingAccount,
   confirmSetupIntent,
   createSetupIntent,
+  detachPaymentMethod,
+  getBillingAccount,
   setDefaultPaymentMethod,
 } from "@/db-fns/web/billing"
 import { env } from "@/env.client"
