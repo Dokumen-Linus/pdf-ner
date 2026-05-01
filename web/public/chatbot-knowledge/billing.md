@@ -1,9 +1,7 @@
-Create a plan to
-- Delete [A] the existing workers billing domain in workers\app\domains\billing and workers\tests\billing, [B] the workers.llm_usage_report_batches table defined in ./db/migrations/00090_create_billing_tables.sql, [C] infra\stripe-setup.sh script to setup Stripe resources, and [D] .\BILLING.md which contains an old, incorrect plan that was used to create the current billing system.
-- Remove billing_user_id and billing_organization_id columns from the workers.llm_usage table. llm_usage will be owned exclusively by a project, not a user, organization, or team. An individual user will own a project for individual accounts and a team will own a project for organization accounts. An organization will own a team. Payment information will be stored in the web.users and web.organizations tables and bills will be charged to individual users or organizations depending on account type.
-- Remove the current use of Stripe inside the web app, except perhaps the code to create a TypeScript SDK Stripe client.
-- Setup a billing system where cost is recorded entirely in the PostgreSQL database and Stripe is used exclusively to process credit/debit card transactions. Ensure all use of Stripe is in alignment with the 2026-04-22.dahlia API version.
-To ensure that the newest resources are used and the 0.9% Stripe Billing fee is never paid, you may only use the following Stripe resources: PaymentIntent, SetupIntent, SetupAttempt, Customer, CustomerSession, PaymentMethod, Dispute, Payout, Refund, Token, ConfirmationToken, and any resources that are subsets of these like BankAccount and Card.
+# Dokumen Billing
+
+Cost is recorded entirely in the PostgreSQL database and Stripe is used exclusively to process credit/debit card transactions. Ensure all use of Stripe is in alignment with the 2026-04-22.dahlia API version.
+To ensure that the newest resources are used and the 0.9% Stripe Billing fee is never paid, Dokumen only uses the following Stripe resources: PaymentIntent, SetupIntent, SetupAttempt, Customer, CustomerSession, PaymentMethod, Dispute, Payout, Refund, Token, ConfirmationToken, and any resources that are subsets of these like BankAccount and Card.
 Setup two account types: individual and organization.
 An individual account has a single user with role individual.
 An organization account can have one or more users with a role of admin, developer, or analyst.
