@@ -33,8 +33,13 @@ async def optimize_prompt(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
+    template = await repository.fetch_template(conn, request_data.template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
     task_id = events.dispatch_optimize_prompt(
         project_id=str(request_data.project_id),
+        template_id=request_data.template_id,
         max_cost_usd=request_data.max_cost_usd,
         model=request_data.model,
     )

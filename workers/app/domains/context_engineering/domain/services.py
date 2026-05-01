@@ -9,6 +9,7 @@ from .entities import (
     FinalPredictionPair,
     LabeledPdf,
     PromptCandidate,
+    PromptExampleSnapshot,
 )
 from .value_objects import EntityMatch, F1Score
 
@@ -110,6 +111,30 @@ def build_base_system_prompt(
     return "\n\n".join(sections)
 
 
+def render_prompt_template(
+    template_txt: str,
+    project_description: str | None,
+    entity_types: list[EntityTypeInfo],
+) -> str:
+    """Render a public template using the same placeholders as API extraction."""
+    names = [et.name for et in entity_types]
+    definitions = [et.best_definition for et in entity_types]
+    examples = [et.all_examples for et in entity_types]
+    constraints = [_build_constraint_text(et) for et in entity_types]
+    is_required = [et.required for et in entity_types]
+    is_unique = [et.unique for et in entity_types]
+
+    prompt = template_txt
+    prompt = prompt.replace("<PROJECT_DESCRIPTION>", project_description or "")
+    prompt = prompt.replace("<ENTITY_TYPES>", str(names))
+    prompt = prompt.replace("<DEFINITIONS>", str(definitions))
+    prompt = prompt.replace("<EXAMPLE_VALUES>", str(examples))
+    prompt = prompt.replace("<CONSTRAINTS>", str(constraints))
+    prompt = prompt.replace("<IS_REQUIRED>", str(is_required))
+    prompt = prompt.replace("<IS_UNIQUE>", str(is_unique))
+    return prompt
+
+
 def _build_constraint_text(et: EntityTypeInfo) -> str:
     parts: list[str] = []
     if et.datatype:
@@ -128,11 +153,21 @@ def format_few_shot_examples(
     max_examples: int = 3,
 ) -> str:
     """Format labeled annotations as few-shot examples for the prompt."""
-    if not labeled_pdfs:
-        return ""
+    return format_prompt_example_snapshots(
+        build_prompt_example_snapshots(labeled_pdfs, max_examples=max_examples)
+    )
 
-    examples = []
-    for pdf in labeled_pdfs[:max_examples]:
+
+def build_prompt_example_snapshots(
+    labeled_pdfs: list[LabeledPdf],
+    max_examples: int = 3,
+    max_chars_per_example: int = 2000,
+) -> list[PromptExampleSnapshot]:
+    if not labeled_pdfs:
+        return []
+
+    snapshots: list[PromptExampleSnapshot] = []
+    for index, pdf in enumerate(labeled_pdfs[:max_examples]):
         ground_truth = pdf.ground_truth
         example_output: dict[str, str | list[str]] = {}
         for entity_name, values in ground_truth.items():
@@ -141,14 +176,36 @@ def format_few_shot_examples(
             else:
                 example_output[entity_name] = values
 
-        doc_text = pdf.full_text[:2000] + ("..." if len(pdf.full_text) > 2000 else "")
-
-        examples.append(
-            f"### Example Document:\n{doc_text}\n\n"
-            f"### Expected Output:\n{json.dumps(example_output, indent=2)}"
+        full_text = pdf.full_text or ""
+        text_excerpt = full_text[:max_chars_per_example] + (
+            "..." if len(full_text) > max_chars_per_example else ""
+        )
+        snapshots.append(
+            PromptExampleSnapshot(
+                pdf_id=pdf.pdf_id,
+                example_order=index,
+                text_excerpt=text_excerpt,
+                labelled_entities=example_output,
+            )
         )
 
-    return "## Few-Shot Examples\n\n" + "\n\n---\n\n".join(examples)
+    return snapshots
+
+
+def format_prompt_example_snapshots(
+    examples: list[PromptExampleSnapshot],
+) -> str:
+    if not examples:
+        return ""
+
+    formatted = []
+    for example in examples:
+        formatted.append(
+            f"### Example Document:\n{example.text_excerpt}\n\n"
+            f"### Expected Output:\n{json.dumps(example.labelled_entities, indent=2)}"
+        )
+
+    return "## Few-Shot Examples\n\n" + "\n\n---\n\n".join(formatted)
 
 
 def generate_prompt_variants(
@@ -156,29 +213,16 @@ def generate_prompt_variants(
     entity_types: list[EntityTypeInfo],
     project_description: str | None,
 ) -> list[str]:
-    """Generate 3 prompt variants with different instruction styles.
-
-    Variant 0: Base prompt (structured, field-by-field)
-    Variant 1: Concise style (shorter instructions, emphasis on precision)
-    Variant 2: Chain-of-thought style (asks model to reason before answering)
-    """
+    """Generate 3 template-based prompt variants with different guidance styles."""
     variants = [base_prompt]
 
-    # Variant 1: Concise
-    field_list = ", ".join(et.name for et in entity_types)
-    concise = f"Extract these fields from the document: {field_list}.\n"
-    concise += (
-        "Return JSON. Required fields must have values; optional fields are null if missing.\n"
+    precision_guidance = (
+        base_prompt
+        + "\n\n## Precision Guidance\n"
+        "Prefer exact text spans from the document. Do not infer values from nearby context. "
+        "Use null or an empty array when the document does not contain a valid value."
     )
-    if project_description:
-        concise += f"Document type: {project_description}\n"
-    for et in entity_types:
-        constraint = _build_constraint_text(et)
-        concise += f"- {et.name}: {et.best_definition}"
-        if constraint:
-            concise += f" ({constraint})"
-        concise += "\n"
-    variants.append(concise)
+    variants.append(precision_guidance)
 
     # Variant 2: Chain-of-thought
     cot = (
@@ -193,6 +237,28 @@ def generate_prompt_variants(
     variants.append(cot)
 
     return variants
+
+
+def select_prompt_example_sets(
+    labeled_pdfs: list[LabeledPdf],
+    *,
+    max_examples: int = 2,
+) -> list[list[LabeledPdf]]:
+    """Return small, deterministic example PDF sets to try in prompt candidates."""
+    if not labeled_pdfs or max_examples <= 0:
+        return [[]]
+
+    first_set = labeled_pdfs[:max_examples]
+    sets = [first_set]
+
+    coverage_set = sorted(
+        labeled_pdfs,
+        key=lambda pdf: (-len(pdf.ground_truth), str(pdf.pdf_id)),
+    )[:max_examples]
+    if [pdf.pdf_id for pdf in coverage_set] != [pdf.pdf_id for pdf in first_set]:
+        sets.append(coverage_set)
+
+    return sets
 
 
 def build_refinement_prompt(
@@ -272,6 +338,18 @@ def evaluate_predictions(
             all_matches.append(match)
             if not is_exact:
                 errors.append(match)
+
+        for gt_v in gt_normalized:
+            if not any(_exact_match(pred_v, gt_v) for pred_v in pred_normalized):
+                errors.append(
+                    EntityMatch(
+                        entity_type_name=et.name,
+                        predicted=None,
+                        ground_truth=gt_v,
+                        is_exact_match=False,
+                        is_partial_match=False,
+                    )
+                )
 
     total_entities = len(entity_types)
     if total_entities > 0:
@@ -478,7 +556,14 @@ def build_error_analysis(
         if et_errors:
             lines.append(f"### {et.name} ({len(et_errors)} errors)")
             for err in et_errors[:5]:
-                lines.append(f"  - Predicted: {err.predicted!r}")
+                if err.predicted is None and err.ground_truth is not None:
+                    lines.append(f"  - Missed labelled value: {err.ground_truth!r}")
+                elif err.ground_truth is not None:
+                    lines.append(
+                        f"  - Predicted: {err.predicted!r}; labelled: {err.ground_truth!r}"
+                    )
+                else:
+                    lines.append(f"  - Predicted: {err.predicted!r}")
             score_vals = [
                 r.per_entity_scores[et.name] for r in results if et.name in r.per_entity_scores
             ]

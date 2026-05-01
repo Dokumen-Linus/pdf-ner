@@ -15,6 +15,7 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Progress } from "@/components/shadcn-ui/progress"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
+import { getAllTemplates } from "@/db-fns/public/templates"
 import { getCurrentProjectAccess, getProjectById } from "@/db-fns/web/projects"
 
 function EngineeringSkeleton() {
@@ -40,20 +41,25 @@ export const Route = createFileRoute("/_private/projects/$projectId_/engineering
     try {
       const userId = context.session?.user?.id
       if (!userId) {
-        return { project: null, loadError: "Not authenticated" }
+        return { project: null, templates: [], loadError: "Not authenticated" }
       }
 
-      const [project, access] = await Promise.all([
+      const [project, access, templates] = await Promise.all([
         getProjectById({ data: { id: params.projectId } }),
         getCurrentProjectAccess({ data: { projectId: params.projectId } }),
+        getAllTemplates(),
       ])
       if (access.accountRole === "analyst" || !access.canManage) {
-        return { project: null, loadError: "Only developers can run prompt engineering." }
+        return {
+          project: null,
+          templates: [],
+          loadError: "Only developers can run prompt engineering.",
+        }
       }
-      return { project, loadError: null }
+      return { project, templates, loadError: null }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      return { project: null, loadError: message }
+      return { project: null, templates: [], loadError: message }
     }
   },
   pendingComponent: EngineeringSkeleton,
@@ -72,7 +78,7 @@ const PHASE_LABELS: Record<string, string> = {
 
 function EngineeringPage() {
   const router = useRouter()
-  const { project, loadError } = Route.useLoaderData()
+  const { project, templates, loadError } = Route.useLoaderData()
   const { projectId } = Route.useParams()
 
   const [taskId, setTaskId] = useState<string | null>(null)
@@ -93,11 +99,17 @@ function EngineeringPage() {
   const isRunning = !!taskId && status?.status !== "SUCCESS" && status?.status !== "FAILURE"
 
   async function handleStart() {
+    const templateId = templates?.[0]?.id
+    if (!templateId) {
+      setStartError("No prompt templates are available.")
+      return
+    }
+
     setIsStarting(true)
     setStartError(null)
     try {
       const result = await startPromptOptimization({
-        data: { projectId, maxCostUsd: 1, model: "gpt-4o" },
+        data: { projectId, templateId, maxCostUsd: 1, model: "gpt-4o" },
       })
       setTaskId(result.task_id)
     } catch (error) {

@@ -5,6 +5,7 @@ import {
   billingChargeAttempts,
   contextEngPreds,
   llmUsage,
+  optimizedPromptExamples,
   optimizedPrompts,
   promptEvaluations,
   workersPdfs,
@@ -100,5 +101,6 @@ export type LlmUsage = InferSelectModel<typeof llmUsage>
 export type BillingChargeAttempt = InferSelectModel<typeof billingChargeAttempts>
 export type FoundWorkersPdf = InferSelectModel<typeof workersPdfs>
 export type FoundOptimizedPrompt = InferSelectModel<typeof optimizedPrompts>
+export type FoundOptimizedPromptExample = InferSelectModel<typeof optimizedPromptExamples>
 export type FoundPromptEvaluation = InferSelectModel<typeof promptEvaluations>
 export type FoundContextEngPred = InferSelectModel<typeof contextEngPreds>

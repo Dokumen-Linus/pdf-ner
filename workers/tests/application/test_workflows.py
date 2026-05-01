@@ -19,6 +19,25 @@ from app.domains.context_engineering.domain.value_objects import CostBudget, F1S
 from tests.conftest import PDF_ID_1, PROJECT_ID, PROMPT_ID
 
 BUCKET_ID = uuid4()
+TEMPLATE_ID = 1
+TEMPLATE_ROW = {
+    "id": TEMPLATE_ID,
+    "txt": (
+        "Project: <PROJECT_DESCRIPTION>\nFields: <ENTITY_TYPES>\nDefinitions: <DEFINITIONS>\n"
+        "Examples: <EXAMPLE_VALUES>\nConstraints: <CONSTRAINTS>\nRequired: <IS_REQUIRED>\n"
+        "Unique: <IS_UNIQUE>\nDocument:"
+    ),
+    "inserts": [
+        "<PROJECT_DESCRIPTION>",
+        "<ENTITY_TYPES>",
+        "<DEFINITIONS>",
+        "<EXAMPLE_VALUES>",
+        "<CONSTRAINTS>",
+        "<IS_REQUIRED>",
+        "<IS_UNIQUE>",
+    ],
+    "document_at_end": True,
+}
 
 # ─── _avg_score ──────────────────────────────────────────────────────────
 
@@ -221,7 +240,7 @@ class TestPromptOptimizationWorkflow:
         conn.fetchrow.return_value = None
         client = AsyncMock()
 
-        cmd = OptimizePrompt(project_id=PROJECT_ID)
+        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=TEMPLATE_ID)
         with pytest.raises(ValueError, match="Project not found"):
             await prompt_optimization_workflow(conn, client, cmd)
 
@@ -231,12 +250,27 @@ class TestPromptOptimizationWorkflow:
         conn.fetchrow.side_effect = [
             {"id": PROJECT_ID, "name": "Test", "description": "desc"},
             {"provider": "openai"},
+            TEMPLATE_ROW,
         ]
         conn.fetch.return_value = []  # no entity types
         client = AsyncMock()
 
-        cmd = OptimizePrompt(project_id=PROJECT_ID)
+        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=TEMPLATE_ID)
         with pytest.raises(ValueError, match="No entity types"):
+            await prompt_optimization_workflow(conn, client, cmd)
+
+    @pytest.mark.anyio
+    async def test_raises_on_missing_template(self):
+        conn = AsyncMock()
+        conn.fetchrow.side_effect = [
+            {"id": PROJECT_ID, "name": "Test", "description": "desc"},
+            {"provider": "openai"},
+            None,
+        ]
+        client = AsyncMock()
+
+        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=999)
+        with pytest.raises(ValueError, match="Template not found"):
             await prompt_optimization_workflow(conn, client, cmd)
 
     @pytest.mark.anyio
@@ -245,6 +279,7 @@ class TestPromptOptimizationWorkflow:
         conn.fetchrow.side_effect = [
             {"id": PROJECT_ID, "name": "Test", "description": "desc"},
             {"provider": "openai"},
+            TEMPLATE_ROW,
         ]
         # First fetch returns entity types, second returns empty (no pdfs)
         entity_row = {
@@ -267,7 +302,7 @@ class TestPromptOptimizationWorkflow:
         conn.fetch.side_effect = [[entity_row], []]
         client = AsyncMock()
 
-        cmd = OptimizePrompt(project_id=PROJECT_ID)
+        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=TEMPLATE_ID)
         with pytest.raises(ValueError, match="No labeled PDFs"):
             await prompt_optimization_workflow(conn, client, cmd)
 
@@ -284,6 +319,7 @@ class TestPromptOptimizationWorkflow:
                 "description": "Test invoices",
             },
             {"provider": "openai"},
+            TEMPLATE_ROW,
         ]
 
         # Build entity type rows
@@ -362,7 +398,9 @@ class TestPromptOptimizationWorkflow:
 
         conn.fetchval.return_value = PROMPT_ID
 
-        cmd = OptimizePrompt(project_id=PROJECT_ID, max_cost_usd=Decimal("1.00"))
+        cmd = OptimizePrompt(
+            project_id=PROJECT_ID, template_id=TEMPLATE_ID, max_cost_usd=Decimal("1.00")
+        )
         with (
             patch(
                 "app.domains.context_engineering.application.workflows.record_llm_usage",
@@ -380,7 +418,7 @@ class TestPromptOptimizationWorkflow:
         assert result["best_prompt_id"] == str(PROMPT_ID)
         assert result["llm_call_count"] == 7
         assert conn.fetchval.call_count == 2
-        assert conn.executemany.await_count == 1
+        assert conn.executemany.await_count == 2
 
     @pytest.mark.anyio
     async def test_skips_pdf_with_no_full_text_and_logs_warning(self, name_entity_type, caplog):
@@ -391,6 +429,7 @@ class TestPromptOptimizationWorkflow:
         conn.fetchrow.side_effect = [
             {"id": PROJECT_ID, "name": "Test", "description": "desc"},
             {"provider": "openai"},
+            TEMPLATE_ROW,
         ]
 
         entity_row = {
@@ -432,7 +471,7 @@ class TestPromptOptimizationWorkflow:
         conn.fetch.side_effect = [entity_row if False else [entity_row], pdf_rows, ann_rows]
 
         client = AsyncMock()
-        cmd = OptimizePrompt(project_id=PROJECT_ID)
+        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=TEMPLATE_ID)
 
         with caplog.at_level(logging.ERROR):
             with pytest.raises(ValueError, match="No labeled PDFs with usable text"):
@@ -447,6 +486,7 @@ class TestPromptOptimizationWorkflow:
         conn.fetchrow.side_effect = [
             {"id": PROJECT_ID, "name": "Test", "description": "desc"},
             {"provider": "openai"},
+            TEMPLATE_ROW,
         ]
 
         entity_row = {
@@ -492,7 +532,9 @@ class TestPromptOptimizationWorkflow:
             choices=[MagicMock(message=MagicMock(content=json.dumps({"full_name": "John Smith"})))]
         )
 
-        cmd = OptimizePrompt(project_id=PROJECT_ID, max_cost_usd=Decimal("1.00"))
+        cmd = OptimizePrompt(
+            project_id=PROJECT_ID, template_id=TEMPLATE_ID, max_cost_usd=Decimal("1.00")
+        )
         with (
             patch(
                 "app.domains.context_engineering.application.workflows.record_llm_usage",

@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, model_validator
 
 class OptimizePromptRequest(BaseModel):
     project_id: UUID
+    template_id: int = Field(gt=0)
     max_cost_usd: Decimal = Field(default=Decimal("1.00"), gt=Decimal("0"))
     model: str = Field(default="gpt-4o", min_length=1)
 

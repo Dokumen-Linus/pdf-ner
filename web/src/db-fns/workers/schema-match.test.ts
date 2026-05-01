@@ -3,6 +3,8 @@ import { describe, expect, it } from "bun:test"
 import type {
   BillingChargeAttempt,
   FoundContextEngPred,
+  FoundOptimizedPrompt,
+  FoundOptimizedPromptExample,
   FoundPromptEvaluation,
   FoundWorkersPdf,
   LlmUsage,
@@ -89,6 +91,32 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       createdAt: Date | null
     }
     const _: Expected = {} as FoundPromptEvaluation
+    expect(true).toBe(true)
+  })
+
+  it("FoundOptimizedPrompt should have expected provenance fields", () => {
+    type Expected = {
+      id: string
+      projectId: string
+      templateId: number
+      fullText: string
+      createdAt: Date | null
+    }
+    const _: Expected = {} as FoundOptimizedPrompt
+    expect(true).toBe(true)
+  })
+
+  it("FoundOptimizedPromptExample should have expected example snapshot fields", () => {
+    type Expected = {
+      id: number
+      optimizedPromptId: string
+      pdfId: string
+      exampleOrder: number
+      textExcerpt: string
+      labelledEntities: Record<string, unknown>
+      createdAt: Date | null
+    }
+    const _: Expected = {} as FoundOptimizedPromptExample
     expect(true).toBe(true)
   })
 

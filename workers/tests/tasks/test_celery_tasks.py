@@ -35,7 +35,7 @@ class TestOptimizePromptTask:
         mock_asyncio_run.return_value = expected_result
 
         # For bound tasks, run() auto-injects self (the task instance)
-        result = task.run(str(PROJECT_ID))
+        result = task.run(str(PROJECT_ID), 1)
 
         assert result == expected_result
         mock_asyncio_run.assert_called_once()
@@ -49,7 +49,7 @@ class TestOptimizePromptTask:
             "iterations_run": 1,
         }
 
-        task.run(str(PROJECT_ID), max_cost_usd="2.50", model="gpt-4o-mini")
+        task.run(str(PROJECT_ID), 1, max_cost_usd="2.50", model="gpt-4o-mini")
         mock_asyncio_run.assert_called_once()
 
     @patch(f"{MODULE}.asyncio.run")
@@ -58,7 +58,7 @@ class TestOptimizePromptTask:
         mock_asyncio_run.side_effect = RuntimeError("connection failed")
 
         # Use apply() which runs synchronously and catches retries
-        result = task.apply(args=[str(PROJECT_ID)])
+        result = task.apply(args=[str(PROJECT_ID), 1])
 
         # The task should have failed (retry raises or task errors)
         assert result.failed() or result.state == "RETRY"
@@ -72,13 +72,13 @@ class TestOptimizePromptTask:
             "iterations_run": 1,
         }
         # Should not raise - valid UUID string
-        result = task.run(str(PROJECT_ID))
+        result = task.run(str(PROJECT_ID), 1)
         assert result is not None
         mock_asyncio_run.assert_called_once()
 
     def test_invalid_uuid_raises(self, task):
         with pytest.raises(ValueError):
-            task.run("not-a-uuid")
+            task.run("not-a-uuid", 1)
 
     def test_task_is_registered_with_correct_name(self, task):
         assert task.name == "context_engineering.optimize_prompt"
@@ -95,11 +95,12 @@ class TestOptimizePromptTask:
             "best_f1": 0.5,
             "iterations_run": 1,
         }
-        task.run(str(PROJECT_ID))
+        task.run(str(PROJECT_ID), 1)
 
         # Inspect the coroutine that was passed to asyncio.run
         handler_coroutine_call = mock_handler.call_args
         cmd = handler_coroutine_call[0][0]
+        assert cmd.template_id == 1
         assert cmd.max_cost_usd == Decimal("1.00")
         assert cmd.model == "gpt-4o"
 
@@ -112,7 +113,7 @@ class TestOptimizePromptTask:
             "iterations_run": 1,
         }
 
-        task.run(str(PROJECT_ID), max_cost_usd="3.25")
+        task.run(str(PROJECT_ID), 1, max_cost_usd="3.25")
 
         cmd = mock_handler.call_args[0][0]
         assert cmd.max_cost_usd == Decimal("3.25")
