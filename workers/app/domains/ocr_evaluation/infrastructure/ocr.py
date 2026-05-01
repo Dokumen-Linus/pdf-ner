@@ -11,7 +11,7 @@ from pdf_ocr_utils import (
     render_pdf_page_to_array,
     render_pdf_page_to_png_bytes,
 )
-from pdfium_utils import extract_text_by_page as extract_pdfium_text_by_page
+from pdfium_utils.annotate import extract_text_by_page as extract_pdfium_text_by_page
 
 from app.core.config import settings
 

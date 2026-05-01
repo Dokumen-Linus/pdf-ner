@@ -1,11 +1,11 @@
 from unittest.mock import patch
 
-from pdfium_utils import (
+from pdfium_utils.annotate import (
     extract_text,
     extract_text_by_page,
-    highlight_phrases,
     parse_hex_color,
 )
+from pdfium_utils.search_and_annotate import highlight_phrases
 import pytest
 
 
@@ -71,7 +71,7 @@ class TestHighlightPhrases:
             "overall_bounds": (10.0, 10.0, 50.0, 20.0),
         }
         with patch(
-            "pdfium_utils.find_text_objects",
+            "pdfium_utils.search.find_text_objects",
             return_value=[fake_match],
         ):
             _, results = highlight_phrases(empty_pdf_bytes, {"hello": "#FF0000"})
@@ -101,7 +101,7 @@ class TestHighlightPhrases:
             },
         ]
         with patch(
-            "pdfium_utils.find_text_objects",
+            "pdfium_utils.search.find_text_objects",
             return_value=fake_matches,
         ):
             _, results = highlight_phrases(three_page_pdf_bytes, {"hello": "#0000FF"})
@@ -128,7 +128,7 @@ class TestHighlightPhrases:
         def _mock_find(pdf, phrase, *args, **kwargs):
             return [fake_match] if phrase == "yes" else []
 
-        with patch("pdfium_utils.find_text_objects", side_effect=_mock_find):
+        with patch("pdfium_utils.search.find_text_objects", side_effect=_mock_find):
             _, results = highlight_phrases(empty_pdf_bytes, {"yes": "#FF0000", "no": "#00FF00"})
 
         yes_result = next(r for r in results if r.phrase == "yes")
@@ -170,7 +170,7 @@ class TestExtractText:
             },
         )()
 
-        with patch("pdfium_utils.pypdfium2.PdfDocument", return_value=mock_pdf):
+        with patch("pdfium_utils.annotate.pypdfium2.PdfDocument", return_value=mock_pdf):
             result = extract_text_by_page(b"pdf-bytes")
 
         assert result == [
@@ -180,7 +180,7 @@ class TestExtractText:
 
     def test_extract_text_joins_trimmed_page_text(self):
         with patch(
-            "pdfium_utils.extract_text_by_page",
+            "pdfium_utils.annotate.extract_text_by_page",
             return_value=[
                 {"page_index": 0, "text": " first\n"},
                 {"page_index": 1, "text": "second  "},

@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID, uuid4
 
 from pdf_ocr_utils.exceptions import OcrExecutionError
-from pdfium_utils import PhraseHighlightResult
+from pdfium_utils.search_and_annotate import PhraseHighlightResult
 import pytest
 
 from app.domains.pdf_utils import service
