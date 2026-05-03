@@ -11,6 +11,7 @@ COPY packages/llm_providers/ ./packages/llm_providers/
 COPY packages/otel_py/ ./packages/otel_py/
 COPY packages/pdf_ocr_utils/ ./packages/pdf_ocr_utils/
 COPY packages/pdfium_utils/ ./packages/pdfium_utils/
+COPY packages/aws_secrets_config/ ./packages/aws_secrets_config/
 WORKDIR /src/api
 RUN uv sync --no-dev --no-install-project --frozen
 
@@ -40,6 +41,6 @@ USER 1001
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD ["python", "-c", "import socket; s = socket.create_connection(('localhost', 8000), timeout=5); s.close()"]
+    CMD ["python", "-c", "from urllib.request import urlopen; r = urlopen('http://localhost:8000/healthz', timeout=5); raise SystemExit(0 if r.status == 200 else 1)"]
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

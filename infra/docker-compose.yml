@@ -13,18 +13,20 @@ services:
     restart: unless-stopped
 
   db:
+    profiles:
+      - local-db
     build:
       context: ../db
     environment:
       POSTGRES_DB: dokumen
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
       # Role passwords — injected into db/init/01_roles.sh
-      OWNER_ROLE_PASSWORD: ${OWNER_ROLE_PASSWORD}
-      AUTH_ROLE_PASSWORD: ${AUTH_ROLE_PASSWORD}
-      WEB_USER_PASSWORD: ${WEB_USER_PASSWORD}
-      API_USER_PASSWORD: ${API_USER_PASSWORD}
-      WORKERS_USER_PASSWORD: ${WORKERS_USER_PASSWORD}
+      OWNER_ROLE_PASSWORD: ${OWNER_ROLE_PASSWORD:-}
+      AUTH_ROLE_PASSWORD: ${AUTH_ROLE_PASSWORD:-}
+      WEB_USER_PASSWORD: ${WEB_USER_PASSWORD:-}
+      API_USER_PASSWORD: ${API_USER_PASSWORD:-}
+      WORKERS_USER_PASSWORD: ${WORKERS_USER_PASSWORD:-}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -39,6 +41,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     volumes:
       - redis_data:/data
       - ./redis.conf:/usr/local/etc/redis/redis.conf
@@ -57,14 +60,12 @@ services:
       dockerfile: api/Dockerfile
     ports:
       - "127.0.0.1:8000:8000"
-    env_file:
-      - ../api/.env
     environment:
-      API_DATABASE_URL: postgres://api_user:${API_USER_PASSWORD}@db:5432/dokumen?sslmode=disable
-      REDIS_URL: redis://redis:6379/0
+      ENV: ${ENV}
+      APP_VERSION: ${APP_VERSION}
+      SECRETS_STAGE: ${SECRETS_STAGE}
+      AWS_REGION: ${AWS_REGION}
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -76,18 +77,17 @@ services:
     build:
       context: ..
       dockerfile: workers/Dockerfile
-    env_file:
-      - ../workers/.env
     environment:
-      WORKERS_DATABASE_URL: postgres://workers_user:${WORKERS_USER_PASSWORD}@db:5432/dokumen?sslmode=disable
-      REDIS_URL: redis://redis:6379/0
+      ENV: ${ENV}
+      APP_VERSION: ${APP_VERSION}
+      SECRETS_STAGE: ${SECRETS_STAGE}
+      AWS_REGION: ${AWS_REGION}
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
       - backend
+      - egress
     restart: unless-stopped
 
   web:
@@ -95,23 +95,15 @@ services:
       context: ../web
       args:
         # Baked into the client bundle at build time
+        VITE_BASE_URL: ${VITE_BASE_URL}
         VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgres://owner_role:${OWNER_ROLE_PASSWORD}@db:5432/dokumen?sslmode=disable
-      AUTH_DATABASE_URL: postgres://auth_role:${AUTH_ROLE_PASSWORD}@db:5432/dokumen?sslmode=disable
-      WEB_DATABASE_URL: postgres://web_user:${WEB_USER_PASSWORD}@db:5432/dokumen?sslmode=disable
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
-      RESEND_API_KEY: ${RESEND_API_KEY}
-      FROM_EMAIL: ${FROM_EMAIL}
-      MY_EMAIL: ${MY_EMAIL}
-      UPLOADTHING_TOKEN: ${UPLOADTHING_TOKEN}
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-    depends_on:
-      db:
-        condition: service_healthy
+      ENV: ${ENV}
+      APP_VERSION: ${APP_VERSION}
+      SECRETS_STAGE: ${SECRETS_STAGE}
+      AWS_REGION: ${AWS_REGION}
     networks:
       - backend
       - frontend
@@ -123,6 +115,8 @@ networks:
   backend:
     driver: bridge
     internal: true
+  egress:
+    driver: bridge
 
 volumes:
   postgres_data:

@@ -55,6 +55,53 @@ dbmate --url "postgres://owner_role:...@localhost:5432/dokumen?sslmode=disable" 
 for f in db/seeds/*.sql; do echo "Executing $f"; psql -d dokumen -f "$f"; done
 ```
 
+## AWS RDS Initialization
+
+Use `db/init/rds/` when the production PostgreSQL database lives in AWS RDS
+instead of the local machine or the EC2 app host. Run these scripts from a
+machine that can reach the RDS endpoint, usually the EC2 instance, a bastion
+host, or a VPN-connected workstation.
+
+Required tools:
+
+- `psql`
+- `dbmate`
+
+Required one-time shell environment variables:
+
+```bash
+export RDS_HOST="your-rds-endpoint.amazonaws.com"
+export RDS_PORT="5432"
+export RDS_DB="dokumen"
+export RDS_ADMIN_DB="postgres"
+export RDS_ADMIN_USER="postgres"
+export PGPASSWORD="your-rds-admin-password"
+export PGSSLMODE="require"
+
+export OWNER_ROLE_PASSWORD="..."
+export AUTH_ROLE_PASSWORD="..."
+export WEB_USER_PASSWORD="..."
+export API_USER_PASSWORD="..."
+export WORKERS_USER_PASSWORD="..."
+```
+
+Initialize the empty RDS database:
+
+```bash
+bash db/init/rds/run_all.sh
+```
+
+`01_create_database_roles_schemas.sh` creates the database if needed, creates
+or updates app roles, creates schemas, and applies grants. `02_migrate_seed.sh`
+runs Better Auth setup, dbmate migrations, and seed SQL files against RDS.
+
+After initialization, put the role-specific RDS connection strings into AWS
+Secrets Manager:
+
+- `prod/web`: `AUTH_DATABASE_URL`, `WEB_DATABASE_URL`, and `DATABASE_URL`
+- `prod/api`: `API_DATABASE_URL`
+- `prod/workers`: `WORKERS_DATABASE_URL`
+
 ### PostgreSQL VSCode Extension by Microsoft
 
 After installing the extension and starting the db, you can establish a connection by:

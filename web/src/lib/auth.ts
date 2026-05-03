@@ -24,7 +24,7 @@ import { sendEmail } from "./send-email"
 
 const trustedOrigins = [
   env.BETTER_AUTH_URL,
-  process.env.BASE_URL,
+  env.BASE_URL,
   "http://localhost:3000",
   "http://127.0.0.1:3000",
 ].filter((origin): origin is string => Boolean(origin))

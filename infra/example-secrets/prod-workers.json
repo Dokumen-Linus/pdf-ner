@@ -1,0 +1,8 @@
+{
+  "WORKERS_DATABASE_URL": "postgres://workers_user:REPLACE_ME@dokumen-prod.cluster-REPLACE_ME.us-east-1.rds.amazonaws.com:5432/dokumen?sslmode=require",
+  "REDIS_URL": "redis://redis:6379/0",
+  "ANTHROPIC_API_KEY": "REPLACE_ME",
+  "OPENAI_API_KEY": "REPLACE_ME",
+  "GOOGLE_AI_API_KEY": "REPLACE_ME",
+  "STRIPE_SECRET_KEY": "sk_live_REPLACE_ME"
+}

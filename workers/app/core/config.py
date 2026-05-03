@@ -1,6 +1,7 @@
 from enum import Enum
 from functools import lru_cache
 
+from dokumen_aws_secrets import load_stage_groups
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -51,7 +52,8 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    secret_values = load_stage_groups(groups=["workers", "runpod"])
+    return Settings(**secret_values)
 
 
 settings = get_settings()

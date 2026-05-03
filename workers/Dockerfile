@@ -16,6 +16,7 @@ COPY packages/llm_providers/ ./packages/llm_providers/
 COPY packages/otel_py/ ./packages/otel_py/
 COPY packages/pdf_ocr_utils/ ./packages/pdf_ocr_utils/
 COPY packages/pdfium_utils/ ./packages/pdfium_utils/
+COPY packages/aws_secrets_config/ ./packages/aws_secrets_config/
 WORKDIR /src/workers
 RUN uv sync --no-dev --no-install-project --frozen
 
@@ -44,6 +45,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 USER 1001
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD ["python", "-c", "from app.core.config import settings; from redis import Redis; r = Redis.from_url(settings.REDIS_URL); r.ping()"]
+    CMD ["python", "-m", "app.healthcheck", "--container"]
 
 CMD ["celery", "-A", "app.main", "worker", "--loglevel=info"]

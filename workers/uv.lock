@@ -350,6 +350,23 @@ wheels = [
 ]
 
 [[package]]
+name = "dokumen-aws-secrets"
+version = "0.0.0"
+source = { directory = "../packages/aws_secrets_config" }
+dependencies = [
+    { name = "boto3" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "boto3" },
+    { name = "pytest", marker = "extra == 'dev'" },
+    { name = "pytest-mock", marker = "extra == 'dev'" },
+    { name = "ruff", marker = "extra == 'dev'" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "dokumen-llm-providers"
 version = "0.0.0"
 source = { directory = "../packages/llm_providers" }
@@ -375,6 +392,7 @@ dependencies = [
     { name = "asyncpg" },
     { name = "boto3" },
     { name = "celery" },
+    { name = "dokumen-aws-secrets" },
     { name = "dokumen-llm-providers" },
     { name = "google-genai" },
     { name = "httpx" },
@@ -406,6 +424,7 @@ requires-dist = [
     { name = "boto3" },
     { name = "celery" },
     { name = "deptry", marker = "extra == 'dev'" },
+    { name = "dokumen-aws-secrets", directory = "../packages/aws_secrets_config" },
     { name = "dokumen-llm-providers", directory = "../packages/llm_providers" },
     { name = "google-genai" },
     { name = "httpx" },

@@ -349,6 +349,7 @@ dependencies = [
     { name = "asyncpg" },
     { name = "boto3" },
     { name = "celery" },
+    { name = "dokumen-aws-secrets" },
     { name = "dokumen-llm-providers" },
     { name = "fastapi", extra = ["standard"] },
     { name = "google-genai" },
@@ -377,6 +378,7 @@ requires-dist = [
     { name = "boto3" },
     { name = "celery" },
     { name = "deptry", marker = "extra == 'dev'" },
+    { name = "dokumen-aws-secrets", directory = "../packages/aws_secrets_config" },
     { name = "dokumen-llm-providers", directory = "../packages/llm_providers" },
     { name = "fastapi", extras = ["standard"] },
     { name = "google-genai" },
@@ -390,6 +392,23 @@ requires-dist = [
     { name = "pytest-anyio", marker = "extra == 'dev'" },
     { name = "pytest-mock", marker = "extra == 'dev'" },
     { name = "redis" },
+    { name = "ruff", marker = "extra == 'dev'" },
+]
+provides-extras = ["dev"]
+
+[[package]]
+name = "dokumen-aws-secrets"
+version = "0.0.0"
+source = { directory = "../packages/aws_secrets_config" }
+dependencies = [
+    { name = "boto3" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "boto3" },
+    { name = "pytest", marker = "extra == 'dev'" },
+    { name = "pytest-mock", marker = "extra == 'dev'" },
     { name = "ruff", marker = "extra == 'dev'" },
 ]
 provides-extras = ["dev"]

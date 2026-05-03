@@ -2,6 +2,7 @@ from app.core.config import Settings
 
 
 def test_ocr_settings_have_safe_defaults(monkeypatch):
+    monkeypatch.delenv("SECRETS_STAGE", raising=False)
     monkeypatch.delenv("OCR_MODEL", raising=False)
     monkeypatch.delenv("DEEPSEEK_OCR_RUNPOD_ENDPOINT_URL", raising=False)
     monkeypatch.delenv("OLM_OCR2_RUNPOD_ENDPOINT_URL", raising=False)
@@ -20,6 +21,7 @@ def test_ocr_settings_have_safe_defaults(monkeypatch):
 
 
 def test_ocr_settings_read_env_vars(monkeypatch):
+    monkeypatch.delenv("SECRETS_STAGE", raising=False)
     monkeypatch.setenv("OCR_MODEL", "olm-ocr2")
     monkeypatch.setenv("DEEPSEEK_OCR_RUNPOD_ENDPOINT_URL", "https://deepseek.test/ocr")
     monkeypatch.setenv("OLM_OCR2_RUNPOD_ENDPOINT_URL", "https://olm.test/ocr")
