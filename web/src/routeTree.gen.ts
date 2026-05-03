@@ -14,7 +14,9 @@ import { Route as PrivateRouteImport } from './routes/_private'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public/index'
 import { Route as ApiReleaseLockRouteImport } from './routes/api/release-lock'
+import { Route as ApiReadyzRouteImport } from './routes/api/readyz'
 import { Route as ApiPdfUploadRouteImport } from './routes/api/pdf-upload'
+import { Route as ApiHealthzRouteImport } from './routes/api/healthz'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiAvatarUploadRouteImport } from './routes/api/avatar-upload'
 import { Route as PublicPricingRouteImport } from './routes/_public/pricing'
@@ -28,6 +30,7 @@ import { Route as AuthSignoutRouteImport } from './routes/_auth/signout'
 import { Route as AuthSigninRouteImport } from './routes/_auth/signin'
 import { Route as AuthErrorRouteImport } from './routes/_auth/error'
 import { Route as PrivateProjectsIndexRouteImport } from './routes/_private/projects/index'
+import { Route as ApiReadyzDetailsRouteImport } from './routes/api/readyz/details'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PrivateProjectsProjectIdRouteImport } from './routes/_private/projects/$projectId'
 import { Route as PrivateProjectsProjectIdLabellingRouteImport } from './routes/_private/projects/$projectId_.labelling'
@@ -59,9 +62,19 @@ const ApiReleaseLockRoute = ApiReleaseLockRouteImport.update({
   path: '/api/release-lock',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiReadyzRoute = ApiReadyzRouteImport.update({
+  id: '/api/readyz',
+  path: '/api/readyz',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPdfUploadRoute = ApiPdfUploadRouteImport.update({
   id: '/api/pdf-upload',
   path: '/api/pdf-upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthzRoute = ApiHealthzRouteImport.update({
+  id: '/api/healthz',
+  path: '/api/healthz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -129,6 +142,11 @@ const PrivateProjectsIndexRoute = PrivateProjectsIndexRouteImport.update({
   path: '/projects/',
   getParentRoute: () => PrivateRoute,
 } as any)
+const ApiReadyzDetailsRoute = ApiReadyzDetailsRouteImport.update({
+  id: '/details',
+  path: '/details',
+  getParentRoute: () => ApiReadyzRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -191,10 +209,13 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PublicPricingRoute
   '/api/avatar-upload': typeof ApiAvatarUploadRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/healthz': typeof ApiHealthzRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
+  '/api/readyz': typeof ApiReadyzRouteWithChildren
   '/api/release-lock': typeof ApiReleaseLockRoute
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/readyz/details': typeof ApiReadyzDetailsRoute
   '/projects/': typeof PrivateProjectsIndexRoute
   '/projects/$projectId/checking': typeof PrivateProjectsProjectIdCheckingRoute
   '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
@@ -217,10 +238,13 @@ export interface FileRoutesByTo {
   '/pricing': typeof PublicPricingRoute
   '/api/avatar-upload': typeof ApiAvatarUploadRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/healthz': typeof ApiHealthzRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
+  '/api/readyz': typeof ApiReadyzRouteWithChildren
   '/api/release-lock': typeof ApiReleaseLockRoute
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/readyz/details': typeof ApiReadyzDetailsRoute
   '/projects': typeof PrivateProjectsIndexRoute
   '/projects/$projectId/checking': typeof PrivateProjectsProjectIdCheckingRoute
   '/projects/$projectId/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
@@ -246,11 +270,14 @@ export interface FileRoutesById {
   '/_public/pricing': typeof PublicPricingRoute
   '/api/avatar-upload': typeof ApiAvatarUploadRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/healthz': typeof ApiHealthzRoute
   '/api/pdf-upload': typeof ApiPdfUploadRoute
+  '/api/readyz': typeof ApiReadyzRouteWithChildren
   '/api/release-lock': typeof ApiReleaseLockRoute
   '/_public/': typeof PublicIndexRoute
   '/_private/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/readyz/details': typeof ApiReadyzDetailsRoute
   '/_private/projects/': typeof PrivateProjectsIndexRoute
   '/_private/projects/$projectId_/checking': typeof PrivateProjectsProjectIdCheckingRoute
   '/_private/projects/$projectId_/dashboard': typeof PrivateProjectsProjectIdDashboardRoute
@@ -275,10 +302,13 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/api/avatar-upload'
     | '/api/chat'
+    | '/api/healthz'
     | '/api/pdf-upload'
+    | '/api/readyz'
     | '/api/release-lock'
     | '/projects/$projectId'
     | '/api/auth/$'
+    | '/api/readyz/details'
     | '/projects/'
     | '/projects/$projectId/checking'
     | '/projects/$projectId/dashboard'
@@ -301,10 +331,13 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/api/avatar-upload'
     | '/api/chat'
+    | '/api/healthz'
     | '/api/pdf-upload'
+    | '/api/readyz'
     | '/api/release-lock'
     | '/projects/$projectId'
     | '/api/auth/$'
+    | '/api/readyz/details'
     | '/projects'
     | '/projects/$projectId/checking'
     | '/projects/$projectId/dashboard'
@@ -329,11 +362,14 @@ export interface FileRouteTypes {
     | '/_public/pricing'
     | '/api/avatar-upload'
     | '/api/chat'
+    | '/api/healthz'
     | '/api/pdf-upload'
+    | '/api/readyz'
     | '/api/release-lock'
     | '/_public/'
     | '/_private/projects/$projectId'
     | '/api/auth/$'
+    | '/api/readyz/details'
     | '/_private/projects/'
     | '/_private/projects/$projectId_/checking'
     | '/_private/projects/$projectId_/dashboard'
@@ -349,7 +385,9 @@ export interface RootRouteChildren {
   PublicRoute: typeof PublicRouteWithChildren
   ApiAvatarUploadRoute: typeof ApiAvatarUploadRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiHealthzRoute: typeof ApiHealthzRoute
   ApiPdfUploadRoute: typeof ApiPdfUploadRoute
+  ApiReadyzRoute: typeof ApiReadyzRouteWithChildren
   ApiReleaseLockRoute: typeof ApiReleaseLockRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -391,11 +429,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiReleaseLockRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/readyz': {
+      id: '/api/readyz'
+      path: '/api/readyz'
+      fullPath: '/api/readyz'
+      preLoaderRoute: typeof ApiReadyzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/pdf-upload': {
       id: '/api/pdf-upload'
       path: '/api/pdf-upload'
       fullPath: '/api/pdf-upload'
       preLoaderRoute: typeof ApiPdfUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/healthz': {
+      id: '/api/healthz'
+      path: '/api/healthz'
+      fullPath: '/api/healthz'
+      preLoaderRoute: typeof ApiHealthzRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/chat': {
@@ -488,6 +540,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/projects/'
       preLoaderRoute: typeof PrivateProjectsIndexRouteImport
       parentRoute: typeof PrivateRoute
+    }
+    '/api/readyz/details': {
+      id: '/api/readyz/details'
+      path: '/details'
+      fullPath: '/api/readyz/details'
+      preLoaderRoute: typeof ApiReadyzDetailsRouteImport
+      parentRoute: typeof ApiReadyzRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -617,13 +676,27 @@ const PublicRouteChildren: PublicRouteChildren = {
 const PublicRouteWithChildren =
   PublicRoute._addFileChildren(PublicRouteChildren)
 
+interface ApiReadyzRouteChildren {
+  ApiReadyzDetailsRoute: typeof ApiReadyzDetailsRoute
+}
+
+const ApiReadyzRouteChildren: ApiReadyzRouteChildren = {
+  ApiReadyzDetailsRoute: ApiReadyzDetailsRoute,
+}
+
+const ApiReadyzRouteWithChildren = ApiReadyzRoute._addFileChildren(
+  ApiReadyzRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   PrivateRoute: PrivateRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   ApiAvatarUploadRoute: ApiAvatarUploadRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiHealthzRoute: ApiHealthzRoute,
   ApiPdfUploadRoute: ApiPdfUploadRoute,
+  ApiReadyzRoute: ApiReadyzRouteWithChildren,
   ApiReleaseLockRoute: ApiReleaseLockRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

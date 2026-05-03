@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router"
-import type { FileRoutesByPath } from "@tanstack/router-core"
 
 import { buildWebReadinessChecks, overallStatus, tokenAuthorized } from "../-health"
 
@@ -13,7 +12,7 @@ export async function readyzDetailsHandler({ request }: { request: Request }): P
   return Response.json({ status, checks }, { status: status === "ready" ? 200 : 503 })
 }
 
-export const Route = createFileRoute("/api/readyz/details" as keyof FileRoutesByPath)({
+export const Route = createFileRoute("/api/readyz/details")({
   server: {
     handlers: {
       GET: readyzDetailsHandler,

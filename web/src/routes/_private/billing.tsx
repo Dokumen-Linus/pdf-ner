@@ -14,7 +14,6 @@ import {
   getBillingAccount,
   setDefaultPaymentMethod,
 } from "@/db-fns/web/billing"
-import { env } from "@/env.client"
 
 const BillingSearchSchema = z.object({
   redirect: z.string().optional(),
@@ -48,7 +47,7 @@ function BillingPage() {
   const { account } = Route.useLoaderData()
   const { redirect } = Route.useSearch()
   const router = useRouter()
-  const stripePromise = useMemo(() => loadStripe(env.VITE_STRIPE_PUBLISHABLE_KEY), [])
+  const stripePromise = useMemo(() => loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!), [])
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isStartingSetup, setIsStartingSetup] = useState(false)
