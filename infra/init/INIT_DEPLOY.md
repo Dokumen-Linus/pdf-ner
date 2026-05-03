@@ -30,17 +30,34 @@ Use one deployer identity for infrastructure setup. Do not use root access keys.
 
 ## AWS Resources
 
-Run the setup script from the repo root:
+Run the setup scripts from the repo root:
 
 ```bash
-chmod +x infra/aws-setup.sh
-cp infra/.env.local.example infra/.env.local
+chmod +x infra/init/aws-setup.sh
+chmod +x infra/init/create-secrets.sh
+cp infra/init/.env.example infra/init/.env.local
 cp infra/.env.prod.example infra/.env.prod
-# Edit infra/.env.local and infra/.env.prod before running.
-bash infra/aws-setup.sh
+# Edit infra/init/.env.local and infra/.env.prod before running.
+bash infra/init/aws-setup.sh
 ```
 
-The script creates or reuses:
+`infra/init/aws-setup.sh` is a thin entrypoint that sources numbered scripts
+from `infra/init/aws-setup.d/`. The split keeps the initial deployment flow in
+one command while making each AWS area easier to inspect:
+
+- `01_common.sh`: paths, env loading, shared AWS and JSON helpers.
+- `02_prerequisites.sh`: required tools, required env vars, AWS account, public IP, and derived names.
+- `03_networking.sh`: VPC, subnet, internet gateway, route table, security group, and SSH key pair.
+- `04_ec2_instance.sh`: EC2 instance and Elastic IP.
+- `05_avatars_bucket.sh`: private avatar S3 bucket.
+- `06_ecr_and_runtime_role.sh`: ECR repositories and EC2 runtime IAM.
+- `07_github_deploy_role.sh`: GitHub OIDC and deploy IAM.
+- `08_runtime_access_keys.sh`: scoped runtime IAM users/access keys and local secret draft files.
+- `09_ses_identity.sh`: SES email identity verification.
+- `10_ec2_compose_deploy.sh`: optional EC2 host setup, repo checkout, `.env.prod` upload, and Compose startup.
+- `11_summary.sh`: final resource, GitHub, and local draft outputs.
+
+Together, those scripts create or reuse:
 
 - VPC.
 - Public subnet.
@@ -57,9 +74,23 @@ The script creates or reuses:
 - IAM user and access key for avatar S3 access.
 - IAM user and access key for PDF-storage S3 bucket creation and access.
 - SES email identity verification request.
+- Local reviewed secret draft JSON files in `infra/init/local-secrets/`.
 
-The script can also SSH into the instance, install Docker, clone the repo,
-upload `infra/.env.prod` if it exists locally, and run:
+The setup flow does not create AWS Secrets Manager secrets directly. It only
+creates AWS-generated values where needed and writes them into local draft JSON
+files for review. After you complete the remaining non-AWS fields, run
+`infra/init/create-secrets.sh` to create the Secrets Manager entries.
+
+The setup script can also SSH into the instance, install the EC2 host tooling
+required by deployment and post-deploy health checks, clone the repo, upload
+`infra/.env.prod` if it exists locally, and run:
+
+- Docker Engine with the `docker compose` v2 command.
+- AWS CLI.
+- `jq`.
+- `curl`.
+- Git.
+- Amazon SSM Agent.
 
 ```bash
 docker compose -f infra/docker-compose.yml --env-file infra/.env.prod up -d --build
@@ -68,13 +99,13 @@ docker compose -f infra/docker-compose.yml --env-file infra/.env.prod up -d --bu
 To provision AWS resources without deploying the app:
 
 ```bash
-DO_DEPLOY=0 bash infra/aws-setup.sh
+DO_DEPLOY=0 bash infra/init/aws-setup.sh
 ```
 
 To deploy code but avoid starting Compose:
 
 ```bash
-START_COMPOSE=0 bash infra/aws-setup.sh
+START_COMPOSE=0 bash infra/init/aws-setup.sh
 ```
 
 ## AWS Access Keys
@@ -94,17 +125,17 @@ On AWS, IAM roles with temporary credentials are preferred for EC2 workloads. Th
 Create the local setup-script input file:
 
 ```bash
-cp infra/.env.local.example infra/.env.local
+cp infra/init/.env.example infra/init/.env.local
 ```
 
-`infra/.env.local` stays on your workstation. It provides `aws-setup.sh` inputs
+`infra/init/.env.local` stays on your workstation. It provides `aws-setup.sh` inputs
 such as `GITHUB_REPO`, `DEPLOY_BRANCH`, `DOMAIN`, `REPO_URL`, SSH key paths,
 ECR repository names, and setup/deploy toggles. It should not contain private
 app runtime secrets.
 
 `GITHUB_REPO` and `DEPLOY_BRANCH` are intentionally not hardcoded in
 `aws-setup.sh`; the script fails early if they are missing. Keep their defaults
-in `infra/.env.local.example` and your real values in `infra/.env.local`.
+in `infra/init/.env.example` and your real values in `infra/init/.env.local`.
 
 Create the EC2 production bootstrap env file:
 
@@ -123,11 +154,12 @@ bootstrap/public values in `infra/.env.prod` for the app containers:
 - `VITE_BASE_URL`.
 - `VITE_STRIPE_PUBLISHABLE_KEY`.
 
-Do not put production app secrets in container environment variables. Use the
-JSON files in `infra/example-secrets/` as the source material for AWS Secrets
-Manager.
+Do not put production app secrets in container environment variables.
+`infra/example-secrets/` contains committed templates only. Real local secret
+drafts live in gitignored `infra/init/local-secrets/` and are created by
+`infra/init/aws-setup.sh`.
 
-Keep `.env` files out of git.
+Keep `.env` files and `infra/init/local-secrets/` out of git.
 
 ## Public Web Build Variables
 
@@ -161,7 +193,7 @@ in AWS Secrets Manager and are loaded by the server process at startup.
 
 ## AWS Secrets Manager
 
-Create these JSON secrets before starting the app containers:
+Create these AWS Secrets Manager secrets before starting the app containers:
 
 - `prod/web`: web database URLs, Better Auth, Stripe, API, PDF-storage, and optional chatbot OpenAI values.
 - `prod/email`: SES credentials, SES region/endpoint, sender email, and admin email.
@@ -176,29 +208,35 @@ customer-managed KMS key, also grant `kms:Decrypt`.
 The apps load secrets once at process startup and keep them in memory. Restart
 the relevant container after rotating a secret.
 
-Example JSON payloads live in `infra/example-secrets/`. Use them as templates
-for the five AWS Secrets Manager secrets; replace every placeholder before
-production.
+The secret workflow is deliberately two-step:
 
-Create or update the secrets from those files with:
+1. `infra/init/aws-setup.sh` copies committed templates from
+   `infra/example-secrets/` into gitignored local drafts in
+   `infra/init/local-secrets/`.
+2. The setup script patches AWS-generated values into those drafts:
+   SES credentials and region, avatar S3 credentials and bucket name, and
+   PDF-storage credentials and region.
+3. You review and complete every remaining non-AWS field locally, including
+   database URLs, API keys, healthcheck tokens, LLM keys, Stripe keys, Runpod
+   values, sender/admin email, and Better Auth values.
+4. `infra/init/create-secrets.sh` validates the completed drafts and creates
+   the AWS Secrets Manager secrets.
+
+The committed `infra/example-secrets/` files must stay as templates. Do not put
+real production values there.
+
+Run a dry-run validation first, then create the AWS Secrets Manager secrets:
 
 ```bash
-aws secretsmanager create-secret --name prod/web --secret-string file://infra/example-secrets/prod-web.json
-aws secretsmanager create-secret --name prod/email --secret-string file://infra/example-secrets/prod-email.json
-aws secretsmanager create-secret --name prod/api --secret-string file://infra/example-secrets/prod-api.json
-aws secretsmanager create-secret --name prod/workers --secret-string file://infra/example-secrets/prod-workers.json
-aws secretsmanager create-secret --name prod/runpod --secret-string file://infra/example-secrets/prod-runpod.json
+DRY_RUN=1 bash infra/init/create-secrets.sh
+bash infra/init/create-secrets.sh
 ```
 
-If a secret already exists, update it instead:
-
-```bash
-aws secretsmanager put-secret-value --secret-id prod/web --secret-string file://infra/example-secrets/prod-web.json
-aws secretsmanager put-secret-value --secret-id prod/email --secret-string file://infra/example-secrets/prod-email.json
-aws secretsmanager put-secret-value --secret-id prod/api --secret-string file://infra/example-secrets/prod-api.json
-aws secretsmanager put-secret-value --secret-id prod/workers --secret-string file://infra/example-secrets/prod-workers.json
-aws secretsmanager put-secret-value --secret-id prod/runpod --secret-string file://infra/example-secrets/prod-runpod.json
-```
+`create-secrets.sh` is intentionally create-only. It fails if any target secret
+already exists and it fails if any draft JSON still contains placeholder text
+such as `REPLACE`, `<your`, or `YOUR_`. It does not update existing secrets; if
+you need to rotate or change a secret later, do that as an explicit separate
+operation.
 
 ## RDS Database Initialization
 
@@ -255,9 +293,10 @@ The deploy workflows in `.github/workflows/` build one Docker image, push it to
 ECR, then use AWS Systems Manager Run Command to tell the EC2 instance to pull
 and restart only that Compose service.
 
-`infra/aws-setup.sh` creates the three ECR repositories, the EC2 runtime role,
-the GitHub OIDC provider if needed, and the GitHub deploy IAM role. At the end
-of the run it prints the exact GitHub Actions secrets and variables to create.
+`infra/init/aws-setup.sh` creates the three ECR repositories, the EC2 runtime
+role, the GitHub OIDC provider if needed, and the GitHub deploy IAM role. At
+the end of the run it prints the GitHub Actions secrets and variables to create,
+plus the local Secrets Manager draft directory to review.
 
 Required GitHub Actions secrets:
 
@@ -283,7 +322,7 @@ Optional GitHub Actions variables:
 | `WORKERS_ECR_REPOSITORY` | `dokumen-workers` | ECR repository name for the worker image. |
 | `EC2_APP_DIR` | `/opt/dokumen/pdf-ner` | Repo path on the EC2 host. |
 
-Values printed by `infra/aws-setup.sh` look like:
+Values printed by `infra/init/aws-setup.sh` look like:
 
 ```text
 GitHub Actions secrets:
@@ -327,7 +366,7 @@ gh variable set EC2_APP_DIR --body "/opt/dokumen/pdf-ner"
 
 AWS setup required for GitHub Actions:
 
-`infra/aws-setup.sh` handles the AWS setup for the default path:
+`infra/init/aws-setup.sh` handles the AWS setup for the default path:
 
 1. Creates ECR repositories named `dokumen-web`, `dokumen-api`, and
    `dokumen-workers`, unless you override the names.
@@ -340,8 +379,10 @@ AWS setup required for GitHub Actions:
    `GITHUB_REPO` and `DEPLOY_BRANCH`.
 7. Grants the GitHub deploy role ECR push permissions and SSM command
    permissions for the EC2 instance.
+8. Writes reviewed local Secrets Manager draft files to
+   `infra/init/local-secrets/`; it does not create AWS Secrets Manager secrets.
 
-Configure these in `infra/.env.local` before running the script:
+Configure these in `infra/init/.env.local` before running the script:
 
 ```env
 GITHUB_REPO=your-org/pdf-ner
@@ -351,9 +392,18 @@ API_ECR_REPOSITORY=dokumen-api
 WORKERS_ECR_REPOSITORY=dokumen-workers
 ```
 
-Then run `bash infra/aws-setup.sh`.
+Then run `bash infra/init/aws-setup.sh`.
 
-If you do not use `infra/aws-setup.sh`, create the same resources manually.
+If you do not use `infra/init/aws-setup.sh`, create the same resources manually.
+Also install the same host tools on EC2 and verify Compose before deploying:
+
+```bash
+sudo dnf update -y
+sudo dnf install -y docker git awscli amazon-ssm-agent jq curl
+sudo systemctl enable --now docker amazon-ssm-agent
+sudo usermod -aG docker ec2-user
+docker compose version
+```
 
 Example trust policy for the GitHub deploy role:
 
