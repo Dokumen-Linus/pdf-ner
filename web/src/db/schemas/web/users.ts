@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import { integer, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { projects } from "./projects"
@@ -17,7 +17,9 @@ export const users = webSchema.table("users", {
   organizationId: text("organization_id"),
   role: text("role").notNull().default("individual"),
   billingStartedAt: timestamp("billing_started_at", { withTimezone: true }),
-  nextPaymentAt: timestamp("next_payment_at", { withTimezone: true }),
+  nextPaymentAt: timestamp("next_payment_at", { withTimezone: true }).default(
+    sql`NOW() + INTERVAL '1 month'`,
+  ),
   lastPaymentAt: timestamp("last_payment_at", { withTimezone: true }),
   billingStatus: text("billing_status").notNull().default("payment_required"),
   billingFailureCount: integer("billing_failure_count").notNull().default(0),

@@ -5,7 +5,7 @@ CREATE TABLE web.organizations (
   plan_expires_at TIMESTAMPTZ,
   n_users INTEGER NOT NULL DEFAULT 1 CHECK (n_users >= 1),
   billing_started_at TIMESTAMPTZ,
-  next_payment_at TIMESTAMPTZ,
+  next_payment_at TIMESTAMPTZ DEFAULT NOW() + INTERVAL '1 month',
   last_payment_at TIMESTAMPTZ,
   billing_status TEXT NOT NULL DEFAULT 'active' CHECK (billing_status IN ('payment_required', 'active', 'past_due', 'disabled')),
   billing_failure_count INTEGER NOT NULL DEFAULT 0,

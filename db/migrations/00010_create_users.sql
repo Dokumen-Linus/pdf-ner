@@ -12,7 +12,7 @@ CREATE TABLE web.users (
   organization_id TEXT REFERENCES auth.organization(id) ON DELETE SET NULL,
   role TEXT NOT NULL DEFAULT 'individual' CHECK (role IN ('individual', 'admin', 'developer', 'analyst')),
   billing_started_at TIMESTAMPTZ,
-  next_payment_at TIMESTAMPTZ,
+  next_payment_at TIMESTAMPTZ DEFAULT NOW() + INTERVAL '1 month',
   last_payment_at TIMESTAMPTZ,
   billing_status TEXT NOT NULL DEFAULT 'payment_required' CHECK (billing_status IN ('payment_required', 'active', 'past_due', 'disabled')),
   billing_failure_count INTEGER NOT NULL DEFAULT 0,
