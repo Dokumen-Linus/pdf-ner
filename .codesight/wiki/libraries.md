@@ -2,9 +2,9 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**44 library files** across 8 modules
+**48 library files** across 8 modules
 
-## Web (20 files)
+## Web (22 files)
 
 - `web/src/db-fns/web/annotations.ts` — LabellingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
 - `web/src/lib/auth-i18n.ts` — normalizeAuthLocale, detectAuthLocaleFromHeaders, getLocalizedAuthApiMessage, getAuthErrorPageCopy, getLocalizedAuthRedirectError, AuthLocale, …
@@ -19,7 +19,9 @@
 - `web/src/lib/auth-redirects.ts` — getPostVerificationRedirect, DEFAULT_POST_VERIFICATION_REDIRECT
 - `web/src/lib/observability/fetch.server.ts` — withObservedRequest, withObservedResponse
 - `web/src/lib/observability/fetch.ts` — buildObservedHeaders, observedApiFetch
+- `web/src/lib/stripe.server.ts` — getStripe, STRIPE_API_VERSION
 - `web/src/api-fns/api-json-call.server.ts` — jsonCall
+- `web/src/db-fns/health.ts` — checkWebDatabase
 - `web/src/hooks/mouse-events/use-double-press-props.ts` — useDoublePressProps
 - `web/src/hooks/shadcn-ui/use-mobile.ts` — useIsMobile
 - `web/src/hooks/use-labelling-lock.ts` — useLabellingLock
@@ -59,18 +61,20 @@
 - `gpu/deepseek-ocr/app.py` — lifespan, ping, ocr
 - `gpu/olm-ocr2/app.py` — lifespan, ping, ocr
 
+## Pdfium_utils (3 files)
+
+- `packages/pdfium_utils/pdfium_utils/annotate.py` — parse_hex_color, extract_text_by_page, extract_text
+- `packages/pdfium_utils/pdfium_utils/search_and_annotate.py` — highlight_phrases, PhraseHighlightResult
+- `packages/pdfium_utils/pdfium_utils/search.py` — find_text_objects
+
 ## Llm_providers (2 files)
 
 - `packages/llm_providers/dokumen_llm_providers/adapters.py` — call_openai, call_anthropic, call_google_genai
 - `packages/llm_providers/dokumen_llm_providers/types.py` — LLMResponseData
 
-## Infra (1 files)
+## Aws_secrets_config (1 files)
 
-- `infra/generate_env_example.py` — parse_env_file, parse_role_password_keys, normalize_value, generated_value, resolve_value, build_sections, …
-
-## Pdfium_utils (1 files)
-
-- `packages/pdfium_utils/pdfium_utils/__init__.py` — find_text_objects, parse_hex_color, extract_text_by_page, extract_text, highlight_phrases, PhraseHighlightResult
+- `packages/aws_secrets_config/dokumen_aws_secrets/config.py` — load_secret_json, load_stage_groups, SecretConfigError
 
 ---
 _Back to [overview.md](./overview.md)_

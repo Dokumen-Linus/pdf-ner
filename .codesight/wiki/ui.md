@@ -7,6 +7,11 @@
 ## Components
 
 - **ColorPicker** — props: value, onChange — `web/src/components/custom/color-picker.tsx`
+- **ContactAutoReply** — props: name — `web/src/components/emails/contact-auto-reply.tsx`
+- **ContactNotification** — props: name, email, message — `web/src/components/emails/contact-notification.tsx`
+- **OrganizationInvitation** — props: invitedByName, organizationName, url — `web/src/components/emails/organization-invitation.tsx`
+- **ResetPassword** — props: name, url — `web/src/components/emails/reset-password.tsx`
+- **VerifyEmail** — props: name, url — `web/src/components/emails/verify-email.tsx`
 - **EntityTable** — props: entityTypes — `web/src/components/entity-table/components/entity-table.tsx`
 - **NotFound** — `web/src/components/not-found.tsx`
 - **PDFContainerClient** — props: initalDocuments, allEntityTypes, author, exportName, canRotate — `web/src/components/pdf-container/pdf-container-client.tsx`
@@ -58,11 +63,6 @@
 - **ItemGroup** — props: className — `web/src/components/shadcn-ui/item.tsx`
 - **Kbd** — props: className — `web/src/components/shadcn-ui/kbd.tsx`
 - **Spinner** — props: className — `web/src/components/shadcn-ui/spinner.tsx`
-- **ContactAutoReply** — props: name — `web/src/emails/contact-auto-reply.tsx`
-- **ContactNotification** — props: name, email, message — `web/src/emails/contact-notification.tsx`
-- **OrganizationInvitation** — props: invitedByName, organizationName, url — `web/src/emails/organization-invitation.tsx`
-- **ResetPassword** — props: name, url — `web/src/emails/reset-password.tsx`
-- **VerifyEmail** — props: name, url — `web/src/emails/verify-email.tsx`
 - **Provider** — props: queryClient — `web/src/integrations/tanstack-query/root-provider.tsx`
 - **Route** — `web/src/routes/__root.tsx`
 - **Route** — `web/src/routes/_auth/error.tsx`

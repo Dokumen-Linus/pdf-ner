@@ -2,17 +2,19 @@
 
 > **Navigation aid.** Route list and file locations extracted via AST. Read the source files listed below before implementing or modifying this subsystem.
 
-The Infra subsystem handles **4 routes** and touches: db, cache.
+The Infra subsystem handles **5 routes** and touches: auth, db, cache.
 
 ## Routes
 
-- `GET` `/healthz` [db, cache]
+- `GET` `/healthz` [auth, db, cache]
   `api/app/core/logging.py`
-- `GET` `/readyz` [db, cache]
+- `GET` `/readyz` [auth, db, cache]
   `api/app/core/logging.py`
-- `GET` `/metrics` [db, cache]
+- `GET` `/readyz/details` [auth, db, cache]
   `api/app/core/logging.py`
-- `GET` `/ping` [cache]
+- `GET` `/metrics` [auth, db, cache]
+  `api/app/core/logging.py`
+- `GET` `/ping` [auth, cache]
   `api/tests/core/test_telemetry.py`
 
 ## Source Files

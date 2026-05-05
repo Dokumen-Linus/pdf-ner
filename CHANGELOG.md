@@ -119,6 +119,9 @@
 - *(wk)* Create domain for evaluating Tesseract and Runpod models for a specific project #94
 - *(wk)* Create domain for evaluating Tesseract and Runpod models for a specific project #94
 - *(wk)* Context engineering run metrics
+- *(infra)* First draft stripe-setup.sh
+- New billing
+- *(ci)* In progress ci/cd
 
 ### 🐛 Bug Fixes
 
@@ -197,6 +200,16 @@
 - *(wk)* Db edits to go with new domains
 - *(web)* Eslint config
 - *(wk)* Ocr_evaluation throws by-pdf errors
+- *(wk)* Ensure context_eng and ocr_eval fail by pdf not entire run
+- Env var examples
+- *(db)* Schema role init
+- *(wk)* Context engineering domain
+- *(web)* Healthz readyz
+- *(ci)* Continue ci/cd
+- Incorrect add month function in js, move to sql
+- *(wk)* Billing stripe client and idempotency
+- Billing logic
+- *(web)* Apply translation to all _public _auth and remove deprecated fields
 
 ### 💼 Other
 
@@ -257,6 +270,9 @@
 - *(web)* Rename email/send.tsx
 - *(web)* Move PDFContainer files
 - Move telemetry to logging.py in api and workers
+- *(api)* Finish move from telemetry.py
+- *(pkg)* Pdfium_utils
+- *(web)* Move emails to components/emails
 
 ### 📚 Documentation
 
@@ -327,6 +343,10 @@
 - *(llm)* Remove codesight hook and ruff
 - *(llm)* Shorten tanstack skills description
 - *(llm)* Shorten skills descriptions
+- *(llm)* Adjust tanstack skills for codex compatability
+- Move billing to chatbot knowledge
+- *(llm)* Activate tanstack cli skill
+- *(web)* Layout description
 
 ### ⚡ Performance
 
@@ -385,6 +405,7 @@
 - *(web)* Move to plugin-bookmark-2
 - *(web)* Simplify sidebar use and move to plugin-rotate-2
 - Uniform imports in eslint rule
+- Use Stripe metered billing
 
 ### 🎨 Styling
 
@@ -427,6 +448,7 @@
 - *(web)* Add public assets to use later
 - Apply formatters
 - *(web)* Add to restricted imports
+- *(web)* Prettier and lint fix
 
 ### 🧪 Testing
 
@@ -458,6 +480,9 @@
 - *(web)* Observability
 - *(web)* Teams and orgs
 - *(web)* Allow any in bun-test-setup
+- *(web)* Translation equality
+- *(web)* Billing logic
+- *(web)* Billing logic test improvement
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -545,6 +570,8 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add to gitignore
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Add auto-format.yml action
 
 ### ◀️ Revert
 
@@ -556,3 +583,4 @@
 - *(web)* Tanstack update
 - *(web)* Remove selection menu from plugin-selection-2
 - *(web)* Return useRotatePlugin
+- *(ci)* Remove old deploy instructions

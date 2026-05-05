@@ -2,11 +2,11 @@
 
 > **Navigation aid.** Route list and file locations extracted via AST. Read the source files listed below before implementing or modifying this subsystem.
 
-The Test_telemetry subsystem handles **1 routes** and touches: cache.
+The Test_telemetry subsystem handles **1 routes** and touches: auth, cache.
 
 ## Routes
 
-- `GET` `/items/{item_id}` params(item_id) [cache]
+- `GET` `/items/{item_id}` params(item_id) [auth, cache]
   `api/tests/core/test_telemetry.py`
 
 ## Source Files

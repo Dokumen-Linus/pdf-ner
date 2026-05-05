@@ -8,7 +8,7 @@
 
 ## Scale
 
-15 API routes · 1 database models · 81 UI components · 44 library files · 22 middleware layers · 60 environment variables
+16 API routes · 1 database models · 81 UI components · 48 library files · 21 middleware layers · 47 environment variables
 
 ## Subsystems
 
@@ -20,14 +20,14 @@
 - **[Ocr](./ocr.md)** — 1 routes — touches: auth, cache
 - **[Optimize-prompt](./optimize-prompt.md)** — 2 routes — touches: cache
 - **[Pdfs](./pdfs.md)** — 2 routes — touches: auth, upload
-- **[Test_telemetry](./test_telemetry.md)** — 1 routes — touches: cache
-- **[Infra](./infra.md)** — 4 routes — touches: db, cache
+- **[Test_telemetry](./test_telemetry.md)** — 1 routes — touches: auth, cache
+- **[Infra](./infra.md)** — 5 routes — touches: auth, db, cache
 
 **Database:** drizzle, 1 models — see [database.md](./database.md)
 
 **UI:** 81 components (react) — see [ui.md](./ui.md)
 
-**Libraries:** 44 files — see [libraries.md](./libraries.md)
+**Libraries:** 48 files — see [libraries.md](./libraries.md)
 
 ## High-Impact Files
 
@@ -36,25 +36,25 @@ Changes to these files have the widest blast radius across the codebase:
 - `web/src/components/pdf-container/plugin-viewport-2/index.ts` — imported by **13** files
 - `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **11** files
 - `web/src/components/pdf-container/plugin-scroll-2/index.ts` — imported by **10** files
+- `//infrastructure.py` — imported by **10** files
 - `///application/schemas.py` — imported by **10** files
-- `//infrastructure.py` — imported by **9** files
-- `web/src/db/schemas/web/schema.ts` — imported by **8** files
+- `/config.py` — imported by **8** files
 
 ## Required Environment Variables
 
-- `ANTHROPIC_API_KEY` — `workers/.env.example`
-- `API_KEY` — `infra/.env.example`
-- `AVATARS_AWS_ACCESS_KEY_ID` — `infra/.env.example`
-- `AVATARS_AWS_ENDPOINT_URL` — `infra/.env.example`
-- `AVATARS_AWS_SECRET_ACCESS_KEY` — `infra/.env.example`
-- `AVATARS_BUCKET` — `infra/.env.example`
-- `AWS_ACCESS_KEY_ID` — `infra/.env.example`
-- `AWS_ENDPOINT_URL` — `infra/.env.example`
-- `AWS_SECRET_ACCESS_KEY` — `infra/.env.example`
+- `API_KEY` — `api/tests/conftest.py`
+- `AVATARS_S3_BUCKET_NAME` — `infra/init/.env.example`
+- `BASE_URL` — `web/src/integrations/sitemap.ts`
 - `CI` — `web/playwright.config.ts`
-- `DEEPSEEK_OCR_RUNPOD_ENDPOINT_URL` — `infra/.env.example`
+- `DATABASE_URL` — `web/tests/bun-test-setup/db-setup.ts`
 - `DEPLOYMENT` — `packages/otel_py/otel_py/config.py`
-- _...22 more_
+- `DEV` — `web/src/client.tsx`
+- `GITHUB_OIDC_THUMBPRINT` — `infra/init/.env.example`
+- `MAX_NEW_TOKENS` — `gpu/olm-ocr2/app.py`
+- `MAX_TOKENS` — `gpu/deepseek-ocr/app.py`
+- `MODEL_NAME` — `gpu/deepseek-ocr/app.py`
+- `NGRAM_SIZE` — `gpu/deepseek-ocr/app.py`
+- _...15 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-04-28_
+_Back to [index.md](./index.md) · Generated 2026-05-05_
