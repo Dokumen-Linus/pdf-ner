@@ -207,7 +207,7 @@ function PricingPage() {
                 {m.pricing_plan_label()}
               </p>
               <p className="text-[40px] leading-none font-medium text-[#171A20]">
-                $5
+                {m.pricing_plan_price_amount()}
                 <span className="ml-1 text-[16px] font-normal text-[#5C5E62]">
                   {m.pricing_plan_price_suffix()}
                 </span>
@@ -271,7 +271,7 @@ function PricingPage() {
               <p className="text-[14px] text-[#393C41]">
                 {pricingUnavailableBefore}
                 <a href="mailto:sales@dokumen.ai" className="text-[#3E6AE1] underline">
-                  sales@dokumen.ai
+                  {m.pricing_sales_email()}
                 </a>{" "}
                 {pricingUnavailableAfter}
               </p>

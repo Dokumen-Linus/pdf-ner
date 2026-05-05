@@ -11,7 +11,7 @@ export default function Footer() {
         <ul className="mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
           <li>
             <span className="text-[12px] font-medium text-[#D0D1D2]">
-              {m.footer_brand()} &copy; {currentYear}
+              {m.footer_copyright({ year: String(currentYear) })}
             </span>
           </li>
           <li>

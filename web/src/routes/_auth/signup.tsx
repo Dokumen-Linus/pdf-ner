@@ -44,9 +44,9 @@ function SignUpPage() {
       onSubmit: ({ value }) => {
         if (value.password !== value.confirmPassword) {
           return {
-            form: "Passwords do not match",
+            form: m.auth_signup_passwords_mismatch(),
             fields: {
-              confirmPassword: "Passwords do not match",
+              confirmPassword: m.auth_signup_passwords_mismatch(),
             },
           }
         }
@@ -63,7 +63,7 @@ function SignUpPage() {
 
         if (authError) {
           return {
-            form: authError.message || "An error occurred during sign up",
+            form: authError.message || m.auth_signup_error_fallback(),
           }
         }
 
@@ -132,7 +132,8 @@ function SignUpPage() {
               <form.Field
                 name="firstName"
                 validators={{
-                  onChange: ({ value }) => (!value ? "First name is required" : undefined),
+                  onChange: ({ value }) =>
+                    !value ? m.auth_signup_firstname_required() : undefined,
                 }}
                 children={({ state, handleChange, handleBlur }) => (
                   <div className="space-y-2">
@@ -154,7 +155,8 @@ function SignUpPage() {
               <form.Field
                 name="lastName"
                 validators={{
-                  onChange: ({ value }) => (!value ? "Last name is required" : undefined),
+                  onChange: ({ value }) =>
+                    !value ? m.auth_signup_lastname_required() : undefined,
                 }}
                 children={({ state, handleChange, handleBlur }) => (
                   <div className="space-y-2">
@@ -206,14 +208,14 @@ function SignUpPage() {
               name="email"
               validators={{
                 onChange: ({ value }) => {
-                  if (!value) return "Email is required"
-                  if (!/\S+@\S+\.\S+/.test(value)) return "Invalid email address"
+                  if (!value) return m.auth_signup_email_required()
+                  if (!/\S+@\S+\.\S+/.test(value)) return m.auth_signup_email_invalid()
                   return undefined
                 },
                 onChangeAsync: async ({ value }) => {
                   try {
                     const user = await getUserByEmail({ data: { email: value } })
-                    if (user) return "An account already exists with this email"
+                    if (user) return m.auth_signup_email_exists()
                   } catch (_e) {}
                 },
               }}
@@ -223,7 +225,7 @@ function SignUpPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="example@gmail.com"
+                    placeholder={m.auth_signup_email_placeholder()}
                     value={state.value}
                     onChange={(e) => handleChange(e.target.value)}
                     onBlur={handleBlur}
@@ -240,15 +242,15 @@ function SignUpPage() {
               name="password"
               validators={{
                 onChange: ({ value }) => {
-                  if (!value) return "Password is required"
-                  if (value.length < 8) return "Password must be at least 8 characters"
+                  if (!value) return m.auth_signup_password_required()
+                  if (value.length < 8) return m.auth_signup_password_min()
                   if (!/[A-Z]/.test(value))
-                    return "Password must contain at least one uppercase letter"
+                    return m.auth_signup_password_uppercase()
                   if (!/[a-z]/.test(value))
-                    return "Password must contain at least one lowercase letter"
-                  if (!/[0-9]/.test(value)) return "Password must contain at least one number"
+                    return m.auth_signup_password_lowercase()
+                  if (!/[0-9]/.test(value)) return m.auth_signup_password_number()
                   if (!/[\W_]/.test(value))
-                    return "Password must contain at least one special character"
+                    return m.auth_signup_password_special()
                   return undefined
                 },
               }}
@@ -273,7 +275,8 @@ function SignUpPage() {
             <form.Field
               name="confirmPassword"
               validators={{
-                onChange: ({ value }) => (!value ? "Please confirm your password" : undefined),
+                onChange: ({ value }) =>
+                  !value ? m.auth_signup_confirmpassword_required() : undefined,
               }}
               children={({ state, handleChange, handleBlur }) => (
                 <div className="space-y-2">

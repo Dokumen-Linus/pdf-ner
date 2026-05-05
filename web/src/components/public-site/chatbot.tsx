@@ -49,7 +49,7 @@ export default function Chatbot() {
               <button
                 onClick={() => setIsOpen(false)}
                 className="rounded-md p-1 transition-colors hover:bg-white/10"
-                aria-label="Close Chat"
+                aria-label={m.chatbot_aria_close()}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -128,7 +128,7 @@ export default function Chatbot() {
                 type="submit"
                 disabled={isLoading || !input.trim()}
                 className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#171A20] text-white transition-colors hover:bg-black disabled:opacity-50"
-                aria-label="Send Message"
+                aria-label={m.chatbot_aria_send()}
               >
                 <Send className="ml-0.5 h-4 w-4" />
               </button>
@@ -140,7 +140,7 @@ export default function Chatbot() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-[#171A20] shadow-lg shadow-black/20 transition-transform hover:scale-105 hover:bg-black active:scale-95"
-        aria-label="Toggle Chat"
+        aria-label={m.chatbot_aria_toggle()}
       >
         {isOpen ? (
           <X className="h-6 w-6 text-white" />
