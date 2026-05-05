@@ -145,10 +145,6 @@ web/src/
 │   ├── api/               # Functions for api schema
 │   ├── workers/           # Functions for workers schema
 │   └── public/            # Functions for public schema
-├── emails/                # Email templates (React components)
-│   ├── verify-email.tsx
-│   ├── reset-password.tsx
-│   └── ...
 ├── hooks/                 # Custom React hooks
 │   ├── mouse-events/
 │   ├── shadcn-ui/
@@ -179,22 +175,17 @@ web/src/
 ├── env.client.ts          # Client environment validation
 └── env.server.ts          # Server environment validation
 
-- **api-fns/**: Server functions for calling external APIs (FastAPI backend), using api-json-call or api-stream-proxy for communication.
-- **components/**: React components, including custom components, shadcn/ui library components, and PDF-related components.
-- **db/**: Database layer with Drizzle ORM client, TypeScript schemas matching the SQL migrations, and generated types.
-- **db-fns/**: Server functions for database interactions, organized by schema (web, api, workers, public). Each file named after the table it queries, using Zod validation and Drizzle.
-- **emails/**: Email templates as React components, rendered server-side for sending.
-- **hooks/**: Custom React hooks for reusable logic, including mouse events and shadcn/ui integrations.
-- **integrations/**: Third-party service integrations like internationalization (Paraglide), data fetching (TanStack Query), and email services.
-- **lib/**: Utility libraries, authentication/authorization configurations, and shared helpers.
-- **middleware/**: Server middleware for authentication and other request processing.
-- **routes/**: TanStack Router file-based routing with layouts (_auth, _private, _public) and API routes.
-- **client.tsx**: Client-side React app entrypoint.
-- **server.tsx**: Server-side rendering entrypoint.
-- **router.tsx**: Router configuration exposing the routes.
-- **start.ts**: TanStack Start server definition.
-- **styles.css**: Global Tailwind CSS and custom styles.
-- **env.client.ts/env.server.ts**: Environment variable validation for client and server.
+- **api-fns/**: Server functions for calling external APIs (FastAPI backend), using api-json-call or api-stream-proxy for communication
+- **components/**: React components, including custom components, shadcn/ui library components, and PDF-related components
+- **db/**: Database layer with Drizzle ORM client, TypeScript schemas matching the SQL migrations, and generated types
+- **db-fns/**: Server functions for database interactions, organized by schema (web, api, workers, public). Each file named after the table it queries, using Zod validation and Drizzle
+- **hooks/**: Custom React hooks for reusable logic, including mouse events and shadcn/ui integrations
+- **integrations/**: Third-party service integrations like internationalization (Paraglide), data fetching (TanStack Query), and email services
+- **lib/**: Utility libraries, authentication/authorization configurations, and shared helpers
+- **middleware/**: Server middleware for authentication and other request processing
+- **routes/**: TanStack Router file-based routing with layouts (_auth, _private, _public) and API routes
+
+React components and .tsx files should not be in api-fns, db, db-fns, hooks, lib, middleware or routes/api
 
 ### Component Development
 
