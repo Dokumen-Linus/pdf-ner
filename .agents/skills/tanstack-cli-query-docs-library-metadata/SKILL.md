@@ -1,12 +1,9 @@
 ---
-name: query-docs-library-metadata
+name: tanstack-cli-query-docs-library-metadata
 description: >
   Retrieve machine-readable context with tanstack libraries, tanstack doc,
   tanstack search-docs, tanstack create --list-add-ons --json, and
   --addon-details for agent-safe discovery and preflight validation.
-type: core
-library: tanstack-cli
-library_version: "0.62.1"
 ---
 
 # Query Docs And Library Metadata
