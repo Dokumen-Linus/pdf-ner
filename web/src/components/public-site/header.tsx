@@ -68,10 +68,11 @@ export default function Header() {
             <img
               src={logoUrl}
               className="h-6 w-auto object-contain transition-transform"
-              alt="Dokumen AI"
+              alt={m.common_brand_name()}
             />
             <span className="text-[17px] font-bold tracking-[0.2em] text-[#171A20] uppercase">
-              Dokumen<span className="text-[#3E6AE1]">AI</span>
+              {m.common_brand_primary()}
+              <span className="text-[#3E6AE1]">{m.common_brand_accent()}</span>
             </span>
           </Link>
 

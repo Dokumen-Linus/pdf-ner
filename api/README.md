@@ -86,7 +86,7 @@ Visualizes the endpoints exposed by the api and what file defines them
 
 **Restriction on API Interactions with Database**: The API can only execute SQL scripts in functions in repository.py files using the [asyncpg](https://github.com/MagicStack/asyncpg) connection created in router.py. No ORM, Pydantic, or other Python schemas for the SQL database are allowed. Validation of the query is solely whether SQL can execute it. Connection is passed from router.py to service.py functions to repository.py functions.
 
-**Schemas**: api_user has CRUD permissions on api schema and read permissions on web, workers, and public schemas with the exception of workers.llm_usage and workers.stripe_customers
+**Schemas**: api_user has CRUD permissions on api schema and read permissions on web, workers, and public schemas, with INSERT access to workers.llm_usage for project-scoped usage recording.
 
 ## Tech Stack
 

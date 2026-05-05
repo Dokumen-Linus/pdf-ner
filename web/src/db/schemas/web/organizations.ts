@@ -1,4 +1,5 @@
-import { text, timestamp } from "drizzle-orm/pg-core"
+import { sql } from "drizzle-orm"
+import { integer, text, timestamp } from "drizzle-orm/pg-core"
 
 import { webSchema } from "./schema"
 
@@ -6,14 +7,16 @@ export const organizations = webSchema.table("organizations", {
   id: text("id").primaryKey(),
   plan: text("plan").notNull().default("base"),
   planExpiresAt: timestamp("plan_expires_at", { withTimezone: true }),
+  nUsers: integer("n_users").notNull().default(1),
+  billingStartedAt: timestamp("billing_started_at", { withTimezone: true }).defaultNow(),
+  nextPaymentAt: timestamp("next_payment_at", { withTimezone: true }).default(
+    sql`NOW() + INTERVAL '1 month'`,
+  ),
+  lastPaymentAt: timestamp("last_payment_at", { withTimezone: true }),
+  billingStatus: text("billing_status").notNull().default("stripe_info_missing"),
+  billingFailureCount: integer("billing_failure_count").notNull().default(0),
   stripeCustomerId: text("stripe_customer_id").unique(),
-  stripeSubscriptionId: text("stripe_subscription_id"),
-  stripeSubscriptionStatus: text("stripe_subscription_status"),
-  stripeDeveloperItemId: text("stripe_developer_item_id"),
-  stripeAnalystItemId: text("stripe_analyst_item_id"),
-  stripeUsageItemId: text("stripe_usage_item_id"),
-  stripeCurrentPeriodStart: timestamp("stripe_current_period_start", { withTimezone: true }),
-  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end", { withTimezone: true }),
+  stripePaymentMethodId: text("stripe_payment_method_id"),
   description: text("description"),
   websiteUrl: text("website_url"),
   defaultColorPresets: text("default_color_presets").array(),

@@ -4,7 +4,13 @@ from uuid import UUID
 
 import asyncpg
 
-from ..domain.entities import EntityTypeInfo, FinalPredictionPair, LabeledAnnotation, LabeledPdf
+from ..domain.entities import (
+    EntityTypeInfo,
+    FinalPredictionPair,
+    LabeledAnnotation,
+    LabeledPdf,
+    PromptExampleSnapshot,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +33,17 @@ async def fetch_model_provider(conn: asyncpg.Connection, model_id: str) -> str |
         model_id,
     )
     return row["provider"] if row else None
+
+
+async def fetch_template(conn: asyncpg.Connection, template_id: int) -> asyncpg.Record | None:
+    return await conn.fetchrow(
+        """
+        SELECT id, txt, inserts, document_at_end
+        FROM public.templates
+        WHERE id = $1
+        """,
+        template_id,
+    )
 
 
 async def fetch_entity_types_with_std(
@@ -145,19 +162,46 @@ async def fetch_labeled_pdfs(conn: asyncpg.Connection, project_id: UUID) -> list
 
 
 async def insert_optimized_prompt(
-    conn: asyncpg.Connection, project_id: UUID, full_text: str
+    conn: asyncpg.Connection, project_id: UUID, template_id: int, full_text: str
 ) -> UUID:
     """Insert an optimized prompt into workers.optimized_prompts."""
     prompt_id = await conn.fetchval(
         """
-        INSERT INTO workers.optimized_prompts (project_id, full_text)
-        VALUES ($1, $2) RETURNING id
+        INSERT INTO workers.optimized_prompts (project_id, template_id, full_text)
+        VALUES ($1, $2, $3) RETURNING id
         """,
         project_id,
+        template_id,
         full_text,
     )
     logger.info("Inserted optimized prompt: %s", prompt_id)
     return prompt_id
+
+
+async def insert_optimized_prompt_examples(
+    conn: asyncpg.Connection,
+    optimized_prompt_id: UUID,
+    examples: list[PromptExampleSnapshot],
+) -> None:
+    if not examples:
+        return
+    await conn.executemany(
+        """
+        INSERT INTO workers.optimized_prompt_examples
+            (optimized_prompt_id, pdf_id, example_order, text_excerpt, labelled_entities)
+        VALUES ($1, $2, $3, $4, $5::jsonb)
+        """,
+        [
+            (
+                optimized_prompt_id,
+                example.pdf_id,
+                example.example_order,
+                example.text_excerpt,
+                json.dumps(example.labelled_entities),
+            )
+            for example in examples
+        ],
+    )
 
 
 async def insert_evaluation(

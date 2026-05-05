@@ -1,9 +1,9 @@
 ---
-name: tanstack-devtools-event-client
+name: tanstack-tanstack-devtools-event-client
 description: Create typed EventClient for a library. Define event maps with typed payloads, pluginId auto-prepend namespacing, emit()/on()/onAll()/onAllPluginEvents() API. Connection lifecycle (5 retries, 300ms), event queuing, enabled/disabled state, SSR fallbacks, singleton pattern. Unique pluginId requirement to avoid event collisions.
 ---
 
-# tanstack-devtools-event-client
+# tanstack-tanstack-devtools-event-client
 
 Typed event emitter/listener that connects application code to TanStack Devtools panels. Framework-agnostic. Works in React, Vue, Solid, Preact, and vanilla JS.
 
@@ -12,13 +12,13 @@ Typed event emitter/listener that connects application code to TanStack Devtools
 Install the package:
 
 ```bash
-npm i @tanstack/devtools-event-client
+npm i @tanstack/tanstack-devtools-event-client
 ```
 
 The package exports a single class:
 
 ```ts
-import { EventClient } from '@tanstack/devtools-event-client'
+import { EventClient } from '@tanstack/tanstack-devtools-event-client'
 ```
 
 ### Constructor Options
@@ -37,7 +37,7 @@ import { EventClient } from '@tanstack/devtools-event-client'
 Define a TypeScript type mapping event suffixes to payload types. Extend `EventClient` and export a single instance at module level.
 
 ```ts
-import { EventClient } from '@tanstack/devtools-event-client'
+import { EventClient } from '@tanstack/tanstack-devtools-event-client'
 
 type StoreEvents = {
   'state-changed': { storeName: string; state: unknown; timestamp: number }
@@ -252,7 +252,7 @@ storeInspector.emit('state-changed', {
 
 ### 7. Not stripping EventClient emit calls for production (HIGH)
 
-The Vite plugin strips adapter imports (e.g., `@tanstack/react-devtools`) from production builds, but it does NOT strip `@tanstack/devtools-event-client` imports or `emit()` calls. Library authors must guard emit calls themselves.
+The Vite plugin strips adapter imports (e.g., `@tanstack/react-devtools`) from production builds, but it does NOT strip `@tanstack/tanstack-devtools-event-client` imports or `emit()` calls. Library authors must guard emit calls themselves.
 
 Options:
 
@@ -277,6 +277,6 @@ When `enabled` is `false`, `emit()` returns immediately (no event creation, no q
 
 ## See Also
 
-- `tanstack-devtools-instrumentation` -- after creating a client, instrument library code with strategic emissions
+- `tanstack-tanstack-devtools-instrumentation` -- after creating a client, instrument library code with strategic emissions
 - `devtools-plugin-panel` -- the client emits events, the panel listens using the same event map
-- `tanstack-devtools-bidirectional` -- two-way communication between panel and application using the same EventClient
+- `tanstack-tanstack-devtools-bidirectional` -- two-way communication between panel and application using the same EventClient

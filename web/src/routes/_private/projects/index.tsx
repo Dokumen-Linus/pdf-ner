@@ -134,7 +134,9 @@ function ProjectsPage() {
     : organization
       ? "No team selected"
       : "Personal workspace"
-  const canCreateProject = !organization || selectedTeam != null
+  const canCreateProjectForRole =
+    user?.role === "individual" || user?.role === "admin" || user?.role === "developer"
+  const canCreateProject = canCreateProjectForRole && (!organization || selectedTeam != null)
 
   const handleTeamChange = async (nextTeamId: string) => {
     setCreateError(null)
@@ -210,90 +212,92 @@ function ProjectsPage() {
         <p className="text-muted-foreground text-sm">{m.projects_list_description()}</p>
       </div>
 
-      <Card>
-        <CardHeader className="space-y-4">
-          <div className="space-y-1">
-            <CardTitle>Create Project</CardTitle>
-            <CardDescription>
-              {organization
-                ? `Projects in ${organization.name} are owned by the selected team.`
-                : "You are creating projects in your personal workspace."}
-            </CardDescription>
-          </div>
-
-          {organization ? (
-            <div className="space-y-1.5">
-              <Label htmlFor="project-scope-team">Team</Label>
-              <Select value={selectedTeamId ?? undefined} onValueChange={handleTeamChange}>
-                <SelectTrigger id="project-scope-team" className="w-full sm:w-80">
-                  <SelectValue placeholder="Choose a team" />
-                </SelectTrigger>
-                <SelectContent>
-                  {teams.map((team) => (
-                    <SelectItem key={team.id} value={team.id}>
-                      {team.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      {canCreateProjectForRole && (
+        <Card>
+          <CardHeader className="space-y-4">
+            <div className="space-y-1">
+              <CardTitle>Create Project</CardTitle>
+              <CardDescription>
+                {organization
+                  ? `Projects in ${organization.name} are owned by the selected team.`
+                  : "You are creating projects in your personal workspace."}
+              </CardDescription>
             </div>
-          ) : null}
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4" onSubmit={handleCreateProject}>
-            <div className="grid gap-4 md:grid-cols-2">
+
+            {organization ? (
               <div className="space-y-1.5">
-                <Label htmlFor="project-name">Project name</Label>
-                <Input
-                  id="project-name"
-                  value={projectName}
-                  onChange={(e) => setProjectName(e.target.value)}
-                  placeholder="e.g. Vendor contracts"
+                <Label htmlFor="project-scope-team">Team</Label>
+                <Select value={selectedTeamId ?? undefined} onValueChange={handleTeamChange}>
+                  <SelectTrigger id="project-scope-team" className="w-full sm:w-80">
+                    <SelectValue placeholder="Choose a team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teams.map((team) => (
+                      <SelectItem key={team.id} value={team.id}>
+                        {team.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
+          </CardHeader>
+          <CardContent>
+            <form className="space-y-4" onSubmit={handleCreateProject}>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="project-name">Project name</Label>
+                  <Input
+                    id="project-name"
+                    value={projectName}
+                    onChange={(e) => setProjectName(e.target.value)}
+                    placeholder="e.g. Vendor contracts"
+                    disabled={isCreatingProject || !canCreateProject}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Ownership scope</Label>
+                  <div className="text-muted-foreground rounded-md border px-3 py-2 text-sm">
+                    {scopeLabel}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="project-description">Description</Label>
+                <Textarea
+                  id="project-description"
+                  value={projectDescription}
+                  onChange={(e) => setProjectDescription(e.target.value)}
+                  placeholder="Optional description"
                   disabled={isCreatingProject || !canCreateProject}
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label>Ownership scope</Label>
-                <div className="text-muted-foreground rounded-md border px-3 py-2 text-sm">
-                  {scopeLabel}
+
+              {createError && (
+                <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
+                  {createError}
                 </div>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="project-description">Description</Label>
-              <Textarea
-                id="project-description"
-                value={projectDescription}
-                onChange={(e) => setProjectDescription(e.target.value)}
-                placeholder="Optional description"
-                disabled={isCreatingProject || !canCreateProject}
-              />
-            </div>
-
-            {createError && (
-              <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
-                {createError}
-              </div>
-            )}
-
-            {!canCreateProject && organization && (
-              <p className="text-muted-foreground text-sm">
-                Create or join a team before creating projects in this organization.
-              </p>
-            )}
-
-            <Button type="submit" disabled={isCreatingProject || !canCreateProject || !user}>
-              {isCreatingProject ? (
-                <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <PlusIcon className="mr-2 h-4 w-4" />
               )}
-              {isCreatingProject ? "Creating project..." : m.projects_list_create_button()}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+
+              {!canCreateProject && organization && (
+                <p className="text-muted-foreground text-sm">
+                  Create or join a team before creating projects in this organization.
+                </p>
+              )}
+
+              <Button type="submit" disabled={isCreatingProject || !canCreateProject || !user}>
+                {isCreatingProject ? (
+                  <LoaderCircleIcon className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <PlusIcon className="mr-2 h-4 w-4" />
+                )}
+                {isCreatingProject ? "Creating project..." : m.projects_list_create_button()}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       {projects.length === 0 ? (
         <Card className="border-dashed">

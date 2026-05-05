@@ -6,7 +6,12 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
-from .telemetry import bind_request_context, clear_request_context, extract_request_trace
+from .logging import (
+    bind_request_context,
+    clear_request_context,
+    extract_request_trace,
+    record_api_http_request,
+)
 
 logger = logging.getLogger("app.requests")
 
@@ -64,8 +69,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 duration,
                 request_id,
             )
-            from .telemetry import record_api_http_request
-
             record_api_http_request(
                 method=request.method,
                 route=route_label,

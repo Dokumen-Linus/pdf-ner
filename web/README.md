@@ -80,7 +80,7 @@ The database schemas are defined in:
 - Projects: own the main functionality of the site including web.projects (project description) web.entity_types (the features to extract) and workers.pdfs (the files to extract from)
 - Project ownership: projects are owned by a user if the user is not part of an organization otherwise they are owned by team (users are recommended to be in organizations)
 - Authorization: use the require* functions in ./src/lib/authorization.server.ts, often needed to call api-fns or db-fns to ensure users are confined to their projects and db rows
-- Billing: [Stripe Payments](https://docs.stripe.com/payments) using both [Stripe.js](https://docs.stripe.com/js) in the local API and [stripe-python](https://github.com/stripe/stripe-python) in the backend FastAPI
+- Billing: database-recorded account charges with Stripe used only for SetupIntent, PaymentIntent, Customer, and saved payment method processing
 
 ## Tech Stack
 
@@ -123,6 +123,69 @@ The database schemas are defined in:
 | `./routes/_public/index.tsx`| Page displayed at base URL                                                          |
 
 ./tanstack-start-docs/* contains the most recent docs displayed on tanstack.com in Markdown
+
+### src Layout
+
+web/src/
+├── api-fns/               # Functions for external API calls (FastAPI, etc.)
+│   ├── api-json-call.server.ts
+│   ├── api-stream-proxy.server.ts
+│   └── ...
+├── components/            # React components
+│   ├── custom/            # Custom reusable components
+│   ├── shadcn-ui/         # shadcn/ui components
+│   ├── pdf-container/     # PDF rendering components
+│   └── ...
+├── db/                    # Database schemas and client
+│   ├── client.ts          # Drizzle ORM client
+│   ├── schemas/           # Drizzle TypeScript schemas
+│   └── types.d.ts         # TypeScript types generated from schemas
+├── db-fns/                # Database server functions
+│   ├── web/               # Functions for web schema
+│   ├── api/               # Functions for api schema
+│   ├── workers/           # Functions for workers schema
+│   └── public/            # Functions for public schema
+├── hooks/                 # Custom React hooks
+│   ├── mouse-events/
+│   ├── shadcn-ui/
+│   └── ...
+├── integrations/          # Third-party integrations
+│   ├── paraglide/         # Internationalization
+│   ├── tanstack-query/    # Data fetching
+│   └── ...
+├── lib/                   # Utility libraries and configurations
+│   ├── auth.ts            # Better Auth configuration
+│   ├── authorization.server.ts  # Authorization helpers
+│   ├── shadcn-ui/         # shadcn/ui configuration
+│   └── ...
+├── middleware/            # Server middleware
+│   └── auth.ts            # Authentication middleware
+├── routes/                # TanStack Router routes
+│   ├── api/               # API routes
+│   ├── _auth.tsx          # Auth layout
+│   ├── _private.tsx       # Private layout
+│   ├── _public.tsx        # Public layout
+│   ├── __root.tsx         # Root layout
+│   └── ...
+├── client.tsx             # Client entrypoint
+├── server.tsx             # Server entrypoint
+├── router.tsx             # Router configuration
+├── start.ts               # TanStack Start server instance
+├── styles.css             # Global CSS
+├── env.client.ts          # Client environment validation
+└── env.server.ts          # Server environment validation
+
+- **api-fns/**: Server functions for calling external APIs (FastAPI backend), using api-json-call or api-stream-proxy for communication
+- **components/**: React components, including custom components, shadcn/ui library components, and PDF-related components
+- **db/**: Database layer with Drizzle ORM client, TypeScript schemas matching the SQL migrations, and generated types
+- **db-fns/**: Server functions for database interactions, organized by schema (web, api, workers, public). Each file named after the table it queries, using Zod validation and Drizzle
+- **hooks/**: Custom React hooks for reusable logic, including mouse events and shadcn/ui integrations
+- **integrations/**: Third-party service integrations like internationalization (Paraglide), data fetching (TanStack Query), and email services
+- **lib/**: Utility libraries, authentication/authorization configurations, and shared helpers
+- **middleware/**: Server middleware for authentication and other request processing
+- **routes/**: TanStack Router file-based routing with layouts (_auth, _private, _public) and API routes
+
+React components and .tsx files should not be in api-fns, db, db-fns, hooks, lib, middleware or routes/api
 
 ### Component Development
 

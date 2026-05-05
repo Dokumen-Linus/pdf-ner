@@ -1,23 +1,25 @@
 import { SendEmailCommand } from "@aws-sdk/client-ses"
 import { render } from "@react-email/components"
 
-import ContactAutoReply, { subject as contactAutoReplySubject } from "../emails/contact-auto-reply"
+import ContactAutoReply, {
+  subject as contactAutoReplySubject,
+} from "../components/emails/contact-auto-reply"
 import ContactNotification, {
   subject as contactNotificationSubject,
-} from "../emails/contact-notification"
+} from "../components/emails/contact-notification"
 import OrganizationInvitation, {
   subject as organizationInvitationSubject,
-} from "../emails/organization-invitation"
-import ResetPassword, { subject as resetPasswordSubject } from "../emails/reset-password"
-import VerifyEmail, { subject as verifyEmailSubject } from "../emails/verify-email"
+} from "../components/emails/organization-invitation"
+import ResetPassword, { subject as resetPasswordSubject } from "../components/emails/reset-password"
+import VerifyEmail, { subject as verifyEmailSubject } from "../components/emails/verify-email"
 import { env } from "../env.server"
 import { sesClient } from "../integrations/ses"
 
-import type { ContactAutoReplyProps } from "../emails/contact-auto-reply"
-import type { ContactNotificationProps } from "../emails/contact-notification"
-import type { OrganizationInvitationProps } from "../emails/organization-invitation"
-import type { ResetPasswordProps } from "../emails/reset-password"
-import type { VerifyEmailProps } from "../emails/verify-email"
+import type { ContactAutoReplyProps } from "../components/emails/contact-auto-reply"
+import type { ContactNotificationProps } from "../components/emails/contact-notification"
+import type { OrganizationInvitationProps } from "../components/emails/organization-invitation"
+import type { ResetPasswordProps } from "../components/emails/reset-password"
+import type { VerifyEmailProps } from "../components/emails/verify-email"
 
 type TemplateMap = {
   "verify-email": VerifyEmailProps

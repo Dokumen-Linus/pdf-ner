@@ -5,7 +5,7 @@ from typing import Any
 
 import asyncpg
 
-from app.domains.billing.infrastructure.repository import record_llm_usage
+from app.domains.llm_usage.infrastructure.repository import record_llm_usage
 from app.integrations.anthropic import call_anthropic
 from app.integrations.gemini import call_google_genai
 from app.integrations.openai import call_openai

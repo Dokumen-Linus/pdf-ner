@@ -9,6 +9,7 @@ export const startPromptOptimization = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
       projectId: z.string().uuid(),
+      templateId: z.number().int().positive(),
       maxCostUsd: z.number().positive().default(1),
       model: z.string().min(1).default("gpt-4o"),
     }),
@@ -21,6 +22,7 @@ export const startPromptOptimization = createServerFn({ method: "POST" })
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         project_id: data.projectId,
+        template_id: data.templateId,
         max_cost_usd: data.maxCostUsd,
         model: data.model,
       }),

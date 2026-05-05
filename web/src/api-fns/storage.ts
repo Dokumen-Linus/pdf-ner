@@ -19,10 +19,10 @@ export const createBucket = createServerFn({ method: "POST" })
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: data.name,
-          region: env.AWS_REGION,
-          access_key_id: env.AWS_ACCESS_KEY_ID,
-          secret_access_key: env.AWS_SECRET_ACCESS_KEY,
-          endpoint_url: env.AWS_ENDPOINT_URL ?? undefined,
+          region: env.PDF_STORAGE_AWS_REGION,
+          access_key_id: env.PDF_STORAGE_AWS_ACCESS_KEY_ID,
+          secret_access_key: env.PDF_STORAGE_AWS_SECRET_ACCESS_KEY,
+          endpoint_url: env.PDF_STORAGE_AWS_ENDPOINT_URL ?? undefined,
         }),
       })
     },

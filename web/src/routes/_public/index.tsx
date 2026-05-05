@@ -120,11 +120,11 @@ function App() {
             >
               &#123;
               <br />
-              &nbsp;&nbsp;&quot;entity&quot;: &quot;invoice_total&quot;,
+              {m.landing_demo_json_entity_line()}
               <br />
-              &nbsp;&nbsp;&quot;value&quot;: &quot;$4,291.00&quot;,
+              {m.landing_demo_json_value_line()}
               <br />
-              &nbsp;&nbsp;&quot;confidence&quot;: 0.98
+              {m.landing_demo_json_confidence_line()}
               <br />
               &#125;
             </motion.div>

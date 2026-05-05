@@ -37,7 +37,7 @@ class TestHandleOptimizePrompt:
         mock_conn = AsyncMock()
         mock_get_pool.return_value = _make_pool_mock(mock_conn)
 
-        cmd = OptimizePrompt(project_id=PROJECT_ID)
+        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=1)
         result = await handle_optimize_prompt(cmd)
 
         assert result == expected_result
@@ -53,6 +53,6 @@ class TestHandleOptimizePrompt:
         mock_conn = AsyncMock()
         mock_get_pool.return_value = _make_pool_mock(mock_conn)
 
-        cmd = OptimizePrompt(project_id=PROJECT_ID)
+        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=1)
         with pytest.raises(ValueError, match="Project not found"):
             await handle_optimize_prompt(cmd)

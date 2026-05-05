@@ -37,7 +37,7 @@ async def upload_avatar(filename: str, content_type: str, data: bytes) -> dict:
     try:
         await anyio.to_thread.run_sync(
             lambda: s3.put_object(
-                Bucket=settings.AVATARS_BUCKET,
+                Bucket=settings.AVATARS_S3_BUCKET_NAME,
                 Key=key,
                 Body=data,
                 ContentType=content_type,
@@ -47,8 +47,8 @@ async def upload_avatar(filename: str, content_type: str, data: bytes) -> dict:
         raise HTTPException(status_code=502, detail=f"S3 error: {e.response['Error']['Message']}")
 
     if settings.AVATARS_AWS_ENDPOINT_URL:
-        url = f"{settings.AVATARS_AWS_ENDPOINT_URL}/{settings.AVATARS_BUCKET}/{key}"
+        url = f"{settings.AVATARS_AWS_ENDPOINT_URL}/{settings.AVATARS_S3_BUCKET_NAME}/{key}"
     else:
-        url = f"https://{settings.AVATARS_BUCKET}.s3.{settings.AVATARS_AWS_REGION}.amazonaws.com/{key}"
+        url = f"https://{settings.AVATARS_S3_BUCKET_NAME}.s3.{settings.AVATARS_AWS_REGION}.amazonaws.com/{key}"
 
     return {"avatar_url": url}

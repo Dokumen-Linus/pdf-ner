@@ -1,25 +1,28 @@
-import asyncio
 import logging
-from uuid import UUID
+
+import anyio
 
 from app.main import app
 
-from .application.workflows import report_usage_to_stripe
+from .application.workflows import charge_due_accounts
 
 logger = logging.getLogger(__name__)
 
 
-@app.task(name="billing.report_usage_to_stripe", bind=True, max_retries=3)
-def report_usage_to_stripe_task(self, project_id: str | None = None):
-    """Batch-report all unreported LLM usage to Stripe metered billing."""
+async def _charge_due_accounts(limit: int):
+    return await charge_due_accounts(limit=limit)
+
+
+@app.task(name="billing.charge_due_accounts", bind=True, max_retries=3)
+def charge_due_accounts_task(self, limit: int = 100):
     try:
-        result = asyncio.run(report_usage_to_stripe(UUID(project_id) if project_id else None))
+        result = anyio.run(_charge_due_accounts, limit)
         logger.info(
-            "Stripe usage reported: reported=%d skipped=%d",
-            result["reported"],
-            result["skipped"],
+            "Billing charges complete: succeeded=%d failed=%d",
+            result["succeeded"],
+            result["failed"],
         )
         return result
     except Exception as exc:
-        logger.exception("billing.report_usage_to_stripe failed")
+        logger.exception("billing.charge_due_accounts failed")
         raise self.retry(exc=exc, countdown=60) from exc

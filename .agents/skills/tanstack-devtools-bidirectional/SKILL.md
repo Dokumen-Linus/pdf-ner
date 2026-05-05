@@ -1,11 +1,11 @@
 ---
-name: tanstack-devtools-bidirectional
-description: Use to plan two-way event patterns between devtools panel and application. Use when creating app-to-devtools observation, devtools-to-app commands, time-travel debugging with snapshots and revert. structuredClone for snapshot safety, distinct event suffixes for observation vs commands, serializable payloads only.
+name: tanstack-tanstack-devtools-bidirectional
+description: Two-way event patterns between devtools panel and application. App-to-devtools observation, devtools-to-app commands, time-travel debugging with snapshots and revert. structuredClone for snapshot safety, distinct event suffixes for observation vs commands, serializable payloads only.
 ---
 
-# tanstack-devtools-bidirectional
+# tanstack-tanstack-devtools-bidirectional
 
-> **Prerequisite:** Read and understand the `tanstack-devtools-event-client` skill first. This skill builds on `EventClient`, its event map types, `emit()`/`on()` API, pluginId namespacing, connection lifecycle, and singleton pattern. Everything here assumes you already have a working `EventClient` instance.
+> **Prerequisite:** Read and understand the `tanstack-tanstack-devtools-event-client` skill first. This skill builds on `EventClient`, its event map types, `emit()`/`on()` API, pluginId namespacing, connection lifecycle, and singleton pattern. Everything here assumes you already have a working `EventClient` instance.
 
 Two-way communication between your application and a TanStack Devtools panel using `EventClient`. The same client instance handles both directions: the app emits observation events that the panel listens to, and the panel emits command events that the app listens to.
 
@@ -30,7 +30,7 @@ The app emits state changes. The panel listens and renders.
 **Event map and client (shared module):**
 
 ```ts
-import { EventClient } from '@tanstack/devtools-event-client'
+import { EventClient } from '@tanstack/tanstack-devtools-event-client'
 
 type CounterEvents = {
   // Observation: app -> panel
@@ -268,7 +268,7 @@ This distinction is purely a convention in your event map keys. The `EventClient
 **Full bidirectional wiring with one client:**
 
 ```ts
-import { EventClient } from '@tanstack/devtools-event-client'
+import { EventClient } from '@tanstack/tanstack-devtools-event-client'
 
 type StoreInspectorEvents = {
   'state-update': { storeName: string; state: unknown; timestamp: number }
@@ -461,5 +461,5 @@ Use observation suffixes that describe what happened (`-update`, `-changed`, `-d
 
 ## See Also
 
-- `tanstack-devtools-event-client` -- base event system: event maps, `emit()`/`on()`, connection lifecycle, singleton pattern
-- `tanstack-devtools-instrumentation` -- strategic placement of `emit()` calls in library code benefits from bidirectional awareness (knowing that commands will flow back)
+- `tanstack-tanstack-devtools-event-client` -- base event system: event maps, `emit()`/`on()`, connection lifecycle, singleton pattern
+- `tanstack-tanstack-devtools-instrumentation` -- strategic placement of `emit()` calls in library code benefits from bidirectional awareness (knowing that commands will flow back)

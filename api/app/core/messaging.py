@@ -1,7 +1,7 @@
 from celery import Celery
 
 from .config import settings
-from .telemetry import build_celery_headers
+from .logging import build_celery_headers
 
 celery_client = Celery(
     "api",

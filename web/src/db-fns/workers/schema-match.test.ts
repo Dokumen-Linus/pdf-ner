@@ -1,11 +1,13 @@
 import { describe, expect, it } from "bun:test"
 
 import type {
+  BillingChargeAttempt,
   FoundContextEngPred,
+  FoundOptimizedPrompt,
+  FoundOptimizedPromptExample,
   FoundPromptEvaluation,
   FoundWorkersPdf,
   LlmUsage,
-  LlmUsageReportBatch,
 } from "../../db/types"
 
 /**
@@ -23,31 +25,31 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       id: string
       projectId: string
       actorUserId: string | null
-      billingUserId: string | null
-      billingOrganizationId: string | null
       modelId: string
       source: string
       taskName: string | null
       inputTokens: number
       outputTokens: number
-      reportBatchId: string | null
     }
     const _: Expected = {} as LlmUsage
     expect(true).toBe(true)
   })
 
-  it("LlmUsageReportBatch should have expected workers.llm_usage_report_batches fields", () => {
+  it("BillingChargeAttempt should have expected workers.billing_charge_attempts fields", () => {
     type Expected = {
       id: string
-      billingUserId: string | null
-      billingOrganizationId: string | null
+      accountType: string
+      userId: string | null
+      organizationId: string | null
       periodStart: Date
       periodEnd: Date
-      usageCount: number
-      stripeUsageRecordId: string | null
+      baseAmountCents: number
+      usageAmountCents: number
+      totalAmountCents: number
+      stripePaymentIntentId: string | null
       status: string
     }
-    const _: Expected = {} as LlmUsageReportBatch
+    const _: Expected = {} as BillingChargeAttempt
     expect(true).toBe(true)
   })
 
@@ -89,6 +91,32 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       createdAt: Date | null
     }
     const _: Expected = {} as FoundPromptEvaluation
+    expect(true).toBe(true)
+  })
+
+  it("FoundOptimizedPrompt should have expected provenance fields", () => {
+    type Expected = {
+      id: string
+      projectId: string
+      templateId: number
+      fullText: string
+      createdAt: Date | null
+    }
+    const _: Expected = {} as FoundOptimizedPrompt
+    expect(true).toBe(true)
+  })
+
+  it("FoundOptimizedPromptExample should have expected example snapshot fields", () => {
+    type Expected = {
+      id: number
+      optimizedPromptId: string
+      pdfId: string
+      exampleOrder: number
+      textExcerpt: string
+      labelledEntities: Record<string, unknown>
+      createdAt: Date | null
+    }
+    const _: Expected = {} as FoundOptimizedPromptExample
     expect(true).toBe(true)
   })
 

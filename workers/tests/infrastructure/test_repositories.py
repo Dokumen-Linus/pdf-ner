@@ -14,6 +14,7 @@ from app.domains.context_engineering.infrastructure.repositories import (
     fetch_project,
     insert_evaluation,
     insert_optimized_prompt,
+    insert_optimized_prompt_examples,
 )
 from tests.conftest import PDF_ID_1, PDF_ID_2, PROJECT_ID, PROMPT_ID
 
@@ -214,7 +215,7 @@ class TestInsertOptimizedPrompt:
     async def test_returns_prompt_id(self):
         conn = AsyncMock()
         conn.fetchval.return_value = PROMPT_ID
-        result = await insert_optimized_prompt(conn, PROJECT_ID, "prompt text")
+        result = await insert_optimized_prompt(conn, PROJECT_ID, 1, "prompt text")
         assert result == PROMPT_ID
         conn.fetchval.assert_awaited_once()
 
@@ -222,10 +223,29 @@ class TestInsertOptimizedPrompt:
     async def test_passes_correct_args(self):
         conn = AsyncMock()
         conn.fetchval.return_value = PROMPT_ID
-        await insert_optimized_prompt(conn, PROJECT_ID, "my prompt")
+        await insert_optimized_prompt(conn, PROJECT_ID, 1, "my prompt")
         args = conn.fetchval.call_args
         assert PROJECT_ID in args[0]
+        assert 1 in args[0]
         assert "my prompt" in args[0]
+
+    @pytest.mark.anyio
+    async def test_inserts_final_example_snapshots(self, labeled_pdf_1):
+        from app.domains.context_engineering.domain.services import build_prompt_example_snapshots
+
+        conn = AsyncMock()
+        examples = build_prompt_example_snapshots([labeled_pdf_1], max_examples=1)
+
+        await insert_optimized_prompt_examples(conn, PROMPT_ID, examples)
+
+        conn.executemany.assert_awaited_once()
+        call_args = conn.executemany.call_args.args
+        row = call_args[1][0]
+        assert row[0] == PROMPT_ID
+        assert row[1] == labeled_pdf_1.pdf_id
+        assert row[2] == 0
+        assert "John Smith" in row[3]
+        assert json.loads(row[4])["full_name"] == "John Smith"
 
 
 class TestInsertEvaluation:

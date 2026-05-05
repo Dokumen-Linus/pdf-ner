@@ -1,11 +1,11 @@
 ---
-name: tanstack-devtools-instrumentation
-description: Analyze library codebase for critical architecture and debugging points, add strategic event emissions. Identify middleware boundaries, state transitions, lifecycle hooks. Consolidate events, debounce high-frequency updates, DRY shared payload fields, guard emit() for production. Transparent server/client event bridging.
+name: tanstack-tanstack-devtools-instrumentation
+description: Analyze library codebase for critical architecture and debugging points, add strategic event emissions. Identify middleware boundaries, state transitions, lifecycle hooks. Consolidate events (1 not 15), debounce high-frequency updates, DRY shared payload fields, guard emit() for production. Transparent server/client event bridging.
 ---
 
-# tanstack-devtools-instrumentation
+# tanstack-tanstack-devtools-instrumentation
 
-> **Prerequisite:** Read the `tanstack-devtools-event-client` skill first for EventClient creation, event maps, and `emit()`/`on()` API.
+> **Prerequisite:** Read the `tanstack-tanstack-devtools-event-client` skill first for EventClient creation, event maps, and `emit()`/`on()` API.
 
 Strategic placement of `emit()` calls inside a library to send high-value diagnostic data to TanStack Devtools panels. Maximum insight with minimum noise.
 
@@ -34,7 +34,7 @@ Do NOT emit from: internal utility functions, loop iterations, getter/setter acc
 Wrap the pipeline at the boundary, not each middleware individually.
 
 ```ts
-import { EventClient } from '@tanstack/devtools-event-client'
+import { EventClient } from '@tanstack/tanstack-devtools-event-client'
 
 type RouterEvents = {
   'request-processed': {
@@ -266,7 +266,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 ```
 
-**Important:** The Vite plugin strips `@tanstack/react-devtools` from production but does NOT strip `@tanstack/devtools-event-client`. You must guard yourself.
+**Important:** The Vite plugin strips `@tanstack/react-devtools` from production but does NOT strip `@tanstack/tanstack-devtools-event-client`. You must guard yourself.
 
 ### 6. Server/Client Transparent Bridging
 

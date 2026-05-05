@@ -6,7 +6,7 @@ from typing import Any
 
 import asyncpg
 
-from app.domains.billing.infrastructure.repository import record_llm_usage
+from app.domains.llm_usage.infrastructure.repository import record_llm_usage
 from app.integrations.gemini import call_google_genai
 from app.shared.domain.LLMResponseData import LLMResponseData
 from app.shared.infrastructure.s3 import download_pdf_bytes
@@ -100,10 +100,35 @@ async def _evaluate_project_ocr_run(
             async with pool.acquire() as conn:
                 pdf_bytes, _filepath = await download_pdf_bytes(conn, pdf.pdf_id)
             pages = await ocr.extract_evaluation_pages(pdf_bytes, cmd.max_pages_per_pdf)
+
+            _report_progress(
+                task,
+                "ocr",
+                f"Evaluated OCR candidates for PDF {pdf_index + 1}/{len(sampled_pdfs)}",
+                min(65, 10 + int(((pdf_index + 1) / len(sampled_pdfs)) * 45)),
+                pdf_id=str(pdf.pdf_id),
+                pages=len(pages),
+            )
+
+            for page in pages:
+                async with pool.acquire() as conn:
+                    evaluation, usage, cost = await _evaluate_page(
+                        conn,
+                        gemini_client,
+                        cmd,
+                        pdf.pdf_id,
+                        page,
+                        spent_cost,
+                    )
+                    input_tokens += usage.input_tokens if usage is not None else 0
+                    output_tokens += usage.output_tokens if usage is not None else 0
+                    spent_cost += cost
+                    evaluations.append(evaluation)
+                    await repo.insert_page_evaluation(conn, run_id=run_id, evaluation=evaluation)
+
         except Exception as exc:
             logger.warning("Failed to process pdf=%s: %s", pdf.pdf_id, exc, exc_info=True)
-            pages = []
-            
+
             # Record a failed page evaluation so the error is tracked
             evaluation = PageEvaluation(
                 pdf_id=pdf.pdf_id,
@@ -120,31 +145,6 @@ async def _evaluate_project_ocr_run(
             async with pool.acquire() as conn:
                 await repo.insert_page_evaluation(conn, run_id=run_id, evaluation=evaluation)
             continue
-
-        _report_progress(
-            task,
-            "ocr",
-            f"Evaluated OCR candidates for PDF {pdf_index + 1}/{len(sampled_pdfs)}",
-            min(65, 10 + int(((pdf_index + 1) / len(sampled_pdfs)) * 45)),
-            pdf_id=str(pdf.pdf_id),
-            pages=len(pages),
-        )
-
-        for page in pages:
-            async with pool.acquire() as conn:
-                evaluation, usage, cost = await _evaluate_page(
-                    conn,
-                    gemini_client,
-                    cmd,
-                    pdf.pdf_id,
-                    page,
-                    spent_cost,
-                )
-                input_tokens += usage.input_tokens if usage is not None else 0
-                output_tokens += usage.output_tokens if usage is not None else 0
-                spent_cost += cost
-                evaluations.append(evaluation)
-                await repo.insert_page_evaluation(conn, run_id=run_id, evaluation=evaluation)
 
     summary = services.summarize_evaluations(
         evaluations,

@@ -520,6 +520,7 @@ class TestOptimizePromptAuthorization:
             "/api/v1/llm-ner/optimize-prompt",
             json={
                 "project_id": str(uuid4()),
+                "template_id": 1,
                 "max_cost_usd": "1.00",
                 "model": "gpt-4o",
             },
@@ -527,6 +528,24 @@ class TestOptimizePromptAuthorization:
 
         assert response.status_code == 404
         assert "Project not found" in response.json()["detail"]
+
+    @pytest.mark.anyio
+    async def test_optimize_prompt_returns_404_for_missing_template(self, async_client, mock_conn):
+        project_id = uuid4()
+        mock_conn.fetchrow = AsyncMock(side_effect=[{"id": project_id}, None])
+
+        response = await async_client.post(
+            "/api/v1/llm-ner/optimize-prompt",
+            json={
+                "project_id": str(project_id),
+                "template_id": 999,
+                "max_cost_usd": "1.00",
+                "model": "gpt-4o",
+            },
+        )
+
+        assert response.status_code == 404
+        assert "Template not found" in response.json()["detail"]
 
     @pytest.mark.anyio
     async def test_optimize_prompt_stores_task_project_mapping(
@@ -537,14 +556,26 @@ class TestOptimizePromptAuthorization:
 
         project_id = uuid4()
         mock_task_id = "mock-task-id-123"
+        dispatch_calls = []
 
-        mock_conn.fetchrow = AsyncMock(return_value={"id": project_id, "description": "Test"})
-        monkeypatch.setattr(events, "dispatch_optimize_prompt", lambda **kw: mock_task_id)
+        mock_conn.fetchrow = AsyncMock(
+            side_effect=[
+                {"id": project_id, "description": "Test"},
+                {"id": 1, "txt": "template"},
+            ]
+        )
+
+        def fake_dispatch(**kw):
+            dispatch_calls.append(kw)
+            return mock_task_id
+
+        monkeypatch.setattr(events, "dispatch_optimize_prompt", fake_dispatch)
 
         response = await async_client.post(
             "/api/v1/llm-ner/optimize-prompt",
             json={
                 "project_id": str(project_id),
+                "template_id": 1,
                 "max_cost_usd": "1.00",
                 "model": "gpt-4o",
             },
@@ -552,6 +583,7 @@ class TestOptimizePromptAuthorization:
 
         assert response.status_code == 200
         assert response.json()["task_id"] == mock_task_id
+        assert dispatch_calls[0]["template_id"] == 1
 
         # Verify redis.set was called with the task->project mapping
         mock_redis.set.assert_called_once()

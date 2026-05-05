@@ -1,36 +1,40 @@
 ---
-name: tanstack-react-start
-description: Use when planning around the React-specific bindings for TanStack Start, createStart, StartClient StartServer, React-specific imports, re-exports from @tanstack/react-router
+name: tanstack-tanstack-react-start
+description: >-
+  React bindings for TanStack Start: createStart, StartClient,
+  StartServer, React-specific imports, re-exports from
+  @tanstack/react-router, full project setup with React, useServerFn
+  hook.
 ---
 
-# React Start (`@tanstack/react-start`)
+# React Start (`@tanstack/tanstack-react-start`)
 
-This skill builds on start-core. Read [tanstack-start-core](../tanstack-start-core/SKILL.md) first for foundational concepts.
+This skill builds on tanstack-start. Read [tanstack-tanstack-start](../tanstack-start/SKILL.md) first for foundational concepts.
 
 This skill covers the React-specific bindings, setup, and patterns for TanStack Start.
 
 > **CRITICAL**: All code is ISOMORPHIC by default. Loaders run on BOTH server and client. Use `createServerFn` for server-only logic.
 
-> **CRITICAL**: Do not confuse `@tanstack/react-start` with Next.js or Remix. They are completely different frameworks with different APIs.
+> **CRITICAL**: Do not confuse `@tanstack/tanstack-react-start` with Next.js or Remix. They are completely different frameworks with different APIs.
 
 > **CRITICAL**: Types are FULLY INFERRED. Never cast, never annotate inferred values.
 
 ## Package API Surface
 
-`@tanstack/react-start` re-exports everything from `@tanstack/start-client-core` plus:
+`@tanstack/tanstack-react-start` re-exports everything from `@tanstack/start-client-core` plus:
 
 - `useServerFn` — React hook for calling server functions from components
 
-All core APIs (`createServerFn`, `createMiddleware`, `createStart`, `createIsomorphicFn`, `createServerOnlyFn`, `createClientOnlyFn`) are available from `@tanstack/react-start`.
+All core APIs (`createServerFn`, `createMiddleware`, `createStart`, `createIsomorphicFn`, `createServerOnlyFn`, `createClientOnlyFn`) are available from `@tanstack/tanstack-react-start`.
 
-Server utilities (`getRequest`, `getRequestHeader`, `setResponseHeader`, `setResponseHeaders`, `setResponseStatus`) are imported from `@tanstack/react-start/server`.
+Server utilities (`getRequest`, `getRequestHeader`, `setResponseHeader`, `setResponseHeaders`, `setResponseStatus`) are imported from `@tanstack/tanstack-react-start/server`.
 
 ## Full Project Setup
 
 ### 1. Install Dependencies
 
 ```bash
-npm i @tanstack/react-start @tanstack/react-router react react-dom
+npm i @tanstack/tanstack-react-start @tanstack/react-router react react-dom
 npm i -D vite @vitejs/plugin-react typescript @types/react @types/react-dom
 ```
 
@@ -66,7 +70,7 @@ npm i -D vite @vitejs/plugin-react typescript @types/react @types/react-dom
 
 ```ts
 import { defineConfig } from 'vite'
-import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import { tanstackStart } from '@tanstack/tanstack-react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 
 export default defineConfig({
@@ -141,7 +145,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 
 ```tsx
 import { createFileRoute } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
+import { createServerFn } from '@tanstack/tanstack-react-start'
 
 const getGreeting = createServerFn({ method: 'GET' }).handler(async () => {
   return 'Hello from TanStack Start!'
@@ -163,7 +167,7 @@ function HomePage() {
 Use `useServerFn` to call server functions from React components with proper integration:
 
 ```tsx
-import { createServerFn, useServerFn } from '@tanstack/react-start'
+import { createServerFn, useServerFn } from '@tanstack/tanstack-react-start'
 
 const updatePost = createServerFn({ method: 'POST' })
   .inputValidator((data: { id: string; title: string }) => data)
@@ -193,7 +197,7 @@ function EditPostForm({ postId }: { postId: string }) {
 ## Global Start Configuration (src/start.ts)
 
 ```tsx
-import { createStart, createMiddleware } from '@tanstack/react-start'
+import { createStart, createMiddleware } from '@tanstack/tanstack-react-start'
 
 const requestLogger = createMiddleware().server(async ({ next, request }) => {
   console.log(`${request.method} ${request.url}`)
@@ -242,8 +246,8 @@ All hooks from `@tanstack/react-router` work in Start:
 // WRONG — this is the SPA router, NOT Start
 import { createServerFn } from '@tanstack/react-router'
 
-// CORRECT — server functions come from react-start
-import { createServerFn } from '@tanstack/react-start'
+// CORRECT — server functions come from tanstack-react-start
+import { createServerFn } from '@tanstack/tanstack-react-start'
 
 // CORRECT — routing APIs come from react-router (re-exported by Start too)
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -267,6 +271,6 @@ Without `<Scripts />` in the root route's `<body>`, client JavaScript doesn't lo
 
 ## Cross-References
 
-- [tanstack-start-core](../tanstack-start-core/SKILL.md) — core Start concepts
-- [tanstack-router-core](../tanstack-router-core/SKILL.md) — routing fundamentals
-- [react-router](../../../react-router/skills/react-router/SKILL.md) — React Router hooks and components
+- [tanstack-tanstack-start](../tanstack-start/SKILL.md) — core Start concepts
+- [tanstack-tanstack-router](../tanstack-router/SKILL.md) — routing fundamentals
+- [react-router](../react-router/SKILL.md) — React Router hooks and components

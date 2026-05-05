@@ -8,8 +8,7 @@ from uuid import UUID
 import asyncpg
 from openai import AsyncOpenAI
 
-from app.domains.billing.application.workflows import report_usage_to_stripe
-from app.domains.billing.infrastructure.repository import record_llm_usage
+from app.domains.llm_usage.infrastructure.repository import record_llm_usage
 from app.integrations.openai import call_openai
 from app.shared.domain.LLMResponseData import LLMResponseData
 
@@ -87,6 +86,10 @@ async def prompt_optimization_workflow(
     if model_provider != "openai":
         raise ValueError(f"Context engineering requires an OpenAI model, got: {model_provider}")
 
+    template = await repo.fetch_template(conn, cmd.template_id)
+    if not template:
+        raise ValueError(f"Template not found: {cmd.template_id}")
+
     entity_types = await repo.fetch_entity_types_with_std(conn, cmd.project_id)
     if not entity_types:
         raise ValueError(f"No entity types for project: {cmd.project_id}")
@@ -101,10 +104,6 @@ async def prompt_optimization_workflow(
     if not labeled_pdfs:
         raise ValueError(f"No labeled PDFs with usable text for project: {cmd.project_id}")
 
-    # Split: first 2 for few-shot examples, rest for evaluation
-    few_shot_pdfs = labeled_pdfs[:2]
-    eval_pdfs = labeled_pdfs[2:] if len(labeled_pdfs) > 2 else labeled_pdfs
-
     _report_progress(
         task,
         "data_fetched",
@@ -118,16 +117,19 @@ async def prompt_optimization_workflow(
     json_schema = services.build_json_schema(entity_types)
 
     # 3. Generate initial prompt variants
-    base_prompt = services.build_base_system_prompt(project["description"], entity_types)
-    few_shot_text = services.format_few_shot_examples(few_shot_pdfs)
+    base_prompt = services.render_prompt_template(
+        template["txt"], project["description"], entity_types
+    )
     variants = services.generate_prompt_variants(base_prompt, entity_types, project["description"])
+    example_sets = services.select_prompt_example_sets(labeled_pdfs, max_examples=2)
 
     _report_progress(
         task,
         "prompts_prepared",
-        f"Generated {len(variants)} prompt variants",
+        f"Generated {len(variants)} prompt variants and {len(example_sets)} example sets",
         10,
         variants_count=len(variants),
+        example_set_count=len(example_sets),
     )
 
     # 4. Evaluate each variant, pick best
@@ -135,58 +137,75 @@ async def prompt_optimization_workflow(
     best_f1 = -1.0
     eval_results: list[EvaluationResult] = []
 
+    total_candidates = len(variants) * len(example_sets)
+    candidate_idx = 0
     for var_idx, system_prompt in enumerate(variants):
+        for example_pdfs in example_sets:
+            candidate_idx += 1
+            if budget.is_exhausted:
+                stop_reason = "max_cost_reached"
+                break
+
+            examples = services.build_prompt_example_snapshots(example_pdfs)
+            few_shot_text = services.format_prompt_example_snapshots(examples)
+            full_prompt = system_prompt
+            if few_shot_text:
+                full_prompt = system_prompt + "\n\n" + few_shot_text
+
+            candidate = PromptCandidate(system_prompt=full_prompt, iteration=0, examples=examples)
+            eval_pdfs = _evaluation_pdfs_for_examples(labeled_pdfs, example_pdfs)
+            eval_results = await _evaluate_prompt_on_pdfs(
+                conn,
+                openai_client,
+                candidate,
+                eval_pdfs,
+                json_schema,
+                entity_types,
+                cmd.model,
+                project_id=cmd.project_id,
+                budget=budget,
+            )
+            llm_call_count += len(eval_results)
+            if not eval_results:
+                stop_reason = "max_cost_reached"
+                break
+            avg_f1 = sum(r.overall_f1 for r in eval_results) / max(len(eval_results), 1)
+            candidate.overall_f1 = avg_f1
+            logger.info(
+                "Variant %d candidate %d F1: %.4f",
+                var_idx,
+                candidate_idx,
+                avg_f1,
+            )
+
+            variant_percent = max(
+                15 + (candidate_idx * 30 // max(total_candidates, 1)),
+                _budget_percent(budget, floor=15, ceiling=45),
+            )
+            _report_progress(
+                task,
+                "evaluating_variant",
+                f"Evaluated candidate {candidate_idx}/{total_candidates} - F1: {avg_f1:.3f}",
+                variant_percent,
+                variant=var_idx + 1,
+                candidate=candidate_idx,
+                total_candidates=total_candidates,
+                total_variants=len(variants),
+                f1=round(avg_f1, 4),
+                **_budget_details(budget),
+            )
+
+            if avg_f1 > best_f1:
+                best_f1 = avg_f1
+                best_candidate = candidate
         if budget.is_exhausted:
-            stop_reason = "max_cost_reached"
             break
-
-        full_prompt = system_prompt
-        if few_shot_text:
-            full_prompt = system_prompt + "\n\n" + few_shot_text
-
-        candidate = PromptCandidate(system_prompt=full_prompt, iteration=0)
-        eval_results = await _evaluate_prompt_on_pdfs(
-            conn,
-            openai_client,
-            candidate,
-            eval_pdfs,
-            json_schema,
-            entity_types,
-            cmd.model,
-            project_id=cmd.project_id,
-            budget=budget,
-        )
-        llm_call_count += len(eval_results)
-        if not eval_results:
-            stop_reason = "max_cost_reached"
-            break
-        avg_f1 = sum(r.overall_f1 for r in eval_results) / max(len(eval_results), 1)
-        candidate.overall_f1 = avg_f1
-        logger.info("Variant %d F1: %.4f", var_idx, avg_f1)
-
-        variant_percent = max(
-            15 + (var_idx * 30 // max(len(variants) - 1, 1)),
-            _budget_percent(budget, floor=15, ceiling=45),
-        )
-        _report_progress(
-            task,
-            "evaluating_variant",
-            f"Evaluated variant {var_idx + 1}/{len(variants)} - F1: {avg_f1:.3f}",
-            variant_percent,
-            variant=var_idx + 1,
-            total_variants=len(variants),
-            f1=round(avg_f1, 4),
-            **_budget_details(budget),
-        )
-
-        if avg_f1 > best_f1:
-            best_f1 = avg_f1
-            best_candidate = candidate
 
     if best_candidate is None:
         raise ValueError("Cost budget exhausted before any prompt could be evaluated")
 
     # 5. Iterative refinement
+    eval_pdfs = _evaluation_pdfs_for_candidate(labeled_pdfs, best_candidate)
     iteration = 0
     while not budget.is_exhausted:
         iteration += 1
@@ -260,7 +279,11 @@ async def prompt_optimization_workflow(
             stop_reason = "max_cost_reached"
             break
 
-        refined_candidate = PromptCandidate(system_prompt=llm_usage.text, iteration=iteration)
+        refined_candidate = PromptCandidate(
+            system_prompt=llm_usage.text,
+            iteration=iteration,
+            examples=best_candidate.examples,
+        )
         refined_results = await _evaluate_prompt_on_pdfs(
             conn,
             openai_client,
@@ -330,21 +353,26 @@ async def prompt_optimization_workflow(
     )
 
     prompt_id = await repo.insert_optimized_prompt(
-        conn, cmd.project_id, best_candidate.system_prompt
+        conn, cmd.project_id, cmd.template_id, best_candidate.system_prompt
     )
-    final_results, final_eval_results, final_pairs, final_llm_calls, final_skipped_count = (
-        await _evaluate_final_prompt_on_pdfs(
-            conn,
-            openai_client,
-            best_candidate,
-            labeled_pdfs,
-            json_schema,
-            entity_types,
-            cmd.model,
-            project_id=cmd.project_id,
-            prompt_id=prompt_id,
-            budget=budget,
-        )
+    await repo.insert_optimized_prompt_examples(conn, prompt_id, best_candidate.examples)
+    (
+        final_results,
+        final_eval_results,
+        final_pairs,
+        final_llm_calls,
+        final_skipped_count,
+    ) = await _evaluate_final_prompt_on_pdfs(
+        conn,
+        openai_client,
+        best_candidate,
+        labeled_pdfs,
+        json_schema,
+        entity_types,
+        cmd.model,
+        project_id=cmd.project_id,
+        prompt_id=prompt_id,
+        budget=budget,
     )
     llm_call_count += final_llm_calls
     skipped_pdf_count += final_skipped_count
@@ -380,8 +408,6 @@ async def prompt_optimization_workflow(
         stop_reason=stop_reason,
     )
     await repo.insert_context_engineering_predictions(conn, evaluation_id, final_pairs)
-    await report_usage_to_stripe(cmd.project_id)
-
     return {
         "best_prompt_id": str(prompt_id),
         "best_f1": final_f1,
@@ -410,6 +436,24 @@ def _usable_labeled_pdfs(labeled_pdfs: list[LabeledPdf]) -> tuple[list[LabeledPd
             continue
         usable.append(pdf)
     return usable, skipped_count
+
+
+def _evaluation_pdfs_for_examples(
+    labeled_pdfs: list[LabeledPdf],
+    example_pdfs: list[LabeledPdf],
+) -> list[LabeledPdf]:
+    example_ids = {pdf.pdf_id for pdf in example_pdfs}
+    held_out = [pdf for pdf in labeled_pdfs if pdf.pdf_id not in example_ids]
+    return held_out or labeled_pdfs
+
+
+def _evaluation_pdfs_for_candidate(
+    labeled_pdfs: list[LabeledPdf],
+    candidate: PromptCandidate,
+) -> list[LabeledPdf]:
+    example_ids = {ex.pdf_id for ex in candidate.examples}
+    held_out = [pdf for pdf in labeled_pdfs if pdf.pdf_id not in example_ids]
+    return held_out or labeled_pdfs
 
 
 async def _evaluate_final_prompt_on_pdfs(
@@ -497,32 +541,38 @@ async def _evaluate_prompt_on_pdfs(
         if budget.is_exhausted:
             break
 
-        llm_usage: LLMResponseData = await call_openai(
-            openai_client,
-            model,
-            candidate.system_prompt,
-            pdf.full_text or "",
-            schema=json_schema,
-            schema_name="ner_extraction",
-        )
-        usage_cost = await record_llm_usage(
-            conn,
-            model=model,
-            input_tokens=llm_usage.input_tokens,
-            output_tokens=llm_usage.output_tokens,
-            project_id=project_id,
-            task_name=_TASK_NAME,
-        )
-        budget.add_usage(usage_cost)
         try:
-            predicted = json.loads(llm_usage.text)
-        except json.JSONDecodeError:
-            logger.warning("Invalid JSON from LLM for PDF %s", pdf.pdf_id)
-            predicted = {}
+            llm_usage: LLMResponseData = await call_openai(
+                openai_client,
+                model,
+                candidate.system_prompt,
+                pdf.full_text or "",
+                schema=json_schema,
+                schema_name="ner_extraction",
+            )
+            usage_cost = await record_llm_usage(
+                conn,
+                model=model,
+                input_tokens=llm_usage.input_tokens,
+                output_tokens=llm_usage.output_tokens,
+                project_id=project_id,
+                task_name=_TASK_NAME,
+            )
+            budget.add_usage(usage_cost)
+            try:
+                predicted = json.loads(llm_usage.text)
+            except json.JSONDecodeError:
+                logger.warning("Invalid JSON from LLM for PDF %s", pdf.pdf_id)
+                predicted = {}
 
-        result = services.evaluate_predictions(predicted, pdf.ground_truth, entity_types)
-        result.prompt_candidate = candidate
-        results.append(result)
+            result = services.evaluate_predictions(predicted, pdf.ground_truth, entity_types)
+            result.prompt_candidate = candidate
+            results.append(result)
+        except Exception as exc:
+            logger.warning(
+                "Failed to evaluate prompt for pdf=%s: %s", pdf.pdf_id, exc, exc_info=True
+            )
+            continue
 
     return results
 

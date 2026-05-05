@@ -6,6 +6,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 
 from .config import settings
+from .health import build_readiness_checks, overall_status
 
 _OBS_PATH = Path(__file__).resolve().parents[3] / "packages" / "otel_py"
 if str(_OBS_PATH) not in sys.path:
@@ -95,43 +96,33 @@ def build_celery_headers(headers: MutableMapping[str, str] | None = None) -> dic
 
 @telemetry_router.get("/healthz")
 async def healthz() -> JSONResponse:
-    return JSONResponse(
-        {
-            "status": "healthy",
-            "service": _config.service,
-            "version": _config.version,
-            "env": _config.env,
-        }
-    )
+    return JSONResponse({"status": "healthy"})
 
 
 @telemetry_router.get("/readyz")
 async def readyz(request: Request) -> JSONResponse:
-    checks: dict[str, str] = {"database": "unknown", "redis": "unknown"}
+    pool = getattr(request.app.state, "pool", None)
+    redis = getattr(request.app.state, "redis", None)
+    checks = await build_readiness_checks(pool=pool, redis=redis)
+    status = overall_status(checks)
+    return JSONResponse({"status": status}, status_code=200 if status == "ready" else 503)
+
+
+@telemetry_router.get("/readyz/details")
+async def readyz_details(request: Request) -> JSONResponse:
+    expected = settings.HEALTHCHECK_TOKEN
+    provided = request.headers.get("X-Health-Check-Token")
+    if not expected or provided != expected:
+        return JSONResponse({"detail": "Unauthorized"}, status_code=401)
 
     pool = getattr(request.app.state, "pool", None)
-    checks["database"] = "ready" if pool is not None else "missing"
-
     redis = getattr(request.app.state, "redis", None)
-    if redis is None:
-        checks["redis"] = "missing"
-    else:
-        ping = getattr(redis, "ping", None)
-        if callable(ping):
-            try:
-                result = await ping()
-                checks["redis"] = "ready" if result else "degraded"
-            except Exception:
-                checks["redis"] = "error"
-        else:
-            checks["redis"] = "ready"
-
-    status_code = 200 if all(value == "ready" for value in checks.values()) else 503
-    body = {
-        "status": "ready" if status_code == 200 else "degraded",
-        "checks": checks,
-    }
-    return JSONResponse(body, status_code=status_code)
+    checks = await build_readiness_checks(pool=pool, redis=redis)
+    status = overall_status(checks)
+    return JSONResponse(
+        {"status": status, "checks": checks},
+        status_code=200 if status == "ready" else 503,
+    )
 
 
 @telemetry_router.get("/metrics")

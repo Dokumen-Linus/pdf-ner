@@ -1,11 +1,6 @@
 ---
 name: dokumen-cookies
 description: Isomorphic cookie management for TanStack Start -- getCookie (server/client), setCookie (server/client), setCookies (client-only batch). Import from @/lib/cookies. Built on createIsomorphicFn/createClientOnlyFn from @tanstack/react-start and js-cookie.
-sources:
-  - web/src/lib/cookies/getCookie.ts
-  - web/src/lib/cookies/setCookie.ts
-  - web/src/lib/cookies/setCookies.ts
-  - web/src/lib/cookies/cookies.test.ts
 ---
 
 ## Setup

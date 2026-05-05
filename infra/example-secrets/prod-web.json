@@ -1,0 +1,17 @@
+{
+  "DATABASE_URL": "postgres://web_user:REPLACE_ME@dokumen-prod.cluster-REPLACE_ME.us-east-1.rds.amazonaws.com:5432/dokumen?sslmode=require",
+  "AUTH_DATABASE_URL": "postgres://auth_role:REPLACE_ME@dokumen-prod.cluster-REPLACE_ME.us-east-1.rds.amazonaws.com:5432/dokumen?sslmode=require",
+  "WEB_DATABASE_URL": "postgres://web_user:REPLACE_ME@dokumen-prod.cluster-REPLACE_ME.us-east-1.rds.amazonaws.com:5432/dokumen?sslmode=require",
+  "BASE_URL": "https://dokumenai.dev",
+  "BETTER_AUTH_SECRET": "REPLACE_WITH_OUTPUT_OF_OPENSSL_RAND_BASE64_32",
+  "BETTER_AUTH_URL": "https://dokumenai.dev",
+  "STRIPE_SECRET_KEY": "sk_live_REPLACE_ME",
+  "API_URL": "http://api:8000",
+  "API_KEY": "REPLACE_WITH_SHARED_WEB_TO_API_KEY",
+  "HEALTHCHECK_TOKEN": "REPLACE_WITH_SHARED_HEALTHCHECK_TOKEN",
+  "PDF_STORAGE_AWS_ACCESS_KEY_ID": "REPLACE_ME",
+  "PDF_STORAGE_AWS_SECRET_ACCESS_KEY": "REPLACE_ME",
+  "PDF_STORAGE_AWS_REGION": "us-east-1",
+  "PDF_STORAGE_AWS_ENDPOINT_URL": null,
+  "OPENAI_API_KEY": "REPLACE_ME_OR_REMOVE_IF_UNUSED"
+}

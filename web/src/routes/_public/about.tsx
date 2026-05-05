@@ -77,7 +77,7 @@ function AboutPage() {
           {/* Replace this src with your own image in web/public/ to show your photo here. */}
           <img
             src="/about-photo-placeholder.svg"
-            alt="Charlie"
+            alt={m.about_founder_image_alt()}
             className="h-48 w-48 rounded-full border border-[#DADDE1] object-cover shadow-[0_18px_40px_rgba(23,26,32,0.08)]"
           />
 

@@ -12,11 +12,18 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(bind=True, name="context_engineering.optimize_prompt", max_retries=2)
-def optimize_prompt_task(self, project_id: str, max_cost_usd: str = "1.00", model: str = "gpt-4o"):
+def optimize_prompt_task(
+    self,
+    project_id: str,
+    template_id: int,
+    max_cost_usd: str = "1.00",
+    model: str = "gpt-4o",
+):
     """Celery task to optimize NER prompts for a project."""
     logger.info("Starting prompt optimization: project=%s", project_id)
     cmd = OptimizePrompt(
         project_id=UUID(project_id),
+        template_id=int(template_id),
         max_cost_usd=Decimal(max_cost_usd),
         model=model,
     )

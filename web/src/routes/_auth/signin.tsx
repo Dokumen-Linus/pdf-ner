@@ -40,7 +40,7 @@ function SignInPage() {
 
         if (error) {
           return {
-            form: error.message || "An error occurred during sign in",
+            form: error.message || m.auth_signin_error_fallback(),
           }
         }
 
@@ -69,7 +69,7 @@ function SignInPage() {
             <form.Field
               name="email"
               validators={{
-                onChange: ({ value }) => (!value ? "Email is required" : undefined),
+                onChange: ({ value }) => (!value ? m.auth_signin_email_required() : undefined),
               }}
               children={({ state, handleChange, handleBlur }) => (
                 <div className="space-y-2">
@@ -77,7 +77,7 @@ function SignInPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="m@example.com"
+                    placeholder={m.auth_signin_email_placeholder()}
                     value={state.value}
                     onChange={(e) => handleChange(e.target.value)}
                     onBlur={handleBlur}
@@ -94,7 +94,8 @@ function SignInPage() {
             <form.Field
               name="password"
               validators={{
-                onChange: ({ value }) => (!value ? "Password is required" : undefined),
+                onChange: ({ value }) =>
+                  !value ? m.auth_signin_password_required() : undefined,
               }}
               children={({ state, handleChange, handleBlur }) => (
                 <div className="space-y-2">

@@ -1,0 +1,97 @@
+name: Deploy Workers
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "workers/**"
+      - "packages/**"
+      - "infra/docker-compose.yml"
+      - "infra/health/**"
+      - ".github/workflows/deploy-workers.yml"
+
+concurrency:
+  group: deploy-workers
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  ECR_REPOSITORY: ${{ vars.WORKERS_ECR_REPOSITORY || 'dokumen-workers' }}
+  EC2_APP_DIR: ${{ vars.EC2_APP_DIR || '/opt/dokumen/pdf-ner' }}
+
+jobs:
+  deploy:
+    name: Build, Push, And Restart Workers
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "$ECR_REPOSITORY" >/dev/null 2>&1 \
+            || aws ecr create-repository --repository-name "$ECR_REPOSITORY" >/dev/null
+
+      - name: Log in to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push workers image
+        id: image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: workers/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+
+      - name: Deploy workers on EC2
+        env:
+          IMAGE: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+        run: |
+          cat > ssm-commands.json <<EOF
+          {
+            "commands": [
+              "set -e",
+              "cd ${EC2_APP_DIR}",
+              "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${{ steps.ecr-login.outputs.registry }}",
+              "cat > /tmp/dokumen-workers.override.yml <<'YAML'\nservices:\n  worker:\n    image: ${IMAGE}\nYAML",
+              "docker compose -f infra/docker-compose.yml -f /tmp/dokumen-workers.override.yml --env-file infra/.env.prod pull worker",
+              "docker compose -f infra/docker-compose.yml -f /tmp/dokumen-workers.override.yml --env-file infra/.env.prod up -d --no-build worker",
+              "bash infra/health/ec2-healthcheck.sh",
+              "docker image prune -f"
+            ]
+          }
+          EOF
+
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy workers ${{ github.sha }}" \
+            --parameters file://ssm-commands.json \
+            --query "Command.CommandId" \
+            --output text)
+
+          aws ssm wait command-executed \
+            --command-id "$COMMAND_ID" \
+            --instance-id "${{ secrets.EC2_INSTANCE_ID }}"
+
+          aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
+            --query "{Status:Status,StandardOutput:StandardOutputContent,StandardError:StandardErrorContent}" \
+            --output json

@@ -17,6 +17,12 @@ app.conf.task_track_started = True
 app.conf.task_serializer = "json"
 app.conf.result_serializer = "json"
 app.conf.accept_content = ["json"]
+app.conf.beat_schedule = {
+    "billing-charge-due-accounts": {
+        "task": "billing.charge_due_accounts",
+        "schedule": 900.0,
+    },
+}
 
 app.autodiscover_tasks(
     [

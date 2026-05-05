@@ -2,9 +2,10 @@ import { InferInsertModel, InferModel, InferSelectModel } from "drizzle-orm"
 
 import * as schema from "./schemas"
 import {
+  billingChargeAttempts,
   contextEngPreds,
   llmUsage,
-  llmUsageReportBatches,
+  optimizedPromptExamples,
   optimizedPrompts,
   promptEvaluations,
   workersPdfs,
@@ -97,8 +98,9 @@ export type FoundDbApiPdf = InferSelectModel<typeof schema.apiPdfs>
 
 // workers - read only
 export type LlmUsage = InferSelectModel<typeof llmUsage>
-export type LlmUsageReportBatch = InferSelectModel<typeof llmUsageReportBatches>
+export type BillingChargeAttempt = InferSelectModel<typeof billingChargeAttempts>
 export type FoundWorkersPdf = InferSelectModel<typeof workersPdfs>
 export type FoundOptimizedPrompt = InferSelectModel<typeof optimizedPrompts>
+export type FoundOptimizedPromptExample = InferSelectModel<typeof optimizedPromptExamples>
 export type FoundPromptEvaluation = InferSelectModel<typeof promptEvaluations>
 export type FoundContextEngPred = InferSelectModel<typeof contextEngPreds>

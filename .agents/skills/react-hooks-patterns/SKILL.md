@@ -1,6 +1,6 @@
 ---
 name: react-hooks-patterns
-description: Use when React Hooks patterns including useState, useEffect, useContext, useMemo, useCallback, and custom hooks. Use for modern React development.
+description: Use when planning use of React Hooks patterns including useState, useEffect, useContext, useMemo, useCallback, and custom hooks
 ---
 
 # React Hooks Patterns

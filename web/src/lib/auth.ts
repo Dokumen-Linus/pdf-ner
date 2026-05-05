@@ -5,11 +5,10 @@ import { haveIBeenPwned, organization } from "better-auth/plugins"
 import { defaultAc, ownerAc } from "better-auth/plugins/organization/access"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { eq, or, sql } from "drizzle-orm"
-import { drizzle } from "drizzle-orm/node-postgres"
 import { Pool } from "pg"
 
 import { db } from "../db/client"
-import { authMembers, authOrganizations, authTeamMembers, authTeams } from "../db/schemas/auth"
+import { authMembers } from "../db/schemas/auth"
 import { organizations, webTeams } from "../db/schemas/web"
 import { users } from "../db/schemas/web/users"
 import { env } from "../env.server"
@@ -25,7 +24,7 @@ import { sendEmail } from "./send-email"
 
 const trustedOrigins = [
   env.BETTER_AUTH_URL,
-  process.env.BASE_URL,
+  env.BASE_URL,
   "http://localhost:3000",
   "http://127.0.0.1:3000",
 ].filter((origin): origin is string => Boolean(origin))
@@ -34,20 +33,19 @@ const authDatabase = new Pool({
   connectionString: env.AUTH_DATABASE_URL,
 })
 
-const authDb = drizzle(authDatabase, {
-  schema: {
-    authOrganizations,
-    authMembers,
-    authTeams,
-    authTeamMembers,
-  },
-})
-
-const developerAc = defaultAc.newRole({
+const adminAc = defaultAc.newRole({
   organization: ["update"],
   member: ["create", "update", "delete"],
   invitation: ["create", "cancel"],
   team: ["create", "update", "delete"],
+  ac: ["read"],
+})
+
+const developerAc = defaultAc.newRole({
+  organization: [],
+  member: [],
+  invitation: [],
+  team: [],
   ac: ["read"],
 })
 
@@ -66,16 +64,26 @@ type BetterAuthUserRecord = {
   image?: string | null
 }
 
-function getDefaultWorkspaceName(user: BetterAuthUserRecord): string {
-  const name = user.name.trim()
-  if (name.length > 0) return `${name}'s workspace`
-  const emailPrefix = user.email.split("@")[0]?.trim()
-  if (emailPrefix) return `${emailPrefix}'s workspace`
-  return "Personal workspace"
+type OrganizationAccountRole = "admin" | "developer" | "analyst"
+
+function normalizeOrganizationRole(role: unknown): OrganizationAccountRole {
+  const rawRole = Array.isArray(role) ? role[0] : String(role ?? "")
+  const roleName = rawRole.split(",")[0]?.trim()
+  if (roleName === "admin" || roleName === "developer" || roleName === "analyst") {
+    return roleName
+  }
+  return "admin"
 }
 
-function getDefaultWorkspaceSlug(user: BetterAuthUserRecord): string {
-  return `workspace-${user.id.slice(0, 8).toLowerCase()}`
+function isAdminLikeOrganizationRole(role: unknown) {
+  const roles = Array.isArray(role) ? role : String(role ?? "").split(",")
+  return roles.some((value) => value.trim() === "admin" || value.trim() === "owner")
+}
+
+function addOneMonth(date: Date) {
+  const next = new Date(date)
+  next.setMonth(next.getMonth() + 1)
+  return next
 }
 
 const betterAuthMessageI18nPlugin = {
@@ -126,73 +134,79 @@ async function syncWebUserFromAuth(user: BetterAuthUserRecord) {
     return existing.id
   }
 
+  const createdAt = new Date()
   await db.insert(users).values({
     id: user.id,
     ...nextUserData,
+    billingStartedAt: createdAt,
+    nextPaymentAt: addOneMonth(createdAt),
+    billingStatus: "stripe_info_missing",
+    createdAt,
   })
 
   return user.id
+}
+
+async function syncWebUserForOrganizationMember({
+  authUser,
+  organizationId,
+  role,
+}: {
+  authUser: BetterAuthUserRecord
+  organizationId: string
+  role: unknown
+}) {
+  const webUserId = await syncWebUserFromAuth(authUser)
+  await db
+    .update(users)
+    .set({
+      organizationId,
+      role: normalizeOrganizationRole(role),
+      stripeCustomerId: null,
+      stripePaymentMethodId: null,
+      billingStartedAt: null,
+      nextPaymentAt: null,
+      lastPaymentAt: null,
+      billingStatus: "stripe_info_missing",
+      billingFailureCount: 0,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, webUserId))
+}
+
+async function assertOrganizationWillKeepAdmin({
+  organizationId,
+  memberId,
+  currentRole,
+  nextRole,
+}: {
+  organizationId: string
+  memberId: string
+  currentRole: unknown
+  nextRole?: unknown
+}) {
+  if (!isAdminLikeOrganizationRole(currentRole)) return
+  if (nextRole && isAdminLikeOrganizationRole(nextRole)) return
+
+  const rows = await db
+    .select({ id: authMembers.id, role: authMembers.role })
+    .from(authMembers)
+    .where(eq(authMembers.organizationId, organizationId))
+  const hasAnotherAdmin = rows.some(
+    (member) => member.id !== memberId && isAdminLikeOrganizationRole(member.role),
+  )
+
+  if (!hasAnotherAdmin) {
+    throw new APIError("BAD_REQUEST", {
+      message: "Each organization account must have at least one admin.",
+    })
+  }
 }
 
 async function deleteWebUserForAuthUser(authUserId: string) {
   await db
     .delete(users)
     .where(or(eq(users.authUserId, authUserId), sql`${users.id}::text = ${authUserId}`))
-}
-
-async function ensureDefaultWorkspaceForUser(user: BetterAuthUserRecord) {
-  const [existingMember] = await authDb
-    .select({ id: authMembers.id })
-    .from(authMembers)
-    .where(eq(authMembers.userId, user.id))
-    .limit(1)
-
-  if (existingMember) {
-    return
-  }
-
-  const organizationId = crypto.randomUUID()
-  const teamId = crypto.randomUUID()
-  const workspaceName = getDefaultWorkspaceName(user)
-  const workspaceSlug = getDefaultWorkspaceSlug(user)
-  const createdAt = new Date()
-
-  await authDb.transaction(async (tx) => {
-    await tx.insert(authOrganizations).values({
-      id: organizationId,
-      name: workspaceName,
-      slug: workspaceSlug,
-      createdAt,
-      metadata: JSON.stringify({ plan: "base", autoProvisioned: true }),
-    })
-
-    await tx.insert(authMembers).values({
-      id: crypto.randomUUID(),
-      organizationId,
-      userId: user.id,
-      role: "owner",
-      createdAt,
-    })
-
-    await tx.insert(authTeams).values({
-      id: teamId,
-      name: "Workspace",
-      organizationId,
-      createdAt,
-      updatedAt: createdAt,
-    })
-
-    await tx.insert(authTeamMembers).values({
-      id: crypto.randomUUID(),
-      teamId,
-      userId: user.id,
-      createdAt,
-    })
-  })
-
-  await db.insert(organizations).values({ id: organizationId, createdAt })
-  await db.insert(webTeams).values({ id: teamId, organizationId, createdAt })
-  await db.update(users).set({ organizationId }).where(eq(users.id, user.id))
 }
 
 export const auth = betterAuth({
@@ -218,7 +232,6 @@ export const auth = betterAuth({
         after: async (user) => {
           const authUser = user as BetterAuthUserRecord
           await syncWebUserFromAuth(authUser)
-          await ensureDefaultWorkspaceForUser(authUser)
         },
       },
       update: {
@@ -267,6 +280,7 @@ export const auth = betterAuth({
     organization({
       roles: {
         owner: ownerAc,
+        admin: adminAc,
         developer: developerAc,
         analyst: analystAc,
       },
@@ -281,10 +295,71 @@ export const auth = betterAuth({
         teamMember: { modelName: "auth.teamMember" },
       },
       organizationHooks: {
+        beforeRemoveMember: async ({ member }) => {
+          await assertOrganizationWillKeepAdmin({
+            organizationId: member.organizationId,
+            memberId: member.id,
+            currentRole: member.role,
+          })
+        },
+        beforeUpdateMemberRole: async ({ member, newRole }) => {
+          await assertOrganizationWillKeepAdmin({
+            organizationId: member.organizationId,
+            memberId: member.id,
+            currentRole: member.role,
+            nextRole: newRole,
+          })
+        },
+        afterAcceptInvitation: async ({ member, user }) => {
+          await syncWebUserForOrganizationMember({
+            authUser: user as BetterAuthUserRecord,
+            organizationId: member.organizationId,
+            role: member.role,
+          })
+          await db
+            .update(organizations)
+            .set({ nUsers: sql`${organizations.nUsers} + 1`, updatedAt: new Date() })
+            .where(eq(organizations.id, member.organizationId))
+        },
+        afterRemoveMember: async ({ member, user }) => {
+          await db
+            .update(users)
+            .set({
+              organizationId: null,
+              role: "individual",
+              stripeCustomerId: null,
+              stripePaymentMethodId: null,
+              billingStartedAt: null,
+              nextPaymentAt: null,
+              lastPaymentAt: null,
+              billingStatus: "stripe_info_missing",
+              billingFailureCount: 0,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.authUserId, user.id))
+          await db
+            .update(organizations)
+            .set({
+              nUsers: sql`GREATEST(${organizations.nUsers} - 1, 1)`,
+              updatedAt: new Date(),
+            })
+            .where(eq(organizations.id, member.organizationId))
+        },
+        afterUpdateMemberRole: async ({ member, user }) => {
+          await syncWebUserForOrganizationMember({
+            authUser: user as BetterAuthUserRecord,
+            organizationId: member.organizationId,
+            role: member.role,
+          })
+        },
         afterCreateOrganization: async ({ organization }) => {
+          const createdAt = new Date(organization.createdAt)
           await db.insert(organizations).values({
             id: organization.id,
-            createdAt: new Date(organization.createdAt),
+            billingStartedAt: createdAt,
+            nextPaymentAt: addOneMonth(createdAt),
+            billingStatus: "stripe_info_missing",
+            createdAt,
           })
         },
         afterCreateTeam: async ({ team }) => {

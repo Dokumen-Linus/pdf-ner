@@ -1,6 +1,6 @@
 ---
 name: react-context-patterns
-description: Use when React Context patterns for state management. Use when sharing state across component trees without prop drilling.
+description: Use when planning state management across React components. Teaches to use React Context patterns without prop drilling.
 ---
 
 # React Context Patterns

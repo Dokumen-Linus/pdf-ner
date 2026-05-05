@@ -1,4 +1,6 @@
 .env
+infra/init/.env.local
+infra/init/local-secrets/
 
 *.log
 logfile

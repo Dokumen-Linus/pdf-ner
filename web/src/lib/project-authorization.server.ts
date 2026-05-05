@@ -15,7 +15,9 @@ export type WorkspaceUserContext = {
   userId: string
   authUserId: string
   email: string
-  subscriptionType: "developer" | "analyst"
+  accountRole: "individual" | "admin" | "developer" | "analyst"
+  billingStatus: string
+  hasPaymentMethod: boolean
 }
 
 type ProjectAccessMode = "read" | "label" | "manage"
@@ -32,8 +34,9 @@ export type ProjectAccessContext = WorkspaceUserContext & {
   canManage: boolean
 }
 
-function normalizeSubscriptionType(value: string | null): WorkspaceUserContext["subscriptionType"] {
-  return value === "analyst" ? "analyst" : "developer"
+function normalizeRole(value: string | null): WorkspaceUserContext["accountRole"] {
+  if (value === "admin" || value === "developer" || value === "analyst") return value
+  return "individual"
 }
 
 async function resolveWorkspaceUserByAuthUserId(authUserId: string): Promise<WorkspaceUserContext> {
@@ -42,7 +45,9 @@ async function resolveWorkspaceUserByAuthUserId(authUserId: string): Promise<Wor
       userId: users.id,
       authUserId: users.authUserId,
       email: users.email,
-      subscriptionType: users.subscriptionType,
+      accountRole: users.role,
+      billingStatus: users.billingStatus,
+      stripePaymentMethodId: users.stripePaymentMethodId,
     })
     .from(users)
     .where(or(eq(users.authUserId, authUserId), sql`${users.id}::text = ${authUserId}`))
@@ -56,7 +61,9 @@ async function resolveWorkspaceUserByAuthUserId(authUserId: string): Promise<Wor
     userId: user.userId,
     authUserId: user.authUserId ?? authUserId,
     email: user.email,
-    subscriptionType: normalizeSubscriptionType(user.subscriptionType),
+    accountRole: normalizeRole(user.accountRole),
+    billingStatus: user.billingStatus,
+    hasPaymentMethod: user.stripePaymentMethodId != null,
   }
 }
 
@@ -66,7 +73,9 @@ async function resolveWorkspaceUserByWebUserId(userId: string): Promise<Workspac
       userId: users.id,
       authUserId: users.authUserId,
       email: users.email,
-      subscriptionType: users.subscriptionType,
+      accountRole: users.role,
+      billingStatus: users.billingStatus,
+      stripePaymentMethodId: users.stripePaymentMethodId,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -80,7 +89,9 @@ async function resolveWorkspaceUserByWebUserId(userId: string): Promise<Workspac
     userId: user.userId,
     authUserId: user.authUserId ?? user.userId,
     email: user.email,
-    subscriptionType: normalizeSubscriptionType(user.subscriptionType),
+    accountRole: normalizeRole(user.accountRole),
+    billingStatus: user.billingStatus,
+    hasPaymentMethod: user.stripePaymentMethodId != null,
   }
 }
 
@@ -134,7 +145,7 @@ async function getProjectAccessContextForUser(
   }
 
   const isOwner = row.ownerId === user.userId || row.ownerAuthUserId === user.authUserId
-  const role = isOwner ? "owner" : row.teamMemberId ? row.organizationRole : null
+  const role = isOwner ? "admin" : row.teamMemberId ? row.organizationRole : null
   const canRead = role != null && LABEL_PROJECT_ROLES.has(role)
   const canLabel = canRead
   const canManage = role != null && MANAGE_PROJECT_ROLES.has(role)

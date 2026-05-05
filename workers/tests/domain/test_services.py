@@ -19,11 +19,14 @@ from app.domains.context_engineering.domain.services import (
     build_error_analysis,
     build_final_run_metrics,
     build_json_schema,
+    build_prompt_example_snapshots,
     build_refinement_prompt,
     evaluate_final_pdf_predictions,
     evaluate_predictions,
     format_few_shot_examples,
     generate_prompt_variants,
+    render_prompt_template,
+    select_prompt_example_sets,
 )
 from app.domains.context_engineering.domain.value_objects import EntityMatch, F1Score
 
@@ -240,6 +243,33 @@ class TestFormatFewShotExamples:
         output = json.loads(parsed_section)
         assert isinstance(output["phone_numbers"], list)
 
+    def test_builds_example_snapshot_for_persistence(self, labeled_pdf_1):
+        snapshots = build_prompt_example_snapshots([labeled_pdf_1], max_examples=1)
+
+        assert len(snapshots) == 1
+        assert snapshots[0].pdf_id == labeled_pdf_1.pdf_id
+        assert snapshots[0].example_order == 0
+        assert "John Smith" in snapshots[0].text_excerpt
+        assert snapshots[0].labelled_entities["full_name"] == "John Smith"
+
+
+class TestRenderPromptTemplate:
+    def test_replaces_supported_placeholders(self, entity_types):
+        template = (
+            "<PROJECT_DESCRIPTION>|<ENTITY_TYPES>|<DEFINITIONS>|<EXAMPLE_VALUES>|"
+            "<CONSTRAINTS>|<IS_REQUIRED>|<IS_UNIQUE>"
+        )
+
+        result = render_prompt_template(template, "Invoices", entity_types)
+
+        assert "<PROJECT_DESCRIPTION>" not in result
+        assert "Invoices" in result
+        assert "full_name" in result
+        assert "The person's full legal name" in result
+        assert "John Smith" in result
+        assert "single word only" in result
+        assert "True" in result
+
 
 class TestGeneratePromptVariants:
     def test_returns_three_variants(self, entity_types):
@@ -255,8 +285,8 @@ class TestGeneratePromptVariants:
     def test_variant_1_is_concise(self, entity_types):
         base = "Base prompt text"
         variants = generate_prompt_variants(base, entity_types, "Invoice")
-        assert "Extract these fields" in variants[1]
-        assert "Invoice" in variants[1]
+        assert "Precision Guidance" in variants[1]
+        assert base in variants[1]
 
     def test_variant_1_without_description(self, entity_types):
         variants = generate_prompt_variants("base", entity_types, None)
@@ -270,8 +300,13 @@ class TestGeneratePromptVariants:
 
     def test_entity_names_in_concise(self, entity_types):
         variants = generate_prompt_variants("base", entity_types, None)
-        for et in entity_types:
-            assert et.name in variants[1]
+        assert "base" in variants[1]
+
+    def test_selects_first_and_coverage_example_sets(self, labeled_pdf_1, labeled_pdf_2, labeled_pdf_3):
+        sets = select_prompt_example_sets([labeled_pdf_3, labeled_pdf_1, labeled_pdf_2])
+
+        assert [pdf.pdf_id for pdf in sets[0]] == [labeled_pdf_3.pdf_id, labeled_pdf_1.pdf_id]
+        assert [pdf.pdf_id for pdf in sets[1]] == [labeled_pdf_1.pdf_id, labeled_pdf_2.pdf_id]
 
 
 class TestBuildRefinementPrompt:

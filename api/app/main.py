@@ -6,8 +6,8 @@ from .api import api_router
 from .core.config import settings
 from .core.exceptions import register_exception_handlers
 from .core.lifespan import lifespan
+from .core.logging import telemetry_router
 from .core.middleware import RequestIDMiddleware, RequestLoggingMiddleware
-from .core.telemetry import telemetry_router
 
 app = FastAPI(
     lifespan=lifespan,
@@ -30,7 +30,13 @@ app.add_middleware(
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allow_headers=["Content-Type", "Authorization", "X-API-Key", "X-Request-ID"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "X-API-Key",
+        "X-Request-ID",
+        "X-Health-Check-Token",
+    ],
     expose_headers=["X-Request-ID"],
 )
 

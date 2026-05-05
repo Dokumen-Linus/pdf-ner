@@ -1,11 +1,22 @@
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 from fastapi import FastAPI
 import httpx
 import pytest
 
-from app.core.middleware import RequestIDMiddleware, RequestLoggingMiddleware
 from app.core.logging import get_metrics_registry, telemetry_router
+from app.core.middleware import RequestIDMiddleware, RequestLoggingMiddleware
+
+
+class AcquireContext:
+    def __init__(self, conn):
+        self.conn = conn
+
+    async def __aenter__(self):
+        return self.conn
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return None
 
 
 @pytest.fixture
@@ -21,8 +32,12 @@ def telemetry_app():
 
     redis = AsyncMock()
     redis.ping = AsyncMock(return_value=True)
+    conn = AsyncMock()
+    conn.fetchval = AsyncMock(return_value=True)
+    pool = MagicMock()
+    pool.acquire.return_value = AcquireContext(conn)
     app.state.redis = redis
-    app.state.pool = object()
+    app.state.pool = pool
     return app
 
 
@@ -75,4 +90,69 @@ async def test_readyz_reports_dependencies(telemetry_app):
     ) as client:
         response = await client.get("/readyz")
         assert response.status_code == 200
-        assert response.json()["checks"] == {"database": "ready", "redis": "ready"}
+        assert response.json() == {"status": "ready"}
+
+
+@pytest.mark.anyio
+async def test_readyz_details_requires_token(telemetry_app):
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=telemetry_app),
+        base_url="http://test",
+    ) as client:
+        assert (await client.get("/readyz/details")).status_code == 401
+        assert (
+            await client.get("/readyz/details", headers={"X-Health-Check-Token": "wrong"})
+        ).status_code == 401
+
+
+@pytest.mark.anyio
+async def test_readyz_details_reports_dependency_checks(telemetry_app):
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=telemetry_app),
+        base_url="http://test",
+    ) as client:
+        response = await client.get(
+            "/readyz/details",
+            headers={"X-Health-Check-Token": "test-health-token"},
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["status"] == "ready"
+        assert body["checks"]["redis"] == "ready"
+        assert body["checks"]["table:api.aws_buckets"] == "ready"
+        assert body["checks"]["table:api.pdfs"] == "ready"
+        assert body["checks"]["table:api.prompts"] == "ready"
+        assert body["checks"]["privilege:workers.llm_usage:insert"] == "ready"
+
+
+@pytest.mark.anyio
+async def test_readyz_schema_probe_failure_returns_503(telemetry_app):
+    conn = AsyncMock()
+    conn.fetchval = AsyncMock(side_effect=[True, False, True, True])
+    pool = MagicMock()
+    pool.acquire.return_value = AcquireContext(conn)
+    telemetry_app.state.pool = pool
+
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=telemetry_app),
+        base_url="http://test",
+    ) as client:
+        response = await client.get("/readyz")
+        assert response.status_code == 503
+        assert response.json() == {"status": "unready"}
+
+
+@pytest.mark.anyio
+async def test_readyz_redis_failure_returns_503(telemetry_app):
+    telemetry_app.state.redis.ping.side_effect = RuntimeError("redis down")
+
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=telemetry_app),
+        base_url="http://test",
+    ) as client:
+        response = await client.get(
+            "/readyz/details",
+            headers={"X-Health-Check-Token": "test-health-token"},
+        )
+        assert response.status_code == 503
+        assert response.json()["checks"]["redis"] == "unready"

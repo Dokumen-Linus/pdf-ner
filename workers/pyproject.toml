@@ -12,12 +12,14 @@ dependencies = [
   "redis",
   "celery",
   "boto3",
+  "dokumen-aws-secrets",
   "httpx",
   "pdf-ocr-utils",
   "pdfium-utils",
   "pillow",
   "pytesseract",
   "otel-py",
+  "stripe>=12.0.0",
 ]
 
 [project.optional-dependencies]
@@ -80,3 +82,4 @@ dokumen-llm-providers = { path = "../packages/llm_providers" }
 pdf-ocr-utils = { path = "../packages/pdf_ocr_utils" }
 pdfium-utils = { path = "../packages/pdfium_utils" }
 otel-py = { path = "../packages/otel_py" }
+dokumen-aws-secrets = { path = "../packages/aws_secrets_config" }

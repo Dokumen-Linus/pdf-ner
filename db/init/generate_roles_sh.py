@@ -33,6 +33,7 @@ psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER:-postgres}" --dbname "${POST
 
     -- privileges on schemas
     GRANT USAGE, CREATE ON SCHEMA public TO owner_role;
+    GRANT USAGE ON SCHEMA auth TO owner_role;
     GRANT USAGE ON SCHEMA public TO web_user, api_user, workers_user;
     GRANT USAGE ON SCHEMA web TO web_user, api_user, workers_user;
     GRANT USAGE ON SCHEMA api TO web_user, api_user, workers_user;

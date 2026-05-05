@@ -11,8 +11,8 @@ from pdf_ocr_utils import (
     extract_text_from_pdf_by_page_via_image_bytes,
     make_runpod_ocr_client,
 )
-from pdfium_utils import extract_text_by_page as extract_pdfium_text_by_page
-from pdfium_utils import highlight_phrases
+from pdfium_utils.annotate import extract_text_by_page as extract_pdfium_text_by_page
+from pdfium_utils.search_and_annotate import highlight_phrases
 
 from app.core.config import settings
 from app.integrations import s3

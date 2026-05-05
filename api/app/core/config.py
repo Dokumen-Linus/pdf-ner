@@ -1,6 +1,7 @@
 from enum import Enum
 from functools import lru_cache
 
+from dokumen_aws_secrets import load_stage_groups
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,6 +18,7 @@ class Settings(BaseSettings):
     API_DATABASE_URL: str
     REDIS_URL: str
     API_KEY: str
+    HEALTHCHECK_TOKEN: str | None = None
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
     ALLOWED_HOSTS: list[str] = ["localhost", "127.0.0.1"]
 
@@ -24,7 +26,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     GOOGLE_AI_API_KEY: str
 
-    AVATARS_BUCKET: str
+    AVATARS_S3_BUCKET_NAME: str
     AVATARS_AWS_ACCESS_KEY_ID: str
     AVATARS_AWS_SECRET_ACCESS_KEY: str
     AVATARS_AWS_REGION: str = "us-east-1"
@@ -50,7 +52,8 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    secret_values = load_stage_groups(groups=["api", "runpod"])
+    return Settings(**secret_values)
 
 
 settings = get_settings()

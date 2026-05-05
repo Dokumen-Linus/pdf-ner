@@ -78,6 +78,7 @@ class PromptCandidate:
 
     system_prompt: str
     iteration: int
+    examples: list[PromptExampleSnapshot] = field(default_factory=list)
     scores: dict[str, F1Score] | None = None
     overall_f1: float | None = None
     error_analysis: str | None = None
@@ -103,6 +104,16 @@ class FinalPredictionPair:
     entity_type_id: UUID
     labelled_value: str | None
     predicted_value: str | None
+
+
+@dataclass(frozen=True)
+class PromptExampleSnapshot:
+    """A labeled PDF snapshot copied into the final prompt as an example."""
+
+    pdf_id: UUID
+    example_order: int
+    text_excerpt: str
+    labelled_entities: dict[str, str | list[str]]
 
 
 @dataclass(frozen=True)
