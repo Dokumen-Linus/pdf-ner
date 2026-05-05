@@ -147,6 +147,7 @@ async def mark_charge_success(
     attempt_id: UUID,
     account_type: str,
     account_id: str,
+    period_end,
     payment_intent_id: str,
 ) -> None:
     async with conn.transaction():
@@ -166,11 +167,12 @@ async def mark_charge_success(
                 SET billing_status = 'active',
                     billing_failure_count = 0,
                     last_payment_at = now(),
-                    next_payment_at = now() + interval '1 month',
+                    next_payment_at = $2::timestamptz + interval '1 month',
                     updated_at = now()
                 WHERE id = $1::uuid
                 """,
                 account_id,
+                period_end,
             )
         else:
             await conn.execute(
@@ -179,11 +181,12 @@ async def mark_charge_success(
                 SET billing_status = 'active',
                     billing_failure_count = 0,
                     last_payment_at = now(),
-                    next_payment_at = now() + interval '1 month',
+                    next_payment_at = $2::timestamptz + interval '1 month',
                     updated_at = now()
                 WHERE id = $1
                 """,
                 account_id,
+                period_end,
             )
 
 
@@ -213,12 +216,10 @@ async def mark_charge_failure(
                 UPDATE web.users
                 SET billing_status = 'past_due',
                     billing_failure_count = billing_failure_count + 1,
-                    next_payment_at = $2,
                     updated_at = now()
                 WHERE id = $1::uuid
                 """,
                 account_id,
-                retry_after,
             )
         else:
             await conn.execute(
@@ -226,10 +227,8 @@ async def mark_charge_failure(
                 UPDATE web.organizations
                 SET billing_status = 'past_due',
                     billing_failure_count = billing_failure_count + 1,
-                    next_payment_at = $2,
                     updated_at = now()
                 WHERE id = $1
                 """,
                 account_id,
-                retry_after,
             )

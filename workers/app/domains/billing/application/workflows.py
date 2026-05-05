@@ -74,6 +74,7 @@ async def _charge_account(conn, *, account_type: str, row: Any) -> str:
             attempt_id=attempt["id"],
             account_type=account_type,
             account_id=account_id,
+            period_end=period_end,
             payment_intent_id=f"zero_due_{attempt['id']}",
         )
         return "succeeded"
@@ -101,6 +102,7 @@ async def _charge_account(conn, *, account_type: str, row: Any) -> str:
             attempt_id=attempt["id"],
             account_type=account_type,
             account_id=account_id,
+            period_end=period_end,
             payment_intent_id=intent["id"],
         )
         return "succeeded"

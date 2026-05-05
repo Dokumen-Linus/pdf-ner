@@ -23,7 +23,7 @@ const getPaymentGate = createServerFn({ method: "GET" }).handler(async () => {
   const user = await requireWorkspaceUser()
   if (user.accountRole === "individual") {
     return {
-      ready: user.hasPaymentMethod && user.billingStatus !== "payment_required",
+      ready: user.hasPaymentMethod && user.billingStatus !== "stripe_info_missing",
     }
   }
   const [row] = await db
@@ -36,7 +36,7 @@ const getPaymentGate = createServerFn({ method: "GET" }).handler(async () => {
     .where(eq(users.id, user.userId))
     .limit(1)
   return {
-    ready: Boolean(row?.stripePaymentMethodId) && row?.billingStatus !== "payment_required",
+    ready: Boolean(row?.stripePaymentMethodId) && row?.billingStatus !== "stripe_info_missing",
   }
 })
 

@@ -80,6 +80,12 @@ function isAdminLikeOrganizationRole(role: unknown) {
   return roles.some((value) => value.trim() === "admin" || value.trim() === "owner")
 }
 
+function addOneMonth(date: Date) {
+  const next = new Date(date)
+  next.setMonth(next.getMonth() + 1)
+  return next
+}
+
 const betterAuthMessageI18nPlugin = {
   id: "dokumen-better-auth-message-i18n",
   version: "1.0.0",
@@ -128,9 +134,14 @@ async function syncWebUserFromAuth(user: BetterAuthUserRecord) {
     return existing.id
   }
 
+  const createdAt = new Date()
   await db.insert(users).values({
     id: user.id,
     ...nextUserData,
+    billingStartedAt: createdAt,
+    nextPaymentAt: addOneMonth(createdAt),
+    billingStatus: "stripe_info_missing",
+    createdAt,
   })
 
   return user.id
@@ -156,7 +167,7 @@ async function syncWebUserForOrganizationMember({
       billingStartedAt: null,
       nextPaymentAt: null,
       lastPaymentAt: null,
-      billingStatus: "active",
+      billingStatus: "stripe_info_missing",
       billingFailureCount: 0,
       updatedAt: new Date(),
     })
@@ -316,7 +327,13 @@ export const auth = betterAuth({
             .set({
               organizationId: null,
               role: "individual",
-              billingStatus: "payment_required",
+              stripeCustomerId: null,
+              stripePaymentMethodId: null,
+              billingStartedAt: null,
+              nextPaymentAt: null,
+              lastPaymentAt: null,
+              billingStatus: "stripe_info_missing",
+              billingFailureCount: 0,
               updatedAt: new Date(),
             })
             .where(eq(users.authUserId, user.id))
@@ -336,9 +353,13 @@ export const auth = betterAuth({
           })
         },
         afterCreateOrganization: async ({ organization }) => {
+          const createdAt = new Date(organization.createdAt)
           await db.insert(organizations).values({
             id: organization.id,
-            createdAt: new Date(organization.createdAt),
+            billingStartedAt: createdAt,
+            nextPaymentAt: addOneMonth(createdAt),
+            billingStatus: "stripe_info_missing",
+            createdAt,
           })
         },
         afterCreateTeam: async ({ team }) => {

@@ -88,6 +88,37 @@ async function ensureStripeCustomer(target: AccountTarget) {
   return customer.id
 }
 
+export const getBillingAccount = createServerFn({ method: "GET" }).handler(async () => {
+  const target = await requireAccountTarget()
+  if (!target.customerId) {
+    return {
+      type: target.type,
+      stripeCustomerId: target.customerId,
+      stripePaymentMethodId: target.paymentMethodId,
+      paymentMethods: [],
+    }
+  }
+
+  const methods = await getStripe().paymentMethods.list({
+    customer: target.customerId,
+    type: "card",
+  })
+
+  return {
+    type: target.type,
+    stripeCustomerId: target.customerId,
+    stripePaymentMethodId: target.paymentMethodId,
+    paymentMethods: methods.data.map((method) => ({
+      id: method.id,
+      brand: method.card?.brand ?? null,
+      last4: method.card?.last4 ?? null,
+      expMonth: method.card?.exp_month ?? null,
+      expYear: method.card?.exp_year ?? null,
+      isDefault: method.id === target.paymentMethodId,
+    })),
+  }
+})
+
 export const createSetupIntent = createServerFn({ method: "POST" }).handler(async () => {
   const target = await requireAccountTarget()
   const customerId = await ensureStripeCustomer(target)
@@ -129,7 +160,7 @@ export const confirmSetupIntent = createServerFn({ method: "POST" })
               : (setupIntent.customer?.id ?? target.customerId),
           stripePaymentMethodId: paymentMethodId,
           billingStartedAt: sql`COALESCE(${users.billingStartedAt}, ${now})`,
-          nextPaymentAt: sql`COALESCE(${users.nextPaymentAt}, NOW() + INTERVAL '1 month')`,
+          nextPaymentAt: sql`COALESCE(${users.nextPaymentAt}, COALESCE(${users.billingStartedAt}, ${now}) + INTERVAL '1 month')`,
           billingStatus: "active",
           billingFailureCount: 0,
           updatedAt: now,
@@ -145,7 +176,7 @@ export const confirmSetupIntent = createServerFn({ method: "POST" })
               : (setupIntent.customer?.id ?? target.customerId),
           stripePaymentMethodId: paymentMethodId,
           billingStartedAt: sql`COALESCE(${organizations.billingStartedAt}, ${now})`,
-          nextPaymentAt: sql`COALESCE(${organizations.nextPaymentAt}, NOW() + INTERVAL '1 month')`,
+          nextPaymentAt: sql`COALESCE(${organizations.nextPaymentAt}, COALESCE(${organizations.billingStartedAt}, ${now}) + INTERVAL '1 month')`,
           billingStatus: "active",
           billingFailureCount: 0,
           updatedAt: now,
@@ -280,7 +311,7 @@ export const upgradeIndividualToOrganization = createServerFn({ method: "POST" }
           billingStartedAt: null,
           nextPaymentAt: null,
           lastPaymentAt: null,
-          billingStatus: "active",
+          billingStatus: "stripe_info_missing",
           billingFailureCount: 0,
           updatedAt: createdAt,
         })
