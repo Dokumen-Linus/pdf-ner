@@ -124,7 +124,7 @@ async def create_charge_attempt(
                 $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         ON CONFLICT (idempotency_key) DO UPDATE
         SET idempotency_key = EXCLUDED.idempotency_key
-        RETURNING id, total_amount_cents
+        RETURNING id, total_amount_cents, status
         """,
         account_type,
         account_id,

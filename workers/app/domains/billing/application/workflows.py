@@ -12,19 +12,15 @@ from ..infrastructure import repository as repo
 
 logger = logging.getLogger(__name__)
 
-STRIPE_API_VERSION = "2026-04-22.dahlia"
 
-
-def _get_stripe() -> Any:
+def _get_stripe_client():
     import stripe
 
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-    stripe.api_version = STRIPE_API_VERSION
-    return stripe
+    return stripe.StripeClient(api_key=settings.STRIPE_SECRET_KEY)
 
 
 def _period_start(row: Any):
-    return row["last_payment_at"] or row["billing_started_at"] or row["next_payment_at"]
+    return row["last_payment_at"] or row["billing_started_at"]
 
 
 def _retry_after(failure_count: int, now):
@@ -54,7 +50,9 @@ async def _charge_account(conn, *, account_type: str, row: Any) -> str:
         base_amount_cents = repo.BASE_PRICE_CENTS * int(row["n_users"])
 
     usage_cost_usd = Decimal(str(usage["usage_cost_usd"]))
-    idempotency_key = f"billing:{account_type}:{account_id}:{period_start.isoformat()}:{period_end.isoformat()}"
+    idempotency_key = (
+        f"billing:{account_type}:{account_id}:{period_start.isoformat()}:{period_end.isoformat()}"
+    )
     attempt = await repo.create_charge_attempt(
         conn,
         account_type=account_type,
@@ -68,6 +66,8 @@ async def _charge_account(conn, *, account_type: str, row: Any) -> str:
         stripe_payment_method_id=row["stripe_payment_method_id"],
         idempotency_key=idempotency_key,
     )
+    if attempt["status"] == "succeeded":
+        return "succeeded"
     if attempt["total_amount_cents"] <= 0:
         await repo.mark_charge_success(
             conn,
@@ -78,21 +78,23 @@ async def _charge_account(conn, *, account_type: str, row: Any) -> str:
         )
         return "succeeded"
 
-    stripe = _get_stripe()
+    stripe_client = _get_stripe_client()
     try:
-        intent = stripe.PaymentIntent.create(
-            amount=attempt["total_amount_cents"],
-            currency="usd",
-            customer=row["stripe_customer_id"],
-            payment_method=row["stripe_payment_method_id"],
-            confirm=True,
-            off_session=True,
-            metadata={
-                "account_type": account_type,
-                "account_id": account_id,
-                "billing_charge_attempt_id": str(attempt["id"]),
+        intent = stripe_client.v1.payment_intents.create(
+            {
+                "amount": attempt["total_amount_cents"],
+                "currency": "usd",
+                "customer": row["stripe_customer_id"],
+                "payment_method": row["stripe_payment_method_id"],
+                "confirm": True,
+                "off_session": True,
+                "metadata": {
+                    "account_type": account_type,
+                    "account_id": account_id,
+                    "billing_charge_attempt_id": str(attempt["id"]),
+                },
             },
-            idempotency_key=idempotency_key,
+            {"idempotency_key": idempotency_key},
         )
         await repo.mark_charge_success(
             conn,
@@ -125,13 +127,13 @@ async def charge_due_accounts(*, limit: int = 100) -> dict[str, int]:
             individuals = await repo.fetch_due_individuals(conn, limit=limit)
             organizations = await repo.fetch_due_organizations(conn, limit=limit)
 
-        for row in individuals:
-            status = await _charge_account(conn, account_type="individual", row=row)
-            succeeded += int(status == "succeeded")
-            failed += int(status == "failed")
-        for row in organizations:
-            status = await _charge_account(conn, account_type="organization", row=row)
-            succeeded += int(status == "succeeded")
-            failed += int(status == "failed")
+            for row in individuals:
+                status = await _charge_account(conn, account_type="individual", row=row)
+                succeeded += int(status == "succeeded")
+                failed += int(status == "failed")
+            for row in organizations:
+                status = await _charge_account(conn, account_type="organization", row=row)
+                succeeded += int(status == "succeeded")
+                failed += int(status == "failed")
 
     return {"succeeded": succeeded, "failed": failed}
