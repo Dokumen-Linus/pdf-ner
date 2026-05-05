@@ -124,6 +124,78 @@ The database schemas are defined in:
 
 ./tanstack-start-docs/* contains the most recent docs displayed on tanstack.com in Markdown
 
+### src Layout
+
+web/src/
+├── api-fns/               # Functions for external API calls (FastAPI, etc.)
+│   ├── api-json-call.server.ts
+│   ├── api-stream-proxy.server.ts
+│   └── ...
+├── components/            # React components
+│   ├── custom/            # Custom reusable components
+│   ├── shadcn-ui/         # shadcn/ui components
+│   ├── pdf-container/     # PDF rendering components
+│   └── ...
+├── db/                    # Database schemas and client
+│   ├── client.ts          # Drizzle ORM client
+│   ├── schemas/           # Drizzle TypeScript schemas
+│   └── types.d.ts         # TypeScript types generated from schemas
+├── db-fns/                # Database server functions
+│   ├── web/               # Functions for web schema
+│   ├── api/               # Functions for api schema
+│   ├── workers/           # Functions for workers schema
+│   └── public/            # Functions for public schema
+├── emails/                # Email templates (React components)
+│   ├── verify-email.tsx
+│   ├── reset-password.tsx
+│   └── ...
+├── hooks/                 # Custom React hooks
+│   ├── mouse-events/
+│   ├── shadcn-ui/
+│   └── ...
+├── integrations/          # Third-party integrations
+│   ├── paraglide/         # Internationalization
+│   ├── tanstack-query/    # Data fetching
+│   └── ...
+├── lib/                   # Utility libraries and configurations
+│   ├── auth.ts            # Better Auth configuration
+│   ├── authorization.server.ts  # Authorization helpers
+│   ├── shadcn-ui/         # shadcn/ui configuration
+│   └── ...
+├── middleware/            # Server middleware
+│   └── auth.ts            # Authentication middleware
+├── routes/                # TanStack Router routes
+│   ├── api/               # API routes
+│   ├── _auth.tsx          # Auth layout
+│   ├── _private.tsx       # Private layout
+│   ├── _public.tsx        # Public layout
+│   ├── __root.tsx         # Root layout
+│   └── ...
+├── client.tsx             # Client entrypoint
+├── server.tsx             # Server entrypoint
+├── router.tsx             # Router configuration
+├── start.ts               # TanStack Start server instance
+├── styles.css             # Global CSS
+├── env.client.ts          # Client environment validation
+└── env.server.ts          # Server environment validation
+
+- **api-fns/**: Server functions for calling external APIs (FastAPI backend), using api-json-call or api-stream-proxy for communication.
+- **components/**: React components, including custom components, shadcn/ui library components, and PDF-related components.
+- **db/**: Database layer with Drizzle ORM client, TypeScript schemas matching the SQL migrations, and generated types.
+- **db-fns/**: Server functions for database interactions, organized by schema (web, api, workers, public). Each file named after the table it queries, using Zod validation and Drizzle.
+- **emails/**: Email templates as React components, rendered server-side for sending.
+- **hooks/**: Custom React hooks for reusable logic, including mouse events and shadcn/ui integrations.
+- **integrations/**: Third-party service integrations like internationalization (Paraglide), data fetching (TanStack Query), and email services.
+- **lib/**: Utility libraries, authentication/authorization configurations, and shared helpers.
+- **middleware/**: Server middleware for authentication and other request processing.
+- **routes/**: TanStack Router file-based routing with layouts (_auth, _private, _public) and API routes.
+- **client.tsx**: Client-side React app entrypoint.
+- **server.tsx**: Server-side rendering entrypoint.
+- **router.tsx**: Router configuration exposing the routes.
+- **start.ts**: TanStack Start server definition.
+- **styles.css**: Global Tailwind CSS and custom styles.
+- **env.client.ts/env.server.ts**: Environment variable validation for client and server.
+
 ### Component Development
 
 - Local state management: React useState
