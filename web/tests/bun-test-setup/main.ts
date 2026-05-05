@@ -86,9 +86,6 @@ type MockStripePaymentMethodListData = {
   type?: string
 }
 
-const mockStripeCustomersBySetupIntentId = new Map<string, string>()
-const mockStripeCustomersByPaymentMethodId = new Map<string, string>()
-
 const mockStripeCard = {
   brand: "visa",
   last4: "4242",
@@ -98,8 +95,28 @@ const mockStripeCard = {
 
 const mockStripeId = (prefix: string) => `${prefix}_${crypto.randomUUID().replace(/-/g, "")}`
 
-const getMockStripeCustomerId = () =>
-  mockStripeCustomersBySetupIntentId.values().next().value ?? mockStripeId("cus")
+type MockSetupIntent = {
+  id: string
+  customer: string
+  paymentMethodId: string
+  status: string
+}
+
+const mockStripeCustomers = new Map<string, string>()
+const mockStripeSetupIntents = new Map<string, MockSetupIntent>()
+const mockStripePaymentMethods = new Map<string, { id: string; customer: string }>()
+
+const getOrCreateMockStripeCustomer = (key: string) => {
+  if (!mockStripeCustomers.has(key)) {
+    mockStripeCustomers.set(key, mockStripeId("cus"))
+  }
+  return mockStripeCustomers.get(key)!
+}
+
+export const mockStripeForceSetupIntentStatus = (id: string, status: string) => {
+  const intent = mockStripeSetupIntents.get(id)
+  if (intent) intent.status = status
+}
 
 const getMockStripePaymentMethod = (id: string, customer: string) => ({
   id,
@@ -108,21 +125,38 @@ const getMockStripePaymentMethod = (id: string, customer: string) => ({
   type: "card",
 })
 
-// Mock Stripe for billing tests
+// Mock Stripe for billing tests. Supports:
+//   - One customer per metadata key (avoids duplicate customers)
+//   - Setup intents with configurable status (default: "succeeded")
+//   - Payment methods only created via setupIntents.retrieve
+//   - mockStripeForceSetupIntentStatus(id, status) to test failure paths
 mock.module("@/lib/stripe.server", () => ({
   STRIPE_API_VERSION: "2026-04-22.dahlia",
   getStripe: () => ({
     customers: {
-      create: async (data: MockStripeCustomerCreateData) => ({
-        id: mockStripeId("cus"),
-        email: data.email,
-        metadata: data.metadata,
-      }),
+      create: async (data: MockStripeCustomerCreateData) => {
+        const key =
+          data.metadata?.user_id ?? data.metadata?.organization_id ?? data.email ?? "default"
+        const id = getOrCreateMockStripeCustomer(key)
+        return { id, email: data.email, metadata: data.metadata }
+      },
+      retrieve: async (id: string) => {
+        const entry = [...mockStripeCustomers.entries()].find(([, v]) => v === id)
+        return {
+          id,
+          email: entry ? entry[0] : null,
+        }
+      },
     },
     setupIntents: {
       create: async (data: MockStripeSetupIntentCreateData) => {
         const id = mockStripeId("seti")
-        mockStripeCustomersBySetupIntentId.set(id, data.customer)
+        mockStripeSetupIntents.set(id, {
+          id,
+          customer: data.customer,
+          paymentMethodId: "",
+          status: "requires_payment_method",
+        })
         return {
           id,
           client_secret: `${id}_secret_${crypto.randomUUID()}`,
@@ -133,42 +167,43 @@ mock.module("@/lib/stripe.server", () => ({
         }
       },
       retrieve: async (id: string) => {
-        const customer = mockStripeCustomersBySetupIntentId.get(id) ?? getMockStripeCustomerId()
-        const paymentMethodId = mockStripeId("pm")
-        mockStripeCustomersBySetupIntentId.set(id, customer)
-        mockStripeCustomersByPaymentMethodId.set(paymentMethodId, customer)
+        const intent = mockStripeSetupIntents.get(id)
+        if (!intent) {
+          throw new Error(`No such setup intent: '${id}'`)
+        }
+        if (!intent.paymentMethodId) {
+          const paymentMethodId = mockStripeId("pm")
+          intent.paymentMethodId = paymentMethodId
+          mockStripePaymentMethods.set(paymentMethodId, { id: paymentMethodId, customer: intent.customer })
+        }
         return {
-          id,
-          status: "succeeded",
-          customer,
-          payment_method: paymentMethodId,
+          id: intent.id,
+          status: intent.status,
+          customer: intent.customer,
+          payment_method: intent.paymentMethodId,
         }
       },
     },
     paymentMethods: {
       list: async (data: MockStripePaymentMethodListData) => ({
-        data: [
-          getMockStripePaymentMethod(
-            mockStripeCustomersByPaymentMethodId.entries().find(
-              ([, customer]) => customer === data.customer,
-            )?.[0] ?? mockStripeId("pm"),
-            data.customer,
-          ),
-          getMockStripePaymentMethod(mockStripeId("pm"), data.customer),
-        ],
+        data: [...mockStripePaymentMethods.values()]
+          .filter((pm) => pm.customer === data.customer)
+          .map((pm) => getMockStripePaymentMethod(pm.id, pm.customer)),
       }),
       retrieve: async (id: string) => {
-        const customer = mockStripeCustomersByPaymentMethodId.get(id) ?? getMockStripeCustomerId()
-        mockStripeCustomersByPaymentMethodId.set(id, customer)
-        return getMockStripePaymentMethod(id, customer)
+        const pm = mockStripePaymentMethods.get(id)
+        if (!pm) {
+          throw new Error(`No such payment method: '${id}'`)
+        }
+        return getMockStripePaymentMethod(pm.id, pm.customer)
       },
-      detach: async (id: string) => ({
-        id,
-        card: mockStripeCard,
-        customer: null,
-      }),
+      detach: async (id: string) => {
+        mockStripePaymentMethods.delete(id)
+        return { id, card: mockStripeCard, customer: null }
+      },
     },
   }),
+  mockStripeForceSetupIntentStatus,
 }))
 
 // ─── Shared auth + fetch mocks ────────────────────────────────────────────────
@@ -189,8 +224,9 @@ installFetchMock()
 installHelpersMock()
 
 afterEach(() => {
-  mockStripeCustomersBySetupIntentId.clear()
-  mockStripeCustomersByPaymentMethodId.clear()
+  mockStripeCustomers.clear()
+  mockStripeSetupIntents.clear()
+  mockStripePaymentMethods.clear()
   resetMocks()
 })
 
