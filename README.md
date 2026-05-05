@@ -54,9 +54,13 @@ pip install jq pytest ruff uv
 [GitHub Actions](https://github.com/features/actions)
 
 - auto-docs: generate CHANGELOG.md and .codesight/wiki
-- claude: talk to Claude in GitHub comments by @claude
+- auto-format: format code (Python with ruff, web with prettier and eslint)
+- commitlint: enforces commit pattern
+- deploy-api: deploy API to AWS
+- deploy-web: deploy web to AWS
+- deploy-workers: deploy workers to AWS
 
-### Enforced Commit Pattern
+### Changelog and Required Commit Pattern
 
 [Conventional Commits](https://www.conventionalcommits.org/) enforced by [husky](https://github.com/typicode/husky) config by .commitlintrc.json, commit messages must start with a prefix in the table below, the workflow edits CHANGELOG.md on any version bump
 
