@@ -347,6 +347,7 @@
 - Move billing to chatbot knowledge
 - *(llm)* Activate tanstack cli skill
 - *(web)* Layout description
+- *(ci)* Github actions
 
 ### ⚡ Performance
 
@@ -483,6 +484,7 @@
 - *(web)* Translation equality
 - *(web)* Billing logic
 - *(web)* Billing logic test improvement
+- *(ci)* Auto-format by merging pull request #138 from optimalcharb/working
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -572,6 +574,7 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add auto-format.yml action
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
 
