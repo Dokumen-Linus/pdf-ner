@@ -1,6 +1,6 @@
-accelerate
 fastapi
 olmocr>=0.4.0
 pillow
 transformers
 uvicorn[standard]
+vllm
