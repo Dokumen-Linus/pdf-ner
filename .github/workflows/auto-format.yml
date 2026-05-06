@@ -17,14 +17,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install ruff
+        run: pip install ruff
+
       - name: Format Python files
         run: ruff format
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Install web dependencies
+        working-directory: web
+        run: npm install prettier eslint @tanstack/eslint-plugin-start @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-config-prettier eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks prettier-plugin-tailwindcss eslint-import-resolver-typescript --no-save
+
       - name: Format web dir with prettier
-        run: cd web && npm run prettier:fix
+        working-directory: web
+        run: npm run prettier:fix
 
       - name: Format web dir with eslint
-        run: cd web && npm run lint:fix
+        working-directory: web
+        run: npm run lint:fix
 
       - name: Commit formatting changes
         if: github.event.pull_request.merged == true
