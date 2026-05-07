@@ -25,7 +25,6 @@ ssh-keygen -t ed25519 -f ~/.ssh/dokumen-ec2
 ```
 
 Your deployer AWS credentials need permission to create EC2, VPC, subnet, internet gateway, route table, security group, Elastic IP, S3, SES identity verification, and IAM users/policies/access keys.
-
 Use one deployer identity for infrastructure setup. Do not use root access keys.
 
 ## AWS Resources
