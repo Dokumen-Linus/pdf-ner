@@ -210,6 +210,7 @@
 - *(wk)* Billing stripe client and idempotency
 - Billing logic
 - *(web)* Apply translation to all _public _auth and remove deprecated fields
+- *(ci)* Auto-format.yml
 
 ### 💼 Other
 
@@ -348,6 +349,9 @@
 - *(llm)* Activate tanstack cli skill
 - *(web)* Layout description
 - *(ci)* Github actions
+- *(llm)* Runpod skills
+- Start pypdfium2 skill
+- Pypdfium2 examples
 
 ### ⚡ Performance
 
@@ -575,6 +579,9 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add auto-format.yml action
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(gpu)* Runpod deployment scripts first draft #140
+- Init-deployer-policy
 
 ### ◀️ Revert
 
