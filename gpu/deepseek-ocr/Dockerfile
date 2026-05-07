@@ -25,4 +25,4 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD ["python", "-c", "import os, urllib.request; port = os.getenv('PORT_HEALTH', os.getenv('PORT', '8000')); urllib.request.urlopen(f'http://127.0.0.1:{port}/ping', timeout=5).close()"]
 
-CMD ["python", "app.py"]
+ENTRYPOINT ["python", "app.py"]

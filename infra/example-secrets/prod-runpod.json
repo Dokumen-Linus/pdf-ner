@@ -1,7 +1,7 @@
 {
   "OCR_MODEL": "deepseek-ocr",
-  "DEEPSEEK_OCR_RUNPOD_ENDPOINT_URL": "https://api.runpod.ai/v2/REPLACE_ME/runsync",
-  "OLM_OCR2_RUNPOD_ENDPOINT_URL": "https://api.runpod.ai/v2/REPLACE_ME/runsync",
+  "DEEPSEEK_OCR_RUNPOD_ENDPOINT_URL": "https://REPLACE_ME.api.runpod.ai/ocr",
+  "OLM_OCR2_RUNPOD_ENDPOINT_URL": "https://REPLACE_ME.api.runpod.ai/ocr",
   "RUNPOD_API_KEY": "REPLACE_ME",
   "OCR_RUNPOD_TIMEOUT_SECONDS": 60,
   "OCR_RUNPOD_RETRIES": 0

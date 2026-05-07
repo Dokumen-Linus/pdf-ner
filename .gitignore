@@ -1,6 +1,9 @@
 .env
+.env.local
 infra/init/.env.local
 infra/init/local-secrets/
+infra/runpod/.env.local
+infra/runpod/local-state/
 
 *.log
 logfile

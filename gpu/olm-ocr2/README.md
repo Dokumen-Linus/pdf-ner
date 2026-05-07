@@ -1,6 +1,6 @@
 # olmOCR2 Worker
 
-FastAPI worker for `allenai/olmOCR-2-7B-1025-FP8` running on Runpod Serverless.
+FastAPI worker for `allenai/olmOCR-2-7B-1025-FP8` running with vLLM on Runpod Serverless.
 
 See [../README.md](../README.md) for build and deployment instructions.
 
@@ -20,6 +20,8 @@ Set these in the Runpod endpoint environment:
 - `MAX_NEW_TOKENS`
 - `TEMPERATURE`
 - `TARGET_LONGEST_IMAGE_DIM`
+- `GPU_MEMORY_UTILIZATION`
+- `MAX_MODEL_LEN`
 
 ## Local Dev
 

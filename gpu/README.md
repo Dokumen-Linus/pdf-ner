@@ -5,7 +5,7 @@ This directory contains the Runpod Serverless HTTP workers used for OCR. Both wo
 ## Layout
 
 - `gpu/deepseek-ocr` - DeepSeek OCR worker backed by vLLM
-- `gpu/olm-ocr2` - olmOCR2 worker backed by `transformers`
+- `gpu/olm-ocr2` - olmOCR2 worker backed by vLLM
 - `gpu/shared` - shared HTTP and image helpers for current and future workers
 
 ## HTTP Contract
@@ -76,8 +76,8 @@ Reference docs:
 
 ```bash
 cd gpu
-docker build --platform linux/amd64 -f deepseek-ocr/Dockerfile -t DOCKER_USER/deepseek-ocr-runpod:latest .
-docker push DOCKER_USER/deepseek-ocr-runpod:latest
+docker build --platform linux/amd64 -f deepseek-ocr/Dockerfile -t DOCKER_USER/deepseek-ocr-runpod:v0.1.0 .
+docker push DOCKER_USER/deepseek-ocr-runpod:v0.1.0
 ```
 
 Use `olm-ocr2/Dockerfile` and a different tag for the olmOCR2 worker.
