@@ -241,7 +241,7 @@ def flatten_and_modify_skills(copied_skill_dirs: list[Path], old_to_new_mapping:
     print("\nFlattening and modifying SKILL.md files...")
     for skill_md in iter_skill_markdown_files(copied_skill_dirs):
         # Skip skills originally in router-core/auth-and-guards and router-core/ssr
-        if 'auth-and-guards' in str(skill_md) or 'ssr' in str(skill_md):
+        if "auth-and-guards" in str(skill_md) or "ssr" in str(skill_md):
             print(f"  Skipping {skill_md.relative_to(PROJECT_ROOT)}")
             continue
         content = skill_md.read_text(encoding="utf-8")

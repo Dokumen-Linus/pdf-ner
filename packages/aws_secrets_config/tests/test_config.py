@@ -35,7 +35,9 @@ def test_load_stage_groups_merges_in_order(monkeypatch):
     client = FakeSecretsClient(
         {
             "prod/api": {"SecretString": json.dumps({"API_KEY": "api", "SHARED": "api"})},
-            "prod/runpod": {"SecretString": json.dumps({"RUNPOD_API_KEY": "runpod", "SHARED": "runpod"})},
+            "prod/runpod": {
+                "SecretString": json.dumps({"RUNPOD_API_KEY": "runpod", "SHARED": "runpod"})
+            },
         }
     )
     monkeypatch.setattr(config, "_client", lambda region: client)

@@ -76,7 +76,9 @@ async def test_workflow_scores_pages_and_persists_recommendation():
                 return_value=[SampledPdf(pdf_id=PDF_ID_1, name="doc.pdf", filepath="doc.pdf")]
             ),
         ),
-        patch.object(workflows, "download_pdf_bytes", new=AsyncMock(return_value=(b"pdf", "doc.pdf"))),
+        patch.object(
+            workflows, "download_pdf_bytes", new=AsyncMock(return_value=(b"pdf", "doc.pdf"))
+        ),
         patch.object(
             workflows.ocr,
             "extract_evaluation_pages",
