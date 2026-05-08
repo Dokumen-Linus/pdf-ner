@@ -43,7 +43,9 @@ mock.module("@tanstack/react-start", () => ({
               validatedData = _validator(callArgs?.data)
             } else if (typeof (_validator as { parse?: unknown }).parse === "function") {
               // Zod schema — parse() throws ZodError on invalid input
-              validatedData = (_validator as { parse: (data: unknown) => unknown }).parse(callArgs?.data)
+              validatedData = (_validator as { parse: (data: unknown) => unknown }).parse(
+                callArgs?.data,
+              )
             }
           }
 
@@ -174,7 +176,10 @@ mock.module("@/lib/stripe.server", () => ({
         if (!intent.paymentMethodId) {
           const paymentMethodId = mockStripeId("pm")
           intent.paymentMethodId = paymentMethodId
-          mockStripePaymentMethods.set(paymentMethodId, { id: paymentMethodId, customer: intent.customer })
+          mockStripePaymentMethods.set(paymentMethodId, {
+            id: paymentMethodId,
+            customer: intent.customer,
+          })
         }
         return {
           id: intent.id,

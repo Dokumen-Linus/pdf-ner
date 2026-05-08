@@ -2,7 +2,7 @@ import { Pool } from "pg"
 
 import { env } from "@/env.server"
 
-const WEB_TABLES = ("auth.user web.users web.projects web.pdfs").split(" ")
+const WEB_TABLES = "auth.user web.users web.projects web.pdfs".split(" ")
 
 let healthPool: Pool | null = null
 

@@ -1,7 +1,8 @@
-import { describe, expect, it } from "bun:test"
 import { readFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
+
+import { describe, expect, it } from "bun:test"
 
 const messagesDir = dirname(fileURLToPath(import.meta.url))
 
