@@ -28,22 +28,22 @@ jobs:
       - name: Format Python files
         run: ruff format
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 22
+          bun-version: 1.3.13
 
       - name: Install web dependencies
         working-directory: web
-        run: npm install prettier@3.8.3 eslint@9.39.4 @tanstack/eslint-plugin-start@0.0.1 @typescript-eslint/eslint-plugin@8.58.2 @typescript-eslint/parser@8.58.2 eslint-config-prettier@10.1.8 eslint-plugin-import@2.32.0 eslint-plugin-react@7.37.5 eslint-plugin-react-hooks@7.1.1 prettier-plugin-tailwindcss@0.7.2 eslint-import-resolver-typescript@4.4.4 --no-save
+        run: bun install --frozen-lockfile
 
       - name: Format web dir with prettier
         working-directory: web
-        run: npm run prettier:fix
+        run: bun run prettier:fix
 
       - name: Format web dir with eslint
         working-directory: web
-        run: npm run lint:fix
+        run: bun run lint:fix
 
       - name: Commit formatting changes
         if: github.event.pull_request.merged == true
