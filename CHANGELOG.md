@@ -454,6 +454,8 @@
 - Apply formatters
 - *(web)* Add to restricted imports
 - *(web)* Prettier and lint fix
+- Ruff
+- Prettier and lint:fix
 
 ### 🧪 Testing
 
@@ -582,6 +584,10 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(gpu)* Runpod deployment scripts first draft #140
 - Init-deployer-policy
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(llm)* Codex hooks
+- *(web)* Update bun
+- Lock package versions in auto-format.yml
 
 ### ◀️ Revert
 
