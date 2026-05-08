@@ -155,8 +155,7 @@ function SignUpPage() {
               <form.Field
                 name="lastName"
                 validators={{
-                  onChange: ({ value }) =>
-                    !value ? m.auth_signup_lastname_required() : undefined,
+                  onChange: ({ value }) => (!value ? m.auth_signup_lastname_required() : undefined),
                 }}
                 children={({ state, handleChange, handleBlur }) => (
                   <div className="space-y-2">
@@ -244,13 +243,10 @@ function SignUpPage() {
                 onChange: ({ value }) => {
                   if (!value) return m.auth_signup_password_required()
                   if (value.length < 8) return m.auth_signup_password_min()
-                  if (!/[A-Z]/.test(value))
-                    return m.auth_signup_password_uppercase()
-                  if (!/[a-z]/.test(value))
-                    return m.auth_signup_password_lowercase()
+                  if (!/[A-Z]/.test(value)) return m.auth_signup_password_uppercase()
+                  if (!/[a-z]/.test(value)) return m.auth_signup_password_lowercase()
                   if (!/[0-9]/.test(value)) return m.auth_signup_password_number()
-                  if (!/[\W_]/.test(value))
-                    return m.auth_signup_password_special()
+                  if (!/[\W_]/.test(value)) return m.auth_signup_password_special()
                   return undefined
                 },
               }}

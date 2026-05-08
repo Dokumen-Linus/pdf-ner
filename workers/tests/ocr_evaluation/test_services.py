@@ -95,7 +95,9 @@ def test_recommend_page_uses_judge_when_tesseract_differs_from_olm():
 
 def test_summarize_recommends_tesseract_when_pages_match_olm():
     pdf_id = uuid4()
-    metrics = score_tesseract_against_olm("Invoice 123 Total 45 " * 10, "Invoice 123 Total 45 " * 10)
+    metrics = score_tesseract_against_olm(
+        "Invoice 123 Total 45 " * 10, "Invoice 123 Total 45 " * 10
+    )
     evaluations = [
         PageEvaluation(
             pdf_id=pdf_id,

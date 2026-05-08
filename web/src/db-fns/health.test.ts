@@ -13,9 +13,11 @@ const { checkWebDatabase } = await import("./health")
 describe("checkWebDatabase", () => {
   it("marks missing tables as missing", async () => {
     const pool = {
-      query: mock(async (_sql: string, params: string[]): Promise<QueryResult> => ({
-        rows: [{ exists: params[0] !== "web.pdfs" }],
-      })),
+      query: mock(
+        async (_sql: string, params: string[]): Promise<QueryResult> => ({
+          rows: [{ exists: params[0] !== "web.pdfs" }],
+        }),
+      ),
     }
 
     const checks = await checkWebDatabase(pool)

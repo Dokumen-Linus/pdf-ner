@@ -302,7 +302,9 @@ class TestGeneratePromptVariants:
         variants = generate_prompt_variants("base", entity_types, None)
         assert "base" in variants[1]
 
-    def test_selects_first_and_coverage_example_sets(self, labeled_pdf_1, labeled_pdf_2, labeled_pdf_3):
+    def test_selects_first_and_coverage_example_sets(
+        self, labeled_pdf_1, labeled_pdf_2, labeled_pdf_3
+    ):
         sets = select_prompt_example_sets([labeled_pdf_3, labeled_pdf_1, labeled_pdf_2])
 
         assert [pdf.pdf_id for pdf in sets[0]] == [labeled_pdf_3.pdf_id, labeled_pdf_1.pdf_id]

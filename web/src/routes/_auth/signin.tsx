@@ -94,8 +94,7 @@ function SignInPage() {
             <form.Field
               name="password"
               validators={{
-                onChange: ({ value }) =>
-                  !value ? m.auth_signin_password_required() : undefined,
+                onChange: ({ value }) => (!value ? m.auth_signin_password_required() : undefined),
               }}
               children={({ state, handleChange, handleBlur }) => (
                 <div className="space-y-2">

@@ -8,8 +8,8 @@ import { eq } from "drizzle-orm"
 import { db } from "@/db/client"
 import { users } from "@/db/schemas/web"
 
-import { setAuthenticated } from "../../../tests/bun-test-setup/mocks"
 import { mockStripeForceSetupIntentStatus } from "../../../tests/bun-test-setup/main"
+import { setAuthenticated } from "../../../tests/bun-test-setup/mocks"
 
 import {
   confirmSetupIntent,
@@ -183,9 +183,9 @@ describe.if(runTests)("Billing functions", () => {
     try {
       const setupIntentId = `seti_${crypto.randomUUID().replace(/-/g, "")}`
       mockStripeForceSetupIntentStatus(setupIntentId, "requires_payment_method")
-      await expect(
-        confirmSetupIntent({ data: { setupIntentId } }),
-      ).rejects.toThrow("Payment method setup has not succeeded")
+      await expect(confirmSetupIntent({ data: { setupIntentId } })).rejects.toThrow(
+        "Payment method setup has not succeeded",
+      )
     } finally {
       await cleanupUser(id)
     }
@@ -203,7 +203,9 @@ describe.if(runTests)("Billing functions", () => {
       const newPaymentMethodId = user2.stripePaymentMethodId
       if (!newPaymentMethodId) throw new Error("Expected payment method after second setup")
 
-      const result = await setDefaultPaymentMethod({ data: { paymentMethodId: newPaymentMethodId } })
+      const result = await setDefaultPaymentMethod({
+        data: { paymentMethodId: newPaymentMethodId },
+      })
       expect(result.success).toBe(true)
 
       const [user3] = await db.select().from(users).where(eq(users.id, id)).limit(1)

@@ -60,7 +60,11 @@ def score_tesseract_against_olm(tesseract_text: str, olm_text: str | None) -> Si
     length_ratio = min(len(tesseract_norm), len(olm_norm)) / max(len(tesseract_norm), len(olm_norm))
     length_penalty = max(0.0, 1.0 - min(abs(1.0 - length_ratio), 1.0))
     score = (char_similarity * 0.60) + (token_overlap * 0.30) + (length_penalty * 0.10)
-    status = "similar" if is_tesseract_similar_to_olm(score, token_overlap, length_ratio) else "different"
+    status = (
+        "similar"
+        if is_tesseract_similar_to_olm(score, token_overlap, length_ratio)
+        else "different"
+    )
 
     return SimilarityMetrics(
         normalized_tesseract_length=len(tesseract_norm),

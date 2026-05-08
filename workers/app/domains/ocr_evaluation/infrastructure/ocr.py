@@ -22,7 +22,9 @@ async def extract_evaluation_pages(
     pdf_bytes: bytes,
     requested_page_count: int,
 ) -> list[PageOcrText]:
-    return await anyio.to_thread.run_sync(_extract_evaluation_pages_sync, pdf_bytes, requested_page_count)
+    return await anyio.to_thread.run_sync(
+        _extract_evaluation_pages_sync, pdf_bytes, requested_page_count
+    )
 
 
 def _extract_evaluation_pages_sync(
@@ -36,10 +38,7 @@ def _extract_evaluation_pages_sync(
             tmp_path = tmp.name
 
         pdfium_pages = extract_pdfium_text_by_page(pdf_bytes)
-        pdfium_text_by_page = {
-            int(page["page_index"]): str(page["text"])
-            for page in pdfium_pages
-        }
+        pdfium_text_by_page = {int(page["page_index"]): str(page["text"]) for page in pdfium_pages}
         page_count = len(pdfium_pages)
         page_indexes = _sample_page_indexes(page_count, requested_page_count)
         tesseract = TesseractOcrEngine()

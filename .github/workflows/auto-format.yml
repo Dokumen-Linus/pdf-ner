@@ -35,7 +35,7 @@ jobs:
 
       - name: Install web dependencies
         working-directory: web
-        run: npm install prettier eslint @tanstack/eslint-plugin-start @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-config-prettier eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks prettier-plugin-tailwindcss eslint-import-resolver-typescript --no-save
+        run: npm install prettier@3.8.3 eslint@9.39.4 @tanstack/eslint-plugin-start@0.0.1 @typescript-eslint/eslint-plugin@8.58.2 @typescript-eslint/parser@8.58.2 eslint-config-prettier@10.1.8 eslint-plugin-import@2.32.0 eslint-plugin-react@7.37.5 eslint-plugin-react-hooks@7.1.1 prettier-plugin-tailwindcss@0.7.2 eslint-import-resolver-typescript@4.4.4 --no-save
 
       - name: Format web dir with prettier
         working-directory: web

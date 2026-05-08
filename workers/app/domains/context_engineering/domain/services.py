@@ -217,8 +217,7 @@ def generate_prompt_variants(
     variants = [base_prompt]
 
     precision_guidance = (
-        base_prompt
-        + "\n\n## Precision Guidance\n"
+        base_prompt + "\n\n## Precision Guidance\n"
         "Prefer exact text spans from the document. Do not infer values from nearby context. "
         "Use null or an empty array when the document does not contain a valid value."
     )
@@ -400,21 +399,20 @@ def evaluate_final_pdf_predictions(
         if et.unique:
             labelled_value = labelled_values[0] if labelled_values else None
             predicted_value = predicted_values[0] if predicted_values else None
-            is_match = (
-                len(predicted_values) <= 1
-                and (
-                    (labelled_value is None and predicted_value is None)
-                    or (
-                        labelled_value is not None
-                        and predicted_value is not None
-                        and _exact_match(predicted_value, labelled_value)
-                    )
+            is_match = len(predicted_values) <= 1 and (
+                (labelled_value is None and predicted_value is None)
+                or (
+                    labelled_value is not None
+                    and predicted_value is not None
+                    and _exact_match(predicted_value, labelled_value)
                 )
             )
             entity_matches[et.name] = is_match
             labelled_counts[et.name] = len(labelled_values)
             matched_counts[et.name] = 1 if is_match and labelled_value is not None else 0
-            false_positive_counts[et.name] = 1 if predicted_value is not None and not is_match else 0
+            false_positive_counts[et.name] = (
+                1 if predicted_value is not None and not is_match else 0
+            )
             false_negative_counts[et.name] = 1 if labelled_value is not None and not is_match else 0
             if labelled_value is not None or predicted_value is not None:
                 pairs.append(
@@ -506,9 +504,7 @@ def build_final_run_metrics(
         labelled_entity_count = sum(
             result.labelled_counts.get(et.name, 0) for result in final_results
         )
-        true_positive_count = sum(
-            result.matched_counts.get(et.name, 0) for result in final_results
-        )
+        true_positive_count = sum(result.matched_counts.get(et.name, 0) for result in final_results)
         false_positive_count = sum(
             result.false_positive_counts.get(et.name, 0) for result in final_results
         )
@@ -522,13 +518,9 @@ def build_final_run_metrics(
             "true_positive_count": true_positive_count,
             "false_positive_count": false_positive_count,
             "false_negative_count": false_negative_count,
-            "tpr": true_positive_count / labelled_entity_count
-            if labelled_entity_count
-            else None,
+            "tpr": true_positive_count / labelled_entity_count if labelled_entity_count else None,
             "fppp": false_positive_count / evaluated_pdf_count if evaluated_pdf_count else None,
-            "fnr": false_negative_count / labelled_entity_count
-            if labelled_entity_count
-            else None,
+            "fnr": false_negative_count / labelled_entity_count if labelled_entity_count else None,
         }
 
     return {
@@ -536,9 +528,7 @@ def build_final_run_metrics(
         "evaluated_pdf_count": evaluated_pdf_count,
         "skipped_pdf_count": skipped_pdf_count,
         "pdfs_fully_correct": pdfs_fully_correct,
-        "pdf_accuracy": pdfs_fully_correct / evaluated_pdf_count
-        if evaluated_pdf_count
-        else None,
+        "pdf_accuracy": pdfs_fully_correct / evaluated_pdf_count if evaluated_pdf_count else None,
         "entity_type_metrics": entity_type_metrics,
     }
 
