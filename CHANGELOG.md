@@ -413,6 +413,8 @@
 - *(web)* Simplify sidebar use and move to plugin-rotate-2
 - Uniform imports in eslint rule
 - Use Stripe metered billing
+- *(db)* Remove api.pdfs table
+- *(db)* Split std_ets into multiple seeds
 
 ### 🎨 Styling
 
@@ -591,6 +593,11 @@
 - *(web)* Update bun
 - Lock package versions in auto-format.yml
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Move auto-format.yml to bun
+- Vscode and kilo settings
+- Move from AWS keys to EC2 profile
+- *(llm)* Kilo settings
 
 ### ◀️ Revert
 
