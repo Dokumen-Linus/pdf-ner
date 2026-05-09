@@ -13,13 +13,10 @@ _TEST_ENV = {
     "GOOGLE_AI_API_KEY": "test-google-key",
     "STRIPE_SECRET_KEY": "sk_test_dummy",
     "AVATARS_S3_BUCKET_NAME": "avatars-test",
-    "AVATARS_AWS_ACCESS_KEY_ID": "test-access-key",
-    "AVATARS_AWS_SECRET_ACCESS_KEY": "test-secret-key",
 }
 for _k, _v in _TEST_ENV.items():
     os.environ.setdefault(_k, _v)
 
-from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock
 
 from fastapi import APIRouter, Depends, FastAPI

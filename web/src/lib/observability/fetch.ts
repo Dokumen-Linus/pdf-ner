@@ -26,9 +26,10 @@ export async function observedApiFetch(
   input: RequestInfo | URL,
   init: RequestInit = {},
   sourceHeaders?: HeadersInit,
+  fetchImpl: typeof fetch = fetch,
 ): Promise<Response> {
   const headers = buildObservedHeaders(init.headers, sourceHeaders)
-  return fetch(input, {
+  return fetchImpl(input, {
     ...init,
     headers,
   })

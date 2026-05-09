@@ -1,6 +1,4 @@
 {
-  "SES_AWS_ACCESS_KEY_ID": "REPLACE_ME",
-  "SES_AWS_SECRET_ACCESS_KEY": "REPLACE_ME",
   "SES_AWS_REGION": "us-east-1",
   "SES_AWS_ENDPOINT_URL": null,
   "FROM_EMAIL": "no-reply@dokumenai.dev",

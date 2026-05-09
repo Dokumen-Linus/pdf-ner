@@ -41,4 +41,62 @@ export function installHelpersMock(): void {
     requirePdfOwnership: notMocked("requirePdfOwnership"),
     getProjectAccessForCurrentUser: notMocked("getProjectAccessForCurrentUser"),
   }))
+
+  mock.module("@/lib/project-authorization.server", () => ({
+    requireUserId: () => helpersState.requireUserId(),
+    requireProjectOwnership: (projectId: string, userId: string) =>
+      helpersState.requireProjectOwnership(projectId, userId),
+    requireProjectAccess: async (projectId: string) => {
+      const userId = await helpersState.requireUserId()
+      await helpersState.requireProjectOwnership(projectId, userId)
+      return {
+        userId,
+        authUserId: userId,
+        email: "test-user@example.com",
+        accountRole: "individual",
+        billingStatus: "active",
+        hasPaymentMethod: true,
+        projectId,
+        ownerId: userId,
+        teamId: null,
+        organizationId: null,
+        role: "admin",
+        isOwner: true,
+        canRead: true,
+        canLabel: true,
+        canManage: true,
+      }
+    },
+    requireWorkspaceUser: notMocked("requireWorkspaceUser"),
+    requirePdfAccess: notMocked("requirePdfAccess"),
+    requirePdfOwnership: notMocked("requirePdfOwnership"),
+    getProjectAccessForCurrentUser: notMocked("getProjectAccessForCurrentUser"),
+  }))
+
+  mock.module("@/lib/authorization.server", () => ({
+    requireUserId: () => helpersState.requireUserId(),
+    requireProjectOwnership: (projectId: string, userId: string) =>
+      helpersState.requireProjectOwnership(projectId, userId),
+    requireProjectAccess: notMocked("requireProjectAccess"),
+    requireWorkspaceUser: notMocked("requireWorkspaceUser"),
+    requirePdfAccess: notMocked("requirePdfAccess"),
+    requirePdfOwnership: notMocked("requirePdfOwnership"),
+    getProjectAccessForCurrentUser: notMocked("getProjectAccessForCurrentUser"),
+  }))
+
+  mock.module("@/lib/role-authorization.server", () => ({
+    canUsePermission: () => true,
+    requirePermission: (access: unknown) => access,
+    requireProjectPermission: async (projectId: string) => {
+      const userId = await helpersState.requireUserId()
+      await helpersState.requireProjectOwnership(projectId, userId)
+      return {
+        userId,
+        projectId,
+        accountRole: "individual",
+        canManage: true,
+        canLabel: true,
+      }
+    },
+  }))
 }

@@ -39,6 +39,6 @@ async def fetch_model_cost(
 
 async def fetch_bucket_by_id(conn: asyncpg.Connection, bucket_id: UUID) -> asyncpg.Record | None:
     return await conn.fetchrow(
-        "SELECT id, name, region, access_key_id, secret_access_key, endpoint_url FROM api.aws_buckets WHERE id = $1",
+        "SELECT id, name, region, endpoint_url FROM api.aws_buckets WHERE id = $1",
         bucket_id,
     )

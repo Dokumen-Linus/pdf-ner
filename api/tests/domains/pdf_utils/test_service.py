@@ -18,8 +18,6 @@ def sample_row():
         "name": "test.pdf",
         "project_id": uuid4(),
         "region": "us-east-1",
-        "access_key_id": "AKIAIOSFODNN7EXAMPLE",
-        "secret_access_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
         "endpoint_url": None,
     }
 
@@ -44,8 +42,6 @@ def sample_extract_row():
         "extract_method": None,
         "text_by_page": None,
         "region": "us-east-1",
-        "access_key_id": "AKIAIOSFODNN7EXAMPLE",
-        "secret_access_key": "WJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
         "endpoint_url": None,
     }
 
@@ -106,8 +102,6 @@ class TestHighlight:
             "name": "test.pdf",
             "project_id": uuid4(),
             "region": "us-east-1",
-            "access_key_id": "key",
-            "secret_access_key": "secret",
             "endpoint_url": None,
         }
         mock_conn = AsyncMock()
@@ -208,8 +202,6 @@ class TestHighlight:
             "name": "test.pdf",
             "project_id": uuid4(),
             "region": "us-east-1",
-            "access_key_id": "key",
-            "secret_access_key": "secret",
             "endpoint_url": "https://s3.custom.example.com",
         }
 
@@ -227,8 +219,6 @@ class TestHighlight:
 
         mock_boto3.assert_called_once_with(
             "s3",
-            aws_access_key_id="key",
-            aws_secret_access_key="secret",
             region_name="us-east-1",
             endpoint_url="https://s3.custom.example.com",
         )

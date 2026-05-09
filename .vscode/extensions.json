@@ -4,21 +4,22 @@
     "tomoki1207.pdf",
 
     // use Kilo Code for autocomplete instead of GitHub Copilot
-    // "kilocode.kilo-code",
+    "kilocode.kilo-code",
 
     // web
-    "bradlc.vscode-tailwindcss",
-    "christian-kohler.npm-intellisense",
+    "TypeScriptTeam.native-preview",
+    "ms-vscode.vscode-typescript-next",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "christian-kohler.npm-intellisense",
 
     // python
-    "charliermarsh.ruff",
-    "ms-python.debugpy",
     "ms-python.python",
     "ms-python.vscode-pylance",
     "ms-toolsai.jupyter",
+    "ms-python.debugpy",
+    "charliermarsh.ruff",
 
     // api
     "onegang2.fastapi-endpoint",
@@ -27,6 +28,20 @@
     "ms-ossdata.vscode-pgsql",
 
     // infra
-    "Redis.redis-for-vscode",
+    "docker.docker",
+    "ms-azuretools.vscode-docker",
+    "ms-azuretools.vscode-containers",
+    "ms-vscode-remote.remote-containers",
+    // "Redis.redis-for-vscode",
+    // "AmazonWebServices.aws-toolkit-vscode",
+
+    // docs
+    "DavidAnson.vscode-markdownlint",
+
+    // ci/cd
+    "github.vscode-github-actions",
+    "GitHub.vscode-pull-request-github",
+    "eamodio.gitlens",
+    "donjayamanne.githistory"
   ]
 }

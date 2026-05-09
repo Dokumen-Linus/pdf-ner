@@ -18,11 +18,7 @@ def _sanitize_filename(filename: str) -> str:
 
 
 def _build_s3_client():
-    kwargs: dict = {
-        "aws_access_key_id": settings.AVATARS_AWS_ACCESS_KEY_ID,
-        "aws_secret_access_key": settings.AVATARS_AWS_SECRET_ACCESS_KEY,
-        "region_name": settings.AVATARS_AWS_REGION,
-    }
+    kwargs: dict = {"region_name": settings.AVATARS_AWS_REGION}
     if settings.AVATARS_AWS_ENDPOINT_URL:
         kwargs["endpoint_url"] = settings.AVATARS_AWS_ENDPOINT_URL
     return boto3.client("s3", **kwargs)
@@ -44,7 +40,9 @@ async def upload_avatar(filename: str, content_type: str, data: bytes) -> dict:
             )
         )
     except ClientError as e:
-        raise HTTPException(status_code=502, detail=f"S3 error: {e.response['Error']['Message']}")
+        raise HTTPException(
+            status_code=502, detail=f"S3 error: {e.response['Error']['Message']}"
+        ) from e
 
     if settings.AVATARS_AWS_ENDPOINT_URL:
         url = f"{settings.AVATARS_AWS_ENDPOINT_URL}/{settings.AVATARS_S3_BUCKET_NAME}/{key}"

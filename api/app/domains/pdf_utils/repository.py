@@ -5,13 +5,12 @@ import asyncpg
 
 
 async def fetch_pdf(conn: asyncpg.Connection, pdf_id: UUID) -> asyncpg.Record | None:
-    """Fetch PDF filepath, bucket credentials, and metadata via workers.pdfs → api.aws_buckets."""
+    """Fetch PDF filepath, bucket location, and metadata via workers.pdfs -> api.aws_buckets."""
     return await conn.fetchrow(
         """
         SELECT w.filepath, w.name, w.project_id,
                w.full_text, w.extract_method, w.text_by_page,
-               ab.name AS bucket_name, ab.region,
-               ab.access_key_id, ab.secret_access_key, ab.endpoint_url
+               ab.name AS bucket_name, ab.region, ab.endpoint_url
         FROM workers.pdfs w
         JOIN api.aws_buckets ab ON ab.id = w.bucket_id
         WHERE w.id = $1

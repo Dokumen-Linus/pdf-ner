@@ -1,15 +1,15 @@
 """Tests for the pdf_storage domain (create_bucket and upload_pdf endpoints)."""
 
-import os
 from contextlib import asynccontextmanager
+import os
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import asyncpg
-import httpx
-import pytest
 from botocore.exceptions import ClientError
 from fastapi import APIRouter, Depends, FastAPI
+import httpx
+import pytest
 
 from app.core.db import get_conn
 from app.core.dependencies import verify_api_key
@@ -59,7 +59,7 @@ async def storage_client(mock_conn, mock_redis):
 class TestCreateBucket:
     @pytest.mark.anyio
     async def test_happy_path(self, storage_client, mock_conn):
-        """POST /buckets with valid credentials returns bucket_id and name."""
+        """POST /buckets creates a bucket with the runtime AWS credentials."""
         bucket_id = uuid4()
         mock_s3 = MagicMock()
         mock_conn.fetchval = AsyncMock(return_value=bucket_id)
@@ -73,12 +73,7 @@ class TestCreateBucket:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/buckets",
-                json={
-                    "name": "my-test-bucket",
-                    "region": "us-east-1",
-                    "access_key_id": "AKIAIOSFODNN7EXAMPLE",
-                    "secret_access_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-                },
+                json={"name": "my-test-bucket", "region": "us-east-1"},
             )
 
         assert response.status_code == 200
@@ -86,6 +81,16 @@ class TestCreateBucket:
         assert body["bucket_id"] == str(bucket_id)
         assert body["name"] == "my-test-bucket"
         assert body["lifecycle_applied"] is True
+        mock_conn.fetchval.assert_awaited_once_with(
+            """
+        INSERT INTO api.aws_buckets (name, region, endpoint_url)
+        VALUES ($1, $2, $3)
+        RETURNING id
+        """,
+            "my-test-bucket",
+            "us-east-1",
+            None,
+        )
 
         mock_s3.put_bucket_lifecycle_configuration.assert_called_once_with(
             Bucket="my-test-bucket",
@@ -96,6 +101,27 @@ class TestCreateBucket:
                         "Status": "Enabled",
                         "Filter": {"Prefix": ""},
                         "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 1},
+                    }
+                ]
+            },
+        )
+        mock_s3.put_public_access_block.assert_called_once_with(
+            Bucket="my-test-bucket",
+            PublicAccessBlockConfiguration={
+                "BlockPublicAcls": True,
+                "IgnorePublicAcls": True,
+                "BlockPublicPolicy": True,
+                "RestrictPublicBuckets": True,
+            },
+        )
+        mock_s3.put_bucket_encryption.assert_called_once_with(
+            Bucket="my-test-bucket",
+            ServerSideEncryptionConfiguration={
+                "Rules": [
+                    {
+                        "ApplyServerSideEncryptionByDefault": {
+                            "SSEAlgorithm": "AES256",
+                        }
                     }
                 ]
             },
@@ -125,12 +151,7 @@ class TestCreateBucket:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/buckets",
-                json={
-                    "name": "my-test-bucket",
-                    "region": "us-east-1",
-                    "access_key_id": "key",
-                    "secret_access_key": "secret",
-                },
+                json={"name": "my-test-bucket", "region": "us-east-1"},
             )
 
         assert response.status_code == 502
@@ -157,12 +178,7 @@ class TestCreateBucket:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/buckets",
-                json={
-                    "name": "existing-bucket",
-                    "region": "us-east-1",
-                    "access_key_id": "key",
-                    "secret_access_key": "secret",
-                },
+                json={"name": "existing-bucket", "region": "us-east-1"},
             )
 
         assert response.status_code == 200
@@ -174,12 +190,9 @@ class TestCreateBucket:
         mock_s3.put_bucket_lifecycle_configuration.assert_called_once()
 
     @pytest.mark.anyio
-    async def test_missing_required_fields_returns_422(self, storage_client):
+    async def test_missing_name_returns_422(self, storage_client):
         """Omitting required fields returns 422 from Pydantic validation."""
-        response = await storage_client.post(
-            "/api/v1/pdf-storage/buckets",
-            json={"name": "bucket"},  # missing access_key_id and secret_access_key
-        )
+        response = await storage_client.post("/api/v1/pdf-storage/buckets", json={})
 
         assert response.status_code == 422
 
@@ -199,12 +212,7 @@ class TestCreateBucket:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/buckets",
-                json={
-                    "name": "eu-bucket",
-                    "region": "eu-west-1",
-                    "access_key_id": "key",
-                    "secret_access_key": "secret",
-                },
+                json={"name": "eu-bucket", "region": "eu-west-1"},
             )
 
         assert response.status_code == 200
@@ -244,8 +252,6 @@ class TestCreateBucket:
                 json={
                     "name": "minio-bucket",
                     "region": "us-east-1",
-                    "access_key_id": "key",
-                    "secret_access_key": "secret",
                     "endpoint_url": "http://localhost:9000",
                 },
             )
@@ -291,8 +297,6 @@ class TestUploadPdf:
             "id": bucket_id,
             "name": "my-bucket",
             "region": "us-east-1",
-            "access_key_id": "key",
-            "secret_access_key": "secret",
             "endpoint_url": None,
         }
 
@@ -358,8 +362,6 @@ class TestUploadPdf:
             "id": bucket_id,
             "name": "my-bucket",
             "region": "us-east-1",
-            "access_key_id": "key",
-            "secret_access_key": "secret",
             "endpoint_url": None,
         }
         mock_conn.fetchrow = AsyncMock(return_value=bucket_record)
@@ -434,8 +436,6 @@ class TestUploadPdf:
             "id": bucket_id,
             "name": "minio-bucket",
             "region": "us-east-1",
-            "access_key_id": "minio-key",
-            "secret_access_key": "minio-secret",
             "endpoint_url": "http://localhost:9000",
         }
         mock_conn.fetchrow = AsyncMock(return_value=bucket_record)
@@ -461,8 +461,6 @@ class TestUploadPdf:
         assert response.status_code == 200
         mock_boto3.assert_called_once_with(
             "s3",
-            aws_access_key_id="minio-key",
-            aws_secret_access_key="minio-secret",
             region_name="us-east-1",
             endpoint_url="http://localhost:9000",
         )
@@ -480,12 +478,7 @@ class TestCreateBucketDuplicateName:
 
         response = await storage_client.post(
             "/api/v1/pdf-storage/buckets",
-            json={
-                "name": "existing-bucket",
-                "region": "us-east-1",
-                "access_key_id": "key",
-                "secret_access_key": "secret",
-            },
+            json={"name": "existing-bucket", "region": "us-east-1"},
         )
 
         assert response.status_code == 409
@@ -516,12 +509,7 @@ class TestCreateBucketS3Rollback:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/buckets",
-                json={
-                    "name": "fail-bucket",
-                    "region": "us-east-1",
-                    "access_key_id": "key",
-                    "secret_access_key": "secret",
-                },
+                json={"name": "fail-bucket", "region": "us-east-1"},
             )
 
         assert response.status_code == 502
@@ -544,8 +532,6 @@ class TestUploadPdfS3Rollback:
             "id": bucket_id,
             "name": "my-bucket",
             "region": "us-east-1",
-            "access_key_id": "key",
-            "secret_access_key": "secret",
             "endpoint_url": None,
         }
         mock_conn.fetchrow = AsyncMock(return_value=bucket_record)
@@ -575,9 +561,9 @@ class TestUploadPdfS3Rollback:
             )
 
         assert response.status_code == 502
-        # Verify delete_pdf was called (rollback): api.pdfs, web.pdfs, workers.pdfs
+        # Verify delete_pdf was called (rollback): web.pdfs, workers.pdfs
         delete_calls = [c for c in mock_conn.execute.call_args_list if "DELETE FROM" in str(c)]
-        assert len(delete_calls) == 3
+        assert len(delete_calls) == 2
         mock_s3.abort_multipart_upload.assert_called_once()
 
 
@@ -602,8 +588,6 @@ class TestGetPdfUrl:
             "id": bucket_id,
             "name": "my-bucket",
             "region": "us-east-1",
-            "access_key_id": "key",
-            "secret_access_key": "secret",
             "endpoint_url": None,
         }
         # First fetchrow is fetch_pdf_by_id, second is fetch_bucket_by_id.
@@ -720,8 +704,6 @@ class TestGetPdfUrl:
                     "id": bucket_id,
                     "name": "b",
                     "region": "us-east-1",
-                    "access_key_id": "k",
-                    "secret_access_key": "s",
                     "endpoint_url": None,
                 },
             ]

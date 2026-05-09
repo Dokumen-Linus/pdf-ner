@@ -25,6 +25,25 @@ import "./bun-test-extensions.d.ts"
 //   - Errors thrown by handlers propagate to callers as-is
 
 mock.module("@tanstack/react-start", () => ({
+  createClientOnlyFn: (fn: (...args: Array<unknown>) => unknown) => fn,
+  createIsomorphicFn: () => {
+    let serverFn: ((...args: Array<unknown>) => unknown) | null = null
+    let clientFn: ((...args: Array<unknown>) => unknown) | null = null
+    const builder = {
+      server(fn: (...args: Array<unknown>) => unknown) {
+        serverFn = fn
+        return builder
+      },
+      client(fn: (...args: Array<unknown>) => unknown) {
+        clientFn = fn
+        return (...args: Array<unknown>) => (clientFn ?? serverFn)?.(...args)
+      },
+    }
+    return builder
+  },
+  createMiddleware: () => ({
+    server: (fn: unknown) => fn,
+  }),
   createServerFn: (_opts?: { method?: string }) => {
     let _validator: unknown = null
 
@@ -55,6 +74,7 @@ mock.module("@tanstack/react-start", () => ({
     }
     return builder
   },
+  createStart: (fn: unknown) => fn,
 }))
 
 // getRequestHeaders is used by auth-gated functions (billing, etc.). The
@@ -62,7 +82,11 @@ mock.module("@tanstack/react-start", () => ({
 // reads session state from tests/bun-test-setup/mocks/state.ts instead. We
 // still stub this so the real server-only module is never loaded.
 mock.module("@tanstack/react-start/server", () => ({
+  deleteCookie: () => undefined,
+  getCookie: () => undefined,
+  getCookies: () => ({}),
   getRequestHeaders: () => new Headers(),
+  setCookie: () => undefined,
 }))
 
 // createBucket makes an HTTP call to the API server, which is not running in tests.

@@ -22,6 +22,14 @@ type UpdateUserArgs = { data: { id: string; avatarUrl: string } }
 const updateUserCalls: UpdateUserArgs[] = []
 
 mock.module("@/db-fns/web/users", () => ({
+  createUser: async () => ({ id: crypto.randomUUID() }),
+  deleteUser: async () => ({ success: true }),
+  getUserByEmail: async () => {
+    throw new Error("User not found")
+  },
+  getUserById: async () => {
+    throw new Error("User not found")
+  },
   updateUser: async (args: UpdateUserArgs) => {
     updateUserCalls.push(args)
     return { success: true }

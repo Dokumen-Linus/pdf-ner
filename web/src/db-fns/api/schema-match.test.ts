@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 
-import type { FoundDbApiPdf, FoundPrompt } from "../../db/types"
+import type { FoundPrompt } from "../../db/types"
 
 /**
  * Compile-time shape checks for api schema Drizzle types.
@@ -12,12 +12,6 @@ import type { FoundDbApiPdf, FoundPrompt } from "../../db/types"
  * If these tests fail to compile, the Drizzle api schema does not match the SQL definition.
  */
 describe("API Drizzle Schema Shape Checks", () => {
-  it("FoundDbApiPdf should match api.pdfs SQL shape (id, bookmarks, originalHasText)", () => {
-    type Expected = { id: string; bookmarks: string[] | null; originalHasText: boolean | null }
-    const _: Expected = {} as FoundDbApiPdf
-    expect(true).toBe(true)
-  })
-
   it("FoundPrompt should have expected api.prompts fields", () => {
     type Expected = {
       id: string

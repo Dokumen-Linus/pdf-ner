@@ -23,12 +23,13 @@
   },
 
   // python
+  "python.analysis.typeCheckingMode": "strict",
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
-        "source.organizeImports": "explicit",
-        "source.fixAll.ruff": "explicit"
-    },
+      "source.organizeImports": "explicit",
+      "source.fixAll.ruff": "explicit"
+    }
   },
   "ruff.configuration": "pyproject.toml",
   "ruff.lineLength": 100,
@@ -44,7 +45,7 @@
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
-    },
+    }
   },
   "[javascriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -52,7 +53,7 @@
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
-    },
+    }
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -60,7 +61,7 @@
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
-    },
+    }
   },
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -68,11 +69,16 @@
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
-    },
+    }
   },
   "prettier.configPath": "web/.prettierrc",
   "prettier.ignorePath": "web/.prettierignore",
   "tailwindCSS.experimental.configFile": "web/src/styles.css",
   "js/ts.tsdk.path": "node_modules/typescript/lib",
-  "js/ts.updateImportsOnFileMove.enabled": "always"
+  "js/ts.updateImportsOnFileMove.enabled": "always",
+  "python.testing.pytestArgs": [
+    "."
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }

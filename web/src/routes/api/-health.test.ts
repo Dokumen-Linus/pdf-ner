@@ -75,7 +75,7 @@ describe("web health routes", () => {
   it("returns protected detailed checks without sensitive values", async () => {
     setApiSuccess("/readyz/details", {
       status: "ready",
-      checks: { redis: "ready", "table:api.pdfs": "ready" },
+      checks: { redis: "ready" },
     })
 
     const response = await readyzDetailsHandler({

@@ -1,5 +1,4 @@
 import re
-from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -7,8 +6,6 @@ from pydantic import BaseModel, Field, field_validator
 class CreateBucketRequest(BaseModel):
     name: str = Field(min_length=1)
     region: str = "us-east-1"
-    access_key_id: str = Field(min_length=1)
-    secret_access_key: str = Field(min_length=1)
     endpoint_url: str | None = None
 
     @field_validator("endpoint_url")

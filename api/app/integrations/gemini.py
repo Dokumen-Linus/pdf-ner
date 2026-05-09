@@ -1,11 +1,10 @@
+from pathlib import Path
+import sys
 import time
 
 from dokumen_llm_providers import LLMResponseData, call_google_genai
 
 from app.core.logging import bind_request_context
-
-import sys
-from pathlib import Path
 
 _OBS_PATH = Path(__file__).resolve().parents[3] / "packages" / "otel_py"
 if str(_OBS_PATH) not in sys.path:

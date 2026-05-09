@@ -18,8 +18,6 @@ class FakeSecretsClient:
                         "OPENAI_API_KEY": "openai-secret",
                         "GOOGLE_AI_API_KEY": "google-secret",
                         "AVATARS_S3_BUCKET_NAME": "avatars-secret",
-                        "AVATARS_AWS_ACCESS_KEY_ID": "avatar-key",
-                        "AVATARS_AWS_SECRET_ACCESS_KEY": "avatar-secret",
                     }
                 )
             },
