@@ -1,39 +1,89 @@
 {
   "$schema": "https://app.kilo.ai/config.json",
-  "mcp": {
-    "git": {
-      "type": "local",
-      "command": [
-        "uvx",
-        "mcp-server-git",
-        "--repository",
-        "C:\\Users\\zchar\\Desktop\\pdf-ner\\"
-      ],
-      "enabled": true
-    }
-  },
+
   "permission": {
+    "edit": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "lsp": "allow",
+    "websearch": "allow",
+    "codesearch": "allow",
+    "webfetch": "allow",
+
+    "external_directory": "deny",
+    "doom_loop": "deny",
+
     "bash": {
-      "pytest *": "allow",
-      "echo *": "allow",
+      "ls": "allow",
       "ls *": "allow",
-      "cat *": "allow",
-      "grep *": "allow",
-      "rg *": "allow",
-      "find *": "allow",
+
+      "pwd": "allow",
       "pwd *": "allow",
+
+      "cd": "allow",
       "cd *": "allow",
-      "git *": "allow",
+
+      "cat": "allow",
+      "cat *": "allow",
+
+      "head": "allow",
+      "head *": "allow",
+
+      "tail": "allow",
+      "tail *": "allow",
+
+      "grep": "allow",
+      "grep *": "allow",
+
+      "rg": "allow",
+      "rg *": "allow",
+
+      "find": "allow",
+      "find *": "allow",
+
+      "echo": "allow",
+      "echo *": "allow",
+
+      "sed": "allow",
+      "sed *": "allow",
+
+      "awk": "allow",
+      "awk *": "allow",
+
+      "wc": "allow",
+      "wc *": "allow",
+
+      "stat": "allow",
+      "stat *": "allow",
+
+      "pytest": "allow",
+      "pytest *": "allow",
+
+      "uv": "allow",
       "uv *": "allow",
+
+      "uvx": "allow",
+      "uvx *": "allow",
+
+      "ruff": "allow",
       "ruff *": "allow",
-      "npx *": "allow",
+
       "npm run *": "allow",
+      "npx *": "allow",
       "bun run *": "allow",
-      "python *": "ask",
+
+      "npm install": "allow",
+      "npm install *": "allow",
+      "bun install": "allow",
+      "bun install *": "allow",
+
+      "sudo": "deny",
       "sudo *": "deny",
+
+      "pip": "deny",
       "pip *": "deny",
+
       "*": "ask"
-    },
-    "edit": "allow"
+    }
   }
 }
