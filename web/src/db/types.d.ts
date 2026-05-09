@@ -94,7 +94,6 @@ export type FoundModel = InferSelectModel<typeof schema.models>
 
 // api - read only
 export type FoundPrompt = InferSelectModel<typeof schema.prompts>
-export type FoundDbApiPdf = InferSelectModel<typeof schema.apiPdfs>
 
 // workers - read only
 export type LlmUsage = InferSelectModel<typeof llmUsage>
