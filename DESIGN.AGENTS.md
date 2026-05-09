@@ -1,4 +1,4 @@
-# Design Agent Notes
+# Design
 
 ## Direction
 

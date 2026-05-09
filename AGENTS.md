@@ -4,14 +4,13 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 
 ## Non-Negotiables
 
-- Follow `AGENTS.md`. Ignore `CLAUDE.md`
 - Never disable, hide, or bypass failing tests, lint, or type checks
 - Touch only requested scope
 - Do not delete code or comments you do not understand without approval
 - Prefer the simplest correct solution. Avoid abstractions unless clearly justified
 - If requirements or source files conflict, stop and surface the ambiguity
-- Never read or edit .env files. Always add new env vars to the relevant `.env.example`
-- Do not read `research.md`, `LICENSE.md`, `CHANGELOG.md`, or any `README.md` file except `README.AGENTS.md`
+- Never read or edit .env files. Always add new env vars to the local `.env.example`
+- Never read or edit `research.md`, `LICENSE.md`, `CHANGELOG.md`, `DESIGN.md` or any `README.md` file except `README.AGENTS.md`
 
 ## Work Loop
 
@@ -22,15 +21,15 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - Push back on approaches with clear downsides
 - If your changes create dead code, list it and ask before removing it
 
-## Repo Map
+## Dokumen AI Monorepo Map
 
-- Monorepo with `web`, `api`, `workers`, `packages`, `db`, `infra`
-- `web`: TanStack Start React app. UI must not access DB directly; use `src/db-fns/`
-- `api`: FastAPI app. Use router -> service -> repository. Only `repository.py` files execute SQL
-- `workers`: Celery app with DDD layers. Keep tasks thin; business logic belongs in application/domain layers
-- `db`: SQL migrations are source of truth. Update create scripts directly; no backward-compat migrations
-- `packages`: shared Python libraries used by `api` and `workers`
-- One Postgres instance, multiple schemas, strict role separation across web/api/workers
+- `web` Tanstack React Start app
+- `api` FastAPI app
+- `workers` Celery tasks app
+- `packages` Python utilities that could be used in api or workers
+- `db` PostgreSQL migration and seed scripts
+- `infra` resource setup, ci/cd, and prod env vars
+- `gpu` Runpod Serverless HTTP models
 
 ### DB Invariants
 
