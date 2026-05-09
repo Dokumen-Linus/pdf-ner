@@ -352,6 +352,8 @@
 - *(llm)* Runpod skills
 - Start pypdfium2 skill
 - Pypdfium2 examples
+- Readmes and centralized styling
+- *(llm)* Remove repeated info
 
 ### ⚡ Performance
 
@@ -588,6 +590,7 @@
 - *(llm)* Codex hooks
 - *(web)* Update bun
 - Lock package versions in auto-format.yml
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
 
