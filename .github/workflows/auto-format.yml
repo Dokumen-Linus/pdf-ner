@@ -2,8 +2,8 @@ name: Auto Format
 
 on:
   pull_request:
-    branches: [ master ]
-    types: [ closed ]
+    branches: [master]
+    types: [closed]
 
 permissions:
   contents: write
@@ -20,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install ruff
         run: pip install ruff
@@ -40,10 +40,6 @@ jobs:
       - name: Format web dir with prettier
         working-directory: web
         run: bun run prettier:fix
-
-      - name: Format web dir with eslint
-        working-directory: web
-        run: bun run lint:fix
 
       - name: Commit formatting changes
         if: github.event.pull_request.merged == true
