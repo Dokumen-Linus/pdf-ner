@@ -10,26 +10,30 @@
         "C:\\Users\\zchar\\Desktop\\pdf-ner\\"
       ],
       "enabled": true
-    },
-    "filesystem": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "C:\\Users\\zchar\\Desktop\\pdf-ner\\"
-      ],
-      "enabled": true
-    },
-    "codesight": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "codesight",
-        "--mcp"
-      ],
-      "enabled": true
     }
+  },
+  "permission": {
+    "bash": {
+      "pytest *": "allow",
+      "echo *": "allow",
+      "ls *": "allow",
+      "cat *": "allow",
+      "grep *": "allow",
+      "rg *": "allow",
+      "find *": "allow",
+      "pwd *": "allow",
+      "cd *": "allow",
+      "git *": "allow",
+      "uv *": "allow",
+      "ruff *": "allow",
+      "npx *": "allow",
+      "npm run *": "allow",
+      "bun run *": "allow",
+      "python *": "ask",
+      "sudo *": "deny",
+      "pip *": "deny",
+      "*": "ask"
+    },
+    "edit": "allow"
   }
 }
