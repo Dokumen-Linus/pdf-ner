@@ -6,8 +6,12 @@ NODE_ENV = "test"
 
 [test]
 timeout = 10000 # 10 seconds (default is 5000ms)
+isolate = true
 
-preload = ["./tests/bun-test-setup/main.ts"]
+preload = [
+  "./tests/bun-test-setup/env.ts",
+  "./tests/bun-test-setup/main.ts"
+]
 
 coverageReporter = ["text"]
 coverageDir = "./coverage"

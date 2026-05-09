@@ -14,28 +14,22 @@ _BUCKET_ROW = {
     "filepath": "uploads/sample.pdf",
     "bucket_name": "my-bucket",
     "region": "us-east-1",
-    "access_key_id": "AKIAIOSFODNN7EXAMPLE",
-    "secret_access_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
     "endpoint_url": None,
 }
 
 
 class TestMakeS3Client:
     def test_returns_boto3_client(self):
-        client = make_s3_client(
-            access_key_id="AKIAIOSFODNN7EXAMPLE",
-            secret_access_key="secret",
-            region="us-east-1",
-            endpoint_url=None,
-        )
-        assert client is not None
-        assert hasattr(client, "get_object")
+        with patch("app.shared.infrastructure.s3.boto3.client") as mock_boto_client:
+            client = make_s3_client(
+                region="us-east-1",
+                endpoint_url=None,
+            )
+            assert client == mock_boto_client.return_value
 
     def test_includes_endpoint_url(self):
         with patch("app.shared.infrastructure.s3.boto3.client") as mock_boto_client:
             make_s3_client(
-                access_key_id="key",
-                secret_access_key="secret",
                 region="us-east-1",
                 endpoint_url="http://localhost:9000",
             )
@@ -45,8 +39,6 @@ class TestMakeS3Client:
     def test_omits_endpoint_url_when_none(self):
         with patch("app.shared.infrastructure.s3.boto3.client") as mock_boto_client:
             make_s3_client(
-                access_key_id="key",
-                secret_access_key="secret",
                 region="us-east-1",
                 endpoint_url=None,
             )

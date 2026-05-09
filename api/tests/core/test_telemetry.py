@@ -120,7 +120,6 @@ async def test_readyz_details_reports_dependency_checks(telemetry_app):
         assert body["status"] == "ready"
         assert body["checks"]["redis"] == "ready"
         assert body["checks"]["table:api.aws_buckets"] == "ready"
-        assert body["checks"]["table:api.pdfs"] == "ready"
         assert body["checks"]["table:api.prompts"] == "ready"
         assert body["checks"]["privilege:workers.llm_usage:insert"] == "ready"
 

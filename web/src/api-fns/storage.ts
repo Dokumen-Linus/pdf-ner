@@ -20,16 +20,14 @@ export const createBucket = createServerFn({ method: "POST" })
         body: JSON.stringify({
           name: data.name,
           region: env.PDF_STORAGE_AWS_REGION,
-          access_key_id: env.PDF_STORAGE_AWS_ACCESS_KEY_ID,
-          secret_access_key: env.PDF_STORAGE_AWS_SECRET_ACCESS_KEY,
           endpoint_url: env.PDF_STORAGE_AWS_ENDPOINT_URL ?? undefined,
         }),
       })
     },
   )
 
-// Presigned GET URL for a stored PDF. The API signs against the bucket's
-// per-row credentials so the browser never sees AWS secrets.
+// Presigned GET URL for a stored PDF. The API signs with its runtime AWS role
+// so the browser never sees AWS credentials.
 // TTL is fixed server-side at 1 hour.
 export const getPdfPresignedUrl = createServerFn({ method: "GET" })
   .inputValidator(z.object({ pdfId: z.string().uuid() }))

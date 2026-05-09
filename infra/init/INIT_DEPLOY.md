@@ -15,7 +15,7 @@ The current shape is intentionally simple:
 
 Install these locally:
 
-- AWS CLI v2, authenticated with deployer credentials.
+- AWS CLI v2, authenticated with an IAM Identity Center or other temporary-credential profile.
 - `jq`.
 - `ssh` and `scp`.
 - A local SSH key pair for EC2, for example:
@@ -24,8 +24,8 @@ Install these locally:
 ssh-keygen -t ed25519 -f ~/.ssh/dokumen-ec2
 ```
 
-Your deployer AWS credentials need permission to create EC2, VPC, subnet, internet gateway, route table, security group, Elastic IP, S3, SES identity verification, and IAM users/policies/access keys.
-Use one deployer identity for infrastructure setup. Do not use root access keys.
+Your deployer profile needs permission to create EC2, VPC, subnet, internet gateway, route table, security group, Elastic IP, S3, SES identity verification, IAM roles/policies, instance profiles, GitHub OIDC, ECR repositories, and Secrets Manager secrets.
+Use one deployer identity for infrastructure setup. Do not use root access.
 
 ## AWS Resources
 
@@ -51,8 +51,7 @@ one command while making each AWS area easier to inspect:
 - `05_avatars_bucket.sh`: private avatar S3 bucket.
 - `06_ecr_and_runtime_role.sh`: ECR repositories and EC2 runtime IAM.
 - `07_github_deploy_role.sh`: GitHub OIDC and deploy IAM.
-- `08_runtime_access_keys.sh`: scoped runtime IAM users/access keys and local secret draft files.
-- `09_ses_identity.sh`: SES email identity verification.
+- `09_ses_identity.sh`: local secret draft files and SES email identity verification.
 - `10_ec2_compose_deploy.sh`: optional EC2 host setup, repo checkout, `.env.prod` upload, and Compose startup.
 - `11_summary.sh`: final resource, GitHub, and local draft outputs.
 
@@ -66,12 +65,9 @@ Together, those scripts create or reuse:
 - EC2 instance using Amazon Linux 2023.
 - Elastic IP.
 - ECR repositories for `web`, `api`, and `worker` images.
-- EC2 instance profile for SSM, ECR image pulls, and Secrets Manager reads.
+- EC2 instance profile for SSM, ECR image pulls, Secrets Manager reads, SES sending, avatar S3 access, and first-party PDF bucket creation/access.
 - GitHub Actions OIDC deploy role for ECR image pushes and SSM deploy commands.
 - Private avatar S3 bucket.
-- IAM user and access key for SES sending.
-- IAM user and access key for avatar S3 access.
-- IAM user and access key for PDF-storage S3 bucket creation and access.
 - SES email identity verification request.
 - Local reviewed secret draft JSON files in `infra/init/local-secrets/`.
 
@@ -107,17 +103,24 @@ To deploy code but avoid starting Compose:
 START_COMPOSE=0 bash infra/init/aws-setup.sh
 ```
 
-## AWS Access Keys
+## AWS Credentials
 
-You do not need a separate AWS access key for EC2, VPC, subnets, DNS-related networking, gateways, route tables, security groups, Elastic IPs, or IAM resources. Those are infrastructure resources created by your deployer credentials through the AWS CLI.
+You do not need long-lived AWS access keys for setup or runtime.
 
-You should separate runtime credentials by application capability:
+For setup, authenticate the AWS CLI with IAM Identity Center or another
+temporary-credential profile, then run the script with that profile:
 
-- `SES_AWS_ACCESS_KEY_ID` and `SES_AWS_SECRET_ACCESS_KEY` for web email sending.
-- `AVATARS_AWS_ACCESS_KEY_ID` and `AVATARS_AWS_SECRET_ACCESS_KEY` for API avatar uploads.
-- `PDF_STORAGE_AWS_ACCESS_KEY_ID` and `PDF_STORAGE_AWS_SECRET_ACCESS_KEY` for creating and using user PDF buckets.
+```bash
+aws configure sso
+aws sso login --profile dokumen-bootstrap
+AWS_PROFILE=dokumen-bootstrap bash infra/init/aws-setup.sh
+```
 
-On AWS, IAM roles with temporary credentials are preferred for EC2 workloads. The current app, however, persists per-bucket S3 credentials in Postgres for PDF storage, so long-lived scoped keys are still part of the current design. Treat that as a later hardening target.
+For runtime, the EC2 instance profile supplies temporary AWS credentials to
+the Docker containers through the normal AWS SDK credential provider chain.
+The app uses that role for SES, avatar uploads, and PDF bucket creation/uploads.
+`api.aws_buckets` stores only bucket metadata needed to locate first-party
+buckets: name, region, and optional endpoint URL.
 
 ## Configure Setup And EC2 Env Files
 
@@ -187,22 +190,24 @@ environment variables and pass them to `docker build` as build args. They do
 not need to be fetched from AWS Secrets Manager at runtime.
 
 Private web server values, such as `DATABASE_URL`, `AUTH_SECRET`,
-`STRIPE_SECRET_KEY`, SES credentials, and API storage credentials, should stay
-in AWS Secrets Manager and are loaded by the server process at startup.
+`STRIPE_SECRET_KEY` should stay in AWS Secrets Manager and is loaded by the
+server process at startup. AWS service access is provided by the EC2 instance
+profile rather than static credentials in Secrets Manager.
 
 ## AWS Secrets Manager
 
 Create these AWS Secrets Manager secrets before starting the app containers:
 
 - `prod/web`: web database URLs, Better Auth, Stripe, API, PDF-storage, and optional chatbot OpenAI values.
-- `prod/email`: SES credentials, SES region/endpoint, sender email, and admin email.
+- `prod/email`: SES region/endpoint, sender email, and admin email.
 - `prod/api`: API database URL, Redis URL, API key, CORS/host config, LLM keys, and avatar S3 values.
 - `prod/workers`: worker database URL, Redis URL, LLM keys, and Stripe secret key.
 - `prod/runpod`: OCR model, Runpod endpoints, Runpod key, timeout, and retry settings.
 
 Attach an IAM instance profile role to the EC2 host with
-`secretsmanager:GetSecretValue` on those secrets. If the secrets use a
-customer-managed KMS key, also grant `kms:Decrypt`.
+`secretsmanager:GetSecretValue` on those secrets, SES send permissions, and S3
+permissions for avatar objects and first-party PDF bucket creation/access. If
+the secrets use a customer-managed KMS key, also grant `kms:Decrypt`.
 
 The apps load secrets once at process startup and keep them in memory. Restart
 the relevant container after rotating a secret.
@@ -212,9 +217,8 @@ The secret workflow is deliberately two-step:
 1. `infra/init/aws-setup.sh` copies committed templates from
    `infra/example-secrets/` into gitignored local drafts in
    `infra/init/local-secrets/`.
-2. The setup script patches AWS-generated values into those drafts:
-   SES credentials and region, avatar S3 credentials and bucket name, and
-   PDF-storage credentials and region.
+2. The setup script patches AWS-generated/non-secret values into those drafts:
+   SES region, avatar bucket name and region, and PDF-storage region.
 3. You review and complete every remaining non-AWS field locally, including
    database URLs, API keys, healthcheck tokens, LLM keys, Stripe keys, Runpod
    values, sender/admin email, and Better Auth values.
@@ -545,7 +549,7 @@ For database changes, rollback is more delicate. This database is pre-instantiat
 After the initial deployment works:
 
 - Move Redis to ElastiCache.
-- Replace long-lived runtime access keys with instance roles where the app design allows it.
+- Tighten the EC2 runtime S3 permissions from account-wide buckets to a naming convention once bucket names are constrained.
 - Add SSM Session Manager and reduce SSH reliance.
 - Add snapshot backups.
 - Add CloudWatch log shipping.

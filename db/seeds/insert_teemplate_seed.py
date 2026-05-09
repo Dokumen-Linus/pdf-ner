@@ -43,7 +43,7 @@ def make_seed_for_template(template_number: int, document_at_end: str) -> None:
     iso_timestamp = timestamp.isoformat()
 
     sql = f"""INSERT INTO public.templates (txt, inserts, document_at_end, created_at, updated_at)
-VALUES ('{escaped_txt}', {inserts_array}, {document_at_end.lower()}, '{iso_timestamp}', now());"""
+VALUES (\n'{escaped_txt}',\n{inserts_array}, {document_at_end.lower()}, '{iso_timestamp}', now());"""
     output_path = os.path.join(os.path.dirname(__file__), f"{timestamp_str}.sql")
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(sql)

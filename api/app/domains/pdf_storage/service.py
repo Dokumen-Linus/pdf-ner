@@ -29,6 +29,34 @@ _INCOMPLETE_MULTIPART_ABORT_DAYS = 1
 _LIFECYCLE_RULE_ID = "abort-incomplete-multipart-uploads"
 
 
+async def _apply_private_encrypted_bucket_defaults(s3, bucket_name: str) -> None:
+    await anyio.to_thread.run_sync(
+        lambda: s3.put_public_access_block(
+            Bucket=bucket_name,
+            PublicAccessBlockConfiguration={
+                "BlockPublicAcls": True,
+                "IgnorePublicAcls": True,
+                "BlockPublicPolicy": True,
+                "RestrictPublicBuckets": True,
+            },
+        )
+    )
+    await anyio.to_thread.run_sync(
+        lambda: s3.put_bucket_encryption(
+            Bucket=bucket_name,
+            ServerSideEncryptionConfiguration={
+                "Rules": [
+                    {
+                        "ApplyServerSideEncryptionByDefault": {
+                            "SSEAlgorithm": "AES256",
+                        }
+                    }
+                ]
+            },
+        )
+    )
+
+
 async def _apply_incomplete_multipart_lifecycle(s3, bucket_name: str) -> bool:
     """Best-effort: install a lifecycle rule that auto-aborts orphan multiparts.
 
@@ -69,19 +97,15 @@ async def create_bucket(conn: asyncpg.Connection, request: CreateBucketRequest) 
             conn,
             request.name,
             request.region,
-            request.access_key_id,
-            request.secret_access_key,
             request.endpoint_url,
         )
-    except asyncpg.UniqueViolationError:
-        raise HTTPException(status_code=409, detail=f"Bucket '{request.name}' already registered")
+    except asyncpg.UniqueViolationError as e:
+        raise HTTPException(
+            status_code=409, detail=f"Bucket '{request.name}' already registered"
+        ) from e
 
     # 2. Create S3 bucket
-    s3_kwargs = {
-        "aws_access_key_id": request.access_key_id,
-        "aws_secret_access_key": request.secret_access_key,
-        "region_name": request.region,
-    }
+    s3_kwargs = {"region_name": request.region}
     if request.endpoint_url:
         s3_kwargs["endpoint_url"] = request.endpoint_url
     s3 = boto3.client("s3", **s3_kwargs)
@@ -104,10 +128,13 @@ async def create_bucket(conn: asyncpg.Connection, request: CreateBucketRequest) 
 
     try:
         await anyio.to_thread.run_sync(_create)
+        await _apply_private_encrypted_bucket_defaults(s3, request.name)
     except ClientError as e:
         # Rollback DB row on S3 failure
         await repository.delete_bucket(conn, bucket_id)
-        raise HTTPException(status_code=502, detail=f"S3 error: {e.response['Error']['Message']}")
+        raise HTTPException(
+            status_code=502, detail=f"S3 error: {e.response['Error']['Message']}"
+        ) from e
 
     # Install the orphan-multipart safety net. Idempotent on S3, so it's safe to
     # re-apply on the BucketAlreadyOwnedByYou path (which lands here too).
@@ -128,11 +155,7 @@ def _sanitize_filename(filename: str) -> str:
 
 
 def _build_s3_client(bucket: asyncpg.Record):
-    s3_kwargs = {
-        "aws_access_key_id": bucket["access_key_id"],
-        "aws_secret_access_key": bucket["secret_access_key"],
-        "region_name": bucket["region"],
-    }
+    s3_kwargs = {"region_name": bucket["region"]}
     if bucket["endpoint_url"]:
         s3_kwargs["endpoint_url"] = bucket["endpoint_url"]
     return boto3.client("s3", **s3_kwargs)
@@ -144,8 +167,8 @@ _PRESIGNED_URL_TTL_SECONDS = 3600  # 1 hour — balances cache-friendliness with
 async def generate_pdf_get_url(conn: asyncpg.Connection, pdf_id: UUID, user_id: UUID) -> dict:
     """Return a time-limited S3 GET URL the browser can fetch directly.
 
-    Credentials never leave the API tier. Per-bucket creds are loaded from
-    api.aws_buckets, the same pattern used by upload_pdf_stream.
+    Credentials never leave the API tier. The AWS SDK resolves them from the
+    runtime environment, normally the EC2 instance profile in production.
     """
     pdf = await repository.fetch_pdf_by_id(conn, pdf_id)
     if pdf is None:
@@ -173,7 +196,9 @@ async def generate_pdf_get_url(conn: asyncpg.Connection, pdf_id: UUID, user_id: 
     try:
         url = await anyio.to_thread.run_sync(_sign)
     except ClientError as e:
-        raise HTTPException(status_code=502, detail=f"S3 error: {e.response['Error']['Message']}")
+        raise HTTPException(
+            status_code=502, detail=f"S3 error: {e.response['Error']['Message']}"
+        ) from e
 
     return {"url": url, "expires_in": _PRESIGNED_URL_TTL_SECONDS, "pdf_id": str(pdf_id)}
 
@@ -214,7 +239,9 @@ async def upload_pdf_stream(
         )
     except ClientError as e:
         await repository.delete_pdf(conn, pdf_id)
-        raise HTTPException(status_code=502, detail=f"S3 error: {e.response['Error']['Message']}")
+        raise HTTPException(
+            status_code=502, detail=f"S3 error: {e.response['Error']['Message']}"
+        ) from e
 
     upload_id = init["UploadId"]
 
@@ -282,7 +309,9 @@ async def upload_pdf_stream(
         raise
     except ClientError as e:
         await _abort_and_rollback()
-        raise HTTPException(status_code=502, detail=f"S3 error: {e.response['Error']['Message']}")
+        raise HTTPException(
+            status_code=502, detail=f"S3 error: {e.response['Error']['Message']}"
+        ) from e
     except Exception:
         await _abort_and_rollback()
         raise

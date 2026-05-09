@@ -78,11 +78,7 @@ def _metadata_text_by_page(row: asyncpg.Record) -> dict:
 
 
 def _build_s3_client(row: asyncpg.Record):
-    s3_kwargs = {
-        "aws_access_key_id": row["access_key_id"],
-        "aws_secret_access_key": row["secret_access_key"],
-        "region_name": row["region"],
-    }
+    s3_kwargs = {"region_name": row["region"]}
     if row["endpoint_url"]:
         s3_kwargs["endpoint_url"] = row["endpoint_url"]
     return boto3.client("s3", **s3_kwargs)

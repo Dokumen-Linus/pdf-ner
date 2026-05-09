@@ -11,24 +11,18 @@ logger = logging.getLogger(__name__)
 
 
 def make_s3_client(
-    access_key_id: str,
-    secret_access_key: str,
     region: str,
     endpoint_url: str | None,
 ):
-    """Create a boto3 S3 client from per-bucket credentials."""
-    kwargs = {
-        "aws_access_key_id": access_key_id,
-        "aws_secret_access_key": secret_access_key,
-        "region_name": region,
-    }
+    """Create a boto3 S3 client using the runtime AWS credential provider chain."""
+    kwargs = {"region_name": region}
     if endpoint_url:
         kwargs["endpoint_url"] = endpoint_url
     return boto3.client("s3", **kwargs)
 
 
 async def download_pdf_bytes(conn: asyncpg.Connection, pdf_id: UUID) -> tuple[bytes, str]:
-    """Resolve bucket credentials for pdf_id from DB, download from S3.
+    """Resolve bucket metadata for pdf_id from DB, download from S3.
 
     Returns (bytes, filepath).
     Raises LookupError if pdf not found.
@@ -38,8 +32,6 @@ async def download_pdf_bytes(conn: asyncpg.Connection, pdf_id: UUID) -> tuple[by
         raise LookupError(f"PDF {pdf_id} not found")
 
     s3 = make_s3_client(
-        row["access_key_id"],
-        row["secret_access_key"],
         row["region"],
         row["endpoint_url"],
     )
@@ -61,8 +53,6 @@ async def upload_pdf_bytes(conn: asyncpg.Connection, pdf_id: UUID, data: bytes) 
         raise LookupError(f"PDF {pdf_id} not found")
 
     s3 = make_s3_client(
-        row["access_key_id"],
-        row["secret_access_key"],
         row["region"],
         row["endpoint_url"],
     )

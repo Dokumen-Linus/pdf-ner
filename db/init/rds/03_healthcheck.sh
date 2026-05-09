@@ -57,7 +57,6 @@ check_table "web_user" "$WEB_USER_PASSWORD" "web.projects"
 check_table "web_user" "$WEB_USER_PASSWORD" "web.pdfs"
 
 check_table "api_user" "$API_USER_PASSWORD" "api.aws_buckets"
-check_table "api_user" "$API_USER_PASSWORD" "api.pdfs"
 check_table "api_user" "$API_USER_PASSWORD" "api.prompts"
 expect_true "api_user" "$API_USER_PASSWORD" "workers.llm_usage insert privilege" \
   "SELECT has_table_privilege(current_user, 'workers.llm_usage', 'INSERT');"

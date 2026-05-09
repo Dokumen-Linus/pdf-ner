@@ -59,6 +59,36 @@ EOF
         "arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:prod/workers-*",
         "arn:aws:secretsmanager:${AWS_REGION}:${ACCOUNT_ID}:secret:prod/runpod-*"
       ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ses:SendEmail",
+        "ses:SendRawEmail"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:GetBucketLocation",
+        "s3:ListBucket",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListBucketMultipartUploads",
+        "s3:ListMultipartUploadParts",
+        "s3:PutLifecycleConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:PutBucketPublicAccessBlock",
+        "s3:PutEncryptionConfiguration"
+      ],
+      "Resource": [
+        "arn:aws:s3:::*",
+        "arn:aws:s3:::*/*"
+      ]
     }
   ]
 }

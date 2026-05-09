@@ -21,6 +21,15 @@ const PROJECT_ID = "11111111-1111-1111-1111-111111111111"
 const BUCKET_ID = "22222222-2222-2222-2222-222222222222"
 const BACKEND_PATH = "/api/v1/pdf-storage/pdfs"
 
+async function expectStatus(res: Response, expected: number): Promise<void> {
+  if (res.status !== expected) {
+    throw new Error(
+      `Expected status ${expected}, received ${res.status}: ${await res.clone().text()}`,
+    )
+  }
+  expect(res.status).toBe(expected)
+}
+
 function buildRequest(
   init: {
     projectId?: string | null
@@ -64,7 +73,7 @@ describe("uploadHandler — success", () => {
     })
 
     const res = await uploadHandler({ request: buildRequest() })
-    expect(res.status).toBe(200)
+    await expectStatus(res, 200)
 
     const json = await res.json()
     expect(json.pdf_id).toBe("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
@@ -146,7 +155,7 @@ describe("uploadHandler — backend failures", () => {
   it("propagates a 502 from the FastAPI backend", async () => {
     setApiError(`POST ${BACKEND_PATH}`, 502, "S3 unavailable")
     const res = await uploadHandler({ request: buildRequest() })
-    expect(res.status).toBe(502)
+    await expectStatus(res, 502)
     expect((await res.json()).detail).toBe("S3 unavailable")
   })
 
@@ -155,7 +164,7 @@ describe("uploadHandler — backend failures", () => {
     // path here since the Tanstack layer only pre-checks Content-Length.
     setApiError(`POST ${BACKEND_PATH}`, 413, "File exceeds 50 MB limit")
     const res = await uploadHandler({ request: buildRequest() })
-    expect(res.status).toBe(413)
+    await expectStatus(res, 413)
     expect((await res.json()).detail).toMatch(/50 MB/)
   })
 })

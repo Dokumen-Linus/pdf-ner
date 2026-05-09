@@ -66,19 +66,9 @@
     },
 
     {
-      "Sid": "LimitedIAMManagement",
+      "Sid": "LimitedRoleManagement",
       "Effect": "Allow",
       "Action": [
-        "iam:CreateUser",
-        "iam:DeleteUser",
-        "iam:GetUser",
-        "iam:CreateAccessKey",
-        "iam:DeleteAccessKey",
-        "iam:ListAccessKeys",
-        "iam:AttachUserPolicy",
-        "iam:DetachUserPolicy",
-        "iam:PutUserPolicy",
-        "iam:DeleteUserPolicy",
         "iam:ListPolicies",
         "iam:CreatePolicy",
         "iam:DeletePolicy",

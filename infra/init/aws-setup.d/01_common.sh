@@ -45,13 +45,6 @@ configure_defaults() {
   INSTANCE_NAME="${PROJECT_NAME}-ec2"
   EIP_NAME="${PROJECT_NAME}-eip"
 
-  SES_IAM_USER_NAME="${PROJECT_NAME}-ses-user"
-  SES_POLICY_NAME="${PROJECT_NAME}-ses-send-email"
-  AVATARS_IAM_USER_NAME="${PROJECT_NAME}-avatars-s3-user"
-  AVATARS_POLICY_NAME="${PROJECT_NAME}-avatars-s3"
-  PDF_STORAGE_IAM_USER_NAME="${PROJECT_NAME}-pdf-storage-s3-user"
-  PDF_STORAGE_POLICY_NAME="${PROJECT_NAME}-pdf-storage-s3-admin"
-
   WEB_ECR_REPOSITORY="${WEB_ECR_REPOSITORY:-${PROJECT_NAME}-web}"
   API_ECR_REPOSITORY="${API_ECR_REPOSITORY:-${PROJECT_NAME}-api}"
   WORKERS_ECR_REPOSITORY="${WORKERS_ECR_REPOSITORY:-${PROJECT_NAME}-workers}"
@@ -303,31 +296,4 @@ set_secret_draft_value() {
   tmp="${target}.tmp"
   jq --arg key "$key" --arg value "$value" '.[$key] = $value' "$target" > "$tmp"
   mv "$tmp" "$target"
-}
-
-create_access_key() {
-  local user_name="$1"
-  local label="$2"
-  local keys_json existing_count
-
-  ACCESS_KEY_ID=""
-  SECRET_ACCESS_KEY=""
-  aws iam create-user --user-name "$user_name" >/dev/null 2>&1 || true
-
-  existing_count=$(aws iam list-access-keys \
-    --user-name "$user_name" \
-    --query 'length(AccessKeyMetadata)' \
-    --output text)
-
-  if [ "$existing_count" -ge 2 ]; then
-    echo "    $label: $user_name already has 2 access keys; preserving any existing local draft value."
-    echo "    Rotate/delete one manually if you need AWS to return a new secret value."
-    return 1
-  fi
-
-  keys_json=$(aws iam create-access-key --user-name "$user_name")
-  ACCESS_KEY_ID=$(printf '%s' "$keys_json" | jq -r '.AccessKey.AccessKeyId')
-  SECRET_ACCESS_KEY=$(printf '%s' "$keys_json" | jq -r '.AccessKey.SecretAccessKey')
-  echo "    $label access key created for IAM user: $user_name"
-  return 0
 }

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from "bun:test"
+import { describe, expect, it, mock } from "bun:test"
 
 import { buildObservedHeaders, observedApiFetch } from "./fetch"
 import { withObservedRequest, withObservedResponse } from "./fetch.server"
@@ -68,28 +68,22 @@ describe("buildObservedHeaders", () => {
 })
 
 describe("observedApiFetch", () => {
-  const originalFetch = globalThis.fetch
-
-  beforeEach(() => {
-    globalThis.fetch = mock(
-      async () => new Response("ok", { status: 200 }),
-    ) as unknown as typeof fetch
-  })
-
-  afterEach(() => {
-    globalThis.fetch = originalFetch
-  })
-
   it("forwards the input and merges observed headers into the outgoing request", async () => {
-    await observedApiFetch("http://test.local/foo", {
-      method: "POST",
-      headers: { Authorization: "Bearer t" },
-      body: JSON.stringify({ a: 1 }),
-    })
+    const fetchMock = mock(async () => new Response("ok", { status: 200 }))
 
-    const fetchMock = globalThis.fetch as unknown as ReturnType<typeof mock>
+    await observedApiFetch(
+      "http://test.local/foo",
+      {
+        method: "POST",
+        headers: { Authorization: "Bearer t" },
+        body: JSON.stringify({ a: 1 }),
+      },
+      undefined,
+      fetchMock as unknown as typeof fetch,
+    )
+
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    const [input, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    const [input, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
     expect(input).toBe("http://test.local/foo")
     expect(init.method).toBe("POST")
     expect(init.body).toBe(JSON.stringify({ a: 1 }))
@@ -100,10 +94,16 @@ describe("observedApiFetch", () => {
   })
 
   it("propagates an upstream request id to the outgoing fetch", async () => {
-    await observedApiFetch("http://test.local/foo", {}, { "X-Request-ID": "req-upstream" })
+    const fetchMock = mock(async () => new Response("ok", { status: 200 }))
 
-    const fetchMock = globalThis.fetch as unknown as ReturnType<typeof mock>
-    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    await observedApiFetch(
+      "http://test.local/foo",
+      {},
+      { "X-Request-ID": "req-upstream" },
+      fetchMock as unknown as typeof fetch,
+    )
+
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
     expect(new Headers(init.headers).get("X-Request-ID")).toBe("req-upstream")
   })
 })

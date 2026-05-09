@@ -30,7 +30,6 @@ for part in \
   05_avatars_bucket.sh \
   06_ecr_and_runtime_role.sh \
   07_github_deploy_role.sh \
-  08_runtime_access_keys.sh \
   09_ses_identity.sh \
   10_ec2_compose_deploy.sh \
   11_summary.sh; do
@@ -48,7 +47,6 @@ main() {
   setup_avatar_bucket
   setup_ecr_and_runtime_role
   setup_github_deploy_role
-  setup_runtime_access_keys
   setup_ses_identity
   deploy_to_ec2
   print_summary

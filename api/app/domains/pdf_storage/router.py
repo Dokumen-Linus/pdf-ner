@@ -66,8 +66,8 @@ async def upload_pdf(
     if content_length_header is not None:
         try:
             content_length = int(content_length_header)
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid Content-Length header")
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail="Invalid Content-Length header") from e
         if content_length > MAX_PDF_SIZE:
             raise HTTPException(status_code=413, detail="File exceeds 50 MB limit")
 

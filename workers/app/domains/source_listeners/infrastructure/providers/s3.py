@@ -8,7 +8,7 @@ from .common import empty_event, require_config
 
 
 class S3Listener:
-    """Configure S3 bucket notifications using config-provided AWS credentials."""
+    """Configure S3 bucket notifications using runtime or optional config credentials."""
 
     async def create(self, connection: dict) -> ListenerProvisioningPayload:
         config = dict(connection.get("config") or {})
@@ -77,11 +77,10 @@ class S3Listener:
 
     @staticmethod
     def _client(config: dict):
-        kwargs = {
-            "aws_access_key_id": config.get("access_key_id"),
-            "aws_secret_access_key": config.get("secret_access_key"),
-            "region_name": config.get("region"),
-        }
+        kwargs = {"region_name": config.get("region")}
+        if config.get("access_key_id") and config.get("secret_access_key"):
+            kwargs["aws_access_key_id"] = config["access_key_id"]
+            kwargs["aws_secret_access_key"] = config["secret_access_key"]
         if config.get("endpoint_url"):
             kwargs["endpoint_url"] = config["endpoint_url"]
         return boto3.client("s3", **kwargs)

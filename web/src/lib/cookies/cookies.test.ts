@@ -6,6 +6,22 @@ import Cookies from "js-cookie"
 // which returns no-op stubs for createIsomorphicFn/createClientOnlyFn.
 // We replace them here so the client branch actually executes.
 mock.module("@tanstack/react-start", () => ({
+  createServerFn: (_opts?: { method?: string }) => {
+    let validator: unknown = null
+    const builder = {
+      inputValidator(v: unknown) {
+        validator = v
+        return builder
+      },
+      handler(handlerFn: (args: { data: unknown }) => unknown) {
+        return async (callArgs?: { data?: unknown }) => {
+          const schema = validator as { parse?: (data: unknown) => unknown } | null
+          return handlerFn({ data: schema?.parse ? schema.parse(callArgs?.data) : callArgs?.data })
+        }
+      },
+    }
+    return builder
+  },
   createIsomorphicFn: () => ({
     server: (_: (...args: unknown[]) => unknown) => ({
       client:
@@ -15,11 +31,16 @@ mock.module("@tanstack/react-start", () => ({
     }),
   }),
   createClientOnlyFn: (fn: (...args: unknown[]) => unknown) => fn,
+  createMiddleware: () => ({
+    server: (fn: unknown) => fn,
+  }),
+  createStart: (fn: unknown) => fn,
 }))
 
 // Server-side cookie functions are never called in the client branch.
 mock.module("@tanstack/react-start/server", () => ({
   getCookie: () => undefined,
+  getRequestHeaders: () => new Headers(),
   setCookie: () => {},
   deleteCookie: () => {},
 }))
