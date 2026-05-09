@@ -6,43 +6,31 @@ export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="w-full bg-[#171A20] py-16">
-      <div className="mx-auto flex max-w-345.75 flex-col items-center px-6">
-        <ul className="mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
+    <footer className="site-footer">
+      <div className="site-footer-inner">
+        <ul className="site-footer-list">
           <li>
-            <span className="text-[12px] font-medium text-[#D0D1D2]">
+            <span className="site-footer-text">
               {m.footer_copyright({ year: String(currentYear) })}
             </span>
           </li>
           <li>
-            <Link
-              to="/demo"
-              className="text-[12px] font-medium text-[#D0D1D2] transition-colors hover:text-[#FFFFFF]"
-            >
+            <Link to="/demo" className="site-footer-text">
               {m.footer_demo()}
             </Link>
           </li>
           <li>
-            <Link
-              to="/about"
-              className="text-[12px] font-medium text-[#D0D1D2] transition-colors hover:text-[#FFFFFF]"
-            >
+            <Link to="/about" className="site-footer-text">
               {m.footer_about()}
             </Link>
           </li>
           <li>
-            <Link
-              to="/signin"
-              className="text-[12px] font-medium text-[#D0D1D2] transition-colors hover:text-[#FFFFFF]"
-            >
+            <Link to="/signin" className="site-footer-text">
               {m.footer_signin()}
             </Link>
           </li>
           <li>
-            <Link
-              to="/signup"
-              className="text-[12px] font-medium text-[#D0D1D2] transition-colors hover:text-[#FFFFFF]"
-            >
+            <Link to="/signup" className="site-footer-text">
               {m.footer_signup()}
             </Link>
           </li>

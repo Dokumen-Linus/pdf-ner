@@ -1,0 +1,63 @@
+# Dokumen AI Web App Agent Notes
+
+## Architecture
+
+- TanStack Start React app using TypeScript, Vite, Tailwind CSS v4, Drizzle, TanStack Query, TanStack Form, shadcn/ui, and Paraglide.
+- Runtime is Node.js, not Bun.
+- Environment variables must be imported from `src/env.server.ts` or `src/env.client.ts`.
+- Never edit `src/routeTree.gen.ts`.
+
+## Data Access
+
+- Components and routes must not access the database directly.
+- Database access belongs in `src/db-fns/`, using TanStack Start Server Functions, Zod validation, Drizzle, and the PostgreSQL connection.
+- `db-fns` files should be named for the table they query.
+- Use `src/db/types.d.ts` types when practical.
+- Protected data access should use existing `require*` authorization helpers.
+- FastAPI calls belong in `src/api-fns/` or `src/routes/api/`, using the existing server-call wrappers.
+
+## Schema Alignment
+
+- Web schema changes must stay aligned across SQL migrations, Drizzle schemas, and `db-fns`.
+- Keep `src/db-fns/match-schemas.test.ts` passing when touching schema-related code.
+
+## Auth and Authorization
+
+- Better Auth owns authentication tables/config.
+- Auth IDs come from `auth.user.id`; app authorization/storage uses `web.users.id`.
+- Use `src/lib/authorization.server.ts` helpers to keep users scoped to authorized projects and rows.
+- Billing uses Stripe for setup/payment/customer/payment-method processing, while account charges are database-recorded.
+
+## Source Layout Rules
+
+- `src/api-fns/`: server functions for external API calls.
+- `src/components/`: React components, including custom, shadcn/ui, PDF, and public-site components.
+- `src/db/`: Drizzle schema/client/types.
+- `src/db-fns/`: database server functions, organized by schema.
+- `src/hooks/`: reusable React hooks.
+- `src/integrations/`: third-party integrations.
+- `src/lib/`: app libraries and configuration.
+- `src/middleware/`: server middleware.
+- `src/routes/`: TanStack Router routes and route-local API handlers.
+- React components and `.tsx` files should not be placed in `api-fns`, `db`, `db-fns`, `hooks`, `lib`, `middleware`, or `routes/api`.
+
+## Component Development
+
+- Use React state for local state.
+- Use Zustand for global state where needed.
+- Use shadcn/ui components from `components/shadcn-ui`.
+- Build forms with TanStack Form and shadcn/ui components.
+- Prefer Lucide icons.
+- Keep shared visual rules in `src/styles.css`; only keep dynamic/data-driven styles in JSX.
+
+## PDF Rendering
+
+- Preserve existing PDF plugin folder structure and file naming patterns.
+- Plugins follow the local EmbedPDF-style plugin architecture, not standard Redux structure.
+- Keep plugin sections and subfolders consistent with existing local plugins.
+
+## Tests
+
+- Unit test files should be named `.test.{ts,tsx}`.
+- Playwright test files should be named `.e2e.ts`.
+- The app has standard Bun/JSDOM tests, database function tests, and Playwright E2E tests.

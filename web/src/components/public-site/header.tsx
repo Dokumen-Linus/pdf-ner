@@ -61,85 +61,66 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-[#EEEEEE] bg-white transition-colors duration-300">
-        <div className="mx-auto flex h-14 max-w-345.75 items-center justify-between px-6">
+      <header className="site-header">
+        <div className="site-header-inner">
           {/* Logo (Left) */}
-          <Link to="/" className="group flex shrink-0 items-center gap-3">
-            <img
-              src={logoUrl}
-              className="h-6 w-auto object-contain transition-transform"
-              alt={m.common_brand_name()}
-            />
-            <span className="text-[17px] font-bold tracking-[0.2em] text-[#171A20] uppercase">
+          <Link to="/" className="site-logo-link">
+            <img src={logoUrl} className="site-logo-img" alt={m.common_brand_name()} />
+            <span className="site-wordmark">
               {m.common_brand_primary()}
-              <span className="text-[#3E6AE1]">{m.common_brand_accent()}</span>
+              <span className="site-wordmark-accent">{m.common_brand_accent()}</span>
             </span>
           </Link>
 
           {/* Desktop Nav (Center) */}
-          <nav className="hidden flex-1 items-center justify-center gap-2 md:flex">
+          <nav className="site-nav">
             <Link
               to="/"
-              className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
-              activeProps={{
-                className:
-                  "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
-              }}
+              className="site-nav-link"
+              activeProps={{ className: "site-nav-link-active" }}
             >
               {m.nav_home()}
             </Link>
             <Link
               to="/demo"
-              className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
-              activeProps={{
-                className:
-                  "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
-              }}
+              className="site-nav-link"
+              activeProps={{ className: "site-nav-link-active" }}
             >
               {m.nav_demo()}
             </Link>
             <Link
               to="/pricing"
-              className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
-              activeProps={{
-                className:
-                  "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
-              }}
+              className="site-nav-link"
+              activeProps={{ className: "site-nav-link-active" }}
             >
               {m.nav_pricing()}
             </Link>
             <Link
               to="/about"
-              className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
-              activeProps={{
-                className:
-                  "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
-              }}
+              className="site-nav-link"
+              activeProps={{ className: "site-nav-link-active" }}
             >
               {m.nav_about()}
             </Link>
             <Link
               to="/contact"
-              className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
-              activeProps={{
-                className:
-                  "rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] bg-[#F4F4F4]",
-              }}
+              className="site-nav-link"
+              activeProps={{ className: "site-nav-link-active" }}
             >
               {m.nav_contact()}
             </Link>
           </nav>
 
           {/* Desktop Auth (Right) */}
-          <div className="hidden shrink-0 items-center justify-end gap-2 md:flex">
+          <div className="site-nav-actions">
             {session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]">
+                  <button className="site-account-button">
                     <span className="max-w-40 truncate">
                       {headerIdentity || session.user.name || session.user.email}
                     </span>
-                    <ChevronDownIcon size={14} className="shrink-0 text-[#5C5E62]" />
+                    <ChevronDownIcon size={14} className="site-account-chevron shrink-0" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" sideOffset={8} className="w-48">
@@ -165,7 +146,7 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link
                       to="/signout"
-                      className="flex cursor-pointer items-center gap-2 text-[#5C5E62]"
+                      className="site-muted-link flex cursor-pointer items-center gap-2"
                     >
                       <LogOutIcon size={14} />
                       {m.nav_signout()}
@@ -175,39 +156,27 @@ export default function Header() {
               </DropdownMenu>
             ) : (
               <>
-                <Link
-                  to="/signin"
-                  className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
-                >
+                <Link to="/signin" className="site-nav-link">
                   {m.nav_signin()}
                 </Link>
-                <Link
-                  to="/signup"
-                  className="rounded-lg px-4 py-1.5 text-[14px] font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
-                >
+                <Link to="/signup" className="site-nav-link">
                   {m.nav_signup()}
                 </Link>
               </>
             )}
             <Popover>
               <PopoverTrigger asChild>
-                <button className="ml-1 rounded-lg p-2 text-[#171A20] transition-colors hover:bg-[#F4F4F4]">
+                <button className="site-icon-button ml-1">
                   <Languages size={18} />
                 </button>
               </PopoverTrigger>
-              <PopoverContent
-                align="end"
-                sideOffset={8}
-                className="w-auto min-w-20 rounded-lg border border-[#EEEEEE] bg-white p-1 shadow-lg"
-              >
+              <PopoverContent align="end" sideOffset={8} className="site-popover-content">
                 {locales.map((tag: string) => (
                   <button
                     key={tag}
                     onClick={() => handleLanguageChange(tag)}
-                    className={`w-full rounded-md px-3 py-1.5 text-left text-sm uppercase transition-colors ${
-                      tag === currentLocale
-                        ? "bg-[#F4F4F4] font-semibold text-[#171A20]"
-                        : "text-[#5C5E62] hover:bg-[#F4F4F4] hover:text-[#171A20]"
+                    className={`site-locale-option ${
+                      tag === currentLocale ? "site-locale-option-active" : ""
                     }`}
                   >
                     {tag}
@@ -220,7 +189,7 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsOpen(true)}
-            className="rounded-lg p-1.5 text-[#171A20] transition-colors hover:bg-[#F4F4F4] md:hidden"
+            className="site-mobile-menu-button"
             aria-label={m.common_aria_menu()}
           >
             <Menu size={20} />
@@ -230,32 +199,24 @@ export default function Header() {
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed inset-0 z-50 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`site-mobile-overlay ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={() => setIsOpen(false)}
       />
-      <aside
-        className={`fixed top-0 right-0 z-50 flex h-full w-80 flex-col bg-white shadow-[-8px_0_24px_rgba(0,0,0,0.05)] transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
-      >
-        <div className="flex items-center justify-between p-4">
+      <aside className={`site-mobile-drawer ${isOpen ? "translate-x-0" : "translate-x-full"}`}>
+        <div className="site-mobile-drawer-header">
           <Popover>
             <PopoverTrigger asChild>
-              <button className="rounded-lg p-2 text-[#171A20] transition-colors hover:bg-[#F4F4F4]">
+              <button className="site-icon-button">
                 <Languages size={18} />
               </button>
             </PopoverTrigger>
-            <PopoverContent
-              align="start"
-              sideOffset={8}
-              className="w-auto min-w-20 rounded-lg border border-[#EEEEEE] bg-white p-1 shadow-lg"
-            >
+            <PopoverContent align="start" sideOffset={8} className="site-popover-content">
               {locales.map((tag: string) => (
                 <button
                   key={tag}
                   onClick={() => handleLanguageChange(tag)}
-                  className={`w-full rounded-md px-3 py-1.5 text-left text-sm uppercase transition-colors ${
-                    tag === currentLocale
-                      ? "bg-[#F4F4F4] font-semibold text-[#171A20]"
-                      : "text-[#5C5E62] hover:bg-[#F4F4F4] hover:text-[#171A20]"
+                  className={`site-locale-option ${
+                    tag === currentLocale ? "site-locale-option-active" : ""
                   }`}
                 >
                   {tag}
@@ -265,52 +226,34 @@ export default function Header() {
           </Popover>
           <button
             onClick={() => setIsOpen(false)}
-            className="rounded-lg p-2 text-[#171A20] transition-colors hover:bg-[#F4F4F4]"
+            className="site-icon-button"
             aria-label={m.common_aria_close()}
           >
             <X size={20} />
           </button>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 pt-2 pb-6">
-          <Link
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className="text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
-          >
+        <nav className="site-mobile-nav">
+          <Link to="/" onClick={() => setIsOpen(false)} className="site-mobile-link">
             {m.nav_home()}
           </Link>
-          <Link
-            to="/pricing"
-            onClick={() => setIsOpen(false)}
-            className="text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
-          >
+          <Link to="/pricing" onClick={() => setIsOpen(false)} className="site-mobile-link">
             {m.nav_pricing()}
           </Link>
-          <Link
-            to="/about"
-            onClick={() => setIsOpen(false)}
-            className="text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
-          >
+          <Link to="/about" onClick={() => setIsOpen(false)} className="site-mobile-link">
             {m.nav_about()}
           </Link>
-          <Link
-            to="/contact"
-            onClick={() => setIsOpen(false)}
-            className="text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
-          >
+          <Link to="/contact" onClick={() => setIsOpen(false)} className="site-mobile-link">
             {m.nav_contact()}
           </Link>
           {session ? (
             <>
-              <div className="mt-4 flex flex-col gap-4 border-t border-[#EEEEEE] pt-4">
-                <p className="text-[12px] font-medium tracking-wide text-[#8E8E8E] uppercase">
-                  {m.nav_account()}
-                </p>
+              <div className="site-mobile-account">
+                <p className="site-mobile-account-label">{m.nav_account()}</p>
                 <Link
                   to="/projects"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
+                  className="site-mobile-account-link"
                 >
                   <FolderOpenIcon size={16} />
                   {m.nav_projects()}
@@ -318,7 +261,7 @@ export default function Header() {
                 <Link
                   to="/profile"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
+                  className="site-mobile-account-link"
                 >
                   <UserIcon size={16} />
                   {m.nav_profile()}
@@ -326,7 +269,7 @@ export default function Header() {
                 <Link
                   to="/billing"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
+                  className="site-mobile-account-link"
                 >
                   <CreditCardIcon size={16} />
                   {m.nav_billing()}
@@ -334,7 +277,7 @@ export default function Header() {
                 <Link
                   to="/signout"
                   onClick={() => setIsOpen(false)}
-                  className="mt-2 flex items-center gap-2 text-[17px] font-medium text-[#5C5E62] transition-colors hover:text-[#171A20]"
+                  className="site-mobile-muted-link"
                 >
                   <LogOutIcon size={16} />
                   {m.nav_signout()}
@@ -343,18 +286,10 @@ export default function Header() {
             </>
           ) : (
             <>
-              <Link
-                to="/signin"
-                onClick={() => setIsOpen(false)}
-                className="mt-4 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
-              >
+              <Link to="/signin" onClick={() => setIsOpen(false)} className="site-mobile-link mt-4">
                 {m.nav_signin()}
               </Link>
-              <Link
-                to="/signup"
-                onClick={() => setIsOpen(false)}
-                className="mt-2 text-[17px] font-medium text-[#171A20] transition-colors hover:text-[#393C41]"
-              >
+              <Link to="/signup" onClick={() => setIsOpen(false)} className="site-mobile-link mt-2">
                 {m.nav_signup()}
               </Link>
             </>

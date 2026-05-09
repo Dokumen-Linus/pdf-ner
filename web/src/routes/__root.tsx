@@ -83,11 +83,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={getLocale()} className="bg-white text-black dark:bg-gray-950 dark:text-white">
+    <html lang={getLocale()}>
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-dvh bg-gray-50">
+      <body className="min-h-dvh">
         {children}
         <TanStackDevtools
           config={{

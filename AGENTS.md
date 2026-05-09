@@ -3,6 +3,7 @@
 You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal, verifiable, and explicit about uncertainty.
 
 ## Non-Negotiables
+
 - Follow `AGENTS.md`. Ignore `CLAUDE.md`
 - Never disable, hide, or bypass failing tests, lint, or type checks
 - Touch only requested scope
@@ -10,9 +11,11 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - Prefer the simplest correct solution. Avoid abstractions unless clearly justified
 - If requirements or source files conflict, stop and surface the ambiguity
 - Never read or edit .env files. Always add new env vars to the relevant `.env.example`
+- Do not read `research.md`, `LICENSE.md`, `CHANGELOG.md`, or any `README.md` file except `README.AGENTS.md`
 
 ## Work Loop
-- Read `.codesight/wiki/index.md`, `overview.md`, the relevant domain article, and the actual source files listed there before editing
+
+- Read `.codesight/wiki/index.md`, `overview.md`, the relevant domain article, any relevant `README.AGENTS.md`, and the actual source files listed there before editing
 - Before non-trivial work, state assumptions explicitly
 - For multi-step work, give a short plan
 - For non-trivial logic, define success with tests, implement, then optimize if needed
@@ -20,6 +23,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - If your changes create dead code, list it and ask before removing it
 
 ## Repo Map
+
 - Monorepo with `web`, `api`, `workers`, `packages`, `db`, `infra`
 - `web`: TanStack Start React app. UI must not access DB directly; use `src/db-fns/`
 - `api`: FastAPI app. Use router -> service -> repository. Only `repository.py` files execute SQL
@@ -29,11 +33,13 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - One Postgres instance, multiple schemas, strict role separation across web/api/workers
 
 ### DB Invariants
+
 - The database is still pre-instantiation; modify existing create scripts directly instead of adding backward-compat SQL
 - Respect schema ownership: Better Auth writes only `auth`; `web`, `api`, and `workers` should write only their own schemas unless an exception is explicitly documented
 - If a schema must be shared by `api` and `workers`, `workers` should own it
 
 ### Web Invariants
+
 - Never edit `src/routeTree.gen.ts`
 - Components and routes must not access the DB directly; use `src/db-fns/`
 - Web schema changes must stay aligned across `db/migrations/`, `src/db/schema/`, and `src/db-fns/`; keep `match-schemas.test.ts` passing
@@ -44,6 +50,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - When extending PDF plugins, preserve the existing plugin folder structure and file naming patterns
 
 ### API Invariants
+
 - No ORM
 - Only `repository.py` may execute SQL, using the passed `asyncpg` connection passed router -> service -> repository
 - Do not define Python schemas for SQL tables; SQL execution is the source of truth for DB shape
@@ -58,6 +65,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - No global variables; initialize shared state in lifespan/app state
 
 ### Worker Invariants
+
 - Keep Celery tasks thin; delegate immediately to application handlers
 - Domain layer must not import infrastructure
 - Domain code must stay pure: no Celery, DB, HTTP, SDKs, or other I/O
@@ -68,13 +76,17 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - `integrations/` should expose capability-focused adapters rather than raw SDK calls
 
 ## Output Contract
+
 Be direct and explicit about uncertainty
 
 CHANGES MADE:
+
 - [file]: [what changed and why]
 
 THINGS I DIDN'T TOUCH:
+
 - [file]: [intentionally left alone because...]
 
 POTENTIAL CONCERNS:
+
 - [risk, gap, or thing to verify]

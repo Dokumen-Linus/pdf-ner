@@ -83,10 +83,10 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
   ]
 
   return (
-    <div className="mt-4 mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
+    <div className="pdf-toolbar">
       <ToolbarToggleButton isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
 
-      <div className="h-6 w-px bg-gray-200" />
+      <div className="pdf-toolbar-divider" />
 
       {tools.map((tool) => (
         <button
@@ -104,10 +104,10 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
               })
             }
           }}
-          className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
+          className={`pdf-tool-button ${
             tool.subtype === annoState?.activeSubtype
-              ? "bg-blue-500 text-white"
-              : "bg-gray-100 hover:bg-gray-200"
+              ? "pdf-tool-button-active"
+              : "pdf-tool-button-secondary"
           }`}
           title={tool.title}
         >
@@ -115,7 +115,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
         </button>
       ))}
 
-      <div className="h-6 w-px bg-gray-200" />
+      <div className="pdf-toolbar-divider" />
 
       <form className="flex items-center gap-2" onSubmit={handleSearchSubmit}>
         <Input
@@ -127,7 +127,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
         <button
           type="submit"
           disabled={!searchScope || searchState.loading}
-          className="rounded-md bg-gray-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-gray-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+          className="pdf-tool-button pdf-tool-button-primary"
           title="Search PDF text"
         >
           <Search size={18} />
@@ -136,7 +136,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
           type="button"
           onClick={() => searchScope?.previousResult()}
           disabled={!searchScope || searchState.total === 0}
-          className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+          className="pdf-tool-button pdf-tool-button-secondary"
           title="Previous result"
         >
           <ChevronLeft size={18} />
@@ -145,7 +145,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
           type="button"
           onClick={() => searchScope?.nextResult()}
           disabled={!searchScope || searchState.total === 0}
-          className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+          className="pdf-tool-button pdf-tool-button-secondary"
           title="Next result"
         >
           <ChevronRight size={18} />
@@ -154,12 +154,12 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
           type="button"
           onClick={() => searchScope?.setShowAllResults(!searchState.showAllResults)}
           disabled={!searchScope || searchState.total === 0}
-          className="rounded-md bg-gray-100 px-3 py-1 text-xs font-medium transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+          className="pdf-tool-button pdf-tool-button-secondary text-xs"
           title="Toggle all search highlights"
         >
           {searchState.showAllResults ? "All" : "One"}
         </button>
-        <div className="min-w-18 text-xs text-gray-600">
+        <div className="pdf-toolbar-count">
           {searchState.loading
             ? "Searching..."
             : searchState.total > 0
@@ -168,12 +168,12 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
         </div>
       </form>
 
-      <div className="h-6 w-px bg-gray-200" />
+      <div className="pdf-toolbar-divider" />
 
       <button
         onClick={() => zoomCapability?.zoomOut()}
         disabled={!zoomCapability}
-        className="rounded-md bg-gray-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-gray-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+        className="pdf-tool-button pdf-tool-button-primary"
         title={m.pdf_toolbar_zoom_out()}
       >
         <ZoomOut size={18} />
@@ -181,18 +181,18 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
       <button
         onClick={() => zoomCapability?.zoomIn()}
         disabled={!zoomCapability}
-        className="rounded-md bg-gray-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-gray-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+        className="pdf-tool-button pdf-tool-button-primary"
         title={m.pdf_toolbar_zoom_in()}
       >
         <ZoomIn size={18} />
       </button>
 
-      <div className="h-6 w-px bg-gray-200" />
+      <div className="pdf-toolbar-divider" />
 
       <button
         onClick={() => annoCapability?.undo()}
         disabled={!annoState?.canUndo}
-        className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+        className="pdf-tool-button pdf-tool-button-secondary"
         title={m.pdf_toolbar_undo()}
       >
         <Undo2 size={18} />
@@ -200,19 +200,19 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
       <button
         onClick={() => annoCapability?.redo()}
         disabled={!annoState?.canRedo}
-        className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+        className="pdf-tool-button pdf-tool-button-secondary"
         title={m.pdf_toolbar_redo()}
       >
         <Redo2 size={18} />
       </button>
 
-      <div className="h-6 w-px bg-gray-200" />
+      <div className="pdf-toolbar-divider" />
       {canRotate && (
         <>
           <button
             onClick={() => rotateCapability?.rotateBackward()}
             disabled={!rotateCapability}
-            className="rounded-md bg-gray-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-gray-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+            className="pdf-tool-button pdf-tool-button-primary"
             title={m.pdf_toolbar_rotate_ccw()}
           >
             <RotateCcw size={18} />
@@ -220,7 +220,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
           <button
             onClick={() => rotateCapability?.rotateForward()}
             disabled={!rotateCapability}
-            className="rounded-md bg-gray-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-gray-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+            className="pdf-tool-button pdf-tool-button-primary"
             title={m.pdf_toolbar_rotate_cw()}
           >
             <RotateCw size={18} />
@@ -230,7 +230,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
       <button
         onClick={() => exportCapability?.download()}
         disabled={!exportCapability}
-        className="rounded-md bg-green-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-300"
+        className="pdf-tool-button pdf-tool-button-success"
         title={m.pdf_toolbar_download()}
       >
         <Download size={18} />
@@ -238,7 +238,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
       <button
         onClick={handleDelete}
         disabled={!annoState?.selectedUid}
-        className="rounded-md bg-red-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-red-300"
+        className="pdf-tool-button pdf-tool-button-danger"
         title={m.pdf_toolbar_delete()}
       >
         <Trash2 size={18} />
@@ -255,7 +255,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
           const allAnnoUids = Object.keys(docState.byUid)
           annoCapability?.updateAnnotations(allAnnoUids.map((id: string) => ({ id, patch })))
         }}
-        className="rounded-md bg-red-500 px-3 py-1 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-red-300"
+        className="pdf-tool-button pdf-tool-button-danger"
         title={m.pdf_toolbar_dev_red_highlights_tooltip()}
       >
         {m.pdf_toolbar_dev_red_highlights_button()}
