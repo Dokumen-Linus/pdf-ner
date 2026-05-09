@@ -72,7 +72,6 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-
   *,
   ::after,
   ::before,
@@ -115,6 +114,21 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 4px;
+    --dokumen-blue: #3e6ae1;
+    --dokumen-blue-hover: #345bd0;
+    --dokumen-carbon: #171a20;
+    --dokumen-graphite: #393c41;
+    --dokumen-pewter: #5c5e62;
+    --dokumen-silver-fog: #8e8e8e;
+    --dokumen-cloud: #eeeeee;
+    --dokumen-pale-silver: #d0d1d2;
+    --dokumen-light-ash: #f4f4f4;
+    --dokumen-panel: #ffffff;
+    --dokumen-frost: rgb(255 255 255 / 0.75);
+    --dokumen-max-content: 86.4375rem;
+    --dokumen-transition: 0.33s cubic-bezier(0.5, 0, 0, 0.75);
+    --dokumen-overlay-shadow: 0 12px 40px rgb(0 0 0 / 0.12);
+    --dokumen-sidebar-shadow: -8px 0 24px rgb(0 0 0 / 0.05);
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 16% 11%;
     --sidebar-primary: 224 74% 56%;
@@ -150,6 +164,21 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --dokumen-blue: #3e6ae1;
+    --dokumen-blue-hover: #345bd0;
+    --dokumen-carbon: #171a20;
+    --dokumen-graphite: #393c41;
+    --dokumen-pewter: #5c5e62;
+    --dokumen-silver-fog: #8e8e8e;
+    --dokumen-cloud: #eeeeee;
+    --dokumen-pale-silver: #d0d1d2;
+    --dokumen-light-ash: #f4f4f4;
+    --dokumen-panel: #ffffff;
+    --dokumen-frost: rgb(255 255 255 / 0.75);
+    --dokumen-max-content: 86.4375rem;
+    --dokumen-transition: 0.33s cubic-bezier(0.5, 0, 0, 0.75);
+    --dokumen-overlay-shadow: 0 12px 40px rgb(0 0 0 / 0.12);
+    --dokumen-sidebar-shadow: -8px 0 24px rgb(0 0 0 / 0.05);
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 16% 11%;
     --sidebar-primary: 224 74% 56%;
@@ -169,13 +198,51 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  html {
+    background: var(--dokumen-panel);
+    color: var(--dokumen-carbon);
+  }
+
+  body {
+    color: var(--dokumen-carbon);
+    font-family: "Manrope", Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    letter-spacing: 0;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: var(--dokumen-carbon);
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  p {
+    color: inherit;
+  }
+
+  a {
+    transition:
+      color var(--dokumen-transition),
+      background-color var(--dokumen-transition),
+      box-shadow 0.25s ease;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--dokumen-blue) 22%, white);
+  }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--dokumen-blue) 70%, transparent);
+    outline-offset: 2px;
+  }
 }
 
 /*
   ---break---
 */
-
-
 
 /*
   ---break---
@@ -231,5 +298,432 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .app-page {
+    @apply mx-auto w-full space-y-6 px-4 py-6 sm:px-6;
+    max-width: 64rem;
+  }
+
+  .app-page-narrow {
+    max-width: 48rem;
+  }
+
+  .app-page-header {
+    @apply space-y-1;
+  }
+
+  .app-page-title {
+    @apply text-3xl font-medium tracking-normal text-pretty;
+  }
+
+  .app-page-description {
+    @apply text-sm;
+    color: var(--dokumen-pewter);
+  }
+
+  .status-panel {
+    @apply rounded-md border px-3 py-2 text-sm;
+  }
+
+  .status-panel-destructive {
+    @apply border-destructive/35 bg-destructive/5 text-destructive;
+  }
+
+  .sticky-action-bar {
+    @apply sticky bottom-4 flex items-center justify-between rounded-md border p-3 shadow-sm backdrop-blur;
+    background: color-mix(in srgb, var(--dokumen-panel) 95%, transparent);
+  }
+
+  .site-header {
+    @apply sticky top-0 z-40 w-full border-b transition-colors;
+    background: var(--dokumen-panel);
+    border-color: var(--dokumen-cloud);
+    transition-duration: 300ms;
+  }
+
+  .site-header-inner {
+    @apply mx-auto flex h-14 items-center justify-between px-6;
+    max-width: var(--dokumen-max-content);
+  }
+
+  .site-logo-link {
+    @apply flex shrink-0 items-center gap-3;
+  }
+
+  .site-logo-img {
+    @apply h-6 w-auto object-contain transition-transform;
+  }
+
+  .site-wordmark {
+    @apply text-[17px] font-bold uppercase;
+    color: var(--dokumen-carbon);
+    letter-spacing: 0.2em;
+  }
+
+  .site-wordmark-accent {
+    color: var(--dokumen-blue);
+  }
+
+  .site-nav {
+    @apply hidden flex-1 items-center justify-center gap-2 md:flex;
+  }
+
+  .site-nav-actions {
+    @apply hidden shrink-0 items-center justify-end gap-2 md:flex;
+  }
+
+  .site-nav-link,
+  .site-icon-button,
+  .site-account-button {
+    @apply rounded-lg font-medium transition-colors;
+    color: var(--dokumen-carbon);
+  }
+
+  .site-nav-link {
+    @apply px-4 py-1.5 text-[14px];
+  }
+
+  .site-nav-link:hover,
+  .site-nav-link-active,
+  .site-icon-button:hover,
+  .site-account-button:hover,
+  .site-locale-option:hover,
+  .site-locale-option-active {
+    background: var(--dokumen-light-ash);
+    color: var(--dokumen-carbon);
+  }
+
+  .site-account-button {
+    @apply flex items-center gap-1.5 px-3 py-1.5 text-[14px];
+  }
+
+  .site-account-chevron,
+  .site-muted-link {
+    color: var(--dokumen-pewter);
+  }
+
+  .site-icon-button {
+    @apply p-2;
+  }
+
+  .site-mobile-menu-button {
+    @apply rounded-lg p-1.5 transition-colors md:hidden;
+    color: var(--dokumen-carbon);
+  }
+
+  .site-mobile-menu-button:hover {
+    background: var(--dokumen-light-ash);
+  }
+
+  .site-popover-content {
+    @apply w-auto min-w-20 rounded-lg border bg-white p-1 shadow-lg;
+    border-color: var(--dokumen-cloud);
+  }
+
+  .site-locale-option {
+    @apply w-full rounded-md px-3 py-1.5 text-left text-sm uppercase transition-colors;
+    color: var(--dokumen-pewter);
+  }
+
+  .site-locale-option-active {
+    @apply font-semibold;
+  }
+
+  .site-mobile-overlay {
+    @apply fixed inset-0 z-50 bg-black/20 backdrop-blur-sm transition-opacity duration-300;
+  }
+
+  .site-mobile-drawer {
+    @apply fixed top-0 right-0 z-50 flex h-full w-80 flex-col bg-white transition-transform duration-300 ease-in-out;
+    box-shadow: var(--dokumen-sidebar-shadow);
+  }
+
+  .site-mobile-drawer-header {
+    @apply flex items-center justify-between p-4;
+  }
+
+  .site-mobile-nav {
+    @apply flex flex-1 flex-col gap-4 overflow-y-auto px-6 pt-2 pb-6;
+  }
+
+  .site-mobile-link {
+    @apply text-[17px] font-medium transition-colors;
+    color: var(--dokumen-carbon);
+  }
+
+  .site-mobile-link:hover {
+    color: var(--dokumen-graphite);
+  }
+
+  .site-mobile-account {
+    @apply mt-4 flex flex-col gap-4 border-t pt-4;
+    border-color: var(--dokumen-cloud);
+  }
+
+  .site-mobile-account-label {
+    @apply text-[12px] font-medium uppercase;
+    color: var(--dokumen-silver-fog);
+    letter-spacing: 0.025em;
+  }
+
+  .site-mobile-account-link {
+    @apply flex items-center gap-2 text-[17px] font-medium transition-colors;
+    color: var(--dokumen-carbon);
+  }
+
+  .site-mobile-account-link:hover {
+    color: var(--dokumen-graphite);
+  }
+
+  .site-mobile-muted-link {
+    @apply mt-2 flex items-center gap-2 text-[17px] font-medium transition-colors;
+    color: var(--dokumen-pewter);
+  }
+
+  .site-mobile-muted-link:hover {
+    color: var(--dokumen-carbon);
+  }
+
+  .site-footer {
+    @apply w-full py-16;
+    background: var(--dokumen-carbon);
+  }
+
+  .site-footer-inner {
+    @apply mx-auto flex flex-col items-center px-6;
+    max-width: var(--dokumen-max-content);
+  }
+
+  .site-footer-list {
+    @apply mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-4;
+  }
+
+  .site-footer-text {
+    @apply text-[12px] font-medium transition-colors;
+    color: var(--dokumen-pale-silver);
+  }
+
+  .site-footer-text:hover {
+    color: var(--dokumen-panel);
+  }
+
+  .chatbot-root {
+    @apply fixed right-6 bottom-6 z-50;
+  }
+
+  .chatbot-panel {
+    @apply absolute right-0 bottom-16 flex h-125 max-h-[calc(100vh-100px)] w-87.5 flex-col overflow-hidden border bg-white sm:w-100;
+    border-color: #e5e7eb;
+    border-radius: 16px;
+    box-shadow: var(--dokumen-overlay-shadow);
+  }
+
+  .chatbot-header {
+    @apply flex items-center justify-between px-4 py-3;
+  }
+
+  .chatbot-heading {
+    @apply flex items-center gap-2 text-[15px] font-medium;
+  }
+
+  .chatbot-accent-icon {
+    color: var(--dokumen-blue);
+  }
+
+  .chatbot-close-button {
+    @apply rounded-md p-1 transition-colors hover:bg-white/10;
+  }
+
+  .chatbot-messages {
+    @apply flex flex-1 flex-col gap-4 overflow-y-auto p-4;
+    background: #f8f9fa;
+  }
+
+  .chatbot-empty {
+    @apply flex h-full flex-col items-center justify-center text-center opacity-60;
+  }
+
+  .chatbot-message-row {
+    @apply flex max-w-[85%] gap-3;
+  }
+
+  .chatbot-message-row-user {
+    @apply ml-auto flex-row-reverse;
+  }
+
+  .chatbot-avatar {
+    @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white;
+  }
+
+  .chatbot-avatar-user {
+    background: var(--dokumen-blue);
+  }
+
+  .chatbot-avatar-assistant {
+    background: #000;
+  }
+
+  .chatbot-bubble {
+    @apply rounded-xl px-4 py-2.5 text-[14px] leading-relaxed;
+  }
+
+  .chatbot-bubble-user {
+    @apply rounded-tr-sm text-white;
+    background: var(--dokumen-blue);
+  }
+
+  .chatbot-bubble-assistant {
+    @apply rounded-tl-sm border bg-white whitespace-pre-wrap shadow-sm;
+    border-color: #e5e7eb;
+    color: var(--dokumen-carbon);
+  }
+
+  .chatbot-loading-row {
+    @apply flex max-w-[85%] animate-pulse gap-3;
+  }
+
+  .chatbot-loading-bubble {
+    @apply flex h-10.5 items-center gap-1.5 rounded-xl rounded-tl-sm border bg-white px-4 py-3;
+    border-color: #e5e7eb;
+  }
+
+  .chatbot-loading-dot {
+    @apply h-1.5 w-1.5 rounded-full bg-gray-400;
+  }
+
+  .chatbot-form {
+    @apply flex gap-2 border-t bg-white p-3;
+    border-color: #e5e7eb;
+  }
+
+  .chatbot-input {
+    @apply flex-1 rounded-lg border border-transparent px-4 py-2 text-[14px] transition-all outline-none;
+    background: var(--dokumen-light-ash);
+  }
+
+  .chatbot-input:focus {
+    border-color: color-mix(in srgb, var(--dokumen-blue) 50%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--dokumen-blue) 20%, transparent);
+  }
+
+  .chatbot-send-button {
+    @apply flex h-10 w-10 items-center justify-center rounded-lg text-white transition-colors disabled:opacity-50;
+    background: var(--dokumen-carbon);
+  }
+
+  .chatbot-send-button:hover {
+    background: #000;
+  }
+
+  .chatbot-toggle {
+    @apply flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg shadow-black/20 transition-transform hover:scale-105 active:scale-95;
+    background: var(--dokumen-carbon);
+  }
+
+  .chatbot-toggle:hover {
+    background: #000;
+  }
+
+  .pdf-toolbar {
+    @apply mt-4 mb-4 flex flex-wrap items-center gap-2 rounded-lg border bg-white p-2 shadow-sm;
+    border-color: var(--dokumen-cloud);
+  }
+
+  .pdf-toolbar-divider {
+    @apply h-6 w-px;
+    background: var(--dokumen-cloud);
+  }
+
+  .pdf-tool-button {
+    @apply rounded-md px-3 py-1 text-sm font-medium transition-colors disabled:cursor-not-allowed;
+  }
+
+  .pdf-tool-button-primary {
+    @apply text-white disabled:bg-gray-300;
+    background: #6b7280;
+  }
+
+  .pdf-tool-button-primary:hover {
+    background: #4b5563;
+  }
+
+  .pdf-tool-button-secondary {
+    @apply disabled:opacity-50;
+    background: var(--dokumen-light-ash);
+  }
+
+  .pdf-tool-button-secondary:hover {
+    background: #e5e7eb;
+  }
+
+  .pdf-tool-button-active {
+    @apply text-white;
+    background: var(--dokumen-blue);
+  }
+
+  .pdf-tool-button-success {
+    @apply text-white disabled:bg-green-300;
+    background: #22c55e;
+  }
+
+  .pdf-tool-button-success:hover {
+    background: #16a34a;
+  }
+
+  .pdf-tool-button-danger {
+    @apply text-white disabled:bg-red-300;
+    background: #ef4444;
+  }
+
+  .pdf-tool-button-danger:hover {
+    background: #dc2626;
+  }
+
+  .pdf-toolbar-count {
+    @apply min-w-18 text-xs;
+    color: var(--dokumen-pewter);
+  }
+
+  .pdf-sidebar {
+    @apply h-full w-[172px] shrink-0 border-r;
+    background: #f9fafb;
+    border-color: #e5e7eb;
+  }
+
+  .pdf-thumbnail-button {
+    @apply absolute flex w-full cursor-pointer flex-col items-center px-2 text-left;
+  }
+
+  .pdf-thumbnail-frame {
+    @apply overflow-hidden rounded-md border-2 transition-all;
+  }
+
+  .pdf-thumbnail-frame-active {
+    @apply shadow-sm;
+    border-color: var(--dokumen-blue);
+  }
+
+  .pdf-thumbnail-frame-idle {
+    border-color: #e5e7eb;
+  }
+
+  .pdf-thumbnail-frame-idle:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  }
+
+  .pdf-thumbnail-label {
+    @apply mt-1 flex items-center justify-center text-xs font-medium;
+  }
+
+  .pdf-thumbnail-label-active {
+    color: var(--dokumen-blue);
+  }
+
+  .pdf-thumbnail-label-idle {
+    color: #6b7280;
   }
 }

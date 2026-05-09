@@ -9,7 +9,7 @@ export default function Sidebar({ documentId }: SidebarProps) {
   const { state, provides: scrollCapability } = useScroll(documentId)
 
   return (
-    <aside className="h-full w-[172px] shrink-0 border-r border-gray-200 bg-gray-50">
+    <aside className="pdf-sidebar">
       <ThumbnailsPane documentId={documentId} className="h-full" style={{ paddingInline: 8 }}>
         {(meta) => {
           const isActive = state.currentPage === meta.pageIndex + 1
@@ -18,7 +18,7 @@ export default function Sidebar({ documentId }: SidebarProps) {
             <button
               key={meta.pageIndex}
               type="button"
-              className="absolute flex w-full cursor-pointer flex-col items-center px-2 text-left"
+              className="pdf-thumbnail-button"
               style={{
                 height: meta.wrapperHeight,
                 top: meta.top,
@@ -30,10 +30,8 @@ export default function Sidebar({ documentId }: SidebarProps) {
               }}
             >
               <div
-                className={`overflow-hidden rounded-md border-2 transition-all ${
-                  isActive
-                    ? "border-blue-500 shadow-sm"
-                    : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                className={`pdf-thumbnail-frame ${
+                  isActive ? "pdf-thumbnail-frame-active" : "pdf-thumbnail-frame-idle"
                 }`}
                 style={{
                   width: meta.width,
@@ -46,11 +44,10 @@ export default function Sidebar({ documentId }: SidebarProps) {
                   className="h-full w-full object-contain"
                 />
               </div>
-              <div
-                className="mt-1 flex items-center justify-center text-xs font-medium"
-                style={{ height: meta.labelHeight }}
-              >
-                <span className={isActive ? "text-blue-600" : "text-gray-500"}>
+              <div className="pdf-thumbnail-label" style={{ height: meta.labelHeight }}>
+                <span
+                  className={isActive ? "pdf-thumbnail-label-active" : "pdf-thumbnail-label-idle"}
+                >
                   {meta.pageIndex + 1}
                 </span>
               </div>
