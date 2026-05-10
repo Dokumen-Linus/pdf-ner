@@ -39,6 +39,14 @@ export type MockAuthCallResult<T = { success: boolean }> = {
   error: MockAuthError | null
 }
 
+export type MockSocialSignInArgs = {
+  provider: string
+  callbackURL?: string
+  errorCallbackURL?: string
+  newUserCallbackURL?: string
+  disableRedirect?: boolean
+}
+
 export type MockCreateTeamArgs = {
   headers?: Headers | Record<string, string>
   body?: {
@@ -75,6 +83,8 @@ export type MockRoute = {
 export type AuthMockState = {
   session: MockSession | null
   signInResult: MockAuthCallResult
+  signInSocialResult: MockAuthCallResult
+  signInSocialCalls: MockSocialSignInArgs[]
   signUpResult: MockAuthCallResult
   signOutResult: MockAuthCallResult
   createTeam: (args?: MockCreateTeamArgs) => Promise<MockCreateTeamResult>
@@ -84,6 +94,8 @@ function defaultAuthState(): AuthMockState {
   return {
     session: null,
     signInResult: { data: { success: true }, error: null },
+    signInSocialResult: { data: { success: true }, error: null },
+    signInSocialCalls: [],
     signUpResult: { data: { success: true }, error: null },
     signOutResult: { data: { success: true }, error: null },
     createTeam: async () => {

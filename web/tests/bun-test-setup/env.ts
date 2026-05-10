@@ -5,6 +5,8 @@ const TEST_SERVER_ENV: Record<string, string> = {
   BASE_URL: "http://localhost:3000",
   BETTER_AUTH_SECRET: "test-better-auth-secret",
   BETTER_AUTH_URL: "http://localhost:3000",
+  MICROSOFT_CLIENT_ID: "test-microsoft-client-id",
+  MICROSOFT_CLIENT_SECRET: "test-microsoft-client-secret",
   FROM_EMAIL: "no-reply@example.test",
   MY_EMAIL: "admin@example.test",
   STRIPE_SECRET_KEY: "sk_test_dummy",

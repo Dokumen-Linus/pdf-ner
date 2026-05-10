@@ -45,6 +45,8 @@
   "auth_signin_description": "Enter your email and password to access your account",
   "auth_signin_email_label": "Email",
   "auth_signin_password_label": "Password",
+  "auth_microsoft_button": "Continue with Microsoft",
+  "auth_email_separator": "or continue with email",
   "auth_signin_button": "Sign In",
   "auth_signin_button_loading": "Signing in...",
   "auth_signin_footer_text": "Don't have an account?",
