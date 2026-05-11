@@ -220,6 +220,11 @@ export const auth = betterAuth({
       authority: "https://login.microsoftonline.com",
       prompt: "select_account",
     },
+    google: {
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
+      prompt: "select_account",
+    },
   },
   onAPIError: {
     errorURL: BETTER_AUTH_ERROR_REDIRECT_PATH,

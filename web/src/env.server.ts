@@ -62,6 +62,8 @@ export const env = createEnv({
     BETTER_AUTH_URL: z.url(),
     MICROSOFT_CLIENT_ID: z.string(),
     MICROSOFT_CLIENT_SECRET: z.string(),
+    GOOGLE_CLIENT_ID: z.string(),
+    GOOGLE_CLIENT_SECRET: z.string(),
     FROM_EMAIL: z.email(),
     MY_EMAIL: z.email(),
     STRIPE_SECRET_KEY: z.string(),
