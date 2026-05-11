@@ -11,7 +11,7 @@ from .application.handlers import handle_process_document_source
 logger = logging.getLogger(__name__)
 
 
-@app.task(bind=True, name="entity_extraction.process_document_source", max_retries=2)
+@app.task(bind=True, name="ner_workflows.process_document_source", max_retries=2)
 def process_document_source_task(
     self,
     document_source_id: str,

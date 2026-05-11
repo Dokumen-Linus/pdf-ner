@@ -61,7 +61,7 @@ async def handle_disable_listener(cmd: DisableListener) -> dict:
 
 
 async def handle_listener_event(cmd: HandleListenerEvent) -> dict:
-    from app.domains.entity_extraction.tasks import process_document_source_task
+    from app.domains.ner_workflows.tasks import process_document_source_task
 
     pool = await get_pool()
     async with pool.acquire() as conn:
