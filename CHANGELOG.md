@@ -124,6 +124,7 @@
 - *(ci)* In progress ci/cd
 - *(api)* Replace llm_ner domain with worker_dispatch
 - *(web)* Microsoft sso
+- *(web)* Google sso
 
 ### 🐛 Bug Fixes
 
@@ -621,6 +622,7 @@
 - Vscode settings
 - *(llm)* Opencode settings
 - Add sitemap to web gitignore
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
