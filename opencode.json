@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "autoupdate": true,
+  "formatter": true,
+  "lsp": true,
+  "permission": {
+    "bash": "ask",
+    "lsp": "allow"
+  }
+}
