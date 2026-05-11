@@ -1,9 +1,14 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { CheckCircle2Icon, Loader2Icon, PlayIcon, RotateCcwIcon, XCircleIcon } from "lucide-react"
 
-import { getOptimizationStatus, startPromptOptimization } from "@/api-fns/engineering"
+import {
+  getOcrEvaluationStatus,
+  getOptimizationStatus,
+  startOcrEvaluation,
+  startPromptOptimization,
+} from "@/api-fns/engineering"
 import { ProjectTabs } from "@/components/project-tabs"
 import { Button } from "@/components/shadcn-ui/button"
 import {
@@ -13,8 +18,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn-ui/card"
+import { Input } from "@/components/shadcn-ui/input"
+import { Label } from "@/components/shadcn-ui/label"
 import { Progress } from "@/components/shadcn-ui/progress"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn-ui/select"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
+import { getAvailableGoogleChatModels } from "@/db-fns/public/models"
 import { getAllTemplates } from "@/db-fns/public/templates"
 import { getCurrentProjectAccess, getProjectById } from "@/db-fns/web/projects"
 
@@ -41,25 +56,27 @@ export const Route = createFileRoute("/_private/projects/$projectId_/engineering
     try {
       const userId = context.session?.user?.id
       if (!userId) {
-        return { project: null, templates: [], loadError: "Not authenticated" }
+        return { project: null, templates: [], googleModels: [], loadError: "Not authenticated" }
       }
 
-      const [project, access, templates] = await Promise.all([
+      const [project, access, templates, googleModels] = await Promise.all([
         getProjectById({ data: { id: params.projectId } }),
         getCurrentProjectAccess({ data: { projectId: params.projectId } }),
         getAllTemplates(),
+        getAvailableGoogleChatModels(),
       ])
       if (access.accountRole === "analyst" || !access.canManage) {
         return {
           project: null,
           templates: [],
+          googleModels: [],
           loadError: "Only developers can run prompt engineering.",
         }
       }
-      return { project, templates, loadError: null }
+      return { project, templates, googleModels, loadError: null }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      return { project: null, templates: [], loadError: message }
+      return { project: null, templates: [], googleModels: [], loadError: message }
     }
   },
   pendingComponent: EngineeringSkeleton,
@@ -74,19 +91,36 @@ const PHASE_LABELS: Record<string, string> = {
   generating_refinement: "Generating Refinement",
   iteration_evaluated: "Iteration Evaluated",
   storing_results: "Saving Results",
+  sampling: "Sampling PDFs",
+  ocr: "Evaluating OCR",
+  complete: "Complete",
 }
 
 function EngineeringPage() {
   const router = useRouter()
-  const { project, templates, loadError } = Route.useLoaderData()
+  const { project, templates, googleModels, loadError } = Route.useLoaderData()
   const { projectId } = Route.useParams()
 
   const [taskId, setTaskId] = useState<string | null>(null)
   const [isStarting, setIsStarting] = useState(false)
   const [startError, setStartError] = useState<string | null>(null)
+  const [ocrTaskId, setOcrTaskId] = useState<string | null>(null)
+  const [isStartingOcr, setIsStartingOcr] = useState(false)
+  const [ocrStartError, setOcrStartError] = useState<string | null>(null)
+  const [judgeModel, setJudgeModel] = useState(googleModels[0]?.id ?? "")
+  const [maxPdfs, setMaxPdfs] = useState(5)
+  const [maxPagesPerPdf, setMaxPagesPerPdf] = useState(3)
+  const [ocrMaxCostUsd, setOcrMaxCostUsd] = useState(0.5)
+
+  useEffect(() => {
+    const firstId = googleModels[0]?.id
+    if (firstId && !googleModels.some((m) => m.id === judgeModel)) {
+      setJudgeModel(firstId)
+    }
+  }, [googleModels, judgeModel])
 
   const { data: status } = useQuery({
-    queryKey: ["optimization-status", taskId],
+    queryKey: ["worker-dispatch", "optimization-status", taskId],
     queryFn: () => getOptimizationStatus({ data: { taskId: taskId! } }),
     enabled: !!taskId,
     refetchInterval: (query) => {
@@ -97,6 +131,20 @@ function EngineeringPage() {
   })
 
   const isRunning = !!taskId && status?.status !== "SUCCESS" && status?.status !== "FAILURE"
+
+  const { data: ocrStatus } = useQuery({
+    queryKey: ["worker-dispatch", "ocr-evaluation-status", ocrTaskId],
+    queryFn: () => getOcrEvaluationStatus({ data: { taskId: ocrTaskId! } }),
+    enabled: !!ocrTaskId,
+    refetchInterval: (query) => {
+      const s = query.state.data?.status
+      if (s === "SUCCESS" || s === "FAILURE") return false
+      return 2000
+    },
+  })
+
+  const isOcrRunning =
+    !!ocrTaskId && ocrStatus?.status !== "SUCCESS" && ocrStatus?.status !== "FAILURE"
 
   async function handleStart() {
     const templateId = templates?.[0]?.id
@@ -109,13 +157,39 @@ function EngineeringPage() {
     setStartError(null)
     try {
       const result = await startPromptOptimization({
-        data: { projectId, templateId, maxCostUsd: 1, model: "gpt-4o" },
+        data: { projectId, templateId, maxCostUsd: 1, model: "gpt-5.4-mini" },
       })
       setTaskId(result.task_id)
     } catch (error) {
       setStartError(error instanceof Error ? error.message : String(error))
     } finally {
       setIsStarting(false)
+    }
+  }
+
+  async function handleStartOcrEvaluation() {
+    if (!judgeModel) {
+      setOcrStartError("Choose a Gemini judge model.")
+      return
+    }
+
+    setIsStartingOcr(true)
+    setOcrStartError(null)
+    try {
+      const result = await startOcrEvaluation({
+        data: {
+          projectId,
+          judgeModel,
+          maxPdfs,
+          maxPagesPerPdf,
+          maxCostUsd: ocrMaxCostUsd,
+        },
+      })
+      setOcrTaskId(result.task_id)
+    } catch (error) {
+      setOcrStartError(error instanceof Error ? error.message : String(error))
+    } finally {
+      setIsStartingOcr(false)
     }
   }
 
@@ -292,6 +366,213 @@ function EngineeringPage() {
           </CardContent>
         </Card>
       )}
+
+      {!ocrTaskId && (
+        <Card>
+          <CardHeader>
+            <CardTitle>OCR Evaluation</CardTitle>
+            <CardDescription>
+              Compare OCR methods across a sample of project PDFs and store the worker evaluation
+              run for review.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {ocrStartError && (
+              <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
+                {ocrStartError}
+              </div>
+            )}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="ocr-judge-model">Judge model</Label>
+                <Select value={judgeModel} onValueChange={setJudgeModel}>
+                  <SelectTrigger id="ocr-judge-model" className="w-full">
+                    <SelectValue placeholder="Choose a Gemini model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {googleModels.map((model) => (
+                      <SelectItem key={model.id} value={model.id}>
+                        {model.displayName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {googleModels.length === 0 && (
+                  <p className="text-muted-foreground text-xs">No available Google models found.</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ocr-max-pdfs">Max PDFs</Label>
+                <Input
+                  id="ocr-max-pdfs"
+                  min={1}
+                  step={1}
+                  type="number"
+                  value={maxPdfs}
+                  onChange={(event) => setMaxPdfs(Number(event.target.value))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ocr-max-pages">Pages per PDF</Label>
+                <Input
+                  id="ocr-max-pages"
+                  min={1}
+                  step={1}
+                  type="number"
+                  value={maxPagesPerPdf}
+                  onChange={(event) => setMaxPagesPerPdf(Number(event.target.value))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ocr-max-cost">Max cost</Label>
+                <Input
+                  id="ocr-max-cost"
+                  min={0.01}
+                  step={0.01}
+                  type="number"
+                  value={ocrMaxCostUsd}
+                  onChange={(event) => setOcrMaxCostUsd(Number(event.target.value))}
+                />
+              </div>
+            </div>
+            <Button
+              onClick={handleStartOcrEvaluation}
+              disabled={
+                isStartingOcr ||
+                !judgeModel ||
+                maxPdfs <= 0 ||
+                maxPagesPerPdf <= 0 ||
+                ocrMaxCostUsd <= 0
+              }
+            >
+              {isStartingOcr ? (
+                <>
+                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                  Starting...
+                </>
+              ) : (
+                <>
+                  <PlayIcon className="mr-2 h-4 w-4" />
+                  Start OCR Evaluation
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {ocrTaskId && isOcrRunning && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Loader2Icon className="text-primary h-5 w-5 animate-spin" />
+              OCR Evaluation In Progress
+            </CardTitle>
+            <CardDescription>
+              Task ID: <span className="font-mono text-xs">{ocrTaskId}</span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium">
+                  {ocrStatus?.progress
+                    ? PHASE_LABELS[ocrStatus.progress.phase] || ocrStatus.progress.phase
+                    : ocrStatus?.status === "STARTED"
+                      ? "Starting..."
+                      : "Waiting..."}
+                </span>
+                <span className="text-muted-foreground">{ocrStatus?.progress?.percent ?? 0}%</span>
+              </div>
+              <Progress value={ocrStatus?.progress?.percent ?? 0} />
+            </div>
+
+            {ocrStatus?.progress?.message && (
+              <p className="text-muted-foreground text-sm">{ocrStatus.progress.message}</p>
+            )}
+
+            {ocrStatus?.progress?.details && (
+              <ProgressDetails
+                details={ocrStatus.progress.details}
+                phase={ocrStatus.progress.phase}
+              />
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {ocrTaskId && ocrStatus?.status === "SUCCESS" && ocrStatus.result && (
+        <Card className="border-emerald-500/40">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-emerald-600">
+              <CheckCircle2Icon className="h-5 w-5" />
+              OCR Evaluation Complete
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-4">
+              <div className="rounded-lg border p-4">
+                <p className="text-muted-foreground text-sm">Recommendation</p>
+                <p className="text-2xl font-bold capitalize">
+                  {ocrStatus.result.recommendation.replaceAll("_", " ")}
+                </p>
+              </div>
+              <div className="rounded-lg border p-4">
+                <p className="text-muted-foreground text-sm">Confidence</p>
+                <p className="text-2xl font-bold">
+                  {(ocrStatus.result.confidence * 100).toFixed(1)}%
+                </p>
+              </div>
+              <div className="rounded-lg border p-4">
+                <p className="text-muted-foreground text-sm">Pages Sampled</p>
+                <p className="text-2xl font-bold">{ocrStatus.result.sampled_page_count}</p>
+              </div>
+              <div className="rounded-lg border p-4">
+                <p className="text-muted-foreground text-sm">Cost Used</p>
+                <p className="text-2xl font-bold">
+                  ${Number(ocrStatus.result.cost_usd).toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOcrTaskId(null)
+                setOcrStartError(null)
+              }}
+            >
+              <RotateCcwIcon className="mr-2 h-4 w-4" />
+              Run Again
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {ocrTaskId && ocrStatus?.status === "FAILURE" && (
+        <Card className="border-destructive/40">
+          <CardHeader>
+            <CardTitle className="text-destructive flex items-center gap-2">
+              <XCircleIcon className="h-5 w-5" />
+              OCR Evaluation Failed
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="border-destructive/35 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm">
+              {ocrStatus.error || "An unknown error occurred."}
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOcrTaskId(null)
+                setOcrStartError(null)
+              }}
+            >
+              <RotateCcwIcon className="mr-2 h-4 w-4" />
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
@@ -359,6 +640,41 @@ function ProgressDetails({
           <p className="text-muted-foreground text-xs">Entity Types</p>
           <p className="text-lg font-semibold">{String(details.entity_types_count)}</p>
         </div>
+      </div>
+    )
+  }
+
+  if (phase === "sampling" || phase === "ocr" || phase === "complete") {
+    return (
+      <div className="grid gap-3 sm:grid-cols-3">
+        {details.pdfs != null && (
+          <div className="rounded-lg border p-3">
+            <p className="text-muted-foreground text-xs">PDFs</p>
+            <p className="text-lg font-semibold">{String(details.pdfs)}</p>
+          </div>
+        )}
+        {details.pages != null && (
+          <div className="rounded-lg border p-3">
+            <p className="text-muted-foreground text-xs">Pages</p>
+            <p className="text-lg font-semibold">{String(details.pages)}</p>
+          </div>
+        )}
+        {details.recommendation != null && (
+          <div className="rounded-lg border p-3">
+            <p className="text-muted-foreground text-xs">Recommendation</p>
+            <p className="text-lg font-semibold capitalize">
+              {String(details.recommendation).replaceAll("_", " ")}
+            </p>
+          </div>
+        )}
+        {details.confidence != null && (
+          <div className="rounded-lg border p-3">
+            <p className="text-muted-foreground text-xs">Confidence</p>
+            <p className="text-lg font-semibold">
+              {(Number(details.confidence) * 100).toFixed(1)}%
+            </p>
+          </div>
+        )}
       </div>
     )
   }

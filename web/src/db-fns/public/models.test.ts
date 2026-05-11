@@ -30,9 +30,18 @@ describe.if(runTests)("public.chat_models", () => {
     expect(result.length).toBeGreaterThan(0)
   })
 
+  it("getAvailableGoogleChatModels returns active Google models", async () => {
+    const result = await getAvailableGoogleChatModels()
+    expect(Array.isArray(result)).toBe(true)
+    for (const model of result) {
+      expect(model.host).toBe("Google")
+      expect(model.endAvailableDate == null || model.endAvailableDate > new Date()).toBe(true)
+    }
+  })
+
   it("getChatModelById throws for non-existent ID", async () => {
-    await expect(
-      getChatModelById({ data: { id: "nonexistent-model" } }),
-    ).rejects.toThrow("Chat model not found")
+    await expect(getChatModelById({ data: { id: "nonexistent-model" } })).rejects.toThrow(
+      "Chat model not found",
+    )
   })
 })

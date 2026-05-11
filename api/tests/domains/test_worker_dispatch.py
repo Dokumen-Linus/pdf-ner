@@ -1,5 +1,4 @@
-from decimal import Decimal
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
 from pydantic import ValidationError
@@ -13,7 +12,7 @@ class TestOptimizePromptRequest:
     def test_defaults_match_workers_context_engineering_command(self):
         request = OptimizePromptRequest(project_id=uuid4(), template_id=1)
 
-        assert request.max_cost_usd == Decimal("1.00")
+        assert request.max_cost_usd == 1.0
         assert request.model == "gpt-5.4-mini"
 
     def test_requires_positive_template_id(self):
@@ -22,7 +21,7 @@ class TestOptimizePromptRequest:
 
     def test_requires_positive_max_cost(self):
         with pytest.raises(ValidationError):
-            OptimizePromptRequest(project_id=uuid4(), template_id=1, max_cost_usd=Decimal("0"))
+            OptimizePromptRequest(project_id=uuid4(), template_id=1, max_cost_usd=0)
 
 
 class TestOcrEvaluationRequest:
@@ -31,7 +30,7 @@ class TestOcrEvaluationRequest:
 
         assert request.max_pdfs == 5
         assert request.max_pages_per_pdf == 3
-        assert request.max_cost_usd == Decimal("0.50")
+        assert request.max_cost_usd == 0.5
 
     def test_requires_judge_model(self):
         with pytest.raises(ValidationError):
@@ -54,7 +53,7 @@ class TestOcrEvaluationRequest:
             OcrEvaluationRequest(
                 project_id=uuid4(),
                 judge_model="gemini-3.1-flash-lite",
-                max_cost_usd=Decimal("0"),
+                max_cost_usd=0,
             )
 
 
@@ -89,7 +88,7 @@ class TestWorkerDispatchEndpoints:
             {
                 "project_id": str(project_id),
                 "template_id": 1,
-                "max_cost_usd": Decimal("1.25"),
+                "max_cost_usd": 1.25,
                 "model": "gpt-5.4-mini",
             }
         ]
@@ -120,7 +119,7 @@ class TestWorkerDispatchEndpoints:
                 "judge_model": "gemini-3.1-flash-lite",
                 "max_pdfs": 2,
                 "max_pages_per_pdf": 1,
-                "max_cost_usd": "0.75",
+                "max_cost_usd": 0.75,
             },
         )
 
@@ -132,7 +131,7 @@ class TestWorkerDispatchEndpoints:
                 "judge_model": "gemini-3.1-flash-lite",
                 "max_pdfs": 2,
                 "max_pages_per_pdf": 1,
-                "max_cost_usd": Decimal("0.75"),
+                "max_cost_usd": 0.75,
             }
         ]
         mock_redis.set.assert_called_once_with(
@@ -233,7 +232,7 @@ class TestWorkerDispatchEvents:
         task_id = events.dispatch_optimize_prompt(
             project_id=str(uuid4()),
             template_id=3,
-            max_cost_usd=Decimal("2.50"),
+            max_cost_usd=2.5,
         )
 
         assert task_id == "task-123"
@@ -242,7 +241,7 @@ class TestWorkerDispatchEvents:
         assert kwargs["args"][0]
         assert kwargs["kwargs"] == {
             "template_id": 3,
-            "max_cost_usd": "2.50",
+            "max_cost_usd": 2.5,
             "model": "gpt-5.4-mini",
         }
         assert kwargs["headers"] == {"request-id": "test"}
@@ -265,7 +264,7 @@ class TestWorkerDispatchEvents:
             judge_model="gemini-3.1-flash-lite",
             max_pdfs=2,
             max_pages_per_pdf=1,
-            max_cost_usd=Decimal("0.75"),
+            max_cost_usd=0.75,
         )
 
         assert task_id == "ocr-task-123"
@@ -276,6 +275,94 @@ class TestWorkerDispatchEvents:
         assert kwargs["kwargs"] == {
             "max_pdfs": 2,
             "max_pages_per_pdf": 1,
-            "max_cost_usd": "0.75",
+            "max_cost_usd": 0.75,
         }
         assert kwargs["headers"] == {"request-id": "test"}
+
+
+class TestGetTaskStatus:
+    def test_returns_pending_when_task_not_ready(self, monkeypatch):
+        class FakeAsyncResult:
+            status = "PENDING"
+            info = None
+
+            def ready(self):
+                return False
+
+        monkeypatch.setattr(events, "AsyncResult", lambda tid, app: FakeAsyncResult())
+
+        result = events.get_task_status("task-1")
+
+        assert result == {"task_id": "task-1", "status": "PENDING"}
+
+    def test_returns_result_on_success(self, monkeypatch):
+        class FakeAsyncResult:
+            status = "SUCCESS"
+            result = {"best_prompt_id": "abc"}
+
+            def ready(self):
+                return True
+
+            def successful(self):
+                return True
+
+        monkeypatch.setattr(events, "AsyncResult", lambda tid, app: FakeAsyncResult())
+
+        result = events.get_task_status("task-2")
+
+        assert result == {
+            "task_id": "task-2",
+            "status": "SUCCESS",
+            "result": {"best_prompt_id": "abc"},
+        }
+
+    def test_returns_error_on_failure(self, monkeypatch):
+        class FakeAsyncResult:
+            status = "FAILURE"
+            result = RuntimeError("Something went wrong")
+
+            def ready(self):
+                return True
+
+            def successful(self):
+                return False
+
+        monkeypatch.setattr(events, "AsyncResult", lambda tid, app: FakeAsyncResult())
+
+        result = events.get_task_status("task-3")
+
+        assert result["task_id"] == "task-3"
+        assert result["status"] == "FAILURE"
+        assert "Something went wrong" in result["error"]
+
+    def test_returns_progress_on_pending_with_info(self, monkeypatch):
+        class FakeAsyncResult:
+            status = "PROGRESS"
+            info = {"phase": "evaluating_variant", "percent": 45}
+
+            def ready(self):
+                return False
+
+        monkeypatch.setattr(events, "AsyncResult", lambda tid, app: FakeAsyncResult())
+
+        result = events.get_task_status("task-4")
+
+        assert result == {
+            "task_id": "task-4",
+            "status": "PROGRESS",
+            "progress": {"phase": "evaluating_variant", "percent": 45},
+        }
+
+    def test_ignores_non_dict_info(self, monkeypatch):
+        class FakeAsyncResult:
+            status = "PROGRESS"
+            info = "some string"
+
+            def ready(self):
+                return False
+
+        monkeypatch.setattr(events, "AsyncResult", lambda tid, app: FakeAsyncResult())
+
+        result = events.get_task_status("task-5")
+
+        assert result == {"task_id": "task-5", "status": "PROGRESS"}

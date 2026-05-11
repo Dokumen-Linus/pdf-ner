@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
-import { eq } from "drizzle-orm/sql"
+import { and, desc, eq, gt, isNull, or } from "drizzle-orm"
 import { z } from "zod"
 
 import { db } from "@/db/client"
@@ -26,5 +26,22 @@ export const getChatModelsByHost = createServerFn({ method: "GET" })
   .inputValidator(z.object({ host: z.string() }))
   .handler(async ({ data }) => {
     const modelsList = await db.select().from(chatModels).where(eq(chatModels.host, data.host))
+    return modelsList
+  })
+
+export const getAvailableGoogleChatModels = createServerFn({ method: "GET" })
+  .inputValidator(z.void())
+  .handler(async () => {
+    const now = new Date()
+    const modelsList = await db
+      .select()
+      .from(chatModels)
+      .where(
+        and(
+          eq(chatModels.host, "Google"),
+          or(isNull(chatModels.endAvailableDate), gt(chatModels.endAvailableDate, now)),
+        ),
+      )
+      .orderBy(desc(chatModels.releaseDate), desc(chatModels.availableDate), desc(chatModels.id))
     return modelsList
   })
