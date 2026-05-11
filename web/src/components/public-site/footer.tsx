@@ -25,6 +25,11 @@ export default function Footer() {
             </Link>
           </li>
           <li>
+            <Link to="/platform" className="site-footer-text">
+              {m.footer_platform()}
+            </Link>
+          </li>
+          <li>
             <Link to="/signin" className="site-footer-text">
               {m.footer_signin()}
             </Link>

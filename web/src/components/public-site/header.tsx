@@ -96,6 +96,13 @@ export default function Header() {
               {m.nav_pricing()}
             </Link>
             <Link
+              to="/platform"
+              className="site-nav-link"
+              activeProps={{ className: "site-nav-link-active" }}
+            >
+              {m.nav_platform()}
+            </Link>
+            <Link
               to="/about"
               className="site-nav-link"
               activeProps={{ className: "site-nav-link-active" }}
@@ -239,6 +246,9 @@ export default function Header() {
           </Link>
           <Link to="/pricing" onClick={() => setIsOpen(false)} className="site-mobile-link">
             {m.nav_pricing()}
+          </Link>
+          <Link to="/platform" onClick={() => setIsOpen(false)} className="site-mobile-link">
+            {m.nav_platform()}
           </Link>
           <Link to="/about" onClick={() => setIsOpen(false)} className="site-mobile-link">
             {m.nav_about()}

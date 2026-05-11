@@ -24,6 +24,10 @@ export const sitemap: Sitemap<TRoutes> = {
       priority: 0.8,
       changeFrequency: "weekly",
     },
+    "/platform": {
+      priority: 0.7,
+      changeFrequency: "weekly",
+    },
     "/signin": {
       priority: 0.4,
       changeFrequency: "monthly",
