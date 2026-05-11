@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth"
 import { authClient } from "@/lib/auth-client"
 
 import {
+  getSignInSocialCalls,
   resetMocks,
   setApiError,
   setApiResponse,
@@ -14,6 +15,7 @@ import {
   setApiUnauthorized,
   setAuthenticated,
   setSignInResult,
+  setSignInSocialResult,
   setSignUpResult,
   setUnauthenticated,
 } from "."
@@ -68,6 +70,26 @@ describe("authClient mock (client)", () => {
     setSignInResult({ data: null, error: { message: "Invalid credentials" } })
     const result = await authClient.signIn.email({ email: "x@y.com", password: "wrong" })
     expect(result.error?.message).toBe("Invalid credentials")
+  })
+
+  it("signIn.social records the provider call and returns the configured result", async () => {
+    setSignInSocialResult({ data: { success: true }, error: null })
+
+    const result = await authClient.signIn.social({
+      provider: "microsoft",
+      callbackURL: "/profile",
+      errorCallbackURL: "/error",
+    })
+
+    expect(result.error).toBeNull()
+    expect(result.data).toBeTruthy()
+    expect(getSignInSocialCalls()).toEqual([
+      {
+        provider: "microsoft",
+        callbackURL: "/profile",
+        errorCallbackURL: "/error",
+      },
+    ])
   })
 
   it("signUp.email returns the result set by setSignUpResult()", async () => {

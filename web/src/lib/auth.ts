@@ -212,6 +212,15 @@ async function deleteWebUserForAuthUser(authUserId: string) {
 export const auth = betterAuth({
   database: authDatabase,
   trustedOrigins,
+  socialProviders: {
+    microsoft: {
+      clientId: env.MICROSOFT_CLIENT_ID,
+      clientSecret: env.MICROSOFT_CLIENT_SECRET,
+      tenantId: "common",
+      authority: "https://login.microsoftonline.com",
+      prompt: "select_account",
+    },
+  },
   onAPIError: {
     errorURL: BETTER_AUTH_ERROR_REDIRECT_PATH,
   },

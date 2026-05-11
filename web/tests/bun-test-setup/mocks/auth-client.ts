@@ -37,6 +37,16 @@ export function installAuthClientMock(): void {
         email: async (_credentials: { email: string; password: string }) => {
           return authState.signInResult
         },
+        social: async (args: {
+          provider: string
+          callbackURL?: string
+          errorCallbackURL?: string
+          newUserCallbackURL?: string
+          disableRedirect?: boolean
+        }) => {
+          authState.signInSocialCalls.push(args)
+          return authState.signInSocialResult
+        },
       },
 
       signUp: {
