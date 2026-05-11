@@ -35,7 +35,6 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 
 - The database is still pre-instantiation; modify existing create scripts directly instead of adding backward-compat SQL
 - Respect schema ownership: Better Auth writes only `auth`; `web`, `api`, and `workers` should write only their own schemas unless an exception is explicitly documented
-- If a schema must be shared by `api` and `workers`, `workers` should own it
 
 ### Web Invariants
 
