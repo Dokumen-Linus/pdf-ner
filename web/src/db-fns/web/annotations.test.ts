@@ -3,10 +3,10 @@ import { eq, sql } from "drizzle-orm"
 
 import { setAuthenticated } from "~/tests/bun-test-setup/mocks"
 import { db } from "@/db/client"
+import { corePdfs } from "@/db/schemas/core/pdfs"
 import { pdfs } from "@/db/schemas/web/pdfs"
 import { projects } from "@/db/schemas/web/projects"
 import { users } from "@/db/schemas/web/users"
-import { workersPdfs } from "@/db/schemas/workers/pdfs"
 
 import {
   createAnnotation,
@@ -14,11 +14,11 @@ import {
   getAnnotationById,
   getAnnotationsByPdfId,
   getAnnotationsBySubtype,
-  LabellingLockLostError,
+  LabelingLockLostError,
   saveAnnotationsByPdfId,
   updateAnnotation,
 } from "./annotations"
-import { acquireLabellingLock, releaseLabellingLock } from "./pdfs"
+import { acquireLabelingLock, releaseLabelingLock } from "./pdfs"
 
 const runTests = process.env.TEST_DB === "true"
 
@@ -174,27 +174,27 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
 })
 
 // Save path tests — exercise the lock-checked transactional replace logic.
-// These tests need real fixtures (a workers.pdfs row and two web.users rows)
+// These tests need real fixtures (a core.pdfs row and two web.users rows)
 // and do NOT share the hard-coded testPdfId above, because that id is expected
 // NOT to exist in the foreign-key parent table.
 async function loadSaveFixtures() {
   const [ownedPdf] = await db
-    .select({ pdfId: workersPdfs.id, ownerId: projects.ownerId })
-    .from(workersPdfs)
-    .innerJoin(projects, eq(projects.id, workersPdfs.projectId))
+    .select({ pdfId: corePdfs.id, ownerUserId: projects.ownerUserId })
+    .from(corePdfs)
+    .innerJoin(projects, eq(projects.id, corePdfs.projectId))
     .limit(1)
   if (!ownedPdf) return null
 
   const [otherUser] = await db
     .select({ id: users.id })
     .from(users)
-    .where(sql`${users.id} <> ${ownedPdf.ownerId}`)
+    .where(sql`${users.id} <> ${ownedPdf.ownerUserId}`)
     .limit(1)
   if (!otherUser) return null
 
   return {
     pdfId: ownedPdf.pdfId,
-    userAId: ownedPdf.ownerId,
+    userAId: ownedPdf.ownerUserId,
     userBId: otherUser.id,
   }
 }
@@ -217,7 +217,7 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
 
     try {
       setAuthenticated({ id: f.userAId! })
-      await acquireLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId! } })
+      await acquireLabelingLock({ data: { pdfId: f.pdfId, userId: f.userAId! } })
 
       const initial = [
         {
@@ -330,7 +330,7 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
     try {
       // userA holds the lock.
       setAuthenticated({ id: f.userAId! })
-      await acquireLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId! } })
+      await acquireLabelingLock({ data: { pdfId: f.pdfId, userId: f.userAId! } })
 
       // userB tries to save a project they do not own — reject before lock logic.
       setAuthenticated({ id: f.userBId! })
@@ -346,7 +346,7 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
       ).rejects.toThrow("You do not have access to this project")
     } finally {
       setAuthenticated({ id: f.userAId! })
-      await releaseLabellingLock({ data: { pdfId: f.pdfId, userId: f.userAId! } })
+      await releaseLabelingLock({ data: { pdfId: f.pdfId, userId: f.userAId! } })
     }
   })
 
@@ -375,7 +375,7 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
             labeledEntities: {},
           },
         }),
-      ).rejects.toThrow(LabellingLockLostError)
+      ).rejects.toThrow(LabelingLockLostError)
 
       await expect(
         saveAnnotationsByPdfId({

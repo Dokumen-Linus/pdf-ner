@@ -4,8 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class ProcessDocumentSourcePayload(BaseModel):
-    document_source_id: UUID
-    optimized_prompt_id: UUID
+    source_id: UUID
 
 
 class ExtractedPagePayload(BaseModel):

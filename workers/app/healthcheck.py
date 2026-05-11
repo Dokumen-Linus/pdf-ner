@@ -13,7 +13,9 @@ from app.core.config import settings
 from app.main import app as celery_app
 
 WORKER_TABLES = (
-    "workers.pdfs",
+    "core.pdfs",
+    "workers.pdf_txts",
+    "workers.ner_runs",
     "workers.llm_usage",
     "workers.billing_charge_attempts",
     "workers.ocr_evaluation_runs",

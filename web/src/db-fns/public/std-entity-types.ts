@@ -49,3 +49,13 @@ export const getStdEntityTypesByDatatype = createServerFn({ method: "GET" })
       .where(eq(stdEntityTypes.datatype, data.datatype))
     return stdEntityTypesList
   })
+
+export const getStdEntityTypesByCategory = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ category: z.string() }))
+  .handler(async ({ data }) => {
+    const stdEntityTypesList = await db
+      .select()
+      .from(stdEntityTypes)
+      .where(eq(stdEntityTypes.category, data.category))
+    return stdEntityTypesList
+  })

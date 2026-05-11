@@ -316,14 +316,14 @@ class TestExtractText:
 
         assert result.source == "ocr"
         assert result.ocr_model == "deepseek-ocr"
-        assert result.extract_method == "deepseek"
+        assert result.extract_method == "deepseek-ocr"
         assert result.full_text == "OCR text"
         mock_ocr.assert_called_once()
         mock_update.assert_awaited_once_with(
             mock_conn,
             extract_request.pdf_id,
             full_text="OCR text",
-            extract_method="deepseek",
+            extract_method="deepseek-ocr",
             text_by_page={"pages": [{"page_index": 0, "text": " OCR text "}]},
         )
 

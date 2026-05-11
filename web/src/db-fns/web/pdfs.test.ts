@@ -3,17 +3,17 @@ import { eq, sql } from "drizzle-orm"
 
 import { setAuthenticated } from "~/tests/bun-test-setup/mocks"
 import { db } from "@/db/client"
+import { corePdfs } from "@/db/schemas/core/pdfs"
 import { pdfs } from "@/db/schemas/web/pdfs"
 import { projects } from "@/db/schemas/web/projects"
 import { users } from "@/db/schemas/web/users"
-import { workersPdfs } from "@/db/schemas/workers/pdfs"
 
-import { getAllWorkersPdfs } from "../workers/pdfs"
+import { getAllCorePdfs } from "../core/pdfs"
 
 import {
-  acquireLabellingLock,
-  heartbeatLabellingLock,
-  releaseLabellingLock,
+  acquireLabelingLock,
+  heartbeatLabelingLock,
+  releaseLabelingLock,
   upsertPdfLabels,
 } from "./pdfs"
 
@@ -23,9 +23,9 @@ const runTests = process.env.TEST_DB === "true"
 // authz tests can exercise both the owning session and a cross-project caller.
 async function loadFixtures() {
   const [ownedPdf] = await db
-    .select({ pdfId: workersPdfs.id, ownerId: projects.ownerId })
-    .from(workersPdfs)
-    .innerJoin(projects, eq(projects.id, workersPdfs.projectId))
+    .select({ pdfId: corePdfs.id, ownerUserId: projects.ownerUserId })
+    .from(corePdfs)
+    .innerJoin(projects, eq(projects.id, corePdfs.projectId))
     .limit(1)
   if (!ownedPdf) {
     return null
@@ -34,7 +34,7 @@ async function loadFixtures() {
   const [otherUser] = await db
     .select({ id: users.id })
     .from(users)
-    .where(sql`${users.id} <> ${ownedPdf.ownerId}`)
+    .where(sql`${users.id} <> ${ownedPdf.ownerUserId}`)
     .limit(1)
   if (!otherUser) {
     return null
@@ -42,16 +42,16 @@ async function loadFixtures() {
 
   return {
     pdfId: ownedPdf.pdfId,
-    userAId: ownedPdf.ownerId,
+    userAId: ownedPdf.ownerUserId,
     userBId: otherUser.id,
   }
 }
 
-describe.if(runTests)("web.pdfs labelling lock", () => {
+describe.if(runTests)("web.pdfs labeling lock", () => {
   it("acquires, refuses to steal a fresh lock, heartbeats, and releases", async () => {
     const f = await loadFixtures()
     if (!f) {
-      console.warn("[pdfs.test] skipping lock tests — TEST_DB lacks workers.pdfs + >=2 web.users")
+      console.warn("[pdfs.test] skipping lock tests — TEST_DB lacks core.pdfs + >=2 web.users")
       return
     }
 
@@ -65,20 +65,20 @@ describe.if(runTests)("web.pdfs labelling lock", () => {
       setAuthenticated({ id: f.userAId! })
 
       // userA acquires the lock.
-      const firstAcquire = await acquireLabellingLock({
+      const firstAcquire = await acquireLabelingLock({
         data: { pdfId: f.pdfId, userId: f.userAId! },
       })
       expect(firstAcquire.acquired).toBe(true)
 
       // userA re-acquires — same-user acquire is idempotent (refresh).
-      const sameUserAcquire = await acquireLabellingLock({
+      const sameUserAcquire = await acquireLabelingLock({
         data: { pdfId: f.pdfId, userId: f.userAId! },
       })
       expect(sameUserAcquire.acquired).toBe(true)
 
       // userB tries to acquire — must be refused. Fresh lock, not stale.
       setAuthenticated({ id: f.userBId! })
-      const userBAttempt = await acquireLabellingLock({
+      const userBAttempt = await acquireLabelingLock({
         data: { pdfId: f.pdfId, userId: f.userBId! },
       }).catch((error) => error)
       expect(userBAttempt).toBeInstanceOf(Error)
@@ -88,28 +88,28 @@ describe.if(runTests)("web.pdfs labelling lock", () => {
 
       // userA heartbeats — still holds.
       setAuthenticated({ id: f.userAId! })
-      const heartbeatA = await heartbeatLabellingLock({
+      const heartbeatA = await heartbeatLabelingLock({
         data: { pdfId: f.pdfId, userId: f.userAId! },
       })
       expect(heartbeatA.stillHeld).toBe(true)
 
       // userB heartbeats — correctly fails (they don't hold it).
       setAuthenticated({ id: f.userBId! })
-      const heartbeatB = await heartbeatLabellingLock({
+      const heartbeatB = await heartbeatLabelingLock({
         data: { pdfId: f.pdfId, userId: f.userBId! },
       }).catch((error) => error)
       expect(heartbeatB).toBeInstanceOf(Error)
 
       // userB tries to release — correctly fails (not theirs to release).
       setAuthenticated({ id: f.userBId! })
-      const badRelease = await releaseLabellingLock({
+      const badRelease = await releaseLabelingLock({
         data: { pdfId: f.pdfId, userId: f.userBId! },
       }).catch((error) => error)
       expect(badRelease).toBeInstanceOf(Error)
 
       // userA releases.
       setAuthenticated({ id: f.userAId! })
-      const goodRelease = await releaseLabellingLock({
+      const goodRelease = await releaseLabelingLock({
         data: { pdfId: f.pdfId, userId: f.userAId! },
       })
       expect(goodRelease.released).toBe(true)
@@ -117,7 +117,7 @@ describe.if(runTests)("web.pdfs labelling lock", () => {
       // Cross-project callers stay blocked even after release.
       setAuthenticated({ id: f.userBId! })
       await expect(
-        acquireLabellingLock({
+        acquireLabelingLock({
           data: { pdfId: f.pdfId, userId: f.userBId! },
         }),
       ).rejects.toThrow("You do not have access to this project")
@@ -148,20 +148,20 @@ describe.if(runTests)("web.pdfs labelling lock", () => {
     try {
       setAuthenticated({ id: f.userAId! })
       await expect(
-        acquireLabellingLock({
+        acquireLabelingLock({
           data: { pdfId: f.pdfId, userId: f.userBId! },
         }),
       ).rejects.toThrow("Cannot act as another user")
 
       setAuthenticated({ id: f.userAId! })
-      const stolen = await acquireLabellingLock({
+      const stolen = await acquireLabelingLock({
         data: { pdfId: f.pdfId, userId: f.userAId! },
       })
       expect(stolen.acquired).toBe(true)
 
       setAuthenticated({ id: f.userAId! })
       await expect(
-        heartbeatLabellingLock({
+        heartbeatLabelingLock({
           data: { pdfId: f.pdfId, userId: f.userBId! },
         }),
       ).rejects.toThrow("Cannot act as another user")
@@ -174,11 +174,11 @@ describe.if(runTests)("web.pdfs labelling lock", () => {
   })
 })
 
-describe.if(runTests)("web.pdfs label upsert", () => {
-  it("upserts labeled_entities JSONB on the pdf row", async () => {
-    const allPdfs = await getAllWorkersPdfs()
+describe.if(runTests)("web.pdfs label compatibility", () => {
+  it("ensures the web pdf row exists for a label save", async () => {
+    const allPdfs = await getAllCorePdfs()
     if (allPdfs.length === 0) {
-      console.warn("[pdfs.test] skipping upsertPdfLabels test — no workers.pdfs rows")
+      console.warn("[pdfs.test] skipping upsertPdfLabels test — no core.pdfs rows")
       return
     }
     const pdfId = allPdfs[0].id
@@ -190,20 +190,19 @@ describe.if(runTests)("web.pdfs label upsert", () => {
     expect(first.success).toBe(true)
 
     const [row1] = await db
-      .select({ labeledEntities: pdfs.labeledEntities })
+      .select({ id: pdfs.id })
       .from(pdfs)
       .where(sql`${pdfs.id} = ${pdfId}`)
-    expect(row1.labeledEntities).toEqual(payload)
+    expect(row1.id).toBe(pdfId)
 
-    // Second call overwrites — it's an upsert, not an append.
     const payload2 = { Agency: ["FDA"] }
     await upsertPdfLabels({
       data: { id: pdfId, labeledEntities: payload2 },
     })
     const [row2] = await db
-      .select({ labeledEntities: pdfs.labeledEntities })
+      .select({ id: pdfs.id })
       .from(pdfs)
       .where(sql`${pdfs.id} = ${pdfId}`)
-    expect(row2.labeledEntities).toEqual(payload2)
+    expect(row2.id).toBe(pdfId)
   })
 })

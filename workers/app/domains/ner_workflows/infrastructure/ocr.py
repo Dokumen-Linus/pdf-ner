@@ -50,7 +50,7 @@ def _extract_ocr_pages_sync(pdf_bytes: bytes, ocr_method: str) -> list[PageText]
                 extract_text_from_pdf_by_page(tmp_path, ocr_engine=TesseractOcrEngine())
             )
 
-        remote_model = "deepseek-ocr" if ocr_method == "deepseek" else "olm-ocr2"
+        remote_model = "deepseek-ocr" if ocr_method == "deepseek-ocr" else "olm-ocr2"
         endpoint_configs = {
             "deepseek-ocr": RunpodOcrEndpointConfig(
                 model="deepseek-ocr",

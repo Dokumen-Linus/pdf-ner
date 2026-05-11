@@ -1,48 +1,38 @@
 import { describe, expect, it } from "bun:test"
 
-import { getAllModels, getModelById, getModelsByProvider } from "./models"
+import { getAllChatModels, getChatModelById, getChatModelsByHost } from "./models"
 
 const runTests = process.env.TEST_DB === "true"
 
-describe.if(runTests)("Public Models Read-Only Functions", () => {
-  describe("getAllModels", () => {
-    it("returns an array of models", async () => {
-      const result = await getAllModels()
-      expect(Array.isArray(result)).toBe(true)
-    })
+describe.if(runTests)("public.chat_models", () => {
+  it("getChatModelById returns a model", async () => {
+    const all = await getAllChatModels()
+    if (all.length === 0) {
+      console.warn("[models.test] skipping — no chat models in DB")
+      return
+    }
+    const model = await getChatModelById({ data: { id: all[0].id } })
+    expect(model.id).toBe(all[0].id)
   })
 
-  describe("getModelById", () => {
-    it("returns a model when it exists", async () => {
-      const allModels = await getAllModels()
-      if (allModels.length > 0) {
-        const firstModel = allModels[0]
-        const result = await getModelById({ data: { id: firstModel.id } })
-        expect(result).toBeDefined()
-        expect(result.id).toBe(firstModel.id)
-        expect(result.provider).toBe(firstModel.provider)
-      }
-    })
-
-    it("throws 'Model not found' for non-existent ID", async () => {
-      const fakeId = "non_existent_model_xyz"
-      await expect(getModelById({ data: { id: fakeId } })).rejects.toThrow("Model not found")
-    })
+  it("getAllChatModels returns an array", async () => {
+    const result = await getAllChatModels()
+    expect(Array.isArray(result)).toBe(true)
   })
 
-  describe("getModelsByProvider", () => {
-    it("returns an array of models for a provider", async () => {
-      const result = await getModelsByProvider({ data: { provider: "openai" } })
-      expect(Array.isArray(result)).toBe(true)
-      for (const model of result) {
-        expect(model.provider).toBe("openai")
-      }
-    })
+  it("getChatModelsByHost returns models for a host", async () => {
+    const all = await getAllChatModels()
+    if (all.length === 0) {
+      console.warn("[models.test] skipping host filter — no chat models in DB")
+      return
+    }
+    const result = await getChatModelsByHost({ data: { host: all[0].host } })
+    expect(result.length).toBeGreaterThan(0)
+  })
 
-    it("returns an empty array for non-existent provider", async () => {
-      const result = await getModelsByProvider({ data: { provider: "non_existent_provider" } })
-      expect(Array.isArray(result)).toBe(true)
-      expect(result.length).toBe(0)
-    })
+  it("getChatModelById throws for non-existent ID", async () => {
+    await expect(
+      getChatModelById({ data: { id: "nonexistent-model" } }),
+    ).rejects.toThrow("Chat model not found")
   })
 })

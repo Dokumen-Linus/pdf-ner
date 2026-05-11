@@ -22,9 +22,5 @@ def test_extraction_task_args_are_serializable():
     import uuid
 
     document_source_id = uuid.uuid4()
-    optimized_prompt_id = uuid.uuid4()
 
-    assert extraction_task_args(document_source_id, optimized_prompt_id) == (
-        str(document_source_id),
-        str(optimized_prompt_id),
-    )
+    assert extraction_task_args(document_source_id) == (str(document_source_id),)

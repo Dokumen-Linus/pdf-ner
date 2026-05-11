@@ -11,13 +11,13 @@ import { getAnnotationsByPdfId } from "@/db-fns/web/annotations"
 
 import usePluginStore from "./use-plugin-store"
 
-import type { FoundDbAnnotation } from "@/db/types"
+import type { DbAnnotation } from "@/db/types"
 
 // Converts a DB annotation row into the plugin's in-memory shape. Returns
 // null for rows whose subtype isn't one of the four text-markup kinds the
 // plugin supports — that's defensive against rows written by future/legacy
 // code paths.
-function toAnnotationObject(row: FoundDbAnnotation): PdfTextMarkupAnnotationObject | null {
+function toAnnotationObject(row: DbAnnotation): PdfTextMarkupAnnotationObject | null {
   const s = row.subtype as Subtype
   if (s !== "highlight" && s !== "underline" && s !== "strikeout" && s !== "squiggly") {
     return null
@@ -43,7 +43,7 @@ function toAnnotationObject(row: FoundDbAnnotation): PdfTextMarkupAnnotationObje
 }
 
 interface UseLoadDbAnnotationsArgs {
-  /** Current active documentId. Same UUID as workers.pdfs.id / web.annotations.pdf_id. */
+  /** Current active documentId. Same UUID as core.pdfs.id / web.annotations.pdf_id. */
   documentId: string | null
   /**
    * Fast-path flag from web.pdfs.annotated. When false, the hook skips the
@@ -57,7 +57,7 @@ interface UseLoadDbAnnotationsArgs {
 /**
  * Seeds the AnnotationPlugin with annotations persisted in web.annotations.
  *
- * Intentionally a hook, not a component. The labelling page calls this once
+ * Intentionally a hook, not a component. The labeling page calls this once
  * per mount; whenever `documentId` changes (e.g. user switches PDFs in the
  * sidebar), this re-runs for the new pdf and seeds its annotations.
  *
@@ -94,7 +94,7 @@ export function useLoadDbAnnotations({ documentId, annotated }: UseLoadDbAnnotat
       try {
         const rows = (await getAnnotationsByPdfId({
           data: { pdfId: documentId },
-        })) as FoundDbAnnotation[]
+        })) as DbAnnotation[]
         if (cancelled) return
         const items = rows
           .map(toAnnotationObject)

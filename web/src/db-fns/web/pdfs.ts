@@ -5,29 +5,21 @@ import { z } from "zod"
 import { db } from "@/db/client"
 import { pdfs } from "@/db/schemas/web/pdfs"
 import { users } from "@/db/schemas/web/users"
-
 import {
   requirePdfAccess,
   requirePdfOwnership,
   requireUserId,
-} from "../../lib/authorization.server"
+} from "@/lib/project-authorization.server"
 
 // Stale threshold in seconds. Clients must heartbeat faster than this.
 // 120s window / 30s heartbeat = 4 missed heartbeats before steal.
 const STALE_SECONDS = 120
 
-// Must match LabeledEntitiesMap in @/db/schemas/web/pdfs — Zod is the wire
-// schema, the Drizzle $type is the storage schema. Schema-match test keeps
-// them aligned.
 export const LabeledEntitiesSchema = z.record(z.string(), z.array(z.string()))
 
 // ** CREATE **
 export const CreatePdfSchema = z.object({
   id: z.string(),
-  labeledEntities: LabeledEntitiesSchema.nullable().optional(),
-  annotated: z.boolean().optional(),
-  uploadedBy: z.string().nullable().optional(),
-  firstViewedAt: z.date().nullable().optional(),
   lockedBy: z.string().nullable().optional(),
   lockedAt: z.date().nullable().optional(),
 })
@@ -98,18 +90,7 @@ export const upsertPdfLabels = createServerFn({ method: "POST" })
     }
     await requirePdfOwnership(data.id, userId)
 
-    await db
-      .insert(pdfs)
-      .values({
-        id: data.id,
-        labeledEntities: data.labeledEntities,
-      })
-      .onConflictDoUpdate({
-        target: pdfs.id,
-        set: {
-          labeledEntities: data.labeledEntities,
-        },
-      })
+    await db.insert(pdfs).values({ id: data.id }).onConflictDoNothing({ target: pdfs.id })
     return { success: true }
   })
 
@@ -132,7 +113,7 @@ async function requireAuthorizedPdfUser(pdfId: string, claimedUserId?: string): 
   return userId
 }
 
-export const acquireLabellingLock = createServerFn({ method: "POST" })
+export const acquireLabelingLock = createServerFn({ method: "POST" })
   .inputValidator(AcquireLockSchema)
   .handler(async ({ data }) => {
     const userId = await requireAuthorizedPdfUser(data.pdfId, data.userId)
@@ -194,13 +175,13 @@ export const acquireLabellingLock = createServerFn({ method: "POST" })
   })
 
 // Refresh the lock's timestamp IFF still held by the same user.
-// Client should call every ~30s while the labelling page is open.
+// Client should call every ~30s while the labeling page is open.
 export const HeartbeatLockSchema = z.object({
   pdfId: z.string(),
   userId: z.string().optional(),
 })
 
-export const heartbeatLabellingLock = createServerFn({ method: "POST" })
+export const heartbeatLabelingLock = createServerFn({ method: "POST" })
   .inputValidator(HeartbeatLockSchema)
   .handler(async ({ data }) => {
     const userId = await requireAuthorizedPdfUser(data.pdfId, data.userId)
@@ -219,7 +200,7 @@ export const ReleaseLockSchema = z.object({
   userId: z.string().optional(),
 })
 
-export const releaseLabellingLock = createServerFn({ method: "POST" })
+export const releaseLabelingLock = createServerFn({ method: "POST" })
   .inputValidator(ReleaseLockSchema)
   .handler(async ({ data }) => {
     const userId = await requireAuthorizedPdfUser(data.pdfId, data.userId)
@@ -233,4 +214,4 @@ export const releaseLabellingLock = createServerFn({ method: "POST" })
   })
 
 // Exported for save-path verification — keep single source of truth.
-export const LABELLING_LOCK_STALE_SECONDS = STALE_SECONDS
+export const LABELING_LOCK_STALE_SECONDS = STALE_SECONDS

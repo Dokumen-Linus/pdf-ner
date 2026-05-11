@@ -1,19 +1,42 @@
 import { index, integer, numeric, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
-import { models } from "../public/models"
-import { organizations } from "../web/organizations"
 import { projects } from "../web/projects"
 import { users } from "../web/users"
 
 import { workersSchema } from "./schema"
+
+export const llmUsage = workersSchema.table(
+  "llm_usage",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
+    modelId: text("model_id").notNull(),
+    source: text("source").notNull(),
+    taskName: text("task_name"),
+    inputTokens: integer("input_tokens").notNull().default(0),
+    outputTokens: integer("output_tokens").notNull().default(0),
+    inputCostUsd: numeric("input_cost_usd", { precision: 12, scale: 8 }).notNull().default("0"),
+    outputCostUsd: numeric("output_cost_usd", { precision: 12, scale: 8 }).notNull().default("0"),
+    costUsd: numeric("cost_usd", { precision: 12, scale: 8 }).notNull().default("0"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("llm_usage_project_id_idx").on(t.projectId),
+    index("llm_usage_actor_user_id_idx").on(t.actorUserId),
+    index("llm_usage_created_at_idx").on(t.createdAt),
+  ],
+)
 
 export const billingChargeAttempts = workersSchema.table(
   "billing_charge_attempts",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     accountType: text("account_type").notNull(),
-    userId: uuid("user_id").references(() => users.id),
-    organizationId: text("organization_id").references(() => organizations.id),
+    userId: text("user_id").references(() => users.id),
+    organizationId: text("organization_id"),
     periodStart: timestamp("period_start", { withTimezone: true }).notNull(),
     periodEnd: timestamp("period_end", { withTimezone: true }).notNull(),
     baseAmountCents: integer("base_amount_cents").notNull().default(0),
@@ -35,32 +58,5 @@ export const billingChargeAttempts = workersSchema.table(
     index("billing_charge_attempts_user_id_idx").on(t.userId),
     index("billing_charge_attempts_organization_id_idx").on(t.organizationId),
     index("billing_charge_attempts_status_idx").on(t.status),
-  ],
-)
-
-export const llmUsage = workersSchema.table(
-  "llm_usage",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    projectId: uuid("project_id")
-      .notNull()
-      .references(() => projects.id, { onDelete: "cascade" }),
-    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
-    modelId: text("model_id")
-      .notNull()
-      .references(() => models.id),
-    source: text("source").notNull(),
-    taskName: text("task_name"),
-    inputTokens: integer("input_tokens").notNull().default(0),
-    outputTokens: integer("output_tokens").notNull().default(0),
-    inputCostUsd: numeric("input_cost_usd", { precision: 12, scale: 8 }).notNull().default("0"),
-    outputCostUsd: numeric("output_cost_usd", { precision: 12, scale: 8 }).notNull().default("0"),
-    costUsd: numeric("cost_usd", { precision: 12, scale: 8 }).notNull().default("0"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => [
-    index("llm_usage_project_id_idx").on(t.projectId),
-    index("llm_usage_actor_user_id_idx").on(t.actorUserId),
-    index("llm_usage_created_at_idx").on(t.createdAt),
   ],
 )

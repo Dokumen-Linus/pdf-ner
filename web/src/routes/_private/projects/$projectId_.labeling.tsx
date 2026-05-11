@@ -20,27 +20,27 @@ import {
   CardTitle,
 } from "@/components/shadcn-ui/card"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
+import { getCorePdfsByProjectId } from "@/db-fns/core/pdfs"
 import { saveAnnotationsByPdfId } from "@/db-fns/web/annotations"
 import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
 import {
-  acquireLabellingLock,
+  acquireLabelingLock,
   getPdfById,
-  releaseLabellingLock,
+  releaseLabelingLock,
   upsertPdfLabels,
 } from "@/db-fns/web/pdfs"
 import { getCurrentProjectAccess, getProjectById } from "@/db-fns/web/projects"
-import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
-import { useLabellingLock } from "@/hooks/use-labelling-lock"
+import { useLabelingLock } from "@/hooks/use-labeling-lock"
 
 import type { ErrorComponentProps } from "@tanstack/react-router"
 import type { EntityType } from "@/components/entity-table/entity-type"
-import type { FoundWorkersPdf, LabeledEntitiesMap } from "@/db/types"
+import type { CorePdf, LabeledEntitiesMap } from "@/db/types"
 
-const LabellingSearchSchema = z.object({
+const LabelingSearchSchema = z.object({
   pdfId: z.string().uuid().optional(),
 })
 
-function LabellingSkeleton() {
+function LabelingSkeleton() {
   return (
     <div className="flex h-[calc(100vh-4rem)] w-full gap-4 p-4">
       <Skeleton className="h-full w-64" />
@@ -50,9 +50,13 @@ function LabellingSkeleton() {
   )
 }
 
-export const Route = createFileRoute("/_private/projects/$projectId_/labelling")({
+function filenameFromFilepath(filepath: string): string {
+  return filepath.split("/").filter(Boolean).at(-1) ?? filepath
+}
+
+export const Route = createFileRoute("/_private/projects/$projectId_/labeling")({
   // ssr: false,
-  validateSearch: LabellingSearchSchema,
+  validateSearch: LabelingSearchSchema,
   loaderDeps: ({ search }) => ({ pdfId: search.pdfId }),
   loader: async ({ params, deps, context }) => {
     if (!context.session?.user?.id) {
@@ -61,11 +65,11 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
 
     const [project, pdfsRaw, access, entityTypes] = await Promise.all([
       getProjectById({ data: { id: params.projectId } }),
-      getWorkersPdfsByProjectId({ data: { projectId: params.projectId } }),
+      getCorePdfsByProjectId({ data: { projectId: params.projectId } }),
       getCurrentProjectAccess({ data: { projectId: params.projectId } }),
       getEntityTypesByProjectId({ data: { projectId: params.projectId } }),
     ])
-    const pdfs = pdfsRaw as FoundWorkersPdf[]
+    const pdfs = pdfsRaw as CorePdf[]
 
     if (!access.canLabel) {
       throw new Error("You do not have access to this project")
@@ -91,7 +95,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
       }
     }
 
-    const lockResult = await acquireLabellingLock({
+    const lockResult = await acquireLabelingLock({
       data: { pdfId: activePdfId, userId: access.userId },
     })
 
@@ -112,7 +116,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
       }
     }
 
-    const [{ url }, webPdf] = await Promise.all([
+    const [{ url }] = await Promise.all([
       getPdfPresignedUrl({ data: { pdfId: activePdfId } }),
       getPdfById({ data: { id: activePdfId } }),
     ])
@@ -121,19 +125,19 @@ export const Route = createFileRoute("/_private/projects/$projectId_/labelling")
       project,
       pdfs,
       activePdfId,
-      activePdfAnnotated: webPdf.annotated,
+      activePdfAnnotated: undefined,
       initialUrl: url,
       entityTypes,
       lockState: { locked: false as const },
       userId: access.userId,
     }
   },
-  pendingComponent: LabellingSkeleton,
-  errorComponent: LabellingRouteError,
-  component: LabellingPage,
+  pendingComponent: LabelingSkeleton,
+  errorComponent: LabelingRouteError,
+  component: LabelingPage,
 })
 
-function LabellingPage() {
+function LabelingPage() {
   const router = useRouter()
   const navigate = useNavigate({ from: Route.fullPath })
   const {
@@ -161,7 +165,7 @@ function LabellingPage() {
   )
 
   const weHoldLock = lockState?.locked === false && Boolean(activePdfId)
-  const { isLockLost, markLockLost, resetLockLost } = useLabellingLock({
+  const { isLockLost, markLockLost, resetLockLost } = useLabelingLock({
     pdfId: weHoldLock ? activePdfId : null,
     userId: weHoldLock ? userId : null,
   })
@@ -228,7 +232,7 @@ function LabellingPage() {
     )
     if (valid.length !== annotations.length) {
       console.warn(
-        `[labelling] skipping ${annotations.length - valid.length} annotations with unsupported subtype`,
+        `[labeling] skipping ${annotations.length - valid.length} annotations with unsupported subtype`,
       )
     }
 
@@ -272,7 +276,7 @@ function LabellingPage() {
       setSwitchingTo(nextPdfId)
       try {
         if (activePdfId && weHoldLock) {
-          await releaseLabellingLock({ data: { pdfId: activePdfId, userId } })
+          await releaseLabelingLock({ data: { pdfId: activePdfId, userId } })
         }
         resetLockLost()
         await navigate({ search: { pdfId: nextPdfId } })
@@ -320,7 +324,7 @@ function LabellingPage() {
           })
         } catch (err) {
           prefetchRequestedRef.current.delete(next.id)
-          console.warn("[labelling] failed to prefetch next pdf", err)
+          console.warn("[labeling] failed to prefetch next pdf", err)
         }
       })()
     }
@@ -346,7 +350,7 @@ function LabellingPage() {
           <CardHeader>
             <CardTitle>No PDFs yet</CardTitle>
             <CardDescription>
-              Upload a PDF before labelling entities in this project.
+              Upload a PDF before labeling entities in this project.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -409,7 +413,7 @@ function LabellingPage() {
       <div className="flex items-center justify-between gap-4 border-b px-4 py-2">
         <div className="flex items-center gap-4">
           <h1 className="text-lg font-semibold tracking-tight">{project.name}</h1>
-          <ProjectTabs projectId={projectId} currentStep="labelling" variant="compact" />
+          <ProjectTabs projectId={projectId} currentStep="labeling" variant="compact" />
         </div>
 
         <div className="flex items-center gap-3">
@@ -487,7 +491,7 @@ function SidebarPdfList({
   switchingTo,
   onSwitch,
 }: {
-  pdfs: FoundWorkersPdf[]
+  pdfs: CorePdf[]
   activePdfId: string | null
   switchingTo: string | null
   onSwitch: (pdfId: string) => void
@@ -521,7 +525,7 @@ function SidebarPdfList({
             >
               <FileTextIcon className="mt-0.5 h-4 w-4 shrink-0" />
               <div className="min-w-0 flex-1">
-                <div className="truncate font-medium">{pdf.name ?? "untitled.pdf"}</div>
+                <div className="truncate font-medium">{filenameFromFilepath(pdf.filepath)}</div>
                 <div className="text-muted-foreground text-xs">
                   {pdf.createdAt ? <ClientDate value={pdf.createdAt} /> : "date unknown"}
                 </div>
@@ -534,13 +538,13 @@ function SidebarPdfList({
   )
 }
 
-function LabellingRouteError({ error, reset }: ErrorComponentProps) {
+function LabelingRouteError({ error, reset }: ErrorComponentProps) {
   const router = useRouter()
   const message = error instanceof Error ? error.message : "Unable to open labeller"
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6">
-      <h1 className="text-3xl font-semibold tracking-tight">Labelling</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">Labeling</h1>
       <Card className="border-destructive/40">
         <CardHeader>
           <CardTitle className="text-destructive">Unable to open labeller</CardTitle>

@@ -9,7 +9,9 @@ describe.if(runTests)("User Table Server Functions", () => {
 
   it("should handle the full user lifecycle (CRUD)", async () => {
     // --- CREATE ---
+    const id = crypto.randomUUID()
     const createInput = {
+      id,
       email: testEmail,
       displayName: "Test User",
       firstName: "Test",
@@ -17,6 +19,7 @@ describe.if(runTests)("User Table Server Functions", () => {
     }
     const createOutput = await createUser({ data: createInput })
     expect(createOutput.id).toBeUuid()
+    expect(createOutput.id).toBe(id)
 
     // --- READ (by email) ---
     const userByEmail = await getUserByEmail({ data: { email: testEmail } })
@@ -58,6 +61,7 @@ describe.if(runTests)("User Table Server Functions", () => {
   describe("Validation and Error Handling", () => {
     it("throws error for invalid email format in createUser", async () => {
       const input = {
+        id: crypto.randomUUID(),
         email: "invalid-email",
       }
       await expect(createUser({ data: input })).rejects.toThrow()

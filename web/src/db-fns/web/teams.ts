@@ -7,7 +7,7 @@ import { db } from "@/db/client"
 import { authMembers, authTeamMembers, authTeams } from "@/db/schemas/auth"
 import { webTeams } from "@/db/schemas/web"
 import { auth } from "@/lib/auth"
-import { requireWorkspaceUser } from "@/lib/authorization.server"
+import { requireWorkspaceUser } from "@/lib/project-authorization.server"
 
 const MANAGE_TEAM_ROLE_FILTER = or(
   eq(authMembers.role, "owner"),

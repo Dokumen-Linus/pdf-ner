@@ -21,13 +21,3 @@ export const getAllTemplates = createServerFn({ method: "GET" })
     const templatesList = await db.select().from(templates)
     return templatesList
   })
-
-export const getTemplatesByDocumentAtEnd = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ documentAtEnd: z.boolean() }))
-  .handler(async ({ data }) => {
-    const templatesList = await db
-      .select()
-      .from(templates)
-      .where(eq(templates.documentAtEnd, data.documentAtEnd))
-    return templatesList
-  })

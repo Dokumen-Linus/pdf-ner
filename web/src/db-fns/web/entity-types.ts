@@ -13,15 +13,15 @@ export const CreateEntityTypeSchema = z.object({
   name: z.string(),
   standardEntityTypeId: z.number().optional(),
   userDefinition: z.string().optional(),
-  userExamples: z.array(z.string()).optional(),
+  userExampleValues: z.array(z.string()).optional(),
   userFormatDescription: z.string().optional(),
   datatype: z.string().optional(),
-  singleWord: z.boolean().optional(),
+  regex: z.string().optional(),
   exactLength: z.number().int().optional(),
   unique: z.boolean(),
   required: z.boolean(),
   subtype: z.string().optional(),
-  color: z.string().optional(),
+  color: z.string(),
   opacity: z.number().optional(),
 })
 

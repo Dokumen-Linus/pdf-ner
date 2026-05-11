@@ -3,9 +3,9 @@ import { and, eq, or, sql } from "drizzle-orm"
 
 import { db } from "@/db/client"
 import { authMembers, authTeamMembers, authTeams } from "@/db/schemas/auth"
+import { corePdfs } from "@/db/schemas/core/pdfs"
 import { projects } from "@/db/schemas/web/projects"
 import { users } from "@/db/schemas/web/users"
-import { workersPdfs } from "@/db/schemas/workers/pdfs"
 import { auth } from "@/lib/auth"
 
 const MANAGE_PROJECT_ROLES = new Set(["owner", "admin", "developer"])
@@ -43,14 +43,14 @@ async function resolveWorkspaceUserByAuthUserId(authUserId: string): Promise<Wor
   const [user] = await db
     .select({
       userId: users.id,
-      authUserId: users.authUserId,
+      authUserId: users.id,
       email: users.email,
       accountRole: users.role,
       billingStatus: users.billingStatus,
       stripePaymentMethodId: users.stripePaymentMethodId,
     })
     .from(users)
-    .where(or(eq(users.authUserId, authUserId), sql`${users.id}::text = ${authUserId}`))
+    .where(or(eq(users.id, authUserId), sql`${users.id}::text = ${authUserId}`))
     .limit(1)
 
   if (!user) {
@@ -71,7 +71,7 @@ async function resolveWorkspaceUserByWebUserId(userId: string): Promise<Workspac
   const [user] = await db
     .select({
       userId: users.id,
-      authUserId: users.authUserId,
+      authUserId: users.id,
       email: users.email,
       accountRole: users.role,
       billingStatus: users.billingStatus,
@@ -116,16 +116,16 @@ async function getProjectAccessContextForUser(
   const [row] = await db
     .select({
       projectId: projects.id,
-      ownerId: projects.ownerId,
-      ownerAuthUserId: users.authUserId,
-      teamId: projects.teamId,
+      ownerId: projects.ownerUserId,
+      ownerAuthUserId: users.id,
+      teamId: projects.ownerTeamId,
       organizationId: authTeams.organizationId,
       organizationRole: authMembers.role,
       teamMemberId: authTeamMembers.id,
     })
     .from(projects)
-    .leftJoin(users, eq(users.id, projects.ownerId))
-    .leftJoin(authTeams, eq(authTeams.id, projects.teamId))
+    .leftJoin(users, eq(users.id, projects.ownerUserId))
+    .leftJoin(authTeams, eq(authTeams.id, projects.ownerTeamId))
     .leftJoin(
       authMembers,
       and(
@@ -135,7 +135,10 @@ async function getProjectAccessContextForUser(
     )
     .leftJoin(
       authTeamMembers,
-      and(eq(authTeamMembers.teamId, projects.teamId), eq(authTeamMembers.userId, user.authUserId)),
+      and(
+        eq(authTeamMembers.teamId, projects.ownerTeamId),
+        eq(authTeamMembers.userId, user.authUserId),
+      ),
     )
     .where(eq(projects.id, projectId))
     .limit(1)
@@ -202,9 +205,9 @@ async function requirePdfAccessForUser(
   mode: ProjectAccessMode,
 ) {
   const [row] = await db
-    .select({ projectId: workersPdfs.projectId })
-    .from(workersPdfs)
-    .where(eq(workersPdfs.id, pdfId))
+    .select({ projectId: corePdfs.projectId })
+    .from(corePdfs)
+    .where(eq(corePdfs.id, pdfId))
     .limit(1)
 
   if (!row) {

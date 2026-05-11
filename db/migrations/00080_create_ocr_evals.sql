@@ -1,9 +1,9 @@
 -- migrate:up
 CREATE TABLE workers.ocr_evaluation_runs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES web.projects (id) ON DELETE CASCADE,
   status TEXT NOT NULL CHECK (status IN ('running', 'succeeded', 'failed')),
-  judge_model TEXT NOT NULL REFERENCES public.models (id),
+  judge_model TEXT NOT NULL REFERENCES public.chat_models (id),
   max_pdfs INT NOT NULL,
   max_pages_per_pdf INT NOT NULL,
   sampled_pdf_count INT NOT NULL DEFAULT 0,
@@ -21,9 +21,9 @@ CREATE TABLE workers.ocr_evaluation_runs (
 );
 
 CREATE TABLE workers.ocr_evaluation_pages (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   run_id UUID NOT NULL REFERENCES workers.ocr_evaluation_runs (id) ON DELETE CASCADE,
-  pdf_id UUID NOT NULL REFERENCES workers.pdfs (id) ON DELETE CASCADE,
+  pdf_id UUID NOT NULL REFERENCES core.pdfs (id) ON DELETE CASCADE,
   page_index INT NOT NULL,
   pdfium_excerpt TEXT,
   tesseract_excerpt TEXT,

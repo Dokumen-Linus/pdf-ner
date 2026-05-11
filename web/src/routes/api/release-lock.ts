@@ -1,15 +1,15 @@
-// Release-lock beacon endpoint. The labelling page uses `navigator.sendBeacon`
+// Release-lock beacon endpoint. The labeling page uses `navigator.sendBeacon`
 // on tab-close to release its editing lock — a regular server-function call
 // would be cancelled by navigation. sendBeacon fires-and-forgets a POST, so
-// we accept it here and forward to the same releaseLabellingLock db-fn the
+// we accept it here and forward to the same releaseLabelingLock db-fn the
 // rest of the app uses.
 //
 // Best-effort: the server-side 2-minute stale expiry is the real backstop.
 
 import { createFileRoute } from "@tanstack/react-router"
 
-import { releaseLabellingLock } from "@/db-fns/web/pdfs"
-import { requireUserId } from "@/lib/authorization.server"
+import { releaseLabelingLock } from "@/db-fns/web/pdfs"
+import { requireUserId } from "@/lib/project-authorization.server"
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -27,7 +27,7 @@ export async function releaseLockHandler({ request }: { request: Request }): Pro
       return Response.json({ detail: "Cannot release another user's lock" }, { status: 403 })
     }
 
-    const result = await releaseLabellingLock({
+    const result = await releaseLabelingLock({
       data: { pdfId: body.pdfId, userId: callerId },
     })
     return Response.json(result, { status: 200 })

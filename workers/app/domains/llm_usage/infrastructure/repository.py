@@ -16,14 +16,14 @@ async def fetch_model_costs(
     row = await conn.fetchrow(
         """
         SELECT usd_per_1m_input, usd_per_1m_output
-        FROM public.models
+        FROM public.chat_models
         WHERE id = $1
           AND (end_available_date IS NULL OR end_available_date > now())
         """,
         model,
     )
     if not row:
-        logger.warning("Model not found in public.models: %s - cost recorded as 0", model)
+        logger.warning("Model not found in public.chat_models: %s - cost recorded as 0", model)
         return Decimal("0"), Decimal("0")
 
     input_cost = (input_tokens * float(row["usd_per_1m_input"])) / 1_000_000
@@ -38,7 +38,7 @@ async def record_llm_usage(
     input_tokens: int,
     output_tokens: int,
     project_id: UUID,
-    actor_user_id: UUID | None = None,
+    actor_user_id: str | None = None,
     task_name: str | None = None,
 ) -> Decimal:
     input_cost, output_cost = await fetch_model_costs(conn, model, input_tokens, output_tokens)

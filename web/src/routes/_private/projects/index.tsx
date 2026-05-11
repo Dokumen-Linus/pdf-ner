@@ -29,7 +29,7 @@ import { getCurrentUserTeamsByOrganizationId } from "@/db-fns/web/teams"
 import { getUserByAuthUserId } from "@/db-fns/web/users"
 import { m } from "@/integrations/paraglide/messages.js"
 
-import type { FoundProject } from "@/db/types"
+import type { Project } from "@/db/types"
 
 type ProjectUser = Awaited<ReturnType<typeof getUserByAuthUserId>>
 type ProjectOrganization = Awaited<ReturnType<typeof getCurrentUserOrganization>>
@@ -67,7 +67,7 @@ export const Route = createFileRoute("/_private/projects/")({
           organization: null as ProjectOrganization,
           teams: [] as ProjectTeam[],
           selectedTeamId: null as string | null,
-          projects: [] as FoundProject[],
+          projects: [] as Project[],
           loadError: "No authenticated session was found.",
         }
       }
@@ -90,10 +90,10 @@ export const Route = createFileRoute("/_private/projects/")({
           : null
 
       const projects = selectedTeamId
-        ? ((await getProjectsByTeamId({ data: { teamId: selectedTeamId } })) as FoundProject[])
+        ? ((await getProjectsByTeamId({ data: { teamId: selectedTeamId } })) as Project[])
         : organization
-          ? ([] as FoundProject[])
-          : ((await getProjectsByOwnerId({ data: { ownerId: user.id } })) as FoundProject[])
+          ? ([] as Project[])
+          : ((await getProjectsByOwnerId({ data: { ownerId: user.id } })) as Project[])
 
       return {
         user,
@@ -110,7 +110,7 @@ export const Route = createFileRoute("/_private/projects/")({
         organization: null as ProjectOrganization,
         teams: [] as ProjectTeam[],
         selectedTeamId: null as string | null,
-        projects: [] as FoundProject[],
+        projects: [] as Project[],
         loadError: "We couldn't load your projects right now. Please try again.",
       }
     }
@@ -170,7 +170,7 @@ function ProjectsPage() {
         data: {
           name: trimmedName,
           description: trimmedDescription || undefined,
-          teamId: selectedTeamId ?? undefined,
+          ownerTeamId: selectedTeamId ?? undefined,
         },
       })
       setProjectName("")
@@ -311,7 +311,7 @@ function ProjectsPage() {
         </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project: FoundProject) => (
+          {projects.map((project: Project) => (
             <Card key={project.id} className="flex h-full min-h-50 flex-col">
               <CardHeader>
                 <CardTitle className="line-clamp-1" title={project.name}>

@@ -98,6 +98,8 @@ async def create_bucket(conn: asyncpg.Connection, request: CreateBucketRequest) 
             request.name,
             request.region,
             request.endpoint_url,
+            request.owner_user_id,
+            request.owner_org_id,
         )
     except asyncpg.UniqueViolationError as e:
         raise HTTPException(
@@ -164,7 +166,7 @@ def _build_s3_client(bucket: asyncpg.Record):
 _PRESIGNED_URL_TTL_SECONDS = 3600  # 1 hour — balances cache-friendliness with security
 
 
-async def generate_pdf_get_url(conn: asyncpg.Connection, pdf_id: UUID, user_id: UUID) -> dict:
+async def generate_pdf_get_url(conn: asyncpg.Connection, pdf_id: UUID, user_id: str) -> dict:
     """Return a time-limited S3 GET URL the browser can fetch directly.
 
     Credentials never leave the API tier. The AWS SDK resolves them from the
@@ -173,13 +175,15 @@ async def generate_pdf_get_url(conn: asyncpg.Connection, pdf_id: UUID, user_id: 
     pdf = await repository.fetch_pdf_by_id(conn, pdf_id)
     if pdf is None:
         raise HTTPException(status_code=404, detail="PDF not found")
-    if pdf["owner_id"] != user_id:
+    try:
+        owner_user_id = pdf["owner_user_id"]
+    except KeyError:
+        owner_user_id = str(pdf["owner_id"])
+    if owner_user_id != user_id:
         raise HTTPException(status_code=403, detail="You do not have access to this PDF")
 
     bucket = await fetch_bucket_by_id(conn, pdf["bucket_id"])
     if bucket is None:
-        # Orphaned PDF row — workers.pdfs.bucket_id references api.aws_buckets
-        # without an FK (cross-schema), so this can theoretically happen.
         raise HTTPException(status_code=500, detail="PDF bucket missing")
 
     s3 = _build_s3_client(bucket)
@@ -209,6 +213,7 @@ async def upload_pdf_stream(
     project_id: UUID,
     filename: str,
     request: Request,
+    uploaded_by_user_id: str | None = None,
 ) -> dict:
     """Stream the request body into S3 using multipart upload.
 
@@ -224,7 +229,7 @@ async def upload_pdf_stream(
     filepath = f"{project_id}/{uuid4()}/{safe_name}"
 
     # Insert DB rows first so a successful S3 upload never lacks a matching row.
-    pdf_id = await repository.insert_pdf(conn, project_id, bucket_id, filepath, safe_name)
+    pdf_id = await repository.insert_pdf(conn, project_id, filepath, uploaded_by_user_id)
 
     s3 = _build_s3_client(bucket)
     bucket_name = bucket["name"]

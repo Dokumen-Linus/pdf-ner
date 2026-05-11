@@ -20,7 +20,7 @@ import { cn } from "@/lib/shadcn-ui/utils"
 const STEP_DESCRIPTIONS: Record<string, string> = {
   documents: "Upload PDFs and manage the document set for this project.",
   entity_types: "Define project settings and the entity types to extract.",
-  labelling: "Review each PDF and tag entity spans to build ground truth.",
+  labeling: "Review each PDF and tag entity spans to build ground truth.",
   engineering: "Optimize prompts and run NER experiments against labelled data.",
   checking: "Verify extracted entities and reconcile disagreements.",
   dashboard: "Review project stats, annotation breakdowns, and progress.",

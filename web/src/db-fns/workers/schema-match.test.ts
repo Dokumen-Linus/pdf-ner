@@ -2,22 +2,20 @@ import { describe, expect, it } from "bun:test"
 
 import type {
   BillingChargeAttempt,
-  FoundContextEngPred,
-  FoundOptimizedPrompt,
-  FoundOptimizedPromptExample,
-  FoundPromptEvaluation,
-  FoundWorkersPdf,
+  ContextEngineeringIteration,
+  ContextEngineeringRun,
+  CorePdf,
   LlmUsage,
+  NerRun,
+  NerWorkflow,
+  OcrEvaluationRun,
+  PdfTxt,
+  PromptExample,
+  Watcher,
 } from "../../db/types"
 
 /**
  * Compile-time shape checks for workers schema Drizzle types.
- *
- * Since workers tables are read-only from web, there are no Zod create/update schemas to match.
- * Instead, these tests verify that the Drizzle InferSelectModel types have the expected
- * fields — catching regressions if the Drizzle schema diverges from the SQL.
- *
- * If these tests fail to compile, the Drizzle workers schema does not match the SQL definition.
  */
 describe("Workers Drizzle Schema Shape Checks", () => {
   it("LlmUsage should have expected workers.llm_usage fields", () => {
@@ -53,83 +51,114 @@ describe("Workers Drizzle Schema Shape Checks", () => {
     expect(true).toBe(true)
   })
 
-  it("FoundWorkersPdf should have expected workers.pdfs fields", () => {
+  it("CorePdf should have expected core.pdfs fields", () => {
     type Expected = {
       id: string
-      name: string | null
-      bucketId: string
-      filepath: string
       projectId: string
-      fullText: string | null
-      extractMethod: string | null
-      modelType: string | null
-      model: string | null
-      promptId: string | null
-      optimizedPromptId: string | null
+      filepath: string
+      hasLabels: boolean
+      sourceType: string
+      uploadedByUserId: string | null
     }
-    const _: Expected = {} as FoundWorkersPdf
+    const _: Expected = {} as CorePdf
     expect(true).toBe(true)
   })
 
-  it("FoundPromptEvaluation should have expected final metric fields", () => {
+  it("PdfTxt should have expected workers.pdf_txts fields", () => {
+    type Expected = {
+      id: string
+      pdfId: string
+      ocrMethod: string
+      createdByDomain: string
+      txt: string
+    }
+    const _: Expected = {} as PdfTxt
+    expect(true).toBe(true)
+  })
+
+  it("Watcher should have expected workers.watchers fields", () => {
+    type Expected = {
+      id: string
+      pdfSourceId: string
+      pollIntervalSeconds: number
+      failureCount: number
+    }
+    const _: Expected = {} as Watcher
+    expect(true).toBe(true)
+  })
+
+  it("NerWorkflow should have expected workers.ner_workflows fields", () => {
+    type Expected = {
+      id: string
+      projectId: string
+      watcherId: string | null
+      listenerId: string | null
+    }
+    const _: Expected = {} as NerWorkflow
+    expect(true).toBe(true)
+  })
+
+  it("ContextEngineeringRun should have expected workers.context_engineering_runs fields", () => {
+    type Expected = {
+      id: string
+      projectId: string
+      beta: number
+      maxUsd: number
+      accumulatedUsd: number
+      bestOverallF: number | null
+      stopReason: string | null
+      labeledPdfs: string[]
+    }
+    const _: Expected = {} as ContextEngineeringRun
+    expect(true).toBe(true)
+  })
+
+  it("ContextEngineeringIteration should have expected context_engineering_iterations fields", () => {
+    type Expected = {
+      id: string
+      contextEngRunId: string
+      promptId: string
+      overallF: number
+    }
+    const _: Expected = {} as ContextEngineeringIteration
+    expect(true).toBe(true)
+  })
+
+  it("PromptExample should have expected workers.prompt_examples fields", () => {
     type Expected = {
       id: string
       promptId: string
-      overallF1: number
-      perEntityScores: Record<string, unknown>
-      modelId: string | null
-      labeledPdfCount: number | null
-      evaluatedPdfCount: number | null
-      skippedPdfCount: number | null
-      pdfsFullyCorrect: number | null
-      pdfAccuracy: number | null
-      entityTypeMetrics: Record<string, unknown> | null
-      llmCallCount: number | null
-      costUsd: string | null
-      iterationsRun: number | null
-      stopReason: string | null
-      createdAt: Date | null
+      pdfId: string
+      entityTypeId: string
+      exampleIdx: number
     }
-    const _: Expected = {} as FoundPromptEvaluation
+    const _: Expected = {} as PromptExample
     expect(true).toBe(true)
   })
 
-  it("FoundOptimizedPrompt should have expected provenance fields", () => {
+  it("NerRun should have expected workers.ner_runs fields", () => {
     type Expected = {
       id: string
       projectId: string
-      templateId: number
-      fullText: string
-      createdAt: Date | null
+      promptId: string
+      nerWorkflowId: string | null
+      contextEngIterId: string | null
+      modelEvalIterId: string | null
     }
-    const _: Expected = {} as FoundOptimizedPrompt
+    const _: Expected = {} as NerRun
     expect(true).toBe(true)
   })
 
-  it("FoundOptimizedPromptExample should have expected example snapshot fields", () => {
+  it("OcrEvaluationRun should have expected workers.ocr_evaluation_runs fields", () => {
     type Expected = {
-      id: number
-      optimizedPromptId: string
-      pdfId: string
-      exampleOrder: number
-      textExcerpt: string
-      labelledEntities: Record<string, unknown>
-      createdAt: Date | null
+      id: string
+      projectId: string
+      status: string
+      judgeModel: string
+      maxPdfs: number
+      maxPagesPerPdf: number
     }
-    const _: Expected = {} as FoundOptimizedPromptExample
-    expect(true).toBe(true)
-  })
-
-  it("FoundContextEngPred should have expected workers.context_eng_preds fields", () => {
-    type Expected = {
-      id: number
-      promptEvaluationId: string
-      pdfId: string
-      entityTypeId: string
-      labelledValue: string | null
-      predictedValue: string | null
-    }
-    const _: Expected = {} as FoundContextEngPred
+    const _: Expected = {} as OcrEvaluationRun
     expect(true).toBe(true)
   })
 })

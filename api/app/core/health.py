@@ -4,7 +4,7 @@ import asyncpg
 
 API_TABLES = (
     "api.aws_buckets",
-    "api.prompts",
+    "core.prompts",
 )
 
 

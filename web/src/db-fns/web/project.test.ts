@@ -53,8 +53,8 @@ describe.if(runTests)("Project Table Server Functions", () => {
 
     const createdById = await getProjectById({ data: { id: created.id } })
     expect(createdById.id).toBe(created.id)
-    expect(createdById.ownerId).toBe(user.webUserId)
-    expect(createdById.teamId).toBeNull()
+    expect(createdById.ownerUserId).toBe(user.webUserId)
+    expect(createdById.ownerTeamId).toBeNull()
     expect(createdById.bucketId).toBeUuid()
     expect(createdById.orientation).toBe("portrait")
 
@@ -106,8 +106,8 @@ describe.if(runTests)("Project Table Server Functions", () => {
     tracker.projectIds.push(created.id)
 
     const project = await getProjectById({ data: { id: created.id } })
-    expect(project.ownerId).toBe(user.webUserId)
-    expect(project.teamId).toBe(teamId)
+    expect(project.ownerUserId).toBe(user.webUserId)
+    expect(project.ownerTeamId).toBe(teamId)
   })
 
   it("reuses buckets within the same personal workspace", async () => {
@@ -122,8 +122,8 @@ describe.if(runTests)("Project Table Server Functions", () => {
     const firstProject = await getProjectById({ data: { id: first.id } })
     const secondProject = await getProjectById({ data: { id: second.id } })
 
-    expect(firstProject.teamId).toBeNull()
-    expect(secondProject.teamId).toBeNull()
+    expect(firstProject.ownerTeamId).toBeNull()
+    expect(secondProject.ownerTeamId).toBeNull()
     expect(secondProject.bucketId).toBe(firstProject.bucketId)
   })
 
@@ -140,15 +140,15 @@ describe.if(runTests)("Project Table Server Functions", () => {
     await seedTeamMember(tracker, { teamId, authUserId: user.authUserId })
     authenticateAs(user)
 
-    const first = await createProject({ data: { name: `${label}-one`, teamId } })
-    const second = await createProject({ data: { name: `${label}-two`, teamId } })
+    const first = await createProject({ data: { name: `${label}-one`, ownerTeamId: teamId } })
+    const second = await createProject({ data: { name: `${label}-two`, ownerTeamId: teamId } })
     tracker.projectIds.push(first.id, second.id)
 
     const firstProject = await getProjectById({ data: { id: first.id } })
     const secondProject = await getProjectById({ data: { id: second.id } })
 
-    expect(firstProject.teamId).toBe(teamId)
-    expect(secondProject.teamId).toBe(teamId)
+    expect(firstProject.ownerTeamId).toBe(teamId)
+    expect(secondProject.ownerTeamId).toBe(teamId)
     expect(secondProject.bucketId).toBe(firstProject.bucketId)
   })
 
@@ -170,7 +170,7 @@ describe.if(runTests)("Project Table Server Functions", () => {
       createProject({
         data: {
           name: `${label}-created`,
-          teamId,
+          ownerTeamId: teamId,
         },
       }),
     ).rejects.toThrow("You do not have access to this team")
@@ -208,8 +208,8 @@ describe.if(runTests)("Project Table Server Functions", () => {
     await seedTeamMember(tracker, { teamId, authUserId: owner.authUserId })
     await seedTeamMember(tracker, { teamId, authUserId: analyst.authUserId })
     const seededProject = await seedProject(tracker, {
-      ownerId: owner.webUserId,
-      teamId,
+      ownerUserId: owner.webUserId,
+      ownerTeamId: teamId,
       name: `${label}-seeded`,
       bucketId: crypto.randomUUID(),
     })
@@ -276,19 +276,19 @@ describe.if(runTests)("Project Table Server Functions", () => {
     await seedTeamMember(tracker, { teamId: otherTeamId, authUserId: outsider.authUserId })
 
     const personalProject = await seedProject(tracker, {
-      ownerId: actor.webUserId,
+      ownerUserId: actor.webUserId,
       name: `${label}-personal`,
       bucketId: crypto.randomUUID(),
     })
     const teamProject = await seedProject(tracker, {
-      ownerId: teammate.webUserId,
-      teamId,
+      ownerUserId: teammate.webUserId,
+      ownerTeamId: teamId,
       name: `${label}-team`,
       bucketId: crypto.randomUUID(),
     })
     await seedProject(tracker, {
-      ownerId: outsider.webUserId,
-      teamId: otherTeamId,
+      ownerUserId: outsider.webUserId,
+      ownerTeamId: otherTeamId,
       name: `${label}-hidden`,
       bucketId: crypto.randomUUID(),
     })

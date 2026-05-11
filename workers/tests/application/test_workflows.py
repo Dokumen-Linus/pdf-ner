@@ -417,7 +417,7 @@ class TestPromptOptimizationWorkflow:
         assert result["stop_reason"] == "no_errors"
         assert result["best_prompt_id"] == str(PROMPT_ID)
         assert result["llm_call_count"] == 7
-        assert conn.fetchval.call_count == 2
+        assert conn.fetchval.call_count == 6
         assert conn.executemany.await_count == 2
 
     @pytest.mark.anyio

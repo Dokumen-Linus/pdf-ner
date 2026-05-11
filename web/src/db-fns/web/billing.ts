@@ -286,7 +286,6 @@ export const upgradeIndividualToOrganization = createServerFn({ method: "POST" }
       })
       await tx.insert(organizations).values({
         id: organizationId,
-        nUsers: 1,
         billingStartedAt: user.billingStartedAt,
         nextPaymentAt: user.nextPaymentAt,
         lastPaymentAt: user.lastPaymentAt,
@@ -299,8 +298,8 @@ export const upgradeIndividualToOrganization = createServerFn({ method: "POST" }
       await tx.insert(webTeams).values({ id: teamId, organizationId, createdAt })
       await tx
         .update(projects)
-        .set({ teamId, updatedAt: createdAt })
-        .where(and(eq(projects.ownerId, user.id), isNull(projects.teamId)))
+        .set({ ownerTeamId: teamId, updatedAt: createdAt })
+        .where(and(eq(projects.ownerUserId, user.id), isNull(projects.ownerTeamId)))
       await tx
         .update(users)
         .set({

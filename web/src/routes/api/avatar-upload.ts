@@ -7,7 +7,7 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import { streamProxy } from "@/api-fns/api-stream-proxy.server"
 import { updateUser } from "@/db-fns/web/users"
-import { requireUserId } from "@/lib/authorization.server"
+import { requireUserId } from "@/lib/project-authorization.server"
 
 const MAX_BYTES = 2 * 1024 * 1024 // 2 MB
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"])

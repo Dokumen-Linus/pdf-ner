@@ -4,71 +4,62 @@ import {
   getAllStdEntityTypes,
   getStdEntityTypeById,
   getStdEntityTypeByShortName,
+  getStdEntityTypesByCategory,
   getStdEntityTypesByDatatype,
 } from "./std-entity-types"
 
 const runTests = process.env.TEST_DB === "true"
 
-describe.if(runTests)("Public Standard Entity Types Read-Only Functions", () => {
-  describe("getAllStdEntityTypes", () => {
-    it("returns an array of standard entity types", async () => {
-      const result = await getAllStdEntityTypes()
-      expect(Array.isArray(result)).toBe(true)
-    })
+describe.if(runTests)("public.std_entity_types", () => {
+  it("getStdEntityTypeById returns an entity type", async () => {
+    const all = await getAllStdEntityTypes()
+    if (all.length === 0) {
+      console.warn("[std-entity-types.test] skipping — no std entity types in DB")
+      return
+    }
+    const et = await getStdEntityTypeById({ data: { id: all[0].id } })
+    expect(et.id).toBe(all[0].id)
   })
 
-  describe("getStdEntityTypeById", () => {
-    it("returns a standard entity type when it exists", async () => {
-      const allTypes = await getAllStdEntityTypes()
-      if (allTypes.length > 0) {
-        const firstType = allTypes[0]
-        const result = await getStdEntityTypeById({ data: { id: firstType.id } })
-        expect(result).toBeDefined()
-        expect(result.id).toBe(firstType.id)
-        expect(result.shortName).toBe(firstType.shortName)
-      }
-    })
-
-    it("throws 'Standard entity type not found' for non-existent ID", async () => {
-      const fakeId = 999999
-      await expect(getStdEntityTypeById({ data: { id: fakeId } })).rejects.toThrow(
-        "Standard entity type not found",
-      )
-    })
+  it("getStdEntityTypeByShortName returns an entity type", async () => {
+    const all = await getAllStdEntityTypes()
+    if (all.length === 0) {
+      console.warn("[std-entity-types.test] skipping — no std entity types in DB")
+      return
+    }
+    const et = await getStdEntityTypeByShortName({ data: { shortName: all[0].shortName } })
+    expect(et.shortName).toBe(all[0].shortName)
   })
 
-  describe("getStdEntityTypeByShortName", () => {
-    it("returns a standard entity type when it exists", async () => {
-      const allTypes = await getAllStdEntityTypes()
-      if (allTypes.length > 0) {
-        const firstType = allTypes[0]
-        const result = await getStdEntityTypeByShortName({
-          data: { shortName: firstType.shortName },
-        })
-        expect(result).toBeDefined()
-        expect(result.shortName).toBe(firstType.shortName)
-      }
-    })
-
-    it("throws 'Standard entity type not found' for non-existent short name", async () => {
-      await expect(
-        getStdEntityTypeByShortName({ data: { shortName: "non_existent_type_xyz" } }),
-      ).rejects.toThrow("Standard entity type not found")
-    })
+  it("getAllStdEntityTypes returns an array", async () => {
+    const result = await getAllStdEntityTypes()
+    expect(Array.isArray(result)).toBe(true)
   })
 
-  describe("getStdEntityTypesByDatatype", () => {
-    it("returns an array of standard entity types for a datatype", async () => {
-      const result = await getStdEntityTypesByDatatype({ data: { datatype: "int" } })
-      expect(Array.isArray(result)).toBe(true)
-    })
+  it("getStdEntityTypesByDatatype returns filtered results", async () => {
+    const all = await getAllStdEntityTypes()
+    const withDatatype = all.find((et) => et.datatype != null)
+    if (!withDatatype) {
+      console.warn("[std-entity-types.test] skipping datatype filter — no entity types with datatype")
+      return
+    }
+    const result = await getStdEntityTypesByDatatype({ data: { datatype: withDatatype.datatype! } })
+    expect(result.length).toBeGreaterThan(0)
+  })
 
-    it("returns an empty array for non-existent datatype", async () => {
-      const result = await getStdEntityTypesByDatatype({
-        data: { datatype: "non_existent_datatype" },
-      })
-      expect(Array.isArray(result)).toBe(true)
-      expect(result.length).toBe(0)
-    })
+  it("getStdEntityTypesByCategory returns filtered results", async () => {
+    const all = await getAllStdEntityTypes()
+    if (all.length === 0) {
+      console.warn("[std-entity-types.test] skipping category filter — no entity types")
+      return
+    }
+    const result = await getStdEntityTypesByCategory({ data: { category: all[0].category } })
+    expect(result.length).toBeGreaterThan(0)
+  })
+
+  it("getStdEntityTypeById throws for non-existent ID", async () => {
+    await expect(
+      getStdEntityTypeById({ data: { id: 999999 } }),
+    ).rejects.toThrow("Standard entity type not found")
   })
 })

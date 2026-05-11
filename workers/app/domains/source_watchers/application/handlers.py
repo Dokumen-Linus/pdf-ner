@@ -37,16 +37,14 @@ async def handle_poll_source_connection(cmd: PollSourceConnection) -> dict:
 
             cursor_before = await repo.fetch_cursor(conn, cmd.connection_id)
             run_id = await repo.insert_watch_run(conn, cmd.connection_id, cursor_before)
+            connection["watcher_run_id"] = run_id
             try:
                 watcher = provider_registry.build_registry(conn).resolve(connection["provider"])
                 result = await watcher.discover(dict(connection), cursor_before)
                 enqueued_count = 0
                 for document in result.documents:
                     if document.materialized is not None and document.materialized.is_new:
-                        args = extraction_task_args(
-                            document.materialized.document_source_id,
-                            connection["optimized_prompt_id"],
-                        )
+                        args = extraction_task_args(document.materialized.source_id)
                         process_document_source_task.delay(*args)
                         enqueued_count += 1
                 await repo.complete_watch_run(

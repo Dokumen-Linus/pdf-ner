@@ -41,11 +41,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/shadcn-ui/table"
+import { getCorePdfsWithLatestTxtByProjectId } from "@/db-fns/core/pdfs"
 import { getCurrentProjectAccess, getProjectById } from "@/db-fns/web/projects"
-import { getWorkersPdfsByProjectId } from "@/db-fns/workers/pdfs"
 import { m } from "@/integrations/paraglide/messages.js"
-
-import type { FoundWorkersPdf } from "@/db/types"
 
 function DocumentsSkeleton() {
   return (
@@ -66,6 +64,10 @@ function DocumentsSkeleton() {
   )
 }
 
+function filenameFromFilepath(filepath: string): string {
+  return filepath.split("/").filter(Boolean).at(-1) ?? filepath
+}
+
 export const Route = createFileRoute("/_private/projects/$projectId_/documents")({
   loader: async ({ params, context }) => {
     try {
@@ -77,16 +79,16 @@ export const Route = createFileRoute("/_private/projects/$projectId_/documents")
       const [project, access, rawPdfs] = await Promise.all([
         getProjectById({ data: { id: params.projectId } }),
         getCurrentProjectAccess({ data: { projectId: params.projectId } }),
-        getWorkersPdfsByProjectId({
+        getCorePdfsWithLatestTxtByProjectId({
           data: { projectId: params.projectId },
         }),
       ])
 
-      const mappedPdfs = (rawPdfs as FoundWorkersPdf[]).map((pdf) => ({
+      const mappedPdfs = rawPdfs.map((pdf) => ({
         id: pdf.id,
-        name: pdf.name,
-        extractMethod: pdf.extractMethod,
-        isProcessed: !!pdf.fullText || !!pdf.predictedEntities,
+        name: filenameFromFilepath(pdf.filepath),
+        extractMethod: pdf.latestTxt?.ocrMethod ?? null,
+        isProcessed: Boolean(pdf.latestTxt?.txt) || pdf.hasLabels,
         createdAt: pdf.createdAt,
       }))
 
@@ -395,7 +397,7 @@ function DocumentsPage() {
                         >
                           <TableCell className="px-6 py-4 font-medium">
                             <Link
-                              to="/projects/$projectId/labelling"
+                              to="/projects/$projectId/labeling"
                               params={{ projectId }}
                               search={{ pdfId: pdf.id }}
                               className="hover:underline"

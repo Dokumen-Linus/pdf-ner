@@ -27,8 +27,8 @@ from .schemas import (
 )
 
 OCR_EXTRACT_METHODS = {
-    "deepseek-ocr": "deepseek",
-    "olm-ocr2": "olm",
+    "deepseek-ocr": "deepseek-ocr",
+    "olm-ocr2": "olm-ocr2",
 }
 
 

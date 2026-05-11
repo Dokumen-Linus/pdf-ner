@@ -17,7 +17,7 @@ async def handle_process_document_source(
     cmd: ProcessDocumentSource,
     task: Any | None = None,
 ) -> dict:
-    async with RedisLock(f"ner_workflows:{cmd.document_source_id}", ttl=1800) as lock:
+    async with RedisLock(f"ner_workflows:{cmd.source_id}", ttl=1800) as lock:
         if not lock.acquired:
             return {"status": "skipped", "reason": "locked"}
 

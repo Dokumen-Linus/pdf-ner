@@ -1,38 +1,38 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { CheckIcon } from "lucide-react"
 
-import { getAllModels } from "@/db-fns/public/models"
+import { getAllChatModels } from "@/db-fns/public/models"
 import { m } from "@/integrations/paraglide/messages.js"
 
-import type { FoundModel } from "@/db/types"
+import type { ChatModel } from "@/db/types"
 
-type ProviderSlug = "anthropic" | "openai" | "gemini"
+type ProviderHost = "Anthropic" | "OpenAI" | "Google"
 
 type ProviderDisplay = {
-  slug: ProviderSlug
+  host: ProviderHost
   name: string
   color: string
   bg: string
   border: string
 }
 
-const PROVIDER_DISPLAY: Record<ProviderSlug, ProviderDisplay> = {
-  anthropic: {
-    slug: "anthropic",
+const PROVIDER_DISPLAY: Record<ProviderHost, ProviderDisplay> = {
+  Anthropic: {
+    host: "Anthropic",
     name: "Anthropic",
     color: "text-purple-700",
     bg: "bg-purple-50",
     border: "border-purple-200",
   },
-  openai: {
-    slug: "openai",
+  OpenAI: {
+    host: "OpenAI",
     name: "OpenAI",
     color: "text-green-700",
     bg: "bg-green-50",
     border: "border-green-200",
   },
-  gemini: {
-    slug: "gemini",
+  Google: {
+    host: "Google",
     name: "Gemini",
     color: "text-blue-700",
     bg: "bg-blue-50",
@@ -40,11 +40,10 @@ const PROVIDER_DISPLAY: Record<ProviderSlug, ProviderDisplay> = {
   },
 }
 
-// The three values above mirror the CHECK constraint on public.models.provider
-// (db/migrations/00005_create_models.sql). Unknown providers are filtered out.
-const PROVIDER_ORDER: ProviderSlug[] = ["anthropic", "openai", "gemini"]
+// Mirrors the public.chat_models.host CHECK constraint. Unknown hosts are filtered out.
+const PROVIDER_ORDER: ProviderHost[] = ["Anthropic", "OpenAI", "Google"]
 
-// Price comes back from Drizzle `numeric(10,4)` as a string like "15.0000".
+// Price comes back from Drizzle `numeric(8,4)` as a string like "15.0000".
 // Format to 2 decimals for display. Keep the raw string as source of truth.
 function formatUsd(raw: string): string {
   const n = Number(raw)
@@ -52,46 +51,34 @@ function formatUsd(raw: string): string {
   return `$${n.toFixed(2)}`
 }
 
-// public.models has no display-name column. Humanize the id for now; if we
-// want branded labels later, add a `display_name` column and migrate.
-function humanizeModelId(id: string): string {
-  return id
-    .split("-")
-    .map((part) => {
-      if (/^\d/.test(part)) return part // leave version tokens like "4o", "2.0"
-      return part.charAt(0).toUpperCase() + part.slice(1)
-    })
-    .join(" ")
-}
-
-function isAvailable(model: FoundModel, now: Date): boolean {
+function isAvailable(model: ChatModel, now: Date): boolean {
   if (!model.endAvailableDate) return true
   return new Date(model.endAvailableDate).getTime() > now.getTime()
 }
 
-type ProviderGroup = ProviderDisplay & { models: FoundModel[] }
+type ProviderGroup = ProviderDisplay & { models: ChatModel[] }
 
-function groupByProvider(models: FoundModel[]): ProviderGroup[] {
+function groupByProvider(models: ChatModel[]): ProviderGroup[] {
   const now = new Date()
-  const buckets = new Map<ProviderSlug, FoundModel[]>()
-  for (const m of models) {
-    if (!isAvailable(m, now)) continue
-    if (!(m.provider in PROVIDER_DISPLAY)) continue
-    const slug = m.provider as ProviderSlug
-    const list = buckets.get(slug) ?? []
-    list.push(m)
-    buckets.set(slug, list)
+  const buckets = new Map<ProviderHost, ChatModel[]>()
+  for (const model of models) {
+    if (!isAvailable(model, now)) continue
+    if (!(model.host in PROVIDER_DISPLAY)) continue
+    const host = model.host as ProviderHost
+    const list = buckets.get(host) ?? []
+    list.push(model)
+    buckets.set(host, list)
   }
-  return PROVIDER_ORDER.filter((slug) => buckets.has(slug)).map((slug) => ({
-    ...PROVIDER_DISPLAY[slug],
-    models: (buckets.get(slug) ?? []).slice().sort((a, b) => a.id.localeCompare(b.id)),
+  return PROVIDER_ORDER.filter((host) => buckets.has(host)).map((host) => ({
+    ...PROVIDER_DISPLAY[host],
+    models: (buckets.get(host) ?? []).slice().sort((a, b) => a.id.localeCompare(b.id)),
   }))
 }
 
 export const Route = createFileRoute("/_public/pricing")({
   loader: async () => {
     try {
-      const models = (await getAllModels()) as FoundModel[]
+      const models = (await getAllChatModels()) as ChatModel[]
       return { providerGroups: groupByProvider(models), loadError: null as string | null }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
@@ -279,7 +266,7 @@ function PricingPage() {
           ) : (
             <div className="flex flex-col gap-8">
               {providerGroups.map((provider) => (
-                <div key={provider.slug}>
+                <div key={provider.host}>
                   <div className="mb-3 flex items-center gap-2">
                     <span
                       className={`inline-flex items-center rounded-[4px] border px-2 py-0.5 text-[12px] font-medium ${provider.color} ${provider.bg} ${provider.border}`}
@@ -312,7 +299,7 @@ function PricingPage() {
                             }
                           >
                             <td className="px-4 py-3 font-mono text-[13px] text-[#393C41]">
-                              {humanizeModelId(model.id)}
+                              {model.displayName}
                             </td>
                             <td className="px-4 py-3 text-right text-[#393C41] tabular-nums">
                               {formatUsd(model.usdPer1mInput)}

@@ -3,68 +3,68 @@ import { count, eq } from "drizzle-orm"
 import { z } from "zod"
 
 import { db } from "@/db/client"
-import { workersPdfs } from "@/db/schemas/workers/pdfs"
-import { requirePdfAccess, requireProjectAccess } from "@/lib/authorization.server"
+import { corePdfs } from "@/db/schemas/core/pdfs"
+import { pdfTxts } from "@/db/schemas/workers/pdf-txts"
+import { requirePdfAccess, requireProjectAccess } from "@/lib/project-authorization.server"
 
-export const getWorkersPdfById = createServerFn({ method: "GET" })
+// ── core.pdfs ──
+
+export const getCorePdfById = createServerFn({ method: "GET" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     await requirePdfAccess(data.id, "label")
-    const [pdf] = await db.select().from(workersPdfs).where(eq(workersPdfs.id, data.id)).limit(1)
+    const [pdf] = await db.select().from(corePdfs).where(eq(corePdfs.id, data.id)).limit(1)
     if (!pdf) {
-      throw new Error("Workers PDF not found")
+      throw new Error("PDF not found")
     }
     return pdf
   })
 
-export const getAllWorkersPdfs = createServerFn({ method: "GET" })
+export const getAllCorePdfs = createServerFn({ method: "GET" })
   .inputValidator(z.void())
   .handler(async () => {
-    return db.select().from(workersPdfs)
+    return db.select().from(corePdfs)
   })
 
-export const getWorkersPdfIdsByProjectId = createServerFn({ method: "GET" })
+export const getCorePdfIdsByProjectId = createServerFn({ method: "GET" })
   .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")
     return db
-      .select({ id: workersPdfs.id })
-      .from(workersPdfs)
-      .where(eq(workersPdfs.projectId, data.projectId))
+      .select({ id: corePdfs.id })
+      .from(corePdfs)
+      .where(eq(corePdfs.projectId, data.projectId))
   })
 
-export const getWorkersPdfsCountByProjectId = createServerFn({ method: "GET" })
+export const getCorePdfsCountByProjectId = createServerFn({ method: "GET" })
   .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")
     const [result] = await db
       .select({ count: count() })
-      .from(workersPdfs)
-      .where(eq(workersPdfs.projectId, data.projectId))
+      .from(corePdfs)
+      .where(eq(corePdfs.projectId, data.projectId))
     return result?.count ?? 0
   })
 
-export const getWorkersPdfsByProjectId = createServerFn({ method: "GET" })
+export const getCorePdfsByProjectId = createServerFn({ method: "GET" })
   .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")
-    return db.select().from(workersPdfs).where(eq(workersPdfs.projectId, data.projectId))
+    return db.select().from(corePdfs).where(eq(corePdfs.projectId, data.projectId))
   })
 
-export const getWorkersPdfsByName = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ name: z.string() }))
+// ── workers.pdf_txts ──
+
+export const getPdfTxtByPdfId = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ pdfId: z.string() }))
   .handler(async ({ data }) => {
-    return db.select().from(workersPdfs).where(eq(workersPdfs.name, data.name))
+    const [txt] = await db.select().from(pdfTxts).where(eq(pdfTxts.pdfId, data.pdfId)).limit(1)
+    return txt ?? null
   })
 
-export const getWorkersPdfsByExtractMethod = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ extractMethod: z.string() }))
+export const getPdfTxtsByOcrMethod = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ ocrMethod: z.string() }))
   .handler(async ({ data }) => {
-    return db.select().from(workersPdfs).where(eq(workersPdfs.extractMethod, data.extractMethod))
-  })
-
-export const getWorkersPdfsByModelType = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ modelType: z.string() }))
-  .handler(async ({ data }) => {
-    return db.select().from(workersPdfs).where(eq(workersPdfs.modelType, data.modelType))
+    return db.select().from(pdfTxts).where(eq(pdfTxts.ocrMethod, data.ocrMethod))
   })

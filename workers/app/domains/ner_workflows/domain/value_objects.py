@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Literal
 
-OcrMethod = Literal["tesseract", "deepseek", "olm"]
-ExtractMethod = Literal["metadata", "pdfium", "tesseract", "deepseek", "olm"]
+OcrMethod = Literal["tesseract", "deepseek-ocr", "olm-ocr2"]
+ExtractMethod = Literal["metadata", "pdfium", "tesseract", "deepseek-ocr", "olm-ocr2"]
 
 
 @dataclass(frozen=True)

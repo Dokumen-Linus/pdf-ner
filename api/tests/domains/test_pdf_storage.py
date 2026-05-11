@@ -17,6 +17,7 @@ from app.core.exceptions import register_exception_handlers
 from app.domains.pdf_storage.router import router as pdf_storage_router
 
 _TEST_API_KEY: str = os.environ.get("API_KEY", "test-api-key")
+_OWNER_USER_ID = uuid4()
 
 
 def _make_client_error(code: str, message: str = "error") -> ClientError:
@@ -73,7 +74,11 @@ class TestCreateBucket:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/buckets",
-                json={"name": "my-test-bucket", "region": "us-east-1"},
+                json={
+                    "name": "my-test-bucket",
+                    "region": "us-east-1",
+                    "owner_user_id": str(_OWNER_USER_ID),
+                },
             )
 
         assert response.status_code == 200
@@ -83,12 +88,14 @@ class TestCreateBucket:
         assert body["lifecycle_applied"] is True
         mock_conn.fetchval.assert_awaited_once_with(
             """
-        INSERT INTO api.aws_buckets (name, region, endpoint_url)
-        VALUES ($1, $2, $3)
+        INSERT INTO api.aws_buckets (name, region, endpoint_url, owner_user_id, owner_org_id)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING id
         """,
             "my-test-bucket",
             "us-east-1",
+            None,
+            str(_OWNER_USER_ID),
             None,
         )
 
@@ -151,7 +158,11 @@ class TestCreateBucket:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/buckets",
-                json={"name": "my-test-bucket", "region": "us-east-1"},
+                json={
+                    "name": "my-test-bucket",
+                    "region": "us-east-1",
+                    "owner_user_id": str(_OWNER_USER_ID),
+                },
             )
 
         assert response.status_code == 502
@@ -178,7 +189,11 @@ class TestCreateBucket:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/buckets",
-                json={"name": "existing-bucket", "region": "us-east-1"},
+                json={
+                    "name": "existing-bucket",
+                    "region": "us-east-1",
+                    "owner_user_id": str(_OWNER_USER_ID),
+                },
             )
 
         assert response.status_code == 200
@@ -212,7 +227,11 @@ class TestCreateBucket:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/buckets",
-                json={"name": "eu-bucket", "region": "eu-west-1"},
+                json={
+                    "name": "eu-bucket",
+                    "region": "eu-west-1",
+                    "owner_user_id": str(_OWNER_USER_ID),
+                },
             )
 
         assert response.status_code == 200
@@ -253,6 +272,7 @@ class TestCreateBucket:
                     "name": "minio-bucket",
                     "region": "us-east-1",
                     "endpoint_url": "http://localhost:9000",
+                    "owner_user_id": str(_OWNER_USER_ID),
                 },
             )
 
@@ -437,6 +457,7 @@ class TestUploadPdf:
             "name": "minio-bucket",
             "region": "us-east-1",
             "endpoint_url": "http://localhost:9000",
+            "owner_user_id": str(_OWNER_USER_ID),
         }
         mock_conn.fetchrow = AsyncMock(return_value=bucket_record)
         mock_conn.fetchval = AsyncMock(return_value=pdf_id)
@@ -478,7 +499,11 @@ class TestCreateBucketDuplicateName:
 
         response = await storage_client.post(
             "/api/v1/pdf-storage/buckets",
-            json={"name": "existing-bucket", "region": "us-east-1"},
+            json={
+                "name": "existing-bucket",
+                "region": "us-east-1",
+                "owner_user_id": str(_OWNER_USER_ID),
+            },
         )
 
         assert response.status_code == 409
@@ -509,7 +534,11 @@ class TestCreateBucketS3Rollback:
         ):
             response = await storage_client.post(
                 "/api/v1/pdf-storage/buckets",
-                json={"name": "fail-bucket", "region": "us-east-1"},
+                json={
+                    "name": "fail-bucket",
+                    "region": "us-east-1",
+                    "owner_user_id": str(_OWNER_USER_ID),
+                },
             )
 
         assert response.status_code == 502

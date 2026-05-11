@@ -33,7 +33,7 @@ import { Route as PrivateProjectsIndexRouteImport } from './routes/_private/proj
 import { Route as ApiReadyzDetailsRouteImport } from './routes/api/readyz/details'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PrivateProjectsProjectIdRouteImport } from './routes/_private/projects/$projectId'
-import { Route as PrivateProjectsProjectIdLabellingRouteImport } from './routes/_private/projects/$projectId_.labelling'
+import { Route as PrivateProjectsProjectIdLabelingRouteImport } from './routes/_private/projects/$projectId_.labeling'
 import { Route as PrivateProjectsProjectIdEntity_typesRouteImport } from './routes/_private/projects/$projectId_.entity_types'
 import { Route as PrivateProjectsProjectIdEngineeringRouteImport } from './routes/_private/projects/$projectId_.engineering'
 import { Route as PrivateProjectsProjectIdDocumentsRouteImport } from './routes/_private/projects/$projectId_.documents'
@@ -158,10 +158,10 @@ const PrivateProjectsProjectIdRoute =
     path: '/projects/$projectId',
     getParentRoute: () => PrivateRoute,
   } as any)
-const PrivateProjectsProjectIdLabellingRoute =
-  PrivateProjectsProjectIdLabellingRouteImport.update({
-    id: '/projects/$projectId_/labelling',
-    path: '/projects/$projectId/labelling',
+const PrivateProjectsProjectIdLabelingRoute =
+  PrivateProjectsProjectIdLabelingRouteImport.update({
+    id: '/projects/$projectId_/labeling',
+    path: '/projects/$projectId/labeling',
     getParentRoute: () => PrivateRoute,
   } as any)
 const PrivateProjectsProjectIdEntity_typesRoute =
@@ -222,7 +222,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/projects/$projectId/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
   '/projects/$projectId/entity_types': typeof PrivateProjectsProjectIdEntity_typesRoute
-  '/projects/$projectId/labelling': typeof PrivateProjectsProjectIdLabellingRoute
+  '/projects/$projectId/labeling': typeof PrivateProjectsProjectIdLabelingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
@@ -251,7 +251,7 @@ export interface FileRoutesByTo {
   '/projects/$projectId/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/projects/$projectId/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
   '/projects/$projectId/entity_types': typeof PrivateProjectsProjectIdEntity_typesRoute
-  '/projects/$projectId/labelling': typeof PrivateProjectsProjectIdLabellingRoute
+  '/projects/$projectId/labeling': typeof PrivateProjectsProjectIdLabelingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -284,7 +284,7 @@ export interface FileRoutesById {
   '/_private/projects/$projectId_/documents': typeof PrivateProjectsProjectIdDocumentsRoute
   '/_private/projects/$projectId_/engineering': typeof PrivateProjectsProjectIdEngineeringRoute
   '/_private/projects/$projectId_/entity_types': typeof PrivateProjectsProjectIdEntity_typesRoute
-  '/_private/projects/$projectId_/labelling': typeof PrivateProjectsProjectIdLabellingRoute
+  '/_private/projects/$projectId_/labeling': typeof PrivateProjectsProjectIdLabelingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -315,7 +315,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/documents'
     | '/projects/$projectId/engineering'
     | '/projects/$projectId/entity_types'
-    | '/projects/$projectId/labelling'
+    | '/projects/$projectId/labeling'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -344,7 +344,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/documents'
     | '/projects/$projectId/engineering'
     | '/projects/$projectId/entity_types'
-    | '/projects/$projectId/labelling'
+    | '/projects/$projectId/labeling'
   id:
     | '__root__'
     | '/_auth'
@@ -376,7 +376,7 @@ export interface FileRouteTypes {
     | '/_private/projects/$projectId_/documents'
     | '/_private/projects/$projectId_/engineering'
     | '/_private/projects/$projectId_/entity_types'
-    | '/_private/projects/$projectId_/labelling'
+    | '/_private/projects/$projectId_/labeling'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -562,11 +562,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateProjectsProjectIdRouteImport
       parentRoute: typeof PrivateRoute
     }
-    '/_private/projects/$projectId_/labelling': {
-      id: '/_private/projects/$projectId_/labelling'
-      path: '/projects/$projectId/labelling'
-      fullPath: '/projects/$projectId/labelling'
-      preLoaderRoute: typeof PrivateProjectsProjectIdLabellingRouteImport
+    '/_private/projects/$projectId_/labeling': {
+      id: '/_private/projects/$projectId_/labeling'
+      path: '/projects/$projectId/labeling'
+      fullPath: '/projects/$projectId/labeling'
+      preLoaderRoute: typeof PrivateProjectsProjectIdLabelingRouteImport
       parentRoute: typeof PrivateRoute
     }
     '/_private/projects/$projectId_/entity_types': {
@@ -633,7 +633,7 @@ interface PrivateRouteChildren {
   PrivateProjectsProjectIdDocumentsRoute: typeof PrivateProjectsProjectIdDocumentsRoute
   PrivateProjectsProjectIdEngineeringRoute: typeof PrivateProjectsProjectIdEngineeringRoute
   PrivateProjectsProjectIdEntity_typesRoute: typeof PrivateProjectsProjectIdEntity_typesRoute
-  PrivateProjectsProjectIdLabellingRoute: typeof PrivateProjectsProjectIdLabellingRoute
+  PrivateProjectsProjectIdLabelingRoute: typeof PrivateProjectsProjectIdLabelingRoute
 }
 
 const PrivateRouteChildren: PrivateRouteChildren = {
@@ -650,8 +650,7 @@ const PrivateRouteChildren: PrivateRouteChildren = {
     PrivateProjectsProjectIdEngineeringRoute,
   PrivateProjectsProjectIdEntity_typesRoute:
     PrivateProjectsProjectIdEntity_typesRoute,
-  PrivateProjectsProjectIdLabellingRoute:
-    PrivateProjectsProjectIdLabellingRoute,
+  PrivateProjectsProjectIdLabelingRoute: PrivateProjectsProjectIdLabelingRoute,
 }
 
 const PrivateRouteWithChildren =

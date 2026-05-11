@@ -15,24 +15,37 @@ from ..domain.entities import (
 
 async def fetch_document_for_extraction(
     conn: asyncpg.Connection,
-    document_source_id: UUID,
+    source_id: UUID,
 ) -> DocumentForExtraction | None:
     row = await conn.fetchrow(
         """
-        SELECT ds.id AS document_source_id, ds.pdf_id, ds.project_id, p.full_text
-        FROM workers.document_sources ds
-        JOIN workers.pdfs p ON p.id = ds.pdf_id
-        WHERE ds.id = $1
+        SELECT
+            s.id AS source_id,
+            p.id AS pdf_id,
+            p.project_id,
+            p.ner_workflow_id,
+            txt.txt AS full_text
+        FROM core.sources s
+        JOIN core.pdfs p ON p.source_id = s.id
+        LEFT JOIN LATERAL (
+            SELECT txt
+            FROM workers.pdf_txts
+            WHERE pdf_id = p.id
+            ORDER BY created_at DESC, id DESC
+            LIMIT 1
+        ) txt ON true
+        WHERE s.id = $1
         """,
-        document_source_id,
+        source_id,
     )
     if row is None:
         return None
     return DocumentForExtraction(
-        document_source_id=row["document_source_id"],
+        source_id=row["source_id"],
         pdf_id=row["pdf_id"],
         project_id=row["project_id"],
         full_text=row["full_text"],
+        ner_workflow_id=row["ner_workflow_id"],
     )
 
 
@@ -42,9 +55,10 @@ async def fetch_project_config(
 ) -> ProjectExtractionConfig | None:
     row = await conn.fetchrow(
         """
-        SELECT id, description, ocr_method, entity_extraction_model
+        SELECT id, description, active_ocr_method, active_chat_model, active_prompt_id
         FROM web.projects
         WHERE id = $1
+          AND active_prompt_id IS NOT NULL
         """,
         project_id,
     )
@@ -53,8 +67,9 @@ async def fetch_project_config(
     return ProjectExtractionConfig(
         project_id=row["id"],
         description=row["description"],
-        ocr_method=row["ocr_method"],
-        entity_extraction_model=row["entity_extraction_model"],
+        ocr_method=row["active_ocr_method"],
+        entity_extraction_model=row["active_chat_model"],
+        active_prompt_id=row["active_prompt_id"],
     )
 
 
@@ -64,8 +79,14 @@ async def fetch_available_model_metadata(
 ) -> ModelMetadata | None:
     row = await conn.fetchrow(
         """
-        SELECT id, provider
-        FROM public.models
+        SELECT id,
+               CASE host
+                   WHEN 'OpenAI' THEN 'openai'
+                   WHEN 'Anthropic' THEN 'anthropic'
+                   WHEN 'Google' THEN 'gemini'
+                   ELSE lower(host)
+               END AS provider
+        FROM public.chat_models
         WHERE id = $1
           AND (end_available_date IS NULL OR end_available_date > now())
         """,
@@ -78,16 +99,16 @@ async def fetch_available_model_metadata(
 
 async def fetch_optimized_prompt(
     conn: asyncpg.Connection,
-    optimized_prompt_id: UUID,
+    prompt_id: UUID,
     project_id: UUID,
 ) -> str | None:
     return await conn.fetchval(
         """
         SELECT full_text
-        FROM workers.optimized_prompts
+        FROM core.prompts
         WHERE id = $1 AND project_id = $2
         """,
-        optimized_prompt_id,
+        prompt_id,
         project_id,
     )
 
@@ -96,18 +117,19 @@ async def fetch_entity_types(conn: asyncpg.Connection, project_id: UUID) -> list
     rows = await conn.fetch(
         """
         SELECT
+            et.id AS entity_type_id,
             et.name,
             et.user_definition,
-            et.user_examples,
+            et.user_example_values,
             et.user_format_description,
             et.datatype,
-            et.single_word,
+            false AS single_word,
             et.exact_length,
             et."unique",
             et.required,
             s.definition AS std_definition,
             s.examples AS std_examples,
-            s.format_description AS std_format_description,
+            NULL AS std_format_description,
             s.regex AS std_regex
         FROM web.entity_types et
         LEFT JOIN public.std_entity_types s ON et.standard_entity_type_id = s.id
@@ -118,9 +140,10 @@ async def fetch_entity_types(conn: asyncpg.Connection, project_id: UUID) -> list
     )
     return [
         EntityTypeInfo(
+            entity_type_id=row["entity_type_id"],
             name=row["name"],
             user_definition=row["user_definition"],
-            user_examples=row["user_examples"] or [],
+            user_examples=row["user_example_values"] or [],
             user_format_description=row["user_format_description"],
             datatype=row["datatype"],
             single_word=row["single_word"],
@@ -139,26 +162,38 @@ async def fetch_entity_types(conn: asyncpg.Connection, project_id: UUID) -> list
 async def insert_run(
     conn: asyncpg.Connection,
     *,
-    document_source_id: UUID,
-    pdf_id: UUID,
     project_id: UUID,
-    optimized_prompt_id: UUID,
-    ocr_method: str,
-    model: str,
+    prompt_id: UUID,
+    ner_workflow_id: UUID | None,
 ) -> UUID:
     return await conn.fetchval(
         """
-        INSERT INTO workers.entity_extraction_runs
-            (document_source_id, pdf_id, project_id, optimized_prompt_id, status, ocr_method, model)
-        VALUES ($1, $2, $3, $4, 'running', $5, $6)
+        INSERT INTO workers.ner_runs
+            (project_id, prompt_id, ner_workflow_id)
+        VALUES ($1, $2, $3)
         RETURNING id
         """,
-        document_source_id,
-        pdf_id,
         project_id,
-        optimized_prompt_id,
-        ocr_method,
-        model,
+        prompt_id,
+        ner_workflow_id,
+    )
+
+
+async def insert_run_pdf(
+    conn: asyncpg.Connection,
+    *,
+    ner_run_id: UUID,
+    pdf_id: UUID,
+    pdf_txt_id: UUID | None,
+) -> None:
+    await conn.execute(
+        """
+        INSERT INTO workers.ner_run_pdfs (pdf_id, ner_run_id, pdf_txt_id)
+        VALUES ($1, $2, $3)
+        """,
+        pdf_id,
+        ner_run_id,
+        pdf_txt_id,
     )
 
 
@@ -169,18 +204,17 @@ async def update_pdf_text(
     full_text: str,
     extract_method: str,
     text_by_page: dict,
-) -> None:
-    await conn.execute(
+) -> UUID:
+    return await conn.fetchval(
         """
-        UPDATE workers.pdfs
-        SET full_text = $2,
-            extract_method = $3,
-            text_by_page = $4::jsonb
-        WHERE id = $1
+        INSERT INTO workers.pdf_txts
+            (pdf_id, ocr_method, created_by_domain, txt, text_by_page)
+        VALUES ($1, $2, 'ner_workflows', $3, $4::jsonb)
+        RETURNING id
         """,
         pdf_id,
-        full_text,
         extract_method,
+        full_text,
         json.dumps(text_by_page),
     )
 
@@ -190,85 +224,59 @@ async def complete_run_and_pdf(
     *,
     run_id: UUID,
     pdf_id: UUID,
-    document_source_id: UUID,
-    optimized_prompt_id: UUID,
-    extract_method: str,
-    model: str,
-    input_tokens: int,
-    output_tokens: int,
+    source_id: UUID,
     extracted: dict,
+    entity_types: list[EntityTypeInfo],
 ) -> None:
-    extracted_json = json.dumps(extracted)
+    rows = []
+    entity_by_name = {entity.name: entity for entity in entity_types}
+    for name, raw_value in extracted.items():
+        entity = entity_by_name.get(name)
+        if entity is None or raw_value is None:
+            continue
+        values = raw_value if isinstance(raw_value, list) else [raw_value]
+        for value in values:
+            text_value = str(value).strip()
+            if text_value:
+                rows.append((pdf_id, entity.entity_type_id, text_value, run_id))
+
     async with conn.transaction():
+        if rows:
+            await conn.executemany(
+                """
+                INSERT INTO core.entity_values
+                    (pdf_id, entity_type_id, text_value, is_label, ner_run_id)
+                VALUES ($1, $2, $3, false, $4)
+                """,
+                rows,
+            )
         await conn.execute(
             """
-            UPDATE workers.pdfs
-            SET predicted_entities = $2::jsonb,
-                model_type = 'LLM',
-                model = $3,
-                optimized_prompt_id = $4
-            WHERE id = $1
-            """,
-            pdf_id,
-            extracted_json,
-            model,
-            optimized_prompt_id,
-        )
-        await conn.execute(
-            """
-            UPDATE workers.document_sources
+            UPDATE core.sources
             SET status = 'processed',
                 last_processed_at = now()
             WHERE id = $1
             """,
-            document_source_id,
-        )
-        await conn.execute(
-            """
-            UPDATE workers.entity_extraction_runs
-            SET status = 'succeeded',
-                extract_method = $2,
-                input_tokens = $3,
-                output_tokens = $4,
-                extracted = $5::jsonb,
-                finished_at = now()
-            WHERE id = $1
-            """,
-            run_id,
-            extract_method,
-            input_tokens,
-            output_tokens,
-            extracted_json,
+            source_id,
         )
 
 
 async def fail_run(
     conn: asyncpg.Connection,
     *,
-    run_id: UUID,
-    document_source_id: UUID,
+    source_id: UUID,
     error_type: str,
     error_message: str,
 ) -> None:
-    async with conn.transaction():
-        await conn.execute(
-            """
-            UPDATE workers.document_sources
-            SET status = 'failed'
-            WHERE id = $1
-            """,
-            document_source_id,
-        )
-        await conn.execute(
-            """
-            UPDATE workers.entity_extraction_runs
-            SET status = 'failed',
-                error_type = $2,
-                error_message = $3,
-                finished_at = now()
-            WHERE id = $1
-            """,
-            run_id,
-            error_type,
-            error_message,
-        )
+    await conn.execute(
+        """
+        UPDATE core.sources
+        SET status = 'failed',
+            metadata = COALESCE(metadata, '{}'::jsonb)
+                || jsonb_build_object('error_type', $2::text, 'error_message', $3::text)
+        WHERE id = $1
+        """,
+        source_id,
+        error_type,
+        error_message,
+    )

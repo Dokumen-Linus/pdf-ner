@@ -82,6 +82,7 @@ describe.if(runTests)("Entity Type Table Server Functions", () => {
         name: "", // empty name should fail
         unique: true,
         required: false,
+        color: "#ff0000",
       }
       await expect(createEntityType({ data: input })).rejects.toThrow()
     })

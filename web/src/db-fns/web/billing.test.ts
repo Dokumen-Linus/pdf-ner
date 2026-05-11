@@ -31,7 +31,7 @@ async function readRepoFile(path: string) {
 
 describe("billing status enum invariant", () => {
   it("allows only stripe_info_missing, active, and past_due in SQL", async () => {
-    const orgSql = await readRepoFile("db/migrations/00008_create_web_organizations.sql")
+    const orgSql = await readRepoFile("db/migrations/00008_create_orgs.sql")
     const userSql = await readRepoFile("db/migrations/00010_create_users.sql")
 
     expect(orgSql).toContain(
@@ -44,7 +44,7 @@ describe("billing status enum invariant", () => {
 
   it("does not introduce payment_required or disabled statuses", async () => {
     const sources = await Promise.all([
-      readRepoFile("db/migrations/00008_create_web_organizations.sql"),
+      readRepoFile("db/migrations/00008_create_orgs.sql"),
       readRepoFile("db/migrations/00010_create_users.sql"),
       readRepoFile("web/src/db/schemas/web/organizations.ts"),
       readRepoFile("web/src/db/schemas/web/users.ts"),
@@ -227,10 +227,12 @@ describe.if(runTests)("Billing functions", () => {
 
       const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1)
       const firstPaymentMethodId = user.stripePaymentMethodId
+      if (!firstPaymentMethodId) throw new Error("Expected initial payment method")
 
       const [user2] = await db.select().from(users).where(eq(users.id, id)).limit(1)
       const secondPaymentMethodId = user2.stripePaymentMethodId
       if (!secondPaymentMethodId) throw new Error("Expected payment method after extra setup")
+      expect(secondPaymentMethodId).not.toBe(firstPaymentMethodId)
 
       const result = await detachPaymentMethod({ data: { paymentMethodId: secondPaymentMethodId } })
       expect(result.success).toBe(true)
