@@ -1,25 +1,21 @@
 import { describe, expect, it } from "bun:test"
 
-import type { FoundPrompt } from "../../db/types"
+import type { Prompt } from "../../db/types"
 
 /**
- * Compile-time shape checks for api schema Drizzle types.
- *
- * Since api tables are read-only from web, there are no Zod create/update schemas to match.
- * Instead, these tests verify that the Drizzle InferSelectModel types have the expected
- * fields — catching regressions if the Drizzle schema diverges from the SQL.
- *
- * If these tests fail to compile, the Drizzle api schema does not match the SQL definition.
+ * Compile-time shape checks for core.prompts Drizzle types (formerly api.prompts).
  */
 describe("API Drizzle Schema Shape Checks", () => {
-  it("FoundPrompt should have expected api.prompts fields", () => {
+  it("Prompt should have expected core.prompts fields", () => {
     type Expected = {
       id: string
       projectId: string
-      templateId: number | null
+      templateId: number
+      projectDescription: string | null
+      entityTypesOrder: string[] | null
       fullText: string | null
     }
-    const _: Expected = {} as FoundPrompt
+    const _: Expected = {} as Prompt
     expect(true).toBe(true)
   })
 })

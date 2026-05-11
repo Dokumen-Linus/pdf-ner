@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 
 class ProviderCursorPayload(BaseModel):
@@ -8,9 +8,13 @@ class ProviderCursorPayload(BaseModel):
 
 
 class MaterializedDocumentPayload(BaseModel):
-    document_source_id: UUID
+    source_id: UUID = Field(validation_alias=AliasChoices("source_id", "document_source_id"))
     pdf_id: UUID
     is_new: bool = False
+
+    @property
+    def document_source_id(self) -> UUID:
+        return self.source_id
 
 
 class DiscoveredDocumentPayload(BaseModel):

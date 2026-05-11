@@ -17,16 +17,16 @@ export const entityTypes = webSchema.table("entity_types", {
     { onDelete: "set null" },
   ),
   userDefinition: text("user_definition"),
-  userExamples: text("user_examples").array(),
+  userExampleValues: text("user_example_values").array(),
   userFormatDescription: text("user_format_description"),
   datatype: text("datatype"),
-  singleWord: boolean("single_word"),
+  regex: text("regex"),
   exactLength: integer("exact_length"),
   unique: boolean("unique").notNull(),
   required: boolean("required").notNull(),
-  subtype: text("subtype"), // CHECK constraint handled in DB
-  color: text("color"), // CHECK constraint handled in DB
-  opacity: real("opacity"), // CHECK constraint handled in DB
+  subtype: text("subtype").notNull().default("highlight"), // CHECK constraint handled in DB
+  color: text("color").notNull(), // CHECK constraint handled in DB
+  opacity: real("opacity").notNull().default(0.6), // CHECK constraint handled in DB
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 })

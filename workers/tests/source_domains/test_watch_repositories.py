@@ -109,9 +109,9 @@ async def test_postgres_materializer_creates_pdf_and_document_source():
     connection_id = uuid4()
     bucket_id = uuid4()
     pdf_id = uuid4()
-    document_source_id = uuid4()
+    source_id = uuid4()
     conn.fetchrow_results.append(None)
-    conn.fetchval_results.extend([pdf_id, document_source_id])
+    conn.fetchval_results.extend([source_id, pdf_id])
     materializer = PostgresDocumentMaterializer(conn)
 
     result = await materializer.materialize(
@@ -130,22 +130,21 @@ async def test_postgres_materializer_creates_pdf_and_document_source():
         ),
     )
 
-    assert result.document_source_id == document_source_id
+    assert result.source_id == source_id
     assert result.pdf_id == pdf_id
     assert result.is_new is True
-    assert conn.fetchval_calls[0][1][1] == bucket_id
     assert (
-        conn.fetchval_calls[0][1][2] == f"{project_id}/incoming/{connection_id}/file-1/invoice.pdf"
+        conn.fetchval_calls[1][1][1] == f"{project_id}/incoming/{connection_id}/file-1/invoice.pdf"
     )
-    assert "'queued'" in conn.fetchval_calls[1][0]
+    assert "'queued'" in conn.fetchval_calls[0][0]
 
 
 @pytest.mark.anyio
 async def test_postgres_materializer_reuses_existing_document_source():
     conn = FakeConnection()
     pdf_id = uuid4()
-    document_source_id = uuid4()
-    conn.fetchrow_results.append({"id": document_source_id, "pdf_id": pdf_id})
+    source_id = uuid4()
+    conn.fetchrow_results.append({"id": source_id, "pdf_id": pdf_id})
     materializer = PostgresDocumentMaterializer(conn)
 
     result = await materializer.materialize(
@@ -153,7 +152,7 @@ async def test_postgres_materializer_reuses_existing_document_source():
         DiscoveredDocumentPayload(external_id="file-1", external_version="v1"),
     )
 
-    assert result.document_source_id == document_source_id
+    assert result.source_id == source_id
     assert result.pdf_id == pdf_id
     assert result.is_new is False
     assert conn.fetchval_calls == []

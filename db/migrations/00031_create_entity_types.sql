@@ -1,29 +1,26 @@
 -- migrate:up
 CREATE TABLE web.entity_types (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES web.projects (id) ON DELETE CASCADE,
-  "name" TEXT NOT NULL,
   standard_entity_type_id BIGINT REFERENCES public.std_entity_types (id) ON DELETE SET NULL,
   
-  -- page1 user inputs
+  -- user entered
+  "name" TEXT NOT NULL,
   user_definition TEXT,
-  user_examples TEXT[],
+  user_example_values TEXT[],
   user_format_description TEXT,
-  datatype TEXT CHECK (datatype IN ('int', 'float', 'alphanumeric', 'alpha')),
-  single_word BOOLEAN,
+  datatype TEXT CHECK (datatype IN ('int', 'float', 'alphanumeric', 'alpha', 'alpha_with_spaces')),
+  regex TEXT, -- should be null unless copied from std_entity_types
   exact_length INT,
   "unique" BOOLEAN NOT NULL,
   "required" BOOLEAN NOT NULL,
 
   -- annotation settings
-  subtype TEXT CHECK (
+  subtype TEXT NOT NULL DEFAULT 'highlight' CHECK (
     subtype IN ('highlight', 'underline', 'squiggly', 'strikeout')
   ),
-  color TEXT CHECK (color ~ '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'),
-  opacity REAL CHECK (
-    opacity >= 0
-    AND opacity <= 1
-  ),
+  color TEXT NOT NULL CHECK (color ~ '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'),
+  opacity REAL NOT NULL DEFAULT 0.6 CHECK (opacity >= 0 AND opacity <= 1),
 
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()

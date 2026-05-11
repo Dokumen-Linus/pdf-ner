@@ -104,6 +104,14 @@ async def prompt_optimization_workflow(
     if not labeled_pdfs:
         raise ValueError(f"No labeled PDFs with usable text for project: {cmd.project_id}")
 
+    context_eng_run_id = await repo.insert_context_engineering_run(
+        conn,
+        project_id=cmd.project_id,
+        beta=1,
+        max_usd=cmd.max_cost_usd,
+        labeled_pdfs=[pdf.pdf_id for pdf in labeled_pdfs],
+    )
+
     _report_progress(
         task,
         "data_fetched",
@@ -355,7 +363,9 @@ async def prompt_optimization_workflow(
     prompt_id = await repo.insert_optimized_prompt(
         conn, cmd.project_id, cmd.template_id, best_candidate.system_prompt
     )
-    await repo.insert_optimized_prompt_examples(conn, prompt_id, best_candidate.examples)
+    await repo.insert_optimized_prompt_examples(
+        conn, prompt_id, best_candidate.examples, entity_types
+    )
     (
         final_results,
         final_eval_results,
@@ -392,6 +402,7 @@ async def prompt_optimization_workflow(
 
     evaluation_id = await repo.insert_evaluation(
         conn,
+        context_eng_run_id,
         prompt_id,
         final_f1,
         per_entity_scores,
@@ -408,6 +419,14 @@ async def prompt_optimization_workflow(
         stop_reason=stop_reason,
     )
     await repo.insert_context_engineering_predictions(conn, evaluation_id, final_pairs)
+    await repo.complete_context_engineering_run(
+        conn,
+        run_id=context_eng_run_id,
+        best_prompt_id=prompt_id,
+        best_overall_f=final_f1,
+        accumulated_usd=budget.spent_cost_usd,
+        stop_reason=stop_reason,
+    )
     return {
         "best_prompt_id": str(prompt_id),
         "best_f1": final_f1,
@@ -505,8 +524,6 @@ async def _evaluate_final_prompt_on_pdfs(
                 conn,
                 pdf_id=pdf.pdf_id,
                 optimized_prompt_id=prompt_id,
-                model=model,
-                predicted=predicted,
             )
             eval_result = services.evaluate_predictions(predicted, pdf.ground_truth, entity_types)
             eval_result.prompt_candidate = candidate

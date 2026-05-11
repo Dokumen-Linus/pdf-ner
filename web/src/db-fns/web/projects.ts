@@ -23,13 +23,13 @@ const MANAGE_TEAM_ROLE_FILTER = or(
 // ** CREATE **
 export const CreateProjectSchema = z.object({
   name: z.string(),
-  ownerId: z.string().optional(),
-  teamId: z.string().optional(),
+  ownerUserId: z.string().optional(),
+  ownerTeamId: z.string().optional(),
   description: z.string().optional(),
   colorPresets: z.array(z.string()).optional(),
   orientation: z.enum(["any", "portrait", "landscape"]).optional(),
-  ocrMethod: z.enum(["tesseract", "deepseek", "olm"]).optional(),
-  entityExtractionModel: z.string().min(1).optional(),
+  activeOcrMethod: z.string().optional(),
+  activeChatModel: z.string().min(1).optional(),
 })
 
 export const createProject = createServerFn({ method: "POST" })
@@ -41,8 +41,8 @@ export const createProject = createServerFn({ method: "POST" })
       eq(authTeamMembers.userId, workspaceUser.authUserId),
       MANAGE_TEAM_ROLE_FILTER,
     ]
-    if (data.teamId) {
-      membershipFilters.push(eq(authTeamMembers.teamId, data.teamId))
+    if (data.ownerTeamId) {
+      membershipFilters.push(eq(authTeamMembers.teamId, data.ownerTeamId))
     }
 
     const [teamMembership] = await db
@@ -60,17 +60,17 @@ export const createProject = createServerFn({ method: "POST" })
       .orderBy(authTeams.createdAt)
       .limit(1)
 
-    if (data.teamId && !teamMembership) {
+    if (data.ownerTeamId && !teamMembership) {
       throw new Error("You do not have access to this team")
     }
 
-    const effectiveTeamId = data.teamId ?? teamMembership?.teamId ?? null
+    const effectiveTeamId = data.ownerTeamId ?? teamMembership?.teamId ?? null
 
     // Reuse the bucket from an existing project in the same ownership scope.
     const bucketScopeFilter =
       effectiveTeamId != null
-        ? eq(projects.teamId, effectiveTeamId)
-        : eq(projects.ownerId, workspaceUser.userId)
+        ? eq(projects.ownerTeamId, effectiveTeamId)
+        : eq(projects.ownerUserId, workspaceUser.userId)
 
     const [existingWithBucket] = await db
       .select({ bucketId: projects.bucketId })
@@ -85,11 +85,11 @@ export const createProject = createServerFn({ method: "POST" })
         description: data.description,
         colorPresets: data.colorPresets,
         orientation: data.orientation,
-        ocrMethod: data.ocrMethod,
-        entityExtractionModel: data.entityExtractionModel,
+        activeOcrMethod: data.activeOcrMethod,
+        activeChatModel: data.activeChatModel,
         // Keep the creator as the stable owner record even for team-linked projects.
-        ownerId: workspaceUser.userId,
-        teamId: effectiveTeamId ?? null,
+        ownerUserId: workspaceUser.userId,
+        ownerTeamId: effectiveTeamId ?? null,
       })
       .returning({ id: projects.id })
 
@@ -143,7 +143,10 @@ export const getProjectsByOwnerId = createServerFn({ method: "GET" })
     if (data.ownerId !== workspaceUser.userId) {
       throw new Error("You do not have access to this user's projects")
     }
-    const userProjects = await db.select().from(projects).where(eq(projects.ownerId, data.ownerId))
+    const userProjects = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.ownerUserId, data.ownerId))
     return userProjects
   })
 
@@ -154,21 +157,21 @@ export const getAccessibleProjects = createServerFn({ method: "GET" })
     return db
       .selectDistinct({
         id: projects.id,
-        ownerId: projects.ownerId,
-        teamId: projects.teamId,
+        ownerUserId: projects.ownerUserId,
+        ownerTeamId: projects.ownerTeamId,
         name: projects.name,
         description: projects.description,
         bucketId: projects.bucketId,
         colorPresets: projects.colorPresets,
         orientation: projects.orientation,
-        ocrMethod: projects.ocrMethod,
-        entityExtractionModel: projects.entityExtractionModel,
+        activeOcrMethod: projects.activeOcrMethod,
+        activeChatModel: projects.activeChatModel,
         createdAt: projects.createdAt,
         updatedAt: projects.updatedAt,
       })
       .from(projects)
-      .leftJoin(users, eq(users.id, projects.ownerId))
-      .leftJoin(authTeams, eq(authTeams.id, projects.teamId))
+      .leftJoin(users, eq(users.id, projects.ownerUserId))
+      .leftJoin(authTeams, eq(authTeams.id, projects.ownerTeamId))
       .leftJoin(
         authMembers,
         and(
@@ -179,14 +182,14 @@ export const getAccessibleProjects = createServerFn({ method: "GET" })
       .leftJoin(
         authTeamMembers,
         and(
-          eq(authTeamMembers.teamId, projects.teamId),
+          eq(authTeamMembers.teamId, projects.ownerTeamId),
           eq(authTeamMembers.userId, workspaceUser.authUserId),
         ),
       )
       .where(
         or(
           eq(users.id, workspaceUser.userId),
-          eq(users.authUserId, workspaceUser.authUserId),
+          eq(users.id, workspaceUser.authUserId),
           and(
             eq(authTeamMembers.userId, workspaceUser.authUserId),
             or(
@@ -253,7 +256,10 @@ export const getProjectsByTeamId = createServerFn({ method: "GET" })
       throw new Error("You do not have access to this team's projects")
     }
 
-    const teamProjects = await db.select().from(projects).where(eq(projects.teamId, data.teamId))
+    const teamProjects = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.ownerTeamId, data.teamId))
     return teamProjects
   })
 

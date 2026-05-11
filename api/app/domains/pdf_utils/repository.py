@@ -5,15 +5,25 @@ import asyncpg
 
 
 async def fetch_pdf(conn: asyncpg.Connection, pdf_id: UUID) -> asyncpg.Record | None:
-    """Fetch PDF filepath, bucket location, and metadata via workers.pdfs -> api.aws_buckets."""
+    """Fetch PDF filepath, bucket location, and latest extracted text metadata."""
     return await conn.fetchrow(
         """
-        SELECT w.filepath, w.name, w.project_id,
-               w.full_text, w.extract_method, w.text_by_page,
+        SELECT p.filepath, p.project_id,
+               txt.txt AS full_text,
+               txt.ocr_method AS extract_method,
+               txt.text_by_page,
                ab.name AS bucket_name, ab.region, ab.endpoint_url
-        FROM workers.pdfs w
-        JOIN api.aws_buckets ab ON ab.id = w.bucket_id
-        WHERE w.id = $1
+        FROM core.pdfs p
+        JOIN web.projects pr ON pr.id = p.project_id
+        JOIN api.aws_buckets ab ON ab.id = pr.bucket_id
+        LEFT JOIN LATERAL (
+            SELECT txt, ocr_method, text_by_page
+            FROM workers.pdf_txts
+            WHERE pdf_id = p.id
+            ORDER BY created_at DESC, id DESC
+            LIMIT 1
+        ) txt ON true
+        WHERE p.id = $1
         """,
         pdf_id,
     )
@@ -27,17 +37,15 @@ async def update_pdf_text_metadata(
     extract_method: str,
     text_by_page: dict,
 ) -> None:
-    """Persist extracted text metadata on workers.pdfs."""
+    """Persist extracted text metadata in workers.pdf_txts."""
     await conn.execute(
         """
-        UPDATE workers.pdfs
-        SET full_text = $2,
-            extract_method = $3,
-            text_by_page = $4::jsonb
-        WHERE id = $1
+        INSERT INTO workers.pdf_txts
+            (pdf_id, ocr_method, created_by_domain, txt, text_by_page)
+        VALUES ($1, $2, 'api_pdf_utils', $3, $4::jsonb)
         """,
         pdf_id,
-        full_text,
         extract_method,
+        full_text,
         json.dumps(text_by_page),
     )

@@ -7,10 +7,11 @@ async def fetch_pdf_bucket_info(conn: asyncpg.Connection, pdf_id: UUID) -> async
     """Fetch filepath and bucket location for a PDF."""
     return await conn.fetchrow(
         """
-        SELECT w.filepath, ab.name AS bucket_name, ab.region, ab.endpoint_url
-        FROM workers.pdfs w
-        JOIN api.aws_buckets ab ON ab.id = w.bucket_id
-        WHERE w.id = $1
+        SELECT p.filepath, ab.name AS bucket_name, ab.region, ab.endpoint_url
+        FROM core.pdfs p
+        JOIN web.projects pr ON pr.id = p.project_id
+        JOIN api.aws_buckets ab ON ab.id = pr.bucket_id
+        WHERE p.id = $1
         """,
         pdf_id,
     )

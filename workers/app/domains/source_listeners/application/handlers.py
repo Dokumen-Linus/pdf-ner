@@ -21,7 +21,7 @@ async def handle_create_listener(cmd: CreateListener) -> dict:
                 raise LookupError(f"Source connection not found: {cmd.connection_id}")
             listener = provider_registry.registry.resolve(connection["provider"])
             payload = await listener.create(dict(connection))
-            subscription_id = await repo.insert_subscription(
+            subscription_id = await repo.activate_listener(
                 conn, cmd.connection_id, connection["provider"], payload
             )
             return {"listener_subscription_id": str(subscription_id)}
@@ -73,9 +73,7 @@ async def handle_listener_event(cmd: HandleListenerEvent) -> dict:
 
     enqueued = 0
     for document in event.documents:
-        args = extraction_task_args(
-            document.document_source_id, subscription["optimized_prompt_id"]
-        )
+        args = extraction_task_args(document.source_id)
         process_document_source_task.delay(*args)
         enqueued += 1
     return {"enqueued": enqueued}

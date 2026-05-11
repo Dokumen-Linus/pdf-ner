@@ -90,9 +90,9 @@ async def process_document_source_workflow(
     cmd: ProcessDocumentSource,
     task: Any | None = None,
 ) -> dict:
-    document = await repo.fetch_document_for_extraction(conn, cmd.document_source_id)
+    document = await repo.fetch_document_for_extraction(conn, cmd.source_id)
     if document is None:
-        raise LookupError(f"Document source not found: {cmd.document_source_id}")
+        raise LookupError(f"Source not found: {cmd.source_id}")
 
     project = await repo.fetch_project_config(conn, document.project_id)
     if project is None:
@@ -107,10 +107,10 @@ async def process_document_source_workflow(
         raise ValueError(f"Unsupported model provider: {model_metadata.provider}")
 
     optimized_prompt = await repo.fetch_optimized_prompt(
-        conn, cmd.optimized_prompt_id, document.project_id
+        conn, project.active_prompt_id, document.project_id
     )
     if optimized_prompt is None:
-        raise ValueError("Optimized prompt not found for document project")
+        raise ValueError("Active prompt not found for document project")
 
     entity_types = await repo.fetch_entity_types(conn, document.project_id)
     if not entity_types:
@@ -118,18 +118,18 @@ async def process_document_source_workflow(
 
     run_id = await repo.insert_run(
         conn,
-        document_source_id=document.document_source_id,
-        pdf_id=document.pdf_id,
         project_id=document.project_id,
-        optimized_prompt_id=cmd.optimized_prompt_id,
-        ocr_method=project.ocr_method,
-        model=project.entity_extraction_model,
+        prompt_id=project.active_prompt_id,
+        ner_workflow_id=document.ner_workflow_id,
     )
 
     try:
         _report_progress(task, "text", "Extracting document text", 15)
-        full_text, text_by_page, extract_method = await _ensure_text(
+        full_text, text_by_page, extract_method, pdf_txt_id = await _ensure_text(
             conn, document, project.ocr_method
+        )
+        await repo.insert_run_pdf(
+            conn, ner_run_id=run_id, pdf_id=document.pdf_id, pdf_txt_id=pdf_txt_id
         )
 
         _report_progress(
@@ -162,17 +162,13 @@ async def process_document_source_workflow(
             conn,
             run_id=run_id,
             pdf_id=document.pdf_id,
-            document_source_id=document.document_source_id,
-            optimized_prompt_id=cmd.optimized_prompt_id,
-            extract_method=extract_method,
-            model=project.entity_extraction_model,
-            input_tokens=llm_usage.input_tokens,
-            output_tokens=llm_usage.output_tokens,
+            source_id=document.source_id,
             extracted=extracted,
+            entity_types=entity_types,
         )
         return {
             "run_id": str(run_id),
-            "document_source_id": str(document.document_source_id),
+            "source_id": str(document.source_id),
             "pdf_id": str(document.pdf_id),
             "extract_method": extract_method,
             "model": project.entity_extraction_model,
@@ -180,8 +176,7 @@ async def process_document_source_workflow(
     except Exception as exc:
         await repo.fail_run(
             conn,
-            run_id=run_id,
-            document_source_id=document.document_source_id,
+            source_id=document.source_id,
             error_type=type(exc).__name__,
             error_message=str(exc),
         )
@@ -192,12 +187,13 @@ async def _ensure_text(
     conn: asyncpg.Connection,
     document,
     ocr_method: str,
-) -> tuple[str, dict, str]:
+) -> tuple[str, dict, str, object | None]:
     if has_usable_text(document.full_text):
         return (
             document.full_text or "",
             {"pages": [{"page_index": 0, "text": document.full_text}]},
             "metadata",
+            None,
         )
 
     pdf_bytes, _filepath = await download_pdf_bytes(conn, document.pdf_id)
@@ -205,25 +201,25 @@ async def _ensure_text(
     full_text = join_page_text(pages)
     if has_usable_text(full_text):
         payload = _text_by_page_payload(pages)
-        await repo.update_pdf_text(
+        pdf_txt_id = await repo.update_pdf_text(
             conn,
             pdf_id=document.pdf_id,
             full_text=full_text,
             extract_method="pdfium",
             text_by_page=payload,
         )
-        return full_text, payload, "pdfium"
+        return full_text, payload, "pdfium", pdf_txt_id
 
     pages = await ocr.extract_ocr_pages(pdf_bytes, ocr_method)
     full_text = join_page_text(pages)
     if not has_usable_text(full_text):
         raise ValueError("No text extracted from PDF")
     payload = _text_by_page_payload(pages)
-    await repo.update_pdf_text(
+    pdf_txt_id = await repo.update_pdf_text(
         conn,
         pdf_id=document.pdf_id,
         full_text=full_text,
         extract_method=ocr_method,
         text_by_page=payload,
     )
-    return full_text, payload, ocr_method
+    return full_text, payload, ocr_method, pdf_txt_id

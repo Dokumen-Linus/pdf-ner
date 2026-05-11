@@ -21,7 +21,7 @@ import { cn } from "@/lib/shadcn-ui/utils"
 export type ProjectStepKey =
   | "documents"
   | "entity_types"
-  | "labelling"
+  | "labeling"
   | "engineering"
   | "checking"
   | "dashboard"
@@ -30,7 +30,7 @@ export type ProjectStepKey =
 type ProjectStepPath =
   | "/projects/$projectId/documents"
   | "/projects/$projectId/entity_types"
-  | "/projects/$projectId/labelling"
+  | "/projects/$projectId/labeling"
   | "/projects/$projectId/engineering"
   | "/projects/$projectId/checking"
   | "/projects/$projectId/dashboard"
@@ -63,9 +63,9 @@ export const PROJECT_STEPS: readonly ProjectStep[] = [
   },
   {
     n: 3,
-    key: "labelling",
-    label: "Labelling",
-    to: "/projects/$projectId/labelling",
+    key: "labeling",
+    label: "Labeling",
+    to: "/projects/$projectId/labeling",
     icon: PencilIcon,
   },
   {

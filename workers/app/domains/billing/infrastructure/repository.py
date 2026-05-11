@@ -34,14 +34,22 @@ async def fetch_due_individuals(conn: asyncpg.Connection, *, limit: int) -> list
 async def fetch_due_organizations(conn: asyncpg.Connection, *, limit: int) -> list[asyncpg.Record]:
     return await conn.fetch(
         """
-        SELECT id, n_users, stripe_customer_id, stripe_payment_method_id, billing_failure_count,
-               billing_started_at, last_payment_at, next_payment_at
-        FROM web.organizations
-        WHERE billing_status IN ('active', 'past_due')
-          AND stripe_customer_id IS NOT NULL
-          AND stripe_payment_method_id IS NOT NULL
-          AND next_payment_at <= now()
-        ORDER BY next_payment_at
+        SELECT o.id,
+               GREATEST(COUNT(m.id)::int, 1) AS member_count,
+               o.stripe_customer_id,
+               o.stripe_payment_method_id,
+               o.billing_failure_count,
+               o.billing_started_at,
+               o.last_payment_at,
+               o.next_payment_at
+        FROM web.organizations o
+        LEFT JOIN auth.member m ON m."organizationId" = o.id
+        WHERE o.billing_status IN ('active', 'past_due')
+          AND o.stripe_customer_id IS NOT NULL
+          AND o.stripe_payment_method_id IS NOT NULL
+          AND o.next_payment_at <= now()
+        GROUP BY o.id
+        ORDER BY o.next_payment_at
         LIMIT $1
         FOR UPDATE SKIP LOCKED
         """,
@@ -52,7 +60,7 @@ async def fetch_due_organizations(conn: asyncpg.Connection, *, limit: int) -> li
 async def sum_individual_usage(
     conn: asyncpg.Connection,
     *,
-    user_id: UUID,
+    user_id: str,
     period_start,
     period_end,
 ) -> asyncpg.Record:
@@ -62,8 +70,8 @@ async def sum_individual_usage(
                COUNT(u.id)::int AS llm_usage_count
         FROM workers.llm_usage u
         INNER JOIN web.projects p ON p.id = u.project_id
-        WHERE p.owner_id = $1
-          AND p.team_id IS NULL
+        WHERE p.owner_user_id = $1
+          AND p.owner_team_id IS NULL
           AND u.created_at >= $2
           AND u.created_at < $3
         """,
@@ -86,7 +94,7 @@ async def sum_organization_usage(
                COUNT(u.id)::int AS llm_usage_count
         FROM workers.llm_usage u
         INNER JOIN web.projects p ON p.id = u.project_id
-        INNER JOIN web.teams t ON t.id = p.team_id
+        INNER JOIN web.teams t ON t.id = p.owner_team_id
         WHERE t.organization_id = $1
           AND u.created_at >= $2
           AND u.created_at < $3
@@ -119,7 +127,7 @@ async def create_charge_attempt(
             (account_type, user_id, organization_id, period_start, period_end,
              base_amount_cents, usage_amount_cents, total_amount_cents, usage_cost_usd,
              llm_usage_count, stripe_customer_id, stripe_payment_method_id, idempotency_key)
-        VALUES ($1, CASE WHEN $1 = 'individual' THEN $2::uuid ELSE NULL END,
+        VALUES ($1, CASE WHEN $1 = 'individual' THEN $2::text ELSE NULL END,
                 CASE WHEN $1 = 'organization' THEN $2::text ELSE NULL END,
                 $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         ON CONFLICT (idempotency_key) DO UPDATE
@@ -169,7 +177,7 @@ async def mark_charge_success(
                     last_payment_at = now(),
                     next_payment_at = $2::timestamptz + interval '1 month',
                     updated_at = now()
-                WHERE id = $1::uuid
+                WHERE id = $1
                 """,
                 account_id,
                 period_end,
@@ -217,7 +225,7 @@ async def mark_charge_failure(
                 SET billing_status = 'past_due',
                     billing_failure_count = billing_failure_count + 1,
                     updated_at = now()
-                WHERE id = $1::uuid
+                WHERE id = $1
                 """,
                 account_id,
             )

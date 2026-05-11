@@ -1,9 +1,8 @@
 -- migrate:up
 CREATE TABLE web.organizations (
-  id TEXT PRIMARY KEY REFERENCES auth.organization(id) ON DELETE CASCADE,
-  plan TEXT NOT NULL DEFAULT 'base',
-  plan_expires_at TIMESTAMPTZ,
-  n_users INTEGER NOT NULL DEFAULT 1 CHECK (n_users >= 1),
+  "id" TEXT PRIMARY KEY REFERENCES auth.organization(id) ON DELETE CASCADE,
+
+  -- billing
   billing_started_at TIMESTAMPTZ DEFAULT NOW(),
   next_payment_at TIMESTAMPTZ DEFAULT NOW() + INTERVAL '1 month',
   last_payment_at TIMESTAMPTZ,
@@ -11,9 +10,11 @@ CREATE TABLE web.organizations (
   billing_failure_count INTEGER NOT NULL DEFAULT 0,
   stripe_customer_id TEXT UNIQUE,
   stripe_payment_method_id TEXT,
-  description TEXT,
-  website_url TEXT,
+
+  -- user entered
+  "description" TEXT,
   default_color_presets TEXT[],
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

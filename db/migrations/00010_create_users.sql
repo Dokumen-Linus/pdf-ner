@@ -1,6 +1,9 @@
 -- migrate:up
 CREATE TABLE web.users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" TEXT PRIMARY KEY REFERENCES auth.user (id) ON DELETE CASCADE,
+  organization_id TEXT REFERENCES auth.organization (id) ON DELETE SET NULL,
+
+  -- user entered
   email TEXT NOT NULL UNIQUE,
   first_name TEXT,
   last_name TEXT,
@@ -8,9 +11,11 @@ CREATE TABLE web.users (
   employer TEXT,
   job_title TEXT,
   avatar_url TEXT,
-  auth_user_id TEXT,
-  organization_id TEXT REFERENCES auth.organization(id) ON DELETE SET NULL,
-  role TEXT NOT NULL DEFAULT 'individual' CHECK (role IN ('individual', 'admin', 'developer', 'analyst')),
+
+  -- RBAC
+  "role" TEXT NOT NULL DEFAULT 'individual' CHECK (role IN ('individual', 'admin', 'developer', 'analyst')),
+
+  -- billing (if user is not in an org)
   billing_started_at TIMESTAMPTZ DEFAULT NOW(),
   next_payment_at TIMESTAMPTZ DEFAULT NOW() + INTERVAL '1 month',
   last_payment_at TIMESTAMPTZ,
@@ -18,13 +23,10 @@ CREATE TABLE web.users (
   billing_failure_count INTEGER NOT NULL DEFAULT 0,
   stripe_customer_id TEXT UNIQUE,
   stripe_payment_method_id TEXT,
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-
-CREATE UNIQUE INDEX users_auth_user_id_uidx
-  ON web.users (auth_user_id)
-  WHERE auth_user_id IS NOT NULL;
 
 CREATE TRIGGER users_updated_at
 BEFORE UPDATE ON web.users

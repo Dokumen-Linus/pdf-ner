@@ -1,16 +1,15 @@
-import { bigserial, boolean, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core"
+import { bigserial, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 
 export const stdEntityTypes = pgTable("std_entity_types", {
   id: bigserial("id", { mode: "number" }).primaryKey(),
   shortName: text("short_name").notNull(),
-  longName: text("long_name"),
-  definition: text("definition"),
+  longName: text("long_name").notNull(),
+  category: text("category").notNull(),
+  definition: text("definition").notNull(),
   examples: text("examples").array(),
-  formatDescription: text("format_description"),
   datatype: text("datatype"),
   regex: text("regex"),
   exactLength: integer("exact_length"),
-  singleWord: boolean("single_word"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 })

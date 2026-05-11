@@ -1,8 +1,11 @@
 -- migrate:up
 CREATE TABLE web.teams (
-  id TEXT PRIMARY KEY REFERENCES auth.team(id) ON DELETE CASCADE,
-  organization_id TEXT NOT NULL REFERENCES auth.organization(id) ON DELETE CASCADE,
-  description TEXT,
+  "id" TEXT PRIMARY KEY REFERENCES auth.team (id) ON DELETE CASCADE,
+  organization_id TEXT NOT NULL REFERENCES auth.organization (id) ON DELETE CASCADE,
+
+  -- user entered
+  "description" TEXT,
+
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

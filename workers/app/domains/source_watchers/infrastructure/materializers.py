@@ -40,25 +40,25 @@ class PostgresDocumentMaterializer:
     ) -> MaterializedDocumentPayload:
         existing = await self.conn.fetchrow(
             """
-            SELECT id, pdf_id
-            FROM workers.document_sources
-            WHERE source_connection_id = $1
+            SELECT s.id, p.id AS pdf_id
+            FROM core.sources s
+            LEFT JOIN core.pdfs p ON p.source_id = s.id
+            WHERE s.source_connection_id = $1
               AND external_id = $2
               AND external_version = $3
             """,
-            connection["id"],
+            connection.get("source_connection_id", connection["id"]),
             document.external_id,
             document.external_version,
         )
         if existing is not None:
             return MaterializedDocumentPayload(
-                document_source_id=existing["id"],
+                source_id=existing["id"],
                 pdf_id=existing["pdf_id"],
                 is_new=False,
             )
 
         config = connection.get("config") or {}
-        bucket_id = _require_uuid_config(config, "bucket_id")
         filepath = _filepath_for_document(connection, document, config)
         metadata = {
             **document.metadata,
@@ -67,28 +67,15 @@ class PostgresDocumentMaterializer:
         }
 
         async with self.conn.transaction():
-            pdf_id = await self.conn.fetchval(
+            source_id = await self.conn.fetchval(
                 """
-                INSERT INTO workers.pdfs (project_id, bucket_id, filepath, name)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO core.sources
+                    (source_connection_id, external_id, external_version, uri, fingerprint,
+                     name, status, metadata, last_queued_at)
+                VALUES ($1, $2, $3, $4, $5, $6, 'queued', $7::jsonb, now())
                 RETURNING id
                 """,
-                connection["project_id"],
-                bucket_id,
-                filepath,
-                document.name,
-            )
-            document_source_id = await self.conn.fetchval(
-                """
-                INSERT INTO workers.document_sources
-                    (source_connection_id, project_id, pdf_id, external_id, external_version,
-                     uri, fingerprint, name, status, metadata, last_queued_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'queued', $9::jsonb, now())
-                RETURNING id
-                """,
-                connection["id"],
-                connection["project_id"],
-                pdf_id,
+                connection.get("source_connection_id", connection["id"]),
                 document.external_id,
                 document.external_version,
                 document.uri,
@@ -96,9 +83,24 @@ class PostgresDocumentMaterializer:
                 document.name,
                 json.dumps(metadata),
             )
+            pdf_id = await self.conn.fetchval(
+                """
+                INSERT INTO core.pdfs
+                    (project_id, filepath, source_type, source_id, ner_workflow_id,
+                     watcher_id, watcher_run_id)
+                VALUES ($1, $2, 'watcher', $3, $4, $5, $6)
+                RETURNING id
+                """,
+                connection["project_id"],
+                filepath,
+                source_id,
+                connection.get("ner_workflow_id"),
+                connection["id"],
+                connection.get("watcher_run_id"),
+            )
 
         return MaterializedDocumentPayload(
-            document_source_id=document_source_id,
+            source_id=source_id,
             pdf_id=pdf_id,
             is_new=True,
         )

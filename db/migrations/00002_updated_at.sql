@@ -8,4 +8,4 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- migrate:down
-DROP FUNCTION set_updated_at()
+DROP FUNCTION set_updated_at();

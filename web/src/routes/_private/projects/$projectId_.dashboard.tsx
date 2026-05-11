@@ -20,10 +20,10 @@ import {
   CardTitle,
 } from "@/components/shadcn-ui/card"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
+import { getCorePdfIdsByProjectId } from "@/db-fns/core/pdfs"
 import { getAnnotationsByPdfIds } from "@/db-fns/web/annotations"
 import { getEntityTypesByProjectId } from "@/db-fns/web/entity-types"
 import { getProjectById } from "@/db-fns/web/projects"
-import { getWorkersPdfIdsByProjectId } from "@/db-fns/workers/pdfs"
 import { m } from "@/integrations/paraglide/messages.js"
 
 function DashboardSkeleton() {
@@ -58,7 +58,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/dashboard")
 
       const [project, pdfRows, entityTypesList] = await Promise.all([
         getProjectById({ data: { id: params.projectId } }),
-        getWorkersPdfIdsByProjectId({ data: { projectId: params.projectId } }),
+        getCorePdfIdsByProjectId({ data: { projectId: params.projectId } }),
         getEntityTypesByProjectId({ data: { projectId: params.projectId } }),
       ])
 

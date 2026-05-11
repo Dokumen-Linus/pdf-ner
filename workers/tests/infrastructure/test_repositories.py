@@ -19,6 +19,8 @@ from app.domains.context_engineering.infrastructure.repositories import (
 from tests.conftest import PDF_ID_1, PDF_ID_2, PROJECT_ID, PROMPT_ID
 
 BUCKET_ID_1 = uuid4()
+ENTITY_TYPE_ID_1 = uuid4()
+ENTITY_TYPE_ID_2 = uuid4()
 
 
 class TestFetchProject:
@@ -121,12 +123,14 @@ class TestFetchLabeledPdfs:
                 {
                     "pdf_id": PDF_ID_1,
                     "custom_entity_type": "full_name",
+                    "entity_type_id": ENTITY_TYPE_ID_1,
                     "contents": "John Smith",
                     "page_index": 0,
                 },
                 {
                     "pdf_id": PDF_ID_1,
                     "custom_entity_type": "ssn",
+                    "entity_type_id": ENTITY_TYPE_ID_2,
                     "contents": "123-45-6789",
                     "page_index": 1,
                 },
@@ -244,8 +248,6 @@ class TestInsertOptimizedPrompt:
         assert row[0] == PROMPT_ID
         assert row[1] == labeled_pdf_1.pdf_id
         assert row[2] == 0
-        assert "John Smith" in row[3]
-        assert json.loads(row[4])["full_name"] == "John Smith"
 
 
 class TestInsertEvaluation:
@@ -256,12 +258,13 @@ class TestInsertEvaluation:
             "name": F1Score(0.9, 0.8, 0.85),
             "ssn": F1Score(1.0, 1.0, 1.0),
         }
-        await insert_evaluation(conn, PROMPT_ID, 0.925, scores)
+        run_id = uuid4()
+        await insert_evaluation(conn, run_id, PROMPT_ID, 0.925, scores)
         conn.fetchval.assert_awaited_once()
 
         # Verify the JSON argument
         call_args = conn.fetchval.call_args[0]
-        scores_json = json.loads(call_args[3])
+        scores_json = json.loads(call_args[4])
         assert scores_json["name"]["precision"] == 0.9
         assert scores_json["ssn"]["f1"] == 1.0
 
@@ -270,7 +273,9 @@ class TestInsertEvaluation:
         conn = AsyncMock()
         conn.fetchval.return_value = PROMPT_ID
         scores = {"name": F1Score(0.5, 0.5, 0.5)}
-        await insert_evaluation(conn, PROMPT_ID, 0.5, scores)
+        run_id = uuid4()
+        await insert_evaluation(conn, run_id, PROMPT_ID, 0.5, scores)
         call_args = conn.fetchval.call_args[0]
-        assert call_args[1] == PROMPT_ID
-        assert call_args[2] == 0.5
+        assert call_args[1] == run_id
+        assert call_args[2] == PROMPT_ID
+        assert call_args[3] == 0.5

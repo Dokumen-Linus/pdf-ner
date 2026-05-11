@@ -9,8 +9,8 @@ class OptimizePrompt:
     template_id: int
     max_cost_usd: Decimal = Decimal("1.00")
     convergence_threshold: float = 0.02  # stop if F1 improvement < this
-    model: str = "gpt-4o"
-    refinement_model: str = "gpt-4o"
+    model: str = "gpt-5.4-mini"
+    refinement_model: str = "gpt-5.4-mini"
 
     def __post_init__(self) -> None:
         if self.template_id <= 0:

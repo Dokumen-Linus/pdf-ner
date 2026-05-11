@@ -1,25 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
-import { heartbeatLabellingLock, releaseLabellingLock } from "@/db-fns/web/pdfs"
+import { heartbeatLabelingLock, releaseLabelingLock } from "@/db-fns/web/pdfs"
 
 // How often the client refreshes its lock on the server. Must be well under
-// the server's stale threshold (120s - see LABELLING_LOCK_STALE_SECONDS).
+// the server's stale threshold (120s - see LABELING_LOCK_STALE_SECONDS).
 const HEARTBEAT_INTERVAL_MS = 30_000
 
-interface UseLabellingLockArgs {
-  /** Current pdfId being labelled. Null when no doc is selected. */
+interface UseLabelingLockArgs {
+  /** Current pdfId being labeled. Null when no doc is selected. */
   pdfId: string | null
   /** Current user's id. Null while auth resolves. */
   userId: string | null
   /**
    * Endpoint that receives navigator.sendBeacon POSTs on tab-close. The
-   * endpoint should call releaseLabellingLock with {pdfId, userId} from
+   * endpoint should call releaseLabelingLock with {pdfId, userId} from
    * the body. See routes/api/release-lock.ts.
    */
   releaseBeaconPath?: string
 }
 
-interface UseLabellingLockResult {
+interface UseLabelingLockResult {
   /** True once we've confirmed the lock is no longer held (stolen or expired). */
   isLockLost: boolean
   /** Imperatively mark lock as lost (e.g. after save rejection). */
@@ -29,9 +29,9 @@ interface UseLabellingLockResult {
 }
 
 /**
- * Heartbeat hook for the labelling lock.
+ * Heartbeat hook for the labeling lock.
  *
- *  - Fires `heartbeatLabellingLock` every 30s while pdfId+userId are present.
+ *  - Fires `heartbeatLabelingLock` every 30s while pdfId+userId are present.
  *  - On the first `{stillHeld: false}` response, flips isLockLost -> true and
  *    stops further heartbeats until the caller calls resetLockLost.
  *  - Releases the lock on both tab-close and effect cleanup so in-app
@@ -40,11 +40,11 @@ interface UseLabellingLockResult {
  * No acquire here - acquire happens in the route loader so the page knows
  * synchronously whether to render the editor or the "locked by X" card.
  */
-export function useLabellingLock({
+export function useLabelingLock({
   pdfId,
   userId,
   releaseBeaconPath = "/api/release-lock",
-}: UseLabellingLockArgs): UseLabellingLockResult {
+}: UseLabelingLockArgs): UseLabelingLockResult {
   const [isLockLost, setIsLockLost] = useState(false)
   const isLockLostRef = useRef(false)
   const releasedRef = useRef<string | null>(null)
@@ -67,9 +67,9 @@ export function useLabellingLock({
         // Fall through to the server-function release below.
       }
 
-      void releaseLabellingLock({ data: { pdfId: documentId, userId: currentUserId } }).catch(
+      void releaseLabelingLock({ data: { pdfId: documentId, userId: currentUserId } }).catch(
         (err) => {
-          console.warn("[use-labelling-lock] release failed", err)
+          console.warn("[use-labeling-lock] release failed", err)
         },
       )
     },
@@ -90,7 +90,7 @@ export function useLabellingLock({
     const tick = async () => {
       if (cancelled || isLockLostRef.current) return
       try {
-        const res = await heartbeatLabellingLock({ data: { pdfId, userId } })
+        const res = await heartbeatLabelingLock({ data: { pdfId, userId } })
         if (cancelled) return
         if (!res.stillHeld) {
           setIsLockLost(true)
@@ -98,7 +98,7 @@ export function useLabellingLock({
       } catch (err) {
         // Network flake - ignore. Next tick retries. If the lock legitimately
         // expired, the next successful heartbeat will report stillHeld:false.
-        console.warn("[use-labelling-lock] heartbeat failed", err)
+        console.warn("[use-labeling-lock] heartbeat failed", err)
       }
     }
 

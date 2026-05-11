@@ -1,28 +1,10 @@
-import { InferInsertModel, InferModel, InferSelectModel } from "drizzle-orm"
+import { InferInsertModel, InferSelectModel } from "drizzle-orm"
 
 import * as schema from "./schemas"
-import {
-  billingChargeAttempts,
-  contextEngPreds,
-  llmUsage,
-  optimizedPromptExamples,
-  optimizedPrompts,
-  promptEvaluations,
-  workersPdfs,
-} from "./schemas/workers"
 
 // ─────────────────────────────────────────────────────────
 // JSONB column types
 // ─────────────────────────────────────────────────────────
-//
-// JSONB columns default to `unknown` under Drizzle's type inference, which
-// breaks TanStack Start's createServerFn return-type constraint (it rejects
-// `unknown` as not-JSON-serializable-enough). Every JSONB column should opt
-// into a concrete shape here via `.$type<T>()`.
-//
-// `JsonbValue` is the recursive-JSON fallback — use for columns whose
-// runtime shape is set by an external writer (the Python workers service)
-// and so isn't owned by this codebase.
 
 export type JsonbValue =
   | string
@@ -35,15 +17,6 @@ export type JsonbValue =
 export type JsonbRecord = { [key: string]: JsonbValue }
 export type JsonbArray = JsonbValue[]
 
-// web.annotations.rect / .segment_rects — PDF page coordinates as persisted
-// in JSONB. This is the *storage* shape, not the runtime shape the EmbedPDF
-// plugin operates on (that's `Rect` from @embedpdf/models, where both
-// `origin` and `size` are required).
-//
-// Kept as a union of nested and flat forms because historical rows were
-// written in both — all keys optional so either serialization round-trips
-// without a migration. Normalize to the library `Rect` at the read
-// boundary via `toEmbedRect` in `./rect`.
 export interface StoredRect {
   origin?: { x: number; y: number }
   size?: { width: number; height: number }
@@ -53,53 +26,62 @@ export interface StoredRect {
   height?: number
 }
 
-// web.pdfs.labeled_entities — entity-type name → labeled strings, written by
-// the labelling save path.
-export type LabeledEntitiesMap = { [entityTypeName: string]: string[] }
-
 // ─────────────────────────────────────────────────────────
 // Drizzle row types
 // ─────────────────────────────────────────────────────────
 
 // web - CRUD
-export type User = InferModel<typeof schema.users>
-export type FoundUser = InferSelectModel<typeof schema.users>
+export type User = InferSelectModel<typeof schema.users>
 export type NewUser = InferInsertModel<typeof schema.users>
-export type UserUpdate = Partial<Omit<FoundUser, "id" | "createdAt" | "updatedAt">>
+export type UserUpdate = Partial<Omit<User, "id" | "createdAt" | "updatedAt">>
 
-export type Project = InferModel<typeof schema.projects>
-export type FoundProject = InferSelectModel<typeof schema.projects>
+export type Project = InferSelectModel<typeof schema.projects>
 export type NewProject = InferInsertModel<typeof schema.projects>
-export type ProjectUpdate = Partial<Omit<FoundProject, "id" | "createdAt" | "updatedAt">>
+export type ProjectUpdate = Partial<Omit<Project, "id" | "createdAt" | "updatedAt">>
 
-export type DbEntityType = InferModel<typeof schema.entityTypes>
-export type FoundDbEntityType = InferSelectModel<typeof schema.entityTypes>
+export type DbEntityType = InferSelectModel<typeof schema.entityTypes>
 export type NewDbEntityType = InferInsertModel<typeof schema.entityTypes>
-export type DbEntityTypeUpdate = Partial<Omit<FoundDbEntityType, "id" | "createdAt" | "updatedAt">>
+export type DbEntityTypeUpdate = Partial<Omit<DbEntityType, "id" | "createdAt" | "updatedAt">>
 
-export type DbWebPdf = InferModel<typeof schema.pdfs>
-export type FoundDbWebPdf = InferSelectModel<typeof schema.pdfs>
+export type DbWebPdf = InferSelectModel<typeof schema.pdfs>
 export type NewDbWebPdf = InferInsertModel<typeof schema.pdfs>
-export type DbWebPdfUpdate = Partial<Omit<FoundDbWebPdf, "id">>
+export type DbWebPdfUpdate = Partial<Omit<DbWebPdf, "id">>
 
-export type DbAnnotation = InferModel<typeof schema.annotations>
-export type FoundDbAnnotation = InferSelectModel<typeof schema.annotations>
+export type DbAnnotation = InferSelectModel<typeof schema.annotations>
 export type NewDbAnnotation = InferInsertModel<typeof schema.annotations>
-export type DbAnnotationUpdate = Partial<Omit<FoundDbAnnotation, "id" | "createdAt" | "updatedAt">>
+export type DbAnnotationUpdate = Partial<Omit<DbAnnotation, "id" | "createdAt" | "updatedAt">>
 
 // public - read only
-export type FoundStandardEntityType = InferSelectModel<typeof schema.stdEntityTypes>
-export type FoundTemplate = InferSelectModel<typeof schema.templates>
-export type FoundModel = InferSelectModel<typeof schema.models>
+export type StdEntityType = InferSelectModel<typeof schema.stdEntityTypes>
+export type Template = InferSelectModel<typeof schema.templates>
+export type ChatModel = InferSelectModel<typeof schema.chatModels>
+export type OcrMethod = InferSelectModel<typeof schema.ocrMethods>
+
+// core - read only (written by workers/api)
+export type CorePdf = InferSelectModel<typeof schema.corePdfs>
+export type Prompt = InferSelectModel<typeof schema.prompts>
+export type EntityValue = InferSelectModel<typeof schema.entityValues>
 
 // api - read only
-export type FoundPrompt = InferSelectModel<typeof schema.prompts>
+export type AwsBucket = InferSelectModel<typeof schema.awsBuckets>
+
+// Convenience alias used by labeling page
+export type LabeledEntitiesMap = Record<string, string[]>
 
 // workers - read only
-export type LlmUsage = InferSelectModel<typeof llmUsage>
-export type BillingChargeAttempt = InferSelectModel<typeof billingChargeAttempts>
-export type FoundWorkersPdf = InferSelectModel<typeof workersPdfs>
-export type FoundOptimizedPrompt = InferSelectModel<typeof optimizedPrompts>
-export type FoundOptimizedPromptExample = InferSelectModel<typeof optimizedPromptExamples>
-export type FoundPromptEvaluation = InferSelectModel<typeof promptEvaluations>
-export type FoundContextEngPred = InferSelectModel<typeof contextEngPreds>
+export type PdfTxt = InferSelectModel<typeof schema.pdfTxts>
+export type Watcher = InferSelectModel<typeof schema.watchers>
+export type WatcherRun = InferSelectModel<typeof schema.watcherRuns>
+export type Listener = InferSelectModel<typeof schema.listeners>
+export type NerWorkflow = InferSelectModel<typeof schema.nerWorkflows>
+export type ContextEngineeringRun = InferSelectModel<typeof schema.contextEngineeringRuns>
+export type ContextEngineeringIteration = InferSelectModel<typeof schema.contextEngineeringIterations>
+export type PromptExample = InferSelectModel<typeof schema.promptExamples>
+export type ChatModelEvalRun = InferSelectModel<typeof schema.chatModelEvalRuns>
+export type ChatModelEvalIteration = InferSelectModel<typeof schema.chatModelEvalIterations>
+export type NerRun = InferSelectModel<typeof schema.nerRuns>
+export type NerRunPdf = InferSelectModel<typeof schema.nerRunPdfs>
+export type OcrEvaluationRun = InferSelectModel<typeof schema.ocrEvaluationRuns>
+export type OcrEvaluationPage = InferSelectModel<typeof schema.ocrEvaluationPages>
+export type LlmUsage = InferSelectModel<typeof schema.llmUsage>
+export type BillingChargeAttempt = InferSelectModel<typeof schema.billingChargeAttempts>

@@ -112,8 +112,8 @@ temporary-credential profile, then run the script with that profile:
 
 ```bash
 aws configure sso
-aws sso login --profile dokumen-bootstrap
-AWS_PROFILE=dokumen-bootstrap bash infra/init/aws-setup.sh
+aws sso login --profile init-deployer
+AWS_PROFILE=init-deployer bash infra/init/aws-setup.sh
 ```
 
 For runtime, the EC2 instance profile supplies temporary AWS credentials to

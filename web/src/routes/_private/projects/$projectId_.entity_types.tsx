@@ -43,9 +43,9 @@ import {
 } from "@/db-fns/web/entity-types"
 import { getCurrentProjectAccess, getProjectById, updateProject } from "@/db-fns/web/projects"
 
-import type { FoundDbEntityType, FoundStandardEntityType } from "@/db/types"
+import type { DbEntityType, StdEntityType } from "@/db/types"
 
-const DATATYPES = ["int", "float", "alphanumeric", "alpha"] as const
+const DATATYPES = ["int", "float", "alphanumeric", "alpha", "alpha_with_spaces"] as const
 const SUBTYPES = ["highlight", "underline", "squiggly", "strikeout"] as const
 const HEX_COLOR_RE = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/
 
@@ -63,10 +63,9 @@ type EntityTypeRow = {
   name: string
   standardEntityTypeId: number | null
   userDefinition: string
-  userExamples: string // stored as newline/comma-separated text in UI, split on save
-  userFormatDescription: string
+  userExampleValues: string // stored as newline/comma-separated text in UI, split on save
   datatype: string // "" | one of DATATYPES
-  singleWord: boolean | null // tri-state
+  regex: string
   exactLength: string // "" or integer string
   unique: boolean
   required: boolean
@@ -77,16 +76,15 @@ type EntityTypeRow = {
 
 type FormValues = { rows: EntityTypeRow[] }
 
-function toRow(et: FoundDbEntityType): EntityTypeRow {
+function toRow(et: DbEntityType): EntityTypeRow {
   return {
     id: et.id,
     name: et.name,
     standardEntityTypeId: et.standardEntityTypeId ?? null,
     userDefinition: et.userDefinition ?? "",
-    userExamples: (et.userExamples ?? []).join("\n"),
-    userFormatDescription: et.userFormatDescription ?? "",
+    userExampleValues: (et.userExampleValues ?? []).join("\n"),
     datatype: et.datatype ?? "",
-    singleWord: et.singleWord,
+    regex: et.regex ?? "",
     exactLength: et.exactLength == null ? "" : String(et.exactLength),
     unique: et.unique,
     required: et.required,
@@ -102,10 +100,9 @@ function emptyRow(): EntityTypeRow {
     name: "",
     standardEntityTypeId: null,
     userDefinition: "",
-    userExamples: "",
-    userFormatDescription: "",
+    userExampleValues: "",
     datatype: "",
-    singleWord: null,
+    regex: "",
     exactLength: "",
     unique: false,
     required: false,
@@ -115,16 +112,15 @@ function emptyRow(): EntityTypeRow {
   }
 }
 
-function rowFromStd(std: FoundStandardEntityType): EntityTypeRow {
+function rowFromStd(std: StdEntityType): EntityTypeRow {
   return {
     id: "",
     name: std.shortName,
     standardEntityTypeId: std.id,
     userDefinition: std.definition ?? "",
-    userExamples: (std.examples ?? []).join("\n"),
-    userFormatDescription: std.formatDescription ?? "",
+    userExampleValues: (std.examples ?? []).join("\n"),
     datatype: std.datatype ?? "",
-    singleWord: std.singleWord,
+    regex: std.regex ?? "",
     exactLength: std.exactLength == null ? "" : String(std.exactLength),
     unique: false,
     required: false,
@@ -172,7 +168,7 @@ function validateRow(row: EntityTypeRow, index: number): RowValidation {
 
 // Convert UI row -> create/update payload (excluding id).
 function rowToPayload(row: EntityTypeRow, projectId: string) {
-  const examples = row.userExamples
+  const examples = row.userExampleValues
     .split(/\r?\n/)
     .map((s) => s.trim())
     .filter((s) => s.length > 0)
@@ -181,15 +177,14 @@ function rowToPayload(row: EntityTypeRow, projectId: string) {
     name: row.name.trim(),
     standardEntityTypeId: row.standardEntityTypeId ?? undefined,
     userDefinition: row.userDefinition.trim() || undefined,
-    userExamples: examples.length > 0 ? examples : undefined,
-    userFormatDescription: row.userFormatDescription.trim() || undefined,
+    userExampleValues: examples.length > 0 ? examples : undefined,
     datatype: row.datatype || undefined,
-    singleWord: row.singleWord ?? undefined,
+    regex: row.regex.trim() || undefined,
     exactLength: row.exactLength === "" ? undefined : Number(row.exactLength),
     unique: row.unique,
     required: row.required,
     subtype: row.subtype || undefined,
-    color: row.color || undefined,
+    color: row.color || "#FFEB3B",
     opacity: row.opacity === "" ? undefined : Number(row.opacity),
   }
 }
@@ -219,8 +214,8 @@ export const Route = createFileRoute("/_private/projects/$projectId_/entity_type
       if (!userId) {
         return {
           project: null,
-          entityTypes: [] as FoundDbEntityType[],
-          stdEntityTypes: [] as FoundStandardEntityType[],
+          entityTypes: [] as DbEntityType[],
+          stdEntityTypes: [] as StdEntityType[],
           loadError: "Not authenticated",
         }
       }
@@ -233,8 +228,8 @@ export const Route = createFileRoute("/_private/projects/$projectId_/entity_type
       if (access.accountRole === "analyst" || !access.canManage) {
         return {
           project: null,
-          entityTypes: [] as FoundDbEntityType[],
-          stdEntityTypes: [] as FoundStandardEntityType[],
+          entityTypes: [] as DbEntityType[],
+          stdEntityTypes: [] as StdEntityType[],
           loadError: "Only developers can manage entity types for this project.",
         }
       }
@@ -243,8 +238,8 @@ export const Route = createFileRoute("/_private/projects/$projectId_/entity_type
       const message = error instanceof Error ? error.message : String(error)
       return {
         project: null,
-        entityTypes: [] as FoundDbEntityType[],
-        stdEntityTypes: [] as FoundStandardEntityType[],
+        entityTypes: [] as DbEntityType[],
+        stdEntityTypes: [] as StdEntityType[],
         loadError: message,
       }
     }
@@ -289,14 +284,14 @@ function EntityTypesPageContent({
 }: {
   router: ReturnType<typeof useRouter>
   project: Awaited<ReturnType<typeof getProjectById>> | null
-  entityTypes: FoundDbEntityType[]
-  stdEntityTypes: FoundStandardEntityType[]
+  entityTypes: DbEntityType[]
+  stdEntityTypes: StdEntityType[]
   loadError: string | null
   projectId: string
 }) {
   const initialRows = useMemo(() => entityTypes.map(toRow), [entityTypes])
   const initialIds = useMemo(
-    () => new Set(entityTypes.map((et: FoundDbEntityType) => et.id)),
+    () => new Set(entityTypes.map((et: DbEntityType) => et.id)),
     [entityTypes],
   )
 
@@ -748,9 +743,9 @@ function AddFromStandard({
   existingStdIds,
   onSelect,
 }: {
-  stdEntityTypes: FoundStandardEntityType[]
+  stdEntityTypes: StdEntityType[]
   existingStdIds: Set<number>
-  onSelect: (std: FoundStandardEntityType) => void
+  onSelect: (std: StdEntityType) => void
 }) {
   return (
     <Select
@@ -791,7 +786,7 @@ function EntityTypeRowCard({
 }: {
   index: number
   projectId: string
-  stdEntityTypes: FoundStandardEntityType[]
+  stdEntityTypes: StdEntityType[]
   onRemove: () => void
   form: ReactFormExtendedApi<
     FormValues,
@@ -889,8 +884,8 @@ function EntityTypeRowCard({
           )}
         </form.Field>
 
-        {/* userExamples */}
-        <form.Field name={`rows[${index}].userExamples`}>
+        {/* userExampleValues */}
+        <form.Field name={`rows[${index}].userExampleValues`}>
           {(field) => (
             <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor={`ex-${index}`}>Examples</Label>
@@ -907,27 +902,6 @@ function EntityTypeRowCard({
               />
               <p className="text-muted-foreground text-xs">
                 One example per line. A few high-quality examples significantly improve extraction.
-              </p>
-            </div>
-          )}
-        </form.Field>
-
-        {/* userFormatDescription */}
-        <form.Field name={`rows[${index}].userFormatDescription`}>
-          {(field) => (
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor={`fmt-${index}`}>Format Description</Label>
-              <Input
-                id={`fmt-${index}`}
-                name={`fmt-${index}`}
-                autoComplete="off"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="e.g. “INV-” followed by digits…"
-              />
-              <p className="text-muted-foreground text-xs">
-                Optional description of the expected surface form (pattern, prefix, length, etc.).
               </p>
             </div>
           )}
@@ -961,28 +935,23 @@ function EntityTypeRowCard({
           )}
         </form.Field>
 
-        {/* singleWord */}
-        <form.Field name={`rows[${index}].singleWord`}>
+        {/* regex */}
+        <form.Field name={`rows[${index}].regex`}>
           {(field) => (
             <div className="space-y-1.5">
-              <Label>Single Word</Label>
-              <Select
-                value={
-                  field.state.value == null ? "__none__" : field.state.value ? "true" : "false"
-                }
-                onValueChange={(v) => field.handleChange(v === "__none__" ? null : v === "true")}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">Unspecified</SelectItem>
-                  <SelectItem value="true">Yes — must be one word</SelectItem>
-                  <SelectItem value="false">No — may span multiple words</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor={`regex-${index}`}>Regex</Label>
+              <Input
+                id={`regex-${index}`}
+                name={`regex-${index}`}
+                autoComplete="off"
+                spellCheck={false}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder="Optional pattern"
+              />
               <p className="text-muted-foreground text-xs">
-                Whether extracted values must be a single whitespace-delimited token.
+                Optional regular expression copied from a standard entity type.
               </p>
             </div>
           )}

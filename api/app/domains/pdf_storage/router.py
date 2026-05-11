@@ -24,7 +24,7 @@ async def create_bucket(
 @router.get("/pdfs/{pdf_id}/url")
 async def get_pdf_url(
     pdf_id: UUID,
-    x_user_id: UUID | None = Header(default=None, alias="X-User-Id"),
+    x_user_id: str | None = Header(default=None, alias="X-User-Id"),
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     """Return a presigned S3 GET URL the browser can fetch directly.
@@ -43,6 +43,7 @@ async def upload_pdf(
     request: Request,
     project_id: UUID = Query(...),
     bucket_id: UUID = Query(...),
+    x_user_id: str | None = Header(default=None, alias="X-User-Id"),
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     """Stream a PDF upload into S3 without buffering the full file in memory.
@@ -74,4 +75,6 @@ async def upload_pdf(
     raw_filename = request.headers.get("x-filename") or "upload.pdf"
     filename = unquote(raw_filename)
 
-    return await service.upload_pdf_stream(conn, bucket_id, project_id, filename, request)
+    return await service.upload_pdf_stream(
+        conn, bucket_id, project_id, filename, request, uploaded_by_user_id=x_user_id
+    )

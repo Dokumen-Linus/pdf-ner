@@ -47,7 +47,11 @@ async def _charge_account(conn, *, account_type: str, row: Any) -> str:
             period_start=period_start,
             period_end=period_end,
         )
-        base_amount_cents = repo.BASE_PRICE_CENTS * int(row["n_users"])
+        try:
+            member_count = row["member_count"]
+        except KeyError:
+            member_count = row.get("n_users", 1)
+        base_amount_cents = repo.BASE_PRICE_CENTS * int(member_count)
 
     usage_cost_usd = Decimal(str(usage["usage_cost_usd"]))
     idempotency_key = (

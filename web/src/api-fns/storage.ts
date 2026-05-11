@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 
 import { env } from "@/env.server"
-import { requirePdfAccess } from "@/lib/authorization.server"
+import { requirePdfAccess } from "@/lib/project-authorization.server"
 
 import { jsonCall } from "./api-json-call.server"
 

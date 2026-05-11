@@ -1,7 +1,8 @@
 import { relations } from "drizzle-orm"
 import { text, timestamp, uuid } from "drizzle-orm/pg-core"
 
-import { models } from "../public/models"
+import { chatModels } from "../public/chat-models"
+import { ocrMethods } from "../public/ocr-methods"
 
 import { entityTypes } from "./entity-types"
 import { webSchema } from "./schema"
@@ -10,25 +11,30 @@ import { users } from "./users"
 
 export const projects = webSchema.table("projects", {
   id: uuid("id").primaryKey().defaultRandom(),
-  ownerId: uuid("owner_id").references(() => users.id, { onDelete: "set null" }),
-  teamId: text("team_id").references(() => webTeams.id, { onDelete: "set null" }),
+  ownerUserId: text("owner_user_id").references(() => users.id, { onDelete: "set null" }),
+  ownerTeamId: text("owner_team_id").references(() => webTeams.id, { onDelete: "set null" }),
+  bucketId: uuid("bucket_id"),
   name: text("name").notNull(),
   description: text("description"),
-  bucketId: uuid("bucket_id"),
   colorPresets: text("color_presets").array(),
   orientation: text("orientation").notNull().default("any"),
-  ocrMethod: text("ocr_method").notNull().default("tesseract"),
-  entityExtractionModel: text("entity_extraction_model")
+  activeOcrMethod: text("active_ocr_method")
     .notNull()
-    .default("gpt-4o")
-    .references(() => models.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+    .default("olm-ocr2")
+    .references(() => ocrMethods.id, { onDelete: "set default" }),
+  activeChatModel: text("active_chat_model")
+    .notNull()
+    .default("gpt-5.4-mini")
+    .references(() => chatModels.id, { onDelete: "set default" }),
+  // Cross-schema FK: active_prompt_id UUID REFERENCES core.prompts (id)
+  activePromptId: uuid("active_prompt_id"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 })
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
   owner: one(users, {
-    fields: [projects.ownerId],
+    fields: [projects.ownerUserId],
     references: [users.id],
   }),
   entityTypes: many(entityTypes),

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start"
-import { eq, or, sql } from "drizzle-orm/sql"
+import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
 
 import { db } from "@/db/client"
@@ -7,8 +7,8 @@ import { users } from "@/db/schemas/web/users"
 
 // ** CREATE **
 export const CreateUserSchema = z.object({
-  id: z.string().uuid().optional(),
-  authUserId: z.string().optional(),
+  id: z.string(),
+  organizationId: z.string().nullable().optional(),
   email: z.email(),
   displayName: z.string().nullable().optional(),
   firstName: z.string().nullable().optional(),
@@ -57,11 +57,7 @@ export const getUserByEmail = createServerFn({ method: "GET" })
 export const getUserByAuthUserId = createServerFn({ method: "GET" })
   .inputValidator(z.object({ authUserId: z.string() }))
   .handler(async ({ data }) => {
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(or(eq(users.authUserId, data.authUserId), sql`${users.id}::text = ${data.authUserId}`))
-      .limit(1)
+    const [user] = await db.select().from(users).where(eq(users.id, data.authUserId)).limit(1)
 
     if (!user) {
       throw new Error("User not found")
@@ -95,10 +91,7 @@ export const updateUserByAuthUserId = createServerFn({ method: "POST" })
   .inputValidator(UpdateUserByAuthUserIdSchema)
   .handler(async ({ data }) => {
     const { authUserId, ...updateData } = data
-    const updatedUser = await db
-      .update(users)
-      .set(updateData)
-      .where(or(eq(users.authUserId, authUserId), sql`${users.id}::text = ${authUserId}`))
+    const updatedUser = await db.update(users).set(updateData).where(eq(users.id, authUserId))
     if (updatedUser.rowCount === 0) {
       throw new Error("User not found")
     }

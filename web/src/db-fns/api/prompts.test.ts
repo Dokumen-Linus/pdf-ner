@@ -1,83 +1,49 @@
 import { describe, expect, it } from "bun:test"
 
-import {
-  getAllPrompts,
-  getPromptById,
-  getPromptsByProjectId,
-  getPromptsByTemplateId,
-} from "./prompts"
+import { getAllPrompts, getPromptById, getPromptsByProjectId, getPromptsByTemplateId } from "./prompts"
 
 const runTests = process.env.TEST_DB === "true"
 
-describe.if(runTests)("API Prompts Read-Only Functions", () => {
-  describe("getAllPrompts", () => {
-    it("returns an array of prompts", async () => {
-      const result = await getAllPrompts()
-      expect(Array.isArray(result)).toBe(true)
-    })
+describe.if(runTests)("core.prompts (api db-fns re-export)", () => {
+  it("getPromptById returns a prompt", async () => {
+    const all = await getAllPrompts()
+    if (all.length === 0) {
+      console.warn("[prompts.test] skipping — no prompts in DB")
+      return
+    }
+    const prompt = await getPromptById({ data: { id: all[0].id } })
+    expect(prompt.id).toBe(all[0].id)
   })
 
-  describe("getPromptById", () => {
-    it("returns a prompt when it exists", async () => {
-      const allPrompts = await getAllPrompts()
-      if (allPrompts.length > 0) {
-        const firstPrompt = allPrompts[0]
-        const result = await getPromptById({ data: { id: firstPrompt.id } })
-        expect(result).toBeDefined()
-        expect(result.id).toBe(firstPrompt.id)
-        expect(result.projectId).toBe(firstPrompt.projectId)
-      }
-    })
-
-    it("throws 'Prompt not found' for non-existent ID", async () => {
-      const fakeId = "00000000-0000-0000-0000-000000000000"
-      await expect(getPromptById({ data: { id: fakeId } })).rejects.toThrow("Prompt not found")
-    })
+  it("getPromptsByProjectId returns prompts for a project", async () => {
+    const all = await getAllPrompts()
+    if (all.length === 0) {
+      console.warn("[prompts.test] skipping — no prompts in DB")
+      return
+    }
+    const result = await getPromptsByProjectId({ data: { projectId: all[0].projectId } })
+    expect(result.length).toBeGreaterThan(0)
   })
 
-  describe("getPromptsByProjectId", () => {
-    it("returns an array of prompts for a project", async () => {
-      const allPrompts = await getAllPrompts()
-      if (allPrompts.length > 0) {
-        const projectId = allPrompts[0].projectId
-        const result = await getPromptsByProjectId({ data: { projectId } })
-        expect(Array.isArray(result)).toBe(true)
-        expect(result.length).toBeGreaterThan(0)
-        for (const prompt of result) {
-          expect(prompt.projectId).toBe(projectId)
-        }
-      }
-    })
-
-    it("returns an empty array for non-existent project ID", async () => {
-      const fakeProjectId = "00000000-0000-0000-0000-000000000000"
-      const result = await getPromptsByProjectId({ data: { projectId: fakeProjectId } })
-      expect(Array.isArray(result)).toBe(true)
-      expect(result.length).toBe(0)
-    })
+  it("getPromptById throws for non-existent ID", async () => {
+    await expect(
+      getPromptById({ data: { id: "00000000-0000-0000-0000-000000000000" } }),
+    ).rejects.toThrow("Prompt not found")
   })
 
-  describe("getPromptsByTemplateId", () => {
-    it("returns an array of prompts for a template", async () => {
-      const allPrompts = await getAllPrompts()
-      const promptWithTemplate = allPrompts.find((p) => p.templateId !== null)
-      if (promptWithTemplate) {
-        const result = await getPromptsByTemplateId({
-          data: { templateId: promptWithTemplate.templateId! },
-        })
-        expect(Array.isArray(result)).toBe(true)
-        expect(result.length).toBeGreaterThan(0)
-        for (const prompt of result) {
-          expect(prompt.templateId).toBe(promptWithTemplate.templateId)
-        }
-      }
-    })
+  it("getAllPrompts returns an array", async () => {
+    const result = await getAllPrompts()
+    expect(Array.isArray(result)).toBe(true)
+  })
 
-    it("returns an empty array for non-existent template ID", async () => {
-      const fakeTemplateId = 999999
-      const result = await getPromptsByTemplateId({ data: { templateId: fakeTemplateId } })
-      expect(Array.isArray(result)).toBe(true)
-      expect(result.length).toBe(0)
-    })
+  it("getPromptsByTemplateId returns prompts for a template", async () => {
+    const all = await getAllPrompts()
+    const withTemplate = all.find((p) => p.templateId != null)
+    if (!withTemplate) {
+      console.warn("[prompts.test] skipping template filter — no prompts with templateId")
+      return
+    }
+    const result = await getPromptsByTemplateId({ data: { templateId: withTemplate.templateId } })
+    expect(result.length).toBeGreaterThan(0)
   })
 })

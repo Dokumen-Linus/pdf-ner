@@ -3,18 +3,18 @@ import { and, eq, inArray, sql } from "drizzle-orm"
 import { z } from "zod"
 
 import { db } from "@/db/client"
+import { entityValues } from "@/db/schemas/core/entity-values"
+import { corePdfs } from "@/db/schemas/core/pdfs"
 import { annotations } from "@/db/schemas/web/annotations"
 import { entityTypes } from "@/db/schemas/web/entity-types"
 import { pdfs } from "@/db/schemas/web/pdfs"
-import { workersPdfs } from "@/db/schemas/workers/pdfs"
-
 import {
   requirePdfAccess,
   requirePdfOwnership,
   requireUserId,
-} from "../../lib/authorization.server"
+} from "@/lib/project-authorization.server"
 
-import { LabeledEntitiesSchema, LABELLING_LOCK_STALE_SECONDS } from "./pdfs"
+import { LabeledEntitiesSchema, LABELING_LOCK_STALE_SECONDS } from "./pdfs"
 
 // Zod mirror of the `StoredRect` JSONB shape in db/types.ts. Accepts either
 // the nested (EmbedPDF-style) form or the flat form — all keys optional so
@@ -134,13 +134,13 @@ export const deleteAnnotation = createServerFn({ method: "POST" })
   })
 
 // ** BULK SAVE WITH LOCK CHECK **
-// Full-replace save path for the labelling page.
+// Full-replace save path for the labeling page.
 // Atomically:
 //   1. SELECT … FOR UPDATE verifies the caller still holds the editing lock
 //      (and the lock isn't stale).
 //   2. DELETE all existing annotations for the pdf.
 //   3. INSERT the provided annotation set.
-//   4. PATCH labeled_entities on web.pdfs so the row carries the aggregate.
+//   4. Refresh the lock heartbeat on web.pdfs.
 // Transaction ensures no partial state on network/client death mid-save.
 // Throws "Lock lost" if the lock was stolen after going stale.
 export const SaveAnnotationsSchema = z.object({
@@ -154,10 +154,10 @@ export const SaveAnnotationsSchema = z.object({
   labeledEntities: LabeledEntitiesSchema.optional(),
 })
 
-export class LabellingLockLostError extends Error {
+export class LabelingLockLostError extends Error {
   constructor(message = "Lock lost — your editing session expired") {
     super(message)
-    this.name = "LabellingLockLostError"
+    this.name = "LabelingLockLostError"
   }
 }
 
@@ -174,7 +174,7 @@ export const saveAnnotationsByPdfId = createServerFn({ method: "POST" })
       const [row] = await tx
         .select({
           lockedBy: pdfs.lockedBy,
-          isStale: sql<boolean>`${pdfs.lockedAt} < now() - make_interval(secs => ${LABELLING_LOCK_STALE_SECONDS})`,
+          isStale: sql<boolean>`${pdfs.lockedAt} < now() - make_interval(secs => ${LABELING_LOCK_STALE_SECONDS})`,
         })
         .from(pdfs)
         .where(eq(pdfs.id, data.pdfId))
@@ -184,16 +184,16 @@ export const saveAnnotationsByPdfId = createServerFn({ method: "POST" })
         throw new Error("PDF not found")
       }
       if (row.lockedBy !== userId || row.isStale) {
-        throw new LabellingLockLostError()
+        throw new LabelingLockLostError()
       }
 
       const [workersPdf] = await tx
-        .select({ projectId: workersPdfs.projectId })
-        .from(workersPdfs)
-        .where(eq(workersPdfs.id, data.pdfId))
+        .select({ projectId: corePdfs.projectId })
+        .from(corePdfs)
+        .where(eq(corePdfs.id, data.pdfId))
         .limit(1)
       if (!workersPdf) {
-        throw new Error("Workers PDF not found")
+        throw new Error("Core PDF not found")
       }
 
       const projectEntityTypes = await tx
@@ -221,23 +221,45 @@ export const saveAnnotationsByPdfId = createServerFn({ method: "POST" })
       })
 
       // Refresh the lock's heartbeat as a side effect of a successful save —
-      // saving is activity, so resetting the stale timer is correct. Also
-      // update the `annotated` fast-path flag so future loads of this pdf
-      // can short-circuit the annotations fetch when empty.
+      // saving is activity, so resetting the stale timer is correct.
       await tx
         .update(pdfs)
         .set({
-          labeledEntities: data.labeledEntities ?? null,
           lockedAt: sql`now()`,
-          annotated: resolvedAnnotations.length > 0,
         })
         .where(and(eq(pdfs.id, data.pdfId), eq(pdfs.lockedBy, userId)))
 
       await tx.delete(annotations).where(eq(annotations.pdfId, data.pdfId))
+      await tx
+        .delete(entityValues)
+        .where(and(eq(entityValues.pdfId, data.pdfId), eq(entityValues.isLabel, true)))
 
       if (resolvedAnnotations.length > 0) {
         await tx.insert(annotations).values(resolvedAnnotations)
       }
+
+      const labelRows = resolvedAnnotations
+        .filter((annotation) => annotation.contents)
+        .map((annotation) => ({
+          pdfId: annotation.pdfId,
+          entityTypeId: annotation.entityTypeId,
+          textValue: annotation.contents!,
+          isLabel: true,
+          rect: annotation.rect,
+          segmentRects: annotation.segmentRects,
+          pageIndex: annotation.pageIndex,
+          contents: annotation.contents,
+          author: annotation.author,
+        }))
+
+      if (labelRows.length > 0) {
+        await tx.insert(entityValues).values(labelRows)
+      }
+
+      await tx
+        .update(corePdfs)
+        .set({ hasLabels: labelRows.length > 0 })
+        .where(eq(corePdfs.id, data.pdfId))
     })
 
     return { success: true, count: data.annotations.length }

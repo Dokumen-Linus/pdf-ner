@@ -1,5 +1,4 @@
 #!/bin/bash
-# AUTO-GENERATED from _init.sql - do not edit by hand.
 # POSTGRES_USER and POSTGRES_DB should be passed as args or env vars from your PostgreSQL service
 set -e
 
@@ -13,6 +12,7 @@ psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER:-postgres}" --dbname "${POST
 
     -- schemas
     CREATE SCHEMA auth AUTHORIZATION auth_role;
+    CREATE SCHEMA core AUTHORIZATION owner_role;
     CREATE SCHEMA web AUTHORIZATION owner_role;
     CREATE SCHEMA api AUTHORIZATION owner_role;
     CREATE SCHEMA workers AUTHORIZATION owner_role;
@@ -20,6 +20,7 @@ psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER:-postgres}" --dbname "${POST
     -- privileges on schemas
     GRANT USAGE, CREATE ON SCHEMA public TO owner_role;
     GRANT USAGE ON SCHEMA auth TO owner_role;
+    GRANT USAGE ON SCHEMA core TO web_user, api_user, workers_user;
     GRANT USAGE ON SCHEMA public TO web_user, api_user, workers_user;
     GRANT USAGE ON SCHEMA web TO web_user, api_user, workers_user;
     GRANT USAGE ON SCHEMA api TO web_user, api_user, workers_user;
@@ -32,6 +33,12 @@ psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER:-postgres}" --dbname "${POST
         GRANT SELECT ON TABLES TO api_user;
     ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA public
         GRANT SELECT ON TABLES TO workers_user;
+    ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA core
+        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO web_user;
+    ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA core
+        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO api_user;
+    ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA core
+        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO workers_user;
     ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA web
         GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO web_user;
     ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA web

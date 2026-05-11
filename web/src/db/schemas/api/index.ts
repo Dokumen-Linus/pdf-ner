@@ -1,2 +1,2 @@
-export { prompts, promptsRelations } from "./prompts"
+export { awsBuckets } from "./aws-buckets"
 export { apiSchema } from "./schema"

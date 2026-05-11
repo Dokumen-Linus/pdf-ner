@@ -1,9 +1,9 @@
 -- migrate:up
 CREATE TABLE workers.llm_usage (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID NOT NULL REFERENCES web.projects(id) ON DELETE CASCADE,
-    actor_user_id UUID REFERENCES web.users(id) ON DELETE SET NULL,
-    model_id TEXT NOT NULL REFERENCES public.models(id),
+    actor_user_id TEXT REFERENCES web.users(id) ON DELETE SET NULL,
+    model_id TEXT NOT NULL REFERENCES public.chat_models (id),
     source TEXT NOT NULL CHECK (source IN ('api', 'worker')),
     task_name TEXT,
     input_tokens INTEGER NOT NULL DEFAULT 0,
@@ -15,9 +15,9 @@ CREATE TABLE workers.llm_usage (
 );
 
 CREATE TABLE workers.billing_charge_attempts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     account_type TEXT NOT NULL CHECK (account_type IN ('individual', 'organization')),
-    user_id UUID REFERENCES web.users(id),
+    user_id TEXT REFERENCES web.users(id),
     organization_id TEXT REFERENCES web.organizations(id),
     period_start TIMESTAMPTZ NOT NULL,
     period_end TIMESTAMPTZ NOT NULL,

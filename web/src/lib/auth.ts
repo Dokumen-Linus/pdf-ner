@@ -4,7 +4,7 @@ import { APIError, createAuthMiddleware, isAPIError } from "better-auth/api"
 import { haveIBeenPwned, organization } from "better-auth/plugins"
 import { defaultAc, ownerAc } from "better-auth/plugins/organization/access"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
-import { eq, or, sql } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 import { Pool } from "pg"
 
 import { db } from "../db/client"
@@ -119,11 +119,10 @@ async function syncWebUserFromAuth(user: BetterAuthUserRecord) {
   const [existing] = await db
     .select({ id: users.id })
     .from(users)
-    .where(or(eq(users.authUserId, user.id), eq(users.email, user.email)))
+    .where(eq(users.id, user.id))
     .limit(1)
 
   const nextUserData = {
-    authUserId: user.id,
     email: user.email,
     displayName: user.name.trim() || null,
     avatarUrl: user.image ?? null,
@@ -204,9 +203,7 @@ async function assertOrganizationWillKeepAdmin({
 }
 
 async function deleteWebUserForAuthUser(authUserId: string) {
-  await db
-    .delete(users)
-    .where(or(eq(users.authUserId, authUserId), sql`${users.id}::text = ${authUserId}`))
+  await db.delete(users).where(eq(users.id, authUserId))
 }
 
 export const auth = betterAuth({
@@ -325,12 +322,8 @@ export const auth = betterAuth({
             organizationId: member.organizationId,
             role: member.role,
           })
-          await db
-            .update(organizations)
-            .set({ nUsers: sql`${organizations.nUsers} + 1`, updatedAt: new Date() })
-            .where(eq(organizations.id, member.organizationId))
         },
-        afterRemoveMember: async ({ member, user }) => {
+        afterRemoveMember: async ({ user }) => {
           await db
             .update(users)
             .set({
@@ -345,14 +338,7 @@ export const auth = betterAuth({
               billingFailureCount: 0,
               updatedAt: new Date(),
             })
-            .where(eq(users.authUserId, user.id))
-          await db
-            .update(organizations)
-            .set({
-              nUsers: sql`GREATEST(${organizations.nUsers} - 1, 1)`,
-              updatedAt: new Date(),
-            })
-            .where(eq(organizations.id, member.organizationId))
+            .where(eq(users.id, user.id))
         },
         afterUpdateMemberRole: async ({ member, user }) => {
           await syncWebUserForOrganizationMember({

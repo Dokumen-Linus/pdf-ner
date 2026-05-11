@@ -26,7 +26,6 @@ type FixtureTracker = {
 type SeedUserOptions = {
   label: string
   authUserId?: string
-  webUserId?: string
 }
 
 type SeedOrganizationOptions = {
@@ -42,9 +41,9 @@ type SeedTeamOptions = {
 }
 
 type SeedProjectOptions = {
-  ownerId: string
+  ownerUserId: string
   name: string
-  teamId?: string | null
+  ownerTeamId?: string | null
   bucketId?: string | null
   description?: string | null
 }
@@ -97,7 +96,7 @@ export async function cleanupFixtures(tracker: FixtureTracker) {
 
 export async function seedUser(tracker: FixtureTracker, options: SeedUserOptions) {
   const authUserId = options.authUserId ?? crypto.randomUUID()
-  const webUserId = options.webUserId ?? crypto.randomUUID()
+  const webUserId = authUserId
   const now = new Date()
   const email = `${options.label}-${authUserId}@example.com`
 
@@ -113,7 +112,6 @@ export async function seedUser(tracker: FixtureTracker, options: SeedUserOptions
 
   await db.insert(users).values({
     id: webUserId,
-    authUserId,
     email,
     displayName: `${options.label} Web User`,
     createdAt: now,
@@ -219,8 +217,8 @@ export async function seedProject(tracker: FixtureTracker, options: SeedProjectO
 
   await db.insert(projects).values({
     id: projectId,
-    ownerId: options.ownerId,
-    teamId: options.teamId ?? null,
+    ownerUserId: options.ownerUserId,
+    ownerTeamId: options.ownerTeamId ?? null,
     name: options.name,
     description: options.description ?? null,
     bucketId: options.bucketId ?? null,

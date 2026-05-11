@@ -18,9 +18,9 @@ async def fetch_available_gemini_model(conn: asyncpg.Connection, model_id: str) 
     row = await conn.fetchrow(
         """
         SELECT id
-        FROM public.models
+        FROM public.chat_models
         WHERE id = $1
-          AND provider = 'gemini'
+          AND host = 'Google'
           AND (end_available_date IS NULL OR end_available_date > now())
         """,
         model_id,
@@ -35,8 +35,8 @@ async def fetch_sample_pdfs(
 ) -> list[SampledPdf]:
     rows = await conn.fetch(
         """
-        SELECT id, name, filepath
-        FROM workers.pdfs
+        SELECT id, filepath
+        FROM core.pdfs
         WHERE project_id = $1
         ORDER BY created_at DESC, id DESC
         LIMIT $2
@@ -47,7 +47,7 @@ async def fetch_sample_pdfs(
     return [
         SampledPdf(
             pdf_id=row["id"],
-            name=row["name"],
+            name=None,
             filepath=row["filepath"],
         )
         for row in rows

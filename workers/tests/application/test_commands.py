@@ -12,8 +12,8 @@ class TestOptimizePrompt:
         assert cmd.template_id == 1
         assert cmd.max_cost_usd == Decimal("1.00")
         assert cmd.convergence_threshold == 0.02
-        assert cmd.model == "gpt-4o"
-        assert cmd.refinement_model == "gpt-4o"
+        assert cmd.model == "gpt-5.4-mini"
+        assert cmd.refinement_model == "gpt-5.4-mini"
 
     def test_custom_values(self):
         cmd = OptimizePrompt(
