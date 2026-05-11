@@ -11,6 +11,7 @@ import {
   type MockFetchResponse,
   type MockRoute,
   type MockSession,
+  type MockSocialSignInArgs,
   type MockUser,
   resetAuthState,
   resetFetchState,
@@ -61,6 +62,16 @@ export function setUnauthenticated(): void {
 /** Configure what authClient.signIn.email() resolves to on the next call. */
 export function setSignInResult(result: MockAuthCallResult): void {
   authState.signInResult = result
+}
+
+/** Configure what authClient.signIn.social() resolves to on the next call. */
+export function setSignInSocialResult(result: MockAuthCallResult): void {
+  authState.signInSocialResult = result
+}
+
+/** Return authClient.signIn.social() calls recorded since the last mock reset. */
+export function getSignInSocialCalls(): MockSocialSignInArgs[] {
+  return [...authState.signInSocialCalls]
 }
 
 /** Configure what authClient.signUp.email() resolves to on the next call. */

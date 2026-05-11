@@ -14,6 +14,7 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
+import { Separator } from "@/components/shadcn-ui/separator"
 import { getUserByEmail, updateUserByAuthUserId } from "@/db-fns/web/users"
 import { m } from "@/integrations/paraglide/messages.js"
 import { authClient } from "@/lib/auth-client"
@@ -28,6 +29,8 @@ export const Route = createFileRoute("/_auth/signup")({
 
 function SignUpPage() {
   const [isSuccess, setIsSuccess] = useState(false)
+  const [socialError, setSocialError] = useState<string | null>(null)
+  const [isMicrosoftPending, setIsMicrosoftPending] = useState(false)
   const { redirect } = Route.useSearch()
   const verificationCallbackURL = getPostVerificationRedirect(redirect)
   const form = useForm({
@@ -90,6 +93,21 @@ function SignUpPage() {
     },
   })
 
+  const handleMicrosoftSignIn = async () => {
+    setSocialError(null)
+    setIsMicrosoftPending(true)
+    const { error } = await authClient.signIn.social({
+      provider: "microsoft",
+      callbackURL: redirect ?? "/profile",
+      errorCallbackURL: "/error",
+    })
+
+    if (error) {
+      setSocialError(error.message || m.auth_signup_error_fallback())
+      setIsMicrosoftPending(false)
+    }
+  }
+
   if (isSuccess) {
     return (
       <div className="my-8 flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
@@ -120,6 +138,25 @@ function SignUpPage() {
           <CardDescription>{m.auth_signup_description()}</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-6 space-y-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={isMicrosoftPending}
+              onClick={() => void handleMicrosoftSignIn()}
+            >
+              {m.auth_microsoft_button()}
+            </Button>
+            {socialError ? (
+              <p className="text-destructive text-sm font-medium">{socialError}</p>
+            ) : null}
+            <div className="flex items-center gap-3">
+              <Separator className="flex-1" />
+              <span className="text-muted-foreground text-xs">{m.auth_email_separator()}</span>
+              <Separator className="flex-1" />
+            </div>
+          </div>
           <form
             onSubmit={(e) => {
               e.preventDefault()

@@ -98,6 +98,8 @@ test.describe("Authentication Flow", () => {
       await expect(
         page.getByText("Enter your email and password to access your account"),
       ).toBeVisible()
+      await expect(page.getByRole("button", { name: "Continue with Microsoft" })).toBeVisible()
+      await expect(page.getByText("or continue with email")).toBeVisible()
       await expect(page.getByLabel("Email")).toBeVisible()
       await expect(page.getByLabel("Password")).toBeVisible()
       await expect(page.getByRole("button", { name: "Sign In" })).toBeVisible()

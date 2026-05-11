@@ -6,7 +6,7 @@
 
 ## Web (22 files)
 
-- `web/src/db-fns/web/annotations.ts` — LabellingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
+- `web/src/db-fns/web/annotations.ts` — LabelingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
 - `web/src/lib/auth-i18n.ts` — normalizeAuthLocale, detectAuthLocaleFromHeaders, getLocalizedAuthApiMessage, getAuthErrorPageCopy, getLocalizedAuthRedirectError, AuthLocale, …
 - `web/src/db-fns/web/test-fixtures.ts` — createFixtureTracker, cleanupFixtures, seedUser, seedOrganization, seedOrganizationMember, seedTeam, …
 - `web/src/lib/project-authorization.server.ts` — requireWorkspaceUser, requireUserId, getProjectAccessForCurrentUser, requireProjectAccess, requireProjectOwnership, requirePdfAccess, …
@@ -24,7 +24,7 @@
 - `web/src/db-fns/health.ts` — checkWebDatabase
 - `web/src/hooks/mouse-events/use-double-press-props.ts` — useDoublePressProps
 - `web/src/hooks/shadcn-ui/use-mobile.ts` — useIsMobile
-- `web/src/hooks/use-labelling-lock.ts` — useLabellingLock
+- `web/src/hooks/use-labeling-lock.ts` — useLabelingLock
 - `web/src/lib/cookies/getCookie.ts` — getCookie
 - `web/src/lib/misc/uuid.ts` — isUuidV4
 - `web/src/lib/shadcn-ui/utils.ts` — cn
