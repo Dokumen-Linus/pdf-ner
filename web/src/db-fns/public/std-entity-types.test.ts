@@ -40,7 +40,9 @@ describe.if(runTests)("public.std_entity_types", () => {
     const all = await getAllStdEntityTypes()
     const withDatatype = all.find((et) => et.datatype != null)
     if (!withDatatype) {
-      console.warn("[std-entity-types.test] skipping datatype filter — no entity types with datatype")
+      console.warn(
+        "[std-entity-types.test] skipping datatype filter — no entity types with datatype",
+      )
       return
     }
     const result = await getStdEntityTypesByDatatype({ data: { datatype: withDatatype.datatype! } })
@@ -58,8 +60,8 @@ describe.if(runTests)("public.std_entity_types", () => {
   })
 
   it("getStdEntityTypeById throws for non-existent ID", async () => {
-    await expect(
-      getStdEntityTypeById({ data: { id: 999999 } }),
-    ).rejects.toThrow("Standard entity type not found")
+    await expect(getStdEntityTypeById({ data: { id: 999999 } })).rejects.toThrow(
+      "Standard entity type not found",
+    )
   })
 })

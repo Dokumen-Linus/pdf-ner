@@ -1,6 +1,11 @@
 import { describe, expect, it } from "bun:test"
 
-import { getAllPrompts, getPromptById, getPromptsByProjectId, getPromptsByTemplateId } from "./prompts"
+import {
+  getAllPrompts,
+  getPromptById,
+  getPromptsByProjectId,
+  getPromptsByTemplateId,
+} from "./prompts"
 
 const runTests = process.env.TEST_DB === "true"
 

@@ -21,8 +21,6 @@ describe.if(runTests)("public.templates", () => {
   })
 
   it("getTemplateById throws for non-existent ID", async () => {
-    await expect(
-      getTemplateById({ data: { id: 999999 } }),
-    ).rejects.toThrow("Template not found")
+    await expect(getTemplateById({ data: { id: 999999 } })).rejects.toThrow("Template not found")
   })
 })

@@ -218,9 +218,7 @@ function PlatformPage() {
                   <div className="grid gap-3">
                     {group.nodes.map((node) => (
                       <div key={node.title} className="border border-[#E6E6E6] bg-white p-4">
-                        <p className="mb-2 text-[15px] font-medium text-[#171A20]">
-                          {node.title}
-                        </p>
+                        <p className="mb-2 text-[15px] font-medium text-[#171A20]">{node.title}</p>
                         <p className="text-[13px] leading-[1.55] text-[#5C5E62]">{node.body}</p>
                       </div>
                     ))}
@@ -313,7 +311,12 @@ function ProviderPanel({ title, providers }: { title: string; providers: Provide
 function LogoImage({ provider, sizeClassName }: { provider: Provider; sizeClassName: string }) {
   return (
     <span className="flex h-12 w-12 shrink-0 items-center justify-center border border-[#EEEEEE] bg-white">
-      <img src={provider.icon} alt="" aria-hidden="true" className={`${sizeClassName} object-contain`} />
+      <img
+        src={provider.icon}
+        alt=""
+        aria-hidden="true"
+        className={`${sizeClassName} object-contain`}
+      />
     </span>
   )
 }

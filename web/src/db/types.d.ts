@@ -75,7 +75,9 @@ export type WatcherRun = InferSelectModel<typeof schema.watcherRuns>
 export type Listener = InferSelectModel<typeof schema.listeners>
 export type NerWorkflow = InferSelectModel<typeof schema.nerWorkflows>
 export type ContextEngineeringRun = InferSelectModel<typeof schema.contextEngineeringRuns>
-export type ContextEngineeringIteration = InferSelectModel<typeof schema.contextEngineeringIterations>
+export type ContextEngineeringIteration = InferSelectModel<
+  typeof schema.contextEngineeringIterations
+>
 export type PromptExample = InferSelectModel<typeof schema.promptExamples>
 export type ChatModelEvalRun = InferSelectModel<typeof schema.chatModelEvalRuns>
 export type ChatModelEvalIteration = InferSelectModel<typeof schema.chatModelEvalIterations>

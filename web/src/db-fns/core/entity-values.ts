@@ -8,10 +8,7 @@ import { entityValues } from "@/db/schemas/core/entity-values"
 export const getEntityValuesByPdfId = createServerFn({ method: "GET" })
   .inputValidator(z.object({ pdfId: z.string() }))
   .handler(async ({ data }) => {
-    const values = await db
-      .select()
-      .from(entityValues)
-      .where(eq(entityValues.pdfId, data.pdfId))
+    const values = await db.select().from(entityValues).where(eq(entityValues.pdfId, data.pdfId))
     return values
   })
 
@@ -22,10 +19,7 @@ export const getEntityValuesByPdfIdAndEntityTypeId = createServerFn({ method: "G
       .select()
       .from(entityValues)
       .where(
-        and(
-          eq(entityValues.pdfId, data.pdfId),
-          eq(entityValues.entityTypeId, data.entityTypeId),
-        ),
+        and(eq(entityValues.pdfId, data.pdfId), eq(entityValues.entityTypeId, data.entityTypeId)),
       )
     return values
   })

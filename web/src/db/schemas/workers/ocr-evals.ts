@@ -28,9 +28,7 @@ export const ocrEvaluationRuns = workersSchema.table(
     startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
     finishedAt: timestamp("finished_at", { withTimezone: true }),
   },
-  (t) => [
-    index("ocr_evaluation_runs_project_started_idx").on(t.projectId, t.startedAt),
-  ],
+  (t) => [index("ocr_evaluation_runs_project_started_idx").on(t.projectId, t.startedAt)],
 )
 
 export const ocrEvaluationPages = workersSchema.table(
