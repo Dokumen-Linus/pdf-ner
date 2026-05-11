@@ -356,6 +356,7 @@
 - Readmes and centralized styling
 - *(llm)* Remove repeated info
 - *(llm)* Create skill for pypdfium2
+- *(llm)* VLLM skill
 
 ### ⚡ Performance
 
@@ -600,6 +601,7 @@
 - Vscode and kilo settings
 - Move from AWS keys to EC2 profile
 - *(llm)* Kilo settings
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
