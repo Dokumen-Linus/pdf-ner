@@ -355,6 +355,7 @@
 - Pypdfium2 examples
 - Readmes and centralized styling
 - *(llm)* Remove repeated info
+- *(llm)* Create skill for pypdfium2
 
 ### ⚡ Performance
 
@@ -599,6 +600,7 @@
 - Vscode and kilo settings
 - Move from AWS keys to EC2 profile
 - *(llm)* Kilo settings
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
