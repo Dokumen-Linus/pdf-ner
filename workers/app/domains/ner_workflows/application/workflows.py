@@ -18,7 +18,7 @@ from ..infrastructure import ocr
 from ..infrastructure import repositories as repo
 from .commands import ProcessDocumentSource
 
-_TASK_NAME = "entity_extraction.process_document_source"
+_TASK_NAME = "ner_workflows.process_document_source"
 _SUPPORTED_PROVIDERS = {"openai", "anthropic", "gemini"}
 
 
@@ -64,7 +64,7 @@ async def _call_llm_for_model(
             system_prompt,
             user_prompt,
             schema=schema,
-            schema_name="entity_extraction",
+            schema_name="ner_workflows",
         )
     if provider == "anthropic":
         return await call_anthropic(

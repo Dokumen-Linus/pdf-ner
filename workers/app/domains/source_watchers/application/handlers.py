@@ -23,7 +23,7 @@ async def handle_dispatch_due_watchers(cmd: DispatchDueWatchers) -> dict:
 
 
 async def handle_poll_source_connection(cmd: PollSourceConnection) -> dict:
-    from app.domains.entity_extraction.tasks import process_document_source_task
+    from app.domains.ner_workflows.tasks import process_document_source_task
 
     async with RedisLock(f"watch:{cmd.connection_id}", ttl=900) as lock:
         if not lock.acquired:

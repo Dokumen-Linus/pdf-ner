@@ -2,13 +2,13 @@ from uuid import uuid4
 
 import pytest
 
-from app.domains.entity_extraction.application import workflows
-from app.domains.entity_extraction.domain.entities import EntityTypeInfo, ProjectExtractionConfig
-from app.domains.entity_extraction.domain.services import (
+from app.domains.ner_workflows.application import workflows
+from app.domains.ner_workflows.domain.entities import EntityTypeInfo, ProjectExtractionConfig
+from app.domains.ner_workflows.domain.services import (
     build_fallback_system_prompt,
     build_json_schema,
 )
-from app.domains.entity_extraction.domain.value_objects import (
+from app.domains.ner_workflows.domain.value_objects import (
     PageText,
     has_usable_text,
     join_page_text,
@@ -103,7 +103,7 @@ async def test_model_provider_routing_openai(monkeypatch):
     )
 
     assert result.input_tokens == 1
-    assert calls[0][4]["schema_name"] == "entity_extraction"
+    assert calls[0][4]["schema_name"] == "ner_workflows"
     assert calls[0][4]["schema"] == {"type": "object"}
 
 
