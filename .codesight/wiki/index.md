@@ -12,10 +12,10 @@ Structural map compiled from source code via AST. No LLM — deterministic, 200m
 - [Database](./database.md)
 - [Avatars](./avatars.md)
 - [Buckets](./buckets.md)
-- [Extract](./extract.md)
 - [Extract-text](./extract-text.md)
 - [Highlight](./highlight.md)
 - [Ocr](./ocr.md)
+- [Ocr-evaluation](./ocr-evaluation.md)
 - [Optimize-prompt](./optimize-prompt.md)
 - [Pdfs](./pdfs.md)
 - [Test_telemetry](./test_telemetry.md)
@@ -25,7 +25,7 @@ Structural map compiled from source code via AST. No LLM — deterministic, 200m
 
 ## Quick Stats
 
-- Routes: **16**
+- Routes: **17**
 - Models: **3**
 - Components: **81**
 - Env vars: **34** required, **50** with defaults

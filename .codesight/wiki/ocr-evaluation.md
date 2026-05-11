@@ -1,14 +1,14 @@
-# Optimize-prompt
+# Ocr-evaluation
 
 > **Navigation aid.** Route list and file locations extracted via AST. Read the source files listed below before implementing or modifying this subsystem.
 
-The Optimize-prompt subsystem handles **2 routes** and touches: cache.
+The Ocr-evaluation subsystem handles **2 routes** and touches: cache.
 
 ## Routes
 
-- `POST` `/api/v1/optimize-prompt` → in: OptimizePromptRequest [cache]
+- `POST` `/api/v1/ocr-evaluation` → in: OptimizePromptRequest [cache]
   `api/app/domains/worker_dispatch/router.py`
-- `GET` `/api/v1/optimize-prompt/{task_id}/status` params(task_id) [cache]
+- `GET` `/api/v1/ocr-evaluation/{task_id}/status` params(task_id) [cache]
   `api/app/domains/worker_dispatch/router.py`
 
 ## Source Files

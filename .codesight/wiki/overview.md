@@ -8,16 +8,16 @@
 
 ## Scale
 
-16 API routes · 3 database models · 81 UI components · 48 library files · 20 middleware layers · 84 environment variables
+17 API routes · 3 database models · 81 UI components · 48 library files · 20 middleware layers · 84 environment variables
 
 ## Subsystems
 
 - **[Avatars](./avatars.md)** — 1 routes — touches: upload
 - **[Buckets](./buckets.md)** — 1 routes — touches: auth, upload
-- **[Extract](./extract.md)** — 1 routes — touches: cache
 - **[Extract-text](./extract-text.md)** — 1 routes
 - **[Highlight](./highlight.md)** — 1 routes
 - **[Ocr](./ocr.md)** — 1 routes — touches: auth, cache
+- **[Ocr-evaluation](./ocr-evaluation.md)** — 2 routes — touches: cache
 - **[Optimize-prompt](./optimize-prompt.md)** — 2 routes — touches: cache
 - **[Pdfs](./pdfs.md)** — 2 routes — touches: auth, upload
 - **[Test_telemetry](./test_telemetry.md)** — 1 routes — touches: auth, cache
