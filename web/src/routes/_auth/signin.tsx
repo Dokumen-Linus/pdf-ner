@@ -18,6 +18,8 @@ import { Separator } from "@/components/shadcn-ui/separator"
 import { m } from "@/integrations/paraglide/messages.js"
 import { authClient } from "@/lib/auth-client"
 
+type SocialProvider = "microsoft" | "google"
+
 export const Route = createFileRoute("/_auth/signin")({
   validateSearch: z.object({
     redirect: z.string().optional(),
@@ -29,7 +31,7 @@ function SignInPage() {
   const navigate = useNavigate()
   const { redirect } = Route.useSearch()
   const [socialError, setSocialError] = useState<string | null>(null)
-  const [isMicrosoftPending, setIsMicrosoftPending] = useState(false)
+  const [pendingSocialProvider, setPendingSocialProvider] = useState<SocialProvider | null>(null)
   const form = useForm({
     defaultValues: {
       email: "",
@@ -54,18 +56,18 @@ function SignInPage() {
     },
   })
 
-  const handleMicrosoftSignIn = async () => {
+  const handleSocialSignIn = async (provider: SocialProvider) => {
     setSocialError(null)
-    setIsMicrosoftPending(true)
+    setPendingSocialProvider(provider)
     const { error } = await authClient.signIn.social({
-      provider: "microsoft",
+      provider,
       callbackURL: redirect ?? "/profile",
       errorCallbackURL: "/error",
     })
 
     if (error) {
       setSocialError(error.message || m.auth_signin_error_fallback())
-      setIsMicrosoftPending(false)
+      setPendingSocialProvider(null)
     }
   }
 
@@ -82,10 +84,19 @@ function SignInPage() {
               type="button"
               variant="outline"
               className="w-full"
-              disabled={isMicrosoftPending}
-              onClick={() => void handleMicrosoftSignIn()}
+              disabled={pendingSocialProvider !== null}
+              onClick={() => void handleSocialSignIn("microsoft")}
             >
               {m.auth_microsoft_button()}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={pendingSocialProvider !== null}
+              onClick={() => void handleSocialSignIn("google")}
+            >
+              {m.auth_google_button()}
             </Button>
             {socialError ? (
               <p className="text-destructive text-sm font-medium">{socialError}</p>

@@ -7,6 +7,8 @@ const TEST_SERVER_ENV: Record<string, string> = {
   BETTER_AUTH_URL: "http://localhost:3000",
   MICROSOFT_CLIENT_ID: "test-microsoft-client-id",
   MICROSOFT_CLIENT_SECRET: "test-microsoft-client-secret",
+  GOOGLE_CLIENT_ID: "test-google-client-id",
+  GOOGLE_CLIENT_SECRET: "test-google-client-secret",
   FROM_EMAIL: "no-reply@example.test",
   MY_EMAIL: "admin@example.test",
   STRIPE_SECRET_KEY: "sk_test_dummy",

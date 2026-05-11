@@ -20,6 +20,8 @@ import { m } from "@/integrations/paraglide/messages.js"
 import { authClient } from "@/lib/auth-client"
 import { getPostVerificationRedirect } from "@/lib/auth-redirects"
 
+type SocialProvider = "microsoft" | "google"
+
 export const Route = createFileRoute("/_auth/signup")({
   validateSearch: z.object({
     redirect: z.string().optional(),
@@ -30,7 +32,7 @@ export const Route = createFileRoute("/_auth/signup")({
 function SignUpPage() {
   const [isSuccess, setIsSuccess] = useState(false)
   const [socialError, setSocialError] = useState<string | null>(null)
-  const [isMicrosoftPending, setIsMicrosoftPending] = useState(false)
+  const [pendingSocialProvider, setPendingSocialProvider] = useState<SocialProvider | null>(null)
   const { redirect } = Route.useSearch()
   const verificationCallbackURL = getPostVerificationRedirect(redirect)
   const form = useForm({
@@ -93,18 +95,18 @@ function SignUpPage() {
     },
   })
 
-  const handleMicrosoftSignIn = async () => {
+  const handleSocialSignIn = async (provider: SocialProvider) => {
     setSocialError(null)
-    setIsMicrosoftPending(true)
+    setPendingSocialProvider(provider)
     const { error } = await authClient.signIn.social({
-      provider: "microsoft",
+      provider,
       callbackURL: redirect ?? "/profile",
       errorCallbackURL: "/error",
     })
 
     if (error) {
       setSocialError(error.message || m.auth_signup_error_fallback())
-      setIsMicrosoftPending(false)
+      setPendingSocialProvider(null)
     }
   }
 
@@ -143,10 +145,19 @@ function SignUpPage() {
               type="button"
               variant="outline"
               className="w-full"
-              disabled={isMicrosoftPending}
-              onClick={() => void handleMicrosoftSignIn()}
+              disabled={pendingSocialProvider !== null}
+              onClick={() => void handleSocialSignIn("microsoft")}
             >
               {m.auth_microsoft_button()}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={pendingSocialProvider !== null}
+              onClick={() => void handleSocialSignIn("google")}
+            >
+              {m.auth_google_button()}
             </Button>
             {socialError ? (
               <p className="text-destructive text-sm font-medium">{socialError}</p>

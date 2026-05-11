@@ -46,6 +46,7 @@
   "auth_signin_email_label": "Email",
   "auth_signin_password_label": "Mot de passe",
   "auth_microsoft_button": "Continuer avec Microsoft",
+  "auth_google_button": "Continuer avec Google",
   "auth_email_separator": "ou continuer avec l'e-mail",
   "auth_signin_button": "Se connecter",
   "auth_signin_button_loading": "Connexion...",
