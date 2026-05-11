@@ -275,6 +275,7 @@
 - *(api)* Finish move from telemetry.py
 - *(pkg)* Pdfium_utils
 - *(web)* Move emails to components/emails
+- *(wk)* Rename entity_extraction domain to ner_workflows
 
 ### 📚 Documentation
 
@@ -357,6 +358,7 @@
 - *(llm)* Remove repeated info
 - *(llm)* Create skill for pypdfium2
 - *(llm)* VLLM skill
+- *(db)* Add core schema
 
 ### ⚡ Performance
 
@@ -418,6 +420,7 @@
 - Use Stripe metered billing
 - *(db)* Remove api.pdfs table
 - *(db)* Split std_ets into multiple seeds
+- Redesign db
 
 ### 🎨 Styling
 
@@ -604,6 +607,11 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Remove eslint from auto-format
+- Vscode settings
+- *(llm)* Opencode settings
+- Add sitemap to web gitignore
 
 ### ◀️ Revert
 
@@ -616,3 +624,5 @@
 - *(web)* Remove selection menu from plugin-selection-2
 - *(web)* Return useRotatePlugin
 - *(ci)* Remove old deploy instructions
+- *(api)* Remove llm_ner domain
+- *(api)* Return llm_ner domain
