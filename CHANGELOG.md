@@ -122,6 +122,7 @@
 - *(infra)* First draft stripe-setup.sh
 - New billing
 - *(ci)* In progress ci/cd
+- *(web)* Microsoft sso
 
 ### 🐛 Bug Fixes
 
@@ -598,6 +599,7 @@
 - Vscode and kilo settings
 - Move from AWS keys to EC2 profile
 - *(llm)* Kilo settings
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
 
