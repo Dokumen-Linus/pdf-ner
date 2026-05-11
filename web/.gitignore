@@ -4,6 +4,9 @@ node_modules/
 # tanstack start
 dist
 dist-ssr
+
+# build artifacts
+public/sitemap.xml
 count.txt
 *.local
 .nitro
