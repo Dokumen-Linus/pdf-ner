@@ -1,26 +1,27 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+from decimal import Decimal
 import json
 import logging
 from typing import Any
 from uuid import UUID
 
 import asyncpg
-from openai import AsyncOpenAI
 
 from app.domains.llm_usage.infrastructure.repository import record_llm_usage
+from app.domains.ner_runs.application.workflows import execute_and_persist_ner_batch
+from app.domains.ner_runs.domain import services as ner_services
+from app.domains.ner_runs.domain.entities import NerPdfInput, NerPdfResult, NerRunOrigin
+from app.domains.ner_runs.domain.value_objects import FScore
+from app.domains.ner_runs.infrastructure.repositories import link_run_to_context_iteration
+from app.integrations.anthropic import call_anthropic
+from app.integrations.gemini import call_google_genai
 from app.integrations.openai import call_openai
 from app.shared.domain.LLMResponseData import LLMResponseData
 
 from ..domain import services
-from ..domain.entities import (
-    EntityTypeInfo,
-    EvaluationResult,
-    FinalPdfEvaluation,
-    FinalPredictionPair,
-    LabeledPdf,
-    PromptCandidate,
-)
+from ..domain.entities import EntityTypeInfo, LabeledPdf
 from ..domain.value_objects import CostBudget
 from ..infrastructure import repositories as repo
 from .commands import OptimizePrompt
@@ -30,581 +31,790 @@ logger = logging.getLogger(__name__)
 _TASK_NAME = "context_engineering.optimize_prompt"
 
 
+@dataclass
+class PromptAttributes:
+    project_description: str | None
+    entity_types_order: list[UUID]
+    entity_type_definitions: dict[str, str]
+    entity_type_example_values: dict[str, list[str]]
+    entity_type_example_finds: dict[str, list[dict]]
+
+
 def _report_progress(
     task: Any | None, phase: str, message: str, percent: int, **details: Any
 ) -> None:
-    """Push a PROGRESS state update to the Celery result backend."""
     if task is None:
         return
     task.update_state(
         state="PROGRESS",
-        meta={
-            "phase": phase,
-            "message": message,
-            "percent": percent,
-            "details": details,
-        },
+        meta={"phase": phase, "message": message, "percent": percent, "details": details},
     )
-
-
-def _budget_details(budget: CostBudget) -> dict[str, str]:
-    return {
-        "cost_usd": str(budget.spent_cost_usd),
-        "max_cost_usd": str(budget.max_cost_usd),
-        "remaining_cost_usd": str(budget.remaining_cost_usd),
-    }
-
-
-def _budget_percent(budget: CostBudget, floor: int = 10, ceiling: int = 95) -> int:
-    ratio = min(float(budget.spent_cost_usd / budget.max_cost_usd), 1.0)
-    return min(ceiling, max(floor, floor + int(ratio * (ceiling - floor))))
 
 
 async def prompt_optimization_workflow(
     conn: asyncpg.Connection,
-    openai_client: AsyncOpenAI,
+    llm_clients: dict[str, Any],
     cmd: OptimizePrompt,
     task: Any | None = None,
 ) -> dict:
-    """Main optimization loop.
-
-    Returns dict with best_prompt_id, best_f1, iterations_run, cost_usd, and stop_reason.
-    """
     budget = CostBudget(max_cost_usd=cmd.max_cost_usd)
+    context_llm_cost = Decimal("0")
     stop_reason = "completed"
-    iterations_run = 0
-    llm_call_count = 0
 
-    # 1. Fetch project data
     project = await repo.fetch_project(conn, cmd.project_id)
     if not project:
         raise ValueError(f"Project not found: {cmd.project_id}")
-
-    model_provider = await repo.fetch_model_provider(conn, cmd.model)
-    if model_provider is None:
-        raise ValueError(f"Model is not available: {cmd.model}")
-    if model_provider != "openai":
-        raise ValueError(f"Context engineering requires an OpenAI model, got: {model_provider}")
 
     template = await repo.fetch_template(conn, cmd.template_id)
     if not template:
         raise ValueError(f"Template not found: {cmd.template_id}")
 
+    ner_provider = await repo.fetch_model_provider(conn, cmd.ner_chat_model)
+    if ner_provider is None:
+        raise ValueError(f"NER model is not available: {cmd.ner_chat_model}")
+    prompt_provider = await repo.fetch_model_provider(conn, cmd.prompt_eng_chat_model)
+    if prompt_provider is None:
+        raise ValueError(f"Prompt engineering model is not available: {cmd.prompt_eng_chat_model}")
+
     entity_types = await repo.fetch_entity_types_with_std(conn, cmd.project_id)
     if not entity_types:
         raise ValueError(f"No entity types for project: {cmd.project_id}")
+    if any(entity.entity_type_id is None for entity in entity_types):
+        raise ValueError("All entity types must have ids for context engineering")
 
-    labeled_pdfs = await repo.fetch_labeled_pdfs(conn, cmd.project_id)
-    if not labeled_pdfs:
-        raise ValueError(f"No labeled PDFs for project: {cmd.project_id}")
-
-    labeled_pdf_count = len(labeled_pdfs)
-    labeled_pdfs, skipped_pdf_count = _usable_labeled_pdfs(labeled_pdfs)
-
-    if not labeled_pdfs:
-        raise ValueError(f"No labeled PDFs with usable text for project: {cmd.project_id}")
+    labeled_pdfs = await repo.fetch_labeled_pdfs(conn, cmd.project_id, cmd.labeled_pdfs)
+    found_pdf_ids = {pdf.pdf_id for pdf in labeled_pdfs}
+    missing_pdf_ids = set(cmd.labeled_pdfs) - found_pdf_ids
+    if missing_pdf_ids:
+        raise ValueError(f"Labeled PDFs are invalid or missing text: {sorted(missing_pdf_ids)}")
 
     context_eng_run_id = await repo.insert_context_engineering_run(
         conn,
         project_id=cmd.project_id,
-        beta=1,
+        beta=cmd.beta,
         max_usd=cmd.max_cost_usd,
-        labeled_pdfs=[pdf.pdf_id for pdf in labeled_pdfs],
+        labeled_pdfs=cmd.labeled_pdfs,
     )
-
     _report_progress(
         task,
         "data_fetched",
-        f"Loaded {len(labeled_pdfs)} PDFs and {len(entity_types)} entity types",
+        f"Loaded {len(labeled_pdfs)} labeled PDFs and {len(entity_types)} entity types",
         5,
-        pdfs_loaded=len(labeled_pdfs),
-        entity_types_count=len(entity_types),
     )
 
-    # 2. Build JSON response schema
-    json_schema = services.build_json_schema(entity_types)
-
-    # 3. Generate initial prompt variants
-    base_prompt = services.render_prompt_template(
-        template["txt"], project["description"], entity_types
+    attributes = _initial_prompt_attributes(project["description"], entity_types)
+    example_find_cost = await _populate_example_finds(
+        conn,
+        llm_clients,
+        provider=prompt_provider,
+        model=cmd.prompt_eng_chat_model,
+        project_id=cmd.project_id,
+        attributes=attributes,
+        entity_types=entity_types,
+        labeled_pdfs=labeled_pdfs,
     )
-    variants = services.generate_prompt_variants(base_prompt, entity_types, project["description"])
-    example_sets = services.select_prompt_example_sets(labeled_pdfs, max_examples=2)
+    context_llm_cost += example_find_cost
 
-    _report_progress(
-        task,
-        "prompts_prepared",
-        f"Generated {len(variants)} prompt variants and {len(example_sets)} example sets",
-        10,
-        variants_count=len(variants),
-        example_set_count=len(example_sets),
-    )
+    best_prompt_id: UUID | None = None
+    best_overall_f = -1.0
+    previous_f = -1.0
+    previous_incorrect_ids: list[UUID] = []
+    previous_missed_entity_types: list[dict] = []
+    iterations_run = 0
 
-    # 4. Evaluate each variant, pick best
-    best_candidate: PromptCandidate | None = None
-    best_f1 = -1.0
-    eval_results: list[EvaluationResult] = []
-
-    total_candidates = len(variants) * len(example_sets)
-    candidate_idx = 0
-    for var_idx, system_prompt in enumerate(variants):
-        for example_pdfs in example_sets:
-            candidate_idx += 1
-            if budget.is_exhausted:
-                stop_reason = "max_cost_reached"
-                break
-
-            examples = services.build_prompt_example_snapshots(example_pdfs)
-            few_shot_text = services.format_prompt_example_snapshots(examples)
-            full_prompt = system_prompt
-            if few_shot_text:
-                full_prompt = system_prompt + "\n\n" + few_shot_text
-
-            candidate = PromptCandidate(system_prompt=full_prompt, iteration=0, examples=examples)
-            eval_pdfs = _evaluation_pdfs_for_examples(labeled_pdfs, example_pdfs)
-            eval_results = await _evaluate_prompt_on_pdfs(
-                conn,
-                openai_client,
-                candidate,
-                eval_pdfs,
-                json_schema,
-                entity_types,
-                cmd.model,
-                project_id=cmd.project_id,
-                budget=budget,
-            )
-            llm_call_count += len(eval_results)
-            if not eval_results:
-                stop_reason = "max_cost_reached"
-                break
-            avg_f1 = sum(r.overall_f1 for r in eval_results) / max(len(eval_results), 1)
-            candidate.overall_f1 = avg_f1
-            logger.info(
-                "Variant %d candidate %d F1: %.4f",
-                var_idx,
-                candidate_idx,
-                avg_f1,
-            )
-
-            variant_percent = max(
-                15 + (candidate_idx * 30 // max(total_candidates, 1)),
-                _budget_percent(budget, floor=15, ceiling=45),
-            )
-            _report_progress(
-                task,
-                "evaluating_variant",
-                f"Evaluated candidate {candidate_idx}/{total_candidates} - F1: {avg_f1:.3f}",
-                variant_percent,
-                variant=var_idx + 1,
-                candidate=candidate_idx,
-                total_candidates=total_candidates,
-                total_variants=len(variants),
-                f1=round(avg_f1, 4),
-                **_budget_details(budget),
-            )
-
-            if avg_f1 > best_f1:
-                best_f1 = avg_f1
-                best_candidate = candidate
-        if budget.is_exhausted:
-            break
-
-    if best_candidate is None:
-        raise ValueError("Cost budget exhausted before any prompt could be evaluated")
-
-    # 5. Iterative refinement
-    eval_pdfs = _evaluation_pdfs_for_candidate(labeled_pdfs, best_candidate)
     iteration = 0
-    while not budget.is_exhausted:
-        iteration += 1
-        iter_base_pct = _budget_percent(budget, floor=50, ceiling=95)
-        _report_progress(
-            task,
-            "evaluating_current",
-            f"Iteration {iteration} - evaluating current best",
-            iter_base_pct,
-            iteration=iteration,
-            best_f1=round(best_f1, 4),
-            **_budget_details(budget),
-        )
-
-        eval_results = await _evaluate_prompt_on_pdfs(
-            conn,
-            openai_client,
-            best_candidate,
-            eval_pdfs,
-            json_schema,
-            entity_types,
-            cmd.model,
-            project_id=cmd.project_id,
-            budget=budget,
-        )
-        llm_call_count += len(eval_results)
-        if not eval_results:
+    while True:
+        if budget.spent_cost_usd + context_llm_cost >= budget.max_cost_usd:
             stop_reason = "max_cost_reached"
             break
 
-        error_analysis = services.build_error_analysis(eval_results, entity_types)
-        if not error_analysis.strip():
-            logger.info("No errors to fix at iteration %d. Stopping.", iteration)
+        if iteration > 0:
+            modifier_cost = await _modify_attributes_from_incorrect_predictions(
+                conn,
+                llm_clients,
+                provider=prompt_provider,
+                model=cmd.prompt_eng_chat_model,
+                project_id=cmd.project_id,
+                attributes=attributes,
+                incorrect_entity_value_ids=previous_incorrect_ids,
+                missed_entity_types=previous_missed_entity_types,
+            )
+            context_llm_cost += modifier_cost
+
+        if budget.spent_cost_usd + context_llm_cost >= budget.max_cost_usd:
+            stop_reason = "max_cost_reached"
+            break
+
+        prompt_id = await repo.insert_prompt_attributes(
+            conn,
+            project_id=cmd.project_id,
+            template_id=cmd.template_id,
+            project_description=attributes.project_description,
+            entity_types_order=attributes.entity_types_order,
+            entity_type_definitions=attributes.entity_type_definitions,
+            entity_type_example_values=attributes.entity_type_example_values,
+            entity_type_example_finds=attributes.entity_type_example_finds,
+        )
+        await _insert_prompt_examples_for_attributes(conn, prompt_id, attributes)
+        formed_prompt = services.form_prompt_text(
+            template["txt"],
+            project_description=attributes.project_description,
+            entity_types=_ordered_entity_types(entity_types, attributes.entity_types_order),
+            entity_type_definitions=attributes.entity_type_definitions,
+            entity_type_example_values=attributes.entity_type_example_values,
+            entity_type_example_finds=attributes.entity_type_example_finds,
+        )
+        ner_result = await execute_and_persist_ner_batch(
+            conn,
+            llm_clients,
+            provider=ner_provider,
+            model=cmd.ner_chat_model,
+            project_id=cmd.project_id,
+            prompt_id=prompt_id,
+            origin=NerRunOrigin(),
+            task_name=_TASK_NAME,
+            schema_name="context_engineering",
+            system_prompt=formed_prompt,
+            pdfs=[
+                NerPdfInput(pdf.pdf_id, pdf.full_text or "", pdf.pdf_txt_id) for pdf in labeled_pdfs
+            ],
+            entity_types=entity_types,
+        )
+        budget.add_usage(ner_result.cost_usd)
+        metrics = _calculate_iteration_metrics(
+            ner_result.pdf_results,
+            labeled_pdfs,
+            entity_types,
+            beta=cmd.beta,
+        )
+        iteration_id = await repo.insert_evaluation(
+            conn,
+            context_eng_run_id,
+            prompt_id,
+            metrics["overall_f"],
+            metrics["per_entity_scores"],
+            pdfs_fully_correct=metrics["num_correct_pdfs"],
+            pdf_accuracy=metrics["pdf_accuracy"],
+            entity_type_metrics=metrics["entity_type_metrics"],
+            incorrectly_predicted_entity_value_ids=metrics[
+                "incorrectly_predicted_entity_value_ids"
+            ],
+        )
+        if ner_result.run_id is not None:
+            await link_run_to_context_iteration(
+                conn,
+                ner_run_id=ner_result.run_id,
+                context_eng_iter_id=iteration_id,
+            )
+
+        iterations_run = iteration + 1
+        previous_incorrect_ids = metrics["incorrectly_predicted_entity_value_ids"]
+        previous_missed_entity_types = metrics["missed_entity_types"]
+        overall_f = metrics["overall_f"]
+        if overall_f > best_overall_f:
+            best_overall_f = overall_f
+            best_prompt_id = prompt_id
+        _report_progress(
+            task,
+            "iteration_complete",
+            f"Iteration {iterations_run} complete - F: {overall_f:.3f}",
+            min(95, 15 + iterations_run * 25),
+            incorrectly_predicted_count=len(previous_incorrect_ids),
+        )
+
+        if not previous_incorrect_ids and not previous_missed_entity_types:
             stop_reason = "no_errors"
             break
-
-        if budget.is_exhausted:
-            stop_reason = "max_cost_reached"
-            break
-
-        _report_progress(
-            task,
-            "generating_refinement",
-            f"Iteration {iteration} - generating refined prompt",
-            _budget_percent(budget, floor=55, ceiling=95),
-            iteration=iteration,
-            **_budget_details(budget),
-        )
-
-        refinement_meta_prompt = services.build_refinement_prompt(
-            best_candidate.system_prompt, error_analysis, entity_types
-        )
-        llm_usage: LLMResponseData = await call_openai(
-            openai_client,
-            cmd.model,
-            "You are a prompt engineering expert.",
-            refinement_meta_prompt,
-        )
-        usage_cost = await record_llm_usage(
-            conn,
-            model=cmd.model,
-            input_tokens=llm_usage.input_tokens,
-            output_tokens=llm_usage.output_tokens,
-            project_id=cmd.project_id,
-            task_name=_TASK_NAME,
-        )
-        budget.add_usage(usage_cost)
-        llm_call_count += 1
-
-        if budget.is_exhausted:
-            stop_reason = "max_cost_reached"
-            break
-
-        refined_candidate = PromptCandidate(
-            system_prompt=llm_usage.text,
-            iteration=iteration,
-            examples=best_candidate.examples,
-        )
-        refined_results = await _evaluate_prompt_on_pdfs(
-            conn,
-            openai_client,
-            refined_candidate,
-            eval_pdfs,
-            json_schema,
-            entity_types,
-            cmd.model,
-            project_id=cmd.project_id,
-            budget=budget,
-        )
-        llm_call_count += len(refined_results)
-        if not refined_results:
-            stop_reason = "max_cost_reached"
-            break
-        refined_f1 = sum(r.overall_f1 for r in refined_results) / max(len(refined_results), 1)
-        refined_candidate.overall_f1 = refined_f1
-        refined_candidate.scores = {
-            et.name: _avg_score(refined_results, et.name) for et in entity_types
-        }
-        logger.info(
-            "Iteration %d refined F1: %.4f (best so far: %.4f)",
-            iteration,
-            refined_f1,
-            best_f1,
-        )
-
-        _report_progress(
-            task,
-            "iteration_evaluated",
-            f"Iteration {iteration} - refined F1: {refined_f1:.3f}",
-            _budget_percent(budget, floor=60, ceiling=95),
-            iteration=iteration,
-            refined_f1=round(refined_f1, 4),
-            best_f1=round(best_f1, 4),
-            **_budget_details(budget),
-        )
-
-        iterations_run = iteration
-        improvement = refined_f1 - best_f1
-        if refined_f1 > best_f1:
-            best_f1 = refined_f1
-            best_candidate = refined_candidate
-
-        if improvement < cmd.convergence_threshold:
-            logger.info(
-                "Converged at iteration %d (improvement %.4f < threshold %.4f)",
-                iteration,
-                improvement,
-                cmd.convergence_threshold,
-            )
+        if previous_f >= 0 and overall_f - previous_f < cmd.convergence_threshold:
             stop_reason = "converged"
             break
+        previous_f = overall_f
+        iteration += 1
 
-    if budget.is_exhausted and stop_reason == "completed":
+    if best_prompt_id is None:
+        raise ValueError("Cost budget exhausted before any prompt could be evaluated")
+    if (
+        budget.spent_cost_usd + context_llm_cost >= budget.max_cost_usd
+        and stop_reason == "completed"
+    ):
         stop_reason = "max_cost_reached"
 
-    # 6. Store best prompt and scores
-    _report_progress(
-        task,
-        "storing_results",
-        "Saving optimized prompt and evaluation scores",
-        98,
-        best_f1=round(best_f1, 4),
-        stop_reason=stop_reason,
-        **_budget_details(budget),
-    )
-
-    prompt_id = await repo.insert_optimized_prompt(
-        conn, cmd.project_id, cmd.template_id, best_candidate.system_prompt
-    )
-    await repo.insert_optimized_prompt_examples(
-        conn, prompt_id, best_candidate.examples, entity_types
-    )
-    (
-        final_results,
-        final_eval_results,
-        final_pairs,
-        final_llm_calls,
-        final_skipped_count,
-    ) = await _evaluate_final_prompt_on_pdfs(
-        conn,
-        openai_client,
-        best_candidate,
-        labeled_pdfs,
-        json_schema,
-        entity_types,
-        cmd.model,
-        project_id=cmd.project_id,
-        prompt_id=prompt_id,
-        budget=budget,
-    )
-    llm_call_count += final_llm_calls
-    skipped_pdf_count += final_skipped_count
-    final_metrics = services.build_final_run_metrics(
-        final_results,
-        entity_types,
-        labeled_pdf_count=labeled_pdf_count,
-        skipped_pdf_count=skipped_pdf_count,
-    )
-    per_entity_scores = {et.name: _avg_score(final_eval_results, et.name) for et in entity_types}
-    final_f1 = (
-        sum(r.overall_f1 for r in final_eval_results) / len(final_eval_results)
-        if final_eval_results
-        else 0.0
-    )
-    best_candidate.scores = per_entity_scores
-
-    evaluation_id = await repo.insert_evaluation(
-        conn,
-        context_eng_run_id,
-        prompt_id,
-        final_f1,
-        per_entity_scores,
-        model_id=cmd.model,
-        labeled_pdf_count=final_metrics["labeled_pdf_count"],
-        evaluated_pdf_count=final_metrics["evaluated_pdf_count"],
-        skipped_pdf_count=final_metrics["skipped_pdf_count"],
-        pdfs_fully_correct=final_metrics["pdfs_fully_correct"],
-        pdf_accuracy=final_metrics["pdf_accuracy"],
-        entity_type_metrics=final_metrics["entity_type_metrics"],
-        llm_call_count=llm_call_count,
-        cost_usd=budget.spent_cost_usd,
-        iterations_run=iterations_run,
-        stop_reason=stop_reason,
-    )
-    await repo.insert_context_engineering_predictions(conn, evaluation_id, final_pairs)
+    total_cost = budget.spent_cost_usd + context_llm_cost
     await repo.complete_context_engineering_run(
         conn,
         run_id=context_eng_run_id,
-        best_prompt_id=prompt_id,
-        best_overall_f=final_f1,
-        accumulated_usd=budget.spent_cost_usd,
+        best_prompt_id=best_prompt_id,
+        best_overall_f=best_overall_f,
+        accumulated_usd=total_cost,
         stop_reason=stop_reason,
     )
     return {
-        "best_prompt_id": str(prompt_id),
-        "best_f1": final_f1,
+        "best_prompt_id": str(best_prompt_id),
+        "best_f": best_overall_f,
         "iterations_run": iterations_run,
-        "cost_usd": str(budget.spent_cost_usd),
+        "cost_usd": str(total_cost),
         "max_cost_usd": str(budget.max_cost_usd),
         "stop_reason": stop_reason,
-        "prompt_evaluation_id": str(evaluation_id),
-        "llm_call_count": llm_call_count,
-        "pdf_accuracy": final_metrics["pdf_accuracy"],
+        "context_engineering_run_id": str(context_eng_run_id),
     }
 
 
-def _usable_labeled_pdfs(labeled_pdfs: list[LabeledPdf]) -> tuple[list[LabeledPdf], int]:
-    usable: list[LabeledPdf] = []
-    skipped_count = 0
-    for pdf in labeled_pdfs:
-        try:
-            if not pdf.full_text or not pdf.full_text.strip():
-                raise ValueError("labeled PDF has no saved full_text")
-            if not any(annotation.labeled_text.strip() for annotation in pdf.annotations):
-                raise ValueError("labeled PDF has no usable annotation text")
-        except ValueError:
-            skipped_count += 1
-            logger.exception("Skipping labeled PDF %s during context engineering", pdf.pdf_id)
-            continue
-        usable.append(pdf)
-    return usable, skipped_count
-
-
-def _evaluation_pdfs_for_examples(
-    labeled_pdfs: list[LabeledPdf],
-    example_pdfs: list[LabeledPdf],
-) -> list[LabeledPdf]:
-    example_ids = {pdf.pdf_id for pdf in example_pdfs}
-    held_out = [pdf for pdf in labeled_pdfs if pdf.pdf_id not in example_ids]
-    return held_out or labeled_pdfs
-
-
-def _evaluation_pdfs_for_candidate(
-    labeled_pdfs: list[LabeledPdf],
-    candidate: PromptCandidate,
-) -> list[LabeledPdf]:
-    example_ids = {ex.pdf_id for ex in candidate.examples}
-    held_out = [pdf for pdf in labeled_pdfs if pdf.pdf_id not in example_ids]
-    return held_out or labeled_pdfs
-
-
-async def _evaluate_final_prompt_on_pdfs(
-    conn: asyncpg.Connection,
-    openai_client: AsyncOpenAI,
-    candidate: PromptCandidate,
-    labeled_pdfs: list[LabeledPdf],
-    json_schema: dict,
+def _initial_prompt_attributes(
+    project_description: str | None,
     entity_types: list[EntityTypeInfo],
-    model: str,
-    *,
-    project_id: UUID,
-    prompt_id: UUID,
-    budget: CostBudget,
-) -> tuple[list[FinalPdfEvaluation], list[EvaluationResult], list[FinalPredictionPair], int, int]:
-    final_results: list[FinalPdfEvaluation] = []
-    eval_results: list[EvaluationResult] = []
-    pairs: list[FinalPredictionPair] = []
-    llm_call_count = 0
-    skipped_count = 0
-
-    for pdf in labeled_pdfs:
-        try:
-            llm_usage: LLMResponseData = await call_openai(
-                openai_client,
-                model,
-                candidate.system_prompt,
-                pdf.full_text or "",
-                schema=json_schema,
-                schema_name="ner_extraction",
-            )
-            llm_call_count += 1
-            usage_cost = await record_llm_usage(
-                conn,
-                model=model,
-                input_tokens=llm_usage.input_tokens,
-                output_tokens=llm_usage.output_tokens,
-                project_id=project_id,
-                task_name=_TASK_NAME,
-            )
-            budget.add_usage(usage_cost)
-            try:
-                predicted = json.loads(llm_usage.text)
-            except json.JSONDecodeError:
-                logger.warning("Invalid final-run JSON from LLM for PDF %s", pdf.pdf_id)
-                predicted = {}
-
-            await repo.update_pdf_final_predictions(
-                conn,
-                pdf_id=pdf.pdf_id,
-                optimized_prompt_id=prompt_id,
-            )
-            eval_result = services.evaluate_predictions(predicted, pdf.ground_truth, entity_types)
-            eval_result.prompt_candidate = candidate
-            final_result = services.evaluate_final_pdf_predictions(pdf, predicted, entity_types)
-        except Exception:
-            skipped_count += 1
-            logger.exception("Skipping final context engineering result for PDF %s", pdf.pdf_id)
-            continue
-
-        eval_results.append(eval_result)
-        final_results.append(final_result)
-        pairs.extend(final_result.pairs)
-
-    return final_results, eval_results, pairs, llm_call_count, skipped_count
-
-
-async def _evaluate_prompt_on_pdfs(
-    conn: asyncpg.Connection,
-    openai_client: AsyncOpenAI,
-    candidate: PromptCandidate,
-    eval_pdfs: list[LabeledPdf],
-    json_schema: dict,
-    entity_types: list[EntityTypeInfo],
-    model: str,
-    *,
-    project_id: UUID,
-    budget: CostBudget,
-) -> list[EvaluationResult]:
-    """Run NER with the candidate prompt on each eval PDF and evaluate."""
-    results: list[EvaluationResult] = []
-    for pdf in eval_pdfs:
-        if budget.is_exhausted:
-            break
-
-        try:
-            llm_usage: LLMResponseData = await call_openai(
-                openai_client,
-                model,
-                candidate.system_prompt,
-                pdf.full_text or "",
-                schema=json_schema,
-                schema_name="ner_extraction",
-            )
-            usage_cost = await record_llm_usage(
-                conn,
-                model=model,
-                input_tokens=llm_usage.input_tokens,
-                output_tokens=llm_usage.output_tokens,
-                project_id=project_id,
-                task_name=_TASK_NAME,
-            )
-            budget.add_usage(usage_cost)
-            try:
-                predicted = json.loads(llm_usage.text)
-            except json.JSONDecodeError:
-                logger.warning("Invalid JSON from LLM for PDF %s", pdf.pdf_id)
-                predicted = {}
-
-            result = services.evaluate_predictions(predicted, pdf.ground_truth, entity_types)
-            result.prompt_candidate = candidate
-            results.append(result)
-        except Exception as exc:
-            logger.warning(
-                "Failed to evaluate prompt for pdf=%s: %s", pdf.pdf_id, exc, exc_info=True
-            )
-            continue
-
-    return results
-
-
-def _avg_score(results: list[EvaluationResult], entity_name: str):
-    """Average F1Score for an entity type across multiple evaluation results."""
-    from ..domain.value_objects import F1Score
-
-    scores = [
-        r.per_entity_scores[entity_name] for r in results if entity_name in r.per_entity_scores
-    ]
-    if not scores:
-        return F1Score(precision=0.0, recall=0.0, f1=0.0)
-    return F1Score(
-        precision=sum(s.precision for s in scores) / len(scores),
-        recall=sum(s.recall for s in scores) / len(scores),
-        f1=sum(s.f1 for s in scores) / len(scores),
+) -> PromptAttributes:
+    ordered_ids = [entity.entity_type_id for entity in entity_types if entity.entity_type_id]
+    return PromptAttributes(
+        project_description=project_description,
+        entity_types_order=ordered_ids,
+        entity_type_definitions={
+            str(entity.entity_type_id): entity.user_definition or ""
+            for entity in entity_types
+            if entity.entity_type_id
+        },
+        entity_type_example_values={
+            str(entity.entity_type_id): list(entity.user_examples)
+            for entity in entity_types
+            if entity.entity_type_id
+        },
+        entity_type_example_finds={str(entity_id): [] for entity_id in ordered_ids},
     )
+
+
+async def _populate_example_finds(
+    conn: asyncpg.Connection,
+    clients: dict[str, Any],
+    *,
+    provider: str,
+    model: str,
+    project_id: UUID,
+    attributes: PromptAttributes,
+    entity_types: list[EntityTypeInfo],
+    labeled_pdfs: list[LabeledPdf],
+) -> Decimal:
+    cost = Decimal("0")
+    entity_by_id = {entity.entity_type_id: entity for entity in entity_types}
+    for pdf in labeled_pdfs:
+        text = pdf.full_text or ""
+        for annotation in pdf.annotations:
+            if annotation.entity_type_id is None:
+                continue
+            entity = entity_by_id.get(annotation.entity_type_id)
+            if entity is None:
+                continue
+            window = _window_around_value(text, annotation.labeled_text)
+            if window is None:
+                continue
+            prompt = (
+                "Explain why the labelled value is an example of this entity type. "
+                "Return JSON with keys context and explanation.\n\n"
+                f"Entity type: {entity.name}\n"
+                f"Definition: {attributes.entity_type_definitions.get(str(entity.entity_type_id), '')}\n"
+                f"Labelled value: {annotation.labeled_text}\n"
+                f"Text window:\n{window}"
+            )
+            response, usage_cost = await _call_prompt_engineering_model(
+                conn,
+                clients,
+                provider=provider,
+                model=model,
+                project_id=project_id,
+                system_prompt="You create concise NER few-shot example explanations.",
+                user_prompt=prompt,
+            )
+            cost += usage_cost
+            try:
+                parsed = json.loads(response.text)
+            except json.JSONDecodeError:
+                parsed = {"context": window, "explanation": response.text}
+            key = str(annotation.entity_type_id)
+            attributes.entity_type_example_finds.setdefault(key, []).append(
+                {
+                    "pdf_id": str(pdf.pdf_id),
+                    "value": annotation.labeled_text,
+                    "context": str(parsed.get("context") or window),
+                    "explanation": str(parsed.get("explanation") or ""),
+                }
+            )
+    return cost
+
+
+async def _modify_attributes_from_incorrect_predictions(
+    conn: asyncpg.Connection,
+    clients: dict[str, Any],
+    *,
+    provider: str,
+    model: str,
+    project_id: UUID,
+    attributes: PromptAttributes,
+    incorrect_entity_value_ids: list[UUID],
+    missed_entity_types: list[dict],
+) -> Decimal:
+    rows = await repo.fetch_entity_values_by_ids(conn, incorrect_entity_value_ids)
+    incorrect_values = _incorrect_values_payload(rows) if rows else []
+    missed_info = missed_entity_types or []
+    total_cost = Decimal("0")
+
+    project_description, cost = await _determine_better_project_description_candidate(
+        conn,
+        clients,
+        provider=provider,
+        model=model,
+        project_id=project_id,
+        attributes=attributes,
+        incorrect_values=incorrect_values,
+        missed_info=missed_info,
+    )
+    total_cost += cost
+    if project_description is not None:
+        attributes.project_description = project_description
+
+    entity_types_order, cost = await _determine_better_entity_types_order_candidate(
+        conn,
+        clients,
+        provider=provider,
+        model=model,
+        project_id=project_id,
+        attributes=attributes,
+        incorrect_values=incorrect_values,
+        missed_info=missed_info,
+    )
+    total_cost += cost
+    if entity_types_order:
+        attributes.entity_types_order = entity_types_order
+
+    definitions, cost = await _determine_better_entity_definitions_candidate(
+        conn,
+        clients,
+        provider=provider,
+        model=model,
+        project_id=project_id,
+        attributes=attributes,
+        incorrect_values=incorrect_values,
+        missed_info=missed_info,
+    )
+    total_cost += cost
+    if definitions:
+        attributes.entity_type_definitions.update(definitions)
+
+    example_values, cost = await _determine_better_example_entity_values_candidate(
+        conn,
+        clients,
+        provider=provider,
+        model=model,
+        project_id=project_id,
+        attributes=attributes,
+        incorrect_values=incorrect_values,
+        missed_info=missed_info,
+    )
+    total_cost += cost
+    if example_values:
+        attributes.entity_type_example_values.update(example_values)
+
+    example_finds, cost = await _determine_better_example_entity_finds_candidate(
+        conn,
+        clients,
+        provider=provider,
+        model=model,
+        project_id=project_id,
+        attributes=attributes,
+        incorrect_values=incorrect_values,
+        missed_info=missed_info,
+    )
+    total_cost += cost
+    if example_finds:
+        attributes.entity_type_example_finds.update(example_finds)
+    return total_cost
+
+
+async def _determine_better_project_description_candidate(
+    conn: asyncpg.Connection,
+    clients: dict[str, Any],
+    *,
+    provider: str,
+    model: str,
+    project_id: UUID,
+    attributes: PromptAttributes,
+    incorrect_values: list[dict],
+    missed_info: list[dict],
+) -> tuple[str | None, Decimal]:
+    parsed, cost = await _determine_attribute_candidate(
+        conn,
+        clients,
+        provider=provider,
+        model=model,
+        project_id=project_id,
+        attribute_name="project_description",
+        instruction="Return a better project_description string or null.",
+        attributes=attributes,
+        incorrect_values=incorrect_values,
+        missed_info=missed_info,
+    )
+    candidate = parsed.get("candidate")
+    return (candidate if isinstance(candidate, str) else None), cost
+
+
+async def _determine_better_entity_types_order_candidate(
+    conn: asyncpg.Connection,
+    clients: dict[str, Any],
+    *,
+    provider: str,
+    model: str,
+    project_id: UUID,
+    attributes: PromptAttributes,
+    incorrect_values: list[dict],
+    missed_info: list[dict],
+) -> tuple[list[UUID] | None, Decimal]:
+    parsed, cost = await _determine_attribute_candidate(
+        conn,
+        clients,
+        provider=provider,
+        model=model,
+        project_id=project_id,
+        attribute_name="entity_types_order",
+        instruction=(
+            "Return candidate as a UUID string list containing only existing entity type ids, "
+            "or null."
+        ),
+        attributes=attributes,
+        incorrect_values=incorrect_values,
+        missed_info=missed_info,
+    )
+    candidate = parsed.get("candidate")
+    if not isinstance(candidate, list):
+        return None, cost
+    allowed = {str(entity_id) for entity_id in attributes.entity_types_order}
+    ordered = [UUID(value) for value in candidate if isinstance(value, str) and value in allowed]
+    return (ordered or None), cost
+
+
+async def _determine_better_entity_definitions_candidate(
+    conn: asyncpg.Connection,
+    clients: dict[str, Any],
+    *,
+    provider: str,
+    model: str,
+    project_id: UUID,
+    attributes: PromptAttributes,
+    incorrect_values: list[dict],
+    missed_info: list[dict],
+) -> tuple[dict[str, str] | None, Decimal]:
+    parsed, cost = await _determine_attribute_candidate(
+        conn,
+        clients,
+        provider=provider,
+        model=model,
+        project_id=project_id,
+        attribute_name="entity_type_definitions",
+        instruction="Return candidate as an object of entity type UUID string to definition string.",
+        attributes=attributes,
+        incorrect_values=incorrect_values,
+        missed_info=missed_info,
+    )
+    candidate = parsed.get("candidate")
+    if not isinstance(candidate, dict):
+        return None, cost
+    allowed = set(attributes.entity_type_definitions)
+    return {
+        key: value for key, value in candidate.items() if key in allowed and isinstance(value, str)
+    } or None, cost
+
+
+async def _determine_better_example_entity_values_candidate(
+    conn: asyncpg.Connection,
+    clients: dict[str, Any],
+    *,
+    provider: str,
+    model: str,
+    project_id: UUID,
+    attributes: PromptAttributes,
+    incorrect_values: list[dict],
+    missed_info: list[dict],
+) -> tuple[dict[str, list[str]] | None, Decimal]:
+    parsed, cost = await _determine_attribute_candidate(
+        conn,
+        clients,
+        provider=provider,
+        model=model,
+        project_id=project_id,
+        attribute_name="entity_type_example_values",
+        instruction=(
+            "Return candidate as an object of entity type UUID string to string arrays. "
+            "Use only values from current examples or incorrect predicted values."
+        ),
+        attributes=attributes,
+        incorrect_values=incorrect_values,
+        missed_info=missed_info,
+    )
+    candidate = parsed.get("candidate")
+    if not isinstance(candidate, dict):
+        return None, cost
+    allowed = set(attributes.entity_type_example_values)
+    result: dict[str, list[str]] = {}
+    for key, values in candidate.items():
+        if key in allowed and isinstance(values, list):
+            result[key] = [str(value) for value in values if str(value).strip()]
+    return result or None, cost
+
+
+async def _determine_better_example_entity_finds_candidate(
+    conn: asyncpg.Connection,
+    clients: dict[str, Any],
+    *,
+    provider: str,
+    model: str,
+    project_id: UUID,
+    attributes: PromptAttributes,
+    incorrect_values: list[dict],
+    missed_info: list[dict],
+) -> tuple[dict[str, list[dict]] | None, Decimal]:
+    parsed, cost = await _determine_attribute_candidate(
+        conn,
+        clients,
+        provider=provider,
+        model=model,
+        project_id=project_id,
+        attribute_name="entity_type_example_finds",
+        instruction=(
+            "Return candidate as an object of entity type UUID string to arrays of objects "
+            "with context, value, explanation, and optional pdf_id."
+        ),
+        attributes=attributes,
+        incorrect_values=incorrect_values,
+        missed_info=missed_info,
+    )
+    candidate = parsed.get("candidate")
+    if not isinstance(candidate, dict):
+        return None, cost
+    allowed = set(attributes.entity_type_example_finds)
+    result: dict[str, list[dict]] = {}
+    for key, values in candidate.items():
+        if key in allowed and isinstance(values, list):
+            result[key] = [value for value in values if isinstance(value, dict)]
+    return result or None, cost
+
+
+async def _determine_attribute_candidate(
+    conn: asyncpg.Connection,
+    clients: dict[str, Any],
+    *,
+    provider: str,
+    model: str,
+    project_id: UUID,
+    attribute_name: str,
+    instruction: str,
+    attributes: PromptAttributes,
+    incorrect_values: list[dict],
+    missed_info: list[dict],
+) -> tuple[dict, Decimal]:
+    missed_text = (
+        f"\n\nMissed entity types (entity type had labels but NER produced no prediction):"
+        f"\n{json.dumps(missed_info, indent=2)}"
+        if missed_info
+        else ""
+    )
+    prompt = (
+        f"Determine a better candidate for {attribute_name} after reviewing incorrect "
+        'NER predictions. Return only JSON shaped as {"candidate": ...}. '
+        f"{instruction}\n\n"
+        f"Current attributes:\n{json.dumps(_attrs_to_json(attributes), indent=2)}\n\n"
+        f"Incorrect predicted core.entity_values:\n{json.dumps(incorrect_values, indent=2)}"
+        f"{missed_text}"
+    )
+    response, cost = await _call_prompt_engineering_model(
+        conn,
+        clients,
+        provider=provider,
+        model=model,
+        project_id=project_id,
+        system_prompt="You improve one structured prompt attribute for NER.",
+        user_prompt=prompt,
+    )
+    try:
+        parsed = json.loads(response.text)
+    except json.JSONDecodeError:
+        logger.warning(
+            "Prompt engineering model returned non-JSON candidate for %s", attribute_name
+        )
+        return {}, cost
+    return parsed if isinstance(parsed, dict) else {}, cost
+
+
+async def _call_prompt_engineering_model(
+    conn: asyncpg.Connection,
+    clients: dict[str, Any],
+    *,
+    provider: str,
+    model: str,
+    project_id: UUID,
+    system_prompt: str,
+    user_prompt: str,
+) -> tuple[LLMResponseData, Decimal]:
+    if provider == "openai":
+        response = await call_openai(clients["openai"], model, system_prompt, user_prompt)
+    elif provider == "anthropic":
+        response = await call_anthropic(clients["anthropic"], model, system_prompt, user_prompt)
+    elif provider == "gemini":
+        response = await call_google_genai(
+            clients["gemini"], model, system_prompt, user_prompt, json_response=True
+        )
+    else:
+        raise ValueError(f"Unsupported model provider: {provider}")
+    usage_cost = await record_llm_usage(
+        conn,
+        model=model,
+        input_tokens=response.input_tokens,
+        output_tokens=response.output_tokens,
+        project_id=project_id,
+        task_name=_TASK_NAME,
+    )
+    return response, usage_cost
+
+
+def _window_around_value(text: str, value: str) -> str | None:
+    index = text.lower().find(value.lower())
+    if index < 0:
+        return None
+    start = max(index - 500, 0)
+    end = min(index + len(value) + 500, len(text))
+    return text[start:end]
+
+
+def _incorrect_values_payload(rows) -> list[dict]:
+    return [
+        {
+            "entity_value_id": str(row["id"]),
+            "entity_type_id": str(row["entity_type_id"]),
+            "entity_type": row["entity_type_name"],
+            "pdf_id": str(row["pdf_id"]),
+            "predicted_value": row["text_value"],
+        }
+        for row in rows
+    ]
+
+
+async def _insert_prompt_examples_for_attributes(
+    conn: asyncpg.Connection,
+    prompt_id: UUID,
+    attributes: PromptAttributes,
+) -> None:
+    rows = []
+    for entity_type_id, finds in attributes.entity_type_example_finds.items():
+        for index, find in enumerate(finds):
+            pdf_id = find.get("pdf_id")
+            if pdf_id:
+                rows.append((prompt_id, UUID(pdf_id), UUID(entity_type_id), index))
+    if not rows:
+        return
+    await conn.executemany(
+        """
+        INSERT INTO workers.prompt_examples
+            (prompt_id, pdf_id, entity_type_id, example_idx)
+        VALUES ($1, $2, $3, $4)
+        """,
+        rows,
+    )
+
+
+def _calculate_iteration_metrics(
+    pdf_results: list[NerPdfResult],
+    labeled_pdfs: list[LabeledPdf],
+    entity_types: list[EntityTypeInfo],
+    *,
+    beta: float,
+) -> dict:
+    labels_by_pdf = {pdf.pdf_id: pdf.ground_truth for pdf in labeled_pdfs}
+    pdfs_fully_correct = 0
+    per_entity_values: dict[str, list] = {entity.name: [] for entity in entity_types}
+    incorrect_ids: list[UUID] = []
+    missed_entity_types: list[dict] = []
+    entity_type_metrics: dict[str, dict] = {}
+
+    for result in pdf_results:
+        pdf_correct = True
+        ground_truth = labels_by_pdf.get(result.pdf_id, {})
+        persisted_by_entity = {
+            persisted.entity_type_id: persisted for persisted in result.persisted_predictions
+        }
+        for entity in entity_types:
+            predicted_values = ner_services.normalise_prediction_values(
+                result.predictions.get(entity.name)
+            )
+            labelled_values = ground_truth.get(entity.name, [])
+            score = ner_services.calculate_f_score(
+                predicted_values,
+                labelled_values,
+                beta=beta,
+            )
+            per_entity_values[entity.name].append(score)
+            if score.f < 1.0:
+                pdf_correct = False
+            if entity.entity_type_id is not None:
+                labelled_normalised = [value.strip().lower() for value in labelled_values]
+                for persisted in result.persisted_predictions:
+                    if (
+                        persisted.entity_type_id == entity.entity_type_id
+                        and persisted.text_value.strip().lower() not in labelled_normalised
+                    ):
+                        incorrect_ids.append(persisted.entity_value_id)
+                if entity.entity_type_id not in persisted_by_entity and labelled_values:
+                    pdf_correct = False
+                    missed_entity_types.append(
+                        {
+                            "entity_type_id": str(entity.entity_type_id),
+                            "entity_type": entity.name,
+                            "pdf_id": str(result.pdf_id),
+                            "labelled_values": labelled_values,
+                        }
+                    )
+        if pdf_correct:
+            pdfs_fully_correct += 1
+
+    per_entity_scores = {}
+    for entity in entity_types:
+        scores = per_entity_values[entity.name]
+        if scores:
+            precision = sum(score.precision for score in scores) / len(scores)
+            recall = sum(score.recall for score in scores) / len(scores)
+            f_score = sum(score.f for score in scores) / len(scores)
+        else:
+            precision = recall = f_score = 0.0
+        per_entity_scores[entity.name] = FScore(precision, recall, f_score)
+        entity_type_metrics[entity.name] = {
+            "precision": precision,
+            "recall": recall,
+            "f": f_score,
+        }
+
+    overall_f = (
+        sum(score.f for score in per_entity_scores.values()) / len(per_entity_scores)
+        if per_entity_scores
+        else 0.0
+    )
+    return {
+        "overall_f": overall_f,
+        "per_entity_scores": per_entity_scores,
+        "num_correct_pdfs": pdfs_fully_correct,
+        "pdf_accuracy": pdfs_fully_correct / len(labeled_pdfs) if labeled_pdfs else None,
+        "entity_type_metrics": entity_type_metrics,
+        "incorrectly_predicted_entity_value_ids": incorrect_ids,
+        "missed_entity_types": missed_entity_types,
+    }
+
+
+def _ordered_entity_types(
+    entity_types: list[EntityTypeInfo],
+    entity_types_order: list[UUID],
+) -> list[EntityTypeInfo]:
+    by_id = {entity.entity_type_id: entity for entity in entity_types}
+    return [by_id[entity_id] for entity_id in entity_types_order if entity_id in by_id]
+
+
+def _attrs_to_json(attributes: PromptAttributes) -> dict:
+    return {
+        "project_description": attributes.project_description,
+        "entity_types_order": [str(entity_id) for entity_id in attributes.entity_types_order],
+        "entity_type_definitions": attributes.entity_type_definitions,
+        "entity_type_example_values": attributes.entity_type_example_values,
+        "entity_type_example_finds": attributes.entity_type_example_finds,
+    }

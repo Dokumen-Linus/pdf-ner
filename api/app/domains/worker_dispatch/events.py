@@ -6,8 +6,12 @@ from app.core.messaging import celery_client, celery_message_headers
 def dispatch_optimize_prompt(
     project_id: str,
     template_id: int,
+    labeled_pdfs: list[str],
+    beta: float = 1.0,
     max_cost_usd: float = 1.0,
-    model: str = "gpt-5.4-mini",
+    ner_chat_model: str = "gpt-5.4-mini",
+    prompt_eng_chat_model: str = "gpt-5.4-mini",
+    convergence_threshold: float = 0.02,
 ) -> str:
     """Send optimize_prompt task to the workers queue via Celery.
 
@@ -16,7 +20,15 @@ def dispatch_optimize_prompt(
     result = celery_client.send_task(
         "context_engineering.optimize_prompt",
         args=[project_id],
-        kwargs={"template_id": template_id, "max_cost_usd": max_cost_usd, "model": model},
+        kwargs={
+            "template_id": template_id,
+            "labeled_pdfs": labeled_pdfs,
+            "beta": beta,
+            "max_cost_usd": max_cost_usd,
+            "ner_chat_model": ner_chat_model,
+            "prompt_eng_chat_model": prompt_eng_chat_model,
+            "convergence_threshold": convergence_threshold,
+        },
         headers=celery_message_headers(),
     )
     return result.id

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import json
 from uuid import UUID
 
 import asyncpg
 
+from app.domains.ner_runs.domain.entities import EntityTypeInfo
+
 from ..domain.entities import (
     DocumentForExtraction,
-    EntityTypeInfo,
     ModelMetadata,
     ProjectExtractionConfig,
 )
@@ -159,106 +159,16 @@ async def fetch_entity_types(conn: asyncpg.Connection, project_id: UUID) -> list
     ]
 
 
-async def insert_run(
-    conn: asyncpg.Connection,
-    *,
-    project_id: UUID,
-    prompt_id: UUID,
-    ner_workflow_id: UUID | None,
-) -> UUID:
-    return await conn.fetchval(
-        """
-        INSERT INTO workers.ner_runs
-            (project_id, prompt_id, ner_workflow_id)
-        VALUES ($1, $2, $3)
-        RETURNING id
-        """,
-        project_id,
-        prompt_id,
-        ner_workflow_id,
-    )
-
-
-async def insert_run_pdf(
-    conn: asyncpg.Connection,
-    *,
-    ner_run_id: UUID,
-    pdf_id: UUID,
-    pdf_txt_id: UUID | None,
-) -> None:
+async def mark_source_processed(conn: asyncpg.Connection, *, source_id: UUID) -> None:
     await conn.execute(
         """
-        INSERT INTO workers.ner_run_pdfs (pdf_id, ner_run_id, pdf_txt_id)
-        VALUES ($1, $2, $3)
+        UPDATE core.sources
+        SET status = 'processed',
+            last_processed_at = now()
+        WHERE id = $1
         """,
-        pdf_id,
-        ner_run_id,
-        pdf_txt_id,
+        source_id,
     )
-
-
-async def update_pdf_text(
-    conn: asyncpg.Connection,
-    *,
-    pdf_id: UUID,
-    full_text: str,
-    extract_method: str,
-    text_by_page: dict,
-) -> UUID:
-    return await conn.fetchval(
-        """
-        INSERT INTO workers.pdf_txts
-            (pdf_id, ocr_method, created_by_domain, txt, text_by_page)
-        VALUES ($1, $2, 'ner_workflows', $3, $4::jsonb)
-        RETURNING id
-        """,
-        pdf_id,
-        extract_method,
-        full_text,
-        json.dumps(text_by_page),
-    )
-
-
-async def complete_run_and_pdf(
-    conn: asyncpg.Connection,
-    *,
-    run_id: UUID,
-    pdf_id: UUID,
-    source_id: UUID,
-    extracted: dict,
-    entity_types: list[EntityTypeInfo],
-) -> None:
-    rows = []
-    entity_by_name = {entity.name: entity for entity in entity_types}
-    for name, raw_value in extracted.items():
-        entity = entity_by_name.get(name)
-        if entity is None or raw_value is None:
-            continue
-        values = raw_value if isinstance(raw_value, list) else [raw_value]
-        for value in values:
-            text_value = str(value).strip()
-            if text_value:
-                rows.append((pdf_id, entity.entity_type_id, text_value, run_id))
-
-    async with conn.transaction():
-        if rows:
-            await conn.executemany(
-                """
-                INSERT INTO core.entity_values
-                    (pdf_id, entity_type_id, text_value, is_label, ner_run_id)
-                VALUES ($1, $2, $3, false, $4)
-                """,
-                rows,
-            )
-        await conn.execute(
-            """
-            UPDATE core.sources
-            SET status = 'processed',
-                last_processed_at = now()
-            WHERE id = $1
-            """,
-            source_id,
-        )
 
 
 async def fail_run(

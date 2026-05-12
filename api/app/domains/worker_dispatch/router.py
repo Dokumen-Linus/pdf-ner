@@ -35,8 +35,12 @@ async def optimize_prompt(
     task_id = events.dispatch_optimize_prompt(
         project_id=str(request_data.project_id),
         template_id=request_data.template_id,
+        labeled_pdfs=[str(pdf_id) for pdf_id in request_data.labeled_pdfs],
+        beta=request_data.beta,
         max_cost_usd=request_data.max_cost_usd,
-        model=request_data.model,
+        ner_chat_model=request_data.ner_chat_model,
+        prompt_eng_chat_model=request_data.prompt_eng_chat_model,
+        convergence_threshold=request_data.convergence_threshold,
     )
 
     await _store_task_project(request, task_id, request_data.project_id)

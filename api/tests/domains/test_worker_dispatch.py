@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 from pydantic import ValidationError
@@ -10,18 +10,33 @@ from app.domains.worker_dispatch.schemas import OcrEvaluationRequest, OptimizePr
 
 class TestOptimizePromptRequest:
     def test_defaults_match_workers_context_engineering_command(self):
-        request = OptimizePromptRequest(project_id=uuid4(), template_id=1)
+        request = OptimizePromptRequest(
+            project_id=uuid4(),
+            template_id=1,
+            labeled_pdfs=[uuid4()],
+        )
 
         assert request.max_cost_usd == 1.0
-        assert request.model == "gpt-5.4-mini"
+        assert request.beta == 1.0
+        assert request.ner_chat_model == "gpt-5.4-mini"
+        assert request.prompt_eng_chat_model == "gpt-5.4-mini"
 
     def test_requires_positive_template_id(self):
         with pytest.raises(ValidationError):
-            OptimizePromptRequest(project_id=uuid4(), template_id=0)
+            OptimizePromptRequest(project_id=uuid4(), template_id=0, labeled_pdfs=[uuid4()])
 
     def test_requires_positive_max_cost(self):
         with pytest.raises(ValidationError):
-            OptimizePromptRequest(project_id=uuid4(), template_id=1, max_cost_usd=0)
+            OptimizePromptRequest(
+                project_id=uuid4(),
+                template_id=1,
+                labeled_pdfs=[uuid4()],
+                max_cost_usd=0,
+            )
+
+    def test_requires_labeled_pdfs(self):
+        with pytest.raises(ValidationError):
+            OptimizePromptRequest(project_id=uuid4(), template_id=1, labeled_pdfs=[])
 
 
 class TestOcrEvaluationRequest:
@@ -63,6 +78,7 @@ class TestWorkerDispatchEndpoints:
         self, async_client, mock_redis, monkeypatch
     ):
         project_id = uuid4()
+        pdf_id = uuid4()
         task_id = "mock-task-id-123"
         dispatch_calls = []
 
@@ -77,8 +93,11 @@ class TestWorkerDispatchEndpoints:
             json={
                 "project_id": str(project_id),
                 "template_id": 1,
+                "labeled_pdfs": [str(pdf_id)],
+                "beta": 2,
                 "max_cost_usd": "1.25",
-                "model": "gpt-5.4-mini",
+                "ner_chat_model": "gpt-5.4-mini",
+                "prompt_eng_chat_model": "gpt-5.4",
             },
         )
 
@@ -88,8 +107,12 @@ class TestWorkerDispatchEndpoints:
             {
                 "project_id": str(project_id),
                 "template_id": 1,
+                "labeled_pdfs": [str(pdf_id)],
+                "beta": 2.0,
                 "max_cost_usd": 1.25,
-                "model": "gpt-5.4-mini",
+                "ner_chat_model": "gpt-5.4-mini",
+                "prompt_eng_chat_model": "gpt-5.4",
+                "convergence_threshold": 0.02,
             }
         ]
         mock_redis.set.assert_called_once_with(
@@ -232,6 +255,7 @@ class TestWorkerDispatchEvents:
         task_id = events.dispatch_optimize_prompt(
             project_id=str(uuid4()),
             template_id=3,
+            labeled_pdfs=[str(uuid4())],
             max_cost_usd=2.5,
         )
 
@@ -241,8 +265,12 @@ class TestWorkerDispatchEvents:
         assert kwargs["args"][0]
         assert kwargs["kwargs"] == {
             "template_id": 3,
+            "labeled_pdfs": [kwargs["kwargs"]["labeled_pdfs"][0]],
+            "beta": 1.0,
             "max_cost_usd": 2.5,
-            "model": "gpt-5.4-mini",
+            "ner_chat_model": "gpt-5.4-mini",
+            "prompt_eng_chat_model": "gpt-5.4-mini",
+            "convergence_threshold": 0.02,
         }
         assert kwargs["headers"] == {"request-id": "test"}
 

@@ -13,7 +13,6 @@ from app.domains.context_engineering.infrastructure.repositories import (
     fetch_labeled_pdfs,
     fetch_project,
     insert_evaluation,
-    insert_optimized_prompt,
     insert_optimized_prompt_examples,
 )
 from tests.conftest import PDF_ID_1, PDF_ID_2, PROJECT_ID, PROMPT_ID
@@ -214,25 +213,7 @@ class TestFetchLabeledPdfs:
         assert result == []
 
 
-class TestInsertOptimizedPrompt:
-    @pytest.mark.anyio
-    async def test_returns_prompt_id(self):
-        conn = AsyncMock()
-        conn.fetchval.return_value = PROMPT_ID
-        result = await insert_optimized_prompt(conn, PROJECT_ID, 1, "prompt text")
-        assert result == PROMPT_ID
-        conn.fetchval.assert_awaited_once()
-
-    @pytest.mark.anyio
-    async def test_passes_correct_args(self):
-        conn = AsyncMock()
-        conn.fetchval.return_value = PROMPT_ID
-        await insert_optimized_prompt(conn, PROJECT_ID, 1, "my prompt")
-        args = conn.fetchval.call_args
-        assert PROJECT_ID in args[0]
-        assert 1 in args[0]
-        assert "my prompt" in args[0]
-
+class TestInsertOptimizedPromptExamples:
     @pytest.mark.anyio
     async def test_inserts_final_example_snapshots(self, labeled_pdf_1):
         from app.domains.context_engineering.domain.services import build_prompt_example_snapshots

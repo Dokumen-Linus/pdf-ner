@@ -38,6 +38,7 @@ CREATE TABLE workers.context_engineering_iterations (
   num_correct_entity_types INTEGER, -- entity types with correct values for all pdfs
   pdf_accuracy REAL,
   entity_type_metrics JSONB,
+  incorrectly_predicted_entity_value_ids UUID[] NOT NULL DEFAULT ARRAY[]::uuid[],
 
   -- each iter executes an ner_run
 

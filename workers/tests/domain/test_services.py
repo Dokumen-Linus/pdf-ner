@@ -257,7 +257,7 @@ class TestRenderPromptTemplate:
     def test_replaces_supported_placeholders(self, entity_types):
         template = (
             "<PROJECT_DESCRIPTION>|<ENTITY_TYPES>|<DEFINITIONS>|<EXAMPLE_VALUES>|"
-            "<CONSTRAINTS>|<IS_REQUIRED>|<IS_UNIQUE>"
+            "<IS_REQUIRED>|<IS_UNIQUE>"
         )
 
         result = render_prompt_template(template, "Invoices", entity_types)
@@ -267,7 +267,6 @@ class TestRenderPromptTemplate:
         assert "full_name" in result
         assert "The person's full legal name" in result
         assert "John Smith" in result
-        assert "single word only" in result
         assert "True" in result
 
 

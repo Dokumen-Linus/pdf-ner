@@ -119,6 +119,7 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       contextEngRunId: string
       promptId: string
       overallF: number
+      incorrectlyPredictedEntityValueIds: string[]
     }
     const _: Expected = {} as ContextEngineeringIteration
     expect(true).toBe(true)
