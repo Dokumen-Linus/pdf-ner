@@ -2,6 +2,8 @@ import { describe, expect, it } from "bun:test"
 
 import type {
   BillingChargeAttempt,
+  ChatModelEvalIteration,
+  ChatModelEvalRun,
   ContextEngineeringIteration,
   ContextEngineeringRun,
   CorePdf,
@@ -135,6 +137,35 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       exampleIdx: number
     }
     const _: Expected = {} as PromptExample
+    expect(true).toBe(true)
+  })
+
+  it("ChatModelEvalRun should have expected workers.chat_model_eval_runs fields", () => {
+    type Expected = {
+      id: string
+      projectId: string
+      bestModelId: string | null
+      beta: number
+      accumulatedUsd: number
+      bestOverallF: number | null
+      bestAccuracyScore: number | null
+      labeledPdfs: string[]
+      chatModels: string[]
+    }
+    const _: Expected = {} as ChatModelEvalRun
+    expect(true).toBe(true)
+  })
+
+  it("ChatModelEvalIteration should have expected workers.chat_model_eval_iterations fields", () => {
+    type Expected = {
+      id: string
+      chatModelEvalRunId: string
+      modelId: string
+      promptId: string
+      overallF: number
+      incorrectlyPredictedEntityValueIds: string[]
+    }
+    const _: Expected = {} as ChatModelEvalIteration
     expect(true).toBe(true)
   })
 

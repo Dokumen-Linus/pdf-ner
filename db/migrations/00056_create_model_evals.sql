@@ -2,9 +2,14 @@
 CREATE TABLE workers.chat_model_eval_runs (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES web.projects (id) ON DELETE CASCADE,
+  best_model_id TEXT REFERENCES public.chat_models (id) ON DELETE SET NULL,
 
   -- run sets beta to use in F-score calculation
   beta REAL NOT NULL DEFAULT 1 CHECK (beta >= 0.001),
+
+  accumulated_usd REAL NOT NULL DEFAULT 0 CHECK (accumulated_usd >= 0),
+  best_overall_f REAL CHECK (best_overall_f >= 0 AND best_overall_f <= 1),
+  best_accuracy_score REAL CHECK (best_accuracy_score >= 0 AND best_accuracy_score <= 1),
 
   -- each run is provided a set of PDFs with is_label = true to create examples from and test on
   labeled_pdfs UUID[] NOT NULL,
@@ -12,7 +17,8 @@ CREATE TABLE workers.chat_model_eval_runs (
   -- each run is provided with a set of models to test
   chat_models TEXT[] NOT NULL,
 
-  created_at TIMESTAMPTZ DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 -- each run iteratively tests multiple prompts
@@ -20,7 +26,8 @@ CREATE TABLE workers.chat_model_eval_iterations (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   chat_model_eval_run_id UUID NOT NULL REFERENCES workers.chat_model_eval_runs (id) ON DELETE CASCADE,
   model_id TEXT NOT NULL REFERENCES public.chat_models (id) ON DELETE CASCADE,
-  -- will get prompt from web.projects.prompt_id and bucket from web.projects.bucket_id
+  prompt_id UUID NOT NULL REFERENCES core.prompts (id) ON DELETE CASCADE,
+  -- will get bucket from web.projects.bucket_id
 
   accumulated_usd REAL NOT NULL DEFAULT 0 CHECK (accumulated_usd >= 0),
   
@@ -32,12 +39,19 @@ CREATE TABLE workers.chat_model_eval_iterations (
   num_correct_entity_types INTEGER, -- entity types with correct values for all pdfs
   pdf_accuracy REAL,
   entity_type_metrics JSONB,
+  incorrectly_predicted_entity_value_ids UUID[] NOT NULL DEFAULT ARRAY[]::uuid[],
 
   -- each iter executes an ner_run
 
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TRIGGER chat_model_eval_runs_updated_at
+BEFORE UPDATE ON workers.chat_model_eval_runs
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
 -- migrate:down
+DROP TRIGGER chat_model_eval_runs_updated_at ON workers.chat_model_eval_runs;
 DROP TABLE workers.chat_model_eval_iterations;
 DROP TABLE workers.chat_model_eval_runs;

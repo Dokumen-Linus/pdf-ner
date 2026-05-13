@@ -104,7 +104,16 @@ async def test_workflow_inserts_structured_prompt_and_updates_run(entity_types, 
         }
         for ann in labeled_pdf_1.annotations
     ]
-    conn.fetch.side_effect = [entity_rows, pdf_rows, ann_rows]
+    label_rows = [
+        {
+            "pdf_id": ann.pdf_id,
+            "entity_type_id": ann.entity_type_id,
+            "entity_type_name": ann.entity_type_name,
+            "text_value": ann.labeled_text,
+        }
+        for ann in labeled_pdf_1.annotations
+    ]
+    conn.fetch.side_effect = [entity_rows, pdf_rows, ann_rows, label_rows, label_rows]
     conn.fetchval.side_effect = [uuid4(), PROMPT_ID, uuid4(), uuid4(), uuid4()]
 
     async def fake_prompt_call(*args, **kwargs):

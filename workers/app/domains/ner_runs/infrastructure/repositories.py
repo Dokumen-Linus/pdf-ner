@@ -48,6 +48,23 @@ async def link_run_to_context_iteration(
     )
 
 
+async def link_run_to_model_eval_iteration(
+    conn: asyncpg.Connection,
+    *,
+    ner_run_id: UUID,
+    model_eval_iter_id: UUID,
+) -> None:
+    await conn.execute(
+        """
+        UPDATE workers.ner_runs
+        SET model_eval_iter_id = $2
+        WHERE id = $1
+        """,
+        ner_run_id,
+        model_eval_iter_id,
+    )
+
+
 async def insert_run_pdf(
     conn: asyncpg.Connection,
     *,

@@ -10,10 +10,9 @@ from uuid import UUID
 import asyncpg
 
 from app.domains.llm_usage.infrastructure.repository import record_llm_usage
+from app.domains.ner_metrics.application.workflows import calculate_ner_run_metrics
 from app.domains.ner_runs.application.workflows import execute_and_persist_ner_batch
-from app.domains.ner_runs.domain import services as ner_services
-from app.domains.ner_runs.domain.entities import NerPdfInput, NerPdfResult, NerRunOrigin
-from app.domains.ner_runs.domain.value_objects import FScore
+from app.domains.ner_runs.domain.entities import NerPdfInput, NerRunOrigin
 from app.domains.ner_runs.infrastructure.repositories import link_run_to_context_iteration
 from app.integrations.anthropic import call_anthropic
 from app.integrations.gemini import call_google_genai
@@ -182,24 +181,24 @@ async def prompt_optimization_workflow(
             make_annotations=False,
         )
         budget.add_usage(ner_result.cost_usd)
-        metrics = _calculate_iteration_metrics(
-            ner_result.pdf_results,
-            labeled_pdfs,
-            entity_types,
+        metrics = await calculate_ner_run_metrics(
+            conn,
+            project_id=cmd.project_id,
+            pdf_ids=[pdf.pdf_id for pdf in labeled_pdfs],
+            pdf_results=ner_result.pdf_results,
+            entity_types=entity_types,
             beta=cmd.beta,
         )
         iteration_id = await repo.insert_evaluation(
             conn,
             context_eng_run_id,
             prompt_id,
-            metrics["overall_f"],
-            metrics["per_entity_scores"],
-            pdfs_fully_correct=metrics["num_correct_pdfs"],
-            pdf_accuracy=metrics["pdf_accuracy"],
-            entity_type_metrics=metrics["entity_type_metrics"],
-            incorrectly_predicted_entity_value_ids=metrics[
-                "incorrectly_predicted_entity_value_ids"
-            ],
+            metrics.overall_f,
+            metrics.per_entity_scores,
+            pdfs_fully_correct=metrics.num_correct_pdfs,
+            pdf_accuracy=metrics.pdf_accuracy,
+            entity_type_metrics=metrics.entity_type_metrics,
+            incorrectly_predicted_entity_value_ids=metrics.incorrectly_predicted_entity_value_ids,
         )
         if ner_result.run_id is not None:
             await link_run_to_context_iteration(
@@ -209,9 +208,9 @@ async def prompt_optimization_workflow(
             )
 
         iterations_run = iteration + 1
-        previous_incorrect_ids = metrics["incorrectly_predicted_entity_value_ids"]
-        previous_missed_entity_types = metrics["missed_entity_types"]
-        overall_f = metrics["overall_f"]
+        previous_incorrect_ids = metrics.incorrectly_predicted_entity_value_ids
+        previous_missed_entity_types = metrics.missed_entity_types
+        overall_f = metrics.overall_f
         if overall_f > best_overall_f:
             best_overall_f = overall_f
             best_prompt_id = prompt_id
@@ -715,92 +714,6 @@ async def _insert_prompt_examples_for_attributes(
         """,
         rows,
     )
-
-
-def _calculate_iteration_metrics(
-    pdf_results: list[NerPdfResult],
-    labeled_pdfs: list[LabeledPdf],
-    entity_types: list[EntityTypeInfo],
-    *,
-    beta: float,
-) -> dict:
-    labels_by_pdf = {pdf.pdf_id: pdf.ground_truth for pdf in labeled_pdfs}
-    pdfs_fully_correct = 0
-    per_entity_values: dict[str, list] = {entity.name: [] for entity in entity_types}
-    incorrect_ids: list[UUID] = []
-    missed_entity_types: list[dict] = []
-    entity_type_metrics: dict[str, dict] = {}
-
-    for result in pdf_results:
-        pdf_correct = True
-        ground_truth = labels_by_pdf.get(result.pdf_id, {})
-        persisted_by_entity = {
-            persisted.entity_type_id: persisted for persisted in result.persisted_predictions
-        }
-        for entity in entity_types:
-            predicted_values = ner_services.normalise_prediction_values(
-                result.predictions.get(entity.name)
-            )
-            labelled_values = ground_truth.get(entity.name, [])
-            score = ner_services.calculate_f_score(
-                predicted_values,
-                labelled_values,
-                beta=beta,
-            )
-            per_entity_values[entity.name].append(score)
-            if score.f < 1.0:
-                pdf_correct = False
-            if entity.entity_type_id is not None:
-                labelled_normalised = [value.strip().lower() for value in labelled_values]
-                for persisted in result.persisted_predictions:
-                    if (
-                        persisted.entity_type_id == entity.entity_type_id
-                        and persisted.text_value.strip().lower() not in labelled_normalised
-                    ):
-                        incorrect_ids.append(persisted.entity_value_id)
-                if entity.entity_type_id not in persisted_by_entity and labelled_values:
-                    pdf_correct = False
-                    missed_entity_types.append(
-                        {
-                            "entity_type_id": str(entity.entity_type_id),
-                            "entity_type": entity.name,
-                            "pdf_id": str(result.pdf_id),
-                            "labelled_values": labelled_values,
-                        }
-                    )
-        if pdf_correct:
-            pdfs_fully_correct += 1
-
-    per_entity_scores = {}
-    for entity in entity_types:
-        scores = per_entity_values[entity.name]
-        if scores:
-            precision = sum(score.precision for score in scores) / len(scores)
-            recall = sum(score.recall for score in scores) / len(scores)
-            f_score = sum(score.f for score in scores) / len(scores)
-        else:
-            precision = recall = f_score = 0.0
-        per_entity_scores[entity.name] = FScore(precision, recall, f_score)
-        entity_type_metrics[entity.name] = {
-            "precision": precision,
-            "recall": recall,
-            "f": f_score,
-        }
-
-    overall_f = (
-        sum(score.f for score in per_entity_scores.values()) / len(per_entity_scores)
-        if per_entity_scores
-        else 0.0
-    )
-    return {
-        "overall_f": overall_f,
-        "per_entity_scores": per_entity_scores,
-        "num_correct_pdfs": pdfs_fully_correct,
-        "pdf_accuracy": pdfs_fully_correct / len(labeled_pdfs) if labeled_pdfs else None,
-        "entity_type_metrics": entity_type_metrics,
-        "incorrectly_predicted_entity_value_ids": incorrect_ids,
-        "missed_entity_types": missed_entity_types,
-    }
 
 
 def _ordered_entity_types(

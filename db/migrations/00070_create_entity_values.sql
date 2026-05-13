@@ -46,6 +46,16 @@ BEFORE UPDATE ON core.entity_values
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
+CREATE INDEX entity_values_labels_pdf_entity_idx
+ON core.entity_values (pdf_id, entity_type_id)
+WHERE is_label;
+
+CREATE INDEX entity_values_predictions_ner_run_pdf_entity_idx
+ON core.entity_values (ner_run_id, pdf_id, entity_type_id)
+WHERE NOT is_label;
+
 -- migrate:down
+DROP INDEX core.entity_values_predictions_ner_run_pdf_entity_idx;
+DROP INDEX core.entity_values_labels_pdf_entity_idx;
 DROP TRIGGER entity_values_updated_at ON core.entity_values;
 DROP TABLE core.entity_values;

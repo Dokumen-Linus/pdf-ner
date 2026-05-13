@@ -1,4 +1,3 @@
-from uuid import uuid4
 
 from app.domains.ner_runs.domain.entities import EntityTypeInfo
 from app.domains.ner_runs.domain.services import (

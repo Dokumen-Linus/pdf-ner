@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.domains.ner_metrics.domain import services as metric_services
+
 from .entities import EntityTypeInfo
 from .value_objects import FScore
 
@@ -44,12 +46,7 @@ def build_fallback_system_prompt(
 
 
 def normalise_prediction_values(raw_value) -> list[str]:
-    if raw_value is None:
-        return []
-    if isinstance(raw_value, list):
-        return [normalised for value in raw_value if (normalised := str(value).strip())]
-    normalised = str(raw_value).strip()
-    return [normalised] if normalised else []
+    return metric_services.normalise_prediction_values(raw_value)
 
 
 def calculate_f_score(
@@ -58,15 +55,8 @@ def calculate_f_score(
     *,
     beta: float,
 ) -> FScore:
-    pred = [value.strip() for value in predicted_values if value.strip()]
-    labels = [value.strip() for value in labelled_values if value.strip()]
-    tp = _count_exact_matches(pred, labels)
-    precision = tp / len(pred) if pred else (1.0 if not labels else 0.0)
-    recall = tp / len(labels) if labels else (1.0 if not pred else 0.0)
-    beta_sq = beta * beta
-    denominator = (beta_sq * precision) + recall
-    f_score = ((1 + beta_sq) * precision * recall / denominator) if denominator > 0 else 0.0
-    return FScore(precision=precision, recall=recall, f=f_score)
+    score = metric_services.calculate_f_score(predicted_values, labelled_values, beta=beta)
+    return FScore(precision=score.precision, recall=score.recall, f=score.f)
 
 
 def build_constraint_text(entity: EntityTypeInfo) -> str:
@@ -100,19 +90,3 @@ def _datatype_to_json_type(datatype: str | None) -> str:
         "alphanumeric": "string",
         "alpha": "string",
     }.get(datatype, "string")
-
-
-def exact_match(a: str, b: str) -> bool:
-    return a.lower().strip() == b.lower().strip()
-
-
-def _count_exact_matches(predicted: list[str], labelled: list[str]) -> int:
-    count = 0
-    remaining = list(labelled)
-    for predicted_value in predicted:
-        for index, labelled_value in enumerate(remaining):
-            if exact_match(predicted_value, labelled_value):
-                count += 1
-                remaining.pop(index)
-                break
-    return count
