@@ -179,6 +179,7 @@ async def prompt_optimization_workflow(
                 NerPdfInput(pdf.pdf_id, pdf.full_text or "", pdf.pdf_txt_id) for pdf in labeled_pdfs
             ],
             entity_types=entity_types,
+            make_annotations=False,
         )
         budget.add_usage(ner_result.cost_usd)
         metrics = _calculate_iteration_metrics(

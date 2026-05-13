@@ -8,6 +8,10 @@ from uuid import UUID
 
 import asyncpg
 
+from app.domains.entity_annotations.application.commands import CreatePredictedEntityAnnotations
+from app.domains.entity_annotations.application.workflows import (
+    create_predicted_entity_annotations_workflow,
+)
 from app.domains.llm_usage.infrastructure.repository import record_llm_usage
 from app.integrations.anthropic import call_anthropic
 from app.integrations.gemini import call_google_genai
@@ -139,6 +143,7 @@ async def persist_ner_batch(
     pdfs: list[NerPdfInput],
     entity_types: list[EntityTypeInfo],
     pdf_results: list[NerPdfResult],
+    make_annotations: bool = False,
 ) -> NerBatchResult:
     run_id = await repo.insert_run(
         conn,
@@ -170,6 +175,11 @@ async def persist_ner_batch(
                 persisted_predictions=persisted_predictions,
             )
         )
+    if make_annotations:
+        await create_predicted_entity_annotations_workflow(
+            conn,
+            CreatePredictedEntityAnnotations(ner_run_id=run_id),
+        )
     return NerBatchResult(
         run_id=run_id,
         pdf_results=persisted_results,
@@ -193,6 +203,7 @@ async def execute_and_persist_ner_batch(
     system_prompt: str,
     pdfs: list[NerPdfInput],
     entity_types: list[EntityTypeInfo],
+    make_annotations: bool = False,
 ) -> NerBatchResult:
     executed = await execute_ner_batch(
         conn,
@@ -214,6 +225,7 @@ async def execute_and_persist_ner_batch(
         pdfs=pdfs,
         entity_types=entity_types,
         pdf_results=executed.pdf_results,
+        make_annotations=make_annotations,
     )
     return NerBatchResult(
         run_id=persisted.run_id,
