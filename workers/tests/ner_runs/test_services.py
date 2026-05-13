@@ -1,4 +1,3 @@
-
 from app.domains.ner_runs.domain.entities import EntityTypeInfo
 from app.domains.ner_runs.domain.services import (
     build_constraint_text,
