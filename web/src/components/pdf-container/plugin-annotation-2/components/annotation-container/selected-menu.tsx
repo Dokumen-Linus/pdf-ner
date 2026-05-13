@@ -81,7 +81,7 @@ export const SelectedMenu = ({
           <SelectTrigger size="sm" className="h-8 min-w-32">
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             {allEntityTypes.map((entityType) => {
               const annoState = annotationCapability?.getState()
               const docState = annoState?.documents?.[documentId]

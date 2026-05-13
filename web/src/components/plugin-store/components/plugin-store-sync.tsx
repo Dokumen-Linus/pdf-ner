@@ -7,12 +7,19 @@ import { useSearchCapability } from "../../pdf-container/plugin-search-2"
 import { useSelectionCapability } from "../../pdf-container/plugin-selection-2"
 import usePluginStore from "../hooks/use-plugin-store"
 
-const PluginStoreSync = () => {
+const PluginStoreSync = ({ activeDocumentId }: { activeDocumentId: string }) => {
   const { provides: annoCapability } = useAnnotationCapability()
   const { provides: searchCapability } = useSearchCapability()
   const { provides: selectCapability } = useSelectionCapability()
   const { provides: scrollCapability } = useScrollCapability()
   const { provides: docManagerCapability } = useDocumentManagerCapability()
+
+  useEffect(() => {
+    usePluginStore.getState().setActiveDocumentId(activeDocumentId)
+    return () => {
+      usePluginStore.getState().setActiveDocumentId(null)
+    }
+  }, [activeDocumentId])
 
   useEffect(() => {
     if (

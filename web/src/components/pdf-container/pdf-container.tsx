@@ -118,7 +118,7 @@ export default function PDFContainer({
                   {({ isLoaded }) =>
                     isLoaded ? (
                       <GlobalPointerProvider documentId={activeDocumentId}>
-                        <PluginStoreSync />
+                        <PluginStoreSync activeDocumentId={activeDocumentId} />
                         <div className="flex h-full min-h-0 flex-col">
                           <Toolbar
                             canRotate={canRotate}

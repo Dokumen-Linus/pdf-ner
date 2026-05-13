@@ -33,6 +33,7 @@ import {
   emptyPendingCommits,
   initAnnotationState,
   selectAnnotation,
+  setActiveDocument,
   setCanUndoRedo,
   setCreateAnnotationDefaults,
   updateAnnotation,
@@ -183,6 +184,13 @@ export class AnnotationPlugin extends BasePlugin<
     )
   }
 
+  protected override onActiveDocumentChanged(
+    _previousId: string | null,
+    currentId: string | null,
+  ): void {
+    this.dispatch(setActiveDocument(currentId))
+  }
+
   async initialize(): Promise<void> {
     // Register a single interaction mode for annotations
     this.interactionManager?.registerMode({
@@ -193,31 +201,34 @@ export class AnnotationPlugin extends BasePlugin<
     })
 
     // Create annotations using SelectionPluginCapability callback
-    this.selection?.onEndSelection(() => {
+    this.selection?.onEndSelection(({ documentId }) => {
       const { activeSubtype, activeColor, activeOpacity, activeEntityType } = this.state
       if (!activeSubtype) return
 
-      const formattedSelection = this.selection?.getFormattedSelection()
-      const selectionText = this.selection?.getSelectedText()
+      const formattedSelection = this.selection?.getFormattedSelection(documentId)
+      const selectionText = this.selection?.getSelectedText(documentId)
       if (!formattedSelection || !selectionText) return
 
       for (const selection of formattedSelection) {
         selectionText.wait((text) => {
           const annotationId = uuidV4()
           // Create an annotation using the active state properties
-          this.createAnnotation({
-            type: subtypeToEnum(activeSubtype),
-            color: activeColor,
-            opacity: activeOpacity,
-            rect: selection.rect,
-            segmentRects: selection.segmentRects,
-            pageIndex: selection.pageIndex,
-            id: annotationId,
-            contents: text.join("\n"),
-            custom: {
-              entityType: activeEntityType,
-            },
-          } as PdfTextMarkupAnnotationObject)
+          this.createAnnotation(
+            {
+              type: subtypeToEnum(activeSubtype),
+              color: activeColor,
+              opacity: activeOpacity,
+              rect: selection.rect,
+              segmentRects: selection.segmentRects,
+              pageIndex: selection.pageIndex,
+              id: annotationId,
+              contents: text.join("\n"),
+              custom: {
+                entityType: activeEntityType,
+              },
+            } as PdfTextMarkupAnnotationObject,
+            documentId,
+          )
 
           if (this.config.deactivateSubtypeAfterCreate) {
             this.dispatch(setCreateAnnotationDefaults({ subtype: null, entityType: "" }))
@@ -228,7 +239,7 @@ export class AnnotationPlugin extends BasePlugin<
         }, ignore)
       }
 
-      this.selection?.clear()
+      this.selection?.clear(documentId)
     })
   }
 
