@@ -1,7 +1,20 @@
-import { index, integer, jsonb, numeric, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import {
+  boolean,
+  index,
+  integer,
+  jsonb,
+  numeric,
+  real,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core"
 
+import { extractMethods } from "../public/extract-methods"
 import { projects } from "../web/projects"
 
+import { pdfTxts } from "./pdf-txts"
 import { workersSchema } from "./schema"
 
 export const ocrEvaluationRuns = workersSchema.table(
@@ -15,6 +28,10 @@ export const ocrEvaluationRuns = workersSchema.table(
     judgeModel: text("judge_model").notNull(),
     maxPdfs: integer("max_pdfs").notNull(),
     maxPagesPerPdf: integer("max_pages_per_pdf").notNull(),
+    extractMethod: text("extract_method")
+      .notNull()
+      .references(() => extractMethods.id),
+    ocrOnly: boolean("ocr_only").notNull().default(false),
     sampledPdfCount: integer("sampled_pdf_count").notNull().default(0),
     sampledPageCount: integer("sampled_page_count").notNull().default(0),
     recommendation: text("recommendation"),
@@ -41,9 +58,6 @@ export const ocrEvaluationPages = workersSchema.table(
     // Cross-schema FK: pdf_id UUID REFERENCES core.pdfs (id)
     pdfId: uuid("pdf_id").notNull(),
     pageIndex: integer("page_index").notNull(),
-    pdfiumExcerpt: text("pdfium_excerpt"),
-    tesseractExcerpt: text("tesseract_excerpt"),
-    olmExcerpt: text("olm_excerpt"),
     deterministicMetrics: jsonb("deterministic_metrics").notNull().default("{}"),
     judgeResult: jsonb("judge_result"),
     recommendedMethod: text("recommended_method"),
@@ -51,4 +65,31 @@ export const ocrEvaluationPages = workersSchema.table(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("ocr_evaluation_pages_run_idx").on(t.runId, t.pdfId, t.pageIndex)],
+)
+
+export const ocrEvaluationPdfTxts = workersSchema.table(
+  "ocr_evaluation_pdf_txts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    runId: uuid("run_id")
+      .notNull()
+      .references(() => ocrEvaluationRuns.id, { onDelete: "cascade" }),
+    // Cross-schema FK: pdf_id UUID REFERENCES core.pdfs (id)
+    pdfId: uuid("pdf_id").notNull(),
+    extractMethod: text("extract_method")
+      .notNull()
+      .references(() => extractMethods.id),
+    pdfTxtId: uuid("pdf_txt_id")
+      .notNull()
+      .references(() => pdfTxts.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("ocr_evaluation_pdf_txts_run_idx").on(t.runId, t.pdfId),
+    unique("ocr_evaluation_pdf_txts_run_id_pdf_id_extract_method_key").on(
+      t.runId,
+      t.pdfId,
+      t.extractMethod,
+    ),
+  ],
 )
