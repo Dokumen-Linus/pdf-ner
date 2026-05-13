@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 import asyncpg
@@ -30,7 +30,7 @@ async def fetch_due_connection_ids(conn: asyncpg.Connection, limit: int = 100) -
         """,
         limit,
     )
-    return [row["id"] for row in rows]
+    return [cast(UUID, row["id"]) for row in rows]
 
 
 async def fetch_connection(conn: asyncpg.Connection, connection_id: UUID) -> dict | None:
@@ -73,14 +73,17 @@ async def insert_watch_run(
     connection_id: UUID,
     cursor_before: dict | None,
 ) -> int:
-    return await conn.fetchval(
-        """
+    return cast(
+        int,
+        await conn.fetchval(
+            """
         INSERT INTO workers.watcher_runs (watcher_id, status, cursor_before)
         VALUES ($1, 'running', $2::jsonb)
         RETURNING id
         """,
-        connection_id,
-        json.dumps(cursor_before) if cursor_before is not None else None,
+            connection_id,
+            json.dumps(cursor_before) if cursor_before is not None else None,
+        ),
     )
 
 

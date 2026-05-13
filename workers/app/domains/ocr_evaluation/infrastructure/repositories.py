@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 import json
+from typing import cast
 from uuid import UUID
 
 import asyncpg
@@ -62,7 +63,7 @@ async def fetch_sample_pdfs(
     )
     return [
         SampledPdf(
-            pdf_id=row["id"],
+            pdf_id=cast(UUID, row["id"]),
             name=None,
             filepath=row["filepath"],
         )
@@ -88,7 +89,7 @@ async def fetch_project_pdfs_by_ids(
     )
     return [
         SampledPdf(
-            pdf_id=row["id"],
+            pdf_id=cast(UUID, row["id"]),
             name=None,
             filepath=row["filepath"],
         )
@@ -118,7 +119,7 @@ async def fetch_pdf_text_by_extract_method(
         return None
     return StoredPdfText(
         pdf_txt_id=row["id"],
-        pdf_id=row["pdf_id"],
+        pdf_id=cast(UUID, row["pdf_id"]),
         full_text=row["txt"],
         extract_method=row["extract_method"],
         text_by_page=row["text_by_page"],
@@ -135,19 +136,22 @@ async def insert_run(
     gpu_model: str,
     ocr_only: bool,
 ) -> UUID:
-    return await conn.fetchval(
-        """
+    return cast(
+        UUID,
+        await conn.fetchval(
+            """
         INSERT INTO workers.ocr_evaluation_runs
             (project_id, status, judge_model, max_pdfs, max_pages_per_pdf, extract_method, ocr_only)
         VALUES ($1, 'running', $2, $3, $4, $5, $6)
         RETURNING id
         """,
-        project_id,
-        judge_model,
-        max_pdfs,
-        max_pages_per_pdf,
-        gpu_model,
-        ocr_only,
+            project_id,
+            judge_model,
+            max_pdfs,
+            max_pages_per_pdf,
+            gpu_model,
+            ocr_only,
+        ),
     )
 
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 import asyncpg
@@ -69,8 +69,10 @@ async def activate_listener(
     provider: str,
     payload: ListenerProvisioningPayload,
 ) -> UUID:
-    return await conn.fetchval(
-        """
+    return cast(
+        UUID,
+        await conn.fetchval(
+            """
         UPDATE workers.listeners
         SET provider = $2,
             provider_subscription_id = $3,
@@ -84,14 +86,15 @@ async def activate_listener(
         WHERE id = $1
         RETURNING id
         """,
-        connection_id,
-        provider,
-        payload.provider_subscription_id,
-        payload.callback_url,
-        payload.secret_ref,
-        payload.expires_at,
-        payload.renew_after,
-        json.dumps(payload.provider_payload),
+            connection_id,
+            provider,
+            payload.provider_subscription_id,
+            payload.callback_url,
+            payload.secret_ref,
+            payload.expires_at,
+            payload.renew_after,
+            json.dumps(payload.provider_payload),
+        ),
     )
 
 

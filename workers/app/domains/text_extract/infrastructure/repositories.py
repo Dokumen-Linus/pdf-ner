@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from typing import cast
 from uuid import UUID
 
 import asyncpg
@@ -74,7 +75,7 @@ async def fetch_latest_pdf_text(
         return None
     return StoredPdfText(
         pdf_txt_id=row["id"],
-        pdf_id=row["pdf_id"],
+        pdf_id=cast(UUID, row["pdf_id"]),
         full_text=row["txt"],
         extract_method=row["extract_method"],
         text_by_page=row["text_by_page"],
@@ -90,16 +91,19 @@ async def insert_pdf_text(
     created_by_domain: str,
     text_by_page: dict,
 ) -> int:
-    return await conn.fetchval(
-        """
+    return cast(
+        int,
+        await conn.fetchval(
+            """
         INSERT INTO workers.pdf_txts
             (pdf_id, extract_method, created_by_domain, txt, text_by_page)
         VALUES ($1, $2, $3, $4, $5::jsonb)
         RETURNING id
         """,
-        pdf_id,
-        extract_method,
-        created_by_domain,
-        full_text,
-        json.dumps(text_by_page),
+            pdf_id,
+            extract_method,
+            created_by_domain,
+            full_text,
+            json.dumps(text_by_page),
+        ),
     )

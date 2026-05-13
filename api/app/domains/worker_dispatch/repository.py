@@ -1,3 +1,4 @@
+from typing import cast
 from uuid import UUID
 
 import asyncpg
@@ -21,7 +22,7 @@ async def fetch_pdf_ids_outside_project(
         project_id,
         pdf_ids,
     )
-    return [row["id"] for row in rows]
+    return [cast(UUID, row["id"]) for row in rows]
 
 
 async def fetch_unavailable_chat_model_ids(

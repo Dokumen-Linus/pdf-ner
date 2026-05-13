@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from typing import cast
 from uuid import UUID
 
 import asyncpg
@@ -25,7 +26,9 @@ async def fetch_project_config(
     )
     if row is None:
         return None
-    return ProjectModelEvalConfig(project_id=row["id"], active_prompt_id=row["active_prompt_id"])
+    return ProjectModelEvalConfig(
+        project_id=cast(UUID, row["id"]), active_prompt_id=cast(UUID, row["active_prompt_id"])
+    )
 
 
 async def fetch_prompt_text(
@@ -68,7 +71,10 @@ async def fetch_available_model_metadata(
         """,
         model_ids,
     )
-    return {row["id"]: ModelMetadata(model_id=row["id"], provider=row["provider"]) for row in rows}
+    return {
+        cast(str, row["id"]): ModelMetadata(model_id=row["id"], provider=row["provider"])
+        for row in rows
+    }
 
 
 async def fetch_entity_types(conn: asyncpg.Connection, project_id: UUID) -> list[EntityTypeInfo]:
@@ -98,7 +104,7 @@ async def fetch_entity_types(conn: asyncpg.Connection, project_id: UUID) -> list
     )
     return [
         EntityTypeInfo(
-            entity_type_id=row["entity_type_id"],
+            entity_type_id=cast(UUID | None, row["entity_type_id"]),
             name=row["name"],
             user_definition=row["user_definition"],
             user_examples=row["user_example_values"] or [],
@@ -150,7 +156,9 @@ async def fetch_labeled_pdf_inputs(
         pdf_ids,
     )
     return [
-        NerPdfInput(pdf_id=row["pdf_id"], text=row["full_text"], pdf_txt_id=row["pdf_txt_id"])
+        NerPdfInput(
+            pdf_id=cast(UUID, row["pdf_id"]), text=row["full_text"], pdf_txt_id=row["pdf_txt_id"]
+        )
         for row in rows
     ]
 
@@ -163,17 +171,20 @@ async def insert_chat_model_eval_run(
     pdf_ids: list[UUID],
     chat_model_ids: list[str],
 ) -> UUID:
-    return await conn.fetchval(
-        """
+    return cast(
+        UUID,
+        await conn.fetchval(
+            """
         INSERT INTO workers.chat_model_eval_runs
             (project_id, beta, labeled_pdfs, chat_models)
         VALUES ($1, $2, $3, $4)
         RETURNING id
         """,
-        project_id,
-        beta,
-        pdf_ids,
-        chat_model_ids,
+            project_id,
+            beta,
+            pdf_ids,
+            chat_model_ids,
+        ),
     )
 
 
@@ -197,8 +208,10 @@ async def insert_chat_model_eval_iteration(
             for key, value in per_entity_scores.items()
         }
     )
-    return await conn.fetchval(
-        """
+    return cast(
+        int,
+        await conn.fetchval(
+            """
         INSERT INTO workers.chat_model_eval_iterations
             (chat_model_eval_run_id, model_id, prompt_id, accumulated_usd,
              overall_f, per_entity_scores, num_correct_pdfs, pdf_accuracy,
@@ -206,16 +219,17 @@ async def insert_chat_model_eval_iteration(
         VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9::jsonb, $10)
         RETURNING id
         """,
-        run_id,
-        model_id,
-        prompt_id,
-        accumulated_usd,
-        overall_f,
-        scores_json,
-        num_correct_pdfs,
-        pdf_accuracy,
-        json.dumps(entity_type_metrics),
-        incorrectly_predicted_entity_value_ids,
+            run_id,
+            model_id,
+            prompt_id,
+            accumulated_usd,
+            overall_f,
+            scores_json,
+            num_correct_pdfs,
+            pdf_accuracy,
+            json.dumps(entity_type_metrics),
+            incorrectly_predicted_entity_value_ids,
+        ),
     )
 
 

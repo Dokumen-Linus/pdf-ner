@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from typing import cast
 from uuid import UUID
 
 import asyncpg
@@ -53,8 +54,8 @@ class PostgresDocumentMaterializer:
         )
         if existing is not None:
             return MaterializedDocumentPayload(
-                source_id=existing["id"],
-                pdf_id=existing["pdf_id"],
+                source_id=cast(UUID, existing["id"]),
+                pdf_id=cast(UUID, existing["pdf_id"]),
                 is_new=False,
             )
 
@@ -67,36 +68,42 @@ class PostgresDocumentMaterializer:
         }
 
         async with self.conn.transaction():
-            source_id = await self.conn.fetchval(
-                """
+            source_id = cast(
+                UUID,
+                await self.conn.fetchval(
+                    """
                 INSERT INTO core.sources
                     (source_connection_id, external_id, external_version, uri, fingerprint,
                      name, status, metadata, last_queued_at)
                 VALUES ($1, $2, $3, $4, $5, $6, 'queued', $7::jsonb, now())
                 RETURNING id
                 """,
-                connection.get("source_connection_id", connection["id"]),
-                document.external_id,
-                document.external_version,
-                document.uri,
-                document.fingerprint,
-                document.name,
-                json.dumps(metadata),
+                    connection.get("source_connection_id", connection["id"]),
+                    document.external_id,
+                    document.external_version,
+                    document.uri,
+                    document.fingerprint,
+                    document.name,
+                    json.dumps(metadata),
+                ),
             )
-            pdf_id = await self.conn.fetchval(
-                """
+            pdf_id = cast(
+                UUID,
+                await self.conn.fetchval(
+                    """
                 INSERT INTO core.pdfs
                     (project_id, filepath, source_type, source_id, ner_workflow_id,
                      watcher_id, watcher_run_id)
                 VALUES ($1, $2, 'watcher', $3, $4, $5, $6)
                 RETURNING id
                 """,
-                connection["project_id"],
-                filepath,
-                source_id,
-                connection.get("ner_workflow_id"),
-                connection["id"],
-                connection.get("watcher_run_id"),
+                    connection["project_id"],
+                    filepath,
+                    source_id,
+                    connection.get("ner_workflow_id"),
+                    connection["id"],
+                    connection.get("watcher_run_id"),
+                ),
             )
 
         return MaterializedDocumentPayload(
