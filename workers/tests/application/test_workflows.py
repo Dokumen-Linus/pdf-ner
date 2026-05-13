@@ -154,7 +154,7 @@ async def test_workflow_inserts_structured_prompt_and_updates_run(entity_types, 
         patch.object(workflows, "record_llm_usage", new=AsyncMock(return_value=Decimal("0.01"))),
         patch.object(
             workflows, "execute_and_persist_ner_batch", new=AsyncMock(return_value=ner_result)
-        ),
+        ) as execute_batch,
         patch.object(workflows, "link_run_to_context_iteration", new=AsyncMock()) as link_run,
     ):
         result = await prompt_optimization_workflow(conn, {"openai": object()}, cmd)
@@ -163,6 +163,10 @@ async def test_workflow_inserts_structured_prompt_and_updates_run(entity_types, 
     assert conn.fetchval.await_count == 5, f"Expected 5, got {conn.fetchval.await_count}"
     prompt_insert_args = conn.fetchval.await_args_list[1].args
     assert prompt_insert_args[7]  # entity_type_example_finds JSON
+    assert prompt_insert_args[8]
+    assert prompt_insert_args[8] == execute_batch.await_args.kwargs["system_prompt"]
+    assert "Project: Invoices" in prompt_insert_args[8]
+    assert "John Smith" in prompt_insert_args[8]
     assert link_run.await_count == 2
 
 

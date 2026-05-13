@@ -14,6 +14,7 @@ from app.domains.context_engineering.infrastructure.repositories import (
     fetch_project,
     insert_evaluation,
     insert_optimized_prompt_examples,
+    insert_prompt_attributes,
 )
 from tests.conftest import PDF_ID_1, PDF_ID_2, PROJECT_ID, PROMPT_ID
 
@@ -229,6 +230,30 @@ class TestInsertOptimizedPromptExamples:
         assert row[0] == PROMPT_ID
         assert row[1] == labeled_pdf_1.pdf_id
         assert row[2] == 0
+
+
+class TestInsertPromptAttributes:
+    @pytest.mark.anyio
+    async def test_persists_full_text(self):
+        conn = AsyncMock()
+        conn.fetchval.return_value = PROMPT_ID
+        full_text = "Project: Invoices\nFields: ['full_name']"
+
+        result = await insert_prompt_attributes(
+            conn,
+            project_id=PROJECT_ID,
+            template_id=1,
+            full_text=full_text,
+            project_description="Invoices",
+            entity_types_order=[ENTITY_TYPE_ID_1],
+            entity_type_definitions={str(ENTITY_TYPE_ID_1): "Legal name"},
+            entity_type_example_values={str(ENTITY_TYPE_ID_1): ["John Smith"]},
+            entity_type_example_finds={str(ENTITY_TYPE_ID_1): []},
+        )
+
+        assert result == PROMPT_ID
+        call_args = conn.fetchval.call_args.args
+        assert call_args[8] == full_text
 
 
 class TestInsertEvaluation:

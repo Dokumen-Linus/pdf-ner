@@ -144,17 +144,6 @@ async def prompt_optimization_workflow(
             stop_reason = "max_cost_reached"
             break
 
-        prompt_id = await repo.insert_prompt_attributes(
-            conn,
-            project_id=cmd.project_id,
-            template_id=cmd.template_id,
-            project_description=attributes.project_description,
-            entity_types_order=attributes.entity_types_order,
-            entity_type_definitions=attributes.entity_type_definitions,
-            entity_type_example_values=attributes.entity_type_example_values,
-            entity_type_example_finds=attributes.entity_type_example_finds,
-        )
-        await _insert_prompt_examples_for_attributes(conn, prompt_id, attributes)
         formed_prompt = services.form_prompt_text(
             template["txt"],
             project_description=attributes.project_description,
@@ -163,6 +152,18 @@ async def prompt_optimization_workflow(
             entity_type_example_values=attributes.entity_type_example_values,
             entity_type_example_finds=attributes.entity_type_example_finds,
         )
+        prompt_id = await repo.insert_prompt_attributes(
+            conn,
+            project_id=cmd.project_id,
+            template_id=cmd.template_id,
+            full_text=formed_prompt,
+            project_description=attributes.project_description,
+            entity_types_order=attributes.entity_types_order,
+            entity_type_definitions=attributes.entity_type_definitions,
+            entity_type_example_values=attributes.entity_type_example_values,
+            entity_type_example_finds=attributes.entity_type_example_finds,
+        )
+        await _insert_prompt_examples_for_attributes(conn, prompt_id, attributes)
         ner_result = await execute_and_persist_ner_batch(
             conn,
             llm_clients,

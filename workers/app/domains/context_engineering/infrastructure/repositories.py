@@ -211,6 +211,7 @@ async def insert_prompt_attributes(
     *,
     project_id: UUID,
     template_id: int,
+    full_text: str,
     project_description: str | None,
     entity_types_order: list[UUID],
     entity_type_definitions: dict,
@@ -229,7 +230,7 @@ async def insert_prompt_attributes(
             entity_type_example_finds,
             full_text
         )
-        VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7::jsonb, NULL)
+        VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7::jsonb, $8)
         RETURNING id
         """,
         project_id,
@@ -239,6 +240,7 @@ async def insert_prompt_attributes(
         json.dumps(entity_type_definitions),
         json.dumps(entity_type_example_values),
         json.dumps(entity_type_example_finds),
+        full_text,
     )
     logger.info("Inserted structured prompt: %s", prompt_id)
     return prompt_id
