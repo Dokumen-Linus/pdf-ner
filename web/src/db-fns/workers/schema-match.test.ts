@@ -2,12 +2,15 @@ import { describe, expect, it } from "bun:test"
 
 import type {
   BillingChargeAttempt,
+  ChatModelEvalIteration,
+  ChatModelEvalRun,
   ContextEngineeringIteration,
   ContextEngineeringRun,
   CorePdf,
   LlmUsage,
   NerRun,
   NerWorkflow,
+  OcrEvaluationPdfTxt,
   OcrEvaluationRun,
   PdfTxt,
   PromptExample,
@@ -68,7 +71,7 @@ describe("Workers Drizzle Schema Shape Checks", () => {
     type Expected = {
       id: string
       pdfId: string
-      ocrMethod: string
+      extractMethod: string
       createdByDomain: string
       txt: string
     }
@@ -119,6 +122,7 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       contextEngRunId: string
       promptId: string
       overallF: number
+      incorrectlyPredictedEntityValueIds: string[]
     }
     const _: Expected = {} as ContextEngineeringIteration
     expect(true).toBe(true)
@@ -133,6 +137,35 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       exampleIdx: number
     }
     const _: Expected = {} as PromptExample
+    expect(true).toBe(true)
+  })
+
+  it("ChatModelEvalRun should have expected workers.chat_model_eval_runs fields", () => {
+    type Expected = {
+      id: string
+      projectId: string
+      bestModelId: string | null
+      beta: number
+      accumulatedUsd: number
+      bestOverallF: number | null
+      bestAccuracyScore: number | null
+      labeledPdfs: string[]
+      chatModels: string[]
+    }
+    const _: Expected = {} as ChatModelEvalRun
+    expect(true).toBe(true)
+  })
+
+  it("ChatModelEvalIteration should have expected workers.chat_model_eval_iterations fields", () => {
+    type Expected = {
+      id: string
+      chatModelEvalRunId: string
+      modelId: string
+      promptId: string
+      overallF: number
+      incorrectlyPredictedEntityValueIds: string[]
+    }
+    const _: Expected = {} as ChatModelEvalIteration
     expect(true).toBe(true)
   })
 
@@ -157,8 +190,22 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       judgeModel: string
       maxPdfs: number
       maxPagesPerPdf: number
+      extractMethod: string
+      ocrOnly: boolean
     }
     const _: Expected = {} as OcrEvaluationRun
+    expect(true).toBe(true)
+  })
+
+  it("OcrEvaluationPdfTxt should have expected workers.ocr_evaluation_pdf_txts fields", () => {
+    type Expected = {
+      id: string
+      runId: string
+      pdfId: string
+      extractMethod: string
+      pdfTxtId: string
+    }
+    const _: Expected = {} as OcrEvaluationPdfTxt
     expect(true).toBe(true)
   })
 })

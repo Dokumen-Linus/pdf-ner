@@ -27,11 +27,14 @@ app.conf.beat_schedule = {
 app.autodiscover_tasks(
     [
         "app.domains.billing",
+        "app.domains.chat_model_eval",
         "app.domains.context_engineering",
+        "app.domains.entity_annotations",
         "app.domains.ner_workflows",
         "app.domains.ocr_evaluation",
         "app.domains.source_listeners",
         "app.domains.source_watchers",
+        "app.domains.text_extract",
     ]
 )
 

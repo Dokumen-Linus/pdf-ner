@@ -11,7 +11,7 @@ CREATE TABLE public.chat_models (
     end_available_date TIMESTAMPTZ
 );
 
-CREATE TABLE public.ocr_methods (
+CREATE TABLE public.extract_methods (
     "id" TEXT PRIMARY KEY,
 
     display_name TEXT NOT NULL,
@@ -27,4 +27,4 @@ CREATE TABLE public.ocr_methods (
 
 -- migrate:down
 DROP TABLE public.chat_models;
-DROP TABLE public.ocr_methods;
+DROP TABLE public.extract_methods;

@@ -63,7 +63,7 @@ export const getCorePdfsWithLatestTxtByProjectId = createServerFn({ method: "GET
       .select({
         id: pdfTxts.id,
         pdfId: pdfTxts.pdfId,
-        ocrMethod: pdfTxts.ocrMethod,
+        extractMethod: pdfTxts.extractMethod,
         txt: pdfTxts.txt,
         createdAt: pdfTxts.createdAt,
       })

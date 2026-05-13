@@ -1,19 +1,8 @@
-from dataclasses import dataclass
-from typing import Literal
+from app.domains.text_extract.domain.value_objects import (
+    ExtractMethod,
+    PageText,
+    has_usable_text,
+    join_page_text,
+)
 
-OcrMethod = Literal["tesseract", "deepseek-ocr", "olm-ocr2"]
-ExtractMethod = Literal["metadata", "pdfium", "tesseract", "deepseek-ocr", "olm-ocr2"]
-
-
-@dataclass(frozen=True)
-class PageText:
-    page_index: int
-    text: str
-
-
-def join_page_text(pages: list[PageText]) -> str:
-    return "\n\n".join(page.text.strip() for page in pages).strip()
-
-
-def has_usable_text(text: str | None) -> bool:
-    return bool(text and text.strip())
+__all__ = ["ExtractMethod", "PageText", "has_usable_text", "join_page_text"]

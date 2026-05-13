@@ -1,6 +1,6 @@
 import { index, jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
-import { ocrMethods } from "../public/ocr-methods"
+import { extractMethods } from "../public/extract-methods"
 
 import { workersSchema } from "./schema"
 
@@ -12,9 +12,9 @@ export const pdfTxts = workersSchema.table(
     id: uuid("id").primaryKey().defaultRandom(),
     // Cross-schema FK: pdf_id UUID REFERENCES core.pdfs (id)
     pdfId: uuid("pdf_id").notNull(),
-    ocrMethod: text("ocr_method")
+    extractMethod: text("extract_method")
       .notNull()
-      .references(() => ocrMethods.id, { onDelete: "cascade" }),
+      .references(() => extractMethods.id, { onDelete: "cascade" }),
     createdByDomain: text("created_by_domain").notNull(),
     txt: text("txt").notNull(),
     textByPage: jsonb("text_by_page").$type<JsonbRecord | null>(),

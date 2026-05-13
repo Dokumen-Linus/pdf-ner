@@ -1,7 +1,16 @@
-from fastapi import APIRouter, Request
+import asyncpg
+from fastapi import APIRouter, Depends, HTTPException, Request
 
-from . import events
-from .schemas import OcrEvaluationRequest, OptimizePromptRequest
+from app.core.db import get_conn
+
+from . import events, repository
+from .schemas import (
+    ChatModelEvalRequest,
+    ExtractTextBatchRequest,
+    OcrEvaluationPdfsRequest,
+    OcrEvaluationRequest,
+    OptimizePromptRequest,
+)
 
 router = APIRouter(prefix="/worker-dispatch", tags=["worker-dispatch"])
 
@@ -35,8 +44,12 @@ async def optimize_prompt(
     task_id = events.dispatch_optimize_prompt(
         project_id=str(request_data.project_id),
         template_id=request_data.template_id,
+        labeled_pdfs=[str(pdf_id) for pdf_id in request_data.labeled_pdfs],
+        beta=request_data.beta,
         max_cost_usd=request_data.max_cost_usd,
-        model=request_data.model,
+        ner_chat_model=request_data.ner_chat_model,
+        prompt_eng_chat_model=request_data.prompt_eng_chat_model,
+        convergence_threshold=request_data.convergence_threshold,
     )
 
     await _store_task_project(request, task_id, request_data.project_id)
@@ -60,6 +73,32 @@ async def evaluate_ocr(
         max_pdfs=request_data.max_pdfs,
         max_pages_per_pdf=request_data.max_pages_per_pdf,
         max_cost_usd=request_data.max_cost_usd,
+        pdf_ids=[str(pdf_id) for pdf_id in request_data.pdf_ids]
+        if request_data.pdf_ids is not None
+        else None,
+        gpu_model=request_data.gpu_model,
+        ocr_only=request_data.ocr_only,
+    )
+
+    await _store_task_project(request, task_id, request_data.project_id)
+
+    return {"task_id": task_id}
+
+
+@router.post("/ocr-evaluation/pdfs")
+async def evaluate_ocr_pdfs(
+    request_data: OcrEvaluationPdfsRequest,
+    request: Request,
+):
+    task_id = events.dispatch_ocr_evaluation(
+        project_id=str(request_data.project_id),
+        judge_model=request_data.judge_model,
+        max_pdfs=request_data.max_pdfs,
+        max_pages_per_pdf=request_data.max_pages_per_pdf,
+        max_cost_usd=request_data.max_cost_usd,
+        pdf_ids=[str(pdf_id) for pdf_id in request_data.pdf_ids],
+        gpu_model=request_data.gpu_model,
+        ocr_only=request_data.ocr_only,
     )
 
     await _store_task_project(request, task_id, request_data.project_id)
@@ -69,4 +108,90 @@ async def evaluate_ocr(
 
 @router.get("/ocr-evaluation/{task_id}/status")
 async def get_ocr_evaluation_status(task_id: str, request: Request):
+    return await _task_status_with_project(request, task_id)
+
+
+@router.post("/chat-model-eval")
+async def evaluate_chat_models(
+    request_data: ChatModelEvalRequest,
+    request: Request,
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    unknown_pdf_ids = await repository.fetch_pdf_ids_outside_project(
+        conn,
+        project_id=request_data.project_id,
+        pdf_ids=request_data.pdf_ids,
+    )
+    if unknown_pdf_ids:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "All pdf_ids must belong to project_id",
+                "pdf_ids": [str(pdf_id) for pdf_id in unknown_pdf_ids],
+            },
+        )
+
+    unavailable_models = await repository.fetch_unavailable_chat_model_ids(
+        conn,
+        chat_model_ids=request_data.chat_model_ids,
+    )
+    if unavailable_models:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "All chat_model_ids must reference available public.chat_models",
+                "chat_model_ids": unavailable_models,
+            },
+        )
+
+    task_id = events.dispatch_chat_model_eval(
+        project_id=str(request_data.project_id),
+        pdf_ids=[str(pdf_id) for pdf_id in request_data.pdf_ids],
+        chat_model_ids=request_data.chat_model_ids,
+        beta=request_data.beta,
+    )
+
+    await _store_task_project(request, task_id, request_data.project_id)
+
+    return {"task_id": task_id}
+
+
+@router.get("/chat-model-eval/{task_id}/status")
+async def get_chat_model_eval_status(task_id: str, request: Request):
+    return await _task_status_with_project(request, task_id)
+
+
+@router.post("/text-extract")
+async def extract_text_batch(
+    request_data: ExtractTextBatchRequest,
+    request: Request,
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    unknown_pdf_ids = await repository.fetch_pdf_ids_outside_project(
+        conn,
+        project_id=request_data.project_id,
+        pdf_ids=request_data.pdf_ids,
+    )
+    if unknown_pdf_ids:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "All pdf_ids must belong to project_id",
+                "pdf_ids": [str(pdf_id) for pdf_id in unknown_pdf_ids],
+            },
+        )
+
+    task_id = events.dispatch_text_extract(
+        project_id=str(request_data.project_id),
+        pdf_ids=[str(pdf_id) for pdf_id in request_data.pdf_ids],
+        extract_method=request_data.extract_method,
+    )
+
+    await _store_task_project(request, task_id, request_data.project_id)
+
+    return {"task_id": task_id}
+
+
+@router.get("/text-extract/{task_id}/status")
+async def get_text_extract_status(task_id: str, request: Request):
     return await _task_status_with_project(request, task_id)

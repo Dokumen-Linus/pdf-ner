@@ -28,7 +28,7 @@ export const CreateProjectSchema = z.object({
   description: z.string().optional(),
   colorPresets: z.array(z.string()).optional(),
   orientation: z.enum(["any", "portrait", "landscape"]).optional(),
-  activeOcrMethod: z.string().optional(),
+  activeExtractMethod: z.string().optional(),
   activeChatModel: z.string().min(1).optional(),
 })
 
@@ -85,7 +85,7 @@ export const createProject = createServerFn({ method: "POST" })
         description: data.description,
         colorPresets: data.colorPresets,
         orientation: data.orientation,
-        activeOcrMethod: data.activeOcrMethod,
+        activeExtractMethod: data.activeExtractMethod,
         activeChatModel: data.activeChatModel,
         // Keep the creator as the stable owner record even for team-linked projects.
         ownerUserId: workspaceUser.userId,
@@ -164,7 +164,7 @@ export const getAccessibleProjects = createServerFn({ method: "GET" })
         bucketId: projects.bucketId,
         colorPresets: projects.colorPresets,
         orientation: projects.orientation,
-        activeOcrMethod: projects.activeOcrMethod,
+        activeExtractMethod: projects.activeExtractMethod,
         activeChatModel: projects.activeChatModel,
         createdAt: projects.createdAt,
         updatedAt: projects.updatedAt,

@@ -7,6 +7,11 @@ import { entityTypes } from "@/db/schemas/web/entity-types"
 import { requireProjectAccess } from "@/lib/project-authorization.server"
 import { requirePermission } from "@/lib/role-authorization.server"
 
+const HexColorSchema = z
+  .string()
+  .transform((color) => color.toUpperCase())
+  .refine((color) => /^#[0-9A-F]{6}$/.test(color), "Color must be #RRGGBB")
+
 // ** CREATE **
 export const CreateEntityTypeSchema = z.object({
   projectId: z.string(),
@@ -21,7 +26,7 @@ export const CreateEntityTypeSchema = z.object({
   unique: z.boolean(),
   required: z.boolean(),
   subtype: z.string().optional(),
-  color: z.string(),
+  color: HexColorSchema,
   opacity: z.number().optional(),
 })
 

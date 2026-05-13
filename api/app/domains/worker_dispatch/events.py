@@ -6,8 +6,12 @@ from app.core.messaging import celery_client, celery_message_headers
 def dispatch_optimize_prompt(
     project_id: str,
     template_id: int,
+    labeled_pdfs: list[str],
+    beta: float = 1.0,
     max_cost_usd: float = 1.0,
-    model: str = "gpt-5.4-mini",
+    ner_chat_model: str = "gpt-5.4-mini",
+    prompt_eng_chat_model: str = "gpt-5.4-mini",
+    convergence_threshold: float = 0.02,
 ) -> str:
     """Send optimize_prompt task to the workers queue via Celery.
 
@@ -16,7 +20,15 @@ def dispatch_optimize_prompt(
     result = celery_client.send_task(
         "context_engineering.optimize_prompt",
         args=[project_id],
-        kwargs={"template_id": template_id, "max_cost_usd": max_cost_usd, "model": model},
+        kwargs={
+            "template_id": template_id,
+            "labeled_pdfs": labeled_pdfs,
+            "beta": beta,
+            "max_cost_usd": max_cost_usd,
+            "ner_chat_model": ner_chat_model,
+            "prompt_eng_chat_model": prompt_eng_chat_model,
+            "convergence_threshold": convergence_threshold,
+        },
         headers=celery_message_headers(),
     )
     return result.id
@@ -28,6 +40,9 @@ def dispatch_ocr_evaluation(
     max_pdfs: int = 5,
     max_pages_per_pdf: int = 3,
     max_cost_usd: float = 0.5,
+    pdf_ids: list[str] | None = None,
+    gpu_model: str = "olm-ocr2",
+    ocr_only: bool = True,
 ) -> str:
     """Send OCR evaluation task to the workers queue via Celery."""
     result = celery_client.send_task(
@@ -37,7 +52,40 @@ def dispatch_ocr_evaluation(
             "max_pdfs": max_pdfs,
             "max_pages_per_pdf": max_pages_per_pdf,
             "max_cost_usd": max_cost_usd,
+            "pdf_ids": pdf_ids,
+            "gpu_model": gpu_model,
+            "ocr_only": ocr_only,
         },
+        headers=celery_message_headers(),
+    )
+    return result.id
+
+
+def dispatch_chat_model_eval(
+    project_id: str,
+    pdf_ids: list[str],
+    chat_model_ids: list[str],
+    beta: float = 1.0,
+) -> str:
+    """Send chat model evaluation task to the workers queue via Celery."""
+    result = celery_client.send_task(
+        "chat_model_eval.evaluate_models",
+        args=[project_id, pdf_ids, chat_model_ids],
+        kwargs={"beta": beta},
+        headers=celery_message_headers(),
+    )
+    return result.id
+
+
+def dispatch_text_extract(
+    project_id: str,
+    pdf_ids: list[str],
+    extract_method: str,
+) -> str:
+    """Send text extraction batch task to the workers queue via Celery."""
+    result = celery_client.send_task(
+        "text_extract.extract_missing_pdf_texts",
+        args=[project_id, pdf_ids, extract_method],
         headers=celery_message_headers(),
     )
     return result.id

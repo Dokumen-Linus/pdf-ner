@@ -40,6 +40,10 @@ export const contextEngineeringIterations = workersSchema.table(
     numCorrectEntityTypes: integer("num_correct_entity_types"),
     pdfAccuracy: real("pdf_accuracy"),
     entityTypeMetrics: jsonb("entity_type_metrics"),
+    incorrectlyPredictedEntityValueIds: uuid("incorrectly_predicted_entity_value_ids")
+      .array()
+      .notNull()
+      .default([]),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
   (t) => [index("context_engineering_iterations_run_id_idx").on(t.contextEngRunId)],

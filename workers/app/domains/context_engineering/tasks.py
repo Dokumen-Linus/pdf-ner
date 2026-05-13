@@ -1,7 +1,8 @@
-import asyncio
 from decimal import Decimal
 import logging
 from uuid import UUID
+
+import anyio
 
 from app.main import app
 
@@ -16,19 +17,27 @@ def optimize_prompt_task(
     self,
     project_id: str,
     template_id: int,
+    labeled_pdfs: list[str],
+    beta: float = 1.0,
     max_cost_usd: str = "1.00",
-    model: str = "gpt-4o",
+    ner_chat_model: str = "gpt-5.4-mini",
+    prompt_eng_chat_model: str = "gpt-5.4-mini",
+    convergence_threshold: float = 0.02,
 ):
     """Celery task to optimize NER prompts for a project."""
     logger.info("Starting prompt optimization: project=%s", project_id)
     cmd = OptimizePrompt(
         project_id=UUID(project_id),
         template_id=int(template_id),
+        labeled_pdfs=[UUID(pdf_id) for pdf_id in labeled_pdfs],
+        beta=float(beta),
         max_cost_usd=Decimal(max_cost_usd),
-        model=model,
+        ner_chat_model=ner_chat_model,
+        prompt_eng_chat_model=prompt_eng_chat_model,
+        convergence_threshold=float(convergence_threshold),
     )
     try:
-        result = asyncio.run(handle_optimize_prompt(cmd, task=self))
+        result = anyio.run(handle_optimize_prompt, cmd, self)
         return result
     except Exception as exc:
         logger.error("Prompt optimization failed: %s", exc, exc_info=True)

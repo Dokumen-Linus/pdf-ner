@@ -44,9 +44,9 @@ def test_similarity_penalizes_truncation():
 def test_similarity_is_inconclusive_when_olm_is_blank():
     metrics = score_tesseract_against_olm("some tesseract text " * 10, "")
 
-    assert metrics.status == "olm_unavailable"
+    assert metrics.status == "selected_ocr_unavailable"
     assert metrics.score is None
-    assert metrics.olm_blank is True
+    assert metrics.selected_blank is True
 
 
 def test_pdfium_usability_uses_alphanumeric_content():
@@ -60,9 +60,9 @@ def test_parse_judge_result_normalizes_unknown_best_method():
         {
           "best_method": "unknown",
           "tesseract_usable": true,
-          "olm_usable": true,
+          "selected_ocr_usable": true,
           "confidence": 1.5,
-          "quality_scores": {"tesseract": 0.9, "olm": 0.8},
+          "quality_scores": {"tesseract": 0.9, "selected_ocr": 0.8},
           "rationale": "close"
         }
         """
@@ -81,16 +81,31 @@ def test_recommend_page_prefers_pdfium_when_embedded_text_is_usable():
 def test_recommend_page_uses_judge_when_tesseract_differs_from_olm():
     metrics = score_tesseract_against_olm("bad", "better text " * 10)
     judge = JudgeResult(
-        best_method="olm",
+        best_method="olm-ocr2",
         tesseract_usable=False,
-        olm_usable=True,
+        selected_ocr_usable=True,
         confidence=0.9,
         tesseract_quality=0.2,
-        olm_quality=0.9,
+        selected_ocr_quality=0.9,
         rationale="olm is coherent",
     )
 
-    assert recommend_page_method("", metrics, judge) == "olm"
+    assert recommend_page_method("", metrics, judge, "olm-ocr2") == "olm-ocr2"
+
+
+def test_recommend_page_uses_selected_method_id():
+    metrics = score_tesseract_against_olm("bad", "better text " * 10)
+    judge = JudgeResult(
+        best_method="deepseek-ocr",
+        tesseract_usable=False,
+        selected_ocr_usable=True,
+        confidence=0.9,
+        tesseract_quality=0.2,
+        selected_ocr_quality=0.9,
+        rationale="selected OCR is coherent",
+    )
+
+    assert recommend_page_method("", metrics, judge, "deepseek-ocr") == "deepseek-ocr"
 
 
 def test_summarize_recommends_tesseract_when_pages_match_olm():
@@ -104,7 +119,8 @@ def test_summarize_recommends_tesseract_when_pages_match_olm():
             page_index=i,
             pdfium_text="",
             tesseract_text="Invoice 123 Total 45",
-            olm_text="Invoice 123 Total 45",
+            selected_ocr_text="Invoice 123 Total 45",
+            selected_ocr_method="olm-ocr2",
             similarity=metrics,
             judge_result=None,
             recommended_method="tesseract",

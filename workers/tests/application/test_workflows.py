@@ -1,544 +1,189 @@
 from decimal import Decimal
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
 
+from app.domains.context_engineering.application import workflows
 from app.domains.context_engineering.application.commands import OptimizePrompt
 from app.domains.context_engineering.application.workflows import (
-    _avg_score,
-    _evaluate_prompt_on_pdfs,
+    _initial_prompt_attributes,
+    _window_around_value,
     prompt_optimization_workflow,
 )
-from app.domains.context_engineering.domain.entities import (
-    EvaluationResult,
-    PromptCandidate,
-)
-from app.domains.context_engineering.domain.value_objects import CostBudget, F1Score
+from app.domains.context_engineering.domain import services
+from app.domains.context_engineering.domain.entities import EntityTypeInfo
+from app.domains.ner_runs.domain.entities import NerBatchResult, NerPdfResult, PersistedPrediction
 from tests.conftest import PDF_ID_1, PROJECT_ID, PROMPT_ID
 
-BUCKET_ID = uuid4()
 TEMPLATE_ID = 1
 TEMPLATE_ROW = {
     "id": TEMPLATE_ID,
-    "txt": (
-        "Project: <PROJECT_DESCRIPTION>\nFields: <ENTITY_TYPES>\nDefinitions: <DEFINITIONS>\n"
-        "Examples: <EXAMPLE_VALUES>\nConstraints: <CONSTRAINTS>\nRequired: <IS_REQUIRED>\n"
-        "Unique: <IS_UNIQUE>\nDocument:"
-    ),
-    "inserts": [
-        "<PROJECT_DESCRIPTION>",
-        "<ENTITY_TYPES>",
-        "<DEFINITIONS>",
-        "<EXAMPLE_VALUES>",
-        "<CONSTRAINTS>",
-        "<IS_REQUIRED>",
-        "<IS_UNIQUE>",
-    ],
-    "document_at_end": True,
+    "txt": "Project: <PROJECT_DESCRIPTION>\nFields: <ENTITY_TYPES>\nFinds: <EXAMPLE_FINDS>",
+    "includes_project_description": True,
+    "includes_entity_type_definitions": True,
+    "includes_entity_type_example_values": True,
+    "includes_entity_type_example_finds": True,
+    "includes_entity_type_regex": True,
 }
 
-# ─── _avg_score ──────────────────────────────────────────────────────────
+
+def test_window_around_value_limits_context():
+    text = ("a" * 600) + "TARGET" + ("b" * 600)
+
+    window = _window_around_value(text, "TARGET")
+
+    assert window is not None
+    assert len(window) == 1006
+    assert "TARGET" in window
 
 
-class TestAvgScore:
-    def test_single_result(self):
-        result = EvaluationResult(
-            prompt_candidate=PromptCandidate(system_prompt="", iteration=0),
-            per_entity_scores={"name": F1Score(0.8, 0.9, 0.85)},
-            overall_exact_match_rate=0.8,
-            overall_partial_match_rate=0.9,
-            overall_f1=0.85,
-            errors=[],
+def test_initial_prompt_attributes_use_user_data_exactly(name_entity_type):
+    attrs = _initial_prompt_attributes("Project description", [name_entity_type])
+
+    assert attrs.project_description == "Project description"
+    assert attrs.entity_types_order == [name_entity_type.entity_type_id]
+    assert attrs.entity_type_definitions[str(name_entity_type.entity_type_id)] == (
+        name_entity_type.user_definition
+    )
+    assert attrs.entity_type_example_values[str(name_entity_type.entity_type_id)] == (
+        name_entity_type.user_examples
+    )
+
+
+def test_form_prompt_text_from_structured_attributes(name_entity_type):
+    attrs = _initial_prompt_attributes("Invoices", [name_entity_type])
+    attrs.entity_type_example_finds[str(name_entity_type.entity_type_id)].append(
+        {"pdf_id": str(PDF_ID_1), "value": "John Smith", "explanation": "name"}
+    )
+
+    formed = services.form_prompt_text(
+        TEMPLATE_ROW["txt"],
+        project_description=attrs.project_description,
+        entity_types=[name_entity_type],
+        entity_type_definitions=attrs.entity_type_definitions,
+        entity_type_example_values=attrs.entity_type_example_values,
+        entity_type_example_finds=attrs.entity_type_example_finds,
+    )
+
+    assert "Invoices" in formed
+    assert "full_name" in formed
+    assert "John Smith" in formed
+
+
+@pytest.mark.anyio
+async def test_workflow_inserts_structured_prompt_and_updates_run(entity_types, labeled_pdf_1):
+    conn = AsyncMock()
+    conn.fetchrow.side_effect = [
+        {"id": PROJECT_ID, "name": "Test Project", "description": "Invoices"},
+        TEMPLATE_ROW,
+        {"provider": "openai"},
+        {"provider": "openai"},
+    ]
+
+    entity_rows = [_entity_row(entity) for entity in entity_types]
+    pdf_rows = [
+        {
+            "id": labeled_pdf_1.pdf_id,
+            "pdf_txt_id": uuid4(),
+            "full_text": labeled_pdf_1.full_text,
+            "text_by_page": None,
+            "bucket_id": uuid4(),
+            "filepath": "uploads/doc1.pdf",
+        }
+    ]
+    ann_rows = [
+        {
+            "pdf_id": ann.pdf_id,
+            "entity_value_id": uuid4(),
+            "entity_type_id": ann.entity_type_id,
+            "custom_entity_type": ann.entity_type_name,
+            "contents": ann.labeled_text,
+            "page_index": ann.page_index,
+        }
+        for ann in labeled_pdf_1.annotations
+    ]
+    label_rows = [
+        {
+            "pdf_id": ann.pdf_id,
+            "entity_type_id": ann.entity_type_id,
+            "entity_type_name": ann.entity_type_name,
+            "text_value": ann.labeled_text,
+        }
+        for ann in labeled_pdf_1.annotations
+    ]
+    conn.fetch.side_effect = [entity_rows, pdf_rows, ann_rows, label_rows, label_rows]
+    conn.fetchval.side_effect = [uuid4(), PROMPT_ID, uuid4(), uuid4(), uuid4()]
+
+    async def fake_prompt_call(*args, **kwargs):
+        return workflows.LLMResponseData(
+            text=json.dumps({"context": "John Smith", "explanation": "example"}),
+            input_tokens=1,
+            output_tokens=1,
         )
-        avg = _avg_score([result], "name")
-        assert avg.precision == pytest.approx(0.8)
-        assert avg.recall == pytest.approx(0.9)
-        assert avg.f1 == pytest.approx(0.85)
 
-    def test_multiple_results_averaged(self):
-        results = [
-            EvaluationResult(
-                prompt_candidate=PromptCandidate(system_prompt="", iteration=0),
-                per_entity_scores={"name": F1Score(0.8, 0.6, 0.7)},
-                overall_exact_match_rate=0.0,
-                overall_partial_match_rate=0.0,
-                overall_f1=0.7,
-                errors=[],
-            ),
-            EvaluationResult(
-                prompt_candidate=PromptCandidate(system_prompt="", iteration=0),
-                per_entity_scores={"name": F1Score(1.0, 1.0, 1.0)},
-                overall_exact_match_rate=1.0,
-                overall_partial_match_rate=1.0,
-                overall_f1=1.0,
-                errors=[],
-            ),
-        ]
-        avg = _avg_score(results, "name")
-        assert avg.precision == pytest.approx(0.9)
-        assert avg.recall == pytest.approx(0.8)
-        assert avg.f1 == pytest.approx(0.85)
-
-    def test_missing_entity_returns_zero(self):
-        result = EvaluationResult(
-            prompt_candidate=PromptCandidate(system_prompt="", iteration=0),
-            per_entity_scores={"other": F1Score(1.0, 1.0, 1.0)},
-            overall_exact_match_rate=1.0,
-            overall_partial_match_rate=1.0,
-            overall_f1=1.0,
-            errors=[],
-        )
-        avg = _avg_score([result], "name")
-        assert avg.f1 == 0.0
-
-
-# ─── _evaluate_prompt_on_pdfs ────────────────────────────────────────────
-
-
-class TestEvaluatePromptOnPdfs:
-    @pytest.mark.anyio
-    async def test_evaluates_each_pdf(self, entity_types, labeled_pdf_1, labeled_pdf_2):
-        mock_client = AsyncMock()
-        perfect_response = json.dumps(
-            {
-                "full_name": "John Smith",
-                "ssn": "123-45-6789",
-                "phone_numbers": ["555-1234", "555-5678"],
-            }
-        )
-        mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content=perfect_response))]
-        )
-
-        candidate = PromptCandidate(system_prompt="test prompt", iteration=0)
-        json_schema = {"type": "object", "properties": {}}
-        conn = AsyncMock()
-        budget = CostBudget(max_cost_usd=Decimal("1.00"))
-
-        with patch(
-            "app.domains.context_engineering.application.workflows.record_llm_usage",
-            new=AsyncMock(return_value=Decimal("0.01")),
-        ):
-            results = await _evaluate_prompt_on_pdfs(
-                conn,
-                mock_client,
-                candidate,
-                [labeled_pdf_1],
-                json_schema,
-                entity_types,
-                "gpt-4o",
-                project_id=PROJECT_ID,
-                budget=budget,
+    persisted_prediction = PersistedPrediction(
+        entity_value_id=uuid4(),
+        pdf_id=labeled_pdf_1.pdf_id,
+        entity_type_id=entity_types[0].entity_type_id,
+        text_value="John Smith",
+    )
+    ner_result = NerBatchResult(
+        run_id=uuid4(),
+        pdf_results=[
+            NerPdfResult(
+                pdf_id=labeled_pdf_1.pdf_id,
+                predictions={"full_name": "John Smith"},
+                persisted_predictions=[persisted_prediction],
             )
+        ],
+        cost_usd=Decimal("0.01"),
+        input_tokens=1,
+        output_tokens=1,
+    )
+    cmd = OptimizePrompt(
+        project_id=PROJECT_ID,
+        template_id=TEMPLATE_ID,
+        labeled_pdfs=[labeled_pdf_1.pdf_id],
+        max_cost_usd=Decimal("1.00"),
+    )
 
-        assert len(results) == 1
-        assert results[0].overall_f1 == 1.0
-        assert mock_client.chat.completions.create.call_count == 1
-        assert budget.spent_cost_usd == Decimal("0.01")
-
-    @pytest.mark.anyio
-    async def test_handles_invalid_json(self, entity_types, labeled_pdf_1):
-        mock_client = AsyncMock()
-        mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="not valid json"))]
-        )
-
-        candidate = PromptCandidate(system_prompt="test", iteration=0)
-        conn = AsyncMock()
-        budget = CostBudget(max_cost_usd=Decimal("1.00"))
-        with patch(
-            "app.domains.context_engineering.application.workflows.record_llm_usage",
-            new=AsyncMock(return_value=Decimal("0.01")),
-        ):
-            results = await _evaluate_prompt_on_pdfs(
-                conn,
-                mock_client,
-                candidate,
-                [labeled_pdf_1],
-                {},
-                entity_types,
-                "gpt-4o",
-                project_id=PROJECT_ID,
-                budget=budget,
-            )
-
-        assert len(results) == 1
-        # Invalid JSON -> empty predictions -> low F1
-        assert results[0].overall_f1 < 1.0
-
-    @pytest.mark.anyio
-    async def test_multiple_pdfs(self, entity_types, labeled_pdf_1, labeled_pdf_2):
-        mock_client = AsyncMock()
-        mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="{}"))]
-        )
-
-        candidate = PromptCandidate(system_prompt="test", iteration=0)
-        conn = AsyncMock()
-        budget = CostBudget(max_cost_usd=Decimal("1.00"))
-        with patch(
-            "app.domains.context_engineering.application.workflows.record_llm_usage",
-            new=AsyncMock(return_value=Decimal("0.01")),
-        ):
-            results = await _evaluate_prompt_on_pdfs(
-                conn,
-                mock_client,
-                candidate,
-                [labeled_pdf_1, labeled_pdf_2],
-                {},
-                entity_types,
-                "gpt-4o",
-                project_id=PROJECT_ID,
-                budget=budget,
-            )
-
-        assert len(results) == 2
-        assert mock_client.chat.completions.create.call_count == 2
-
-    @pytest.mark.anyio
-    async def test_stops_before_next_pdf_when_budget_is_exhausted(
-        self, entity_types, labeled_pdf_1, labeled_pdf_2
+    with (
+        patch.object(workflows, "call_openai", new=AsyncMock(side_effect=fake_prompt_call)),
+        patch.object(workflows, "record_llm_usage", new=AsyncMock(return_value=Decimal("0.01"))),
+        patch.object(
+            workflows, "execute_and_persist_ner_batch", new=AsyncMock(return_value=ner_result)
+        ) as execute_batch,
+        patch.object(workflows, "link_run_to_context_iteration", new=AsyncMock()) as link_run,
     ):
-        mock_client = AsyncMock()
-        mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content="{}"))]
-        )
+        result = await prompt_optimization_workflow(conn, {"openai": object()}, cmd)
 
-        candidate = PromptCandidate(system_prompt="test", iteration=0)
-        conn = AsyncMock()
-        budget = CostBudget(max_cost_usd=Decimal("0.01"))
-        with patch(
-            "app.domains.context_engineering.application.workflows.record_llm_usage",
-            new=AsyncMock(return_value=Decimal("0.01")),
-        ):
-            results = await _evaluate_prompt_on_pdfs(
-                conn,
-                mock_client,
-                candidate,
-                [labeled_pdf_1, labeled_pdf_2],
-                {},
-                entity_types,
-                "gpt-4o",
-                project_id=PROJECT_ID,
-                budget=budget,
-            )
-
-        assert len(results) == 1
-        assert budget.is_exhausted
-        assert mock_client.chat.completions.create.call_count == 1
+    assert result["best_prompt_id"] == str(PROMPT_ID)
+    assert conn.fetchval.await_count == 5, f"Expected 5, got {conn.fetchval.await_count}"
+    prompt_insert_args = conn.fetchval.await_args_list[1].args
+    assert prompt_insert_args[7]  # entity_type_example_finds JSON
+    assert prompt_insert_args[8]
+    assert prompt_insert_args[8] == execute_batch.await_args.kwargs["system_prompt"]
+    assert "Project: Invoices" in prompt_insert_args[8]
+    assert "John Smith" in prompt_insert_args[8]
+    assert link_run.await_count == 2
 
 
-# ─── prompt_optimization_workflow ────────────────────────────────────────
-
-
-class TestPromptOptimizationWorkflow:
-    @pytest.mark.anyio
-    async def test_raises_on_missing_project(self):
-        conn = AsyncMock()
-        conn.fetchrow.return_value = None
-        client = AsyncMock()
-
-        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=TEMPLATE_ID)
-        with pytest.raises(ValueError, match="Project not found"):
-            await prompt_optimization_workflow(conn, client, cmd)
-
-    @pytest.mark.anyio
-    async def test_raises_on_no_entity_types(self):
-        conn = AsyncMock()
-        conn.fetchrow.side_effect = [
-            {"id": PROJECT_ID, "name": "Test", "description": "desc"},
-            {"provider": "openai"},
-            TEMPLATE_ROW,
-        ]
-        conn.fetch.return_value = []  # no entity types
-        client = AsyncMock()
-
-        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=TEMPLATE_ID)
-        with pytest.raises(ValueError, match="No entity types"):
-            await prompt_optimization_workflow(conn, client, cmd)
-
-    @pytest.mark.anyio
-    async def test_raises_on_missing_template(self):
-        conn = AsyncMock()
-        conn.fetchrow.side_effect = [
-            {"id": PROJECT_ID, "name": "Test", "description": "desc"},
-            {"provider": "openai"},
-            None,
-        ]
-        client = AsyncMock()
-
-        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=999)
-        with pytest.raises(ValueError, match="Template not found"):
-            await prompt_optimization_workflow(conn, client, cmd)
-
-    @pytest.mark.anyio
-    async def test_raises_on_no_labeled_pdfs(self, name_entity_type):
-        conn = AsyncMock()
-        conn.fetchrow.side_effect = [
-            {"id": PROJECT_ID, "name": "Test", "description": "desc"},
-            {"provider": "openai"},
-            TEMPLATE_ROW,
-        ]
-        # First fetch returns entity types, second returns empty (no pdfs)
-        entity_row = {
-            "name": name_entity_type.name,
-            "user_definition": name_entity_type.user_definition,
-            "user_examples": name_entity_type.user_examples,
-            "user_format_description": name_entity_type.user_format_description,
-            "datatype": name_entity_type.datatype,
-            "single_word": name_entity_type.single_word,
-            "exact_length": name_entity_type.exact_length,
-            "unique": name_entity_type.unique,
-            "required": name_entity_type.required,
-            "std_definition": name_entity_type.std_definition,
-            "std_examples": name_entity_type.std_examples,
-            "std_format_description": name_entity_type.std_format_description,
-            "std_regex": name_entity_type.std_regex,
-            "entity_type_id": name_entity_type.entity_type_id,
-        }
-        # fetch_entity_types_with_std calls conn.fetch once, fetch_labeled_pdfs calls it again
-        conn.fetch.side_effect = [[entity_row], []]
-        client = AsyncMock()
-
-        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=TEMPLATE_ID)
-        with pytest.raises(ValueError, match="No labeled PDFs"):
-            await prompt_optimization_workflow(conn, client, cmd)
-
-    @pytest.mark.anyio
-    async def test_full_workflow_convergence(
-        self, entity_types, labeled_pdf_1, labeled_pdf_2, labeled_pdf_3
-    ):
-        """Full workflow that converges after initial variant evaluation."""
-        conn = AsyncMock()
-        conn.fetchrow.side_effect = [
-            {
-                "id": PROJECT_ID,
-                "name": "Test Project",
-                "description": "Test invoices",
-            },
-            {"provider": "openai"},
-            TEMPLATE_ROW,
-        ]
-
-        # Build entity type rows
-        entity_rows = []
-        for et in entity_types:
-            entity_rows.append(
-                {
-                    "name": et.name,
-                    "user_definition": et.user_definition,
-                    "user_examples": et.user_examples,
-                    "user_format_description": et.user_format_description,
-                    "datatype": et.datatype,
-                    "single_word": et.single_word,
-                    "exact_length": et.exact_length,
-                    "unique": et.unique,
-                    "required": et.required,
-                    "std_definition": et.std_definition,
-                    "std_examples": et.std_examples,
-                    "std_format_description": et.std_format_description,
-                    "std_regex": et.std_regex,
-                    "entity_type_id": et.entity_type_id,
-                }
-            )
-
-        # Build PDF and annotation rows
-        pdf_rows = [
-            {
-                "id": labeled_pdf_1.pdf_id,
-                "full_text": labeled_pdf_1.full_text,
-                "text_by_page": None,
-                "bucket_id": BUCKET_ID,
-                "filepath": "uploads/doc1.pdf",
-            },
-            {
-                "id": labeled_pdf_2.pdf_id,
-                "full_text": labeled_pdf_2.full_text,
-                "text_by_page": None,
-                "bucket_id": BUCKET_ID,
-                "filepath": "uploads/doc2.pdf",
-            },
-            {
-                "id": labeled_pdf_3.pdf_id,
-                "full_text": labeled_pdf_3.full_text,
-                "text_by_page": None,
-                "bucket_id": BUCKET_ID,
-                "filepath": "uploads/doc3.pdf",
-            },
-        ]
-        ann_rows = []
-        for pdf in [labeled_pdf_1, labeled_pdf_2, labeled_pdf_3]:
-            for ann in pdf.annotations:
-                ann_rows.append(
-                    {
-                        "pdf_id": ann.pdf_id,
-                        "custom_entity_type": ann.entity_type_name,
-                        "entity_type_id": ann.entity_type_id,
-                        "contents": ann.labeled_text,
-                        "page_index": ann.page_index,
-                    }
-                )
-
-        conn.fetch.side_effect = [entity_rows, pdf_rows, ann_rows]
-
-        # Mock OpenAI: always return perfect predictions
-        perfect_json = json.dumps(
-            {
-                "full_name": "Alice Johnson",
-                "ssn": "111-22-3333",
-                "phone_numbers": [],
-            }
-        )
-        mock_client = AsyncMock()
-        mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content=perfect_json))]
-        )
-
-        conn.fetchval.return_value = PROMPT_ID
-
-        cmd = OptimizePrompt(
-            project_id=PROJECT_ID, template_id=TEMPLATE_ID, max_cost_usd=Decimal("1.00")
-        )
-        with (
-            patch(
-                "app.domains.context_engineering.application.workflows.record_llm_usage",
-                new=AsyncMock(return_value=Decimal("0.01")),
-            ),
-        ):
-            result = await prompt_optimization_workflow(conn, mock_client, cmd)
-
-        assert "best_prompt_id" in result
-        assert "best_f1" in result
-        assert "iterations_run" in result
-        assert result["cost_usd"] == "0.07"
-        assert result["max_cost_usd"] == "1.00"
-        assert result["stop_reason"] == "no_errors"
-        assert result["best_prompt_id"] == str(PROMPT_ID)
-        assert result["llm_call_count"] == 7
-        assert conn.fetchval.call_count == 6
-        assert conn.executemany.await_count == 2
-
-    @pytest.mark.anyio
-    async def test_skips_pdf_with_no_full_text_and_logs_warning(self, name_entity_type, caplog):
-        """PDFs with full_text=None are skipped and logged without S3 fallback."""
-        import logging
-
-        conn = AsyncMock()
-        conn.fetchrow.side_effect = [
-            {"id": PROJECT_ID, "name": "Test", "description": "desc"},
-            {"provider": "openai"},
-            TEMPLATE_ROW,
-        ]
-
-        entity_row = {
-            "name": name_entity_type.name,
-            "user_definition": name_entity_type.user_definition,
-            "user_examples": name_entity_type.user_examples,
-            "user_format_description": name_entity_type.user_format_description,
-            "datatype": name_entity_type.datatype,
-            "single_word": name_entity_type.single_word,
-            "exact_length": name_entity_type.exact_length,
-            "unique": name_entity_type.unique,
-            "required": name_entity_type.required,
-            "std_definition": name_entity_type.std_definition,
-            "std_examples": name_entity_type.std_examples,
-            "std_format_description": name_entity_type.std_format_description,
-            "std_regex": name_entity_type.std_regex,
-            "entity_type_id": name_entity_type.entity_type_id,
-        }
-
-        # One PDF with no full_text
-        pdf_rows = [
-            {
-                "id": PDF_ID_1,
-                "full_text": None,
-                "text_by_page": None,
-                "bucket_id": BUCKET_ID,
-                "filepath": "uploads/doc1.pdf",
-            },
-        ]
-        ann_rows = [
-            {
-                "pdf_id": PDF_ID_1,
-                "custom_entity_type": "full_name",
-                "entity_type_id": name_entity_type.entity_type_id,
-                "contents": "John Smith",
-                "page_index": 0,
-            },
-        ]
-        conn.fetch.side_effect = [entity_row if False else [entity_row], pdf_rows, ann_rows]
-
-        client = AsyncMock()
-        cmd = OptimizePrompt(project_id=PROJECT_ID, template_id=TEMPLATE_ID)
-
-        with caplog.at_level(logging.ERROR):
-            with pytest.raises(ValueError, match="No labeled PDFs with usable text"):
-                await prompt_optimization_workflow(conn, client, cmd)
-
-        assert any("no saved full_text" in r.exc_text for r in caplog.records if r.exc_text)
-
-    @pytest.mark.anyio
-    async def test_uses_full_text_from_db_when_present(self, name_entity_type):
-        """PDFs that already have full_text do NOT trigger download_pdf_bytes."""
-        conn = AsyncMock()
-        conn.fetchrow.side_effect = [
-            {"id": PROJECT_ID, "name": "Test", "description": "desc"},
-            {"provider": "openai"},
-            TEMPLATE_ROW,
-        ]
-
-        entity_row = {
-            "name": name_entity_type.name,
-            "user_definition": name_entity_type.user_definition,
-            "user_examples": name_entity_type.user_examples,
-            "user_format_description": name_entity_type.user_format_description,
-            "datatype": name_entity_type.datatype,
-            "single_word": name_entity_type.single_word,
-            "exact_length": name_entity_type.exact_length,
-            "unique": name_entity_type.unique,
-            "required": name_entity_type.required,
-            "std_definition": name_entity_type.std_definition,
-            "std_examples": name_entity_type.std_examples,
-            "std_format_description": name_entity_type.std_format_description,
-            "std_regex": name_entity_type.std_regex,
-            "entity_type_id": name_entity_type.entity_type_id,
-        }
-
-        pdf_rows = [
-            {
-                "id": PDF_ID_1,
-                "full_text": "John Smith SSN: 123-45-6789",
-                "text_by_page": None,
-                "bucket_id": BUCKET_ID,
-                "filepath": "uploads/doc1.pdf",
-            },
-        ]
-        ann_rows = [
-            {
-                "pdf_id": PDF_ID_1,
-                "custom_entity_type": "full_name",
-                "entity_type_id": name_entity_type.entity_type_id,
-                "contents": "John Smith",
-                "page_index": 0,
-            },
-        ]
-        conn.fetch.side_effect = [[entity_row], pdf_rows, ann_rows]
-        conn.fetchval.return_value = PROMPT_ID
-
-        mock_client = AsyncMock()
-        mock_client.chat.completions.create.return_value = MagicMock(
-            choices=[MagicMock(message=MagicMock(content=json.dumps({"full_name": "John Smith"})))]
-        )
-
-        cmd = OptimizePrompt(
-            project_id=PROJECT_ID, template_id=TEMPLATE_ID, max_cost_usd=Decimal("1.00")
-        )
-        with (
-            patch(
-                "app.domains.context_engineering.application.workflows.record_llm_usage",
-                new=AsyncMock(return_value=Decimal("0.01")),
-            ),
-        ):
-            await prompt_optimization_workflow(conn, mock_client, cmd)
+def _entity_row(entity: EntityTypeInfo) -> dict:
+    return {
+        "name": entity.name,
+        "user_definition": entity.user_definition,
+        "user_example_values": entity.user_examples,
+        "user_format_description": entity.user_format_description,
+        "datatype": entity.datatype,
+        "single_word": entity.single_word,
+        "exact_length": entity.exact_length,
+        "unique": entity.unique,
+        "required": entity.required,
+        "std_definition": entity.std_definition,
+        "std_examples": entity.std_examples,
+        "std_format_description": entity.std_format_description,
+        "std_regex": entity.std_regex,
+        "entity_type_id": entity.entity_type_id,
+    }

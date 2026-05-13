@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+import sys
 
 # Set required env vars before any app imports
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
@@ -8,6 +10,8 @@ os.environ.setdefault("OPENAI_API_KEY", "test-key")
 os.environ.setdefault("GOOGLE_AI_API_KEY", "test-key")
 os.environ.setdefault("STRIPE_SECRET_KEY", "sk_test_dummy")
 os.environ.setdefault("ENV", "development")
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages" / "pdfium_utils"))
 
 from datetime import UTC, datetime
 from uuid import UUID

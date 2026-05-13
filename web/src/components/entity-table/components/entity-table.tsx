@@ -63,7 +63,8 @@ function createAnnotationFromSearchResult(
 
 const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
   const pluginStore = usePluginStore()
-  const { annoState, annoCapability, searchCapability, scrollCapability } = pluginStore
+  const { activeDocumentId, annoState, annoCapability, searchCapability, scrollCapability } =
+    pluginStore
 
   const { byName: entityTypesByName, setByName, patchEntityType } = useEntityTypeStore()
 
@@ -71,11 +72,10 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
     setByName(entityTypesToRecord(entityTypes))
   }, [entityTypes, setByName])
 
-  const activeDocumentId = annoState?.activeDocumentId ?? null
-
   return (
     <EntityTableDocumentRows
       key={activeDocumentId ?? "no-document"}
+      activeDocumentId={activeDocumentId}
       annoState={annoState ?? null}
       annoCapability={annoCapability}
       searchCapability={searchCapability}
@@ -87,6 +87,7 @@ const EntityTable = ({ entityTypes }: { entityTypes: EntityType[] }) => {
 }
 
 function EntityTableDocumentRows({
+  activeDocumentId,
   annoState,
   annoCapability,
   searchCapability,
@@ -94,6 +95,7 @@ function EntityTableDocumentRows({
   entityTypesByName,
   patchEntityType,
 }: {
+  activeDocumentId: PluginStore["activeDocumentId"]
   annoState: PluginStore["annoState"]
   annoCapability: PluginStore["annoCapability"]
   searchCapability: PluginStore["searchCapability"]
@@ -105,7 +107,6 @@ function EntityTableDocumentRows({
   const [searchFeedback, setSearchFeedback] = useState<Record<string, string>>({})
   const [searchingEntityName, setSearchingEntityName] = useState<string | null>(null)
 
-  const activeDocumentId = annoState?.activeDocumentId ?? null
   const activeDoc = activeDocumentId ? annoState?.documents[activeDocumentId] : null
 
   const activateEntityType = (entityTypeName: string) => {
@@ -243,9 +244,9 @@ function EntityTableDocumentRows({
                         subtype: value as Subtype,
                       })
                     }
-                    const currentDocument = annoState?.activeDocumentId
-                      ? annoState.documents[annoState.activeDocumentId]
-                      : null
+                    if (!activeDocumentId) return
+
+                    const currentDocument = annoState?.documents[activeDocumentId] ?? null
                     const annoIds = currentDocument?.byEntityType?.[name] || []
                     annoCapability?.updateAnnotations(
                       annoIds.map((id: string) => ({
@@ -254,6 +255,7 @@ function EntityTableDocumentRows({
                           type: subtypeToEnum(value as Subtype),
                         } as Partial<PdfTextMarkupAnnotationObject>,
                       })),
+                      activeDocumentId ?? undefined,
                     )
                   }}
                 >
@@ -288,9 +290,9 @@ function EntityTableDocumentRows({
                         color,
                       })
                     }
-                    const currentDocument = annoState?.activeDocumentId
-                      ? annoState.documents[annoState.activeDocumentId]
-                      : null
+                    if (!activeDocumentId) return
+
+                    const currentDocument = annoState?.documents[activeDocumentId] ?? null
                     const annoIds = currentDocument?.byEntityType?.[name] || []
                     annoCapability?.updateAnnotations(
                       annoIds.map((id: string) => ({
@@ -299,6 +301,7 @@ function EntityTableDocumentRows({
                           color,
                         } as Partial<PdfTextMarkupAnnotationObject>,
                       })),
+                      activeDocumentId ?? undefined,
                     )
                   }}
                 />

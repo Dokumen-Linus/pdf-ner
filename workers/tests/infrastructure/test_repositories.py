@@ -13,8 +13,8 @@ from app.domains.context_engineering.infrastructure.repositories import (
     fetch_labeled_pdfs,
     fetch_project,
     insert_evaluation,
-    insert_optimized_prompt,
     insert_optimized_prompt_examples,
+    insert_prompt_attributes,
 )
 from tests.conftest import PDF_ID_1, PDF_ID_2, PROJECT_ID, PROMPT_ID
 
@@ -214,25 +214,7 @@ class TestFetchLabeledPdfs:
         assert result == []
 
 
-class TestInsertOptimizedPrompt:
-    @pytest.mark.anyio
-    async def test_returns_prompt_id(self):
-        conn = AsyncMock()
-        conn.fetchval.return_value = PROMPT_ID
-        result = await insert_optimized_prompt(conn, PROJECT_ID, 1, "prompt text")
-        assert result == PROMPT_ID
-        conn.fetchval.assert_awaited_once()
-
-    @pytest.mark.anyio
-    async def test_passes_correct_args(self):
-        conn = AsyncMock()
-        conn.fetchval.return_value = PROMPT_ID
-        await insert_optimized_prompt(conn, PROJECT_ID, 1, "my prompt")
-        args = conn.fetchval.call_args
-        assert PROJECT_ID in args[0]
-        assert 1 in args[0]
-        assert "my prompt" in args[0]
-
+class TestInsertOptimizedPromptExamples:
     @pytest.mark.anyio
     async def test_inserts_final_example_snapshots(self, labeled_pdf_1):
         from app.domains.context_engineering.domain.services import build_prompt_example_snapshots
@@ -248,6 +230,30 @@ class TestInsertOptimizedPrompt:
         assert row[0] == PROMPT_ID
         assert row[1] == labeled_pdf_1.pdf_id
         assert row[2] == 0
+
+
+class TestInsertPromptAttributes:
+    @pytest.mark.anyio
+    async def test_persists_full_text(self):
+        conn = AsyncMock()
+        conn.fetchval.return_value = PROMPT_ID
+        full_text = "Project: Invoices\nFields: ['full_name']"
+
+        result = await insert_prompt_attributes(
+            conn,
+            project_id=PROJECT_ID,
+            template_id=1,
+            full_text=full_text,
+            project_description="Invoices",
+            entity_types_order=[ENTITY_TYPE_ID_1],
+            entity_type_definitions={str(ENTITY_TYPE_ID_1): "Legal name"},
+            entity_type_example_values={str(ENTITY_TYPE_ID_1): ["John Smith"]},
+            entity_type_example_finds={str(ENTITY_TYPE_ID_1): []},
+        )
+
+        assert result == PROMPT_ID
+        call_args = conn.fetchval.call_args.args
+        assert call_args[8] == full_text
 
 
 class TestInsertEvaluation:

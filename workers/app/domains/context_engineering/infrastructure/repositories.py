@@ -6,7 +6,6 @@ import asyncpg
 
 from ..domain.entities import (
     EntityTypeInfo,
-    FinalPredictionPair,
     LabeledAnnotation,
     LabeledPdf,
     PromptExampleSnapshot,
@@ -117,15 +116,20 @@ async def fetch_entity_types_with_std(
     ]
 
 
-async def fetch_labeled_pdfs(conn: asyncpg.Connection, project_id: UUID) -> list[LabeledPdf]:
+async def fetch_labeled_pdfs(
+    conn: asyncpg.Connection,
+    project_id: UUID,
+    labeled_pdf_ids: list[UUID] | None = None,
+) -> list[LabeledPdf]:
     """Fetch PDFs that have user labels in core.entity_values and saved text."""
     pdf_rows = await conn.fetch(
         """
-        SELECT p.id, txt.txt AS full_text, txt.text_by_page, pr.bucket_id, p.filepath
+        SELECT p.id, txt.id AS pdf_txt_id, txt.txt AS full_text, txt.text_by_page,
+               pr.bucket_id, p.filepath
         FROM core.pdfs p
         JOIN web.projects pr ON pr.id = p.project_id
-        LEFT JOIN LATERAL (
-            SELECT txt, text_by_page
+        JOIN LATERAL (
+            SELECT id, txt, text_by_page
             FROM workers.pdf_txts
             WHERE pdf_id = p.id
             ORDER BY created_at DESC, id DESC
@@ -133,6 +137,7 @@ async def fetch_labeled_pdfs(conn: asyncpg.Connection, project_id: UUID) -> list
         ) txt ON true
         WHERE p.project_id = $1
           AND p.has_labels
+          AND ($2::uuid[] IS NULL OR p.id = ANY($2::uuid[]))
           AND EXISTS (
               SELECT 1
               FROM core.entity_values ev
@@ -141,6 +146,7 @@ async def fetch_labeled_pdfs(conn: asyncpg.Connection, project_id: UUID) -> list
         ORDER BY p.id
         """,
         project_id,
+        labeled_pdf_ids,
     )
 
     if not pdf_rows:
@@ -153,6 +159,7 @@ async def fetch_labeled_pdfs(conn: asyncpg.Connection, project_id: UUID) -> list
         """
         SELECT
             ev.pdf_id,
+            ev.id AS entity_value_id,
             ev.entity_type_id,
             et.name AS custom_entity_type,
             ev.text_value AS contents,
@@ -176,6 +183,7 @@ async def fetch_labeled_pdfs(conn: asyncpg.Connection, project_id: UUID) -> list
             labeled_text=r["contents"] or "",
             page_index=r["page_index"],
             entity_type_id=r["entity_type_id"] if "entity_type_id" in r else None,
+            entity_value_id=_row_get(r, "entity_value_id"),
         )
         anns_by_pdf.setdefault(r["pdf_id"], []).append(ann)
 
@@ -191,26 +199,50 @@ async def fetch_labeled_pdfs(conn: asyncpg.Connection, project_id: UUID) -> list
                     annotations=annotations,
                     bucket_id=UUID(str(pdf_row["bucket_id"])) if pdf_row["bucket_id"] else None,
                     filepath=pdf_row["filepath"],
+                    pdf_txt_id=_row_get(pdf_row, "pdf_txt_id"),
                 )
             )
 
     return result
 
 
-async def insert_optimized_prompt(
-    conn: asyncpg.Connection, project_id: UUID, template_id: int, full_text: str
+async def insert_prompt_attributes(
+    conn: asyncpg.Connection,
+    *,
+    project_id: UUID,
+    template_id: int,
+    full_text: str,
+    project_description: str | None,
+    entity_types_order: list[UUID],
+    entity_type_definitions: dict,
+    entity_type_example_values: dict,
+    entity_type_example_finds: dict,
 ) -> UUID:
-    """Insert an optimized prompt candidate into core.prompts."""
     prompt_id = await conn.fetchval(
         """
-        INSERT INTO core.prompts (project_id, template_id, full_text)
-        VALUES ($1, $2, $3) RETURNING id
+        INSERT INTO core.prompts (
+            project_id,
+            template_id,
+            project_description,
+            entity_types_order,
+            entity_type_definitions,
+            entity_type_example_values,
+            entity_type_example_finds,
+            full_text
+        )
+        VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7::jsonb, $8)
+        RETURNING id
         """,
         project_id,
         template_id,
+        project_description,
+        entity_types_order,
+        json.dumps(entity_type_definitions),
+        json.dumps(entity_type_example_values),
+        json.dumps(entity_type_example_finds),
         full_text,
     )
-    logger.info("Inserted optimized prompt: %s", prompt_id)
+    logger.info("Inserted structured prompt: %s", prompt_id)
     return prompt_id
 
 
@@ -288,6 +320,7 @@ async def insert_evaluation(
     pdfs_fully_correct: int | None = None,
     pdf_accuracy: float | None = None,
     entity_type_metrics: dict | None = None,
+    incorrectly_predicted_entity_value_ids: list[UUID] | None = None,
     llm_call_count: int | None = None,
     cost_usd=None,
     iterations_run: int | None = None,
@@ -314,7 +347,12 @@ async def insert_evaluation(
     """Store final context-engineering iteration metrics."""
     scores_json = json.dumps(
         {
-            k: {"precision": v.precision, "recall": v.recall, "f1": v.f1}
+            k: {
+                "precision": v.precision,
+                "recall": v.recall,
+                "f": getattr(v, "f", getattr(v, "f1", 0.0)),
+                "f1": getattr(v, "f1", getattr(v, "f", 0.0)),
+            }
             for k, v in per_entity_scores.items()
         }
     )
@@ -323,8 +361,8 @@ async def insert_evaluation(
         INSERT INTO workers.context_engineering_iterations
             (context_eng_run_id, prompt_id, overall_f, per_entity_scores,
              num_example_pdfs, num_correct_pdfs, num_correct_entity_types, pdf_accuracy,
-             entity_type_metrics)
-        VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7, $8, $9::jsonb)
+             entity_type_metrics, incorrectly_predicted_entity_value_ids)
+        VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7, $8, $9::jsonb, $10)
         RETURNING id
         """,
         context_eng_run_id,
@@ -336,62 +374,28 @@ async def insert_evaluation(
         None,
         pdf_accuracy,
         json.dumps(entity_type_metrics) if entity_type_metrics is not None else None,
+        incorrectly_predicted_entity_value_ids or [],
     )
-    logger.info("Inserted evaluation for prompt %s: f1=%.4f", prompt_id, overall_f1)
+    logger.info("Inserted evaluation for prompt %s: f=%.4f", prompt_id, overall_f1)
     return evaluation_id
 
 
-async def insert_context_engineering_predictions(
+async def fetch_entity_values_by_ids(
     conn: asyncpg.Connection,
-    prompt_evaluation_id: UUID,
-    pairs: list[FinalPredictionPair],
-) -> None:
-    if not pairs:
-        return
-    await conn.executemany(
+    entity_value_ids: list[UUID],
+) -> list[asyncpg.Record]:
+    if not entity_value_ids:
+        return []
+    return await conn.fetch(
         """
-        INSERT INTO core.entity_values
-            (pdf_id, entity_type_id, text_value, is_label)
-        VALUES ($1, $2, $3, false)
+        SELECT ev.id, ev.pdf_id, ev.entity_type_id, et.name AS entity_type_name, ev.text_value
+        FROM core.entity_values ev
+        JOIN web.entity_types et ON et.id = ev.entity_type_id
+        WHERE ev.id = ANY($1::uuid[])
+        ORDER BY ev.id
         """,
-        [
-            (
-                pair.pdf_id,
-                pair.entity_type_id,
-                pair.predicted_value,
-            )
-            for pair in pairs
-            if pair.predicted_value
-        ],
+        entity_value_ids,
     )
-
-
-async def update_pdf_final_predictions(
-    conn: asyncpg.Connection,
-    *,
-    pdf_id: UUID,
-    optimized_prompt_id: UUID,
-) -> UUID:
-    ner_run_id = await conn.fetchval(
-        """
-        INSERT INTO workers.ner_runs (project_id, prompt_id, context_eng_iter_id)
-        SELECT p.project_id, $2, NULL
-        FROM core.pdfs p
-        WHERE p.id = $1
-        RETURNING id
-        """,
-        pdf_id,
-        optimized_prompt_id,
-    )
-    await conn.execute(
-        """
-        INSERT INTO workers.ner_run_pdfs (pdf_id, ner_run_id)
-        VALUES ($1, $2)
-        """,
-        pdf_id,
-        ner_run_id,
-    )
-    return ner_run_id
 
 
 async def complete_context_engineering_run(
@@ -417,17 +421,4 @@ async def complete_context_engineering_run(
         best_overall_f,
         accumulated_usd,
         stop_reason,
-    )
-    await conn.execute(
-        """
-        UPDATE web.projects
-        SET active_prompt_id = $2
-        WHERE id = (
-            SELECT project_id
-            FROM workers.context_engineering_runs
-            WHERE id = $1
-        )
-        """,
-        run_id,
-        best_prompt_id,
     )

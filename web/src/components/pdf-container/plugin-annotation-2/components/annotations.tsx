@@ -44,8 +44,9 @@ export function Annotations(annotationsProps: AnnotationsProps) {
 
   useEffect(() => {
     if (annotationProvides) {
-      annotationProvides.onStateChange((state) => {
-        setAnnotations(getAnnotationsByPageIndex(state.documents[documentId], pageIndex))
+      return annotationProvides.onStateChange((state) => {
+        const documentState = state.documents[documentId]
+        setAnnotations(documentState ? getAnnotationsByPageIndex(documentState, pageIndex) : [])
         setSelectedUid(state.selectedUid)
       })
     }

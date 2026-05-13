@@ -17,19 +17,20 @@ class PageOcrText:
     page_index: int
     pdfium_text: str
     tesseract_text: str
-    olm_text: str | None
+    selected_ocr_text: str | None
+    selected_ocr_method: str
     error_message: str | None = None
 
 
 @dataclass(frozen=True)
 class SimilarityMetrics:
     normalized_tesseract_length: int
-    normalized_olm_length: int
+    normalized_selected_length: int
     character_similarity: float | None
     token_overlap: float | None
     length_ratio: float | None
     tesseract_blank: bool
-    olm_blank: bool
+    selected_blank: bool
     score: float | None
     status: str
 
@@ -38,10 +39,10 @@ class SimilarityMetrics:
 class JudgeResult:
     best_method: str
     tesseract_usable: bool
-    olm_usable: bool
+    selected_ocr_usable: bool
     confidence: float
     tesseract_quality: float
-    olm_quality: float
+    selected_ocr_quality: float
     rationale: str
 
 
@@ -51,7 +52,8 @@ class PageEvaluation:
     page_index: int
     pdfium_text: str
     tesseract_text: str
-    olm_text: str | None
+    selected_ocr_text: str | None
+    selected_ocr_method: str
     similarity: SimilarityMetrics
     judge_result: JudgeResult | None
     recommended_method: str

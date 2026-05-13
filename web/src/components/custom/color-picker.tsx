@@ -7,6 +7,10 @@ interface ColorPickerProps {
   onChange: (color: string) => void
 }
 
+function normalizeHexColor(color: string): string {
+  return color.toUpperCase()
+}
+
 const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
   return (
     <Popover>
@@ -18,7 +22,7 @@ const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
       </PopoverTrigger>
 
       <PopoverContent className="w-auto p-3">
-        <HexColorPicker color={value} onChange={onChange} />
+        <HexColorPicker color={value} onChange={(color) => onChange(normalizeHexColor(color))} />
       </PopoverContent>
     </Popover>
   )

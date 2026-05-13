@@ -63,8 +63,8 @@ export const getPdfTxtByPdfId = createServerFn({ method: "GET" })
     return txt ?? null
   })
 
-export const getPdfTxtsByOcrMethod = createServerFn({ method: "GET" })
-  .inputValidator(z.object({ ocrMethod: z.string() }))
+export const getPdfTxtsByExtractMethod = createServerFn({ method: "GET" })
+  .inputValidator(z.object({ extractMethod: z.string() }))
   .handler(async ({ data }) => {
-    return db.select().from(pdfTxts).where(eq(pdfTxts.ocrMethod, data.ocrMethod))
+    return db.select().from(pdfTxts).where(eq(pdfTxts.extractMethod, data.extractMethod))
   })

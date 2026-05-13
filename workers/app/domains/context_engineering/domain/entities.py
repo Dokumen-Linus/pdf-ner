@@ -6,7 +6,7 @@ from uuid import UUID
 from .value_objects import EntityMatch, F1Score
 
 
-@dataclass
+@dataclass(frozen=True)
 class EntityTypeInfo:
     """Merged entity type info from web.entity_types + public.std_entity_types."""
 
@@ -50,6 +50,7 @@ class LabeledAnnotation:
     labeled_text: str  # contents
     page_index: int
     entity_type_id: UUID | None = None
+    entity_value_id: UUID | None = None
 
 
 @dataclass
@@ -62,6 +63,7 @@ class LabeledPdf:
     annotations: list[LabeledAnnotation]
     bucket_id: UUID | None = None
     filepath: str | None = None
+    pdf_txt_id: UUID | None = None
 
     @property
     def ground_truth(self) -> dict[str, list[str]]:

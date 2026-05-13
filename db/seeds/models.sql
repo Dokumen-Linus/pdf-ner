@@ -20,7 +20,7 @@ ON CONFLICT (id) DO UPDATE SET
     usd_per_1m_output = EXCLUDED.usd_per_1m_output,
     release_date = EXCLUDED.release_date;
 
-INSERT INTO public.ocr_methods (id, display_name, method_type, usd_per_1m_pages, usd_per_sec, release_date) VALUES
+INSERT INTO public.extract_methods (id, display_name, method_type, usd_per_1m_pages, usd_per_sec, release_date) VALUES
 
 ('pdfium','Google PDFium','engine','10',NULL,'2014-05-22'),
 ('tesseract','Google Tesseract','engine','30',NULL,'2006-06-17'),

@@ -28,6 +28,16 @@ CREATE TABLE workers.ner_run_pdfs (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE INDEX ner_runs_context_eng_iter_id_idx
+ON workers.ner_runs (context_eng_iter_id)
+WHERE context_eng_iter_id IS NOT NULL;
+
+CREATE INDEX ner_runs_model_eval_iter_id_idx
+ON workers.ner_runs (model_eval_iter_id)
+WHERE model_eval_iter_id IS NOT NULL;
+
 -- migrate:down
+DROP INDEX workers.ner_runs_model_eval_iter_id_idx;
+DROP INDEX workers.ner_runs_context_eng_iter_id_idx;
 DROP TABLE workers.ner_run_pdfs;
 DROP TABLE workers.ner_runs;

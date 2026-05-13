@@ -1,6 +1,11 @@
 import { describe, expect, it } from "bun:test"
 
-import { getAllChatModels, getChatModelById, getChatModelsByHost } from "./models"
+import {
+  getAllChatModels,
+  getAvailableGoogleChatModels,
+  getChatModelById,
+  getChatModelsByHost,
+} from "./models"
 
 const runTests = process.env.TEST_DB === "true"
 

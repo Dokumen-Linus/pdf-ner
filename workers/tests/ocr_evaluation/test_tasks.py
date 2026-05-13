@@ -27,6 +27,9 @@ def test_task_requires_and_passes_judge_model(mock_run):
         max_pdfs=2,
         max_pages_per_pdf=1,
         max_cost_usd="1.25",
+        gpu_model="deepseek-ocr",
+        ocr_only=False,
+        pdf_ids=[str(pdf_id := uuid4())],
     )
 
     assert result == {"ok": True}
@@ -36,6 +39,9 @@ def test_task_requires_and_passes_judge_model(mock_run):
     assert cmd.max_pdfs == 2
     assert cmd.max_pages_per_pdf == 1
     assert cmd.max_cost_usd == Decimal("1.25")
+    assert cmd.gpu_model == "deepseek-ocr"
+    assert cmd.ocr_only is False
+    assert cmd.pdf_ids == [pdf_id]
 
 
 def test_task_rejects_missing_judge_model():

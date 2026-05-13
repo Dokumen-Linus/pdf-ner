@@ -12,12 +12,16 @@ import type { SearchCapability } from "@/components/pdf-container/plugin-search-
 import type { SelectionCapability } from "@/components/pdf-container/plugin-selection-2"
 
 export interface PluginStore {
+  // UI-timing active document from PDFContainer/EmbedPDF. Consumers outside the
+  // plugin tree should prefer this over annoState.activeDocumentId.
+  activeDocumentId: string | null
   annoCapability: AnnotationCapability | null
   annoState: AnnotationState | null
   searchCapability: SearchCapability | null
   selectCapability: SelectionCapability | null
   scrollCapability: ScrollCapability | null
   docManagerCapability: DocumentManagerCapability | null
+  setActiveDocumentId: (documentId: string | null) => void
   setAnnoCapability: (capability: AnnotationCapability | null) => void
   setAnnoState: (state: AnnotationState | null) => void
   setSearchCapability: (capability: SearchCapability | null) => void
@@ -28,12 +32,14 @@ export interface PluginStore {
 
 // use entire store (rerenders on any state change)
 const usePluginStore = create<PluginStore>((set) => ({
+  activeDocumentId: null,
   annoCapability: null,
   annoState: null,
   searchCapability: null,
   selectCapability: null,
   scrollCapability: null,
   docManagerCapability: null,
+  setActiveDocumentId: (activeDocumentId) => set({ activeDocumentId }),
   setAnnoCapability: (annoCapability) => set({ annoCapability }),
   setAnnoState: (annoState) => set({ annoState }),
   setSearchCapability: (searchCapability) => set({ searchCapability }),

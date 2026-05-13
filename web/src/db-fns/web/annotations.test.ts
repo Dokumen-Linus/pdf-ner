@@ -10,6 +10,7 @@ import { users } from "@/db/schemas/web/users"
 
 import {
   createAnnotation,
+  CreateAnnotationSchema,
   deleteAnnotation,
   getAnnotationById,
   getAnnotationsByPdfId,
@@ -32,6 +33,24 @@ type AnnotationRecord = {
   contents: string | null
 }
 
+describe("Annotation color validation", () => {
+  it("normalizes lowercase #RRGGBB and rejects shorthand colors", () => {
+    const base = {
+      id: "00000000-0000-0000-0000-000000000001",
+      pdfId: "00000000-0000-0000-0000-000000000002",
+      subtype: "highlight",
+      rect: { x: 0, y: 0, width: 100, height: 50 },
+      segmentRects: [{ x: 0, y: 0, width: 50, height: 25 }],
+      pageIndex: 0,
+      entityTypeId: "00000000-0000-4000-8000-000000000003",
+    }
+    const parsed = CreateAnnotationSchema.parse({ ...base, color: "#ffff00" })
+
+    expect(parsed.color).toBe("#FFFF00")
+    expect(() => CreateAnnotationSchema.parse({ ...base, color: "#FF0" })).toThrow()
+  })
+})
+
 describe.if(runTests)("Annotation Table Server Functions", () => {
   const testPdfId = "00000000-0000-0000-0000-000000000001"
   const testEntityTypeId = "00000000-0000-0000-0000-000000000101"
@@ -49,7 +68,7 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
       segmentRects: testSegmentRects,
       pageIndex: 0,
       entityTypeId: testEntityTypeId,
-      color: "#ffff00",
+      color: "#FFFF00",
       opacity: 0.5,
       contents: "Test annotation",
       author: "Test Author",
@@ -99,7 +118,7 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
     // --- UPDATE ---
     const updateInput = {
       id: annotationId,
-      color: "#ff0000",
+      color: "#FF0000",
       opacity: 0.8,
       contents: "Updated annotation",
     }
@@ -109,7 +128,7 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
     const updatedAnnotation = (await getAnnotationById({
       data: { id: annotationId },
     })) as AnnotationRecord
-    expect(updatedAnnotation.color).toBe("#ff0000")
+    expect(updatedAnnotation.color).toBe("#FF0000")
     expect(updatedAnnotation.opacity).toBe(0.8)
     expect(updatedAnnotation.contents).toBe("Updated annotation")
 
@@ -159,7 +178,7 @@ describe.if(runTests)("Annotation Table Server Functions", () => {
 
     it("throws 'Annotation not found' when updating non-existent annotation", async () => {
       const fakeId = "00000000-0000-0000-0000-000000000000"
-      await expect(updateAnnotation({ data: { id: fakeId, color: "#ff0000" } })).rejects.toThrow(
+      await expect(updateAnnotation({ data: { id: fakeId, color: "#FF0000" } })).rejects.toThrow(
         "Annotation not found",
       )
     })
@@ -227,7 +246,7 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
           rect: testRect,
           segmentRects: testSegmentRects,
           pageIndex: 0,
-          color: "#00ff00",
+          color: "#00FF00",
           opacity: 0.5,
           contents: "one",
           customEntityType: "Title",
@@ -239,7 +258,7 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
           rect: testRect,
           segmentRects: testSegmentRects,
           pageIndex: 1,
-          color: "#0000ff",
+          color: "#0000FF",
           opacity: 0.4,
           contents: "two",
           customEntityType: "Date",
@@ -273,7 +292,7 @@ describe.if(runTests)("saveAnnotationsByPdfId", () => {
           rect: testRect,
           segmentRects: testSegmentRects,
           pageIndex: 0,
-          color: "#ff0000",
+          color: "#FF0000",
           opacity: 0.7,
           contents: "three",
           customEntityType: "Agency",

@@ -120,7 +120,6 @@ def render_prompt_template(
     names = [et.name for et in entity_types]
     definitions = [et.best_definition for et in entity_types]
     examples = [et.all_examples for et in entity_types]
-    constraints = [_build_constraint_text(et) for et in entity_types]
     is_required = [et.required for et in entity_types]
     is_unique = [et.unique for et in entity_types]
 
@@ -129,9 +128,43 @@ def render_prompt_template(
     prompt = prompt.replace("<ENTITY_TYPES>", str(names))
     prompt = prompt.replace("<DEFINITIONS>", str(definitions))
     prompt = prompt.replace("<EXAMPLE_VALUES>", str(examples))
-    prompt = prompt.replace("<CONSTRAINTS>", str(constraints))
     prompt = prompt.replace("<IS_REQUIRED>", str(is_required))
     prompt = prompt.replace("<IS_UNIQUE>", str(is_unique))
+    return prompt
+
+
+def form_prompt_text(
+    template_txt: str,
+    *,
+    project_description: str | None,
+    entity_types: list[EntityTypeInfo],
+    entity_type_definitions: dict[str, str],
+    entity_type_example_values: dict[str, list[str]],
+    entity_type_example_finds: dict[str, list[dict]],
+) -> str:
+    ordered = [entity for entity in entity_types if entity.entity_type_id is not None]
+    names = [entity.name for entity in ordered]
+    definitions = [
+        entity_type_definitions.get(str(entity.entity_type_id), entity.best_definition)
+        for entity in ordered
+    ]
+    examples = [
+        entity_type_example_values.get(str(entity.entity_type_id), entity.all_examples)
+        for entity in ordered
+    ]
+    finds = [entity_type_example_finds.get(str(entity.entity_type_id), []) for entity in ordered]
+    regex = [entity.std_regex for entity in ordered]
+    constraints = [_build_constraint_text(entity) for entity in ordered]
+    prompt = template_txt
+    prompt = prompt.replace("<PROJECT_DESCRIPTION>", project_description or "")
+    prompt = prompt.replace("<ENTITY_TYPES>", str(names))
+    prompt = prompt.replace("<DEFINITIONS>", str(definitions))
+    prompt = prompt.replace("<EXAMPLE_VALUES>", str(examples))
+    prompt = prompt.replace("<EXAMPLE_FINDS>", json.dumps(finds, indent=2))
+    prompt = prompt.replace("<REGEX>", str(regex))
+    prompt = prompt.replace("<CONSTRAINTS>", str(constraints))
+    prompt = prompt.replace("<IS_REQUIRED>", str([entity.required for entity in ordered]))
+    prompt = prompt.replace("<IS_UNIQUE>", str([entity.unique for entity in ordered]))
     return prompt
 
 

@@ -1,27 +1,48 @@
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 from pydantic import ValidationError
 import pytest
 
 from app.domains.worker_dispatch import events
-from app.domains.worker_dispatch.schemas import OcrEvaluationRequest, OptimizePromptRequest
+from app.domains.worker_dispatch.schemas import (
+    ChatModelEvalRequest,
+    ExtractTextBatchRequest,
+    OcrEvaluationPdfsRequest,
+    OcrEvaluationRequest,
+    OptimizePromptRequest,
+)
 
 
 class TestOptimizePromptRequest:
     def test_defaults_match_workers_context_engineering_command(self):
-        request = OptimizePromptRequest(project_id=uuid4(), template_id=1)
+        request = OptimizePromptRequest(
+            project_id=uuid4(),
+            template_id=1,
+            labeled_pdfs=[uuid4()],
+        )
 
         assert request.max_cost_usd == 1.0
-        assert request.model == "gpt-5.4-mini"
+        assert request.beta == 1.0
+        assert request.ner_chat_model == "gpt-5.4-mini"
+        assert request.prompt_eng_chat_model == "gpt-5.4-mini"
 
     def test_requires_positive_template_id(self):
         with pytest.raises(ValidationError):
-            OptimizePromptRequest(project_id=uuid4(), template_id=0)
+            OptimizePromptRequest(project_id=uuid4(), template_id=0, labeled_pdfs=[uuid4()])
 
     def test_requires_positive_max_cost(self):
         with pytest.raises(ValidationError):
-            OptimizePromptRequest(project_id=uuid4(), template_id=1, max_cost_usd=0)
+            OptimizePromptRequest(
+                project_id=uuid4(),
+                template_id=1,
+                labeled_pdfs=[uuid4()],
+                max_cost_usd=0,
+            )
+
+    def test_requires_labeled_pdfs(self):
+        with pytest.raises(ValidationError):
+            OptimizePromptRequest(project_id=uuid4(), template_id=1, labeled_pdfs=[])
 
 
 class TestOcrEvaluationRequest:
@@ -31,6 +52,9 @@ class TestOcrEvaluationRequest:
         assert request.max_pdfs == 5
         assert request.max_pages_per_pdf == 3
         assert request.max_cost_usd == 0.5
+        assert request.pdf_ids is None
+        assert request.gpu_model == "olm-ocr2"
+        assert request.ocr_only is True
 
     def test_requires_judge_model(self):
         with pytest.raises(ValidationError):
@@ -56,6 +80,55 @@ class TestOcrEvaluationRequest:
                 max_cost_usd=0,
             )
 
+    def test_rejects_invalid_gpu_model(self):
+        with pytest.raises(ValidationError):
+            OcrEvaluationRequest(
+                project_id=uuid4(),
+                judge_model="gemini-3.1-flash-lite",
+                gpu_model="bad-ocr",
+            )
+
+    def test_pdf_request_requires_pdf_ids(self):
+        with pytest.raises(ValidationError):
+            OcrEvaluationPdfsRequest(
+                project_id=uuid4(),
+                judge_model="gemini-3.1-flash-lite",
+                pdf_ids=[],
+            )
+
+
+class TestChatModelEvalRequest:
+    def test_requires_pdf_ids(self):
+        with pytest.raises(ValidationError):
+            ChatModelEvalRequest(project_id=uuid4(), pdf_ids=[], chat_model_ids=["gpt-5.4-mini"])
+
+    def test_requires_chat_model_ids(self):
+        with pytest.raises(ValidationError):
+            ChatModelEvalRequest(project_id=uuid4(), pdf_ids=[uuid4()], chat_model_ids=[])
+
+    def test_requires_positive_beta(self):
+        with pytest.raises(ValidationError):
+            ChatModelEvalRequest(
+                project_id=uuid4(),
+                pdf_ids=[uuid4()],
+                chat_model_ids=["gpt-5.4-mini"],
+                beta=0,
+            )
+
+
+class TestExtractTextBatchRequest:
+    def test_requires_pdf_ids(self):
+        with pytest.raises(ValidationError):
+            ExtractTextBatchRequest(project_id=uuid4(), pdf_ids=[], extract_method="pdfium")
+
+    def test_rejects_invalid_extract_method(self):
+        with pytest.raises(ValidationError):
+            ExtractTextBatchRequest(
+                project_id=uuid4(),
+                pdf_ids=[uuid4()],
+                extract_method="metadata",
+            )
+
 
 class TestWorkerDispatchEndpoints:
     @pytest.mark.anyio
@@ -63,6 +136,7 @@ class TestWorkerDispatchEndpoints:
         self, async_client, mock_redis, monkeypatch
     ):
         project_id = uuid4()
+        pdf_id = uuid4()
         task_id = "mock-task-id-123"
         dispatch_calls = []
 
@@ -77,8 +151,11 @@ class TestWorkerDispatchEndpoints:
             json={
                 "project_id": str(project_id),
                 "template_id": 1,
+                "labeled_pdfs": [str(pdf_id)],
+                "beta": 2,
                 "max_cost_usd": "1.25",
-                "model": "gpt-5.4-mini",
+                "ner_chat_model": "gpt-5.4-mini",
+                "prompt_eng_chat_model": "gpt-5.4",
             },
         )
 
@@ -88,8 +165,12 @@ class TestWorkerDispatchEndpoints:
             {
                 "project_id": str(project_id),
                 "template_id": 1,
+                "labeled_pdfs": [str(pdf_id)],
+                "beta": 2.0,
                 "max_cost_usd": 1.25,
-                "model": "gpt-5.4-mini",
+                "ner_chat_model": "gpt-5.4-mini",
+                "prompt_eng_chat_model": "gpt-5.4",
+                "convergence_threshold": 0.02,
             }
         ]
         mock_redis.set.assert_called_once_with(
@@ -120,6 +201,8 @@ class TestWorkerDispatchEndpoints:
                 "max_pdfs": 2,
                 "max_pages_per_pdf": 1,
                 "max_cost_usd": 0.75,
+                "gpu_model": "deepseek-ocr",
+                "ocr_only": True,
             },
         )
 
@@ -132,6 +215,54 @@ class TestWorkerDispatchEndpoints:
                 "max_pdfs": 2,
                 "max_pages_per_pdf": 1,
                 "max_cost_usd": 0.75,
+                "pdf_ids": None,
+                "gpu_model": "deepseek-ocr",
+                "ocr_only": True,
+            }
+        ]
+        mock_redis.set.assert_called_once_with(
+            f"worker-dispatch:task:project:{task_id}",
+            str(project_id),
+            ex=86400,
+        )
+
+    @pytest.mark.anyio
+    async def test_ocr_evaluation_pdfs_dispatches_worker_task(
+        self, async_client, mock_redis, monkeypatch
+    ):
+        project_id = uuid4()
+        pdf_id = uuid4()
+        task_id = "ocr-task-id-456"
+        dispatch_calls = []
+
+        def fake_dispatch(**kwargs):
+            dispatch_calls.append(kwargs)
+            return task_id
+
+        monkeypatch.setattr(events, "dispatch_ocr_evaluation", fake_dispatch)
+
+        response = await async_client.post(
+            "/api/v1/worker-dispatch/ocr-evaluation/pdfs",
+            json={
+                "project_id": str(project_id),
+                "judge_model": "gemini-3.1-flash-lite",
+                "pdf_ids": [str(pdf_id)],
+                "gpu_model": "olm-ocr2",
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"task_id": task_id}
+        assert dispatch_calls == [
+            {
+                "project_id": str(project_id),
+                "judge_model": "gemini-3.1-flash-lite",
+                "max_pdfs": 5,
+                "max_pages_per_pdf": 3,
+                "max_cost_usd": 0.5,
+                "pdf_ids": [str(pdf_id)],
+                "gpu_model": "olm-ocr2",
+                "ocr_only": True,
             }
         ]
         mock_redis.set.assert_called_once_with(
@@ -165,6 +296,94 @@ class TestWorkerDispatchEndpoints:
             "project_id": project_id,
         }
         mock_redis.get.assert_called_once_with(f"worker-dispatch:task:project:{task_id}")
+
+    @pytest.mark.anyio
+    async def test_chat_model_eval_dispatches_worker_task(
+        self, async_client, mock_redis, monkeypatch
+    ):
+        project_id = uuid4()
+        pdf_id = uuid4()
+        task_id = "model-eval-task-123"
+        dispatch_calls = []
+
+        def fake_dispatch(**kwargs):
+            dispatch_calls.append(kwargs)
+            return task_id
+
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.fetch_pdf_ids_outside_project",
+            AsyncMock(return_value=[]),
+        )
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.fetch_unavailable_chat_model_ids",
+            AsyncMock(return_value=[]),
+        )
+        monkeypatch.setattr(events, "dispatch_chat_model_eval", fake_dispatch)
+
+        response = await async_client.post(
+            "/api/v1/worker-dispatch/chat-model-eval",
+            json={
+                "project_id": str(project_id),
+                "pdf_ids": [str(pdf_id)],
+                "chat_model_ids": ["gpt-5.4-mini", "claude-sonnet-4-5"],
+                "beta": 2,
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"task_id": task_id}
+        assert dispatch_calls == [
+            {
+                "project_id": str(project_id),
+                "pdf_ids": [str(pdf_id)],
+                "chat_model_ids": ["gpt-5.4-mini", "claude-sonnet-4-5"],
+                "beta": 2.0,
+            }
+        ]
+        mock_redis.set.assert_called_once_with(
+            f"worker-dispatch:task:project:{task_id}",
+            str(project_id),
+            ex=86400,
+        )
+
+    @pytest.mark.anyio
+    async def test_chat_model_eval_rejects_unavailable_models(
+        self, async_client, mock_redis, monkeypatch
+    ):
+        project_id = uuid4()
+        pdf_id = uuid4()
+        dispatch_calls = []
+
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.fetch_pdf_ids_outside_project",
+            AsyncMock(return_value=[]),
+        )
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.fetch_unavailable_chat_model_ids",
+            AsyncMock(return_value=["bad-model"]),
+        )
+        monkeypatch.setattr(
+            events, "dispatch_chat_model_eval", lambda **kwargs: dispatch_calls.append(kwargs)
+        )
+
+        response = await async_client.post(
+            "/api/v1/worker-dispatch/chat-model-eval",
+            json={
+                "project_id": str(project_id),
+                "pdf_ids": [str(pdf_id)],
+                "chat_model_ids": ["bad-model"],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": {
+                "message": "All chat_model_ids must reference available public.chat_models",
+                "chat_model_ids": ["bad-model"],
+            }
+        }
+        assert dispatch_calls == []
+        mock_redis.set.assert_not_called()
 
     @pytest.mark.anyio
     async def test_status_decodes_project_id_from_redis_bytes(
@@ -206,6 +425,82 @@ class TestWorkerDispatchEndpoints:
         assert response.json()["project_id"] is None
 
     @pytest.mark.anyio
+    async def test_text_extract_dispatches_worker_task(self, async_client, mock_redis, monkeypatch):
+        project_id = uuid4()
+        pdf_id = uuid4()
+        task_id = "text-extract-task-123"
+        dispatch_calls = []
+
+        def fake_dispatch(**kwargs):
+            dispatch_calls.append(kwargs)
+            return task_id
+
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.fetch_pdf_ids_outside_project",
+            AsyncMock(return_value=[]),
+        )
+        monkeypatch.setattr(events, "dispatch_text_extract", fake_dispatch)
+
+        response = await async_client.post(
+            "/api/v1/worker-dispatch/text-extract",
+            json={
+                "project_id": str(project_id),
+                "pdf_ids": [str(pdf_id)],
+                "extract_method": "pdfium",
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"task_id": task_id}
+        assert dispatch_calls == [
+            {
+                "project_id": str(project_id),
+                "pdf_ids": [str(pdf_id)],
+                "extract_method": "pdfium",
+            }
+        ]
+        mock_redis.set.assert_called_once_with(
+            f"worker-dispatch:task:project:{task_id}",
+            str(project_id),
+            ex=86400,
+        )
+
+    @pytest.mark.anyio
+    async def test_text_extract_rejects_pdf_ids_outside_project(
+        self, async_client, mock_redis, monkeypatch
+    ):
+        project_id = uuid4()
+        pdf_id = uuid4()
+        dispatch_calls = []
+
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.fetch_pdf_ids_outside_project",
+            AsyncMock(return_value=[pdf_id]),
+        )
+        monkeypatch.setattr(
+            events, "dispatch_text_extract", lambda **kwargs: dispatch_calls.append(kwargs)
+        )
+
+        response = await async_client.post(
+            "/api/v1/worker-dispatch/text-extract",
+            json={
+                "project_id": str(project_id),
+                "pdf_ids": [str(pdf_id)],
+                "extract_method": "pdfium",
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": {
+                "message": "All pdf_ids must belong to project_id",
+                "pdf_ids": [str(pdf_id)],
+            }
+        }
+        assert dispatch_calls == []
+        mock_redis.set.assert_not_called()
+
+    @pytest.mark.anyio
     async def test_old_llm_ner_routes_are_not_mounted(self, async_client):
         response = await async_client.post(
             "/api/v1/llm-ner/optimize-prompt",
@@ -232,6 +527,7 @@ class TestWorkerDispatchEvents:
         task_id = events.dispatch_optimize_prompt(
             project_id=str(uuid4()),
             template_id=3,
+            labeled_pdfs=[str(uuid4())],
             max_cost_usd=2.5,
         )
 
@@ -241,8 +537,12 @@ class TestWorkerDispatchEvents:
         assert kwargs["args"][0]
         assert kwargs["kwargs"] == {
             "template_id": 3,
+            "labeled_pdfs": [kwargs["kwargs"]["labeled_pdfs"][0]],
+            "beta": 1.0,
             "max_cost_usd": 2.5,
-            "model": "gpt-5.4-mini",
+            "ner_chat_model": "gpt-5.4-mini",
+            "prompt_eng_chat_model": "gpt-5.4-mini",
+            "convergence_threshold": 0.02,
         }
         assert kwargs["headers"] == {"request-id": "test"}
 
@@ -265,6 +565,9 @@ class TestWorkerDispatchEvents:
             max_pdfs=2,
             max_pages_per_pdf=1,
             max_cost_usd=0.75,
+            pdf_ids=[str(uuid4())],
+            gpu_model="deepseek-ocr",
+            ocr_only=True,
         )
 
         assert task_id == "ocr-task-123"
@@ -276,7 +579,66 @@ class TestWorkerDispatchEvents:
             "max_pdfs": 2,
             "max_pages_per_pdf": 1,
             "max_cost_usd": 0.75,
+            "pdf_ids": [kwargs["kwargs"]["pdf_ids"][0]],
+            "gpu_model": "deepseek-ocr",
+            "ocr_only": True,
         }
+        assert kwargs["headers"] == {"request-id": "test"}
+
+    def test_dispatch_sends_chat_model_eval_task(self, monkeypatch):
+        send_task_calls = []
+
+        class FakeResult:
+            id = "model-eval-task-123"
+
+        def fake_send_task(*args, **kwargs):
+            send_task_calls.append((args, kwargs))
+            return FakeResult()
+
+        monkeypatch.setattr(events.celery_client, "send_task", fake_send_task)
+        monkeypatch.setattr(events, "celery_message_headers", lambda: {"request-id": "test"})
+
+        pdf_id = str(uuid4())
+        project_id = str(uuid4())
+        task_id = events.dispatch_chat_model_eval(
+            project_id=project_id,
+            pdf_ids=[pdf_id],
+            chat_model_ids=["gpt-5.4-mini"],
+            beta=2.0,
+        )
+
+        assert task_id == "model-eval-task-123"
+        args, kwargs = send_task_calls[0]
+        assert args == ("chat_model_eval.evaluate_models",)
+        assert kwargs["args"] == [project_id, [pdf_id], ["gpt-5.4-mini"]]
+        assert kwargs["kwargs"] == {"beta": 2.0}
+        assert kwargs["headers"] == {"request-id": "test"}
+
+    def test_dispatch_sends_text_extract_task(self, monkeypatch):
+        send_task_calls = []
+
+        class FakeResult:
+            id = "text-task-123"
+
+        def fake_send_task(*args, **kwargs):
+            send_task_calls.append((args, kwargs))
+            return FakeResult()
+
+        monkeypatch.setattr(events.celery_client, "send_task", fake_send_task)
+        monkeypatch.setattr(events, "celery_message_headers", lambda: {"request-id": "test"})
+
+        pdf_id = str(uuid4())
+        project_id = str(uuid4())
+        task_id = events.dispatch_text_extract(
+            project_id=project_id,
+            pdf_ids=[pdf_id],
+            extract_method="pdfium",
+        )
+
+        assert task_id == "text-task-123"
+        args, kwargs = send_task_calls[0]
+        assert args == ("text_extract.extract_missing_pdf_texts",)
+        assert kwargs["args"] == [project_id, [pdf_id], "pdfium"]
         assert kwargs["headers"] == {"request-id": "test"}
 
 
