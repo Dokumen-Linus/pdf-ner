@@ -1,14 +1,14 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from uuid import UUID
 
-from .value_objects import OcrMethod
+from .value_objects import ExtractMethod
 
 
 @dataclass(frozen=True)
 class ProjectExtractionConfig:
     project_id: UUID
     description: str | None
-    ocr_method: OcrMethod
+    extract_method: ExtractMethod
     entity_extraction_model: str
     active_prompt_id: UUID | None = None
 

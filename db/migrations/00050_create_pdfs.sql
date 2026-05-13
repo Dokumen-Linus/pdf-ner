@@ -22,9 +22,9 @@ CREATE TABLE core.pdfs (
 CREATE TABLE workers.pdf_txts (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   pdf_id UUID NOT NULL REFERENCES core.pdfs (id) ON DELETE CASCADE,
-  ocr_method TEXT NOT NULL REFERENCES public.ocr_methods (id) ON DELETE CASCADE,
+  extract_method TEXT NOT NULL REFERENCES public.extract_methods (id) ON DELETE CASCADE,
 
-  created_by_domain TEXT NOT NULL CHECK (created_by_domain IN ('api_pdf_utils', 'ner_workflows', 'context_eng', 'model_eval', 'ner_run')),
+  created_by_domain TEXT NOT NULL CHECK (created_by_domain IN ('api_pdf_utils', 'ner_workflows', 'ocr_evaluation', 'context_eng', 'model_eval', 'ner_run', 'text_extract')),
   -- ner_run is for one-off runs. will add more values, for example when an api domain is made to add text selection layers to pdfs going into labeling
 
   txt TEXT NOT NULL,

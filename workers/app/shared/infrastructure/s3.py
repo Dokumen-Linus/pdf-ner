@@ -21,13 +21,20 @@ def make_s3_client(
     return boto3.client("s3", **kwargs)
 
 
-async def download_pdf_bytes(conn: asyncpg.Connection, pdf_id: UUID) -> tuple[bytes, str]:
+async def download_pdf_bytes(
+    conn: asyncpg.Connection,
+    pdf_id: UUID,
+    project_id: UUID | None = None,
+) -> tuple[bytes, str]:
     """Resolve bucket metadata for pdf_id from DB, download from S3.
 
     Returns (bytes, filepath).
     Raises LookupError if pdf not found.
     """
-    row = await fetch_pdf_bucket_info(conn, pdf_id)
+    if project_id is None:
+        row = await fetch_pdf_bucket_info(conn, pdf_id)
+    else:
+        row = await fetch_pdf_bucket_info(conn, pdf_id, project_id)
     if row is None:
         raise LookupError(f"PDF {pdf_id} not found")
 

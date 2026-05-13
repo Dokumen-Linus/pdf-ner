@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 
-import type { ChatModel, OcrMethod, StdEntityType, Template } from "../../db/types"
+import type { ChatModel, ExtractMethod, StdEntityType, Template } from "../../db/types"
 
 /**
  * Compile-time shape checks for public schema Drizzle types.
@@ -50,7 +50,7 @@ describe("Public Drizzle Schema Shape Checks", () => {
     expect(true).toBe(true)
   })
 
-  it("OcrMethod should have expected public.ocr_methods fields", () => {
+  it("ExtractMethod should have expected public.extract_methods fields", () => {
     type Expected = {
       id: string
       displayName: string
@@ -58,7 +58,7 @@ describe("Public Drizzle Schema Shape Checks", () => {
       usdPer1mPages: string | null
       usdPerSec: string | null
     }
-    const _: Expected = {} as OcrMethod
+    const _: Expected = {} as ExtractMethod
     expect(true).toBe(true)
   })
 })

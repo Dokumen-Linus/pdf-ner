@@ -1,6 +1,6 @@
 import { numeric, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 
-export const ocrMethods = pgTable("ocr_methods", {
+export const extractMethods = pgTable("extract_methods", {
   id: text("id").primaryKey(),
   displayName: text("display_name").notNull(),
   methodType: text("method_type").notNull(),

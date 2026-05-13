@@ -1,4 +1,4 @@
-from app.domains.ocr_evaluation.infrastructure.ocr import _sample_page_indexes
+from app.domains.ocr_evaluation.application.workflows import _sample_page_indexes
 
 
 def test_sample_page_indexes_keeps_first_middle_last():

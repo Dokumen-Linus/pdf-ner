@@ -19,7 +19,7 @@ CREATE TABLE web.entity_types (
   subtype TEXT NOT NULL DEFAULT 'highlight' CHECK (
     subtype IN ('highlight', 'underline', 'squiggly', 'strikeout')
   ),
-  color TEXT NOT NULL CHECK (color ~ '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'),
+  color TEXT NOT NULL CHECK (color ~ '^#[0-9A-F]{6}$'),
   opacity REAL NOT NULL DEFAULT 0.6 CHECK (opacity >= 0 AND opacity <= 1),
 
   created_at TIMESTAMPTZ DEFAULT now(),

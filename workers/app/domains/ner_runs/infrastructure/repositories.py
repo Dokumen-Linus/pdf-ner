@@ -117,7 +117,7 @@ async def insert_pdf_text(
     return await conn.fetchval(
         """
         INSERT INTO workers.pdf_txts
-            (pdf_id, ocr_method, created_by_domain, txt, text_by_page)
+            (pdf_id, extract_method, created_by_domain, txt, text_by_page)
         VALUES ($1, $2, $3, $4, $5::jsonb)
         RETURNING id
         """,

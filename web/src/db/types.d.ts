@@ -55,7 +55,7 @@ export type DbAnnotationUpdate = Partial<Omit<DbAnnotation, "id" | "createdAt" |
 export type StdEntityType = InferSelectModel<typeof schema.stdEntityTypes>
 export type Template = InferSelectModel<typeof schema.templates>
 export type ChatModel = InferSelectModel<typeof schema.chatModels>
-export type OcrMethod = InferSelectModel<typeof schema.ocrMethods>
+export type ExtractMethod = InferSelectModel<typeof schema.extractMethods>
 
 // core - read only (written by workers/api)
 export type CorePdf = InferSelectModel<typeof schema.corePdfs>
@@ -85,5 +85,6 @@ export type NerRun = InferSelectModel<typeof schema.nerRuns>
 export type NerRunPdf = InferSelectModel<typeof schema.nerRunPdfs>
 export type OcrEvaluationRun = InferSelectModel<typeof schema.ocrEvaluationRuns>
 export type OcrEvaluationPage = InferSelectModel<typeof schema.ocrEvaluationPages>
+export type OcrEvaluationPdfTxt = InferSelectModel<typeof schema.ocrEvaluationPdfTxts>
 export type LlmUsage = InferSelectModel<typeof schema.llmUsage>
 export type BillingChargeAttempt = InferSelectModel<typeof schema.billingChargeAttempts>

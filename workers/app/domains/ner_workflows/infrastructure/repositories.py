@@ -55,7 +55,7 @@ async def fetch_project_config(
 ) -> ProjectExtractionConfig | None:
     row = await conn.fetchrow(
         """
-        SELECT id, description, active_ocr_method, active_chat_model, active_prompt_id
+        SELECT id, description, active_extract_method, active_chat_model, active_prompt_id
         FROM web.projects
         WHERE id = $1
           AND active_prompt_id IS NOT NULL
@@ -67,7 +67,7 @@ async def fetch_project_config(
     return ProjectExtractionConfig(
         project_id=row["id"],
         description=row["description"],
-        ocr_method=row["active_ocr_method"],
+        extract_method=row["active_extract_method"],
         entity_extraction_model=row["active_chat_model"],
         active_prompt_id=row["active_prompt_id"],
     )

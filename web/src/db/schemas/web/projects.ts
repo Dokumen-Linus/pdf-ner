@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm"
 import { text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { chatModels } from "../public/chat-models"
-import { ocrMethods } from "../public/ocr-methods"
+import { extractMethods } from "../public/extract-methods"
 
 import { entityTypes } from "./entity-types"
 import { webSchema } from "./schema"
@@ -18,10 +18,10 @@ export const projects = webSchema.table("projects", {
   description: text("description"),
   colorPresets: text("color_presets").array(),
   orientation: text("orientation").notNull().default("any"),
-  activeOcrMethod: text("active_ocr_method")
+  activeExtractMethod: text("active_extract_method")
     .notNull()
     .default("olm-ocr2")
-    .references(() => ocrMethods.id, { onDelete: "set default" }),
+    .references(() => extractMethods.id, { onDelete: "set default" }),
   activeChatModel: text("active_chat_model")
     .notNull()
     .default("gpt-5.4-mini")

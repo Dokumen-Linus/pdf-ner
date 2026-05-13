@@ -20,6 +20,9 @@ def evaluate_project_ocr_task(
     max_pdfs: int = 5,
     max_pages_per_pdf: int = 3,
     max_cost_usd: str = "0.50",
+    gpu_model: str = "olm-ocr2",
+    ocr_only: bool = True,
+    pdf_ids: list[str] | None = None,
 ) -> dict:
     cmd = EvaluateProjectOcr(
         project_id=UUID(project_id),
@@ -27,6 +30,9 @@ def evaluate_project_ocr_task(
         max_pdfs=max_pdfs,
         max_pages_per_pdf=max_pages_per_pdf,
         max_cost_usd=Decimal(max_cost_usd),
+        gpu_model=gpu_model,
+        ocr_only=ocr_only,
+        pdf_ids=[UUID(pdf_id) for pdf_id in pdf_ids] if pdf_ids is not None else None,
     )
     try:
         return anyio.run(handle_evaluate_project_ocr, cmd, self)

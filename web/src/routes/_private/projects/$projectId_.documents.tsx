@@ -87,7 +87,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/documents")
       const mappedPdfs = rawPdfs.map((pdf) => ({
         id: pdf.id,
         name: filenameFromFilepath(pdf.filepath),
-        extractMethod: pdf.latestTxt?.ocrMethod ?? null,
+        extractMethod: pdf.latestTxt?.extractMethod ?? null,
         isProcessed: Boolean(pdf.latestTxt?.txt) || pdf.hasLabels,
         createdAt: pdf.createdAt,
       }))

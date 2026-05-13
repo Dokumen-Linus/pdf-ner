@@ -7,11 +7,8 @@ import asyncpg
 from app.domains.ner_runs.application.workflows import execute_and_persist_ner_batch
 from app.domains.ner_runs.domain import services as ner_run_services
 from app.domains.ner_runs.domain.entities import NerPdfInput, NerRunOrigin
-from app.domains.ner_runs.infrastructure.repositories import insert_pdf_text
-from app.shared.infrastructure.s3 import download_pdf_bytes
+from app.domains.text_extract.application.use_cases import extract_default_text
 
-from ..domain.value_objects import PageText, has_usable_text, join_page_text
-from ..infrastructure import ocr
 from ..infrastructure import repositories as repo
 from .commands import ProcessDocumentSource
 
@@ -32,10 +29,6 @@ def _report_progress(
         state="PROGRESS",
         meta={"phase": phase, "message": message, "percent": percent, "details": details},
     )
-
-
-def _text_by_page_payload(pages: list[PageText]) -> dict:
-    return {"pages": [{"page_index": page.page_index, "text": page.text} for page in pages]}
 
 
 async def process_document_source_workflow(
@@ -72,8 +65,11 @@ async def process_document_source_workflow(
 
     try:
         _report_progress(task, "text", "Extracting document text", 15)
-        full_text, text_by_page, extract_method, pdf_txt_id = await _ensure_text(
-            conn, document, project.ocr_method
+        text_result = await extract_default_text(
+            conn,
+            pdf_id=document.pdf_id,
+            extract_method=project.extract_method,
+            created_by_domain="ner_workflows",
         )
 
         _report_progress(
@@ -93,8 +89,15 @@ async def process_document_source_workflow(
             task_name=_TASK_NAME,
             schema_name="ner_workflows",
             system_prompt=system_prompt,
-            pdfs=[NerPdfInput(document.pdf_id, full_text, pdf_txt_id)],
+            pdfs=[
+                NerPdfInput(
+                    document.pdf_id,
+                    text_result.full_text,
+                    text_result.pdf_txt_id,
+                )
+            ],
             entity_types=entity_types,
+            make_annotations=True,
         )
 
         _report_progress(task, "persist", "Saving extracted entities", 90)
@@ -103,7 +106,7 @@ async def process_document_source_workflow(
             "run_id": str(ner_result.run_id),
             "source_id": str(document.source_id),
             "pdf_id": str(document.pdf_id),
-            "extract_method": extract_method,
+            "extract_method": text_result.extract_method,
             "model": project.entity_extraction_model,
         }
     except Exception as exc:
@@ -114,47 +117,3 @@ async def process_document_source_workflow(
             error_message=str(exc),
         )
         raise
-
-
-async def _ensure_text(
-    conn: asyncpg.Connection,
-    document,
-    ocr_method: str,
-) -> tuple[str, dict, str, object | None]:
-    if has_usable_text(document.full_text):
-        return (
-            document.full_text or "",
-            {"pages": [{"page_index": 0, "text": document.full_text}]},
-            "metadata",
-            None,
-        )
-
-    pdf_bytes, _filepath = await download_pdf_bytes(conn, document.pdf_id)
-    pages = await ocr.extract_pdfium_pages(pdf_bytes)
-    full_text = join_page_text(pages)
-    if has_usable_text(full_text):
-        payload = _text_by_page_payload(pages)
-        pdf_txt_id = await insert_pdf_text(
-            conn,
-            pdf_id=document.pdf_id,
-            full_text=full_text,
-            extract_method="pdfium",
-            created_by_domain="ner_workflows",
-            text_by_page=payload,
-        )
-        return full_text, payload, "pdfium", pdf_txt_id
-
-    pages = await ocr.extract_ocr_pages(pdf_bytes, ocr_method)
-    full_text = join_page_text(pages)
-    if not has_usable_text(full_text):
-        raise ValueError("No text extracted from PDF")
-    payload = _text_by_page_payload(pages)
-    pdf_txt_id = await insert_pdf_text(
-        conn,
-        pdf_id=document.pdf_id,
-        full_text=full_text,
-        extract_method=ocr_method,
-        created_by_domain="ner_workflows",
-        text_by_page=payload,
-    )
-    return full_text, payload, ocr_method, pdf_txt_id

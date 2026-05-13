@@ -8,6 +8,7 @@ import type {
   LlmUsage,
   NerRun,
   NerWorkflow,
+  OcrEvaluationPdfTxt,
   OcrEvaluationRun,
   PdfTxt,
   PromptExample,
@@ -68,7 +69,7 @@ describe("Workers Drizzle Schema Shape Checks", () => {
     type Expected = {
       id: string
       pdfId: string
-      ocrMethod: string
+      extractMethod: string
       createdByDomain: string
       txt: string
     }
@@ -158,8 +159,22 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       judgeModel: string
       maxPdfs: number
       maxPagesPerPdf: number
+      extractMethod: string
+      ocrOnly: boolean
     }
     const _: Expected = {} as OcrEvaluationRun
+    expect(true).toBe(true)
+  })
+
+  it("OcrEvaluationPdfTxt should have expected workers.ocr_evaluation_pdf_txts fields", () => {
+    type Expected = {
+      id: string
+      runId: string
+      pdfId: string
+      extractMethod: string
+      pdfTxtId: string
+    }
+    const _: Expected = {} as OcrEvaluationPdfTxt
     expect(true).toBe(true)
   })
 })

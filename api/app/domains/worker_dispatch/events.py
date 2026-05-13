@@ -40,6 +40,9 @@ def dispatch_ocr_evaluation(
     max_pdfs: int = 5,
     max_pages_per_pdf: int = 3,
     max_cost_usd: float = 0.5,
+    pdf_ids: list[str] | None = None,
+    gpu_model: str = "olm-ocr2",
+    ocr_only: bool = True,
 ) -> str:
     """Send OCR evaluation task to the workers queue via Celery."""
     result = celery_client.send_task(
@@ -49,7 +52,24 @@ def dispatch_ocr_evaluation(
             "max_pdfs": max_pdfs,
             "max_pages_per_pdf": max_pages_per_pdf,
             "max_cost_usd": max_cost_usd,
+            "pdf_ids": pdf_ids,
+            "gpu_model": gpu_model,
+            "ocr_only": ocr_only,
         },
+        headers=celery_message_headers(),
+    )
+    return result.id
+
+
+def dispatch_text_extract(
+    project_id: str,
+    pdf_ids: list[str],
+    extract_method: str,
+) -> str:
+    """Send text extraction batch task to the workers queue via Celery."""
+    result = celery_client.send_task(
+        "text_extract.extract_missing_pdf_texts",
+        args=[project_id, pdf_ids, extract_method],
         headers=celery_message_headers(),
     )
     return result.id

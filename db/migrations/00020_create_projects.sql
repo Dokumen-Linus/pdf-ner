@@ -12,7 +12,7 @@ CREATE TABLE web.projects (
   orientation TEXT NOT NULL DEFAULT 'any' CHECK (orientation IN ('any', 'portrait', 'landscape')),
 
   -- user entered based on recommendations
-  active_ocr_method TEXT NOT NULL DEFAULT 'olm-ocr2' REFERENCES public.ocr_methods (id) ON DELETE SET DEFAULT,
+  active_extract_method TEXT NOT NULL DEFAULT 'olm-ocr2' REFERENCES public.extract_methods (id) ON DELETE SET DEFAULT,
   active_chat_model TEXT NOT NULL DEFAULT 'gpt-5.4-mini' REFERENCES public.chat_models (id) ON DELETE SET DEFAULT,
 
   created_at TIMESTAMPTZ DEFAULT now(),

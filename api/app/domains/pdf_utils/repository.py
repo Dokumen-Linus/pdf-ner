@@ -10,14 +10,14 @@ async def fetch_pdf(conn: asyncpg.Connection, pdf_id: UUID) -> asyncpg.Record | 
         """
         SELECT p.filepath, p.project_id,
                txt.txt AS full_text,
-               txt.ocr_method AS extract_method,
+               txt.extract_method AS extract_method,
                txt.text_by_page,
                ab.name AS bucket_name, ab.region, ab.endpoint_url
         FROM core.pdfs p
         JOIN web.projects pr ON pr.id = p.project_id
         JOIN api.aws_buckets ab ON ab.id = pr.bucket_id
         LEFT JOIN LATERAL (
-            SELECT txt, ocr_method, text_by_page
+            SELECT txt, extract_method, text_by_page
             FROM workers.pdf_txts
             WHERE pdf_id = p.id
             ORDER BY created_at DESC, id DESC
@@ -41,7 +41,7 @@ async def update_pdf_text_metadata(
     await conn.execute(
         """
         INSERT INTO workers.pdf_txts
-            (pdf_id, ocr_method, created_by_domain, txt, text_by_page)
+            (pdf_id, extract_method, created_by_domain, txt, text_by_page)
         VALUES ($1, $2, 'api_pdf_utils', $3, $4::jsonb)
         """,
         pdf_id,
