@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test"
 
 import {
   createEntityType,
+  CreateEntityTypeSchema,
   deleteEntityType,
   getEntityTypeById,
   getEntityTypesByProjectId,
@@ -9,6 +10,29 @@ import {
 } from "./entity-types"
 
 const runTests = process.env.TEST_DB === "true"
+
+describe("Entity type color validation", () => {
+  it("normalizes lowercase #RRGGBB and rejects shorthand colors", () => {
+    const parsed = CreateEntityTypeSchema.parse({
+      projectId: "00000000-0000-0000-0000-000000000001",
+      name: "Color",
+      unique: true,
+      required: true,
+      color: "#ff0000",
+    })
+
+    expect(parsed.color).toBe("#FF0000")
+    expect(() =>
+      CreateEntityTypeSchema.parse({
+        projectId: "00000000-0000-0000-0000-000000000001",
+        name: "Color",
+        unique: true,
+        required: true,
+        color: "#F00",
+      }),
+    ).toThrow()
+  })
+})
 
 describe.if(runTests)("Entity Type Table Server Functions", () => {
   const testProjectId = "00000000-0000-0000-0000-000000000001"
@@ -25,7 +49,7 @@ describe.if(runTests)("Entity Type Table Server Functions", () => {
       unique: true,
       required: true,
       subtype: "test-subtype",
-      color: "#ff0000",
+      color: "#FF0000",
       opacity: 0.8,
     }
     const createOutput = await createEntityType({ data: createInput })
@@ -54,7 +78,7 @@ describe.if(runTests)("Entity Type Table Server Functions", () => {
     const updateInput = {
       id: entityTypeId,
       page1Definition: "Updated definition",
-      color: "#00ff00",
+      color: "#00FF00",
       opacity: 0.9,
     }
     const updateOutput = await updateEntityType({ data: updateInput })
@@ -62,7 +86,7 @@ describe.if(runTests)("Entity Type Table Server Functions", () => {
 
     const updatedEntityType = await getEntityTypeById({ data: { id: entityTypeId } })
     expect(updatedEntityType.userDefinition).toBe("Updated definition")
-    expect(updatedEntityType.color).toBe("#00ff00")
+    expect(updatedEntityType.color).toBe("#00FF00")
     expect(updatedEntityType.opacity).toBe(0.9)
 
     // --- DELETE ---
@@ -82,7 +106,7 @@ describe.if(runTests)("Entity Type Table Server Functions", () => {
         name: "", // empty name should fail
         unique: true,
         required: false,
-        color: "#ff0000",
+        color: "#FF0000",
       }
       await expect(createEntityType({ data: input })).rejects.toThrow()
     })

@@ -29,6 +29,11 @@ const StoredRectSchema = z.object({
   height: z.number().optional(),
 })
 
+const HexColorSchema = z
+  .string()
+  .transform((color) => color.toUpperCase())
+  .refine((color) => /^#[0-9A-F]{6}$/.test(color), "Color must be #RRGGBB")
+
 // ** CREATE **
 export const CreateAnnotationSchema = z.object({
   id: z.string(),
@@ -38,7 +43,7 @@ export const CreateAnnotationSchema = z.object({
   segmentRects: z.array(StoredRectSchema),
   pageIndex: z.number().int().min(0, "Page index must be non-negative"),
   entityTypeId: z.string().uuid(),
-  color: z.string().optional(),
+  color: HexColorSchema.optional(),
   opacity: z.number().min(0).max(1).optional(),
   contents: z.string().optional(),
   customEntityType: z.string().optional(),
