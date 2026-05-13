@@ -17,3 +17,14 @@ include-package-data = false
 
 [tool.setuptools.packages.find]
 include = ["dokumen_llm_providers*"]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-cov",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "--cov"
