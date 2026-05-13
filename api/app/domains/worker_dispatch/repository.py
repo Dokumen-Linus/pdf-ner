@@ -22,3 +22,22 @@ async def fetch_pdf_ids_outside_project(
         pdf_ids,
     )
     return [row["id"] for row in rows]
+
+
+async def fetch_unavailable_chat_model_ids(
+    conn: asyncpg.Connection,
+    *,
+    chat_model_ids: list[str],
+) -> list[str]:
+    rows = await conn.fetch(
+        """
+        SELECT requested.id
+        FROM unnest($1::text[]) AS requested(id)
+        LEFT JOIN public.chat_models cm
+          ON cm.id = requested.id
+         AND (cm.end_available_date IS NULL OR cm.end_available_date > now())
+        WHERE cm.id IS NULL
+        """,
+        chat_model_ids,
+    )
+    return [row["id"] for row in rows]

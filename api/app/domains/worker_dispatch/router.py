@@ -5,6 +5,7 @@ from app.core.db import get_conn
 
 from . import events, repository
 from .schemas import (
+    ChatModelEvalRequest,
     ExtractTextBatchRequest,
     OcrEvaluationPdfsRequest,
     OcrEvaluationRequest,
@@ -107,6 +108,56 @@ async def evaluate_ocr_pdfs(
 
 @router.get("/ocr-evaluation/{task_id}/status")
 async def get_ocr_evaluation_status(task_id: str, request: Request):
+    return await _task_status_with_project(request, task_id)
+
+
+@router.post("/chat-model-eval")
+async def evaluate_chat_models(
+    request_data: ChatModelEvalRequest,
+    request: Request,
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    unknown_pdf_ids = await repository.fetch_pdf_ids_outside_project(
+        conn,
+        project_id=request_data.project_id,
+        pdf_ids=request_data.pdf_ids,
+    )
+    if unknown_pdf_ids:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "All pdf_ids must belong to project_id",
+                "pdf_ids": [str(pdf_id) for pdf_id in unknown_pdf_ids],
+            },
+        )
+
+    unavailable_models = await repository.fetch_unavailable_chat_model_ids(
+        conn,
+        chat_model_ids=request_data.chat_model_ids,
+    )
+    if unavailable_models:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "All chat_model_ids must reference available public.chat_models",
+                "chat_model_ids": unavailable_models,
+            },
+        )
+
+    task_id = events.dispatch_chat_model_eval(
+        project_id=str(request_data.project_id),
+        pdf_ids=[str(pdf_id) for pdf_id in request_data.pdf_ids],
+        chat_model_ids=request_data.chat_model_ids,
+        beta=request_data.beta,
+    )
+
+    await _store_task_project(request, task_id, request_data.project_id)
+
+    return {"task_id": task_id}
+
+
+@router.get("/chat-model-eval/{task_id}/status")
+async def get_chat_model_eval_status(task_id: str, request: Request):
     return await _task_status_with_project(request, task_id)
 
 

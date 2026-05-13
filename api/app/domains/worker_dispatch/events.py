@@ -61,6 +61,22 @@ def dispatch_ocr_evaluation(
     return result.id
 
 
+def dispatch_chat_model_eval(
+    project_id: str,
+    pdf_ids: list[str],
+    chat_model_ids: list[str],
+    beta: float = 1.0,
+) -> str:
+    """Send chat model evaluation task to the workers queue via Celery."""
+    result = celery_client.send_task(
+        "chat_model_eval.evaluate_models",
+        args=[project_id, pdf_ids, chat_model_ids],
+        kwargs={"beta": beta},
+        headers=celery_message_headers(),
+    )
+    return result.id
+
+
 def dispatch_text_extract(
     project_id: str,
     pdf_ids: list[str],

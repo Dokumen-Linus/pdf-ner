@@ -17,6 +17,13 @@ class OptimizePromptRequest(BaseModel):
     convergence_threshold: float = Field(default=0.02, ge=0)
 
 
+class ChatModelEvalRequest(BaseModel):
+    project_id: UUID
+    pdf_ids: list[UUID] = Field(min_length=1)
+    chat_model_ids: list[str] = Field(min_length=1)
+    beta: float = Field(default=1.0, gt=0)
+
+
 class OcrEvaluationRequest(BaseModel):
     project_id: UUID
     judge_model: str = Field(min_length=1)

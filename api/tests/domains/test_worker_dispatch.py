@@ -6,6 +6,7 @@ import pytest
 
 from app.domains.worker_dispatch import events
 from app.domains.worker_dispatch.schemas import (
+    ChatModelEvalRequest,
     ExtractTextBatchRequest,
     OcrEvaluationPdfsRequest,
     OcrEvaluationRequest,
@@ -93,6 +94,25 @@ class TestOcrEvaluationRequest:
                 project_id=uuid4(),
                 judge_model="gemini-3.1-flash-lite",
                 pdf_ids=[],
+            )
+
+
+class TestChatModelEvalRequest:
+    def test_requires_pdf_ids(self):
+        with pytest.raises(ValidationError):
+            ChatModelEvalRequest(project_id=uuid4(), pdf_ids=[], chat_model_ids=["gpt-5.4-mini"])
+
+    def test_requires_chat_model_ids(self):
+        with pytest.raises(ValidationError):
+            ChatModelEvalRequest(project_id=uuid4(), pdf_ids=[uuid4()], chat_model_ids=[])
+
+    def test_requires_positive_beta(self):
+        with pytest.raises(ValidationError):
+            ChatModelEvalRequest(
+                project_id=uuid4(),
+                pdf_ids=[uuid4()],
+                chat_model_ids=["gpt-5.4-mini"],
+                beta=0,
             )
 
 
@@ -276,6 +296,94 @@ class TestWorkerDispatchEndpoints:
             "project_id": project_id,
         }
         mock_redis.get.assert_called_once_with(f"worker-dispatch:task:project:{task_id}")
+
+    @pytest.mark.anyio
+    async def test_chat_model_eval_dispatches_worker_task(
+        self, async_client, mock_redis, monkeypatch
+    ):
+        project_id = uuid4()
+        pdf_id = uuid4()
+        task_id = "model-eval-task-123"
+        dispatch_calls = []
+
+        def fake_dispatch(**kwargs):
+            dispatch_calls.append(kwargs)
+            return task_id
+
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.fetch_pdf_ids_outside_project",
+            AsyncMock(return_value=[]),
+        )
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.fetch_unavailable_chat_model_ids",
+            AsyncMock(return_value=[]),
+        )
+        monkeypatch.setattr(events, "dispatch_chat_model_eval", fake_dispatch)
+
+        response = await async_client.post(
+            "/api/v1/worker-dispatch/chat-model-eval",
+            json={
+                "project_id": str(project_id),
+                "pdf_ids": [str(pdf_id)],
+                "chat_model_ids": ["gpt-5.4-mini", "claude-sonnet-4-5"],
+                "beta": 2,
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"task_id": task_id}
+        assert dispatch_calls == [
+            {
+                "project_id": str(project_id),
+                "pdf_ids": [str(pdf_id)],
+                "chat_model_ids": ["gpt-5.4-mini", "claude-sonnet-4-5"],
+                "beta": 2.0,
+            }
+        ]
+        mock_redis.set.assert_called_once_with(
+            f"worker-dispatch:task:project:{task_id}",
+            str(project_id),
+            ex=86400,
+        )
+
+    @pytest.mark.anyio
+    async def test_chat_model_eval_rejects_unavailable_models(
+        self, async_client, mock_redis, monkeypatch
+    ):
+        project_id = uuid4()
+        pdf_id = uuid4()
+        dispatch_calls = []
+
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.fetch_pdf_ids_outside_project",
+            AsyncMock(return_value=[]),
+        )
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.fetch_unavailable_chat_model_ids",
+            AsyncMock(return_value=["bad-model"]),
+        )
+        monkeypatch.setattr(
+            events, "dispatch_chat_model_eval", lambda **kwargs: dispatch_calls.append(kwargs)
+        )
+
+        response = await async_client.post(
+            "/api/v1/worker-dispatch/chat-model-eval",
+            json={
+                "project_id": str(project_id),
+                "pdf_ids": [str(pdf_id)],
+                "chat_model_ids": ["bad-model"],
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json() == {
+            "detail": {
+                "message": "All chat_model_ids must reference available public.chat_models",
+                "chat_model_ids": ["bad-model"],
+            }
+        }
+        assert dispatch_calls == []
+        mock_redis.set.assert_not_called()
 
     @pytest.mark.anyio
     async def test_status_decodes_project_id_from_redis_bytes(
@@ -475,6 +583,35 @@ class TestWorkerDispatchEvents:
             "gpu_model": "deepseek-ocr",
             "ocr_only": True,
         }
+        assert kwargs["headers"] == {"request-id": "test"}
+
+    def test_dispatch_sends_chat_model_eval_task(self, monkeypatch):
+        send_task_calls = []
+
+        class FakeResult:
+            id = "model-eval-task-123"
+
+        def fake_send_task(*args, **kwargs):
+            send_task_calls.append((args, kwargs))
+            return FakeResult()
+
+        monkeypatch.setattr(events.celery_client, "send_task", fake_send_task)
+        monkeypatch.setattr(events, "celery_message_headers", lambda: {"request-id": "test"})
+
+        pdf_id = str(uuid4())
+        project_id = str(uuid4())
+        task_id = events.dispatch_chat_model_eval(
+            project_id=project_id,
+            pdf_ids=[pdf_id],
+            chat_model_ids=["gpt-5.4-mini"],
+            beta=2.0,
+        )
+
+        assert task_id == "model-eval-task-123"
+        args, kwargs = send_task_calls[0]
+        assert args == ("chat_model_eval.evaluate_models",)
+        assert kwargs["args"] == [project_id, [pdf_id], ["gpt-5.4-mini"]]
+        assert kwargs["kwargs"] == {"beta": 2.0}
         assert kwargs["headers"] == {"request-id": "test"}
 
     def test_dispatch_sends_text_extract_task(self, monkeypatch):
