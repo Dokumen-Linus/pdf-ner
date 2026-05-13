@@ -189,8 +189,8 @@ async def insert_chat_model_eval_iteration(
     num_correct_pdfs: int,
     pdf_accuracy: float | None,
     entity_type_metrics: dict,
-    incorrectly_predicted_entity_value_ids: list[UUID],
-) -> UUID:
+    incorrectly_predicted_entity_value_ids: list[int],
+) -> int:
     scores_json = json.dumps(
         {
             key: {"precision": value.precision, "recall": value.recall, "f": value.f}

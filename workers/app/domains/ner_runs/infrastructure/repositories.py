@@ -35,7 +35,7 @@ async def link_run_to_context_iteration(
     conn: asyncpg.Connection,
     *,
     ner_run_id: UUID,
-    context_eng_iter_id: UUID,
+    context_eng_iter_id: int,
 ) -> None:
     await conn.execute(
         """
@@ -52,7 +52,7 @@ async def link_run_to_model_eval_iteration(
     conn: asyncpg.Connection,
     *,
     ner_run_id: UUID,
-    model_eval_iter_id: UUID,
+    model_eval_iter_id: int,
 ) -> None:
     await conn.execute(
         """
@@ -70,7 +70,7 @@ async def insert_run_pdf(
     *,
     ner_run_id: UUID,
     pdf_id: UUID,
-    pdf_txt_id: UUID | None,
+    pdf_txt_id: int | None,
 ) -> None:
     await conn.execute(
         """
@@ -130,7 +130,7 @@ async def insert_pdf_text(
     extract_method: str,
     created_by_domain: str,
     text_by_page: dict,
-) -> UUID:
+) -> int:
     return await conn.fetchval(
         """
         INSERT INTO workers.pdf_txts

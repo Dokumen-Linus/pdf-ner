@@ -1,4 +1,4 @@
-import { index, integer, jsonb, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { bigint, bigserial, index, integer, jsonb, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { prompts } from "../core/prompts"
 import { chatModels } from "../public/chat-models"
@@ -29,7 +29,7 @@ export const chatModelEvalRuns = workersSchema.table(
 export const chatModelEvalIterations = workersSchema.table(
   "chat_model_eval_iterations",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     chatModelEvalRunId: uuid("chat_model_eval_run_id")
       .notNull()
       .references(() => chatModelEvalRuns.id, { onDelete: "cascade" }),
@@ -45,7 +45,7 @@ export const chatModelEvalIterations = workersSchema.table(
     numCorrectEntityTypes: integer("num_correct_entity_types"),
     pdfAccuracy: real("pdf_accuracy"),
     entityTypeMetrics: jsonb("entity_type_metrics"),
-    incorrectlyPredictedEntityValueIds: uuid("incorrectly_predicted_entity_value_ids")
+    incorrectlyPredictedEntityValueIds: bigint("incorrectly_predicted_entity_value_ids", { mode: "number" })
       .array()
       .notNull()
       .default([]),

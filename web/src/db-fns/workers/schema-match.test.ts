@@ -23,7 +23,7 @@ import type {
 describe("Workers Drizzle Schema Shape Checks", () => {
   it("LlmUsage should have expected workers.llm_usage fields", () => {
     type Expected = {
-      id: string
+      id: number
       projectId: string
       actorUserId: string | null
       modelId: string
@@ -38,7 +38,7 @@ describe("Workers Drizzle Schema Shape Checks", () => {
 
   it("BillingChargeAttempt should have expected workers.billing_charge_attempts fields", () => {
     type Expected = {
-      id: string
+      id: number
       accountType: string
       userId: string | null
       organizationId: string | null
@@ -69,7 +69,7 @@ describe("Workers Drizzle Schema Shape Checks", () => {
 
   it("PdfTxt should have expected workers.pdf_txts fields", () => {
     type Expected = {
-      id: string
+      id: number
       pdfId: string
       extractMethod: string
       createdByDomain: string
@@ -118,11 +118,11 @@ describe("Workers Drizzle Schema Shape Checks", () => {
 
   it("ContextEngineeringIteration should have expected context_engineering_iterations fields", () => {
     type Expected = {
-      id: string
+      id: number
       contextEngRunId: string
       promptId: string
       overallF: number
-      incorrectlyPredictedEntityValueIds: string[]
+      incorrectlyPredictedEntityValueIds: number[]
     }
     const _: Expected = {} as ContextEngineeringIteration
     expect(true).toBe(true)
@@ -130,7 +130,7 @@ describe("Workers Drizzle Schema Shape Checks", () => {
 
   it("PromptExample should have expected workers.prompt_examples fields", () => {
     type Expected = {
-      id: string
+      id: number
       promptId: string
       pdfId: string
       entityTypeId: string
@@ -158,12 +158,12 @@ describe("Workers Drizzle Schema Shape Checks", () => {
 
   it("ChatModelEvalIteration should have expected workers.chat_model_eval_iterations fields", () => {
     type Expected = {
-      id: string
+      id: number
       chatModelEvalRunId: string
       modelId: string
       promptId: string
       overallF: number
-      incorrectlyPredictedEntityValueIds: string[]
+      incorrectlyPredictedEntityValueIds: number[]
     }
     const _: Expected = {} as ChatModelEvalIteration
     expect(true).toBe(true)
@@ -175,8 +175,8 @@ describe("Workers Drizzle Schema Shape Checks", () => {
       projectId: string
       promptId: string
       nerWorkflowId: string | null
-      contextEngIterId: string | null
-      modelEvalIterId: string | null
+      contextEngIterId: number | null
+      modelEvalIterId: number | null
     }
     const _: Expected = {} as NerRun
     expect(true).toBe(true)
@@ -199,11 +199,11 @@ describe("Workers Drizzle Schema Shape Checks", () => {
 
   it("OcrEvaluationPdfTxt should have expected workers.ocr_evaluation_pdf_txts fields", () => {
     type Expected = {
-      id: string
+      id: number
       runId: string
       pdfId: string
       extractMethod: string
-      pdfTxtId: string
+      pdfTxtId: number
     }
     const _: Expected = {} as OcrEvaluationPdfTxt
     expect(true).toBe(true)

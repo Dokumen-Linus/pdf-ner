@@ -89,7 +89,7 @@ async def insert_pdf_text(
     extract_method: str,
     created_by_domain: str,
     text_by_page: dict,
-) -> UUID:
+) -> int:
     return await conn.fetchval(
         """
         INSERT INTO workers.pdf_txts

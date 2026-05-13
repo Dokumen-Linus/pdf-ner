@@ -23,7 +23,7 @@ CREATE TABLE workers.chat_model_eval_runs (
 
 -- each run iteratively tests multiple prompts
 CREATE TABLE workers.chat_model_eval_iterations (
-  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
   chat_model_eval_run_id UUID NOT NULL REFERENCES workers.chat_model_eval_runs (id) ON DELETE CASCADE,
   model_id TEXT NOT NULL REFERENCES public.chat_models (id) ON DELETE CASCADE,
   prompt_id UUID NOT NULL REFERENCES core.prompts (id) ON DELETE CASCADE,
@@ -39,7 +39,7 @@ CREATE TABLE workers.chat_model_eval_iterations (
   num_correct_entity_types INTEGER, -- entity types with correct values for all pdfs
   pdf_accuracy REAL,
   entity_type_metrics JSONB,
-  incorrectly_predicted_entity_value_ids UUID[] NOT NULL DEFAULT ARRAY[]::uuid[],
+  incorrectly_predicted_entity_value_ids BIGINT[] NOT NULL DEFAULT ARRAY[]::bigint[],
 
   -- each iter executes an ner_run
 

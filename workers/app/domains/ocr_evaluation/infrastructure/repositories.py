@@ -157,7 +157,7 @@ async def insert_run_pdf_text(
     run_id: UUID,
     pdf_id: UUID,
     method: str,
-    pdf_txt_id: UUID,
+    pdf_txt_id: int,
 ) -> None:
     await conn.execute(
         """

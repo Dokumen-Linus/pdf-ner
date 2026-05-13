@@ -6,7 +6,7 @@ from uuid import UUID
 
 @dataclass(frozen=True)
 class PredictedEntityValue:
-    entity_value_id: UUID
+    entity_value_id: int
     pdf_id: UUID
     text_value: str
     subtype: str

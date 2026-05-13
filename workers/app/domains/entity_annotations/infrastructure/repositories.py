@@ -54,7 +54,7 @@ async def fetch_predicted_entity_values(
 async def update_entity_value_annotation(
     conn: asyncpg.Connection,
     *,
-    entity_value_id: UUID,
+    entity_value_id: int,
     rect: dict,
     segment_rects: list[dict],
     page_index: int,

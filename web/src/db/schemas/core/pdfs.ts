@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { boolean, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { bigint, boolean, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { projects } from "../web/projects"
 import { users } from "../web/users"
@@ -25,7 +25,7 @@ export const corePdfs = coreSchema.table("pdfs", {
   nerWorkflowId: uuid("ner_workflow_id"),
   listenerId: uuid("listener_id"),
   watcherId: uuid("watcher_id"),
-  watcherRunId: uuid("watcher_run_id"),
+  watcherRunId: bigint("watcher_run_id", { mode: "number" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 })

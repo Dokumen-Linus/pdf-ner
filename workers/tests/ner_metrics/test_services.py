@@ -22,7 +22,7 @@ def test_calculates_beta_weighted_f_score():
 def test_metrics_handle_duplicates_and_incorrect_prediction_ids():
     pdf_id = uuid4()
     entity_type_id = uuid4()
-    wrong_prediction_id = uuid4()
+    wrong_prediction_id = 1
     entity = EntityTypeInfo(
         name="name",
         user_definition=None,
@@ -45,7 +45,7 @@ def test_metrics_handle_duplicates_and_incorrect_prediction_ids():
         pdf_id=pdf_id,
         predictions={"name": ["acme", "wrong"]},
         persisted_predictions=[
-            PersistedPrediction(uuid4(), pdf_id, entity_type_id, "acme"),
+            PersistedPrediction(2, pdf_id, entity_type_id, "acme"),
             PersistedPrediction(wrong_prediction_id, pdf_id, entity_type_id, "wrong"),
         ],
     )

@@ -320,12 +320,12 @@ async def insert_evaluation(
     pdfs_fully_correct: int | None = None,
     pdf_accuracy: float | None = None,
     entity_type_metrics: dict | None = None,
-    incorrectly_predicted_entity_value_ids: list[UUID] | None = None,
+    incorrectly_predicted_entity_value_ids: list[int] | None = None,
     llm_call_count: int | None = None,
     cost_usd=None,
     iterations_run: int | None = None,
     stop_reason: str | None = None,
-) -> UUID:
+) -> int:
     if per_entity_scores is None:
         per_entity_scores = overall_f1
         overall_f1 = prompt_id
@@ -382,7 +382,7 @@ async def insert_evaluation(
 
 async def fetch_entity_values_by_ids(
     conn: asyncpg.Connection,
-    entity_value_ids: list[UUID],
+    entity_value_ids: list[int],
 ) -> list[asyncpg.Record]:
     if not entity_value_ids:
         return []
@@ -391,7 +391,7 @@ async def fetch_entity_values_by_ids(
         SELECT ev.id, ev.pdf_id, ev.entity_type_id, et.name AS entity_type_name, ev.text_value
         FROM core.entity_values ev
         JOIN web.entity_types et ON et.id = ev.entity_type_id
-        WHERE ev.id = ANY($1::uuid[])
+        WHERE ev.id = ANY($1::bigint[])
         ORDER BY ev.id
         """,
         entity_value_ids,

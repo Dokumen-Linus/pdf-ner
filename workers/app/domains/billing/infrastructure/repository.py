@@ -152,7 +152,7 @@ async def create_charge_attempt(
 async def mark_charge_success(
     conn: asyncpg.Connection,
     *,
-    attempt_id: UUID,
+    attempt_id: int,
     account_type: str,
     account_id: str,
     period_end,
@@ -201,7 +201,7 @@ async def mark_charge_success(
 async def mark_charge_failure(
     conn: asyncpg.Connection,
     *,
-    attempt_id: UUID,
+    attempt_id: int,
     account_type: str,
     account_id: str,
     error_message: str,

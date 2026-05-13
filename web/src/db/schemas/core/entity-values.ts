@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { boolean, integer, jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { bigserial, boolean, integer, jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { entityTypes } from "../web/entity-types"
 
@@ -9,7 +9,7 @@ import { coreSchema } from "./schema"
 import type { StoredRect } from "../../types"
 
 export const entityValues = coreSchema.table("entity_values", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: bigserial("id", { mode: "number" }).primaryKey(),
   pdfId: uuid("pdf_id")
     .notNull()
     .references(() => corePdfs.id, { onDelete: "cascade" }),

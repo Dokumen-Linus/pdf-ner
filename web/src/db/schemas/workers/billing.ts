@@ -1,4 +1,4 @@
-import { index, integer, numeric, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { bigserial, index, integer, numeric, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { projects } from "../web/projects"
 import { users } from "../web/users"
@@ -8,7 +8,7 @@ import { workersSchema } from "./schema"
 export const llmUsage = workersSchema.table(
   "llm_usage",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     projectId: uuid("project_id")
       .notNull()
       .references(() => projects.id, { onDelete: "cascade" }),
@@ -33,7 +33,7 @@ export const llmUsage = workersSchema.table(
 export const billingChargeAttempts = workersSchema.table(
   "billing_charge_attempts",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     accountType: text("account_type").notNull(),
     userId: text("user_id").references(() => users.id),
     organizationId: text("organization_id"),

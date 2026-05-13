@@ -109,7 +109,7 @@ async def test_success_advances_monthly_anchor_from_prior_anchor():
 
     await repository.mark_charge_success(
         conn,
-        attempt_id=uuid4(),
+        attempt_id=1,
         account_type="individual",
         account_id="11111111-1111-1111-1111-111111111111",
         period_end=period_end,
@@ -128,7 +128,7 @@ async def test_failed_charge_uses_retry_after_without_moving_monthly_anchor():
 
     await repository.mark_charge_failure(
         conn,
-        attempt_id=uuid4(),
+        attempt_id=1,
         account_type="organization",
         account_id="org_123",
         error_message="card declined",

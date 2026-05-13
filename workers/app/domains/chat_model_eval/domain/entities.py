@@ -18,7 +18,7 @@ class ModelMetadata:
 
 @dataclass(frozen=True)
 class ModelEvalIterationResult:
-    iteration_id: UUID
+    iteration_id: int
     ner_run_id: UUID | None
     model_id: str
     overall_f: float

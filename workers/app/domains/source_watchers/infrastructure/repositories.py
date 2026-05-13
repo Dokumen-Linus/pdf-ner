@@ -72,7 +72,7 @@ async def insert_watch_run(
     conn: asyncpg.Connection,
     connection_id: UUID,
     cursor_before: dict | None,
-) -> UUID:
+) -> int:
     return await conn.fetchval(
         """
         INSERT INTO workers.watcher_runs (watcher_id, status, cursor_before)
@@ -86,7 +86,7 @@ async def insert_watch_run(
 
 async def complete_watch_run(
     conn: asyncpg.Connection,
-    run_id: UUID,
+    run_id: int,
     connection_id: UUID,
     *,
     cursor_after: dict | None,
@@ -127,7 +127,7 @@ async def complete_watch_run(
 
 async def fail_watch_run(
     conn: asyncpg.Connection,
-    run_id: UUID,
+    run_id: int,
     connection_id: UUID,
     *,
     error_type: str,

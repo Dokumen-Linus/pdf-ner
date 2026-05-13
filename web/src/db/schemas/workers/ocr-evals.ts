@@ -1,4 +1,6 @@
 import {
+  bigint,
+  bigserial,
   boolean,
   index,
   integer,
@@ -51,7 +53,7 @@ export const ocrEvaluationRuns = workersSchema.table(
 export const ocrEvaluationPages = workersSchema.table(
   "ocr_evaluation_pages",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     runId: uuid("run_id")
       .notNull()
       .references(() => ocrEvaluationRuns.id, { onDelete: "cascade" }),
@@ -70,7 +72,7 @@ export const ocrEvaluationPages = workersSchema.table(
 export const ocrEvaluationPdfTxts = workersSchema.table(
   "ocr_evaluation_pdf_txts",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     runId: uuid("run_id")
       .notNull()
       .references(() => ocrEvaluationRuns.id, { onDelete: "cascade" }),
@@ -79,7 +81,7 @@ export const ocrEvaluationPdfTxts = workersSchema.table(
     extractMethod: text("extract_method")
       .notNull()
       .references(() => extractMethods.id),
-    pdfTxtId: uuid("pdf_txt_id")
+    pdfTxtId: bigint("pdf_txt_id", { mode: "number" })
       .notNull()
       .references(() => pdfTxts.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

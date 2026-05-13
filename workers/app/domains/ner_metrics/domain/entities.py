@@ -21,7 +21,7 @@ class MetricsResult:
     num_correct_pdfs: int
     accuracy_score: float | None
     entity_type_metrics: dict[str, dict[str, float]]
-    incorrectly_predicted_entity_value_ids: list[UUID] = field(default_factory=list)
+    incorrectly_predicted_entity_value_ids: list[int] = field(default_factory=list)
     missed_entity_types: list[dict] = field(default_factory=list)
 
     @property
@@ -31,7 +31,7 @@ class MetricsResult:
 
 @dataclass(frozen=True)
 class PersistedPredictionLike:
-    entity_value_id: UUID
+    entity_value_id: int
     pdf_id: UUID
     entity_type_id: UUID
     text_value: str
