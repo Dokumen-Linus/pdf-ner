@@ -1,9 +1,22 @@
+import { renderHook } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "bun:test"
 
-import usePluginStore from "./use-plugin-store"
+import usePluginStore, { usePluginCapabilities } from "./use-plugin-store"
+
+import type { AnnotationCapability } from "@/components/pdf-container/plugin-annotation-2"
+import type { DocumentManagerCapability } from "@/components/pdf-container/plugin-document-manager-2"
+import type { ScrollCapability } from "@/components/pdf-container/plugin-scroll-2"
+import type { SearchCapability } from "@/components/pdf-container/plugin-search-2"
+import type { SelectionCapability } from "@/components/pdf-container/plugin-selection-2"
 
 afterEach(() => {
   usePluginStore.getState().setActiveDocumentId(null)
+  usePluginStore.getState().setAnnoCapability(null)
+  usePluginStore.getState().setAnnoState(null)
+  usePluginStore.getState().setSearchCapability(null)
+  usePluginStore.getState().setSelectCapability(null)
+  usePluginStore.getState().setScrollCapability(null)
+  usePluginStore.getState().setDocManagerCapability(null)
 })
 
 describe("usePluginStore activeDocumentId", () => {
@@ -31,5 +44,32 @@ describe("usePluginStore activeDocumentId", () => {
     usePluginStore.getState().setActiveDocumentId(null)
 
     expect(usePluginStore.getState().activeDocumentId).toBeNull()
+  })
+
+  it("selects only plugin capabilities from the store", () => {
+    const annoCapability = { kind: "anno" } as unknown as AnnotationCapability
+    const searchCapability = { kind: "search" } as unknown as SearchCapability
+    const selectCapability = { kind: "select" } as unknown as SelectionCapability
+    const scrollCapability = { kind: "scroll" } as unknown as ScrollCapability
+    const docManagerCapability = { kind: "doc-manager" } as unknown as DocumentManagerCapability
+
+    usePluginStore.getState().setActiveDocumentId("doc-a")
+    usePluginStore.getState().setAnnoCapability(annoCapability)
+    usePluginStore.getState().setSearchCapability(searchCapability)
+    usePluginStore.getState().setSelectCapability(selectCapability)
+    usePluginStore.getState().setScrollCapability(scrollCapability)
+    usePluginStore.getState().setDocManagerCapability(docManagerCapability)
+
+    const { result } = renderHook(() => usePluginCapabilities())
+
+    expect(result.current).toEqual({
+      annoCapability,
+      searchCapability,
+      selectCapability,
+      scrollCapability,
+      docManagerCapability,
+    })
+    expect(result.current).not.toHaveProperty("activeDocumentId")
+    expect(result.current).not.toHaveProperty("annoState")
   })
 })
