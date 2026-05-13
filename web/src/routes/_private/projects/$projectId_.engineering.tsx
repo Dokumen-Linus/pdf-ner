@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import { CheckCircle2Icon, Loader2Icon, PlayIcon, RotateCcwIcon, XCircleIcon } from "lucide-react"
@@ -111,13 +111,10 @@ function EngineeringPage() {
   const [maxPdfs, setMaxPdfs] = useState(5)
   const [maxPagesPerPdf, setMaxPagesPerPdf] = useState(3)
   const [ocrMaxCostUsd, setOcrMaxCostUsd] = useState(0.5)
-
-  useEffect(() => {
-    const firstId = googleModels[0]?.id
-    if (firstId && !googleModels.some((m) => m.id === judgeModel)) {
-      setJudgeModel(firstId)
-    }
-  }, [googleModels, judgeModel])
+  const fallbackJudgeModel = googleModels[0]?.id ?? ""
+  const selectedJudgeModel = googleModels.some((model) => model.id === judgeModel)
+    ? judgeModel
+    : fallbackJudgeModel
 
   const { data: status } = useQuery({
     queryKey: ["worker-dispatch", "optimization-status", taskId],
@@ -168,7 +165,7 @@ function EngineeringPage() {
   }
 
   async function handleStartOcrEvaluation() {
-    if (!judgeModel) {
+    if (!selectedJudgeModel) {
       setOcrStartError("Choose a Gemini judge model.")
       return
     }
@@ -179,7 +176,7 @@ function EngineeringPage() {
       const result = await startOcrEvaluation({
         data: {
           projectId,
-          judgeModel,
+          judgeModel: selectedJudgeModel,
           maxPdfs,
           maxPagesPerPdf,
           maxCostUsd: ocrMaxCostUsd,
@@ -385,7 +382,7 @@ function EngineeringPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="ocr-judge-model">Judge model</Label>
-                <Select value={judgeModel} onValueChange={setJudgeModel}>
+                <Select value={selectedJudgeModel} onValueChange={setJudgeModel}>
                   <SelectTrigger id="ocr-judge-model" className="w-full">
                     <SelectValue placeholder="Choose a Gemini model" />
                   </SelectTrigger>
@@ -439,7 +436,7 @@ function EngineeringPage() {
               onClick={handleStartOcrEvaluation}
               disabled={
                 isStartingOcr ||
-                !judgeModel ||
+                !selectedJudgeModel ||
                 maxPdfs <= 0 ||
                 maxPagesPerPdf <= 0 ||
                 ocrMaxCostUsd <= 0
