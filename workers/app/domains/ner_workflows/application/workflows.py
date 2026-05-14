@@ -8,6 +8,7 @@ from app.domains.ner_runs.application.workflows import execute_and_persist_ner_b
 from app.domains.ner_runs.domain import services as ner_run_services
 from app.domains.ner_runs.domain.entities import NerPdfInput, NerRunOrigin
 from app.domains.text_extract.application.use_cases import extract_default_text
+from app.shared.infrastructure.prompts import ensure_prompt_full_text
 
 from ..infrastructure import repositories as repo
 from .commands import ProcessDocumentSource
@@ -53,11 +54,9 @@ async def process_document_source_workflow(
     if model_metadata.provider not in _SUPPORTED_PROVIDERS:
         raise ValueError(f"Unsupported model provider: {model_metadata.provider}")
 
-    optimized_prompt = await repo.fetch_optimized_prompt(
+    optimized_prompt = await ensure_prompt_full_text(
         conn, project.active_prompt_id, document.project_id
     )
-    if optimized_prompt is None:
-        raise ValueError("Active prompt not found for document project")
 
     entity_types = await repo.fetch_entity_types(conn, document.project_id)
     if not entity_types:

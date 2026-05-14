@@ -64,7 +64,7 @@ async def test_evaluate_chat_models_persists_iteration_and_completes_run():
             "fetch_project_config",
             new=AsyncMock(return_value=ProjectModelEvalConfig(project_id, prompt_id)),
         ),
-        patch.object(workflows.repo, "fetch_prompt_text", new=AsyncMock(return_value="prompt")),
+        patch.object(workflows, "ensure_prompt_full_text", new=AsyncMock(return_value="prompt")),
         patch.object(
             workflows.repo,
             "fetch_available_model_metadata",
