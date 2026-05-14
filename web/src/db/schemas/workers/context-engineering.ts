@@ -1,4 +1,14 @@
-import { bigint, bigserial, index, integer, jsonb, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import {
+  bigint,
+  bigserial,
+  index,
+  integer,
+  jsonb,
+  real,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core"
 
 import { entityTypes } from "../web/entity-types"
 import { projects } from "../web/projects"
@@ -40,7 +50,9 @@ export const contextEngineeringIterations = workersSchema.table(
     numCorrectEntityTypes: integer("num_correct_entity_types"),
     pdfAccuracy: real("pdf_accuracy"),
     entityTypeMetrics: jsonb("entity_type_metrics"),
-    incorrectlyPredictedEntityValueIds: bigint("incorrectly_predicted_entity_value_ids", { mode: "number" })
+    incorrectlyPredictedEntityValueIds: bigint("incorrectly_predicted_entity_value_ids", {
+      mode: "number",
+    })
       .array()
       .notNull()
       .default([]),

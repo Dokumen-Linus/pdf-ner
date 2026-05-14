@@ -24,9 +24,12 @@ export const nerRuns = workersSchema.table(
       () => contextEngineeringIterations.id,
       { onDelete: "cascade" },
     ),
-    modelEvalIterId: bigint("model_eval_iter_id", { mode: "number" }).references(() => chatModelEvalIterations.id, {
-      onDelete: "cascade",
-    }),
+    modelEvalIterId: bigint("model_eval_iter_id", { mode: "number" }).references(
+      () => chatModelEvalIterations.id,
+      {
+        onDelete: "cascade",
+      },
+    ),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
   (t) => [
@@ -44,7 +47,9 @@ export const nerRunPdfs = workersSchema.table(
     nerRunId: uuid("ner_run_id")
       .notNull()
       .references(() => nerRuns.id, { onDelete: "cascade" }),
-    pdfTxtId: bigint("pdf_txt_id", { mode: "number" }).references(() => pdfTxts.id, { onDelete: "set null" }),
+    pdfTxtId: bigint("pdf_txt_id", { mode: "number" }).references(() => pdfTxts.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
   (t) => [
