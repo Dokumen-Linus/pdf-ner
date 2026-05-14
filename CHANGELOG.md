@@ -131,6 +131,7 @@
 - *(wk)* Chat_model_eval domain and refactoring to ner_metrics
 - *(api)* Create worker dispatch for chat_model_eval
 - *(web)* More test coverage
+- Expose web access to prompt formation
 
 ### 🐛 Bug Fixes
 
@@ -226,6 +227,9 @@
 - *(web)* Refresh activeDocumentId accross PDFContainer and EntityTable #136
 - Save core.prompts.full_text of  context_eng best prompt set to web.projects.active_prompt_id
 - *(web)* Remove useEffect in engineering.tsx
+- Update current prompt template to new format #169
+- *(llm)* Stop hook installs dev deps
+- *(wk)* Ner_workflows, chat_model_eval ensure that core.prompts.full_text exists
 
 ### 💼 Other
 
@@ -293,6 +297,7 @@
 - *(wk)* Rename entity_extraction domain to ner_workflows
 - *(wk)* Create ner_runs domain, update ner_workflows, and add to context_eng
 - *(db, wk)* Rename ocr_methods to extract_methods,  add text_extract workers domain
+- *(wk)* Move prompt formation from inserts to shared  domain
 
 ### 📚 Documentation
 
@@ -652,6 +657,7 @@
 - *(fix)* Pull before push in auto-docs and auto-format actions
 - *(fix)* Only pull if changes made
 - *(fix)* Autostash when rebasing auto-docs.yml
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
 

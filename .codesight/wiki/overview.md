@@ -8,10 +8,11 @@
 
 ## Scale
 
-22 API routes · 3 database models · 82 UI components · 48 library files · 21 middleware layers · 84 environment variables
+24 API routes · 3 database models · 82 UI components · 48 library files · 21 middleware layers · 84 environment variables
 
 ## Subsystems
 
+- **[Activate-prompt](./activate-prompt.md)** — 2 routes — touches: cache
 - **[Avatars](./avatars.md)** — 1 routes — touches: upload
 - **[Buckets](./buckets.md)** — 1 routes — touches: auth, upload
 - **[Chat-model-eval](./chat-model-eval.md)** — 2 routes — touches: cache
@@ -35,9 +36,9 @@
 
 Changes to these files have the widest blast radius across the codebase:
 
-- `//infrastructure.py` — imported by **15** files
+- `//infrastructure.py` — imported by **16** files
+- `/commands.py` — imported by **16** files
 - `//domain/entities.py` — imported by **15** files
-- `/commands.py` — imported by **14** files
 - `web/src/components/pdf-container/plugin-viewport-2/index.ts` — imported by **13** files
 - `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **12** files
 - `web/src/db/schemas/web/projects.ts` — imported by **11** files
