@@ -24,6 +24,11 @@ class ChatModelEvalRequest(BaseModel):
     beta: float = Field(default=1.0, gt=0)
 
 
+class ActivatePromptRequest(BaseModel):
+    project_id: UUID
+    prompt_id: UUID
+
+
 class OcrEvaluationRequest(BaseModel):
     project_id: UUID
     judge_model: str = Field(min_length=1)

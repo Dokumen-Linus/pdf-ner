@@ -77,6 +77,16 @@ def dispatch_chat_model_eval(
     return result.id
 
 
+def dispatch_activate_prompt(project_id: str, prompt_id: str) -> str:
+    """Send active prompt materialization/activation task to the workers queue."""
+    result = celery_client.send_task(
+        "prompt_activation.activate_project_prompt",
+        args=[project_id, prompt_id],
+        headers=celery_message_headers(),
+    )
+    return result.id
+
+
 def dispatch_text_extract(
     project_id: str,
     pdf_ids: list[str],

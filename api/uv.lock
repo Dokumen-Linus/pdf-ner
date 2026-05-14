@@ -397,6 +397,7 @@ dependencies = [
     { name = "pdf-ocr-utils" },
     { name = "pdfium-utils" },
     { name = "pydantic-settings" },
+    { name = "pytest-cov" },
     { name = "redis" },
 ]
 
@@ -430,6 +431,7 @@ requires-dist = [
     { name = "pydantic-settings" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-anyio", marker = "extra == 'dev'" },
+    { name = "pytest-cov" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "pytest-mock", marker = "extra == 'dev'" },
     { name = "redis" },

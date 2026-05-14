@@ -67,6 +67,26 @@ export const getOptimizationStatus = createServerFn({ method: "GET" })
     return res
   })
 
+export const activatePrompt = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      projectId: z.string().uuid(),
+      promptId: z.string().uuid(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    await requireProjectPermission(data.projectId, "engineering")
+
+    return jsonCall("/api/v1/worker-dispatch/activate-prompt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        project_id: data.projectId,
+        prompt_id: data.promptId,
+      }),
+    }) as Promise<{ task_id: string }>
+  })
+
 export const startOcrEvaluation = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({

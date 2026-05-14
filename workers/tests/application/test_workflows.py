@@ -12,7 +12,6 @@ from app.domains.context_engineering.application.workflows import (
     _window_around_value,
     prompt_optimization_workflow,
 )
-from app.domains.context_engineering.domain import services
 from app.domains.context_engineering.domain.entities import EntityTypeInfo
 from app.domains.ner_runs.domain.entities import NerBatchResult, NerPdfResult, PersistedPrediction
 from tests.conftest import PDF_ID_1, PROJECT_ID, PROMPT_ID
@@ -50,26 +49,6 @@ def test_initial_prompt_attributes_use_user_data_exactly(name_entity_type):
     assert attrs.entity_type_example_values[str(name_entity_type.entity_type_id)] == (
         name_entity_type.user_examples
     )
-
-
-def test_form_prompt_text_from_structured_attributes(name_entity_type):
-    attrs = _initial_prompt_attributes("Invoices", [name_entity_type])
-    attrs.entity_type_example_finds[str(name_entity_type.entity_type_id)].append(
-        {"pdf_id": str(PDF_ID_1), "value": "John Smith", "explanation": "name"}
-    )
-
-    formed = services.form_prompt_text(
-        TEMPLATE_ROW["txt"],
-        project_description=attrs.project_description,
-        entity_types=[name_entity_type],
-        entity_type_definitions=attrs.entity_type_definitions,
-        entity_type_example_values=attrs.entity_type_example_values,
-        entity_type_example_finds=attrs.entity_type_example_finds,
-    )
-
-    assert "Invoices" in formed
-    assert "full_name" in formed
-    assert "John Smith" in formed
 
 
 @pytest.mark.anyio
@@ -155,6 +134,8 @@ async def test_workflow_inserts_structured_prompt_and_updates_run(entity_types, 
         patch.object(
             workflows, "execute_and_persist_ner_batch", new=AsyncMock(return_value=ner_result)
         ) as execute_batch,
+        patch.object(workflows, "ensure_prompt_full_text", new=AsyncMock()) as ensure_prompt,
+        patch.object(workflows.repo, "activate_project_prompt", new=AsyncMock()) as activate_prompt,
         patch.object(workflows, "link_run_to_context_iteration", new=AsyncMock()) as link_run,
     ):
         result = await prompt_optimization_workflow(conn, {"openai": object()}, cmd)
@@ -163,10 +144,11 @@ async def test_workflow_inserts_structured_prompt_and_updates_run(entity_types, 
     assert conn.fetchval.await_count == 5, f"Expected 5, got {conn.fetchval.await_count}"
     prompt_insert_args = conn.fetchval.await_args_list[1].args
     assert prompt_insert_args[7]  # entity_type_example_finds JSON
-    assert prompt_insert_args[8]
-    assert prompt_insert_args[8] == execute_batch.await_args.kwargs["system_prompt"]
-    assert "Project: Invoices" in prompt_insert_args[8]
-    assert "John Smith" in prompt_insert_args[8]
+    assert prompt_insert_args[8] is None
+    assert "Project: Invoices" in execute_batch.await_args.kwargs["system_prompt"]
+    assert "John Smith" in execute_batch.await_args.kwargs["system_prompt"]
+    ensure_prompt.assert_awaited_once_with(conn, PROMPT_ID, cmd.project_id)
+    activate_prompt.assert_awaited_once_with(conn, project_id=cmd.project_id, prompt_id=PROMPT_ID)
     assert link_run.await_count == 2
 
 

@@ -42,3 +42,25 @@ async def fetch_unavailable_chat_model_ids(
         chat_model_ids,
     )
     return [row["id"] for row in rows]
+
+
+async def prompt_belongs_to_project(
+    conn: asyncpg.Connection,
+    *,
+    project_id: UUID,
+    prompt_id: UUID,
+) -> bool:
+    return bool(
+        await conn.fetchval(
+            """
+            SELECT EXISTS (
+                SELECT 1
+                FROM core.prompts
+                WHERE id = $1
+                  AND project_id = $2
+            )
+            """,
+            prompt_id,
+            project_id,
+        )
+    )

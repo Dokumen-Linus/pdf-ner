@@ -9,6 +9,7 @@ from app.domains.ner_metrics.application.workflows import calculate_ner_run_metr
 from app.domains.ner_runs.application.workflows import execute_and_persist_ner_batch
 from app.domains.ner_runs.domain.entities import NerRunOrigin
 from app.domains.ner_runs.infrastructure.repositories import link_run_to_model_eval_iteration
+from app.shared.infrastructure.prompts import ensure_prompt_full_text
 
 from ..domain.entities import ModelEvalIterationResult
 from ..infrastructure import repositories as repo
@@ -42,10 +43,10 @@ async def evaluate_chat_models_workflow(
     if project is None:
         raise ValueError(f"Project not found or missing active prompt: {cmd.project_id}")
 
-    system_prompt = await repo.fetch_prompt_text(
+    system_prompt = await ensure_prompt_full_text(
         conn,
-        project_id=cmd.project_id,
-        prompt_id=project.active_prompt_id,
+        project.active_prompt_id,
+        cmd.project_id,
     )
     if not system_prompt:
         raise ValueError(f"Active prompt has no full_text: {project.active_prompt_id}")

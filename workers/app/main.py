@@ -32,6 +32,7 @@ app.autodiscover_tasks(
         "app.domains.entity_annotations",
         "app.domains.ner_workflows",
         "app.domains.ocr_evaluation",
+        "app.domains.prompt_activation",
         "app.domains.source_listeners",
         "app.domains.source_watchers",
         "app.domains.text_extract",

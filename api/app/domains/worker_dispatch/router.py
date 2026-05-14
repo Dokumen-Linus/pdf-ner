@@ -5,6 +5,7 @@ from app.core.db import get_conn
 
 from . import events, repository
 from .schemas import (
+    ActivatePromptRequest,
     ChatModelEvalRequest,
     ExtractTextBatchRequest,
     OcrEvaluationPdfsRequest,
@@ -158,6 +159,37 @@ async def evaluate_chat_models(
 
 @router.get("/chat-model-eval/{task_id}/status")
 async def get_chat_model_eval_status(task_id: str, request: Request):
+    return await _task_status_with_project(request, task_id)
+
+
+@router.post("/activate-prompt")
+async def activate_prompt(
+    request_data: ActivatePromptRequest,
+    request: Request,
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    if not await repository.prompt_belongs_to_project(
+        conn,
+        project_id=request_data.project_id,
+        prompt_id=request_data.prompt_id,
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail="prompt_id must belong to project_id",
+        )
+
+    task_id = events.dispatch_activate_prompt(
+        project_id=str(request_data.project_id),
+        prompt_id=str(request_data.prompt_id),
+    )
+
+    await _store_task_project(request, task_id, request_data.project_id)
+
+    return {"task_id": task_id}
+
+
+@router.get("/activate-prompt/{task_id}/status")
+async def get_activate_prompt_status(task_id: str, request: Request):
     return await _task_status_with_project(request, task_id)
 
 

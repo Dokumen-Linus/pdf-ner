@@ -133,41 +133,6 @@ def render_prompt_template(
     return prompt
 
 
-def form_prompt_text(
-    template_txt: str,
-    *,
-    project_description: str | None,
-    entity_types: list[EntityTypeInfo],
-    entity_type_definitions: dict[str, str],
-    entity_type_example_values: dict[str, list[str]],
-    entity_type_example_finds: dict[str, list[dict]],
-) -> str:
-    ordered = [entity for entity in entity_types if entity.entity_type_id is not None]
-    names = [entity.name for entity in ordered]
-    definitions = [
-        entity_type_definitions.get(str(entity.entity_type_id), entity.best_definition)
-        for entity in ordered
-    ]
-    examples = [
-        entity_type_example_values.get(str(entity.entity_type_id), entity.all_examples)
-        for entity in ordered
-    ]
-    finds = [entity_type_example_finds.get(str(entity.entity_type_id), []) for entity in ordered]
-    regex = [entity.std_regex for entity in ordered]
-    constraints = [_build_constraint_text(entity) for entity in ordered]
-    prompt = template_txt
-    prompt = prompt.replace("<PROJECT_DESCRIPTION>", project_description or "")
-    prompt = prompt.replace("<ENTITY_TYPES>", str(names))
-    prompt = prompt.replace("<DEFINITIONS>", str(definitions))
-    prompt = prompt.replace("<EXAMPLE_VALUES>", str(examples))
-    prompt = prompt.replace("<EXAMPLE_FINDS>", json.dumps(finds, indent=2))
-    prompt = prompt.replace("<REGEX>", str(regex))
-    prompt = prompt.replace("<CONSTRAINTS>", str(constraints))
-    prompt = prompt.replace("<IS_REQUIRED>", str([entity.required for entity in ordered]))
-    prompt = prompt.replace("<IS_UNIQUE>", str([entity.unique for entity in ordered]))
-    return prompt
-
-
 def _build_constraint_text(et: EntityTypeInfo) -> str:
     parts: list[str] = []
     if et.datatype:
