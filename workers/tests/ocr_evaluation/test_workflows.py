@@ -110,7 +110,7 @@ async def test_workflow_scores_pages_and_persists_recommendation():
                             ]
                         },
                         extract_method=extract_method,
-                        pdf_txt_id=PROJECT_ID,
+                        pdf_txt_id=1,
                     )
                 )
             ),
@@ -185,7 +185,7 @@ async def test_workflow_with_explicit_pdf_ids_uses_those_pdfs():
                     full_text="embedded text " * 10,
                     text_by_page={"pages": [{"page_index": 0, "text": "embedded text " * 10}]},
                     extract_method="pdfium",
-                    pdf_txt_id=PROJECT_ID,
+                    pdf_txt_id=1,
                 )
             ),
         ),
@@ -221,7 +221,7 @@ async def test_workflow_still_collects_ocr_candidates_when_pdfium_text_is_usable
             full_text=text,
             text_by_page={"pages": [{"page_index": 0, "text": text}]},
             extract_method=extract_method,
-            pdf_txt_id=PROJECT_ID,
+            pdf_txt_id=1,
         )
 
     with (
@@ -298,11 +298,11 @@ async def test_workflow_uses_saved_pdfium_text_and_still_judges_ocr_candidates()
             full_text=text,
             text_by_page={"pages": [{"page_index": 0, "text": text}]},
             extract_method=extract_method,
-            pdf_txt_id=PROJECT_ID,
+            pdf_txt_id=1,
         )
 
     saved_pdfium = StoredPdfText(
-        pdf_txt_id=PROJECT_ID,
+        pdf_txt_id=1,
         pdf_id=PDF_ID_1,
         full_text="saved pdfium text " * 10,
         extract_method="pdfium",

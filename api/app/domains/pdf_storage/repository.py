@@ -1,3 +1,4 @@
+from typing import cast
 from uuid import UUID
 
 import asyncpg
@@ -11,17 +12,20 @@ async def insert_bucket(
     owner_user_id: str | None,
     owner_org_id: str | None,
 ) -> UUID:
-    return await conn.fetchval(
-        """
+    return cast(
+        UUID,
+        await conn.fetchval(
+            """
         INSERT INTO api.aws_buckets (name, region, endpoint_url, owner_user_id, owner_org_id)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id
         """,
-        name,
-        region,
-        endpoint_url,
-        owner_user_id,
-        owner_org_id,
+            name,
+            region,
+            endpoint_url,
+            owner_user_id,
+            owner_org_id,
+        ),
     )
 
 
@@ -31,15 +35,18 @@ async def insert_pdf(
     filepath: str,
     uploaded_by_user_id: str | None,
 ) -> UUID:
-    pdf_id = await conn.fetchval(
-        """
+    pdf_id = cast(
+        UUID,
+        await conn.fetchval(
+            """
         INSERT INTO core.pdfs (project_id, filepath, source_type, uploaded_by_user_id)
         VALUES ($1, $2, 'upload', $3)
         RETURNING id
         """,
-        project_id,
-        filepath,
-        uploaded_by_user_id,
+            project_id,
+            filepath,
+            uploaded_by_user_id,
+        ),
     )
     await conn.execute("INSERT INTO web.pdfs (id) VALUES ($1)", pdf_id)
     return pdf_id

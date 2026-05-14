@@ -24,7 +24,7 @@ async def test_evaluate_chat_models_persists_iteration_and_completes_run():
     prompt_id = uuid4()
     pdf_id = uuid4()
     run_id = uuid4()
-    iteration_id = uuid4()
+    iteration_id = 42
     ner_run_id = uuid4()
     entity_type = EntityTypeInfo(
         name="invoice_id",
@@ -76,7 +76,7 @@ async def test_evaluate_chat_models_persists_iteration_and_completes_run():
         patch.object(
             workflows.repo,
             "fetch_labeled_pdf_inputs",
-            new=AsyncMock(return_value=[NerPdfInput(pdf_id, "text", uuid4())]),
+            new=AsyncMock(return_value=[NerPdfInput(pdf_id, "text", 1)]),
         ),
         patch.object(
             workflows.repo,

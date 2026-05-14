@@ -13,14 +13,14 @@ CREATE TABLE core.pdfs (
   ner_workflow_id UUID REFERENCES workers.ner_workflows (id) ON DELETE SET NULL,
   listener_id UUID REFERENCES workers.listeners (id) ON DELETE SET NULL,
   watcher_id UUID REFERENCES workers.watchers (id) ON DELETE SET NULL,
-  watcher_run_id UUID REFERENCES workers.watcher_runs (id) ON DELETE SET NULL,
+  watcher_run_id BIGINT REFERENCES workers.watcher_runs (id) ON DELETE SET NULL,
 
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE workers.pdf_txts (
-  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
   pdf_id UUID NOT NULL REFERENCES core.pdfs (id) ON DELETE CASCADE,
   extract_method TEXT NOT NULL REFERENCES public.extract_methods (id) ON DELETE CASCADE,
 

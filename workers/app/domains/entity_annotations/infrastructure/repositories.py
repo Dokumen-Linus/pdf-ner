@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from typing import cast
 from uuid import UUID
 
 import asyncpg
@@ -41,7 +42,7 @@ async def fetch_predicted_entity_values(
     return [
         PredictedEntityValue(
             entity_value_id=row["entity_value_id"],
-            pdf_id=row["pdf_id"],
+            pdf_id=cast(UUID, row["pdf_id"]),
             text_value=row["text_value"],
             subtype=row["subtype"],
             color=row["color"],
@@ -54,7 +55,7 @@ async def fetch_predicted_entity_values(
 async def update_entity_value_annotation(
     conn: asyncpg.Connection,
     *,
-    entity_value_id: UUID,
+    entity_value_id: int,
     rect: dict,
     segment_rects: list[dict],
     page_index: int,

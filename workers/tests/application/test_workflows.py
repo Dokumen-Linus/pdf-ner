@@ -86,7 +86,7 @@ async def test_workflow_inserts_structured_prompt_and_updates_run(entity_types, 
     pdf_rows = [
         {
             "id": labeled_pdf_1.pdf_id,
-            "pdf_txt_id": uuid4(),
+            "pdf_txt_id": 1,
             "full_text": labeled_pdf_1.full_text,
             "text_by_page": None,
             "bucket_id": uuid4(),
@@ -96,7 +96,7 @@ async def test_workflow_inserts_structured_prompt_and_updates_run(entity_types, 
     ann_rows = [
         {
             "pdf_id": ann.pdf_id,
-            "entity_value_id": uuid4(),
+            "entity_value_id": 1,
             "entity_type_id": ann.entity_type_id,
             "custom_entity_type": ann.entity_type_name,
             "contents": ann.labeled_text,
@@ -114,7 +114,7 @@ async def test_workflow_inserts_structured_prompt_and_updates_run(entity_types, 
         for ann in labeled_pdf_1.annotations
     ]
     conn.fetch.side_effect = [entity_rows, pdf_rows, ann_rows, label_rows, label_rows]
-    conn.fetchval.side_effect = [uuid4(), PROMPT_ID, uuid4(), uuid4(), uuid4()]
+    conn.fetchval.side_effect = [uuid4(), PROMPT_ID, 1, uuid4(), uuid4()]
 
     async def fake_prompt_call(*args, **kwargs):
         return workflows.LLMResponseData(
@@ -124,7 +124,7 @@ async def test_workflow_inserts_structured_prompt_and_updates_run(entity_types, 
         )
 
     persisted_prediction = PersistedPrediction(
-        entity_value_id=uuid4(),
+        entity_value_id=1,
         pdf_id=labeled_pdf_1.pdf_id,
         entity_type_id=entity_types[0].entity_type_id,
         text_value="John Smith",

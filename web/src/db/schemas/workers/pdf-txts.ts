@@ -1,4 +1,4 @@
-import { index, jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { bigserial, index, jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { extractMethods } from "../public/extract-methods"
 
@@ -9,7 +9,7 @@ import type { JsonbRecord } from "@/db/types"
 export const pdfTxts = workersSchema.table(
   "pdf_txts",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     // Cross-schema FK: pdf_id UUID REFERENCES core.pdfs (id)
     pdfId: uuid("pdf_id").notNull(),
     extractMethod: text("extract_method")

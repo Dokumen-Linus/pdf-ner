@@ -40,8 +40,8 @@ class EntityTypeInfo:
 @dataclass(frozen=True)
 class NerRunOrigin:
     ner_workflow_id: UUID | None = None
-    context_eng_iter_id: UUID | None = None
-    model_eval_iter_id: UUID | None = None
+    context_eng_iter_id: int | None = None
+    model_eval_iter_id: int | None = None
 
     def __post_init__(self) -> None:
         origins = [
@@ -57,12 +57,12 @@ class NerRunOrigin:
 class NerPdfInput:
     pdf_id: UUID
     text: str
-    pdf_txt_id: UUID | None = None
+    pdf_txt_id: int | None = None
 
 
 @dataclass(frozen=True)
 class PersistedPrediction:
-    entity_value_id: UUID
+    entity_value_id: int
     pdf_id: UUID
     entity_type_id: UUID
     text_value: str

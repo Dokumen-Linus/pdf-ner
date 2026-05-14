@@ -1,4 +1,4 @@
-import { index, timestamp, uuid } from "drizzle-orm/pg-core"
+import { bigint, bigserial, index, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { projects } from "../web/projects"
 
@@ -20,11 +20,11 @@ export const nerRuns = workersSchema.table(
     nerWorkflowId: uuid("ner_workflow_id").references(() => nerWorkflows.id, {
       onDelete: "cascade",
     }),
-    contextEngIterId: uuid("context_eng_iter_id").references(
+    contextEngIterId: bigint("context_eng_iter_id", { mode: "number" }).references(
       () => contextEngineeringIterations.id,
       { onDelete: "cascade" },
     ),
-    modelEvalIterId: uuid("model_eval_iter_id").references(() => chatModelEvalIterations.id, {
+    modelEvalIterId: bigint("model_eval_iter_id", { mode: "number" }).references(() => chatModelEvalIterations.id, {
       onDelete: "cascade",
     }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
@@ -38,13 +38,13 @@ export const nerRuns = workersSchema.table(
 export const nerRunPdfs = workersSchema.table(
   "ner_run_pdfs",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     // Cross-schema FK: pdf_id UUID REFERENCES core.pdfs (id)
     pdfId: uuid("pdf_id").notNull(),
     nerRunId: uuid("ner_run_id")
       .notNull()
       .references(() => nerRuns.id, { onDelete: "cascade" }),
-    pdfTxtId: uuid("pdf_txt_id").references(() => pdfTxts.id, { onDelete: "set null" }),
+    pdfTxtId: bigint("pdf_txt_id", { mode: "number" }).references(() => pdfTxts.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   },
   (t) => [

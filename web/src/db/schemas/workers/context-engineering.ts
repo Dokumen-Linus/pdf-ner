@@ -1,4 +1,4 @@
-import { index, integer, jsonb, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { bigint, bigserial, index, integer, jsonb, real, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { entityTypes } from "../web/entity-types"
 import { projects } from "../web/projects"
@@ -27,7 +27,7 @@ export const contextEngineeringRuns = workersSchema.table(
 export const contextEngineeringIterations = workersSchema.table(
   "context_engineering_iterations",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     contextEngRunId: uuid("context_eng_run_id")
       .notNull()
       .references(() => contextEngineeringRuns.id, { onDelete: "cascade" }),
@@ -40,7 +40,7 @@ export const contextEngineeringIterations = workersSchema.table(
     numCorrectEntityTypes: integer("num_correct_entity_types"),
     pdfAccuracy: real("pdf_accuracy"),
     entityTypeMetrics: jsonb("entity_type_metrics"),
-    incorrectlyPredictedEntityValueIds: uuid("incorrectly_predicted_entity_value_ids")
+    incorrectlyPredictedEntityValueIds: bigint("incorrectly_predicted_entity_value_ids", { mode: "number" })
       .array()
       .notNull()
       .default([]),
@@ -52,7 +52,7 @@ export const contextEngineeringIterations = workersSchema.table(
 export const promptExamples = workersSchema.table(
   "prompt_examples",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     // Cross-schema FK: prompt_id UUID REFERENCES core.prompts (id)
     promptId: uuid("prompt_id").notNull(),
     // Cross-schema FK: pdf_id UUID REFERENCES core.pdfs (id)

@@ -13,7 +13,7 @@ from app.domains.entity_annotations.infrastructure.repositories import (
 async def test_fetch_predicted_entity_values_maps_rows():
     conn = AsyncMock()
     ner_run_id = uuid4()
-    entity_value_id = uuid4()
+    entity_value_id = 1
     pdf_id = uuid4()
     conn.fetch.return_value = [
         {
@@ -41,7 +41,7 @@ async def test_fetch_predicted_entity_values_maps_rows():
 @pytest.mark.anyio
 async def test_update_entity_value_annotation_serializes_json_fields():
     conn = AsyncMock()
-    entity_value_id = uuid4()
+    entity_value_id = 1
 
     await update_entity_value_annotation(
         conn,

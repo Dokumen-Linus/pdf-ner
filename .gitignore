@@ -21,6 +21,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.coverage
 
 # JavaScript
 **/node_modules/

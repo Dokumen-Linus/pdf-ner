@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from typing import cast
 from uuid import UUID
 
 import asyncpg
@@ -16,18 +17,21 @@ async def insert_run(
     prompt_id: UUID,
     origin: NerRunOrigin,
 ) -> UUID:
-    return await conn.fetchval(
-        """
+    return cast(
+        UUID,
+        await conn.fetchval(
+            """
         INSERT INTO workers.ner_runs
             (project_id, prompt_id, ner_workflow_id, context_eng_iter_id, model_eval_iter_id)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id
         """,
-        project_id,
-        prompt_id,
-        origin.ner_workflow_id,
-        origin.context_eng_iter_id,
-        origin.model_eval_iter_id,
+            project_id,
+            prompt_id,
+            origin.ner_workflow_id,
+            origin.context_eng_iter_id,
+            origin.model_eval_iter_id,
+        ),
     )
 
 
@@ -35,7 +39,7 @@ async def link_run_to_context_iteration(
     conn: asyncpg.Connection,
     *,
     ner_run_id: UUID,
-    context_eng_iter_id: UUID,
+    context_eng_iter_id: int,
 ) -> None:
     await conn.execute(
         """
@@ -52,7 +56,7 @@ async def link_run_to_model_eval_iteration(
     conn: asyncpg.Connection,
     *,
     ner_run_id: UUID,
-    model_eval_iter_id: UUID,
+    model_eval_iter_id: int,
 ) -> None:
     await conn.execute(
         """
@@ -70,7 +74,7 @@ async def insert_run_pdf(
     *,
     ner_run_id: UUID,
     pdf_id: UUID,
-    pdf_txt_id: UUID | None,
+    pdf_txt_id: int | None,
 ) -> None:
     await conn.execute(
         """
@@ -102,20 +106,23 @@ async def insert_predictions(
 
     persisted: list[PersistedPrediction] = []
     for row in rows:
-        entity_value_id = await conn.fetchval(
-            """
+        entity_value_id = cast(
+            int,
+            await conn.fetchval(
+                """
             INSERT INTO core.entity_values
                 (pdf_id, entity_type_id, text_value, is_label, ner_run_id)
             VALUES ($1, $2, $3, $4, $5)
             RETURNING id
             """,
-            *row,
+                *row,
+            ),
         )
         persisted.append(
             PersistedPrediction(
                 entity_value_id=entity_value_id,
-                pdf_id=row[0],
-                entity_type_id=row[1],
+                pdf_id=cast(UUID, row[0]),
+                entity_type_id=cast(UUID, row[1]),
                 text_value=row[2],
             )
         )
@@ -130,17 +137,20 @@ async def insert_pdf_text(
     extract_method: str,
     created_by_domain: str,
     text_by_page: dict,
-) -> UUID:
-    return await conn.fetchval(
-        """
+) -> int:
+    return cast(
+        int,
+        await conn.fetchval(
+            """
         INSERT INTO workers.pdf_txts
             (pdf_id, extract_method, created_by_domain, txt, text_by_page)
         VALUES ($1, $2, $3, $4, $5::jsonb)
         RETURNING id
         """,
-        pdf_id,
-        extract_method,
-        created_by_domain,
-        full_text,
-        json.dumps(text_by_page),
+            pdf_id,
+            extract_method,
+            created_by_domain,
+            full_text,
+            json.dumps(text_by_page),
+        ),
     )

@@ -26,7 +26,7 @@ CREATE TABLE workers.context_engineering_runs (
 
 -- each run iteratively tests multiple prompts
 CREATE TABLE workers.context_engineering_iterations (
-  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
   context_eng_run_id UUID NOT NULL REFERENCES workers.context_engineering_runs (id) ON DELETE CASCADE,
   prompt_id UUID NOT NULL REFERENCES core.prompts (id) ON DELETE CASCADE,
 
@@ -38,7 +38,7 @@ CREATE TABLE workers.context_engineering_iterations (
   num_correct_entity_types INTEGER, -- entity types with correct values for all pdfs
   pdf_accuracy REAL,
   entity_type_metrics JSONB,
-  incorrectly_predicted_entity_value_ids UUID[] NOT NULL DEFAULT ARRAY[]::uuid[],
+  incorrectly_predicted_entity_value_ids BIGINT[] NOT NULL DEFAULT ARRAY[]::bigint[],
 
   -- each iter executes an ner_run
 
@@ -47,7 +47,7 @@ CREATE TABLE workers.context_engineering_iterations (
 
 -- each prompt tracks which PDFs + entity type combos are used as examples for accuracy metrics with train-test spilt
 CREATE TABLE workers.prompt_examples (
-  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
   prompt_id UUID NOT NULL REFERENCES core.prompts (id) ON DELETE CASCADE,
   pdf_id UUID NOT NULL REFERENCES core.pdfs (id) ON DELETE CASCADE,
   entity_type_id UUID NOT NULL REFERENCES web.entity_types (id) ON DELETE CASCADE,

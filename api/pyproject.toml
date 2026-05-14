@@ -26,6 +26,7 @@ dev = [
   "pytest",
   "pytest-anyio",
   "pytest-mock",
+  "pytest-cov",
   "httpx",
 ]
 
@@ -74,6 +75,7 @@ indent-style = "space"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+addopts = "--cov"
 
 [tool.uv.sources]
 dokumen-llm-providers = { path = "../packages/llm_providers" }

@@ -12,7 +12,7 @@ from app.domains.text_extract.domain.value_objects import PageText
 async def test_pdfium_text_persists_and_skips_ocr():
     conn = AsyncMock()
     pdf_id = uuid4()
-    pdf_txt_id = uuid4()
+    pdf_txt_id = 1
 
     with (
         patch.object(use_cases.repo, "fetch_latest_pdf_text", new=AsyncMock(return_value=None)),
@@ -65,7 +65,7 @@ async def test_blank_pdfium_falls_back_to_selected_ocr():
             "extract_ocr_pages",
             new=AsyncMock(return_value=[PageText(0, "ocr text")]),
         ) as ocr_pages,
-        patch.object(use_cases.repo, "insert_pdf_text", new=AsyncMock(return_value=uuid4())),
+        patch.object(use_cases.repo, "insert_pdf_text", new=AsyncMock(return_value=2)),
     ):
         result = await use_cases.extract_default_text(
             conn,
@@ -94,7 +94,7 @@ async def test_ocr_only_skips_pdfium():
             "extract_ocr_pages",
             new=AsyncMock(return_value=[PageText(0, "ocr text")]),
         ),
-        patch.object(use_cases.repo, "insert_pdf_text", new=AsyncMock(return_value=uuid4())),
+        patch.object(use_cases.repo, "insert_pdf_text", new=AsyncMock(return_value=3)),
     ):
         result = await use_cases.extract_default_text(
             conn,
@@ -113,7 +113,7 @@ async def test_ocr_only_skips_pdfium():
 async def test_reuses_stored_text_when_available():
     conn = AsyncMock()
     pdf_id = uuid4()
-    pdf_txt_id = uuid4()
+    pdf_txt_id = 4
 
     with patch.object(
         use_cases.repo,
@@ -156,7 +156,7 @@ async def test_exact_candidate_persists_created_by_domain_and_method():
         patch.object(
             use_cases.repo,
             "insert_pdf_text",
-            new=AsyncMock(return_value=uuid4()),
+            new=AsyncMock(return_value=5),
         ) as insert_text,
     ):
         result = await use_cases.extract_exact_text(

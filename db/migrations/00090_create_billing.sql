@@ -1,6 +1,6 @@
 -- migrate:up
 CREATE TABLE workers.llm_usage (
-    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
     project_id UUID NOT NULL REFERENCES web.projects(id) ON DELETE CASCADE,
     actor_user_id TEXT REFERENCES web.users(id) ON DELETE SET NULL,
     model_id TEXT NOT NULL REFERENCES public.chat_models (id),
@@ -15,7 +15,7 @@ CREATE TABLE workers.llm_usage (
 );
 
 CREATE TABLE workers.billing_charge_attempts (
-    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
     account_type TEXT NOT NULL CHECK (account_type IN ('individual', 'organization')),
     user_id TEXT REFERENCES web.users(id),
     organization_id TEXT REFERENCES web.organizations(id),

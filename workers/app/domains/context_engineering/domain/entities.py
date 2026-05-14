@@ -50,7 +50,7 @@ class LabeledAnnotation:
     labeled_text: str  # contents
     page_index: int
     entity_type_id: UUID | None = None
-    entity_value_id: UUID | None = None
+    entity_value_id: int | None = None
 
 
 @dataclass
@@ -63,7 +63,7 @@ class LabeledPdf:
     annotations: list[LabeledAnnotation]
     bucket_id: UUID | None = None
     filepath: str | None = None
-    pdf_txt_id: UUID | None = None
+    pdf_txt_id: int | None = None
 
     @property
     def ground_truth(self) -> dict[str, list[str]]:

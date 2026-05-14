@@ -23,7 +23,7 @@ CREATE TABLE workers.ocr_evaluation_runs (
 );
 
 CREATE TABLE workers.ocr_evaluation_pages (
-  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
   run_id UUID NOT NULL REFERENCES workers.ocr_evaluation_runs (id) ON DELETE CASCADE,
   pdf_id UUID NOT NULL REFERENCES core.pdfs (id) ON DELETE CASCADE,
   page_index INT NOT NULL,
@@ -35,11 +35,11 @@ CREATE TABLE workers.ocr_evaluation_pages (
 );
 
 CREATE TABLE workers.ocr_evaluation_pdf_txts (
-  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
   run_id UUID NOT NULL REFERENCES workers.ocr_evaluation_runs (id) ON DELETE CASCADE,
   pdf_id UUID NOT NULL REFERENCES core.pdfs (id) ON DELETE CASCADE,
   extract_method TEXT NOT NULL REFERENCES public.extract_methods (id),
-  pdf_txt_id UUID NOT NULL REFERENCES workers.pdf_txts (id) ON DELETE CASCADE,
+  pdf_txt_id BIGINT NOT NULL REFERENCES workers.pdf_txts (id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (run_id, pdf_id, extract_method)
 );

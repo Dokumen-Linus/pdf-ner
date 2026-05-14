@@ -1,4 +1,4 @@
-import { index, integer, jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core"
+import { bigserial, index, integer, jsonb, text, timestamp, uuid } from "drizzle-orm/pg-core"
 
 import { workersSchema } from "./schema"
 
@@ -23,7 +23,7 @@ export const watchers = workersSchema.table(
 export const watcherRuns = workersSchema.table(
   "watcher_runs",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: bigserial("id", { mode: "number" }).primaryKey(),
     watcherId: uuid("watcher_id")
       .notNull()
       .references(() => watchers.id, { onDelete: "cascade" }),

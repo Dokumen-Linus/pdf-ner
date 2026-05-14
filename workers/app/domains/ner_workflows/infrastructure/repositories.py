@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import cast
 from uuid import UUID
 
 import asyncpg
@@ -41,11 +42,11 @@ async def fetch_document_for_extraction(
     if row is None:
         return None
     return DocumentForExtraction(
-        source_id=row["source_id"],
-        pdf_id=row["pdf_id"],
-        project_id=row["project_id"],
+        source_id=cast(UUID, row["source_id"]),
+        pdf_id=cast(UUID, row["pdf_id"]),
+        project_id=cast(UUID, row["project_id"]),
         full_text=row["full_text"],
-        ner_workflow_id=row["ner_workflow_id"],
+        ner_workflow_id=cast(UUID | None, row["ner_workflow_id"]),
     )
 
 
@@ -65,11 +66,11 @@ async def fetch_project_config(
     if row is None:
         return None
     return ProjectExtractionConfig(
-        project_id=row["id"],
+        project_id=cast(UUID, row["id"]),
         description=row["description"],
         extract_method=row["active_extract_method"],
         entity_extraction_model=row["active_chat_model"],
-        active_prompt_id=row["active_prompt_id"],
+        active_prompt_id=cast(UUID, row["active_prompt_id"]),
     )
 
 
@@ -140,7 +141,7 @@ async def fetch_entity_types(conn: asyncpg.Connection, project_id: UUID) -> list
     )
     return [
         EntityTypeInfo(
-            entity_type_id=row["entity_type_id"],
+            entity_type_id=cast(UUID | None, row["entity_type_id"]),
             name=row["name"],
             user_definition=row["user_definition"],
             user_examples=row["user_example_values"] or [],

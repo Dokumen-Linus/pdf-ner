@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import cast
 from uuid import UUID
 
 import asyncpg
@@ -33,8 +34,8 @@ async def fetch_label_values(
     )
     return [
         LabelValue(
-            pdf_id=row["pdf_id"],
-            entity_type_id=row["entity_type_id"],
+            pdf_id=cast(UUID, row["pdf_id"]),
+            entity_type_id=cast(UUID, row["entity_type_id"]),
             entity_type_name=row["entity_type_name"],
             text_value=row["text_value"],
         )

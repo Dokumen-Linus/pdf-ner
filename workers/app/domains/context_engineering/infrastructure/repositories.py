@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import cast
 from uuid import UUID
 
 import asyncpg
@@ -110,7 +111,7 @@ async def fetch_entity_types_with_std(
             std_examples=r["std_examples"] or [],
             std_format_description=r["std_format_description"],
             std_regex=r["std_regex"],
-            entity_type_id=_row_get(r, "entity_type_id"),
+            entity_type_id=cast(UUID | None, _row_get(r, "entity_type_id")),
         )
         for r in rows
     ]
@@ -152,8 +153,8 @@ async def fetch_labeled_pdfs(
     if not pdf_rows:
         return []
 
-    pdf_ids = [r["id"] for r in pdf_rows]
-    pdf_map = {r["id"]: r for r in pdf_rows}
+    pdf_ids = [cast(UUID, r["id"]) for r in pdf_rows]
+    pdf_map = {cast(UUID, r["id"]): r for r in pdf_rows}
 
     ann_rows = await conn.fetch(
         """
@@ -178,14 +179,16 @@ async def fetch_labeled_pdfs(
     anns_by_pdf: dict[UUID, list[LabeledAnnotation]] = {}
     for r in ann_rows:
         ann = LabeledAnnotation(
-            pdf_id=r["pdf_id"],
+            pdf_id=cast(UUID, r["pdf_id"]),
             entity_type_name=r["custom_entity_type"],
             labeled_text=r["contents"] or "",
             page_index=r["page_index"],
-            entity_type_id=r["entity_type_id"] if "entity_type_id" in r else None,
+            entity_type_id=cast(UUID | None, r["entity_type_id"])
+            if "entity_type_id" in r
+            else None,
             entity_value_id=_row_get(r, "entity_value_id"),
         )
-        anns_by_pdf.setdefault(r["pdf_id"], []).append(ann)
+        anns_by_pdf.setdefault(cast(UUID, r["pdf_id"]), []).append(ann)
 
     result = []
     for pdf_id, annotations in anns_by_pdf.items():
@@ -218,8 +221,10 @@ async def insert_prompt_attributes(
     entity_type_example_values: dict,
     entity_type_example_finds: dict,
 ) -> UUID:
-    prompt_id = await conn.fetchval(
-        """
+    prompt_id = cast(
+        UUID,
+        await conn.fetchval(
+            """
         INSERT INTO core.prompts (
             project_id,
             template_id,
@@ -233,14 +238,15 @@ async def insert_prompt_attributes(
         VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7::jsonb, $8)
         RETURNING id
         """,
-        project_id,
-        template_id,
-        project_description,
-        entity_types_order,
-        json.dumps(entity_type_definitions),
-        json.dumps(entity_type_example_values),
-        json.dumps(entity_type_example_finds),
-        full_text,
+            project_id,
+            template_id,
+            project_description,
+            entity_types_order,
+            json.dumps(entity_type_definitions),
+            json.dumps(entity_type_example_values),
+            json.dumps(entity_type_example_finds),
+            full_text,
+        ),
     )
     logger.info("Inserted structured prompt: %s", prompt_id)
     return prompt_id
@@ -293,16 +299,19 @@ async def insert_context_engineering_run(
     max_usd,
     labeled_pdfs: list[UUID],
 ) -> UUID:
-    return await conn.fetchval(
-        """
+    return cast(
+        UUID,
+        await conn.fetchval(
+            """
         INSERT INTO workers.context_engineering_runs (project_id, beta, max_usd, labeled_pdfs)
         VALUES ($1, $2, $3, $4)
         RETURNING id
         """,
-        project_id,
-        beta,
-        max_usd,
-        labeled_pdfs,
+            project_id,
+            beta,
+            max_usd,
+            labeled_pdfs,
+        ),
     )
 
 
@@ -320,18 +329,20 @@ async def insert_evaluation(
     pdfs_fully_correct: int | None = None,
     pdf_accuracy: float | None = None,
     entity_type_metrics: dict | None = None,
-    incorrectly_predicted_entity_value_ids: list[UUID] | None = None,
+    incorrectly_predicted_entity_value_ids: list[int] | None = None,
     llm_call_count: int | None = None,
     cost_usd=None,
     iterations_run: int | None = None,
     stop_reason: str | None = None,
-) -> UUID:
+) -> int:
     if per_entity_scores is None:
         per_entity_scores = overall_f1
         overall_f1 = prompt_id
         prompt_id = context_eng_run_id
-        context_eng_run_id = await conn.fetchval(
-            """
+        context_eng_run_id = cast(
+            UUID,
+            await conn.fetchval(
+                """
             INSERT INTO workers.context_engineering_runs
                 (project_id, beta, max_usd, labeled_pdfs)
             VALUES (
@@ -342,7 +353,8 @@ async def insert_evaluation(
             )
             RETURNING id
             """,
-            prompt_id,
+                prompt_id,
+            ),
         )
     """Store final context-engineering iteration metrics."""
     scores_json = json.dumps(
@@ -356,8 +368,10 @@ async def insert_evaluation(
             for k, v in per_entity_scores.items()
         }
     )
-    evaluation_id = await conn.fetchval(
-        """
+    evaluation_id = cast(
+        int,
+        await conn.fetchval(
+            """
         INSERT INTO workers.context_engineering_iterations
             (context_eng_run_id, prompt_id, overall_f, per_entity_scores,
              num_example_pdfs, num_correct_pdfs, num_correct_entity_types, pdf_accuracy,
@@ -365,16 +379,17 @@ async def insert_evaluation(
         VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7, $8, $9::jsonb, $10)
         RETURNING id
         """,
-        context_eng_run_id,
-        prompt_id,
-        overall_f1,
-        scores_json,
-        None,
-        pdfs_fully_correct,
-        None,
-        pdf_accuracy,
-        json.dumps(entity_type_metrics) if entity_type_metrics is not None else None,
-        incorrectly_predicted_entity_value_ids or [],
+            context_eng_run_id,
+            prompt_id,
+            overall_f1,
+            scores_json,
+            None,
+            pdfs_fully_correct,
+            None,
+            pdf_accuracy,
+            json.dumps(entity_type_metrics) if entity_type_metrics is not None else None,
+            incorrectly_predicted_entity_value_ids or [],
+        ),
     )
     logger.info("Inserted evaluation for prompt %s: f=%.4f", prompt_id, overall_f1)
     return evaluation_id
@@ -382,7 +397,7 @@ async def insert_evaluation(
 
 async def fetch_entity_values_by_ids(
     conn: asyncpg.Connection,
-    entity_value_ids: list[UUID],
+    entity_value_ids: list[int],
 ) -> list[asyncpg.Record]:
     if not entity_value_ids:
         return []
@@ -391,7 +406,7 @@ async def fetch_entity_values_by_ids(
         SELECT ev.id, ev.pdf_id, ev.entity_type_id, et.name AS entity_type_name, ev.text_value
         FROM core.entity_values ev
         JOIN web.entity_types et ON et.id = ev.entity_type_id
-        WHERE ev.id = ANY($1::uuid[])
+        WHERE ev.id = ANY($1::bigint[])
         ORDER BY ev.id
         """,
         entity_value_ids,

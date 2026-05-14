@@ -16,8 +16,8 @@ async def test_workflow_updates_matched_predictions_and_uploads_pdf():
     conn = AsyncMock()
     ner_run_id = uuid4()
     pdf_id = uuid4()
-    first_value_id = uuid4()
-    second_value_id = uuid4()
+    first_value_id = 1
+    second_value_id = 2
     predictions = [
         PredictedEntityValue(
             entity_value_id=first_value_id,
@@ -98,7 +98,7 @@ async def test_workflow_rejects_invalid_entity_type_color_before_pdf_mutation():
     pdf_id = uuid4()
     predictions = [
         PredictedEntityValue(
-            entity_value_id=uuid4(),
+            entity_value_id=1,
             pdf_id=pdf_id,
             text_value="John Smith",
             subtype="highlight",

@@ -1,6 +1,6 @@
 -- migrate:up
 CREATE TABLE core.entity_values (
-  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
   pdf_id UUID NOT NULL REFERENCES core.pdfs (id) ON DELETE CASCADE,
   entity_type_id UUID NOT NULL REFERENCES web.entity_types (id) ON DELETE CASCADE,
 

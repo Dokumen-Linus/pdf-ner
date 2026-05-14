@@ -57,7 +57,7 @@ CREATE TABLE workers.watchers (
 );
 
 CREATE TABLE workers.watcher_runs (
-  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "id" BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1),
   watcher_id UUID NOT NULL REFERENCES workers.watchers (id) ON DELETE CASCADE,
 
   -- TODO: review
