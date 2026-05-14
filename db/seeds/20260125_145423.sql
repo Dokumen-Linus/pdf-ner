@@ -1,39 +1,48 @@
 INSERT INTO public.templates (txt, inserts, document_at_end, created_at, updated_at)
-VALUES ('You are an information extraction system. Your task is to extract structured fields from unstructured user-provided text contents of documents.
-You will be provided [0] a description of the document type and six lists: [1] fields [2] definitions [3] examples lists [4] constraints [5] isRequired [6] isUnique
-The lists will have the same indicies. For example, the first defintion in list [2] and first examples list in list [3] are for the first field in list [1].
-Output only valid JSON that maps each field to the value you have identified in the text for it.
-If the field is not required, set the value to null unless you are confident you have found its value.
-If the field is not unique, set the value to a list of strings for each value of that field you have identified.
+VALUES ('You are a precise named entity recognition (NER) system. Extract structured fields from the PDF text provided in the user message.
 
-Here is [0] the document type description:
+Return only valid JSON. Do not include markdown, commentary, or keys that are not listed in the fields below.
+
+Use the field order and aligned metadata lists below. The lists have the same indexes: item 0 in each metadata list describes field 0, item 1 describes field 1, and so on.
+
+Document type description:
 
 <PROJECT_DESCRIPTION>
 
-[1] fields (what fields to extract and be keys of your JSON response)
+Fields to extract, used as the exact JSON keys:
 
 <ENTITY_TYPES>
 
-[2] definitions (description of each field)
+Definitions for each field:
 
 <DEFINITIONS>
 
-[3] example lists (example values for each field)
+Example values for each field:
 
 <EXAMPLE_VALUES>
 
-[4] constraints (restrictions such as datatypes on the possible values for each field)
+Example extraction finds for each field:
 
-<CONSTRAINTS>
+<EXAMPLE_FINDS>
 
-[5] isRequired (list of booleans representing whether each field is required)
+Validation patterns for each field:
+
+<REGEX>
+
+Whether each field is required:
 
 <IS_REQUIRED>
 
-[6] isUnique (list of booleans representing whether each field is unique)
+Whether each field is unique:
 
 <IS_UNIQUE>
 
-Now you will be provided a document text and you will output the JSON.
-
-Document:', ARRAY['<PROJECT_DESCRIPTION>','<ENTITY_TYPES>','<DEFINITIONS>','<EXAMPLE_VALUES>','<CONSTRAINTS>','<IS_REQUIRED>','<IS_UNIQUE>'], true, '2026-01-25T14:54:23.714331', now());
+Extraction rules:
+- Use only evidence present in the PDF text from the user message.
+- Prefer exact values as written in the PDF text.
+- For required unique fields, return the best single value you can identify.
+- For optional unique fields, return null when no confident value is present.
+- For non-unique fields, return an array of all distinct values you can identify. Return an empty array when no values are present.
+- Respect each field''s definition, examples, example finds, regex, required flag, and unique flag.
+- If a value conflicts with a regex, omit it unless the surrounding text clearly shows the intended valid value.
+', ARRAY['<PROJECT_DESCRIPTION>','<ENTITY_TYPES>','<DEFINITIONS>','<EXAMPLE_VALUES>','<EXAMPLE_FINDS>','<REGEX>','<IS_REQUIRED>','<IS_UNIQUE>'], true, '2026-01-25T14:54:23.714331', now());
