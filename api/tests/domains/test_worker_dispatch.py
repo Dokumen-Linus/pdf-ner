@@ -6,6 +6,7 @@ import pytest
 
 from app.domains.worker_dispatch import events
 from app.domains.worker_dispatch.schemas import (
+    ActivatePromptRequest,
     ChatModelEvalRequest,
     ExtractTextBatchRequest,
     OcrEvaluationPdfsRequest,
@@ -114,6 +115,17 @@ class TestChatModelEvalRequest:
                 chat_model_ids=["gpt-5.4-mini"],
                 beta=0,
             )
+
+
+class TestActivatePromptRequest:
+    def test_accepts_project_and_prompt_ids(self):
+        project_id = uuid4()
+        prompt_id = uuid4()
+
+        request = ActivatePromptRequest(project_id=project_id, prompt_id=prompt_id)
+
+        assert request.project_id == project_id
+        assert request.prompt_id == prompt_id
 
 
 class TestExtractTextBatchRequest:
@@ -345,6 +357,62 @@ class TestWorkerDispatchEndpoints:
             str(project_id),
             ex=86400,
         )
+
+    @pytest.mark.anyio
+    async def test_activate_prompt_validates_project_and_dispatches_task(
+        self, async_client, mock_redis, monkeypatch
+    ):
+        project_id = uuid4()
+        prompt_id = uuid4()
+        task_id = "activate-task-123"
+        dispatch_calls = []
+
+        def fake_dispatch(**kwargs):
+            dispatch_calls.append(kwargs)
+            return task_id
+
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.prompt_belongs_to_project",
+            AsyncMock(return_value=True),
+        )
+        monkeypatch.setattr(events, "dispatch_activate_prompt", fake_dispatch)
+
+        response = await async_client.post(
+            "/api/v1/worker-dispatch/activate-prompt",
+            json={"project_id": str(project_id), "prompt_id": str(prompt_id)},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {"task_id": task_id}
+        assert dispatch_calls == [{"project_id": str(project_id), "prompt_id": str(prompt_id)}]
+        mock_redis.set.assert_called_once_with(
+            f"worker-dispatch:task:project:{task_id}",
+            str(project_id),
+            ex=86400,
+        )
+
+    @pytest.mark.anyio
+    async def test_activate_prompt_rejects_wrong_project_prompt(
+        self, async_client, mock_redis, monkeypatch
+    ):
+        monkeypatch.setattr(
+            "app.domains.worker_dispatch.router.repository.prompt_belongs_to_project",
+            AsyncMock(return_value=False),
+        )
+        monkeypatch.setattr(
+            events,
+            "dispatch_activate_prompt",
+            lambda **kwargs: "should-not-dispatch",
+        )
+
+        response = await async_client.post(
+            "/api/v1/worker-dispatch/activate-prompt",
+            json={"project_id": str(uuid4()), "prompt_id": str(uuid4())},
+        )
+
+        assert response.status_code == 422
+        assert response.json()["detail"] == "prompt_id must belong to project_id"
+        mock_redis.set.assert_not_called()
 
     @pytest.mark.anyio
     async def test_chat_model_eval_rejects_unavailable_models(

@@ -17,6 +17,7 @@ let fetchResponse: Response
 let originalFetch: typeof fetch
 
 const {
+  activatePrompt,
   getOcrEvaluationStatus,
   getOptimizationStatus,
   startOcrEvaluation,
@@ -93,6 +94,26 @@ describe("engineering API functions", () => {
       max_pdfs: 7,
       max_pages_per_pdf: 4,
       max_cost_usd: 0.75,
+    })
+  })
+
+  it("authorizes and starts prompt activation with the worker-dispatch payload shape", async () => {
+    const promptId = "9f9c4a44-e18d-4e09-a3ea-dc9c57fe4d52"
+
+    const result = await activatePrompt({
+      data: {
+        projectId: PROJECT_ID,
+        promptId,
+      },
+    })
+
+    expect(result).toEqual({ task_id: "task-1" })
+    expect(authorizedProjectIds).toEqual([PROJECT_ID])
+    expect(fetchCalls[0].url).toBe("http://api.test/api/v1/worker-dispatch/activate-prompt")
+    expect(fetchCalls[0].init?.method).toBe("POST")
+    expect(fetchCalls[0].body).toEqual({
+      project_id: PROJECT_ID,
+      prompt_id: promptId,
     })
   })
 
