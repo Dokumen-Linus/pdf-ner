@@ -8,19 +8,21 @@
 
 ## Scale
 
-17 API routes · 3 database models · 82 UI components · 48 library files · 20 middleware layers · 84 environment variables
+22 API routes · 3 database models · 82 UI components · 48 library files · 21 middleware layers · 84 environment variables
 
 ## Subsystems
 
 - **[Avatars](./avatars.md)** — 1 routes — touches: upload
 - **[Buckets](./buckets.md)** — 1 routes — touches: auth, upload
+- **[Chat-model-eval](./chat-model-eval.md)** — 2 routes — touches: cache
 - **[Extract-text](./extract-text.md)** — 1 routes
 - **[Highlight](./highlight.md)** — 1 routes
 - **[Ocr](./ocr.md)** — 1 routes — touches: auth, cache
-- **[Ocr-evaluation](./ocr-evaluation.md)** — 2 routes — touches: cache
+- **[Ocr-evaluation](./ocr-evaluation.md)** — 3 routes — touches: cache
 - **[Optimize-prompt](./optimize-prompt.md)** — 2 routes — touches: cache
 - **[Pdfs](./pdfs.md)** — 2 routes — touches: auth, upload
 - **[Test_telemetry](./test_telemetry.md)** — 1 routes — touches: auth, cache
+- **[Text-extract](./text-extract.md)** — 2 routes — touches: cache
 - **[Infra](./infra.md)** — 5 routes — touches: auth, db, cache
 
 **Database:** drizzle, 3 models — see [database.md](./database.md)
@@ -33,12 +35,12 @@
 
 Changes to these files have the widest blast radius across the codebase:
 
+- `//infrastructure.py` — imported by **15** files
+- `//domain/entities.py` — imported by **15** files
+- `/commands.py` — imported by **14** files
 - `web/src/components/pdf-container/plugin-viewport-2/index.ts` — imported by **13** files
-- `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **11** files
+- `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **12** files
 - `web/src/db/schemas/web/projects.ts` — imported by **11** files
-- `web/src/components/pdf-container/plugin-scroll-2/index.ts` — imported by **10** files
-- `web/src/db/schemas/workers/schema.ts` — imported by **10** files
-- `//infrastructure.py` — imported by **10** files
 
 ## Required Environment Variables
 
@@ -57,4 +59,4 @@ Changes to these files have the widest blast radius across the codebase:
 - _...22 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-05-11_
+_Back to [index.md](./index.md) · Generated 2026-05-14_

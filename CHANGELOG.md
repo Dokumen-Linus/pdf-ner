@@ -126,6 +126,11 @@
 - *(web)* Microsoft sso
 - *(web)* Google sso
 - *(web)* Platform page
+- *(pkg)* Add annotation to pdfium_utils
+- *(wk)* Add entity_annotations domain to create annos for entity value predictions
+- *(wk)* Chat_model_eval domain and refactoring to ner_metrics
+- *(api)* Create worker dispatch for chat_model_eval
+- *(web)* More test coverage
 
 ### 🐛 Bug Fixes
 
@@ -215,6 +220,12 @@
 - Billing logic
 - *(web)* Apply translation to all _public _auth and remove deprecated fields
 - *(ci)* Auto-format.yml
+- *(db)* Remove format_description from std_ets seeds
+- Continue rename ocr_methods to extract_methods
+- *(wk)* Add text_extract ad entity_annotation domains to main.py
+- *(web)* Refresh activeDocumentId accross PDFContainer and EntityTable #136
+- Save core.prompts.full_text of  context_eng best prompt set to web.projects.active_prompt_id
+- *(web)* Remove useEffect in engineering.tsx
 
 ### 💼 Other
 
@@ -280,6 +291,8 @@
 - *(web)* Move emails to components/emails
 - *(wk)* Rename entity_extraction domain to ner_workflows
 - *(wk)* Rename entity_extraction domain to ner_workflows
+- *(wk)* Create ner_runs domain, update ner_workflows, and add to context_eng
+- *(db, wk)* Rename ocr_methods to extract_methods,  add text_extract workers domain
 
 ### 📚 Documentation
 
@@ -364,6 +377,7 @@
 - *(llm)* Create skill for pypdfium2
 - *(llm)* VLLM skill
 - *(db)* Add core schema
+- Tesseract
 
 ### ⚡ Performance
 
@@ -427,6 +441,9 @@
 - *(db)* Split std_ets into multiple seeds
 - Redesign db
 - Redesign db
+- Enforce colors codes to be "#RRGGBB" for annotations
+- *(db)* Switch some primary keys from uuid to bigint identity #171
+- *(api, wk)* Type cast uuids #172
 
 ### 🎨 Styling
 
@@ -472,6 +489,8 @@
 - *(web)* Prettier and lint fix
 - Ruff
 - Prettier and lint:fix
+- Auto-format code [skip ci]
+- Auto-format code [skip ci]
 
 ### 🧪 Testing
 
@@ -507,6 +526,9 @@
 - *(web)* Billing logic
 - *(web)* Billing logic test improvement
 - *(ci)* Auto-format by merging pull request #138 from optimalcharb/working
+- Add pytest-cov
+- *(api)* Unit tests
+- *(pkg)* More test coverage
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -626,6 +648,10 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(fix)* Pull before push in auto-docs and auto-format actions
+- *(fix)* Only pull if changes made
+- *(fix)* Autostash when rebasing auto-docs.yml
 
 ### ◀️ Revert
 

@@ -12,7 +12,7 @@ pk: `id` (text)
 - `displayName`: text _(required)_
 - `host`: text _(required)_
 
-### ocr_methods
+### extract_methods
 
 pk: `id` (text)
 

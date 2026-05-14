@@ -63,7 +63,7 @@
 
 ## Pdfium_utils (3 files)
 
-- `packages/pdfium_utils/pdfium_utils/annotate.py` — parse_hex_color, extract_text_by_page, extract_text
+- `packages/pdfium_utils/pdfium_utils/annotate.py` — normalize_hex_color, parse_hex_color, extract_text_by_page, extract_text, create_text_markup_annotations, TextMarkupAnnotationRequest, …
 - `packages/pdfium_utils/pdfium_utils/search_and_annotate.py` — highlight_phrases, PhraseHighlightResult
 - `packages/pdfium_utils/pdfium_utils/search.py` — find_text_objects
 

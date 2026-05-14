@@ -1,13 +1,15 @@
-# Extract-text
+# Text-extract
 
 > **Navigation aid.** Route list and file locations extracted via AST. Read the source files listed below before implementing or modifying this subsystem.
 
-The Extract-text subsystem handles **1 routes**.
+The Text-extract subsystem handles **2 routes** and touches: cache.
 
 ## Routes
 
-- `POST` `/api/v1/extract-text` → in: HighlightRequest
-  `api/app/domains/pdf_utils/router.py`
+- `POST` `/api/v1/text-extract` → in: OptimizePromptRequest [cache]
+  `api/app/domains/worker_dispatch/router.py`
+- `GET` `/api/v1/text-extract/{task_id}/status` params(task_id) [cache]
+  `api/app/domains/worker_dispatch/router.py`
 
 ## Related Models
 
@@ -16,7 +18,7 @@ The Extract-text subsystem handles **1 routes**.
 ## Source Files
 
 Read these before implementing or modifying this subsystem:
-- `api/app/domains/pdf_utils/router.py`
+- `api/app/domains/worker_dispatch/router.py`
 
 ---
 _Back to [overview.md](./overview.md)_
