@@ -33,6 +33,17 @@ dev = [
   "pytest-cov"
 ]
 
+[dependency-groups]
+dev = [
+  "ruff",
+  "deptry",
+  "pytest",
+  "pytest-anyio",
+  "pytest-mock",
+  "pytest-celery",
+  "pytest-cov",
+]
+
 [tool.ruff]
 line-length = 100
 target-version = "py313"

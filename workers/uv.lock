@@ -462,6 +462,17 @@ dev = [
     { name = "ruff" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "deptry" },
+    { name = "pytest" },
+    { name = "pytest-anyio" },
+    { name = "pytest-celery" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "anthropic" },
@@ -490,6 +501,17 @@ requires-dist = [
     { name = "stripe", specifier = ">=12.0.0" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "deptry" },
+    { name = "pytest" },
+    { name = "pytest-anyio" },
+    { name = "pytest-celery" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+]
 
 [[package]]
 name = "google-auth"

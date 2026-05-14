@@ -7,7 +7,13 @@ import anyio
 from fastapi import FastAPI, Request, Response
 from PIL import Image
 from shared.ocr import read_png_image
-from shared.runpod_http import ensure_ready, normalize_text, readiness_response, run_app
+from shared.runpod_http import (
+    ensure_ready,
+    normalize_text,
+    readiness_response,
+    require_bearer_token,
+    run_app,
+)
 from vllm import LLM, SamplingParams
 from vllm.model_executor.models.deepseek_ocr import NGramPerReqLogitsProcessor
 
@@ -40,6 +46,7 @@ async def ping(request: Request) -> Response:
 
 @app.post("/ocr")
 async def ocr(request: Request) -> dict[str, Any]:
+    require_bearer_token(request)
     ensure_ready(request)
     image = await read_png_image(request)
     result = await anyio.to_thread.run_sync(

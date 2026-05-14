@@ -30,6 +30,17 @@ dev = [
   "httpx",
 ]
 
+[dependency-groups]
+dev = [
+  "ruff",
+  "deptry",
+  "pytest",
+  "pytest-anyio",
+  "pytest-mock",
+  "pytest-cov",
+  "httpx",
+]
+
 [tool.ruff]
 line-length = 100
 target-version = "py313"
