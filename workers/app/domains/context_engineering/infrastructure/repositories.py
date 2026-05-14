@@ -214,7 +214,7 @@ async def insert_prompt_attributes(
     *,
     project_id: UUID,
     template_id: int,
-    full_text: str,
+    full_text: str | None,
     project_description: str | None,
     entity_types_order: list[UUID],
     entity_type_definitions: dict,
@@ -250,6 +250,25 @@ async def insert_prompt_attributes(
     )
     logger.info("Inserted structured prompt: %s", prompt_id)
     return prompt_id
+
+
+async def activate_project_prompt(
+    conn: asyncpg.Connection,
+    *,
+    project_id: UUID,
+    prompt_id: UUID,
+) -> None:
+    result = await conn.execute(
+        """
+        UPDATE web.projects
+        SET active_prompt_id = $2
+        WHERE id = $1
+        """,
+        project_id,
+        prompt_id,
+    )
+    if result == "UPDATE 0":
+        raise ValueError(f"Project not found: {project_id}")
 
 
 async def insert_optimized_prompt_examples(

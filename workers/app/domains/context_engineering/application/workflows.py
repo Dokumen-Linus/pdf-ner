@@ -18,8 +18,9 @@ from app.integrations.anthropic import call_anthropic
 from app.integrations.gemini import call_google_genai
 from app.integrations.openai import call_openai
 from app.shared.domain.LLMResponseData import LLMResponseData
+from app.shared.domain.prompts import PromptEntityMetadata, form_prompt_text
+from app.shared.infrastructure.prompts import ensure_prompt_full_text
 
-from ..domain import services
 from ..domain.entities import EntityTypeInfo, LabeledPdf
 from ..domain.value_objects import CostBudget
 from ..infrastructure import repositories as repo
@@ -144,19 +145,17 @@ async def prompt_optimization_workflow(
             stop_reason = "max_cost_reached"
             break
 
-        formed_prompt = services.form_prompt_text(
+        ordered_entity_types = _ordered_entity_types(entity_types, attributes.entity_types_order)
+        formed_prompt = form_prompt_text(
             template["txt"],
             project_description=attributes.project_description,
-            entity_types=_ordered_entity_types(entity_types, attributes.entity_types_order),
-            entity_type_definitions=attributes.entity_type_definitions,
-            entity_type_example_values=attributes.entity_type_example_values,
-            entity_type_example_finds=attributes.entity_type_example_finds,
+            entity_types=_prompt_metadata_for_attributes(ordered_entity_types, attributes),
         )
         prompt_id = await repo.insert_prompt_attributes(
             conn,
             project_id=cmd.project_id,
             template_id=cmd.template_id,
-            full_text=formed_prompt,
+            full_text=None,
             project_description=attributes.project_description,
             entity_types_order=attributes.entity_types_order,
             entity_type_definitions=attributes.entity_type_definitions,
@@ -249,6 +248,8 @@ async def prompt_optimization_workflow(
         accumulated_usd=total_cost,
         stop_reason=stop_reason,
     )
+    await ensure_prompt_full_text(conn, best_prompt_id, cmd.project_id)
+    await repo.activate_project_prompt(conn, project_id=cmd.project_id, prompt_id=best_prompt_id)
     return {
         "best_prompt_id": str(best_prompt_id),
         "best_f": best_overall_f,
@@ -280,6 +281,30 @@ def _initial_prompt_attributes(
         },
         entity_type_example_finds={str(entity_id): [] for entity_id in ordered_ids},
     )
+
+
+def _prompt_metadata_for_attributes(
+    entity_types: list[EntityTypeInfo],
+    attributes: PromptAttributes,
+) -> list[PromptEntityMetadata]:
+    metadata: list[PromptEntityMetadata] = []
+    for entity in entity_types:
+        if entity.entity_type_id is None:
+            continue
+        key = str(entity.entity_type_id)
+        metadata.append(
+            PromptEntityMetadata(
+                entity_type_id=entity.entity_type_id,
+                name=entity.name,
+                definition=attributes.entity_type_definitions.get(key) or entity.best_definition,
+                example_values=attributes.entity_type_example_values.get(key, entity.all_examples),
+                example_finds=attributes.entity_type_example_finds.get(key, []),
+                regex=entity.std_regex,
+                required=entity.required,
+                unique=entity.unique,
+            )
+        )
+    return metadata
 
 
 async def _populate_example_finds(
