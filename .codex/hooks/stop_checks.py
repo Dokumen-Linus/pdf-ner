@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 import subprocess
 import tokenize
 
@@ -26,6 +27,12 @@ def run(command: list[str], cwd: Path, name: str) -> subprocess.CompletedProcess
         stderr=subprocess.STDOUT,
         check=False,
     )
+
+
+def python_test_command(project_root: Path) -> list[str]:
+    if (project_root / "uv.lock").exists() and shutil.which("uv"):
+        return [executable("uv"), "run", "--locked", "--group", "dev", "pytest"]
+    return [executable("pytest")]
 
 
 def web_relative(paths: list[Path], web_root: Path) -> set[str]:
@@ -125,7 +132,7 @@ def main() -> int:
 
     for project_root in python_project_roots(python_files, root):
         label = f"pytest ({project_root.relative_to(root).as_posix()})"
-        result = run([executable("pytest")], project_root, label)
+        result = run(python_test_command(project_root), project_root, label)
         if result.returncode != 0:
             failures.append(command_failure_context(label, result))
 
