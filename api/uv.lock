@@ -471,6 +471,7 @@ requires-dist = [
     { name = "google-genai" },
     { name = "openai" },
     { name = "pytest", marker = "extra == 'dev'" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
 ]
 provides-extras = ["dev"]
