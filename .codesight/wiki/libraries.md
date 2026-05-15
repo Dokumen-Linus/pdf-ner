@@ -56,8 +56,8 @@
 
 ## Gpu (4 files)
 
+- `gpu/shared/runpod_http.py` — require_bearer_token, readiness_response, ensure_ready, normalize_text, run_app
 - `gpu/shared/ocr.py` — resize_longest_dimension, image_to_base64_png, split_yaml_front_matter, read_png_image
-- `gpu/shared/runpod_http.py` — readiness_response, ensure_ready, normalize_text, run_app
 - `gpu/deepseek-ocr/app.py` — lifespan, ping, ocr
 - `gpu/olm-ocr2/app.py` — lifespan, ping, ocr
 

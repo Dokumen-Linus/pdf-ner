@@ -1,6 +1,6 @@
 # pdf-ner — Wiki
 
-_Generated 2026-05-14 — re-run `npx codesight --wiki` if the codebase has changed._
+_Generated 2026-05-15 — re-run `npx codesight --wiki` if the codebase has changed._
 
 Structural map compiled from source code via AST. No LLM — deterministic, 200ms.
 
@@ -31,7 +31,7 @@ Structural map compiled from source code via AST. No LLM — deterministic, 200m
 - Routes: **24**
 - Models: **3**
 - Components: **82**
-- Env vars: **34** required, **50** with defaults
+- Env vars: **33** required, **46** with defaults
 
 ## How to Use
 
@@ -58,4 +58,4 @@ These exist in your codebase but are **not** reflected in wiki articles:
 When in doubt, search the source. The wiki is a starting point, not a complete inventory.
 
 ---
-_Last compiled: 2026-05-14 · 18 articles · [codesight](https://github.com/Houseofmvps/codesight)_
+_Last compiled: 2026-05-15 · 18 articles · [codesight](https://github.com/Houseofmvps/codesight)_

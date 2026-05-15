@@ -8,7 +8,7 @@
 
 ## Scale
 
-24 API routes · 3 database models · 82 UI components · 48 library files · 21 middleware layers · 84 environment variables
+24 API routes · 3 database models · 82 UI components · 48 library files · 21 middleware layers · 79 environment variables
 
 ## Subsystems
 
@@ -50,14 +50,14 @@ Changes to these files have the widest blast radius across the codebase:
 - `BASE_URL` — `web/src/integrations/sitemap.ts`
 - `CI` — `web/playwright.config.ts`
 - `DATABASE_URL` — `web/tests/bun-test-setup/db-setup.ts`
-- `DEEPSEEK_IMAGE` — `infra/runpod/.env.example`
+- `DEEPSEEK_RUNPOD_POD_ID` — `infra/runpod/.env.example`
 - `DEPLOYMENT` — `packages/otel_py/otel_py/config.py`
 - `DEV` — `web/src/client.tsx`
 - `GITHUB_OIDC_THUMBPRINT` — `infra/init/.env.example`
 - `GPU_MEMORY_UTILIZATION` — `gpu/olm-ocr2/app.py`
 - `HF_TOKEN` — `infra/runpod/.env.example`
 - `MAX_MODEL_LEN` — `gpu/olm-ocr2/app.py`
-- _...22 more_
+- _...21 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-05-14_
+_Back to [index.md](./index.md) · Generated 2026-05-15_

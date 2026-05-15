@@ -132,6 +132,7 @@
 - *(api)* Create worker dispatch for chat_model_eval
 - *(web)* More test coverage
 - Expose web access to prompt formation
+- *(web)* Infra info
 
 ### 🐛 Bug Fixes
 
@@ -230,6 +231,7 @@
 - Update current prompt template to new format #169
 - *(llm)* Stop hook installs dev deps
 - *(wk)* Ner_workflows, chat_model_eval ensure that core.prompts.full_text exists
+- *(gpu)* Move from runpod serverless to pods
 
 ### 💼 Other
 
@@ -496,6 +498,7 @@
 - Prettier and lint:fix
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
+- Auto-format code [skip ci]
 
 ### 🧪 Testing
 
@@ -657,6 +660,7 @@
 - *(fix)* Pull before push in auto-docs and auto-format actions
 - *(fix)* Only pull if changes made
 - *(fix)* Autostash when rebasing auto-docs.yml
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
