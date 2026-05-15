@@ -1,21 +1,12 @@
-#!/usr/bin/env python3
-# Generate db/init/01_roles.sh from db/migrations/_init.sql.
-from pathlib import Path
-
-ROOT = Path(__file__).parent.parent
-
-PASSWORD_VARS = {
-    "owner_role": "OWNER_ROLE_PASSWORD",
-    "auth_role": "AUTH_ROLE_PASSWORD",
-    "web_user": "WEB_USER_PASSWORD",
-    "api_user": "API_USER_PASSWORD",
-    "workers_user": "WORKERS_USER_PASSWORD",
-}
-
-SCRIPT = """#!/bin/bash
-# AUTO-GENERATED from _init.sql - do not edit by hand.
+#!/usr/bin/env bash
 # POSTGRES_USER and POSTGRES_DB should be passed as args or env vars from your PostgreSQL service
-set -e
+set -euo pipefail
+
+: "${OWNER_ROLE_PASSWORD:?OWNER_ROLE_PASSWORD is required}"
+: "${AUTH_ROLE_PASSWORD:?AUTH_ROLE_PASSWORD is required}"
+: "${WEB_USER_PASSWORD:?WEB_USER_PASSWORD is required}"
+: "${API_USER_PASSWORD:?API_USER_PASSWORD is required}"
+: "${WORKERS_USER_PASSWORD:?WORKERS_USER_PASSWORD is required}"
 
 psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER:-postgres}" --dbname "${POSTGRES_DB:-dokumen}" <<-EOSQL
     -- roles
@@ -25,8 +16,13 @@ psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER:-postgres}" --dbname "${POST
     CREATE ROLE api_user LOGIN PASSWORD '${API_USER_PASSWORD}';
     CREATE ROLE workers_user LOGIN PASSWORD '${WORKERS_USER_PASSWORD}';
 
+    -- allow the deploy connection to create schemas owned by these roles
+    GRANT owner_role TO CURRENT_USER;
+    GRANT auth_role TO CURRENT_USER;
+
     -- schemas
     CREATE SCHEMA auth AUTHORIZATION auth_role;
+    CREATE SCHEMA core AUTHORIZATION owner_role;
     CREATE SCHEMA web AUTHORIZATION owner_role;
     CREATE SCHEMA api AUTHORIZATION owner_role;
     CREATE SCHEMA workers AUTHORIZATION owner_role;
@@ -34,6 +30,8 @@ psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER:-postgres}" --dbname "${POST
     -- privileges on schemas
     GRANT USAGE, CREATE ON SCHEMA public TO owner_role;
     GRANT USAGE ON SCHEMA auth TO owner_role;
+    GRANT USAGE ON SCHEMA auth TO web_user;
+    GRANT USAGE ON SCHEMA core TO web_user, api_user, workers_user;
     GRANT USAGE ON SCHEMA public TO web_user, api_user, workers_user;
     GRANT USAGE ON SCHEMA web TO web_user, api_user, workers_user;
     GRANT USAGE ON SCHEMA api TO web_user, api_user, workers_user;
@@ -46,6 +44,12 @@ psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER:-postgres}" --dbname "${POST
         GRANT SELECT ON TABLES TO api_user;
     ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA public
         GRANT SELECT ON TABLES TO workers_user;
+    ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA core
+        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO web_user;
+    ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA core
+        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO api_user;
+    ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA core
+        GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO workers_user;
     ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA web
         GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO web_user;
     ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA web
@@ -68,14 +72,3 @@ psql -v ON_ERROR_STOP=1 --username "${POSTGRES_USER:-postgres}" --dbname "${POST
     -- set search path for BetterAuth
     ALTER ROLE auth_role SET search_path = auth;
 EOSQL
-"""
-
-
-def main() -> None:
-    output = ROOT / "db" / "init" / "01_roles.sh"
-    output.write_text(SCRIPT)
-    print(f"Written to: {output}")
-
-
-if __name__ == "__main__":
-    main()
