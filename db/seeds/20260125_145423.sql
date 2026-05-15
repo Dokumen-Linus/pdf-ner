@@ -1,4 +1,13 @@
-INSERT INTO public.templates (txt, inserts, document_at_end, created_at, updated_at)
+INSERT INTO public.templates (
+  txt,
+  includes_project_description,
+  includes_entity_type_definitions,
+  includes_entity_type_example_values,
+  includes_entity_type_example_finds,
+  includes_entity_type_regex,
+  created_at,
+  updated_at
+)
 VALUES ('You are a precise named entity recognition (NER) system. Extract structured fields from the PDF text provided in the user message.
 
 Return only valid JSON. Do not include markdown, commentary, or keys that are not listed in the fields below.
@@ -45,4 +54,4 @@ Extraction rules:
 - For non-unique fields, return an array of all distinct values you can identify. Return an empty array when no values are present.
 - Respect each field''s definition, examples, example finds, regex, required flag, and unique flag.
 - If a value conflicts with a regex, omit it unless the surrounding text clearly shows the intended valid value.
-', ARRAY['<PROJECT_DESCRIPTION>','<ENTITY_TYPES>','<DEFINITIONS>','<EXAMPLE_VALUES>','<EXAMPLE_FINDS>','<REGEX>','<IS_REQUIRED>','<IS_UNIQUE>'], true, '2026-01-25T14:54:23.714331', now());
+', true, true, true, true, true, '2026-01-25T14:54:23.714331', now());
