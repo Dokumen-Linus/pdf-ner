@@ -16,6 +16,7 @@ describe("Public Drizzle Schema Shape Checks", () => {
       examples: string[] | null
       datatype: string | null
       exactLength: number | null
+      singleWord: boolean
     }
     const _: Expected = {} as StdEntityType
     expect(true).toBe(true)

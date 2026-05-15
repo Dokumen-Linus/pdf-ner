@@ -28,7 +28,7 @@ services:
       API_USER_PASSWORD: ${API_USER_PASSWORD:-}
       WORKERS_USER_PASSWORD: ${WORKERS_USER_PASSWORD:-}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     networks:
       - backend
     healthcheck:

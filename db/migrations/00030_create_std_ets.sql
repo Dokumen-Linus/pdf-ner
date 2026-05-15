@@ -10,6 +10,7 @@ CREATE TABLE public.std_entity_types (
   datatype TEXT CHECK (datatype IN ('int', 'float', 'alphanumeric', 'alpha', 'alpha_with_spaces')),
   regex TEXT,
   exact_length INT, -- populated when the entity type value must be a specific length, like 9 for ssn
+  single_word BOOLEAN NOT NULL DEFAULT false,
 
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
