@@ -232,6 +232,7 @@
 - *(llm)* Stop hook installs dev deps
 - *(wk)* Ner_workflows, chat_model_eval ensure that core.prompts.full_text exists
 - *(gpu)* Move from runpod serverless to pods
+- *(db)* Typos
 
 ### 💼 Other
 
@@ -385,6 +386,7 @@
 - *(llm)* VLLM skill
 - *(db)* Add core schema
 - Tesseract
+- *(llm)* Aws published skills
 
 ### ⚡ Performance
 
@@ -496,6 +498,7 @@
 - *(web)* Prettier and lint fix
 - Ruff
 - Prettier and lint:fix
+- Auto-format code [skip ci]
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
@@ -662,6 +665,8 @@
 - *(fix)* Autostash when rebasing auto-docs.yml
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(db)* Deployment scripts
 
 ### ◀️ Revert
 

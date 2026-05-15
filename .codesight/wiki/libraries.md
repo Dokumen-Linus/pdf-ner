@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**48 library files** across 8 modules
+**47 library files** across 8 modules
 
 ## Web (22 files)
 
@@ -47,19 +47,18 @@
 - `packages/pdf_ocr_utils/pdf_ocr_utils/types.py` — RenderConfig, OcrConfig, PageTextResult
 - `packages/pdf_ocr_utils/pdf_ocr_utils/ocr/tesseract.py` — extract_text_from_array, TesseractOcrEngine
 
-## Db (4 files)
-
-- `db/seeds/insert_teemplate_seed.py` — extract_inserts, escape_sql_string, format_sql_array, make_seed_for_template
-- `db/seeds/update_template_seed.py` — extract_inserts, escape_sql_string, format_sql_array, make_seed_for_template
-- `db/generate_roles_sh.py` — env_var_for_role, transform, main
-- `db/init/generate_roles_sh.py` — main
-
 ## Gpu (4 files)
 
 - `gpu/shared/runpod_http.py` — require_bearer_token, readiness_response, ensure_ready, normalize_text, run_app
 - `gpu/shared/ocr.py` — resize_longest_dimension, image_to_base64_png, split_yaml_front_matter, read_png_image
 - `gpu/deepseek-ocr/app.py` — lifespan, ping, ocr
 - `gpu/olm-ocr2/app.py` — lifespan, ping, ocr
+
+## Db (3 files)
+
+- `db/seeds/insert_teemplate_seed.py` — extract_inserts, escape_sql_string, format_sql_array, make_seed_for_template
+- `db/seeds/update_template_seed.py` — extract_inserts, escape_sql_string, format_sql_array, make_seed_for_template
+- `db/generate_roles_sh.py` — env_var_for_role, transform, main
 
 ## Pdfium_utils (3 files)
 
