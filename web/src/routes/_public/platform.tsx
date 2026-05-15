@@ -314,9 +314,9 @@ function PlatformPage() {
                 {platform_services_title()}
               </h3>
               <p className="mb-4 text-[13px] leading-[1.55] text-[#5C5E62]">
-                Dokumen limits service providers and external APIs to reduce security risk.
-                The platform only uses 5 required providers: Stripe, Cloudflare, GitHub, AWS,
-                and Runpod.
+                Dokumen limits service providers and external APIs to reduce security risk. The
+                platform only uses 5 required providers: Stripe, Cloudflare, GitHub, AWS, and
+                Runpod.
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[13px]">
@@ -357,17 +357,22 @@ function PlatformPage() {
                     </tr>
                     <tr className="border-b border-[#EEEEEE]">
                       <td className="py-2 pr-4 font-medium text-[#171A20]">AI inference</td>
-                      <td className="py-2 text-[#5C5E62]">Dokumen, OpenAI, Anthropic, Google Deepmind</td>
+                      <td className="py-2 text-[#5C5E62]">
+                        Dokumen, OpenAI, Anthropic, Google Deepmind
+                      </td>
                     </tr>
                     <tr className="border-b border-[#EEEEEE]">
                       <td className="py-2 pr-4 font-medium text-[#171A20]">PDF storage</td>
-                      <td className="py-2 text-[#5C5E62]">Dokumen, S3, Google Drive, GCS, Gmail, OneDrive, Azure Blob, Outlook</td>
+                      <td className="py-2 text-[#5C5E62]">
+                        Dokumen, S3, Google Drive, GCS, Gmail, OneDrive, Azure Blob, Outlook
+                      </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
               <p className="mt-4 text-[13px] leading-[1.55] text-[#5C5E62]">
-                Dokumen supports Bring Your Own Key (BYOK) for AI inference. Contact us to provide keys for your organization.
+                Dokumen supports Bring Your Own Key (BYOK) for AI inference. Contact us to provide
+                keys for your organization.
               </p>
             </div>
           </div>
