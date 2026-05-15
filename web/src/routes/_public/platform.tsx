@@ -1,5 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 
+import { platform_capacities_title } from "@/integrations/paraglide/messages/platform_capacities_title.js"
+import { platform_services_title } from "@/integrations/paraglide/messages/platform_services_title.js"
+import { platform_techstack_description } from "@/integrations/paraglide/messages/platform_techstack_description.js"
+import { platform_techstack_title } from "@/integrations/paraglide/messages/platform_techstack_title.js"
 import { m } from "@/integrations/paraglide/messages.js"
 
 export const Route = createFileRoute("/_public/platform")({
@@ -29,6 +33,11 @@ const requiredProviders: Provider[] = [
     icon: "/icons/cloudflare-color.svg",
   },
   {
+    name: "GitHub",
+    detail: "Source control and CI/CD automation via GitHub Actions.",
+    icon: "/icons/github.svg",
+  },
+  {
     name: "Runpod",
     detail: "GPU capacity for OCR and model-serving workloads.",
     icon: "/icons/runpod.svg",
@@ -38,6 +47,49 @@ const requiredProviders: Provider[] = [
     detail: "Payments, billing setup, and customer payment methods.",
     icon: "/icons/stripe.svg",
   },
+]
+
+type ServiceDetail = {
+  service: string
+  category: string
+}
+
+const requiredServiceDetails: ServiceDetail[] = [
+  { service: "Stripe", category: "Payments" },
+  { service: "Cloudflare WAF", category: "Edge security firewall" },
+  { service: "GitHub", category: "Source control" },
+  { service: "GitHub Actions", category: "CI/CD automation" },
+  { service: "Amazon ECR", category: "Container registry" },
+  { service: "Amazon EC2", category: "CPU compute" },
+  { service: "Runpod.io", category: "GPU compute" },
+  { service: "Amazon RDS", category: "Managed database" },
+  { service: "Amazon ElastiCache", category: "Managed cache" },
+  { service: "Amazon S3", category: "PDF storage" },
+  { service: "Amazon SES", category: "Emails" },
+  { service: "Amazon VPC", category: "Networking" },
+  { service: "AWS Secrets Manager", category: "Secrets management" },
+]
+
+type TechStackItem = {
+  name: string
+  category: string
+}
+
+const techStackItems: TechStackItem[] = [
+  { name: "Docker + Compose", category: "Container orchestration" },
+  { name: "Nginx Proxy Manager", category: "Reverse proxy & TLS termination" },
+  { name: "PostgreSQL", category: "Database" },
+  { name: "Redis", category: "Cache" },
+  { name: "OpenTelemetry", category: "Observability" },
+  { name: "TypeScript", category: "Frontend language" },
+  { name: "Node.js", category: "Frontend runtime" },
+  { name: "Bun.js", category: "Frontend package manager" },
+  { name: "Tanstack React Start", category: "Web app framework" },
+  { name: "PDFium", category: "PDF engine (frontend & backend)" },
+  { name: "Python", category: "Backend language" },
+  { name: "Uvicorn", category: "Backend runtime & package manager" },
+  { name: "FastAPI", category: "API framework" },
+  { name: "Celery", category: "Workers framework" },
 ]
 
 const optionalProviders: Provider[] = [
@@ -256,6 +308,102 @@ function PlatformPage() {
           <div className="grid gap-6">
             <ProviderPanel title={m.platform_required_title()} providers={requiredProviders} />
             <ProviderPanel title={m.platform_optional_title()} providers={optionalProviders} />
+
+            <div className="border border-[#E6E6E6] bg-white p-5">
+              <h3 className="mb-4 text-[18px] font-medium text-[#171A20]">
+                {platform_services_title()}
+              </h3>
+              <p className="mb-4 text-[13px] leading-[1.55] text-[#5C5E62]">
+                Dokumen limits service providers and external APIs to reduce security risk.
+                The platform only uses 5 required providers: Stripe, Cloudflare, GitHub, AWS,
+                and Runpod.
+              </p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-[13px]">
+                  <thead>
+                    <tr className="border-b border-[#EEEEEE] text-[11px] font-semibold tracking-[0.08em] text-[#8E8E8E] uppercase">
+                      <th className="py-2 pr-4">Service</th>
+                      <th className="py-2">Category</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {requiredServiceDetails.map((s) => (
+                      <tr key={s.service} className="border-b border-[#EEEEEE] last:border-0">
+                        <td className="py-2 pr-4 font-medium text-[#171A20]">{s.service}</td>
+                        <td className="py-2 text-[#5C5E62]">{s.category}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="border border-[#E6E6E6] bg-white p-5">
+              <h3 className="mb-4 text-[18px] font-medium text-[#171A20]">
+                {platform_capacities_title()}
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-[13px]">
+                  <thead>
+                    <tr className="border-b border-[#EEEEEE] text-[11px] font-semibold tracking-[0.08em] text-[#8E8E8E] uppercase">
+                      <th className="py-2 pr-4">Capability</th>
+                      <th className="py-2">Providers</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-[#EEEEEE]">
+                      <td className="py-2 pr-4 font-medium text-[#171A20]">Authentication</td>
+                      <td className="py-2 text-[#5C5E62]">Dokumen, Google, Microsoft</td>
+                    </tr>
+                    <tr className="border-b border-[#EEEEEE]">
+                      <td className="py-2 pr-4 font-medium text-[#171A20]">AI inference</td>
+                      <td className="py-2 text-[#5C5E62]">Dokumen, OpenAI, Anthropic, Google Deepmind</td>
+                    </tr>
+                    <tr className="border-b border-[#EEEEEE]">
+                      <td className="py-2 pr-4 font-medium text-[#171A20]">PDF storage</td>
+                      <td className="py-2 text-[#5C5E62]">Dokumen, S3, Google Drive, GCS, Gmail, OneDrive, Azure Blob, Outlook</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-4 text-[13px] leading-[1.55] text-[#5C5E62]">
+                Dokumen supports Bring Your Own Key (BYOK) for AI inference. Contact us to provide keys for your organization.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-10 max-w-2xl">
+            <h2 className="mb-4 text-[32px] font-medium text-[#171A20]">
+              {platform_techstack_title()}
+            </h2>
+            <p className="text-[16px] leading-[1.75] text-[#5C5E62]">
+              {platform_techstack_description()}
+            </p>
+          </div>
+
+          <div className="overflow-hidden border border-[#E6E6E6] bg-[#FAFAFA]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-[13px]">
+                <thead>
+                  <tr className="border-b border-[#E6E6E6] bg-[#F4F4F4] text-[11px] font-semibold tracking-[0.08em] text-[#8E8E8E] uppercase">
+                    <th className="px-5 py-3">Dependencies</th>
+                    <th className="px-5 py-3">Category</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {techStackItems.map((item) => (
+                    <tr key={item.name} className="border-b border-[#E6E6E6] last:border-0">
+                      <td className="px-5 py-3 font-medium text-[#171A20]">{item.name}</td>
+                      <td className="px-5 py-3 text-[#5C5E62]">{item.category}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

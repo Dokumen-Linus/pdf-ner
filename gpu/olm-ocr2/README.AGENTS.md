@@ -2,7 +2,7 @@
 
 ## Purpose
 
-- FastAPI worker for `allenai/olmOCR-2-7B-1025-FP8` running with vLLM on Runpod Serverless
+- FastAPI worker for `allenai/olmOCR-2-7B-1025-FP8` running with vLLM on a fixed Runpod Pod
 - Build and deployment conventions live at the `gpu/` level; keep this worker focused on olmOCR2-specific behavior
 
 ## Contract
@@ -13,4 +13,4 @@
 
 ## Settings
 
-- Worker-specific environment settings are `MODEL_NAME`, `PROCESSOR_NAME`, `MAX_NEW_TOKENS`, `TEMPERATURE`, `TARGET_LONGEST_IMAGE_DIM`, `GPU_MEMORY_UTILIZATION`, and `MAX_MODEL_LEN`
+- Worker-specific environment settings are `MODEL_NAME`, `PROCESSOR_NAME`, `MAX_NEW_TOKENS`, `TEMPERATURE`, `TARGET_LONGEST_IMAGE_DIM`, `GPU_MEMORY_UTILIZATION`, `MAX_MODEL_LEN`, and `OCR_HTTP_BEARER_TOKEN`

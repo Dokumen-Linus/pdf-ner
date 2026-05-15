@@ -397,11 +397,21 @@ dependencies = [
     { name = "pdf-ocr-utils" },
     { name = "pdfium-utils" },
     { name = "pydantic-settings" },
-    { name = "pytest-cov" },
     { name = "redis" },
 ]
 
 [package.optional-dependencies]
+dev = [
+    { name = "deptry" },
+    { name = "httpx" },
+    { name = "pytest" },
+    { name = "pytest-anyio" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+]
+
+[package.dev-dependencies]
 dev = [
     { name = "deptry" },
     { name = "httpx" },
@@ -431,13 +441,23 @@ requires-dist = [
     { name = "pydantic-settings" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-anyio", marker = "extra == 'dev'" },
-    { name = "pytest-cov" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
     { name = "pytest-mock", marker = "extra == 'dev'" },
     { name = "redis" },
     { name = "ruff", marker = "extra == 'dev'" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "deptry" },
+    { name = "httpx" },
+    { name = "pytest" },
+    { name = "pytest-anyio" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+]
 
 [[package]]
 name = "dokumen-aws-secrets"

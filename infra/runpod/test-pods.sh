@@ -1,0 +1,194 @@
+#!/usr/bin/env bash
+# Smoke test deployed Runpod Pod OCR services.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOCAL_ENV_FILE="${LOCAL_ENV_FILE:-${SCRIPT_DIR}/.env.local}"
+STATE_FILE="${STATE_FILE:-${SCRIPT_DIR}/local-state/runpod-state.json}"
+TMP_DIR="${TMPDIR:-/tmp}"
+SMOKE_PNG="${SMOKE_PNG:-${TMP_DIR}/dokumen-runpod-pod-smoke.png}"
+PORT="${PORT:-8000}"
+
+if [ -f "$LOCAL_ENV_FILE" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  . "$LOCAL_ENV_FILE"
+  set +a
+fi
+
+RUNPOD_API_KEY="${RUNPOD_API_KEY:-}"
+OCR_HTTP_BEARER_TOKEN="${OCR_HTTP_BEARER_TOKEN:-${OCR_RUNPOD_HTTP_TOKEN:-}}"
+
+require_cmd() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "ERROR: required command not found: $1" >&2
+    exit 1
+  fi
+}
+
+require_cmd base64
+require_cmd curl
+require_cmd jq
+require_cmd runpodctl
+
+if [ -n "$RUNPOD_API_KEY" ]; then
+  runpodctl config --apiKey "$RUNPOD_API_KEY" >/dev/null
+fi
+
+if [ -z "$OCR_HTTP_BEARER_TOKEN" ] || [ "$OCR_HTTP_BEARER_TOKEN" = "REPLACE_ME" ]; then
+  echo "ERROR: OCR_HTTP_BEARER_TOKEN or OCR_RUNPOD_HTTP_TOKEN is required." >&2
+  exit 1
+fi
+
+state_value() {
+  local filter="$1"
+  if [ -f "$STATE_FILE" ]; then
+    jq -r "${filter} // empty" "$STATE_FILE"
+  fi
+}
+
+pod_id_for() {
+  local explicit_id="$1"
+  local state_filter="$2"
+  if [ -n "$explicit_id" ]; then
+    printf '%s' "$explicit_id"
+    return 0
+  fi
+  state_value "$state_filter"
+}
+
+pod_base_url() {
+  local explicit_url="$1"
+  local pod_id="$2"
+  if [ -n "$explicit_url" ]; then
+    printf '%s' "${explicit_url%/ocr}"
+    return 0
+  fi
+  printf 'https://%s-%s.proxy.runpod.net' "$pod_id" "$PORT"
+}
+
+write_smoke_png() {
+  base64 -d > "$SMOKE_PNG" <<'PNG'
+iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAAAAACPAi4CAAABTklEQVR4Ae3BAQEAAACCIP+vbkhAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPgOQkQAAUaFZ2gAAAAASUVORK5CYII=
+PNG
+}
+
+assert_pod_storage() {
+  local name="$1"
+  local pod_id="$2"
+  local details network_volume mount_path
+
+  details="$(runpodctl pod get "$pod_id" --include-network-volume --output json)"
+  network_volume="$(printf '%s' "$details" | jq -r '.networkVolume.id // .networkVolumeId // empty')"
+  mount_path="$(printf '%s' "$details" | jq -r '.volumeMountPath // .container.volumeMountPath // empty')"
+
+  if [ -n "$network_volume" ]; then
+    echo "ERROR: $name has a network volume attached: $network_volume" >&2
+    exit 1
+  fi
+  if [ -n "$mount_path" ] && [ "$mount_path" != "/workspace" ]; then
+    echo "ERROR: $name volume mount path is $mount_path, expected /workspace" >&2
+    exit 1
+  fi
+}
+
+poll_ready() {
+  local name="$1"
+  local base_url="$2"
+  local attempts="${HEALTH_ATTEMPTS:-60}"
+  local delay="${HEALTH_DELAY_SECONDS:-10}"
+  local status
+
+  echo "Waiting for $name readiness at ${base_url}/ping ..."
+  for attempt in $(seq 1 "$attempts"); do
+    status="$(curl -sS -o /dev/null -w '%{http_code}' "${base_url}/ping" || true)"
+    if [ "$status" = "200" ]; then
+      echo "$name is ready."
+      return 0
+    fi
+    if [ "$status" != "204" ] && [ "$status" != "502" ] && [ "$status" != "000" ]; then
+      echo "Unexpected $name health response: HTTP $status" >&2
+      return 1
+    fi
+    echo "  $name warming up ($attempt/$attempts, HTTP $status)."
+    sleep "$delay"
+  done
+
+  echo "ERROR: $name did not become ready after $attempts attempts." >&2
+  return 1
+}
+
+assert_auth_required() {
+  local name="$1"
+  local base_url="$2"
+  local status
+
+  status="$(curl -sS -o /dev/null -w '%{http_code}' \
+    -X POST "${base_url}/ocr" \
+    -H "Content-Type: image/png" \
+    --data-binary "@${SMOKE_PNG}" || true)"
+
+  if [ "$status" != "401" ]; then
+    echo "ERROR: expected unauthenticated $name OCR request to return 401, got $status." >&2
+    return 1
+  fi
+}
+
+post_ocr() {
+  local name="$1"
+  local base_url="$2"
+  local response
+  response="$(mktemp)"
+
+  echo "Posting authenticated OCR smoke image to $name ..."
+  curl -fsS \
+    -X POST "${base_url}/ocr" \
+    -H "Authorization: Bearer ${OCR_HTTP_BEARER_TOKEN}" \
+    -H "Content-Type: image/png" \
+    --data-binary "@${SMOKE_PNG}" > "$response"
+
+  jq -e '
+    type == "object"
+    and (.text | type == "string")
+    and (.model | type == "string")
+    and (.usage | type == "object")
+    and (.usage.prompt_tokens | type == "number")
+    and (.usage.completion_tokens | type == "number")
+  ' "$response" >/dev/null
+
+  echo "$name OCR response shape is valid."
+  rm -f "$response"
+}
+
+main() {
+  local deepseek_pod_id olm_pod_id deepseek_base olm_base
+  deepseek_pod_id="$(pod_id_for "${DEEPSEEK_RUNPOD_POD_ID:-}" '.["deepseek-ocr"].pod_id')"
+  olm_pod_id="$(pod_id_for "${OLM_OCR2_RUNPOD_POD_ID:-}" '.["olm-ocr2"].pod_id')"
+
+  if [ -z "$deepseek_pod_id" ]; then
+    echo "ERROR: missing DeepSeek Pod ID. Set DEEPSEEK_RUNPOD_POD_ID or deploy state." >&2
+    exit 1
+  fi
+  if [ -z "$olm_pod_id" ]; then
+    echo "ERROR: missing olmOCR2 Pod ID. Set OLM_OCR2_RUNPOD_POD_ID or deploy state." >&2
+    exit 1
+  fi
+
+  deepseek_base="$(pod_base_url "${DEEPSEEK_BASE_URL:-}" "$deepseek_pod_id")"
+  olm_base="$(pod_base_url "${OLM_OCR2_BASE_URL:-}" "$olm_pod_id")"
+
+  write_smoke_png
+  assert_pod_storage "deepseek-ocr" "$deepseek_pod_id"
+  assert_pod_storage "olm-ocr2" "$olm_pod_id"
+  poll_ready "deepseek-ocr" "$deepseek_base"
+  assert_auth_required "deepseek-ocr" "$deepseek_base"
+  post_ocr "deepseek-ocr" "$deepseek_base"
+  poll_ready "olm-ocr2" "$olm_base"
+  assert_auth_required "olm-ocr2" "$olm_base"
+  post_ocr "olm-ocr2" "$olm_base"
+
+  echo "Runpod OCR Pod smoke tests passed."
+}
+
+main "$@"

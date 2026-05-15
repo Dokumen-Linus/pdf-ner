@@ -7,6 +7,8 @@ setup_ecr_and_runtime_role() {
   ensure_ecr_repository "$WEB_ECR_REPOSITORY"
   ensure_ecr_repository "$API_ECR_REPOSITORY"
   ensure_ecr_repository "$WORKERS_ECR_REPOSITORY"
+  ensure_ecr_repository "$GPU_DEEPSEEK_ECR_REPOSITORY"
+  ensure_ecr_repository "$GPU_OLM_OCR2_ECR_REPOSITORY"
 
   EC2_TRUST_POLICY=$(cat <<EOF
 {
@@ -43,7 +45,9 @@ EOF
       "Resource": [
         "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$WEB_ECR_REPOSITORY")",
         "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$API_ECR_REPOSITORY")",
-        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$WORKERS_ECR_REPOSITORY")"
+        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$WORKERS_ECR_REPOSITORY")",
+        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$GPU_DEEPSEEK_ECR_REPOSITORY")",
+        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$GPU_OLM_OCR2_ECR_REPOSITORY")"
       ]
     },
     {

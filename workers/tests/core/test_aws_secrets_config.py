@@ -22,7 +22,7 @@ class FakeSecretsClient:
                 "SecretString": json.dumps(
                     {
                         "OCR_MODEL": "olm-ocr2",
-                        "RUNPOD_API_KEY": "runpod-secret",
+                        "OCR_RUNPOD_HTTP_TOKEN": "runpod-secret",
                         "OCR_RUNPOD_TIMEOUT_SECONDS": 12.5,
                         "OCR_RUNPOD_RETRIES": 2,
                     }
@@ -45,7 +45,7 @@ def test_worker_settings_load_from_aws_secrets(monkeypatch):
 
     assert settings.WORKERS_DATABASE_URL == "postgres://workers-secret/db"
     assert settings.STRIPE_SECRET_KEY == "stripe-secret"
-    assert settings.RUNPOD_API_KEY == "runpod-secret"
+    assert settings.OCR_RUNPOD_HTTP_TOKEN == "runpod-secret"
 
     config.get_settings.cache_clear()
     secrets_config._CACHE.clear()

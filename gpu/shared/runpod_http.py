@@ -3,6 +3,19 @@ import os
 from fastapi import HTTPException, Request, Response, status
 
 
+def require_bearer_token(request: Request) -> None:
+    expected_token = os.getenv("OCR_HTTP_BEARER_TOKEN", "")
+    if not expected_token:
+        return
+
+    scheme, _, token = request.headers.get("authorization", "").partition(" ")
+    if scheme.lower() != "bearer" or token != expected_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing or invalid OCR bearer token",
+        )
+
+
 def readiness_response(request: Request) -> Response:
     if not getattr(request.app.state, "ready", False):
         return Response(status_code=status.HTTP_204_NO_CONTENT)

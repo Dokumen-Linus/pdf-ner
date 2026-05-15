@@ -55,14 +55,14 @@ def _extract_ocr_pages_sync(pdf_bytes: bytes, ocr_method: str) -> list[PageText]
             "deepseek-ocr": RunpodOcrEndpointConfig(
                 model="deepseek-ocr",
                 endpoint_url=settings.DEEPSEEK_OCR_RUNPOD_ENDPOINT_URL,
-                api_key=settings.RUNPOD_API_KEY,
+                api_key=settings.OCR_RUNPOD_HTTP_TOKEN,
                 timeout=settings.OCR_RUNPOD_TIMEOUT_SECONDS,
                 retries=settings.OCR_RUNPOD_RETRIES,
             ),
             "olm-ocr2": RunpodOcrEndpointConfig(
                 model="olm-ocr2",
                 endpoint_url=settings.OLM_OCR2_RUNPOD_ENDPOINT_URL,
-                api_key=settings.RUNPOD_API_KEY,
+                api_key=settings.OCR_RUNPOD_HTTP_TOKEN,
                 timeout=settings.OCR_RUNPOD_TIMEOUT_SECONDS,
                 retries=settings.OCR_RUNPOD_RETRIES,
             ),

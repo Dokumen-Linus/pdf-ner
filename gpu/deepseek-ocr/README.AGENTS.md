@@ -2,7 +2,7 @@
 
 ## Purpose
 
-- FastAPI worker for `deepseek-ai/DeepSeek-OCR` running on Runpod Serverless
+- FastAPI worker for `deepseek-ai/DeepSeek-OCR` running on a fixed Runpod Pod
 - Build and deployment conventions live at the `gpu/` level; keep this worker focused on DeepSeek-specific behavior
 
 ## Contract
@@ -13,4 +13,4 @@
 
 ## Settings
 
-- Worker-specific environment settings are `MODEL_NAME`, `OCR_PROMPT`, `MAX_TOKENS`, `TEMPERATURE`, `NGRAM_SIZE`, and `NGRAM_WINDOW_SIZE`
+- Worker-specific environment settings are `MODEL_NAME`, `OCR_PROMPT`, `MAX_TOKENS`, `TEMPERATURE`, `NGRAM_SIZE`, `NGRAM_WINDOW_SIZE`, and `OCR_HTTP_BEARER_TOKEN`
