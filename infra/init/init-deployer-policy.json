@@ -31,6 +31,20 @@
     },
 
     {
+      "Sid": "RDSBootstrap",
+      "Effect": "Allow",
+      "Action": [
+        "rds:CreateDBInstance",
+        "rds:DescribeDBInstances",
+        "rds:ModifyDBInstance",
+        "rds:CreateDBSubnetGroup",
+        "rds:DescribeDBSubnetGroups",
+        "rds:ModifyDBSubnetGroup"
+      ],
+      "Resource": "*"
+    },
+
+    {
       "Sid": "S3Management",
       "Effect": "Allow",
       "Action": [

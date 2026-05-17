@@ -11,6 +11,7 @@ EC2 instance:       $INSTANCE_ID
 Elastic IP:         $ELASTIC_IP
 VPC:                $VPC_ID
 Public subnet:      $SUBNET_ID
+Public subnet 2:    $SUBNET_2_ID
 Security group:     $SG_ID
 EC2 runtime role:   $EC2_ROLE_ARN
 GitHub deploy role: $GITHUB_DEPLOY_ROLE_ARN
@@ -34,6 +35,11 @@ Local AWS Secrets Manager draft JSON files:
 
 Review and complete all placeholder fields, then create Secrets Manager secrets:
   bash infra/init/create-secrets.sh
+
+RDS setup:
+  bash infra/init/create-prod-rds.sh
+  bash infra/init/create-dev-rds.sh
+  bash infra/init/authorize-rds-admin-ip.sh
 
 Nginx Proxy Manager:
   http://$ELASTIC_IP:81

@@ -36,14 +36,46 @@ configure_defaults() {
 
   VPC_CIDR="${VPC_CIDR:-10.40.0.0/16}"
   PUBLIC_SUBNET_CIDR="${PUBLIC_SUBNET_CIDR:-10.40.1.0/24}"
+  PUBLIC_SUBNET_2_CIDR="${PUBLIC_SUBNET_2_CIDR:-10.40.2.0/24}"
 
   VPC_NAME="${PROJECT_NAME}-vpc"
   SUBNET_NAME="${PROJECT_NAME}-public-subnet"
+  SUBNET_2_NAME="${PROJECT_NAME}-public-subnet-2"
   IGW_NAME="${PROJECT_NAME}-igw"
   ROUTE_TABLE_NAME="${PROJECT_NAME}-public-rt"
   SG_NAME="${PROJECT_NAME}-ec2-sg"
   INSTANCE_NAME="${PROJECT_NAME}-ec2"
   EIP_NAME="${PROJECT_NAME}-eip"
+
+  PROD_RDS_IDENTIFIER="${PROD_RDS_IDENTIFIER:-dokuprod}"
+  PROD_RDS_SUBNET_GROUP_NAME="${PROD_RDS_SUBNET_GROUP_NAME:-${PROJECT_NAME}-prod-rds-subnets}"
+  PROD_RDS_SG_NAME="${PROD_RDS_SG_NAME:-${PROJECT_NAME}-prod-rds-sg}"
+  PROD_RDS_ALLOW_LOCAL_ADMIN="${PROD_RDS_ALLOW_LOCAL_ADMIN:-1}"
+
+  DEV_PROJECT_NAME="${DEV_PROJECT_NAME:-${PROJECT_NAME}-dev}"
+  DEV_VPC_CIDR="${DEV_VPC_CIDR:-10.50.0.0/16}"
+  DEV_PUBLIC_SUBNET_1_CIDR="${DEV_PUBLIC_SUBNET_1_CIDR:-10.50.1.0/24}"
+  DEV_PUBLIC_SUBNET_2_CIDR="${DEV_PUBLIC_SUBNET_2_CIDR:-10.50.2.0/24}"
+  DEV_VPC_NAME="${DEV_VPC_NAME:-${DEV_PROJECT_NAME}-vpc}"
+  DEV_SUBNET_1_NAME="${DEV_SUBNET_1_NAME:-${DEV_PROJECT_NAME}-public-subnet-1}"
+  DEV_SUBNET_2_NAME="${DEV_SUBNET_2_NAME:-${DEV_PROJECT_NAME}-public-subnet-2}"
+  DEV_IGW_NAME="${DEV_IGW_NAME:-${DEV_PROJECT_NAME}-igw}"
+  DEV_ROUTE_TABLE_NAME="${DEV_ROUTE_TABLE_NAME:-${DEV_PROJECT_NAME}-public-rt}"
+  DEV_RDS_IDENTIFIER="${DEV_RDS_IDENTIFIER:-dokudev}"
+  DEV_RDS_SUBNET_GROUP_NAME="${DEV_RDS_SUBNET_GROUP_NAME:-${DEV_PROJECT_NAME}-rds-subnets}"
+  DEV_RDS_SG_NAME="${DEV_RDS_SG_NAME:-${DEV_PROJECT_NAME}-rds-sg}"
+
+  RDS_ENGINE="${RDS_ENGINE:-postgres}"
+  RDS_ENGINE_VERSION="${RDS_ENGINE_VERSION:-18}"
+  RDS_INSTANCE_CLASS="${RDS_INSTANCE_CLASS:-db.t4g.micro}"
+  RDS_ALLOCATED_STORAGE="${RDS_ALLOCATED_STORAGE:-20}"
+  RDS_STORAGE_TYPE="${RDS_STORAGE_TYPE:-gp3}"
+  RDS_DB_NAME="${RDS_DB_NAME:-dokumen}"
+  RDS_MASTER_USERNAME="${RDS_MASTER_USERNAME:-postgres}"
+  RDS_BACKUP_RETENTION_DAYS="${RDS_BACKUP_RETENTION_DAYS:-7}"
+  RDS_DELETION_PROTECTION="${RDS_DELETION_PROTECTION:-1}"
+  RDS_SKIP_FINAL_SNAPSHOT="${RDS_SKIP_FINAL_SNAPSHOT:-0}"
+  RDS_PORT="${RDS_PORT:-5432}"
 
   WEB_ECR_REPOSITORY="${WEB_ECR_REPOSITORY:-${PROJECT_NAME}-web}"
   API_ECR_REPOSITORY="${API_ECR_REPOSITORY:-${PROJECT_NAME}-api}"
@@ -96,6 +128,200 @@ get_single_id_by_name() {
     --filters "$(tag_value_filter "$name")" \
     --query "$query" \
     --output text 2>/dev/null | awk 'NF && $1 != "None" { print $1; exit }'
+}
+
+get_availability_zone() {
+  local index="$1"
+  aws_region ec2 describe-availability-zones \
+    --query "AvailabilityZones[${index}].ZoneName" \
+    --output text
+}
+
+bool_flag() {
+  local value="$1"
+  if [ "$value" = "1" ] || [ "$value" = "true" ] || [ "$value" = "TRUE" ]; then
+    printf "true"
+  else
+    printf "false"
+  fi
+}
+
+ensure_public_subnet() {
+  local vpc_id="$1"
+  local subnet_name="$2"
+  local cidr="$3"
+  local az="$4"
+  local subnet_id
+
+  subnet_id="$(get_single_id_by_name ec2 describe-subnets "$subnet_name" 'Subnets[0].SubnetId')"
+  if [ -z "$subnet_id" ]; then
+    subnet_id=$(aws_region ec2 create-subnet \
+      --vpc-id "$vpc_id" \
+      --cidr-block "$cidr" \
+      --availability-zone "$az" \
+      --tag-specifications "ResourceType=subnet,Tags=[{Key=Name,Value=${subnet_name}}]" \
+      --query 'Subnet.SubnetId' \
+      --output text)
+  fi
+  aws_region ec2 modify-subnet-attribute --subnet-id "$subnet_id" --map-public-ip-on-launch
+  printf '%s' "$subnet_id"
+}
+
+ensure_route_table_association() {
+  local route_table_id="$1"
+  local subnet_id="$2"
+
+  aws_region ec2 associate-route-table \
+    --route-table-id "$route_table_id" \
+    --subnet-id "$subnet_id" >/dev/null 2>&1 || true
+}
+
+get_security_group_id() {
+  local group_name="$1"
+  local vpc_id="$2"
+  aws_region ec2 describe-security-groups \
+    --filters "Name=group-name,Values=${group_name}" "Name=vpc-id,Values=${vpc_id}" \
+    --query 'SecurityGroups[0].GroupId' \
+    --output text 2>/dev/null | awk 'NF && $1 != "None" { print $1; exit }'
+}
+
+ensure_security_group() {
+  local group_name="$1"
+  local description="$2"
+  local vpc_id="$3"
+  local group_id
+
+  group_id="$(get_security_group_id "$group_name" "$vpc_id")"
+  if [ -z "$group_id" ]; then
+    group_id=$(aws_region ec2 create-security-group \
+      --group-name "$group_name" \
+      --description "$description" \
+      --vpc-id "$vpc_id" \
+      --query 'GroupId' \
+      --output text)
+    aws_region ec2 create-tags --resources "$group_id" --tags "Key=Name,Value=${group_name}"
+  fi
+
+  printf '%s' "$group_id"
+}
+
+authorize_tcp_from_cidr() {
+  local group_id="$1"
+  local port="$2"
+  local cidr="$3"
+
+  aws_region ec2 authorize-security-group-ingress \
+    --group-id "$group_id" \
+    --protocol tcp \
+    --port "$port" \
+    --cidr "$cidr" >/dev/null 2>&1 || true
+}
+
+authorize_tcp_from_sg() {
+  local group_id="$1"
+  local port="$2"
+  local source_group_id="$3"
+
+  aws_region ec2 authorize-security-group-ingress \
+    --group-id "$group_id" \
+    --protocol tcp \
+    --port "$port" \
+    --source-group "$source_group_id" >/dev/null 2>&1 || true
+}
+
+get_rds_endpoint() {
+  local db_identifier="$1"
+  aws_region rds describe-db-instances \
+    --db-instance-identifier "$db_identifier" \
+    --query 'DBInstances[0].Endpoint.Address' \
+    --output text 2>/dev/null | awk 'NF && $1 != "None" { print $1; exit }'
+}
+
+ensure_db_subnet_group() {
+  local subnet_group_name="$1"
+  local description="$2"
+  shift 2
+
+  if aws_region rds describe-db-subnet-groups \
+    --db-subnet-group-name "$subnet_group_name" >/dev/null 2>&1; then
+    aws_region rds modify-db-subnet-group \
+      --db-subnet-group-name "$subnet_group_name" \
+      --subnet-ids "$@" >/dev/null
+  else
+    aws_region rds create-db-subnet-group \
+      --db-subnet-group-name "$subnet_group_name" \
+      --db-subnet-group-description "$description" \
+      --subnet-ids "$@" >/dev/null
+  fi
+}
+
+ensure_postgres_rds_instance() {
+  local db_identifier="$1"
+  local subnet_group_name="$2"
+  local security_group_id="$3"
+  local master_password="$4"
+  local publicly_accessible="$5"
+  local deletion_protection="$6"
+  local public_flag deletion_flag
+
+  if [ "$publicly_accessible" = "true" ]; then
+    public_flag="--publicly-accessible"
+  else
+    public_flag="--no-publicly-accessible"
+  fi
+
+  if [ "$deletion_protection" = "true" ]; then
+    deletion_flag="--deletion-protection"
+  else
+    deletion_flag="--no-deletion-protection"
+  fi
+
+  if aws_region rds describe-db-instances \
+    --db-instance-identifier "$db_identifier" >/dev/null 2>&1; then
+    echo "    Reusing RDS instance: $db_identifier"
+    aws_region rds modify-db-instance \
+      --db-instance-identifier "$db_identifier" \
+      --vpc-security-group-ids "$security_group_id" \
+      --backup-retention-period "$RDS_BACKUP_RETENTION_DAYS" \
+      --no-enable-iam-database-authentication \
+      --apply-immediately >/dev/null
+  else
+    aws_region rds create-db-instance \
+      --db-instance-identifier "$db_identifier" \
+      --engine "$RDS_ENGINE" \
+      --engine-version "$RDS_ENGINE_VERSION" \
+      --db-instance-class "$RDS_INSTANCE_CLASS" \
+      --allocated-storage "$RDS_ALLOCATED_STORAGE" \
+      --storage-type "$RDS_STORAGE_TYPE" \
+      --db-name "$RDS_DB_NAME" \
+      --master-username "$RDS_MASTER_USERNAME" \
+      --master-user-password "$master_password" \
+      --db-subnet-group-name "$subnet_group_name" \
+      --vpc-security-group-ids "$security_group_id" \
+      --backup-retention-period "$RDS_BACKUP_RETENTION_DAYS" \
+      --storage-encrypted \
+      --no-enable-iam-database-authentication \
+      "$public_flag" \
+      "$deletion_flag" \
+      --copy-tags-to-snapshot \
+      --no-auto-minor-version-upgrade >/dev/null
+    echo "    Created RDS instance: $db_identifier"
+  fi
+
+  aws_region rds wait db-instance-available --db-instance-identifier "$db_identifier"
+}
+
+postgres_url() {
+  local username="$1"
+  local password="$2"
+  local host="$3"
+  local db_name="$4"
+  local encoded_username encoded_password encoded_db_name
+  encoded_username="$(jq -rn --arg value "$username" '$value|@uri')"
+  encoded_password="$(jq -rn --arg value "$password" '$value|@uri')"
+  encoded_db_name="$(jq -rn --arg value "$db_name" '$value|@uri')"
+  printf 'postgres://%s:%s@%s:%s/%s?sslmode=require' \
+    "$encoded_username" "$encoded_password" "$host" "$RDS_PORT" "$encoded_db_name"
 }
 
 ensure_policy() {

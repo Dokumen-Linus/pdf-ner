@@ -18,15 +18,18 @@ if ! command -v dbmate >/dev/null 2>&1; then
   exit 1
 fi
 
-# echo "Running Better Auth setup against ${RDS_DB}..."
-# echo "BEGIN ONE-TIME SETUP BLOCK"
-# psql -v ON_ERROR_STOP=1 \
-#   --host "$RDS_HOST" \
-#   --port "$RDS_PORT" \
-#   --username "$RDS_ADMIN_USER" \
-#   --dbname "$RDS_DB" \
-#   -f "${DB_DIR}/migrations/better-auth/setup.sql"
-# echo "END ONE-TIME SETUP BLOCK"
+echo "Running Better Auth setup against ${RDS_DB}..."
+echo "NOTE: This is a one-time setup block. If it fails because auth tables or indexes already exist,"
+echo "      comment out the block between BEGIN ONE-TIME BETTER AUTH SETUP and END ONE-TIME BETTER AUTH SETUP,"
+echo "      then rerun this script."
+# BEGIN ONE-TIME BETTER AUTH SETUP
+psql -v ON_ERROR_STOP=1 \
+  --host "$RDS_HOST" \
+  --port "$RDS_PORT" \
+  --username "$RDS_ADMIN_USER" \
+  --dbname "$RDS_DB" \
+  -f "${DB_DIR}/migrations/better-auth/setup.sql"
+# END ONE-TIME BETTER AUTH SETUP
 
 echo "Running dbmate migrations as owner_role..."
 echo "Checking ${RDS_ADMIN_USER} can SET ROLE owner_role..."
