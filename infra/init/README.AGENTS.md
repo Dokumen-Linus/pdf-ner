@@ -18,13 +18,14 @@ Install these locally:
 - AWS CLI v2, authenticated with an IAM Identity Center or other temporary-credential profile.
 - `jq`.
 - `ssh` and `scp`.
+- `psql` and `dbmate` for the later `db/deploy-rds` database bootstrap step.
 - A local SSH key pair for EC2, for example:
 
 ```bash
 ssh-keygen -t ed25519 -f ~/.ssh/dokumen-ec2
 ```
 
-Your deployer profile needs permission to create EC2, VPC, subnet, internet gateway, route table, security group, Elastic IP, S3, SES identity verification, IAM roles/policies, instance profiles, GitHub OIDC, ECR repositories, and Secrets Manager secrets.
+Your deployer profile needs permission to create EC2, VPC, subnet, internet gateway, route table, security group, Elastic IP, RDS instances, RDS subnet groups, S3, SES identity verification, IAM roles/policies, instance profiles, GitHub OIDC, ECR repositories, and Secrets Manager secrets.
 Use one deployer identity for infrastructure setup. Do not use root access.
 
 ## AWS Resources
@@ -34,6 +35,9 @@ Run the setup scripts from the repo root:
 ```bash
 chmod +x infra/init/aws-setup.sh
 chmod +x infra/init/create-secrets.sh
+chmod +x infra/init/create-prod-rds.sh
+chmod +x infra/init/create-dev-rds.sh
+chmod +x infra/init/authorize-rds-admin-ip.sh
 cp infra/init/.env.example infra/init/.env.local
 cp infra/.env.prod.example infra/.env.prod
 # Edit infra/init/.env.local and infra/.env.prod before running.
@@ -46,7 +50,7 @@ one command while making each AWS area easier to inspect:
 
 - `01_common.sh`: paths, env loading, shared AWS and JSON helpers.
 - `02_prerequisites.sh`: required tools, required env vars, AWS account, public IP, and derived names.
-- `03_networking.sh`: VPC, subnet, internet gateway, route table, security group, and SSH key pair.
+- `03_networking.sh`: VPC, two public subnets, internet gateway, route table, security group, and SSH key pair.
 - `04_ec2_instance.sh`: EC2 instance and Elastic IP.
 - `05_avatars_bucket.sh`: private avatar S3 bucket.
 - `06_ecr_and_runtime_role.sh`: ECR repositories and EC2 runtime IAM.
@@ -58,7 +62,7 @@ one command while making each AWS area easier to inspect:
 Together, those scripts create or reuse:
 
 - VPC.
-- Public subnet.
+- Two public subnets in separate Availability Zones.
 - Internet gateway.
 - Public route table.
 - Security group.
@@ -70,6 +74,19 @@ Together, those scripts create or reuse:
 - Private avatar S3 bucket.
 - SES email identity verification request.
 - Local reviewed secret draft JSON files in `infra/init/local-secrets/`.
+
+RDS is intentionally split out from the main setup entrypoint so database
+networking can be run, inspected, retried, and fixed independently:
+
+- `infra/init/create-prod-rds.sh` creates or reuses `dokuprod` in the app VPC.
+  It creates the production DB subnet group and RDS security group, allows
+  PostgreSQL from the EC2 app security group, and can also allow your current
+  public `/32` for local administration.
+- `infra/init/create-dev-rds.sh` creates or reuses `dokudev` in a separate
+  public dev VPC. It allows PostgreSQL only from your current public `/32`.
+- `infra/init/authorize-rds-admin-ip.sh` refreshes current-IP PostgreSQL
+  ingress for the prod/dev RDS security groups when your workstation IP
+  changes.
 
 The setup flow does not create AWS Secrets Manager secrets directly. It only
 creates AWS-generated values where needed and writes them into local draft JSON
@@ -132,8 +149,8 @@ cp infra/init/.env.example infra/init/.env.local
 
 `infra/init/.env.local` stays on your workstation. It provides `aws-setup.sh` inputs
 such as `GITHUB_REPO`, `DEPLOY_BRANCH`, `DOMAIN`, `REPO_URL`, SSH key paths,
-ECR repository names, and setup/deploy toggles. It should not contain private
-app runtime secrets.
+ECR repository names, setup/deploy toggles, and optional RDS bootstrap values.
+It should not contain private app runtime secrets.
 
 `GITHUB_REPO` and `DEPLOY_BRANCH` are intentionally not hardcoded in
 `aws-setup.sh`; the script fails early if they are missing. Keep their defaults
@@ -162,6 +179,29 @@ drafts live in gitignored `infra/init/local-secrets/` and are created by
 `infra/init/aws-setup.sh`.
 
 Keep `.env` files and `infra/init/local-secrets/` out of git.
+
+For RDS creation, either export the RDS master passwords in your shell before
+running the RDS scripts, or keep them in your local uncommitted
+`infra/init/.env.local`:
+
+```env
+PROD_RDS_MASTER_PASSWORD=<strong prod master password>
+DEV_RDS_MASTER_PASSWORD=<strong dev master password>
+```
+
+If you also set the app role passwords in `infra/init/.env.local`,
+`infra/init/create-prod-rds.sh` patches the local Secrets Manager draft JSON
+files with production database URLs:
+
+```env
+OWNER_ROLE_PASSWORD=<owner role password>
+AUTH_ROLE_PASSWORD=<auth role password>
+WEB_USER_PASSWORD=<web role password>
+API_USER_PASSWORD=<api role password>
+WORKERS_USER_PASSWORD=<workers role password>
+```
+
+Use the same role password values when running `db/deploy-rds/run_all.sh`.
 
 ## Public Web Build Variables
 
@@ -219,6 +259,8 @@ The secret workflow is deliberately two-step:
    `infra/init/local-secrets/`.
 2. The setup script patches AWS-generated/non-secret values into those drafts:
    SES region, avatar bucket name and region, and PDF-storage region.
+   `infra/init/create-prod-rds.sh` can also patch production RDS URLs if app
+   role passwords are available in the local environment.
 3. You review and complete every remaining non-AWS field locally, including
    database URLs, API keys, healthcheck tokens, LLM keys, Stripe keys, Runpod
    values, sender/admin email, and Better Auth values.
@@ -243,18 +285,78 @@ operation.
 
 ## RDS Database Initialization
 
-If Postgres is hosted in AWS RDS, do not use the local `db` container as the
-production source of truth. From a machine that can reach the RDS endpoint,
-install `psql` and `dbmate`, export the one-time RDS/admin/role password values,
-then run:
+You will run scripts in both `infra/init` and `db/deploy-rds` for a fresh RDS
+deployment. The split is deliberate:
+
+- `infra/init` creates AWS infrastructure: VPC/subnets/routes/security groups,
+  RDS instances, DB subnet groups, IAM, ECR, EC2, S3, SES, and secret drafts.
+- `db/deploy-rds` connects to an existing RDS endpoint and creates the
+  PostgreSQL database, roles, schemas, grants, migrations, seeds, and direct
+  app-role health checks.
+
+Create or update the production RDS instance:
 
 ```bash
-bash db/init/rds/run_all.sh
+bash infra/init/create-prod-rds.sh
 ```
 
-The script creates the database, roles, schemas, grants, Better Auth tables,
-numbered migrations, and seed data. After it succeeds, store the app-specific
-RDS URLs in Secrets Manager.
+`dokuprod` is created in the app VPC. Its RDS security group allows PostgreSQL
+from the EC2 app security group so the Docker Compose apps keep database
+access through normal VPC networking. If `PROD_RDS_ALLOW_LOCAL_ADMIN=1`, the
+script also allows your current public `/32` for local `psql` and `dbmate`
+bootstrap.
+
+Create or update the development RDS instance:
+
+```bash
+bash infra/init/create-dev-rds.sh
+```
+
+`dokudev` is created in a separate public dev VPC and is accessible only from
+your current public `/32` using normal Postgres credentials and
+`sslmode=require`. RDS IAM database authentication is not enabled.
+
+If your workstation IP changes, refresh the RDS admin ingress rules:
+
+```bash
+bash infra/init/authorize-rds-admin-ip.sh
+```
+
+After each RDS instance exists, run the database bootstrap against its endpoint.
+From a machine that can reach the RDS endpoint, install `psql` and `dbmate`,
+export the one-time RDS/admin/role password values, then run:
+
+```bash
+export RDS_HOST=<endpoint printed by create-prod-rds.sh or create-dev-rds.sh>
+export RDS_PORT=5432
+export RDS_DB=dokumen
+export RDS_ADMIN_DB=postgres
+export RDS_ADMIN_USER=postgres
+export PGPASSWORD=<matching RDS master password>
+export PGSSLMODE=require
+
+export OWNER_ROLE_PASSWORD=<owner role password>
+export AUTH_ROLE_PASSWORD=<auth role password>
+export WEB_USER_PASSWORD=<web role password>
+export API_USER_PASSWORD=<api role password>
+export WORKERS_USER_PASSWORD=<workers role password>
+
+bash db/deploy-rds/run_all.sh
+```
+
+Run `db/deploy-rds/run_all.sh` once for `dokuprod` and once for `dokudev` if
+both instances should contain the Dokumen schema and seed/reference data.
+
+The script creates or updates the `dokumen` database, roles, schemas, grants,
+Better Auth tables, numbered migrations, and seed data. Its health check
+connects directly as each app role using its own password, which verifies the
+same credential path used by web, API, and workers.
+
+After `dokuprod` succeeds, create or update the app-specific RDS URLs in AWS
+Secrets Manager. If `infra/init/create-prod-rds.sh` had the app role passwords
+available, it already patched the local draft JSON files in
+`infra/init/local-secrets/`; review those drafts and run
+`infra/init/create-secrets.sh` when ready.
 
 The Compose `db` service is behind the `local-db` profile. Production starts
 without it by default; use `--profile local-db` only for local/single-host
@@ -384,15 +486,20 @@ AWS setup required for GitHub Actions:
    permissions for the EC2 instance.
 8. Writes reviewed local Secrets Manager draft files to
    `infra/init/local-secrets/`; it does not create AWS Secrets Manager secrets.
+9. RDS creation is separate: run `infra/init/create-prod-rds.sh` and/or
+   `infra/init/create-dev-rds.sh`, then run `db/deploy-rds/run_all.sh` against
+   each endpoint you want initialized.
 
 Configure these in `infra/init/.env.local` before running the script:
 
 ```env
 GITHUB_REPO=your-org/pdf-ner
-DEPLOY_BRANCH=main
+DEPLOY_BRANCH=master
 WEB_ECR_REPOSITORY=dokumen-web
 API_ECR_REPOSITORY=dokumen-api
 WORKERS_ECR_REPOSITORY=dokumen-workers
+PROD_RDS_IDENTIFIER=dokuprod
+DEV_RDS_IDENTIFIER=dokudev
 ```
 
 Then run `bash infra/init/aws-setup.sh`.
