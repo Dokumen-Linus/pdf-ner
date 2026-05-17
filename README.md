@@ -1,66 +1,214 @@
 # Dokumen AI Monorepo
 
-## Quickstart
+## Dependencies
 
-1 Install [Git](https://git-scm.com/downloads), [Bun](https://bun.sh/) and [Microsoft VS Code](https://code.visualstudio.com/download) or fork
-2 Clone repo:
+**quickstart.sh**: script to install all dependencies
 
-```cmd
-git clone https://github.com/optimalcharb/pdf-entity-labeling.git
+### Runtime
+
+JavaScript:
+
+- [Node.js v24](https://nodejs.org/en/download)
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt install -y nodejs
 ```
 
-3 Install recommended extensions
+Python:
 
-4 Install JavaScript libraries for formatting and linting in base dir
+- [CPython v13.3](https://www.python.org/downloads/) via pyenv (NOT conda)
+- Uvicorn [uv](https://docs.astral.sh/uv/)
 
-```cmd
-bun i
-```
-
-5 Follow the quickstart instructions in ./db/README.md and any apps (api, web, workers) you want to use
-
-6 Install CLIs globally and add to PATH (Windows) if you want to use them in Claude Code hooks or other purposes
-
-Selectively install:
-
-```cmd
-npm install -g @playwright/test
-npm install -g @tanstack/cli
-npm install -g better-auth-cli
-npm install -g cross-env
-npm install -g drizzle-kit
-pip install jq
-pip install pytest
-pip install ruff
+```bash
 pip install uv
 ```
 
-Install all:
+Other:
 
-```cmd
-npm install -g @playwright/test @tanstack/cli better-auth-cli cross-env drizzle-kit
-pip install jq pytest ruff uv
+- [PostgreSQL](https://www.postgresql.org/download/) and [dbmate](https://github.com/amacneil/dbmate)
+- [C and C++](https://gcc.gnu.org/)
+- Docker [Desktop](https://www.docker.com/products/docker-desktop/) + [Compose](https://docs.docker.com/compose/)
+- [Redis](https://redis.io/download/)
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract)
+
+```bash
+sudo apt install -y build-essential postgresql postgresql-contrib redis-server tesseract-ocr
+# Docker Desktop: see https://docs.docker.com/engine/install/ubuntu/
 ```
 
-## Version Control
+### Linting
+
+JavaScript:
+
+- [ESLint](https://eslint.org/)
+- [Prettier](https://prettier.io/)
+
+```bash
+npm install -g eslint @tanstack/eslint-plugin-start @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-config-prettier eslint-import-resolver-typescript eslint-plugin-import eslint-plugin-react eslint-plugin-react-hooks prettier prettier-plugin-tailwindcss
+```
+
+Python:
+
+- [ruff](https://docs.astral.sh/ruff/)
+- [pyright](https://github.com/microsoft/pyright)
+
+```bash
+pip install ruff pyright
+```
+
+### Testing
+
+JavaScript:
+
+- [Bun](https://bun.sh/)
+- [Playwright](https://playwright.dev/)
+- [cross-env](https://www.npmjs.com/package/cross-env)
+- [Drizzle Kit](https://orm.drizzle.team/kit-docs/overview)
+
+```bash
+npm install -g @playwright/test @tanstack/cli better-auth cross-env drizzle-kit
+```
+
+Python:
+
+- [pytest](https://docs.pytest.org/en/8.3.x/getting-started.html)
+
+```bash
+pip install pytest pytest-anyio pytest-mock pytest-cov pytest-celery
+```
+
+### Package Checking
+
+Included in each app so global install is *optional*.
+
+Javascript:
+
+- [depcheck](https://www.npmjs.com/package/depcheck)
+- [patch-package](https://www.npmjs.com/package/patch-package)
+
+Python:
+
+- [deptry](https://deptry.com/)
+
+```bash
+npm install -g depcheck patch-package
+pip install deptry
+```
+
+### Docs
+
+*Optional* installs for docs about specific tools:
+
+- [Tanstack CLI](https://tanstack.com/cli)
+- [BetterAuth CLI](https://www.better-auth.com/)
+
+```bash
+npm install -g @tanstack/cli better-auth
+```
+
+### Source Control and CI/CD
+
+Required installs:
+
+- [Git](https://git-scm.com/downloads)
+- [Microsoft VS Code](https://code.visualstudio.com/download) and this repo's recommended extensions
+- root dir package.json: [husky](https://github.com/typicode/husky) and commit-lint
+
+```bash
+bun i
+```
+
+Recommended installs:
+
+- [GitHub CLI](https://cli.github.com/)
+- [Go](https://go.dev/dl/)
+- [Rust](https://www.rust-lang.org/tools/install)
+- [scc](https://github.com/boyter/scc)
+- [actionlint](https://github.com/rhysd/actionlint)
+- [OpenSSH](https://www.openssh.com/)
+
+```bash
+# GitHub CLI
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
+sudo apt update && sudo apt install -y gh
+
+# Go
+wget -q https://go.dev/dl/go1.22.0.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz
+
+# Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+# scc
+go install github.com/boyter/scc@latest
+
+# actionlint
+curl -fsSL https://github.com/rhysd/actionlint/releases/latest/download/actionlint-linux-amd64.tar.gz | sudo tar -xz -C /usr/local/bin actionlint
+
+# OpenSSH
+sudo apt install -y openssh-client openssh-server
+```
+
+Recommended to not install (run on GitHub Actions only):
+
+- [git-cliff](https://git-cliff.org/docs/)
+- [Codesight](https://github.com/Houseofmvps/codesight)
+
+### Integrations
+
+- [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html)
+- [runpodctl](https://github.com/runpod/runpodctl)
+- [Stripe CLI](https://docs.stripe.com/stripe-cli)
+- [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
+
+```bash
+# AWS CLI v2
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip && sudo ./aws/install && rm -rf awscliv2.zip aws/
+
+# runpodctl
+curl -fsSL -o runpodctl https://github.com/runpod/runpodctl/releases/latest/download/runpodctl-linux-amd64
+chmod +x runpodctl && sudo mv runpodctl /usr/local/bin/
+
+# Stripe CLI
+curl -fsSL https://packages.stripe.dev/api/security/keypair/stripe-cli-gpg/public | sudo gpg --dearmor -o /usr/share/keyrings/stripe.gpg
+echo "deb [signed-by=/usr/share/keyrings/stripe.gpg] https://packages.stripe.dev/stripe-cli-deb stable main" | sudo tee /etc/apt/sources.list.d/stripe.list
+sudo apt update && sudo apt install -y stripe
+
+# cloudflared
+curl -fsSL -o cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+sudo dpkg -i cloudflared.deb
+```
+
+### Coding Agents
+
+- [Codex](https://github.com/openai/codex)
+- [OpenCode](https://opencode.ai)
+
+```bash
+npm install -g @openai/codex
+```
+
+## CI/CD
+
+[GitHub Actions](https://github.com/features/actions)
+
+- auto-docs: generate CHANGELOG.md and .codesight/wiki
+- auto-format: format code (Python with ruff, TypeScript with prettier and eslint)
+- commitlint: enforces commit pattern
+- deploy-api: deploy API to AWS
+- deploy-web: deploy web to AWS
+- deploy-workers: deploy workers to AWS
+- deploy-gpu-pods: deploy models to Runpod
 
 ### Documentation
 
 - CHANGELOG.md: auto-updated by [git-cliff](https://git-cliff.org/docs/) following [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/) format that catches new conventional commits
 - .codesight/wiki: generated by [Codesight](https://github.com/Houseofmvps/codesight) to quickly document layout and functionality of the repo. Codesight uses the AST generated by the official custom TypeScript compiler API and regex detectors for Python
 
-### CI/CD
-
-[GitHub Actions](https://github.com/features/actions)
-
-- auto-docs: generate CHANGELOG.md and .codesight/wiki
-- auto-format: format code (Python with ruff, web with prettier and eslint)
-- commitlint: enforces commit pattern
-- deploy-api: deploy API to AWS
-- deploy-web: deploy web to AWS
-- deploy-workers: deploy workers to AWS
-
-### Changelog and Required Commit Pattern
+### Required Commit Pattern
 
 [Conventional Commits](https://www.conventionalcommits.org/) enforced by [husky](https://github.com/typicode/husky) config by .commitlintrc.json, commit messages must start with a prefix in the table below, the workflow edits CHANGELOG.md on any version bump
 
@@ -77,20 +225,3 @@ pip install jq pytest ruff uv
 | refactor:     | none                   | reorganizing code without changes          |
 | chore:        | none                   | maintenance tasks                          |
 | build:        | none                   | build system or dependencies               |
-
-### Auto-Format and Auto-Lint
-
-For the VSCode plugins and Claude Code hooks for auto-formatting to work correctly, you need to have Python installed globally with executable path "python", ruff installed globally (pip install ruff outside of any Python env), bun installed globally with executable path "bunx".
-
-## Database
-
-The [PostgreSQL](https://www.postgresql.org/) database is defined by SQL scripts. Migrations are performed by [dbmate](https://github.com/amacneil/dbmate). The database server needs to be started before running code that depends on it. The database will be saved locally in .\pgdata. To start, run this script in a separate, dedicated terminal:
-
-```cmd
-pg_ctl -D .\pgdata -l logfile start
-```
-
-## Deployment
-
-- [Docker](https://www.docker.com/)
-- [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html)
