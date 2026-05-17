@@ -667,6 +667,9 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(db)* Deployment scripts
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Documentation and script for dependencies
+- New deployment scripts
 
 ### ◀️ Revert
 
