@@ -24,6 +24,7 @@ set -uo pipefail
 # - Rust
 # - scc
 # - actionlint
+# - ShellCheck
 # - OpenSSH (optional)
 # - Tesseract OCR
 # - Google Chrome
@@ -239,7 +240,7 @@ install_nodejs() {
         return 0
     fi
 
-    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - || return
+    curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - || return
     sudo apt update || return
     sudo apt install -y nodejs || return
 
@@ -489,6 +490,16 @@ verify_tesseract() {
     tesseract --version || return
 }
 
+install_shellcheck() {
+    if command_exists shellcheck; then
+        echo "ShellCheck already installed at $(command -v shellcheck)"
+        return 0
+    fi
+
+    sudo apt install -y shellcheck || return
+    shellcheck --version || return
+}
+
 install_go() {
     if command_exists go; then
         echo "Go already installed at $(command -v go)"
@@ -500,7 +511,7 @@ install_go() {
 
     (
         cd "$tmp_dir" || exit
-        wget -q https://go.dev/dl/go1.22.0.linux-amd64.tar.gz -O go.tar.gz || exit
+        wget -q https://go.dev/dl/go1.26.3.linux-amd64.tar.gz -O go.tar.gz || exit
         sudo rm -rf /usr/local/go
         sudo tar -C /usr/local -xzf go.tar.gz || exit
     ) || return
@@ -653,7 +664,8 @@ print_executable_checks() {
         go \
         rustc \
         scc \
-        actionlint; do
+        actionlint \
+        shellcheck; do
         if command_exists "$executable"; then
             printf "%-14s %s\n" "$executable:" "$(command -v "$executable")"
         else
@@ -704,6 +716,7 @@ print_versions() {
     rustc --version || true
     scc --version || true
     actionlint --version || true
+    shellcheck --version || true
 }
 
 run_step "Updating system and installing Ubuntu packages" install_ubuntu_packages
@@ -723,6 +736,7 @@ run_optional_step "Configuring OpenSSH" configure_openssh
 run_step "Verifying C and C++ toolchains" verify_cpp_toolchain
 run_step "Installing Docker" install_docker
 run_step "Installing GitHub CLI" install_github_cli
+run_step "Installing ShellCheck" install_shellcheck
 run_step "Installing Go" install_go
 run_step "Installing Rust" install_rust
 run_step "Installing scc" install_scc

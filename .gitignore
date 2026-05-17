@@ -1,8 +1,8 @@
 .env
 .env.local
-infra/init/.env.local
+.env.prod
 infra/init/local-secrets/
-infra/runpod/.env.local
+infra/init/local-state/
 infra/runpod/local-state/
 
 *.log
@@ -24,7 +24,6 @@ __pycache__/
 .coverage
 
 # JavaScript
-**/node_modules/
 node_modules/
 
 # PostgreSQL
@@ -38,6 +37,7 @@ CLAUDE.md
 .kilo/skills
 .skill-lock.json
 skills-lock.json
+session*.md
 
 # Build
 build/
