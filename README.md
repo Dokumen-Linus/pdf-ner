@@ -128,6 +128,7 @@ Recommended installs:
 - [scc](https://github.com/boyter/scc)
 - [actionlint](https://github.com/rhysd/actionlint)
 - [ShellCheck](https://github.com/koalaman/shellcheck)
+- [Docker Credential Helpers](https://github.com/docker/docker-credential-helpers)
 
 ```bash
 # GitHub CLI
@@ -135,9 +136,9 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githu
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
 sudo apt update && sudo apt install -y gh
 
-# Go
-wget -q https://go.dev/dl/go1.26.3.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.26.3.linux-amd64.tar.gz
+# Go (latest stable)
+wget -q https://go.dev/dl/$(curl -sL "https://go.dev/dl/" | grep -oP 'go[0-9]+\.[0-9]+\.[0-9]+\.linux-amd64\.tar\.gz' | head -1)
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go*.tar.gz
 
 # Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -153,6 +154,16 @@ curl -fsSL https://github.com/rhysd/actionlint/releases/latest/download/actionli
 
 # ShellCheck
 sudo apt install -y shellcheck
+
+# Docker Credential Helpers
+sudo apt install -y golang-docker-credential-helpers
+
+# Configure credential store
+mkdir -p ~/.docker && cat > ~/.docker/config.json <<'EOF'
+{
+    "credsStore": "secretservice"
+}
+EOF
 ```
 
 Recommended to not install (run on GitHub Actions only):
