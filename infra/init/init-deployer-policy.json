@@ -3,7 +3,7 @@
   "Statement": [
 
     {
-      "Sid": "EC2AndNetworking",
+      "Sid": "EC2Bootstrap",
       "Effect": "Allow",
       "Action": [
         "ec2:*"
@@ -24,12 +24,7 @@
       "Sid": "ECRBootstrap",
       "Effect": "Allow",
       "Action": [
-        "ecr:CreateRepository",
-        "ecr:DescribeRepositories",
-        "ecr:PutImageScanningConfiguration",
-        "ecr:PutImageTagMutability",
-        "ecr:PutLifecyclePolicy",
-        "ecr:TagResource"
+        "ecr:*"
       ],
       "Resource": "*"
     },
@@ -38,13 +33,7 @@
       "Sid": "RDSBootstrap",
       "Effect": "Allow",
       "Action": [
-        "rds:CreateDBInstance",
-        "rds:DescribeDBInstances",
-        "rds:ModifyDBInstance",
-        "rds:CreateDBSubnetGroup",
-        "rds:DescribeDBSubnetGroups",
-        "rds:ModifyDBSubnetGroup",
-        "rds:AddTagsToResource"
+        "rds:*"
       ],
       "Resource": "*"
     },
@@ -88,34 +77,10 @@
     },
 
     {
-      "Sid": "LimitedRoleManagement",
+      "Sid": "UnlimitedRoleManagement",
       "Effect": "Allow",
       "Action": [
-        "iam:ListPolicies",
-        "iam:CreatePolicy",
-        "iam:DeletePolicy",
-        "iam:GetPolicy",
-        "iam:ListPolicyVersions",
-        "iam:CreatePolicyVersion",
-        "iam:DeletePolicyVersion",
-        "iam:CreateRole",
-        "iam:DeleteRole",
-        "iam:GetRole",
-        "iam:UpdateAssumeRolePolicy",
-        "iam:AttachRolePolicy",
-        "iam:DetachRolePolicy",
-        "iam:PutRolePolicy",
-        "iam:TagRole",
-        "iam:TagPolicy",
-        "iam:PassRole",
-        "iam:CreateServiceLinkedRole",
-        "iam:ListOpenIDConnectProviders",
-        "iam:CreateOpenIDConnectProvider",
-        "iam:GetInstanceProfile",
-        "iam:CreateInstanceProfile",
-        "iam:AddRoleToInstanceProfile",
-        "iam:TagInstanceProfile",
-        "iam:TagOpenIDConnectProvider"
+        "iam:*"
       ],
       "Resource": "*"
     },

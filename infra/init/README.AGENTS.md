@@ -224,6 +224,17 @@ binary instead of installing the conflicting full `curl` package.
 docker compose -f infra/docker-compose.yml --env-file infra/.env.prod up -d --build
 ```
 
+The production EC2 Compose stack uses these service names and images:
+
+| Service | Image in `docker compose ps` | Source | Notes |
+| --- | --- | --- | --- |
+| `nginx-proxy-manager` | `jc21/nginx-proxy-manager:latest` | Public image | Exposes ports `80`, `81`, and `443` on the host. |
+| `redis` | `redis:7-alpine` | Public image | Internal backend Redis service with a health check. |
+| `api` | `infra-api` | Built from `api/Dockerfile` | Binds `127.0.0.1:8000`; public traffic should go through Nginx Proxy Manager. |
+| `worker` | `infra-worker` | Built from `workers/Dockerfile` | Celery worker; uses backend Redis and outbound egress. |
+| `web` | `infra-web` | Built from `web/Dockerfile` | Binds host port `3000`; public traffic should go through Nginx Proxy Manager. |
+| `db` | `infra-db` | Built from `db/Dockerfile` | Local fallback only; excluded from production unless the `local-db` profile is explicitly enabled. |
+
 To provision AWS resources without deploying the app:
 
 ```bash

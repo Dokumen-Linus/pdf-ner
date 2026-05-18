@@ -12,12 +12,9 @@ WORKDIR /src
 
 # Install dependencies first (layer caching)
 COPY workers/pyproject.toml workers/uv.lock ./workers/
-COPY packages/llm_providers/ ./packages/llm_providers/
-COPY packages/otel_py/ ./packages/otel_py/
-COPY packages/pdf_ocr_utils/ ./packages/pdf_ocr_utils/
-COPY packages/pdfium_utils/ ./packages/pdfium_utils/
-COPY packages/aws_secrets_config/ ./packages/aws_secrets_config/
+COPY packages/ ./packages/
 WORKDIR /src/workers
+ENV UV_PROJECT_ENVIRONMENT=/app/.venv
 RUN uv sync --no-dev --no-install-project --frozen
 
 # Copy source and install project
@@ -37,7 +34,8 @@ RUN groupadd -g 1001 appgroup && \
 
 WORKDIR /app
 
-COPY --from=build --chown=appuser:appgroup /src/workers/.venv /app/.venv
+COPY --from=build --chown=appuser:appgroup /app/.venv /app/.venv
+COPY --from=build --chown=appuser:appgroup /src/packages /src/packages
 COPY --from=build --chown=appuser:appgroup /src/workers/app /app/app
 
 ENV PATH="/app/.venv/bin:$PATH"
