@@ -22,3 +22,14 @@ personality = false
 memories = false
 shell_snapshot = true
 shell_tool = true
+
+[mcp_servers.aws_mcp]
+command = "uvx"
+args = [
+  "mcp-proxy-for-aws@latest",
+  "https://aws-mcp.us-east-1.api.aws/mcp",
+  "--metadata", "AWS_REGION=us-east-1"
+]
+
+[mcp_servers.aws_mcp.tools.aws___call_aws]
+approval_mode = "approve"

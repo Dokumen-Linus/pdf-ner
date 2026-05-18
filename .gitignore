@@ -1,6 +1,7 @@
 .env
 .env.local
 .env.prod
+.env.dev
 infra/init/local-secrets/
 infra/init/local-state/
 infra/runpod/local-state/
