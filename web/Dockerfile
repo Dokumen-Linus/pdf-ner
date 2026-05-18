@@ -25,14 +25,18 @@ RUN groupadd -g 1001 appgroup && \
 
 WORKDIR /app
 
-COPY --from=builder --chown=appuser:appgroup /app/dist ./dist
+COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appgroup /app/.output ./.output
+COPY --from=builder --chown=appuser:appgroup /app/package.json ./package.json
 
 USER 1001
 
 EXPOSE 3000
+ENV HOST=0.0.0.0
+ENV NPM_CONFIG_CACHE=/tmp/.npm
+ENV PORT=3000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD ["node", "-e", "const h=require('http');h.get('http://localhost:3000/api/healthz',r=>{process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))"]
+    CMD ["node", "-e", "const net=require('net');const s=net.createConnection({host:'127.0.0.1',port:3000},()=>{s.destroy();process.exit(0)});s.on('error',()=>process.exit(1));s.setTimeout(5000,()=>{s.destroy();process.exit(1)})"]
 
-# TanStack Start emits a Node server bundle under dist/server.
-CMD ["node", "dist/server/server.js"]
+CMD ["npm", "run", "start"]

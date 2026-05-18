@@ -60,11 +60,9 @@ services:
       dockerfile: api/Dockerfile
     ports:
       - "127.0.0.1:8000:8000"
-    environment:
-      ENV: ${ENV}
-      APP_VERSION: ${APP_VERSION}
-      SECRETS_STAGE: ${SECRETS_STAGE}
-      AWS_REGION: ${AWS_REGION}
+    env_file:
+      - path: .env.prod
+        required: true
     depends_on:
       redis:
         condition: service_healthy
@@ -77,11 +75,9 @@ services:
     build:
       context: ..
       dockerfile: workers/Dockerfile
-    environment:
-      ENV: ${ENV}
-      APP_VERSION: ${APP_VERSION}
-      SECRETS_STAGE: ${SECRETS_STAGE}
-      AWS_REGION: ${AWS_REGION}
+    env_file:
+      - path: .env.prod
+        required: true
     depends_on:
       redis:
         condition: service_healthy
@@ -99,11 +95,9 @@ services:
         VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
     ports:
       - "3000:3000"
-    environment:
-      ENV: ${ENV}
-      APP_VERSION: ${APP_VERSION}
-      SECRETS_STAGE: ${SECRETS_STAGE}
-      AWS_REGION: ${AWS_REGION}
+    env_file:
+      - path: .env.prod
+        required: true
     networks:
       - backend
       - frontend

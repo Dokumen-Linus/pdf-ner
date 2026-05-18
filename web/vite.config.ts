@@ -2,6 +2,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import { paraglideVitePlugin } from "@inlang/paraglide-js"
 import tailwindcss from "@tailwindcss/vite"
 import viteReact from "@vitejs/plugin-react"
+import { nitro } from "nitro/vite"
 import { generateSitemap } from "tanstack-router-sitemap"
 import { defineConfig } from "vite"
 import viteTsConfigPaths from "vite-tsconfig-paths"
@@ -15,6 +16,7 @@ const config = defineConfig({
     }),
     tailwindcss(),
     tanstackStart(),
+    nitro(),
     paraglideVitePlugin({
       project: "./project.inlang",
       outdir: "./src/integrations/paraglide",
