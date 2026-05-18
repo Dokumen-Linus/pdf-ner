@@ -236,6 +236,9 @@
 - *(db)* Typos
 - *(web)* Platform.tsx i18n
 - *(ci)* Web dockerfile uses bun for install, npm for build
+- *(ci)* Remove old db dockerfile
+- *(ci)* Healthcheck
+- *(ci)* Continue fixing dockerfiles
 
 ### 💼 Other
 
@@ -511,6 +514,7 @@
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
+- Auto-format code [skip ci]
 
 ### 🧪 Testing
 
@@ -686,6 +690,8 @@
 - *(db)* Rds deploy scripts
 - *(gpu)* Init runpod deployment
 - *(aws)* Continue init deploy
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Move in-progress actions to disabled-workflows
 
 ### ◀️ Revert
 
