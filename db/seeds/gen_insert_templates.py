@@ -30,9 +30,7 @@ def format_sql_array(items: list[str]) -> str:
 
 def read_template(template_number: int) -> tuple[str, list[str]]:
     """Read a template file and return (content, inserts)."""
-    template_path = os.path.join(
-        os.path.dirname(__file__), "templates", f"{template_number}.txt"
-    )
+    template_path = os.path.join(os.path.dirname(__file__), "templates", f"{template_number}.txt")
     with open(template_path, encoding="utf-8") as f:
         content = f.read()
     inserts = extract_inserts(content)
@@ -42,9 +40,7 @@ def read_template(template_number: int) -> tuple[str, list[str]]:
 def generate_seed() -> str:
     """Generate the SQL seed content."""
     templates_dir = os.path.join(os.path.dirname(__file__), "templates")
-    template_files = sorted(
-        [f for f in os.listdir(templates_dir) if f.endswith(".txt")]
-    )
+    template_files = sorted([f for f in os.listdir(templates_dir) if f.endswith(".txt")])
 
     values_lines = []
     for filename in template_files:
@@ -53,9 +49,7 @@ def generate_seed() -> str:
         escaped_txt = escape_sql_string(content)
         inserts_array = format_sql_array(inserts)
 
-        values_lines.append(
-            f"('{escaped_txt}', {inserts_array}, true, true, true, true, true)"
-        )
+        values_lines.append(f"('{escaped_txt}', {inserts_array}, true, true, true, true, true)")
 
     values_sql = ",\n".join(values_lines)
 
@@ -79,6 +73,7 @@ def main() -> None:
 
     # Generate timestamped filename like the old script did
     from datetime import datetime
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_path = os.path.join(os.path.dirname(__file__), f"{timestamp}.sql")
 
@@ -86,7 +81,9 @@ def main() -> None:
         f.write(sql)
 
     print(f"Generated SQL seed file: {output_path}")
-    print(f"Inserted {len([f for f in os.listdir(os.path.join(os.path.dirname(__file__), 'templates')) if f.endswith('.txt')])} templates")
+    print(
+        f"Inserted {len([f for f in os.listdir(os.path.join(os.path.dirname(__file__), 'templates')) if f.endswith('.txt')])} templates"
+    )
 
 
 if __name__ == "__main__":
