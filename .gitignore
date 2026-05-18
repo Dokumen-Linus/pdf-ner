@@ -5,6 +5,7 @@
 infra/init/local-secrets/
 infra/init/local-state/
 infra/runpod/local-state/
+infra/data
 
 *.log
 logfile
