@@ -128,6 +128,7 @@ configure_defaults() {
   REPO_URL="${REPO_URL:-https://github.com/optimalcharb/pdf-ner.git}"
   DEPLOY_BRANCH="${DEPLOY_BRANCH:-}"
   GITHUB_REPO="${GITHUB_REPO:-}"
+  GITHUB_DEPLOY_KEY_PATH="${GITHUB_DEPLOY_KEY_PATH:-}"
 
   KEY_NAME="${KEY_NAME:-${PROJECT_NAME}-ec2}"
   SSH_PUBKEY_PATH="${SSH_PUBKEY_PATH:-$HOME/.ssh/${PROJECT_NAME}-ec2.pub}"
@@ -1327,6 +1328,7 @@ ensure_instance_profile_attached() {
 
 remote_run() {
   local elastic_ip="$1"
+  shift
   ssh \
     -o StrictHostKeyChecking=accept-new \
     -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" \

@@ -210,12 +210,15 @@ The setup script can also SSH into the instance, install the EC2 host tooling
 required by deployment and post-deploy health checks, clone the repo, upload
 `infra/.env.prod` if it exists locally, and run:
 
-- Docker Engine with the `docker compose` v2 command.
+- Docker Engine with the `docker compose` and `docker buildx` v2 plugins.
 - AWS CLI.
 - `jq`.
 - `curl`.
 - Git.
 - Amazon SSM Agent.
+
+Amazon Linux 2023 installs `curl-minimal` by default; use that existing `curl`
+binary instead of installing the conflicting full `curl` package.
 
 ```bash
 docker compose -f infra/docker-compose.yml --env-file infra/.env.prod up -d --build
@@ -293,6 +296,10 @@ It should not contain private app runtime secrets.
 `GITHUB_REPO` and `DEPLOY_BRANCH` are intentionally not hardcoded in
 `aws-setup.sh`; the script fails early if they are missing. Keep their defaults
 in `infra/init/.env.example` and your real values in `infra/init/.env.local`.
+`07_github_deploy_role.sh` creates AWS IAM/OIDC permissions for GitHub Actions;
+it does not create GitHub credentials for EC2. For a private repo, create a
+GitHub read-only deploy key and set `GITHUB_DEPLOY_KEY_PATH` to the local
+private key path before running the EC2 deployment step.
 
 Create the EC2 production bootstrap env file:
 
