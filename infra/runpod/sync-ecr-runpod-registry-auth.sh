@@ -17,7 +17,7 @@ fi
 
 AWS_REGION="${AWS_REGION:-us-east-1}"
 PROJECT_NAME="${PROJECT_NAME:-dokumen}"
-REGISTRY_AUTH_NAME="${REGISTRY_AUTH_NAME:-${PROJECT_NAME}-ecr-$(date -u +%Y%m%d%H%M%S)}"
+REGISTRY_AUTH_NAME="${REGISTRY_AUTH_NAME:-${PROJECT_NAME}-ecr-$(date -u +%Y%m%d%H%M%S)-$$}"
 RUNPOD_API_KEY="${RUNPOD_API_KEY:-}"
 
 require_cmd() {
@@ -43,10 +43,6 @@ state_set() {
 require_cmd aws
 require_cmd jq
 require_cmd runpodctl
-
-if [ -n "$RUNPOD_API_KEY" ]; then
-  runpodctl config --apiKey "$RUNPOD_API_KEY" >/dev/null
-fi
 
 ECR_PASSWORD="$(aws --region "$AWS_REGION" ecr get-login-password)"
 CREATE_RESPONSE="$(runpodctl registry create \
