@@ -2,7 +2,8 @@
 
 setup_ses_identity() {
   echo ""
-  echo ">>> 8. Secret drafts and SES identity"
+  echo ">>> Secret drafts and SES identity"
+  require_setup_values "Secret drafts and SES identity" AVATARS_S3_BUCKET_NAME
   ensure_secret_drafts
   set_secret_draft_value prod-email.json SES_AWS_REGION "$AWS_REGION"
   set_secret_draft_value prod-api.json AVATARS_S3_BUCKET_NAME "$AVATARS_S3_BUCKET_NAME"
