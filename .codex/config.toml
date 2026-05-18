@@ -38,14 +38,9 @@ default_tools_approval_mode = "approve"
 [plugins."stripe@openai-curated"]
 enabled = true
 
-[plugins."github@openai-curated"]
-enabled = true
 [mcp_servers.cloudflare-docs]
 url = "https://docs.mcp.cloudflare.com/mcp"
 default_tools_approval_mode = "approve"
-
-[plugins."stripe@openai-curated"]
-enabled = true
 
 [plugins."github@openai-curated"]
 enabled = true
