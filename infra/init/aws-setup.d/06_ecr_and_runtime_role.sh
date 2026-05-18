@@ -2,7 +2,8 @@
 
 setup_ecr_and_runtime_role() {
   echo ""
-  echo ">>> 6. ECR repositories and EC2 runtime IAM"
+  echo ">>> ECR repositories and EC2 runtime IAM"
+  require_setup_values "ECR and EC2 runtime IAM" ACCOUNT_ID INSTANCE_ID
 
   ensure_ecr_repository "$WEB_ECR_REPOSITORY"
   ensure_ecr_repository "$API_ECR_REPOSITORY"
@@ -87,7 +88,10 @@ EOF
         "s3:PutLifecycleConfiguration",
         "s3:GetLifecycleConfiguration",
         "s3:PutBucketPublicAccessBlock",
-        "s3:PutEncryptionConfiguration"
+        "s3:PutEncryptionConfiguration",
+        "s3:PutBucketVersioning",
+        "s3:GetBucketPolicy",
+        "s3:PutBucketPolicy"
       ],
       "Resource": [
         "arn:aws:s3:::*",

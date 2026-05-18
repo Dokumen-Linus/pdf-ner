@@ -22,3 +22,25 @@ personality = false
 memories = false
 shell_snapshot = true
 shell_tool = true
+
+[mcp_servers.aws_mcp]
+command = "uvx"
+args = [
+  "mcp-proxy-for-aws@latest",
+  "https://aws-mcp.us-east-1.api.aws/mcp",
+  "--metadata", "AWS_REGION=us-east-1"
+]
+default_tools_approval_mode = "auto"
+
+[mcp_servers.runpod-docs]
+url = "https://docs.runpod.io/mcp"
+default_tools_approval_mode = "approve"
+[plugins."stripe@openai-curated"]
+enabled = true
+
+[mcp_servers.cloudflare-docs]
+url = "https://docs.mcp.cloudflare.com/mcp"
+default_tools_approval_mode = "approve"
+
+[plugins."github@openai-curated"]
+enabled = true

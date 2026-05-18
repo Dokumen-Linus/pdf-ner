@@ -5,6 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOCAL_ENV_FILE="${LOCAL_ENV_FILE:-${SCRIPT_DIR}/.env.local}"
+ECR_UNTAGGED_IMAGE_RETENTION_DAYS="${ECR_UNTAGGED_IMAGE_RETENTION_DAYS:-14}"
 
 if [ -f "$LOCAL_ENV_FILE" ]; then
   set -a
@@ -25,6 +26,25 @@ require_cmd() {
   fi
 }
 
+ecr_lifecycle_policy_json() {
+  jq -cn --argjson days "$ECR_UNTAGGED_IMAGE_RETENTION_DAYS" '
+    {
+      rules: [
+        {
+          rulePriority: 1,
+          description: "Expire untagged images after the configured retention window",
+          selection: {
+            tagStatus: "untagged",
+            countType: "sinceImagePushed",
+            countUnit: "days",
+            countNumber: $days
+          },
+          action: { type: "expire" }
+        }
+      ]
+    }'
+}
+
 aws_region() {
   aws --region "$AWS_REGION" "$@"
 }
@@ -33,18 +53,29 @@ ensure_ecr_repository() {
   local repository="$1"
   if aws_region ecr describe-repositories --repository-names "$repository" >/dev/null 2>&1; then
     echo "Reusing ECR repository: $repository"
-    return 0
+  else
+    aws_region ecr create-repository \
+      --repository-name "$repository" \
+      --image-scanning-configuration scanOnPush=true \
+      --image-tag-mutability IMMUTABLE \
+      --encryption-configuration encryptionType=AES256 >/dev/null
+    echo "Created ECR repository: $repository"
   fi
 
-  aws_region ecr create-repository \
+  aws_region ecr put-image-scanning-configuration \
     --repository-name "$repository" \
-    --image-scanning-configuration scanOnPush=true \
-    --encryption-configuration encryptionType=AES256 >/dev/null
-  echo "Created ECR repository: $repository"
+    --image-scanning-configuration scanOnPush=true >/dev/null
+  aws_region ecr put-image-tag-mutability \
+    --repository-name "$repository" \
+    --image-tag-mutability IMMUTABLE >/dev/null
+  aws_region ecr put-lifecycle-policy \
+    --repository-name "$repository" \
+    --lifecycle-policy-text "$(ecr_lifecycle_policy_json)" >/dev/null
 }
 
 require_cmd aws
 require_cmd docker
+require_cmd jq
 
 ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 ECR_REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"

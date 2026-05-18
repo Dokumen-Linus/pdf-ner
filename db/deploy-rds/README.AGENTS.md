@@ -2,43 +2,46 @@
 
 ## Scope
 
-- These scripts create the RDS database, roles, schemas, grants, migrations, seed data, and smoke-checks for the Dokumen database.
-- These scripts do not create AWS RDS instances, VPCs, subnets, or security groups. Create those first with `infra/init/create-prod-rds.sh` and/or `infra/init/create-dev-rds.sh`.
-- Run from the repository root unless you have verified all relative paths.
-- Do not read or edit `.env` files. Use `.env.example` as the documented variable list and provide real values through your shell or secret manager.
+- These scripts create the RDS database, roles, schemas, grants, migrations, seed data, and smoke-checks for the Dokumen database
+- These scripts do not create AWS RDS instances, VPCs, subnets, or security groups. Create those first with `infra/init/aws-setup.sh`
+- Run from the repository root unless you have verified all relative paths
 
 ## Prerequisites
 
-- The target RDS instance must already exist and be reachable from the machine running these scripts.
-- `psql` must be installed and able to reach the RDS host.
-- `dbmate` must be installed locally.
-- The RDS admin user must be allowed to create the target database and roles.
-- Export the required variables listed in `db/deploy-rds/.env.example`.
+- The target RDS instance must already exist and be reachable from the machine running these scripts
+- `psql` and `dbmate` installed
+- The RDS admin user must be allowed to create the target database and roles
+- Export the required variables listed in `db/deploy-rds/.env.local.example`,
+  or use the production/development wrappers with `.env.prod` and `.env.dev`
 
 ## Relationship To `infra/init`
 
 Run both script groups for a fresh deployment:
 
 1. `infra/init/aws-setup.sh` creates the app VPC, EC2 host, ECR repos, IAM roles, S3 bucket, SES identity request, and local secret drafts.
-2. `infra/init/create-prod-rds.sh` creates or updates `dokuprod` in the app VPC, with Postgres access from the EC2 security group and optional current-IP admin access.
-3. `infra/init/create-dev-rds.sh` creates or updates `dokudev` in a separate public dev VPC, restricted to your current public `/32`.
+2. By default, `infra/init/aws-setup.sh` creates or updates `dokuprod` in the app VPC, with Postgres access from the EC2 security group and optional current-IP admin access.
+3. By default, `infra/init/aws-setup.sh` creates or updates `dokudev` in a separate public dev VPC, restricted to your current public `/32`.
 4. `db/deploy-rds/run_all.sh` initializes the actual Postgres database objects on whichever RDS endpoint `RDS_HOST` points to.
 
 Run `db/deploy-rds/run_all.sh` once for `dokuprod` and once for `dokudev` if both instances should have the Dokumen schema and seed data.
 
-## Standard Run
+## How to Run
+
+Create .env before running
 
 ```bash
 set -a
-source db/deploy-rds/.env.example
+source db/deploy-rds/.env.prod
 set +a
-bash db/deploy-rds/run_all.sh
+bash db/deploy-rds/deploy_prod.sh
 ```
 
-Replace the example values before running. Never put real passwords in committed files.
-
-For `dokuprod`, set `RDS_HOST` to the endpoint printed by `infra/init/create-prod-rds.sh`.
-For `dokudev`, set `RDS_HOST` to the endpoint printed by `infra/init/create-dev-rds.sh`.
+```bash
+set -a
+source db/deploy-rds/.env.dev
+set +a
+bash db/deploy-rds/deploy_dev.sh
+```
 
 ## Script Order
 
@@ -53,7 +56,4 @@ For `dokudev`, set `RDS_HOST` to the endpoint printed by `infra/init/create-dev-
   - `END ONE-TIME BETTER AUTH SETUP`
 - Then rerun `bash db/deploy-rds/run_all.sh`.
 - Do not disable failing migrations, seeds, or health checks. Fix the underlying SQL or privilege issue.
-
-## Expected Success Signal
-
 - A complete run ends with `RDS health checks passed.`

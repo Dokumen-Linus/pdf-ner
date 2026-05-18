@@ -24,6 +24,8 @@ set -uo pipefail
 # - Rust
 # - scc
 # - actionlint
+# - ShellCheck
+# - Docker Credential Helpers
 # - OpenSSH (optional)
 # - Tesseract OCR
 # - Google Chrome
@@ -239,7 +241,7 @@ install_nodejs() {
         return 0
     fi
 
-    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - || return
+    curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - || return
     sudo apt update || return
     sudo apt install -y nodejs || return
 
@@ -489,10 +491,46 @@ verify_tesseract() {
     tesseract --version || return
 }
 
+install_shellcheck() {
+    if command_exists shellcheck; then
+        echo "ShellCheck already installed at $(command -v shellcheck)"
+        return 0
+    fi
+
+    sudo apt install -y shellcheck || return
+    shellcheck --version || return
+}
+
+install_docker_credential_helpers() {
+    if command_exists docker-credential-ecr-login; then
+        echo "Docker credential helpers already installed"
+        return 0
+    fi
+
+    sudo apt install -y golang-docker-credential-helpers || return
+
+    mkdir -p "$HOME/.docker"
+    cat > "$HOME/.docker/config.json" <<'EOF'
+{
+    "credsStore": "secretservice"
+}
+EOF
+
+    docker-credential-ecr-login version || true
+}
+
 install_go() {
     if command_exists go; then
         echo "Go already installed at $(command -v go)"
         return 0
+    fi
+
+    local go_tarball
+    go_tarball=$(curl -sL "https://go.dev/dl/" | grep -oP 'go[0-9]+\.[0-9]+\.[0-9]+\.linux-amd64\.tar\.gz' | head -1) || return
+
+    if [ -z "$go_tarball" ]; then
+        echo "Unable to determine latest Go version." >&2
+        return 1
     fi
 
     local tmp_dir
@@ -500,7 +538,7 @@ install_go() {
 
     (
         cd "$tmp_dir" || exit
-        wget -q https://go.dev/dl/go1.22.0.linux-amd64.tar.gz -O go.tar.gz || exit
+        wget -q "https://go.dev/dl/$go_tarball" -O go.tar.gz || exit
         sudo rm -rf /usr/local/go
         sudo tar -C /usr/local -xzf go.tar.gz || exit
     ) || return
@@ -653,7 +691,9 @@ print_executable_checks() {
         go \
         rustc \
         scc \
-        actionlint; do
+        actionlint \
+        shellcheck \
+        docker-credential-ecr-login; do
         if command_exists "$executable"; then
             printf "%-14s %s\n" "$executable:" "$(command -v "$executable")"
         else
@@ -704,6 +744,8 @@ print_versions() {
     rustc --version || true
     scc --version || true
     actionlint --version || true
+    shellcheck --version || true
+    docker-credential-ecr-login version || true
 }
 
 run_step "Updating system and installing Ubuntu packages" install_ubuntu_packages
@@ -722,7 +764,9 @@ run_step "Installing VS Code" install_vscode
 run_optional_step "Configuring OpenSSH" configure_openssh
 run_step "Verifying C and C++ toolchains" verify_cpp_toolchain
 run_step "Installing Docker" install_docker
+run_step "Installing Docker Credential Helpers" install_docker_credential_helpers
 run_step "Installing GitHub CLI" install_github_cli
+run_step "Installing ShellCheck" install_shellcheck
 run_step "Installing Go" install_go
 run_step "Installing Rust" install_rust
 run_step "Installing scc" install_scc

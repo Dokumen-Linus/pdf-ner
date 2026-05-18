@@ -1,9 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 
-import { platform_capacities_title } from "@/integrations/paraglide/messages/platform_capacities_title.js"
-import { platform_services_title } from "@/integrations/paraglide/messages/platform_services_title.js"
-import { platform_techstack_description } from "@/integrations/paraglide/messages/platform_techstack_description.js"
-import { platform_techstack_title } from "@/integrations/paraglide/messages/platform_techstack_title.js"
 import { m } from "@/integrations/paraglide/messages.js"
 
 export const Route = createFileRoute("/_public/platform")({
@@ -311,7 +307,7 @@ function PlatformPage() {
 
             <div className="border border-[#E6E6E6] bg-white p-5">
               <h3 className="mb-4 text-[18px] font-medium text-[#171A20]">
-                {platform_services_title()}
+                {m.platform_services_title()}
               </h3>
               <p className="mb-4 text-[13px] leading-[1.55] text-[#5C5E62]">
                 Dokumen limits service providers and external APIs to reduce security risk. The
@@ -340,7 +336,7 @@ function PlatformPage() {
 
             <div className="border border-[#E6E6E6] bg-white p-5">
               <h3 className="mb-4 text-[18px] font-medium text-[#171A20]">
-                {platform_capacities_title()}
+                {m.platform_capacities_title()}
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[13px]">
@@ -383,10 +379,10 @@ function PlatformPage() {
         <div className="mx-auto max-w-6xl">
           <div className="mb-10 max-w-2xl">
             <h2 className="mb-4 text-[32px] font-medium text-[#171A20]">
-              {platform_techstack_title()}
+              {m.platform_techstack_title()}
             </h2>
             <p className="text-[16px] leading-[1.75] text-[#5C5E62]">
-              {platform_techstack_description()}
+              {m.platform_techstack_description()}
             </p>
           </div>
 

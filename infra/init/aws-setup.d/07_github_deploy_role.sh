@@ -2,7 +2,8 @@
 
 setup_github_deploy_role() {
   echo ""
-  echo ">>> 7. GitHub deployment IAM"
+  echo ">>> GitHub deployment IAM"
+  require_setup_values "GitHub deployment IAM" ACCOUNT_ID INSTANCE_ID
 
   GITHUB_OIDC_PROVIDER_ARN=$(ensure_oidc_provider)
   GITHUB_TRUST_POLICY=$(cat <<EOF

@@ -21,6 +21,7 @@ fi
 PROJECT_NAME="${PROJECT_NAME:-dokumen}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
 IMAGE_TAG="${IMAGE_TAG:-}"
+ECR_UNTAGGED_IMAGE_RETENTION_DAYS="${ECR_UNTAGGED_IMAGE_RETENTION_DAYS:-14}"
 DEEPSEEK_ECR_REPOSITORY="${DEEPSEEK_ECR_REPOSITORY:-${PROJECT_NAME}-deepseek-ocr}"
 OLM_OCR2_ECR_REPOSITORY="${OLM_OCR2_ECR_REPOSITORY:-${PROJECT_NAME}-olm-ocr2}"
 RUNPOD_GPU_TYPE="${RUNPOD_GPU_TYPE:-NVIDIA GeForce RTX 5090}"
@@ -69,6 +70,25 @@ require_env() {
     echo "Set it in $LOCAL_ENV_FILE, export it, or configure it in GitHub Actions." >&2
     exit 1
   fi
+}
+
+ecr_lifecycle_policy_json() {
+  jq -cn --argjson days "$ECR_UNTAGGED_IMAGE_RETENTION_DAYS" '
+    {
+      rules: [
+        {
+          rulePriority: 1,
+          description: "Expire untagged images after the configured retention window",
+          selection: {
+            tagStatus: "untagged",
+            countType: "sinceImagePushed",
+            countUnit: "days",
+            countNumber: $days
+          },
+          action: { type: "expire" }
+        }
+      ]
+    }'
 }
 
 aws_region() {
@@ -135,13 +155,24 @@ csv_to_json_array() {
 ensure_ecr_repository() {
   local repository="$1"
   if aws_region ecr describe-repositories --repository-names "$repository" >/dev/null 2>&1; then
-    return 0
+    :
+  else
+    aws_region ecr create-repository \
+      --repository-name "$repository" \
+      --image-scanning-configuration scanOnPush=true \
+      --image-tag-mutability IMMUTABLE \
+      --encryption-configuration encryptionType=AES256 >/dev/null
   fi
 
-  aws_region ecr create-repository \
+  aws_region ecr put-image-scanning-configuration \
     --repository-name "$repository" \
-    --image-scanning-configuration scanOnPush=true \
-    --encryption-configuration encryptionType=AES256 >/dev/null
+    --image-scanning-configuration scanOnPush=true >/dev/null
+  aws_region ecr put-image-tag-mutability \
+    --repository-name "$repository" \
+    --image-tag-mutability IMMUTABLE >/dev/null
+  aws_region ecr put-lifecycle-policy \
+    --repository-name "$repository" \
+    --lifecycle-policy-text "$(ecr_lifecycle_policy_json)" >/dev/null
 }
 
 base_env_json() {
@@ -255,7 +286,6 @@ pod_create_payload() {
       name: $name,
       imageName: $image,
       computeType: "GPU",
-      gpuTypeId: $gpu_type,
       gpuTypeIds: [$gpu_type],
       gpuCount: $gpu_count,
       cloudType: $cloud_type,
@@ -274,21 +304,30 @@ build_and_push_images() {
   ensure_ecr_repository "$DEEPSEEK_ECR_REPOSITORY"
   ensure_ecr_repository "$OLM_OCR2_ECR_REPOSITORY"
 
-  echo "Logging Docker into ECR..."
-  aws_region ecr get-login-password | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+  if [ "${SKIP_DEEPSEEK_IMAGE:-0}" != "1" ] || [ "${SKIP_OLM_OCR2_IMAGE:-0}" != "1" ]; then
+    echo "Logging Docker into ECR..."
+    aws_region ecr get-login-password | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+  fi
 
-  echo "Building and pushing DeepSeek OCR image..."
-  docker build --platform linux/amd64 -f "${GPU_DIR}/deepseek-ocr/Dockerfile" -t "$DEEPSEEK_IMAGE" "$GPU_DIR"
-  docker push "$DEEPSEEK_IMAGE"
+  if [ "${SKIP_DEEPSEEK_IMAGE:-0}" = "1" ]; then
+    echo "Skipping DeepSeek OCR image build and push; reusing: $DEEPSEEK_IMAGE"
+  else
+    echo "Building and pushing DeepSeek OCR image..."
+    docker build --platform linux/amd64 -f "${GPU_DIR}/deepseek-ocr/Dockerfile" -t "$DEEPSEEK_IMAGE" "$GPU_DIR"
+    docker push "$DEEPSEEK_IMAGE"
+  fi
 
-  echo "Building and pushing olmOCR2 image..."
-  docker build --platform linux/amd64 -f "${GPU_DIR}/olm-ocr2/Dockerfile" -t "$OLM_OCR2_IMAGE" "$GPU_DIR"
-  docker push "$OLM_OCR2_IMAGE"
+  if [ "${SKIP_OLM_OCR2_IMAGE:-0}" = "1" ]; then
+    echo "Skipping olmOCR2 image build and push; reusing: $OLM_OCR2_IMAGE"
+  else
+    echo "Building and pushing olmOCR2 image..."
+    docker build --platform linux/amd64 -f "${GPU_DIR}/olm-ocr2/Dockerfile" -t "$OLM_OCR2_IMAGE" "$GPU_DIR"
+    docker push "$OLM_OCR2_IMAGE"
+  fi
 }
 
 refresh_registry_auth() {
-  REGISTRY_AUTH_NAME="${REGISTRY_AUTH_NAME:-${PROJECT_NAME}-ecr-${IMAGE_TAG}}" \
-    LOCAL_ENV_FILE="$LOCAL_ENV_FILE" \
+  LOCAL_ENV_FILE="$LOCAL_ENV_FILE" \
     STATE_DIR="$STATE_DIR" \
     STATE_FILE="$STATE_FILE" \
     AWS_REGION="$AWS_REGION" \
@@ -352,6 +391,25 @@ deploy_worker() {
   state_set_worker "$worker" "$result_id" "$image"
 }
 
+record_existing_worker() {
+  local worker="$1"
+  local pod_env_name="$2"
+  local image="$3"
+  local pod_id
+
+  pod_id="${!pod_env_name:-}"
+  if [ -z "$pod_id" ]; then
+    pod_id="$(state_get ".[\"${worker}\"].pod_id")"
+  fi
+  if [ -z "$pod_id" ]; then
+    echo "ERROR: SKIP_${worker//-/_}_POD=1 requires ${pod_env_name} or existing state for $worker." >&2
+    exit 1
+  fi
+
+  echo "Skipping Runpod Pod create/update for $worker; recording existing Pod: $pod_id" >&2
+  state_set_worker "$worker" "$pod_id" "$image"
+}
+
 print_summary() {
   cat <<EOF
 
@@ -375,9 +433,11 @@ EOF
 main() {
   require_cmd aws
   require_cmd curl
-  require_cmd docker
   require_cmd jq
   require_cmd runpodctl
+  if [ "${SKIP_DEEPSEEK_IMAGE:-0}" != "1" ] || [ "${SKIP_OLM_OCR2_IMAGE:-0}" != "1" ]; then
+    require_cmd docker
+  fi
   require_env IMAGE_TAG
   require_env RUNPOD_API_KEY
   require_env OCR_HTTP_BEARER_TOKEN
@@ -407,7 +467,11 @@ main() {
 
   build_and_push_images
   refresh_registry_auth
-  deploy_worker "deepseek-ocr" "DEEPSEEK_RUNPOD_POD_ID" "$DEEPSEEK_IMAGE" "$(deepseek_env_json)"
+  if [ "${SKIP_DEEPSEEK_POD:-0}" = "1" ]; then
+    record_existing_worker "deepseek-ocr" "DEEPSEEK_RUNPOD_POD_ID" "$DEEPSEEK_IMAGE"
+  else
+    deploy_worker "deepseek-ocr" "DEEPSEEK_RUNPOD_POD_ID" "$DEEPSEEK_IMAGE" "$(deepseek_env_json)"
+  fi
   deploy_worker "olm-ocr2" "OLM_OCR2_RUNPOD_POD_ID" "$OLM_OCR2_IMAGE" "$(olm_ocr2_env_json)"
   print_summary
 }

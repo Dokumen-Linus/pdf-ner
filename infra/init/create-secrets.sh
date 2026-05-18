@@ -5,7 +5,6 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INFRA_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 LOCAL_ENV_FILE="${LOCAL_ENV_FILE:-${SCRIPT_DIR}/.env.local}"
 SECRET_DRAFT_DIR="${SECRET_DRAFT_DIR:-${SCRIPT_DIR}/local-secrets}"
 
@@ -17,6 +16,7 @@ if [ -f "$LOCAL_ENV_FILE" ]; then
 fi
 
 AWS_REGION="${AWS_REGION:-us-east-1}"
+PROJECT_NAME="${PROJECT_NAME:-dokumen}"
 DRY_RUN="${DRY_RUN:-0}"
 
 require_cmd() {
@@ -117,7 +117,8 @@ fi
 for index in "${!FILES[@]}"; do
   aws_region secretsmanager create-secret \
     --name "${NAMES[$index]}" \
-    --secret-string "file://$(draft_path "${FILES[$index]}")" >/dev/null
+    --secret-string "file://$(draft_path "${FILES[$index]}")" \
+    --tags "Key=Name,Value=${NAMES[$index]}" "Key=Project,Value=${PROJECT_NAME}" >/dev/null
   echo "Created ${NAMES[$index]}"
 done
 

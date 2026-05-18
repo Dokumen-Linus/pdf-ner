@@ -11,7 +11,7 @@ JavaScript:
 - [Node.js v24](https://nodejs.org/en/download)
 
 ```bash
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt install -y nodejs
 ```
 
@@ -124,9 +124,11 @@ Recommended installs:
 - [GitHub CLI](https://cli.github.com/)
 - [Go](https://go.dev/dl/)
 - [Rust](https://www.rust-lang.org/tools/install)
+- [OpenSSH](https://www.openssh.com/)
 - [scc](https://github.com/boyter/scc)
 - [actionlint](https://github.com/rhysd/actionlint)
-- [OpenSSH](https://www.openssh.com/)
+- [ShellCheck](https://github.com/koalaman/shellcheck)
+- [Docker Credential Helpers](https://github.com/docker/docker-credential-helpers)
 
 ```bash
 # GitHub CLI
@@ -134,12 +136,15 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githu
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
 sudo apt update && sudo apt install -y gh
 
-# Go
-wget -q https://go.dev/dl/go1.22.0.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz
+# Go (latest stable)
+wget -q https://go.dev/dl/$(curl -sL "https://go.dev/dl/" | grep -oP 'go[0-9]+\.[0-9]+\.[0-9]+\.linux-amd64\.tar\.gz' | head -1)
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go*.tar.gz
 
 # Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+# OpenSSH
+sudo apt install -y openssh-client openssh-server
 
 # scc
 go install github.com/boyter/scc@latest
@@ -147,8 +152,18 @@ go install github.com/boyter/scc@latest
 # actionlint
 curl -fsSL https://github.com/rhysd/actionlint/releases/latest/download/actionlint-linux-amd64.tar.gz | sudo tar -xz -C /usr/local/bin actionlint
 
-# OpenSSH
-sudo apt install -y openssh-client openssh-server
+# ShellCheck
+sudo apt install -y shellcheck
+
+# Docker Credential Helpers
+sudo apt install -y golang-docker-credential-helpers
+
+# Configure credential store
+mkdir -p ~/.docker && cat > ~/.docker/config.json <<'EOF'
+{
+    "credsStore": "secretservice"
+}
+EOF
 ```
 
 Recommended to not install (run on GitHub Actions only):

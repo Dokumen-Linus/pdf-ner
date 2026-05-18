@@ -11,6 +11,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - If requirements or source files conflict, stop and surface the ambiguity
 - Never read or edit .env files. Always add new env vars to the local `.env.example`
 - Never read or edit `research.md`, `LICENSE.md`, `CHANGELOG.md`, `DESIGN.md` or any `README.md` file except `README.AGENTS.md`
+- Whenever you ask the user to run more than one commands, write them to `./tmp.sh` with explanation comments. If temp.sh doesn't exist, create it. If it does, append to it
 
 ## Work Loop
 
