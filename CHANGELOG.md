@@ -133,6 +133,7 @@
 - *(web)* More test coverage
 - Expose web access to prompt formation
 - *(web)* Infra info
+- *(db)* New insert templates seed generation script
 
 ### 🐛 Bug Fixes
 
@@ -233,6 +234,8 @@
 - *(wk)* Ner_workflows, chat_model_eval ensure that core.prompts.full_text exists
 - *(gpu)* Move from runpod serverless to pods
 - *(db)* Typos
+- *(web)* Platform.tsx i18n
+- *(ci)* Web dockerfile uses bun for install, npm for build
 
 ### 💼 Other
 
@@ -387,6 +390,12 @@
 - *(db)* Add core schema
 - Tesseract
 - *(llm)* Aws published skills
+- *(llm)* More aws published skills
+- *(llm)* Tmp.sh instruction
+- *(llm)* Aws mcp
+- *(llm)* Add runpod mcp, gh stripe plugins to codex
+- Add docker credential helpers to quickstart
+- *(llm)* Remove stripe plugin
 
 ### ⚡ Performance
 
@@ -670,6 +679,13 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Documentation and script for dependencies
 - New deployment scripts
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Lock node version in quickstart
+- *(db)* Delete outdate bat
+- *(aws)* Init deploy scripts
+- *(db)* Rds deploy scripts
+- *(gpu)* Init runpod deployment
+- *(aws)* Continue init deploy
 
 ### ◀️ Revert
 

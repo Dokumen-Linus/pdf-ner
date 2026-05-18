@@ -56,7 +56,7 @@
 
 ## Db (3 files)
 
-- `db/seeds/insert_teemplate_seed.py` — extract_inserts, escape_sql_string, format_sql_array, make_seed_for_template
+- `db/seeds/gen_insert_templates.py` — extract_inserts, escape_sql_string, format_sql_array, read_template, generate_seed, main
 - `db/seeds/update_template_seed.py` — extract_inserts, escape_sql_string, format_sql_array, make_seed_for_template
 - `db/generate_roles_sh.py` — env_var_for_role, transform, main
 
