@@ -345,7 +345,11 @@
   "platform_demo_cta": "View demo",
   "platform_required_title": "Mandatory providers",
   "platform_optional_title": "Optional providers",
+  "platform_services_title": "Required services",
+  "platform_capacities_title": "Capability coverage",
   "platform_sources_title": "Document sources",
   "platform_sources_description": "Document sources mirror the worker provider registries and show the connectors the ingestion layer is designed to watch or receive events from.",
+  "platform_techstack_title": "Runtime and dependencies",
+  "platform_techstack_description": "Dokumen keeps the production runtime explicit: Node.js serves the web app, Python runs the API and workers, and Docker Compose coordinates the host services.",
   "footer_copyright": "Dokumen AI © {year}"
 }
