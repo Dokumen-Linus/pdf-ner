@@ -399,6 +399,7 @@
 - *(llm)* Add runpod mcp, gh stripe plugins to codex
 - Add docker credential helpers to quickstart
 - *(llm)* Remove stripe plugin
+- *(web)* Copy current tanstack repo
 
 ### ⚡ Performance
 
@@ -692,6 +693,8 @@
 - *(aws)* Continue init deploy
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Move in-progress actions to disabled-workflows
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Dockerignore
 
 ### ◀️ Revert
 
