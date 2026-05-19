@@ -62,12 +62,11 @@ pip install ruff pyright
 JavaScript:
 
 - [Bun](https://bun.sh/)
-- [Playwright](https://playwright.dev/)
 - [cross-env](https://www.npmjs.com/package/cross-env)
 - [Drizzle Kit](https://orm.drizzle.team/kit-docs/overview)
 
 ```bash
-npm install -g @playwright/test @tanstack/cli better-auth cross-env drizzle-kit
+npm install -g @tanstack/cli better-auth cross-env drizzle-kit
 ```
 
 Python:

@@ -59,5 +59,4 @@
 ## Tests
 
 - Unit test files should be named `.test.{ts,tsx}`
-- Playwright test files should be named `.e2e.ts`
-- The app has standard Bun/JSDOM tests, database function tests, and Playwright E2E tests
+- The app has standard Bun/JSDOM tests and database function tests

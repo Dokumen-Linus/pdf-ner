@@ -13,13 +13,7 @@ git clone https://github.com/optimalcharb/pdf-entity-labeling.git
 bun i
 ```
 
-3 To setup playwright:
-
-```cmd
-bunx playwright install
-```
-
-4 Ensure .env is created following to .env.local.example
+3 Ensure .env is created following to .env.local.example
 
 ### Running the web app
 
@@ -53,7 +47,6 @@ npm run dev
 | depcheck     | check for unused dependencies                                 |
 | test         | run tests using Bun Test Runner + React Testing Library DOM   |
 | test:db      | run database functions tests (must have db on)                |
-| test:e2e     | run playwright end-to-end tests                               |
 
 ## Database
 
@@ -96,7 +89,6 @@ The database schemas are defined in:
 - Linting: [ESlint 9](https://eslint.org/), config by eslint.config.mjs
 - Formatting: [Prettier](https://prettier.io/), config by .prettierignore, .prettierrc (VSCode extension and settings.json does this on every save)
 - Testing: [React Testing Library](https://testing-library.com/react) + [Bun Test Runner](https://bun.sh/docs/test/writing) which is based on Jest, name files as ".{spec,test}.{ts,tsx}"
-- End-to-End Testing: [Playwright](https://playwright.dev/) inside test/e2e/ with files named as "*.e2e.ts"
 
 ### Backend for Frontend (BFF)
 
@@ -203,10 +195,9 @@ npx shadcn@latest add --overwrite accordion alert-dialog alert aspect-ratio avat
 ### PDF Rendering
 
 - EmbedPDF: [GitHub](https://github.com/embedpdf/embed-pdf-viewer), [docs for @embedpdf/pdfium](https://www.embedpdf.com/docs/pdfium/introduction) the JS library to wrap the C++ engine, [docs for @embedpdf/core/react](https://www.embedpdf.com/docs/react/introduction)
-- Plugins are built in consistent style defined by core (not using standard Redux style) and must have commented sections and same subfolders and filenames as existing local plugins
-- PDF retrieval: currently from URL as defined by @embedpdf/plugin-loader
+- Plugins are built in consistent style defined by core (not using exact Redux style) and must have commented sections and same subfolders and filenames as existing local plugins
 
 ## Tests
 
-- Three test setups: one with standard tests Bun and JSDOM, one with database tests, one with Playwright E2E tests
-- Naming conventions: Unit test files should be named as ".test.{ts,tsx}" and Playwright test files should be named as ".e2e.ts"
+- Two test setups: one with standard tests Bun and JSDOM, one with database tests
+- Naming conventions: Unit test files should be named as ".test.{ts,tsx}"
