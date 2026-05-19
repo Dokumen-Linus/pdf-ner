@@ -21,6 +21,7 @@ deploy_to_ec2() {
   echo "    Branch: $DEPLOY_BRANCH"
   echo "    Upload env: $UPLOAD_LOCAL_ENV"
   echo "    Start Compose: $START_COMPOSE"
+  echo "    Compose services: ${COMPOSE_SERVICES:-all}"
   echo "    Waiting for SSH (${SSH_WAIT_ATTEMPTS} attempts, ${SSH_WAIT_SECONDS}s apart)..."
 
   local attempt last_ssh_error
@@ -173,8 +174,19 @@ deploy_to_ec2() {
   fi
 
   if [ "$START_COMPOSE" = "1" ]; then
+    local compose_services_q
+    printf -v compose_services_q '%q' "$COMPOSE_SERVICES"
     echo "    Starting Docker Compose stack..."
-    remote_run "$ELASTIC_IP" "cd '$REMOTE_APP_DIR' && docker compose -f infra/docker-compose.yml --env-file infra/.env.prod up -d --build"
+    remote_run "$ELASTIC_IP" "set -euo pipefail
+      cd '$REMOTE_APP_DIR'
+      export COMPOSE_PARALLEL_LIMIT=1
+      COMPOSE_SERVICES_VALUE=$compose_services_q
+      if [ -n \"\$COMPOSE_SERVICES_VALUE\" ]; then
+        # shellcheck disable=SC2086
+        docker compose -f infra/docker-compose.yml --env-file infra/.env.prod up -d --build \$COMPOSE_SERVICES_VALUE
+      else
+        docker compose -f infra/docker-compose.yml --env-file infra/.env.prod up -d --build
+      fi"
     echo "    Compose services:"
     remote_run "$ELASTIC_IP" "cd '$REMOTE_APP_DIR' && docker compose -f infra/docker-compose.yml --env-file infra/.env.prod ps"
   else
