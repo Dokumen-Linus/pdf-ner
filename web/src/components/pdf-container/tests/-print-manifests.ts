@@ -5,8 +5,8 @@ import { writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { ExportPluginPackage } from "@embedpdf/plugin-export/react"
-import { RotatePluginPackage } from "@embedpdf/plugin-rotate/react"
+import { ExportPluginPackage } from "../plugin-export-2"
+import { RotatePluginPackage } from "../plugin-rotate-2"
 
 import { AnnotationPluginPackage } from "../plugin-annotation-2"
 import { DocumentManagerPluginPackage } from "../plugin-document-manager-2"
