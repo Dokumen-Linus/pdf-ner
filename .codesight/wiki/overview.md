@@ -8,7 +8,7 @@
 
 ## Scale
 
-24 API routes · 3 database models · 82 UI components · 47 library files · 21 middleware layers · 119 environment variables
+24 API routes · 3 database models · 76 UI components · 47 library files · 20 middleware layers · 121 environment variables
 
 ## Subsystems
 
@@ -28,7 +28,7 @@
 
 **Database:** drizzle, 3 models — see [database.md](./database.md)
 
-**UI:** 82 components (react) — see [ui.md](./ui.md)
+**UI:** 76 components (react) — see [ui.md](./ui.md)
 
 **Libraries:** 47 files — see [libraries.md](./libraries.md)
 
@@ -47,7 +47,7 @@ Changes to these files have the widest blast radius across the codebase:
 
 - `API_KEY` — `api/tests/conftest.py`
 - `BASE_URL` — `web/src/integrations/sitemap.ts`
-- `CI` — `web/playwright.config.ts`
+- `COMPOSE_SERVICES` — `infra/init/.env.example`
 - `DATABASE_URL` — `web/tests/bun-test-setup/db-setup.ts`
 - `DEEPSEEK_RUNPOD_POD_ID` — `infra/runpod/.env.example`
 - `DEPLOYMENT` — `packages/otel_py/otel_py/config.py`

@@ -400,6 +400,7 @@
 - Add docker credential helpers to quickstart
 - *(llm)* Remove stripe plugin
 - *(web)* Copy current tanstack repo
+- *(llm)* Approve call_aws
 
 ### ⚡ Performance
 
@@ -466,6 +467,8 @@
 - Enforce colors codes to be "#RRGGBB" for annotations
 - *(db)* Switch some primary keys from uuid to bigint identity #171
 - *(api, wk)* Type cast uuids #172
+- *(web)* Remove unused components
+- *(web)* Remove unused deps
 
 ### 🎨 Styling
 
@@ -554,6 +557,7 @@
 - Add pytest-cov
 - *(api)* Unit tests
 - *(pkg)* More test coverage
+- *(web)* Fix -print-manifests
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -697,6 +701,11 @@
 - Dockerignore
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(web)* Continue fixing web build
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Continue deploy scripts
+- *(web)* Improve dockerfile
+- *(db)* Remove old dockerignore
+- Add to dockerignores
 
 ### ◀️ Revert
 
@@ -713,3 +722,4 @@
 - *(api)* Return llm_ner domain
 - *(api)* Remove llm_ner domain
 - *(api)* Return llm_ner domain
+- *(test)* Remove playwright

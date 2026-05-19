@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**82 components** (react)
+**76 components** (react)
 
 ## Components
 
@@ -56,12 +56,6 @@
 - **Chatbot** — `web/src/components/public-site/chatbot.tsx`
 - **Footer** — `web/src/components/public-site/footer.tsx`
 - **Header** — `web/src/components/public-site/header.tsx`
-- **ButtonGroup** — props: className, orientation — `web/src/components/shadcn-ui/button-group.tsx`
-- **Empty** — props: className — `web/src/components/shadcn-ui/empty.tsx`
-- **FieldSet** — props: className — `web/src/components/shadcn-ui/field.tsx`
-- **InputGroup** — props: className — `web/src/components/shadcn-ui/input-group.tsx`
-- **ItemGroup** — props: className — `web/src/components/shadcn-ui/item.tsx`
-- **Kbd** — props: className — `web/src/components/shadcn-ui/kbd.tsx`
 - **Spinner** — props: className — `web/src/components/shadcn-ui/spinner.tsx`
 - **Provider** — props: queryClient — `web/src/integrations/tanstack-query/root-provider.tsx`
 - **Route** — `web/src/routes/__root.tsx`
