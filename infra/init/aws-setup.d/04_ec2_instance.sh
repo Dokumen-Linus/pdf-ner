@@ -37,7 +37,7 @@ setup_ec2_instance() {
       "${key_args[@]}" \
       --network-interfaces "DeviceIndex=0,SubnetId=${SUBNET_ID},Groups=${SG_ID},AssociatePublicIpAddress=false" \
       --iam-instance-profile "Name=${EC2_INSTANCE_PROFILE_NAME}" \
-      --metadata-options "HttpTokens=required,HttpEndpoint=enabled" \
+      --metadata-options "HttpTokens=required,HttpEndpoint=enabled,HttpPutResponseHopLimit=2" \
       --block-device-mappings "[{\"DeviceName\":\"/dev/xvda\",\"Ebs\":{\"VolumeSize\":${EC2_ROOT_VOLUME_SIZE},\"VolumeType\":\"gp3\",\"Encrypted\":true,\"DeleteOnTermination\":true}}]" \
       $monitoring_arg \
       "$termination_arg" \
@@ -47,6 +47,11 @@ setup_ec2_instance() {
   fi
   tag_ec2_resource "$INSTANCE_ID" "$INSTANCE_NAME"
   aws_region ec2 wait instance-running --instance-ids "$INSTANCE_ID"
+  aws_region ec2 modify-instance-metadata-options \
+    --instance-id "$INSTANCE_ID" \
+    --http-tokens required \
+    --http-endpoint enabled \
+    --http-put-response-hop-limit 2 >/dev/null
   ensure_instance_profile_attached "$INSTANCE_ID" "$EC2_INSTANCE_PROFILE_NAME"
   if [ "$EC2_TERMINATION_PROTECTION" = "1" ]; then
     aws_region ec2 modify-instance-attribute --instance-id "$INSTANCE_ID" --disable-api-termination '{"Value":true}'

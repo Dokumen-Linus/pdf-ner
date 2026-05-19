@@ -1,3 +1,9 @@
+x-app-bootstrap-env: &app-bootstrap-env
+  ENV: ${ENV:-production}
+  APP_VERSION: ${APP_VERSION:-0.0.0}
+  SECRETS_STAGE: ${SECRETS_STAGE:-prod}
+  AWS_REGION: ${AWS_REGION:-us-east-1}
+
 services:
   nginx-proxy-manager:
     image: jc21/nginx-proxy-manager:latest
@@ -63,6 +69,8 @@ services:
     env_file:
       - path: .env.prod
         required: true
+    environment:
+      <<: *app-bootstrap-env
     depends_on:
       redis:
         condition: service_healthy
@@ -78,6 +86,8 @@ services:
     env_file:
       - path: .env.prod
         required: true
+    environment:
+      <<: *app-bootstrap-env
     depends_on:
       redis:
         condition: service_healthy
@@ -98,6 +108,8 @@ services:
     env_file:
       - path: .env.prod
         required: true
+    environment:
+      <<: *app-bootstrap-env
     networks:
       - backend
       - frontend
