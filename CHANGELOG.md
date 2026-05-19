@@ -695,6 +695,8 @@
 - Move in-progress actions to disabled-workflows
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Dockerignore
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(web)* Continue fixing web build
 
 ### ◀️ Revert
 
