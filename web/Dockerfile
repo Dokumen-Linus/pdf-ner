@@ -26,9 +26,7 @@ RUN groupadd -g 1001 appgroup && \
 
 WORKDIR /app
 
-COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
 COPY --from=builder --chown=appuser:appgroup /app/.output ./.output
-COPY --from=builder --chown=appuser:appgroup /app/package.json ./package.json
 
 USER 1001
 
@@ -40,4 +38,4 @@ ENV PORT=3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD ["node", "-e", "const net=require('net');const s=net.createConnection({host:'127.0.0.1',port:3000},()=>{s.destroy();process.exit(0)});s.on('error',()=>process.exit(1));s.setTimeout(5000,()=>{s.destroy();process.exit(1)})"]
 
-CMD ["npm", "run", "start"]
+CMD ["node", ".output/server/index.mjs"]

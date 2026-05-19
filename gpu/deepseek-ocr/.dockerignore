@@ -4,3 +4,8 @@ __pycache__/
 .ruff_cache/
 .venv/
 README.md
+
+.env*
+*.log
+.DS_Store
+tests/

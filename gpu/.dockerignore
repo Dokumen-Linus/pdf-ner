@@ -3,3 +3,8 @@
 **/.pytest_cache/
 **/.ruff_cache/
 **/.venv/
+
+.env*
+*.log
+.DS_Store
+**/*.md

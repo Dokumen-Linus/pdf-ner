@@ -22,6 +22,8 @@ deploy_to_ec2() {
   echo "    Upload env: $UPLOAD_LOCAL_ENV"
   echo "    Start Compose: $START_COMPOSE"
   echo "    Compose services: ${COMPOSE_SERVICES:-all}"
+  echo "    Clean checkout: $DEPLOY_CLEAN_CHECKOUT"
+  echo "    Prune Docker: $DEPLOY_PRUNE_DOCKER"
   echo "    Waiting for SSH (${SSH_WAIT_ATTEMPTS} attempts, ${SSH_WAIT_SECONDS}s apart)..."
 
   local attempt last_ssh_error
@@ -109,6 +111,7 @@ deploy_to_ec2() {
 
   local ec2_repo_url git_ssh_command remote_deploy_key_path
   local git_ssh_command_q remote_app_dir_q deploy_branch_q ec2_repo_url_q
+  local deploy_clean_checkout_q deploy_prune_docker_q
   ec2_repo_url="$REPO_URL"
   git_ssh_command=""
   remote_deploy_key_path="/home/ec2-user/.ssh/github-deploy-key"
@@ -142,8 +145,11 @@ deploy_to_ec2() {
   printf -v remote_app_dir_q '%q' "$REMOTE_APP_DIR"
   printf -v deploy_branch_q '%q' "$DEPLOY_BRANCH"
   printf -v ec2_repo_url_q '%q' "$ec2_repo_url"
+  printf -v deploy_clean_checkout_q '%q' "$DEPLOY_CLEAN_CHECKOUT"
+  printf -v deploy_prune_docker_q '%q' "$DEPLOY_PRUNE_DOCKER"
   remote_run "$ELASTIC_IP" "set -euo pipefail
     GIT_SSH_COMMAND_VALUE=$git_ssh_command_q
+    DEPLOY_CLEAN_CHECKOUT_VALUE=$deploy_clean_checkout_q
     run_git() {
       if [ -n \"\$GIT_SSH_COMMAND_VALUE\" ]; then
         GIT_SSH_COMMAND=\"\$GIT_SSH_COMMAND_VALUE\" \"\$@\"
@@ -155,8 +161,16 @@ deploy_to_ec2() {
       cd $remote_app_dir_q
       run_git git fetch origin
       git checkout $deploy_branch_q
-      run_git git pull --ff-only origin $deploy_branch_q
+      run_git git reset --hard origin/$deploy_branch_q
+      if [ \"\$DEPLOY_CLEAN_CHECKOUT_VALUE\" = \"1\" ]; then
+        echo \"Cleaning stale checkout artifacts while preserving runtime bind mounts...\"
+        git clean -ffdx -e infra/.env.prod -e infra/data/ -e infra/letsencrypt/
+      fi
     else
+      if [ -e $remote_app_dir_q ]; then
+        echo \"Removing stale non-git remote app directory: $REMOTE_APP_DIR\"
+        rm -rf $remote_app_dir_q
+      fi
       run_git git clone --branch $deploy_branch_q $ec2_repo_url_q $remote_app_dir_q
     fi"
 
@@ -180,12 +194,26 @@ deploy_to_ec2() {
     remote_run "$ELASTIC_IP" "set -euo pipefail
       cd '$REMOTE_APP_DIR'
       export COMPOSE_PARALLEL_LIMIT=1
+      DEPLOY_PRUNE_DOCKER_VALUE=$deploy_prune_docker_q
+      if [ \"\$DEPLOY_PRUNE_DOCKER_VALUE\" = \"1\" ]; then
+        echo \"Pruning stopped containers, unused images, and Docker build cache before build...\"
+        docker container prune -f || true
+        docker image prune -af || true
+        docker builder prune -af || true
+        docker buildx prune -af || true
+      fi
       COMPOSE_SERVICES_VALUE=$compose_services_q
       if [ -n \"\$COMPOSE_SERVICES_VALUE\" ]; then
         # shellcheck disable=SC2086
         docker compose -f infra/docker-compose.yml --env-file infra/.env.prod up -d --build \$COMPOSE_SERVICES_VALUE
       else
         docker compose -f infra/docker-compose.yml --env-file infra/.env.prod up -d --build
+      fi
+      if [ \"\$DEPLOY_PRUNE_DOCKER_VALUE\" = \"1\" ]; then
+        echo \"Pruning old images and Docker build cache after successful deploy...\"
+        docker image prune -af || true
+        docker builder prune -af || true
+        docker buildx prune -af || true
       fi"
     echo "    Compose services:"
     remote_run "$ELASTIC_IP" "cd '$REMOTE_APP_DIR' && docker compose -f infra/docker-compose.yml --env-file infra/.env.prod ps"

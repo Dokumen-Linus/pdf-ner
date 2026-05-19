@@ -1,4 +1,6 @@
 .git/
+.gitignore
+**/.gitignore
 .github/
 .agents/
 .codex/
@@ -9,14 +11,20 @@
 
 **/*.md
 **/*.sh
+**/*.sql
+*.log
+
+.DS_Store
 
 .env
 .env.*
 **/.env
 **/.env.*
-*.local
 
+db/
+gpu/
 infra/
+web/
 
 **/__pycache__/
 **/*.py[cod]
@@ -25,10 +33,11 @@ infra/
 **/.venv/
 
 **/node_modules/
-**/.output/
-**/.vite/
 **/dist/
 **/build/
 **/coverage/
 
-web/tanstack-start-docs/
+.commitlintrc
+opencode.json
+cliff.toml
+ruff.toml

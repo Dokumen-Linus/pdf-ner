@@ -31,7 +31,7 @@ set -uo pipefail
 # - Google Chrome
 # - Codex CLI
 # - OpenCode CLI
-# - Global npm packages (ESLint, Prettier, Playwright, ...)
+# - Global npm packages (ESLint, Prettier, ...)
 # - Global pip packages (pytest, ruff, pyright, deptry, ...)
 #
 # Tested on Ubuntu 24.04+
@@ -252,7 +252,6 @@ install_nodejs() {
 install_global_npm_packages() {
     sudo npm install -g \
         @openai/codex \
-        @playwright/test \
         @tanstack/cli \
         @tanstack/eslint-plugin-start \
         @typescript-eslint/eslint-plugin \
@@ -275,10 +274,6 @@ install_global_npm_packages() {
 
     codex --version || return
     opencode --version || return
-}
-
-install_playwright_browsers() {
-    npx playwright install --with-deps || return
 }
 
 install_bun() {
@@ -757,7 +752,6 @@ run_step "Configuring PostgreSQL" configure_postgresql
 run_step "Configuring Redis" configure_redis
 run_step "Installing Node.js" install_nodejs
 run_step "Installing global npm packages" install_global_npm_packages
-run_step "Installing Playwright browsers and OS dependencies" install_playwright_browsers
 run_step "Installing Bun" install_bun
 run_step "Installing dbmate" install_dbmate
 run_step "Installing VS Code" install_vscode
