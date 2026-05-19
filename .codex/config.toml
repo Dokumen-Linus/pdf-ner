@@ -32,6 +32,9 @@ args = [
 ]
 default_tools_approval_mode = "auto"
 
+[mcp_servers.aws_mcp.tools.aws___call_aws]
+approval_mode = "approve"
+
 [mcp_servers.runpod-docs]
 url = "https://docs.runpod.io/mcp"
 default_tools_approval_mode = "approve"
