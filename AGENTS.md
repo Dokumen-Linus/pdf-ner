@@ -11,7 +11,8 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - If requirements or source files conflict, stop and surface the ambiguity
 - Never read or edit .env files. Always add new env vars to the local `.env.example`
 - Never read or edit `research.md`, `LICENSE.md`, `CHANGELOG.md`, `DESIGN.md` or any `README.md` file except `README.AGENTS.md`
-- Whenever you ask the user to run more than one commands, write them to `./tmp.sh` with explanation comments. If temp.sh doesn't exist, create it. If it does, append to it
+- Never prompt the user to run more than one commands. Instead write them to `./tmp.sh` with explanation comments. If temp.sh doesn't exist, create it. If it does, append to it
+- Whenever a command or script starts a long-running process like localhost:3000 for web or a Docker image, terminate the process before responding
 
 ## Work Loop
 
@@ -75,8 +76,6 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - `integrations/` should expose capability-focused adapters rather than raw SDK calls
 
 ## Output Contract
-
-Be direct and explicit about uncertainty
 
 CHANGES MADE:
 
