@@ -65,10 +65,13 @@ LOCAL_ENV_PRESERVED_OVERRIDES=(
   DO_DEPLOY
   UPLOAD_LOCAL_ENV
   START_COMPOSE
+  COMPOSE_SERVICES
   SETUP_RESUME
   SETUP_START_AT
   SETUP_STOP_AFTER
   SETUP_ONLY
+  DEPLOY_CLEAN_CHECKOUT
+  CLEAR_DOCKER_BUILD_CACHE
   CREATE_PROD_RDS
   CREATE_DEV_RDS
   REFRESH_RDS_ADMIN_IP
@@ -139,12 +142,14 @@ configure_defaults() {
   START_COMPOSE="${START_COMPOSE:-1}"
   COMPOSE_SERVICES="${COMPOSE_SERVICES:-}"
   DEPLOY_CLEAN_CHECKOUT="${DEPLOY_CLEAN_CHECKOUT:-1}"
-  DEPLOY_PRUNE_DOCKER="${DEPLOY_PRUNE_DOCKER:-1}"
+  CLEAR_DOCKER_BUILD_CACHE="${CLEAR_DOCKER_BUILD_CACHE:-0}"
   SETUP_RESUME="${SETUP_RESUME:-0}"
   SETUP_START_AT="${SETUP_START_AT:-}"
   SETUP_STOP_AFTER="${SETUP_STOP_AFTER:-}"
   SETUP_ONLY="${SETUP_ONLY:-}"
   SSH_CONNECT_TIMEOUT="${SSH_CONNECT_TIMEOUT:-10}"
+  SSH_SERVER_ALIVE_INTERVAL="${SSH_SERVER_ALIVE_INTERVAL:-30}"
+  SSH_SERVER_ALIVE_COUNT_MAX="${SSH_SERVER_ALIVE_COUNT_MAX:-4}"
   SSH_WAIT_ATTEMPTS="${SSH_WAIT_ATTEMPTS:-30}"
   SSH_WAIT_SECONDS="${SSH_WAIT_SECONDS:-30}"
 
@@ -246,6 +251,16 @@ require_env() {
   if [ -z "${!name:-}" ]; then
     echo "ERROR: required environment variable is not set: $name" >&2
     echo "Set it in $LOCAL_ENV_FILE or export it before running this script." >&2
+    return 1
+  fi
+}
+
+require_boolean_env() {
+  local name="$1"
+  local value="${!name:-}"
+  if [ "$value" != "0" ] && [ "$value" != "1" ]; then
+    echo "ERROR: $name must be 0 or 1, got: ${value:-<empty>}" >&2
+    echo "Set $name in $LOCAL_ENV_FILE or export it before running this script." >&2
     return 1
   fi
 }
@@ -1335,6 +1350,8 @@ remote_run() {
   ssh \
     -o StrictHostKeyChecking=accept-new \
     -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" \
+    -o ServerAliveInterval="$SSH_SERVER_ALIVE_INTERVAL" \
+    -o ServerAliveCountMax="$SSH_SERVER_ALIVE_COUNT_MAX" \
     -i "$SSH_PRIVATE_KEY_PATH" \
     "ec2-user@${elastic_ip}" "$@"
 }
@@ -1345,6 +1362,8 @@ remote_probe() {
     -o BatchMode=yes \
     -o StrictHostKeyChecking=accept-new \
     -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" \
+    -o ServerAliveInterval="$SSH_SERVER_ALIVE_INTERVAL" \
+    -o ServerAliveCountMax="$SSH_SERVER_ALIVE_COUNT_MAX" \
     -i "$SSH_PRIVATE_KEY_PATH" \
     "ec2-user@${elastic_ip}" true
 }

@@ -1,5 +1,29 @@
 #!/usr/bin/env bash
 
+ec2_deploy_remote_run() {
+  local label="$1"
+  local elastic_ip="$2"
+  local status
+  shift 2
+
+  if remote_run "$elastic_ip" "$@"; then
+    return 0
+  else
+    status=$?
+  fi
+
+  if [ "$status" = "255" ]; then
+    echo "ERROR: SSH connection failed during EC2 deployment step: $label" >&2
+    echo "       Target: ec2-user@$elastic_ip" >&2
+    echo "       This usually means the connection was lost, the instance rebooted, SSH was restarted, or the network timed out." >&2
+    echo "       Retry with: SETUP_ONLY=ec2-deployment bash infra/init/aws-setup.sh" >&2
+  else
+    echo "ERROR: EC2 remote command failed during deployment step: $label (exit $status)" >&2
+  fi
+
+  return "$status"
+}
+
 deploy_to_ec2() {
   if [ "$DO_DEPLOY" != "1" ]; then
     echo ""
@@ -11,6 +35,8 @@ deploy_to_ec2() {
   echo ""
   echo ">>> 12. EC2 deployment"
   require_setup_values "EC2 deployment" ELASTIC_IP MY_IP
+  require_boolean_env CLEAR_DOCKER_BUILD_CACHE
+  require_boolean_env DEPLOY_CLEAN_CHECKOUT
   require_cmd ssh
   require_cmd scp
 
@@ -23,7 +49,7 @@ deploy_to_ec2() {
   echo "    Start Compose: $START_COMPOSE"
   echo "    Compose services: ${COMPOSE_SERVICES:-all}"
   echo "    Clean checkout: $DEPLOY_CLEAN_CHECKOUT"
-  echo "    Prune Docker: $DEPLOY_PRUNE_DOCKER"
+  echo "    Clear Docker build cache: $CLEAR_DOCKER_BUILD_CACHE"
   echo "    Waiting for SSH (${SSH_WAIT_ATTEMPTS} attempts, ${SSH_WAIT_SECONDS}s apart)..."
 
   local attempt last_ssh_error
@@ -48,7 +74,7 @@ deploy_to_ec2() {
 
   echo "    Installing EC2 host packages and enabling services..."
   # shellcheck disable=SC2016
-  remote_run "$ELASTIC_IP" 'set -euo pipefail
+  ec2_deploy_remote_run "install host packages and enable services" "$ELASTIC_IP" 'set -euo pipefail
     sudo dnf update -y
     sudo dnf install -y docker git awscli amazon-ssm-agent jq openssh-clients
     command -v curl >/dev/null
@@ -111,7 +137,7 @@ deploy_to_ec2() {
 
   local ec2_repo_url git_ssh_command remote_deploy_key_path
   local git_ssh_command_q remote_app_dir_q deploy_branch_q ec2_repo_url_q
-  local deploy_clean_checkout_q deploy_prune_docker_q
+  local deploy_clean_checkout_q clear_docker_build_cache_q
   ec2_repo_url="$REPO_URL"
   git_ssh_command=""
   remote_deploy_key_path="/home/ec2-user/.ssh/github-deploy-key"
@@ -126,19 +152,19 @@ deploy_to_ec2() {
     fi
 
     echo "    Installing GitHub deploy key on EC2..."
-    remote_run "$ELASTIC_IP" "install -d -m 700 /home/ec2-user/.ssh && ssh-keyscan github.com >> /home/ec2-user/.ssh/known_hosts && chmod 600 /home/ec2-user/.ssh/known_hosts"
+    ec2_deploy_remote_run "install GitHub known_hosts entry" "$ELASTIC_IP" "install -d -m 700 /home/ec2-user/.ssh && ssh-keyscan github.com >> /home/ec2-user/.ssh/known_hosts && chmod 600 /home/ec2-user/.ssh/known_hosts"
     scp \
       -o StrictHostKeyChecking=accept-new \
       -o ConnectTimeout="$SSH_CONNECT_TIMEOUT" \
       -i "$SSH_PRIVATE_KEY_PATH" \
       "$GITHUB_DEPLOY_KEY_PATH" \
       "ec2-user@${ELASTIC_IP}:${remote_deploy_key_path}.tmp"
-    remote_run "$ELASTIC_IP" "mv '${remote_deploy_key_path}.tmp' '$remote_deploy_key_path' && chmod 600 '$remote_deploy_key_path'"
+    ec2_deploy_remote_run "finalize GitHub deploy key" "$ELASTIC_IP" "mv '${remote_deploy_key_path}.tmp' '$remote_deploy_key_path' && chmod 600 '$remote_deploy_key_path'"
     git_ssh_command="ssh -i $remote_deploy_key_path -o IdentitiesOnly=yes"
   fi
 
   echo "    Ensuring remote app directory exists..."
-  remote_run "$ELASTIC_IP" "sudo install -d -o ec2-user -g ec2-user '$REMOTE_APP_DIR'"
+  ec2_deploy_remote_run "ensure remote app directory" "$ELASTIC_IP" "sudo install -d -o ec2-user -g ec2-user '$REMOTE_APP_DIR'"
 
   echo "    Cloning or updating repo on EC2..."
   printf -v git_ssh_command_q '%q' "$git_ssh_command"
@@ -146,8 +172,8 @@ deploy_to_ec2() {
   printf -v deploy_branch_q '%q' "$DEPLOY_BRANCH"
   printf -v ec2_repo_url_q '%q' "$ec2_repo_url"
   printf -v deploy_clean_checkout_q '%q' "$DEPLOY_CLEAN_CHECKOUT"
-  printf -v deploy_prune_docker_q '%q' "$DEPLOY_PRUNE_DOCKER"
-  remote_run "$ELASTIC_IP" "set -euo pipefail
+  printf -v clear_docker_build_cache_q '%q' "$CLEAR_DOCKER_BUILD_CACHE"
+  ec2_deploy_remote_run "clone or update repository" "$ELASTIC_IP" "set -euo pipefail
     GIT_SSH_COMMAND_VALUE=$git_ssh_command_q
     DEPLOY_CLEAN_CHECKOUT_VALUE=$deploy_clean_checkout_q
     run_git() {
@@ -191,11 +217,11 @@ deploy_to_ec2() {
     local compose_services_q
     printf -v compose_services_q '%q' "$COMPOSE_SERVICES"
     echo "    Starting Docker Compose stack..."
-    remote_run "$ELASTIC_IP" "set -euo pipefail
+    ec2_deploy_remote_run "start Docker Compose stack" "$ELASTIC_IP" "set -euo pipefail
       cd '$REMOTE_APP_DIR'
       export COMPOSE_PARALLEL_LIMIT=1
-      DEPLOY_PRUNE_DOCKER_VALUE=$deploy_prune_docker_q
-      if [ \"\$DEPLOY_PRUNE_DOCKER_VALUE\" = \"1\" ]; then
+      CLEAR_DOCKER_BUILD_CACHE_VALUE=$clear_docker_build_cache_q
+      if [ \"\$CLEAR_DOCKER_BUILD_CACHE_VALUE\" = \"1\" ]; then
         echo \"Pruning stopped containers, unused images, and Docker build cache before build...\"
         docker container prune -f || true
         docker image prune -af || true
@@ -209,14 +235,14 @@ deploy_to_ec2() {
       else
         docker compose -f infra/docker-compose.yml --env-file infra/.env.prod up -d --build
       fi
-      if [ \"\$DEPLOY_PRUNE_DOCKER_VALUE\" = \"1\" ]; then
+      if [ \"\$CLEAR_DOCKER_BUILD_CACHE_VALUE\" = \"1\" ]; then
         echo \"Pruning old images and Docker build cache after successful deploy...\"
         docker image prune -af || true
         docker builder prune -af || true
         docker buildx prune -af || true
       fi"
     echo "    Compose services:"
-    remote_run "$ELASTIC_IP" "cd '$REMOTE_APP_DIR' && docker compose -f infra/docker-compose.yml --env-file infra/.env.prod ps"
+    ec2_deploy_remote_run "show Docker Compose services" "$ELASTIC_IP" "cd '$REMOTE_APP_DIR' && docker compose -f infra/docker-compose.yml --env-file infra/.env.prod ps"
   else
     echo "    START_COMPOSE=0, skipped docker compose startup."
   fi

@@ -66,9 +66,6 @@ services:
       dockerfile: api/Dockerfile
     ports:
       - "127.0.0.1:8000:8000"
-    env_file:
-      - path: .env.prod
-        required: true
     environment:
       <<: *app-bootstrap-env
     depends_on:
@@ -83,9 +80,6 @@ services:
     build:
       context: ..
       dockerfile: workers/Dockerfile
-    env_file:
-      - path: .env.prod
-        required: true
     environment:
       <<: *app-bootstrap-env
     depends_on:
@@ -105,9 +99,6 @@ services:
         VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
     ports:
       - "3000:3000"
-    env_file:
-      - path: .env.prod
-        required: true
     environment:
       <<: *app-bootstrap-env
     networks:

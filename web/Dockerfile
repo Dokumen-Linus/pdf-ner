@@ -18,7 +18,16 @@ ENV NODE_OPTIONS=--max-old-space-size=3072
 
 RUN npm run build
 
-# Stage 2: Runtime
+# Stage 2: Production dependencies
+FROM node:24-slim AS prod-deps
+WORKDIR /app
+
+RUN npm install -g bun@1.3.12
+
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile --production
+
+# Stage 3: Runtime
 FROM node:24-slim AS runner
 
 RUN groupadd -g 1001 appgroup && \
@@ -26,6 +35,8 @@ RUN groupadd -g 1001 appgroup && \
 
 WORKDIR /app
 
+COPY --from=prod-deps --chown=appuser:appgroup /app/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appgroup /app/package.json ./package.json
 COPY --from=builder --chown=appuser:appgroup /app/.output ./.output
 
 USER 1001

@@ -8,14 +8,17 @@ COMPOSE_FILE="${COMPOSE_FILE:-infra/docker-compose.yml}"
 ENV_FILE="${ENV_FILE:-infra/.env.prod}"
 LOG_LINES="${LOG_LINES:-120}"
 MAX_RESTARTS="${MAX_RESTARTS:-}"
-REQUIRED_SERVICES=(nginx-proxy-manager redis api worker web)
-HOST_PORT_CHECKS=(
-  "nginx-proxy-manager:127.0.0.1:80"
-  "nginx-proxy-manager:127.0.0.1:81"
-  "nginx-proxy-manager:127.0.0.1:443"
-  "api:127.0.0.1:8000"
-  "web:127.0.0.1:3000"
-)
+REQUIRED_SERVICES_TEXT="${REQUIRED_SERVICES:-nginx-proxy-manager redis api worker}"
+OPTIONAL_SERVICES_TEXT="${OPTIONAL_SERVICES:-web}"
+HOST_PORT_CHECKS_TEXT="${HOST_PORT_CHECKS:-nginx-proxy-manager:127.0.0.1:80 nginx-proxy-manager:127.0.0.1:81 nginx-proxy-manager:127.0.0.1:443 api:127.0.0.1:8000}"
+CHECK_AWS_SECRETS="${CHECK_AWS_SECRETS:-0}"
+CHECK_SECRET_UNPACK="${CHECK_SECRET_UNPACK:-0}"
+AWS_REGION="${AWS_REGION:-us-east-1}"
+AWS_SECRET_NAMES_TEXT="${AWS_SECRET_NAMES:-prod/web prod/email prod/api prod/workers prod/runpod}"
+read -r -a REQUIRED_SERVICES <<< "$REQUIRED_SERVICES_TEXT"
+read -r -a OPTIONAL_SERVICES <<< "$OPTIONAL_SERVICES_TEXT"
+read -r -a HOST_PORT_CHECKS <<< "$HOST_PORT_CHECKS_TEXT"
+read -r -a AWS_SECRET_NAMES <<< "$AWS_SECRET_NAMES_TEXT"
 FAILURES=()
 
 cd "$APP_DIR"
@@ -58,6 +61,13 @@ service_image() {
 service_ports() {
   local container_id="$1"
   docker port "$container_id" 2>/dev/null | tr '\n' ',' | sed 's/,$//'
+}
+
+container_env_value() {
+  local container_id="$1"
+  local name="$2"
+  docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$container_id" \
+    | awk -F= -v key="$name" '$1 == key { print substr($0, length(key) + 2); exit }'
 }
 
 record_failure() {
@@ -108,6 +118,9 @@ print_failure_context() {
   for service in "${REQUIRED_SERVICES[@]}"; do
     print_recent_logs "$service"
   done
+  for service in "${OPTIONAL_SERVICES[@]}"; do
+    print_recent_logs "$service"
+  done
 }
 
 check_compose_services() {
@@ -119,6 +132,9 @@ check_compose_services() {
   printf '%-22s %-12s %-12s %-8s %-28s %s\n' "SERVICE" "STATUS" "HEALTH" "RESTARTS" "IMAGE" "PORTS"
   local service
   for service in "${REQUIRED_SERVICES[@]}"; do
+    print_service_summary "$service"
+  done
+  for service in "${OPTIONAL_SERVICES[@]}"; do
     print_service_summary "$service"
   done
 
@@ -147,6 +163,27 @@ check_compose_services() {
     restarts="$(service_restart_count "$container_id")"
     if [[ -n "$MAX_RESTARTS" ]]; then
       (( restarts <= MAX_RESTARTS )) || record_failure "compose service '${service}' has restarted ${restarts} time(s), max allowed is ${MAX_RESTARTS}"
+    fi
+  done
+
+  for service in "${OPTIONAL_SERVICES[@]}"; do
+    local container_id
+    container_id="$(service_container_id "$service")"
+    if [[ -z "$container_id" ]]; then
+      echo "optional compose service '${service}' has no container"
+      continue
+    fi
+
+    local status
+    status="$(service_status "$container_id")"
+    if [[ "$status" != "running" ]]; then
+      echo "optional compose service '${service}' is ${status}"
+    fi
+
+    local health
+    health="$(service_health "$container_id")"
+    if [[ "$health" == "unhealthy" ]]; then
+      echo "optional compose service '${service}' health is unhealthy"
     fi
   done
 }
@@ -178,6 +215,116 @@ check_host_ports() {
   done
 }
 
+check_bootstrap_env() {
+  echo
+  echo "Bootstrap env checks:"
+  printf '%-22s %-16s %-12s %-12s %-12s %s\n' "SERVICE" "ENV" "APP_VERSION" "SECRETS" "REGION" "RESULT"
+
+  local service
+  for service in api worker web; do
+    local container_id required result env_value app_version secrets_stage region
+    container_id="$(service_container_id "$service")"
+    required=0
+    result="ok"
+    for required_service in "${REQUIRED_SERVICES[@]}"; do
+      if [[ "$required_service" == "$service" ]]; then
+        required=1
+        break
+      fi
+    done
+
+    if [[ -z "$container_id" ]]; then
+      result="missing"
+      printf '%-22s %-16s %-12s %-12s %-12s %s\n' "$service" "-" "-" "-" "-" "$result"
+      if [[ "$required" = "1" ]]; then
+        record_failure "bootstrap env for required service '${service}' could not be checked because the container is missing"
+      fi
+      continue
+    fi
+
+    env_value="$(container_env_value "$container_id" ENV)"
+    app_version="$(container_env_value "$container_id" APP_VERSION)"
+    secrets_stage="$(container_env_value "$container_id" SECRETS_STAGE)"
+    region="$(container_env_value "$container_id" AWS_REGION)"
+
+    if [[ -z "$env_value" || -z "$app_version" || -z "$secrets_stage" || -z "$region" ]]; then
+      result="empty-bootstrap"
+      if [[ "$required" = "1" ]]; then
+        record_failure "bootstrap env for required service '${service}' has empty ENV, APP_VERSION, SECRETS_STAGE, or AWS_REGION"
+      fi
+    fi
+
+    printf '%-22s %-16s %-12s %-12s %-12s %s\n' "$service" "${env_value:-<empty>}" "${app_version:-<empty>}" "${secrets_stage:-<empty>}" "${region:-<empty>}" "$result"
+  done
+}
+
+check_aws_secrets() {
+  if [[ "$CHECK_AWS_SECRETS" != "1" ]]; then
+    return
+  fi
+
+  echo
+  echo "AWS Secrets Manager metadata checks:"
+  printf '%-22s %-14s %s\n' "SECRET" "REGION" "RESULT"
+
+  local secret_name
+  for secret_name in "${AWS_SECRET_NAMES[@]}"; do
+    if aws --region "$AWS_REGION" secretsmanager describe-secret --secret-id "$secret_name" >/dev/null 2>&1; then
+      printf '%-22s %-14s %s\n' "$secret_name" "$AWS_REGION" "exists"
+    else
+      printf '%-22s %-14s %s\n' "$secret_name" "$AWS_REGION" "missing-or-inaccessible"
+      record_failure "AWS secret '${secret_name}' is missing or inaccessible in ${AWS_REGION}"
+    fi
+  done
+}
+
+check_secret_unpacking() {
+  if [[ "$CHECK_SECRET_UNPACK" != "1" ]]; then
+    return
+  fi
+
+  echo
+  echo "Secret JSON unpack checks:"
+
+  if compose run --rm --no-deps api python - <<'PY'
+from dokumen_aws_secrets import load_stage_groups
+
+required = {
+    "api": ["API_DATABASE_URL", "REDIS_URL", "API_KEY", "AVATARS_S3_BUCKET_NAME"],
+    "runpod": ["OCR_MODEL"],
+}
+values = load_stage_groups(groups=["api", "runpod"])
+missing = [key for keys in required.values() for key in keys if key not in values or values[key] in ("", None)]
+if missing:
+    raise SystemExit(f"api secret JSON missing keys after unpack: {', '.join(missing)}")
+print("api/runpod JSON unpack: ok")
+PY
+  then
+    :
+  else
+    record_failure "api/runpod secret JSON did not unpack to required keys"
+  fi
+
+  if compose run --rm --no-deps worker python - <<'PY'
+from dokumen_aws_secrets import load_stage_groups
+
+required = {
+    "workers": ["WORKERS_DATABASE_URL", "REDIS_URL", "STRIPE_SECRET_KEY"],
+    "runpod": ["OCR_MODEL"],
+}
+values = load_stage_groups(groups=["workers", "runpod"])
+missing = [key for keys in required.values() for key in keys if key not in values or values[key] in ("", None)]
+if missing:
+    raise SystemExit(f"workers secret JSON missing keys after unpack: {', '.join(missing)}")
+print("workers/runpod JSON unpack: ok")
+PY
+  then
+    :
+  else
+    record_failure "workers/runpod secret JSON did not unpack to required keys"
+  fi
+}
+
 check_internal_services() {
   echo
   echo "Informational internal probes:"
@@ -195,6 +342,9 @@ check_internal_services() {
 }
 
 check_compose_services
+check_bootstrap_env
+check_aws_secrets
+check_secret_unpacking
 check_host_ports
 check_internal_services
 
