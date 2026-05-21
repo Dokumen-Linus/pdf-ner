@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import shutil
 import sys
 import urllib.request
 
@@ -56,6 +57,13 @@ def download_dir(api_path: str, out_dir: Path) -> int:
 def main() -> int:
     print(f"Downloading {OWNER}/{REPO}@{REF}:{SRC_PATH}")
     print(f"Into: {DEST_DIR}")
+    if DEST_DIR.exists():
+        for item in DEST_DIR.iterdir():
+            if item.is_dir():
+                shutil.rmtree(item)
+            else:
+                item.unlink()
+        print(f"Cleared existing contents of: {DEST_DIR}")
     total = download_dir(SRC_PATH, DEST_DIR)
     print(f"Done. {total} file(s) downloaded.")
     return 0
