@@ -148,7 +148,7 @@ sets the selected service image to the new ECR image tag. This keeps
 `infra/docker-compose.yml` usable for manual local builds while CI/CD can deploy
 prebuilt images.
 
-## Nginx Proxy Manager
+## Nginx Proxy Manager - DEPRECATED
 
 Open:
 
