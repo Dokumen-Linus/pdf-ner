@@ -1,44 +1,4 @@
-# Runpod Deployment Helpers
-
-This directory contains local operator scripts for deploying the two fixed
-Runpod OCR Pods used by Dokumen AI:
-
-- `deepseek-ocr`
-- `olm-ocr2`
-
-The source-of-truth worker service contract lives in `gpu/README.AGENTS.md`.
-Read that file before changing the GPU workers.
-
-## What To Run
-
-Create local Runpod deploy inputs:
-
-```bash
-cp infra/runpod/.env.example infra/runpod/.env.local
-```
-
-Edit `infra/runpod/.env.local`. For the first Pod creation, set:
-
-```env
-AWS_REGION=us-east-1
-IMAGE_TAG=<immutable-tag-not-latest>
-RUNPOD_API_KEY=<runpod-api-key>
-OCR_HTTP_BEARER_TOKEN=<new-runtime-token>
-HF_TOKEN=<optional-if-needed>
-DEEPSEEK_RUNPOD_POD_ID=
-OLM_OCR2_RUNPOD_POD_ID=
-CREATE_PODS=1
-```
-
-Then run:
-
-```bash
-bash infra/runpod/deploy_all.sh
-```
-
-After the first successful run, save the printed Pod IDs in
-`infra/runpod/.env.local` and change `CREATE_PODS=0`. Future runs should update
-the same fixed Pods instead of creating replacements.
+# Runpod Deployment Scripts
 
 ## Script Flow
 
@@ -73,41 +33,13 @@ is attached, waits for `/ping`, verifies unauthenticated `/ocr` returns `401`,
 posts an authenticated smoke PNG to `/ocr`, and validates the normalized JSON
 shape.
 
-## Local Ubuntu Setup
-
-Install and authenticate the required CLIs on an Ubuntu desktop:
-
-```bash
-# Runpod CLI
-mkdir -p ~/.local/bin
-curl -sL https://github.com/runpod/runpodctl/releases/latest/download/runpodctl-linux-amd64.tar.gz \
-  | tar xz -C ~/.local/bin
-export PATH="$HOME/.local/bin:$PATH"
-runpodctl doctor
-
-# Docker
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker "$USER"
-
-# AWS CLI v2
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip
-unzip awscliv2.zip
-sudo ./aws/install
-aws configure
-
-# Utilities
-sudo apt-get update
-sudo apt-get install -y curl jq
-```
-
-After adding yourself to the `docker` group, log out and back in before running
-Docker without `sudo`.
+After the first successful run, save the printed Pod IDs in
+`infra/runpod/.env.local` and change `CREATE_PODS=0`. Future runs should update
+the same fixed Pods instead of creating replacements.
 
 ## Registry
 
-The image registry is private AWS Elastic Container Registry.
-
-Expected repositories:
+The `deploy_all.sh` script assume you have two ECR repositories (created by `ecr-setup.sh`):
 
 - `dokumen-deepseek-ocr`
 - `dokumen-olm-ocr2`
@@ -192,7 +124,7 @@ CREATE_PODS=0
 Then run the deploy or smoke-test scripts from this directory. Fixed deploys
 should update those same Pod IDs instead of creating replacements.
 
-## Files Written
+## Outputs Written
 
 The deployment scripts write local, gitignored operator state:
 
@@ -257,20 +189,3 @@ curl -X POST "https://POD_ID-8000.proxy.runpod.net/ocr" \
   -H "Content-Type: image/png" \
   --data-binary @page.png
 ```
-
-## GitHub Actions Values
-
-The deploy workflow assumes the existing AWS GitHub OIDC deploy role. That role
-must have ECR push permissions for both GPU repositories.
-
-After first Pod creation, save these variables for CI deploys:
-
-```bash
-gh variable set GPU_DEEPSEEK_ECR_REPOSITORY --body "dokumen-deepseek-ocr"
-gh variable set GPU_OLM_OCR2_ECR_REPOSITORY --body "dokumen-olm-ocr2"
-gh variable set DEEPSEEK_RUNPOD_POD_ID --body "<fixed-deepseek-pod-id>"
-gh variable set OLM_OCR2_RUNPOD_POD_ID --body "<fixed-olm-pod-id>"
-```
-
-The deploy workflow also needs `RUNPOD_API_KEY`, `OCR_HTTP_BEARER_TOKEN`, and
-optional `HF_TOKEN` as GitHub Actions secrets.

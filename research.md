@@ -47,10 +47,9 @@
 
 ### Generate Assets
 
-- Frontend design: Google Stitch
 - Images: Gemini
 - SVG Icons: [OmniSVG/OmniSVG](https://github.com/OmniSVG/OmniSVG)
-- Videos: https://github.com/heygen-com/hyperframes
+- Videos: [HeyGen](https://github.com/heygen-com/hyperframes)
 
 ## Frontend links
 

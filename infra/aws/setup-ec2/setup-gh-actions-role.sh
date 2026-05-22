@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-setup_github_deploy_role() {
-  echo ""
-  echo ">>> GitHub deployment IAM"
-  require_setup_values "GitHub deployment IAM" ACCOUNT_ID INSTANCE_ID
+setup_github_actions_role() {
+  echo "Setting up GitHub Actions deployment IAM"
+  : "${GITHUB_REPO:?Set GITHUB_REPO to owner/repo before running setup-ec2.sh}"
+  : "${DEPLOY_BRANCH:?Set DEPLOY_BRANCH before running setup-ec2.sh}"
+  : "${INSTANCE_ID:?setup_github_actions_role must run after setup_ec2_instance}"
 
   GITHUB_OIDC_PROVIDER_ARN=$(ensure_oidc_provider)
   GITHUB_TRUST_POLICY=$(cat <<EOF
@@ -30,7 +31,7 @@ setup_github_deploy_role() {
 EOF
 )
 
-  GITHUB_DEPLOY_POLICY_DOCUMENT=$(cat <<EOF
+  GITHUB_ACTIONS_POLICY_DOCUMENT=$(cat <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -55,9 +56,7 @@ EOF
       "Resource": [
         "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$WEB_ECR_REPOSITORY")",
         "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$API_ECR_REPOSITORY")",
-        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$WORKERS_ECR_REPOSITORY")",
-        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$GPU_DEEPSEEK_ECR_REPOSITORY")",
-        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$GPU_OLM_OCR2_ECR_REPOSITORY")"
+        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$WORKERS_ECR_REPOSITORY")"
       ]
     },
     {
@@ -83,9 +82,10 @@ EOF
 EOF
 )
 
-  GITHUB_DEPLOY_ROLE_ARN=$(ensure_role "$GITHUB_DEPLOY_ROLE_NAME" "$GITHUB_TRUST_POLICY")
-  GITHUB_DEPLOY_POLICY_ARN=$(ensure_policy "$GITHUB_DEPLOY_POLICY_NAME" "$GITHUB_DEPLOY_POLICY_DOCUMENT")
-  aws iam attach-role-policy --role-name "$GITHUB_DEPLOY_ROLE_NAME" --policy-arn "$GITHUB_DEPLOY_POLICY_ARN"
+  GITHUB_ACTIONS_ROLE_ARN=$(ensure_role "$GITHUB_ACTIONS_ROLE_NAME" "$GITHUB_TRUST_POLICY")
+  GITHUB_ACTIONS_POLICY_ARN=$(ensure_policy "$GITHUB_ACTIONS_POLICY_NAME" "$GITHUB_ACTIONS_POLICY_DOCUMENT")
+  aws iam attach-role-policy --role-name "$GITHUB_ACTIONS_ROLE_NAME" --policy-arn "$GITHUB_ACTIONS_POLICY_ARN"
   echo "    GitHub OIDC provider: $GITHUB_OIDC_PROVIDER_ARN"
-  echo "    GitHub deploy role: $GITHUB_DEPLOY_ROLE_ARN"
+  echo "    GitHub Actions role: $GITHUB_ACTIONS_ROLE_ARN"
+  echo "    GitHub Actions policy: $GITHUB_ACTIONS_POLICY_ARN"
 }

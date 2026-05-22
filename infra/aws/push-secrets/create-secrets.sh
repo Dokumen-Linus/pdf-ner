@@ -1,38 +1,16 @@
 #!/usr/bin/env bash
-# Create AWS Secrets Manager secrets from reviewed local draft JSON files.
-# This script is intentionally create-only; it fails if any target secret exists.
-
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOCAL_ENV_FILE="${LOCAL_ENV_FILE:-${SCRIPT_DIR}/.env.local}"
 SECRET_DRAFT_DIR="${SECRET_DRAFT_DIR:-${SCRIPT_DIR}/local-secrets}"
 
-if [ -f "$LOCAL_ENV_FILE" ]; then
-  set -a
-  # shellcheck disable=SC1090
-  . "$LOCAL_ENV_FILE"
-  set +a
-fi
+# shellcheck source=infra/aws/shared/common.sh
+. "${SCRIPT_DIR}/../shared/common.sh"
 
-AWS_REGION="${AWS_REGION:-us-east-1}"
-PROJECT_NAME="${PROJECT_NAME:-dokumen}"
+load_env_file "$LOCAL_ENV_FILE"
+configure_common_defaults
 DRY_RUN="${DRY_RUN:-0}"
-
-require_cmd() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    echo "ERROR: required command not found: $1" >&2
-    exit 1
-  fi
-}
-
-aws_region() {
-  aws --region "$AWS_REGION" "$@"
-}
-
-draft_path() {
-  printf '%s/%s' "$SECRET_DRAFT_DIR" "$1"
-}
 
 validate_secret_file() {
   local file="$1"
@@ -60,12 +38,9 @@ secret_exists() {
   aws_region secretsmanager describe-secret --secret-id "$secret_name" >/dev/null 2>&1
 }
 
-require_cmd aws
-require_cmd jq
-
 if [ ! -d "$SECRET_DRAFT_DIR" ]; then
   echo "ERROR: secret draft directory not found: $SECRET_DRAFT_DIR" >&2
-  echo "Run infra/init/aws-setup.sh first, then review and complete the generated drafts." >&2
+  echo "Create and review the local secret drafts before running this script." >&2
   exit 1
 fi
 

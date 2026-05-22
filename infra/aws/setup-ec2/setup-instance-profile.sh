@@ -1,31 +1,12 @@
 #!/usr/bin/env bash
 
-setup_ecr_and_runtime_role() {
-  echo ""
-  echo ">>> ECR repositories and EC2 runtime IAM"
-  require_setup_values "ECR and EC2 runtime IAM" ACCOUNT_ID INSTANCE_ID
+setup_instance_profile() {
+  local trust_policy runtime_policy_document
 
-  ensure_ecr_repository "$WEB_ECR_REPOSITORY"
-  ensure_ecr_repository "$API_ECR_REPOSITORY"
-  ensure_ecr_repository "$WORKERS_ECR_REPOSITORY"
-  ensure_ecr_repository "$GPU_DEEPSEEK_ECR_REPOSITORY"
-  ensure_ecr_repository "$GPU_OLM_OCR2_ECR_REPOSITORY"
+  echo "Setting up EC2 instance profile"
+  trust_policy='{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]}'
 
-  EC2_TRUST_POLICY=$(cat <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {"Service": "ec2.amazonaws.com"},
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-)
-
-  EC2_RUNTIME_POLICY_DOCUMENT=$(cat <<EOF
+  runtime_policy_document=$(cat <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -46,9 +27,7 @@ EOF
       "Resource": [
         "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$WEB_ECR_REPOSITORY")",
         "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$API_ECR_REPOSITORY")",
-        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$WORKERS_ECR_REPOSITORY")",
-        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$GPU_DEEPSEEK_ECR_REPOSITORY")",
-        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$GPU_OLM_OCR2_ECR_REPOSITORY")"
+        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/$(json_escape "$WORKERS_ECR_REPOSITORY")"
       ]
     },
     {
@@ -91,7 +70,8 @@ EOF
         "s3:PutEncryptionConfiguration",
         "s3:PutBucketVersioning",
         "s3:GetBucketPolicy",
-        "s3:PutBucketPolicy"
+        "s3:PutBucketPolicy",
+        "s3:HeadBucket"
       ],
       "Resource": [
         "arn:aws:s3:::*",
@@ -103,13 +83,10 @@ EOF
 EOF
 )
 
-  EC2_ROLE_ARN=$(ensure_role "$EC2_ROLE_NAME" "$EC2_TRUST_POLICY")
-  EC2_RUNTIME_POLICY_ARN=$(ensure_policy "$EC2_RUNTIME_POLICY_NAME" "$EC2_RUNTIME_POLICY_DOCUMENT")
+  EC2_ROLE_ARN="$(ensure_role "$EC2_ROLE_NAME" "$trust_policy")"
+  EC2_RUNTIME_POLICY_ARN="$(ensure_policy "$EC2_RUNTIME_POLICY_NAME" "$runtime_policy_document")"
   aws iam attach-role-policy --role-name "$EC2_ROLE_NAME" --policy-arn "$EC2_RUNTIME_POLICY_ARN"
   aws iam attach-role-policy --role-name "$EC2_ROLE_NAME" --policy-arn "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   ensure_instance_profile "$EC2_ROLE_NAME" "$EC2_INSTANCE_PROFILE_NAME"
   sleep 30
-  ensure_instance_profile_attached "$INSTANCE_ID" "$EC2_INSTANCE_PROFILE_NAME"
-  echo "    EC2 runtime role: $EC2_ROLE_ARN"
-  echo "    EC2 instance profile: $EC2_INSTANCE_PROFILE_NAME"
 }
