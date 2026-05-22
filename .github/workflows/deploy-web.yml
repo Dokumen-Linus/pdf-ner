@@ -1,4 +1,4 @@
-name: Deploy Workers
+name: Deploy Web
 
 on:
   workflow_dispatch:
@@ -6,25 +6,24 @@ on:
     branches:
       - master
     paths:
-      - "workers/**"
-      - "packages/**"
+      - "web/**"
       - "infra/docker-compose.yml"
-      - "infra/health/**"
-      - ".github/workflows/deploy-workers.yml"
+      - "infra/aws/health/**"
+      - ".github/workflows/deploy-web.yml"
 
 concurrency:
-  group: deploy-workers
+  group: deploy-web
   cancel-in-progress: false
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
-  ECR_REPOSITORY: ${{ vars.WORKERS_ECR_REPOSITORY || 'dokumen-workers' }}
+  ECR_REPOSITORY: ${{ vars.WEB_ECR_REPOSITORY || 'dokumen-web' }}
   EC2_APP_DIR: ${{ vars.EC2_APP_DIR || '/opt/dokumen/pdf-ner' }}
   EC2_DEPLOY_STATE_DIR: ${{ vars.EC2_DEPLOY_STATE_DIR || '/opt/dokumen/deploy-state' }}
 
 jobs:
   deploy:
-    name: Build, Push, And Restart Workers
+    name: Build, Push, And Restart Web
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -53,16 +52,18 @@ jobs:
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and push workers image
-        id: image
+      - name: Build and push web image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: workers/Dockerfile
+          context: web
+          file: web/Dockerfile
           push: true
+          build-args: |
+            VITE_BASE_URL=${{ vars.VITE_BASE_URL }}
+            VITE_STRIPE_PUBLISHABLE_KEY=${{ vars.VITE_STRIPE_PUBLISHABLE_KEY }}
           tags: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
 
-      - name: Deploy workers on EC2
+      - name: Deploy web on EC2
         env:
           IMAGE: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
         run: |
@@ -72,11 +73,14 @@ jobs:
             --arg state_dir "$EC2_DEPLOY_STATE_DIR" \
             --arg image "$IMAGE" \
             --arg registry "${{ steps.ecr-login.outputs.registry }}" \
-            --arg service "worker" \
+            --arg service "web" \
+            --arg sha "${{ github.sha }}" \
             '{
               commands: [
                 "set -euo pipefail",
                 "cd \($app_dir)",
+                "git fetch origin master",
+                "git checkout --detach \($sha)",
                 "aws ecr get-login-password --region \($region) | docker login --username AWS --password-stdin \($registry)",
                 "STATE_DIR=\($state_dir)",
                 "IMAGE=\($image)",
@@ -86,7 +90,7 @@ jobs:
                 "{ echo '\''services:'\''; for service in web api worker; do image_file=\"$STATE_DIR/images/$service\"; if [ -s \"$image_file\" ]; then echo \"  $service:\"; printf '\''    image: %s\\n'\'' \"$(cat \"$image_file\")\"; fi; done; } > \"$STATE_DIR/docker-compose.images.yml\"",
                 "docker compose -f infra/docker-compose.yml -f \"$STATE_DIR/docker-compose.images.yml\" --env-file infra/.env.prod pull \"$SERVICE\"",
                 "docker compose -f infra/docker-compose.yml -f \"$STATE_DIR/docker-compose.images.yml\" --env-file infra/.env.prod up -d --no-build --no-deps \"$SERVICE\"",
-                "bash infra/health/ec2-healthcheck.sh",
+                "bash infra/aws/health/ec2-healthcheck.sh",
                 "docker image prune -f"
               ]
             }' > ssm-commands.json
@@ -94,7 +98,7 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --comment "Deploy workers ${{ github.sha }}" \
+            --comment "Deploy web ${{ github.sha }}" \
             --parameters file://ssm-commands.json \
             --query "Command.CommandId" \
             --output text)
