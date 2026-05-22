@@ -33,7 +33,9 @@ describe.if(runTests)("Application Table Server Functions", () => {
     expect(deleteOutput.success).toBe(true)
 
     // Verify deletion
-    await expect(getApplicationById({ data: { id: appIntId } })).rejects.toThrow("Application not found")
+    await expect(getApplicationById({ data: { id: appIntId } })).rejects.toThrow(
+      "Application not found",
+    )
   })
 
   describe("Validation and Error Handling", () => {
@@ -46,11 +48,15 @@ describe.if(runTests)("Application Table Server Functions", () => {
     })
 
     it("throws 'Application not found' for non-existent ID", async () => {
-      await expect(getApplicationById({ data: { id: 9999999 } })).rejects.toThrow("Application not found")
+      await expect(getApplicationById({ data: { id: 9999999 } })).rejects.toThrow(
+        "Application not found",
+      )
     })
 
     it("throws 'Application not found' when deleting non-existent application", async () => {
-      await expect(deleteApplication({ data: { id: 9999999 } })).rejects.toThrow("Application not found")
+      await expect(deleteApplication({ data: { id: 9999999 } })).rejects.toThrow(
+        "Application not found",
+      )
     })
   })
 })

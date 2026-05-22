@@ -108,7 +108,7 @@ export async function sendApplicationEmail(args: {
       email={args.email}
       phone={args.phone}
       message={args.message}
-    />
+    />,
   )
 
   const boundary = "----=_Part_" + Math.random().toString(36).substring(2)
@@ -141,6 +141,6 @@ export async function sendApplicationEmail(args: {
       RawMessage: {
         Data: new TextEncoder().encode(rawMessage),
       },
-    })
+    }),
   )
 }
