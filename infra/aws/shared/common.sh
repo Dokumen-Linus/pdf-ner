@@ -377,6 +377,36 @@ ensure_policy() {
   printf '%s' "$policy_arn"
 }
 
+ensure_oidc_provider() {
+  local provider_host provider_arn tag_args
+  provider_host="${GITHUB_OIDC_PROVIDER_URL#https://}"
+  provider_host="${provider_host#http://}"
+  provider_host="${provider_host%%/*}"
+  tag_args=("Key=Name,Value=${GITHUB_OIDC_PROVIDER_NAME}" "Key=Project,Value=${PROJECT_NAME}" "Key=Environment,Value=${ENVIRONMENT}")
+
+  provider_arn=$(aws iam list-open-id-connect-providers \
+    --query "OpenIDConnectProviderList[?contains(Arn, '${provider_host}')].Arn | [0]" \
+    --output text)
+
+  if [ -z "$provider_arn" ] || [ "$provider_arn" = "None" ]; then
+    provider_arn=$(aws iam create-open-id-connect-provider \
+      --url "$GITHUB_OIDC_PROVIDER_URL" \
+      --client-id-list sts.amazonaws.com \
+      --tags "${tag_args[@]}" \
+      --query 'OpenIDConnectProviderArn' \
+      --output text)
+  else
+    aws iam add-client-id-to-open-id-connect-provider \
+      --open-id-connect-provider-arn "$provider_arn" \
+      --client-id sts.amazonaws.com >/dev/null 2>&1 || true
+  fi
+
+  aws iam tag-open-id-connect-provider \
+    --open-id-connect-provider-arn "$provider_arn" \
+    --tags "${tag_args[@]}" >/dev/null
+  printf '%s' "$provider_arn"
+}
+
 ensure_instance_profile() {
   local role_name="$1"
   local profile_name="$2"
