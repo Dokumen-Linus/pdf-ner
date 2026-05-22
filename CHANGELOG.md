@@ -401,6 +401,7 @@
 - *(llm)* Remove stripe plugin
 - *(web)* Copy current tanstack repo
 - *(llm)* Approve call_aws
+- Create cloudflare tunnels and waf skills
 
 ### ⚡ Performance
 
@@ -706,6 +707,7 @@
 - *(web)* Improve dockerfile
 - *(db)* Remove old dockerignore
 - Add to dockerignores
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
 
