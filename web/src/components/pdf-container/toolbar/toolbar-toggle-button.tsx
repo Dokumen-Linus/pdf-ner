@@ -1,5 +1,4 @@
-import { PanelLeftIcon } from "lucide-react"
-
+import { PanelLeftIcon } from "@/components/icons"
 import { m } from "@/integrations/paraglide/messages.js"
 
 import type { Dispatch, SetStateAction } from "react"

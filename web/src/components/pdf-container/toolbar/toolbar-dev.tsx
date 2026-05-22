@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react"
 import { PdfAnnotationSubtype } from "@embedpdf/models"
+
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,8 +17,7 @@ import {
   Undo2,
   ZoomIn,
   ZoomOut,
-} from "lucide-react"
-
+} from "@/components/icons"
 import { Input } from "@/components/shadcn-ui/input"
 import { m } from "@/integrations/paraglide/messages.js"
 

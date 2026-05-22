@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react"
 import { fetchServerSentEvents } from "@tanstack/ai-client"
 import { useChat } from "@tanstack/ai-react"
-import { Bot, MessageSquare, Send, Sparkles, User, X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 
+import { Bot, MessageSquare, Send, Sparkles, User, X } from "@/components/icons"
 import { m } from "@/integrations/paraglide/messages.js"
 import { cn } from "@/lib/shadcn-ui/utils"
 

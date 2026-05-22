@@ -1,4 +1,5 @@
 import { bigserial, text, timestamp } from "drizzle-orm/pg-core"
+
 import { webSchema } from "./schema"
 
 export const applications = webSchema.table("applications", {

@@ -1,8 +1,8 @@
 import { useMemo, useRef, useState } from "react"
 import { type ReactFormExtendedApi, useForm } from "@tanstack/react-form"
 import { createFileRoute, Link, useBlocker, useRouter } from "@tanstack/react-router"
-import { LoaderCircleIcon, PlusIcon, SaveIcon, Trash2Icon } from "lucide-react"
 
+import { LoaderCircleIcon, PlusIcon, SaveIcon, Trash2Icon } from "@/components/icons"
 import { ProjectTabs } from "@/components/project-tabs"
 import {
   AlertDialog,

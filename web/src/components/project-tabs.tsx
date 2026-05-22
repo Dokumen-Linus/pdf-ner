@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router"
+
 import {
   BrainCircuitIcon,
   FileTextIcon,
@@ -7,8 +8,7 @@ import {
   PencilIcon,
   ShieldCheckIcon,
   TagIcon,
-} from "lucide-react"
-
+} from "@/components/icons"
 import { Badge } from "@/components/shadcn-ui/badge"
 import {
   Tooltip,

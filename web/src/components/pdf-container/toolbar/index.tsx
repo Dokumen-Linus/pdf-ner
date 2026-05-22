@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+
 import {
   ArrowLeftRight,
   Download,
@@ -9,8 +10,7 @@ import {
   Undo2,
   ZoomIn,
   ZoomOut,
-} from "lucide-react"
-
+} from "@/components/icons"
 import { m } from "@/integrations/paraglide/messages.js"
 
 import { AnnotationPluginPackage, useAnnotationCapability } from "../plugin-annotation-2"

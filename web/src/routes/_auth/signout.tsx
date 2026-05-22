@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { Loader2 } from "lucide-react"
 
+import { Loader2 } from "@/components/icons"
 import { m } from "@/integrations/paraglide/messages.js"
 import { authClient } from "@/lib/auth-client"
 

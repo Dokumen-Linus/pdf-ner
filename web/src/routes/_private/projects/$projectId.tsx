@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { ChevronRightIcon } from "lucide-react"
 
+import { ChevronRightIcon } from "@/components/icons"
 import { PROJECT_STEPS, ProjectTabs } from "@/components/project-tabs"
 import { Badge } from "@/components/shadcn-ui/badge"
 import { Button } from "@/components/shadcn-ui/button"

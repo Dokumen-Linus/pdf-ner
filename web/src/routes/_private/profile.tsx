@@ -1,9 +1,9 @@
 import { useRef, useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { EditIcon, LoaderCircleIcon, SaveIcon, Trash2Icon, XIcon } from "lucide-react"
 import { z } from "zod"
 
+import { EditIcon, LoaderCircleIcon, SaveIcon, Trash2Icon, XIcon } from "@/components/icons"
 import {
   AlertDialog,
   AlertDialogCancel,

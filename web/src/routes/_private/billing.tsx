@@ -2,9 +2,9 @@ import { useMemo, useState } from "react"
 import { createFileRoute, useRouter } from "@tanstack/react-router"
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
-import { CreditCardIcon, LoaderCircleIcon, Trash2Icon } from "lucide-react"
 import { z } from "zod"
 
+import { CreditCardIcon, LoaderCircleIcon, Trash2Icon } from "@/components/icons"
 import { Button } from "@/components/shadcn-ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn-ui/card"
 import {

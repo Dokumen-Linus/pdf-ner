@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ShieldCheckIcon } from "lucide-react"
 
+import { ShieldCheckIcon } from "@/components/icons"
 import { ProjectTabs } from "@/components/project-tabs"
 import { Button } from "@/components/shadcn-ui/button"
 import {
