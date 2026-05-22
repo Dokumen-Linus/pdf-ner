@@ -1,0 +1,175 @@
+@reference "../../styles.css";
+
+.site-header {
+  @apply sticky top-0 z-40 w-full border-b transition-colors;
+  background: var(--dokumen-panel);
+  border-color: var(--dokumen-cloud);
+  transition-duration: 300ms;
+}
+
+.site-header > div {
+  @apply mx-auto flex h-14 items-center justify-between px-6;
+  max-width: var(--dokumen-max-content);
+}
+
+/* Logo and Wordmark */
+.site-header .logo {
+  @apply flex shrink-0 items-center gap-3;
+}
+
+.site-header .logo img {
+  @apply h-6 w-auto object-contain transition-transform;
+}
+
+.site-header .logo span {
+  @apply text-[17px] font-bold uppercase;
+  color: var(--dokumen-carbon);
+  letter-spacing: 0.2em;
+}
+
+.site-header .logo span span {
+  color: var(--dokumen-blue);
+}
+
+/* Desktop Navigation */
+.site-header nav {
+  @apply hidden flex-1 items-center justify-center gap-2 md:flex;
+}
+
+.site-header .actions {
+  @apply hidden shrink-0 items-center justify-end gap-2 md:flex;
+}
+
+/* Interactive elements in header */
+.site-header nav a,
+.site-header .actions button,
+.site-header .actions a {
+  @apply rounded-lg font-medium transition-colors;
+  color: var(--dokumen-carbon);
+}
+
+.site-header nav a {
+  @apply px-4 py-1.5 text-[14px];
+}
+
+/* Common Hover/Active States */
+.site-header nav a:hover,
+.site-header nav a.active,
+.site-header .actions button:hover,
+.site-header .actions a:hover {
+  background: var(--dokumen-light-ash);
+  color: var(--dokumen-carbon);
+}
+
+.site-header .actions button {
+  @apply flex items-center gap-1.5 px-3 py-1.5 text-[14px];
+}
+
+.site-header .actions button.icon-only {
+  @apply p-2;
+}
+
+.site-header .actions .chevron {
+  color: var(--dokumen-pewter);
+}
+
+.site-header .actions .muted-link {
+  color: var(--dokumen-pewter);
+}
+
+/* Mobile Menu Button */
+.site-header button.mobile-menu {
+  @apply rounded-lg p-1.5 transition-colors md:hidden;
+  color: var(--dokumen-carbon);
+}
+
+.site-header button.mobile-menu:hover {
+  background: var(--dokumen-light-ash);
+}
+
+/* Popover Content (language selector) */
+.popover-content {
+  @apply w-auto min-w-20 rounded-lg border bg-white p-1 shadow-lg;
+  border-color: var(--dokumen-cloud);
+}
+
+.popover-content button {
+  @apply w-full rounded-md px-3 py-1.5 text-left text-sm uppercase transition-colors;
+  color: var(--dokumen-pewter);
+}
+
+.popover-content button:hover,
+.popover-content button.active {
+  background: var(--dokumen-light-ash);
+  color: var(--dokumen-carbon);
+}
+
+.popover-content button.active {
+  @apply font-semibold;
+}
+
+/* Mobile Drawer Overlay and Drawer */
+.mobile-overlay {
+  @apply fixed inset-0 z-50 bg-black/20 backdrop-blur-sm transition-opacity duration-300;
+}
+
+.mobile-drawer {
+  @apply fixed top-0 right-0 z-50 flex h-full w-80 flex-col bg-white transition-transform duration-300 ease-in-out;
+  box-shadow: var(--dokumen-sidebar-shadow);
+}
+
+.mobile-drawer .drawer-header {
+  @apply flex items-center justify-between p-4;
+}
+
+.mobile-drawer .drawer-header button {
+  @apply rounded-lg font-medium transition-colors p-2;
+  color: var(--dokumen-carbon);
+}
+
+.mobile-drawer .drawer-header button:hover {
+  background: var(--dokumen-light-ash);
+}
+
+.mobile-drawer nav {
+  @apply flex flex-1 flex-col gap-4 overflow-y-auto px-6 pt-2 pb-6;
+}
+
+.mobile-drawer nav a {
+  @apply text-[17px] font-medium transition-colors;
+  color: var(--dokumen-carbon);
+}
+
+.mobile-drawer nav a:hover {
+  color: var(--dokumen-graphite);
+}
+
+/* Mobile Drawer Account Section */
+.mobile-drawer nav .account {
+  @apply mt-4 flex flex-col gap-4 border-t pt-4;
+  border-color: var(--dokumen-cloud);
+}
+
+.mobile-drawer nav .account p {
+  @apply text-[12px] font-medium uppercase;
+  color: var(--dokumen-silver-fog);
+  letter-spacing: 0.025em;
+}
+
+.mobile-drawer nav .account a {
+  @apply flex items-center gap-2 text-[17px] font-medium transition-colors;
+  color: var(--dokumen-carbon);
+}
+
+.mobile-drawer nav .account a:hover {
+  color: var(--dokumen-graphite);
+}
+
+.mobile-drawer nav .account a.muted {
+  @apply mt-2;
+  color: var(--dokumen-pewter);
+}
+
+.mobile-drawer nav .account a.muted:hover {
+  color: var(--dokumen-carbon);
+}
