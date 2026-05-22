@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ENV_FILE_ARG="${1:-}"
 
 load_env_file() {
   local env_file="$1"
@@ -10,10 +11,13 @@ load_env_file() {
     # shellcheck disable=SC1090
     . "$env_file"
     set +a
+    echo "Loaded env file: ${env_file}" >&2
+  else
+    echo "Env file not found, continuing with current environment: ${env_file}" >&2
   fi
 }
 
-load_env_file "${LOCAL_ENV_FILE:-${SCRIPT_DIR}/.env.local}"
+load_env_file "${LOCAL_ENV_FILE:-${ENV_FILE_ARG:-${SCRIPT_DIR}/.env.local}}"
 
 CF_API_BASE="${CF_API_BASE:-https://api.cloudflare.com/client/v4}"
 TUNNEL_NAME="${TUNNEL_NAME:-dokumen-prod}"
@@ -32,6 +36,7 @@ for var_name in "${required_vars[@]}"; do
     exit 1
   fi
 done
+echo "Required Cloudflare environment variables are present." >&2
 
 for command_name in curl jq; do
   if ! command -v "$command_name" >/dev/null 2>&1; then
@@ -39,6 +44,7 @@ for command_name in curl jq; do
     exit 1
   fi
 done
+echo "Required local commands are available: curl jq." >&2
 
 cf_api() {
   local method="$1"
@@ -71,20 +77,28 @@ cf_api() {
 
   echo "Cloudflare API request failed: ${method} ${path}" >&2
   jq -r '.errors[]? | "  - \(.message)"' <<< "$response" >&2
-  exit 1
+  return 1
+}
+
+verify_cloudflare_token() {
+  if ! cf_api GET "/user/tokens/verify" >/dev/null; then
+    echo "Cloudflare API token verification failed. Check CLOUDFLARE_API_TOKEN in the loaded env file." >&2
+    return 1
+  fi
+  echo "Verified Cloudflare API token." >&2
 }
 
 find_tunnel_id() {
   local response
-  response="$(cf_api GET "/accounts/${CLOUDFLARE_ACCOUNT_ID}/cfd_tunnel?is_deleted=false&per_page=100")"
+  response="$(cf_api GET "/accounts/${CLOUDFLARE_ACCOUNT_ID}/cfd_tunnel?is_deleted=false&per_page=100")" || return
   jq -r --arg name "$TUNNEL_NAME" '.result[]? | select(.name == $name and .deleted_at == null) | .id' <<< "$response" | head -n 1
 }
 
 create_tunnel() {
   local body response
   body="$(jq -n --arg name "$TUNNEL_NAME" '{name: $name, config_src: "cloudflare"}')"
-  response="$(cf_api POST "/accounts/${CLOUDFLARE_ACCOUNT_ID}/cfd_tunnel" "$body")"
-  jq -r '.result.id' <<< "$response"
+  response="$(cf_api POST "/accounts/${CLOUDFLARE_ACCOUNT_ID}/cfd_tunnel" "$body")" || return
+  jq -r '[.result.id, (.result.token // .result.tunnel_token // "")] | @tsv' <<< "$response"
 }
 
 put_tunnel_config() {
@@ -113,6 +127,7 @@ put_tunnel_config() {
   )"
 
   cf_api PUT "/accounts/${CLOUDFLARE_ACCOUNT_ID}/cfd_tunnel/${tunnel_id}/configurations" "$body" >/dev/null
+  echo "Updated Cloudflare Tunnel ingress configuration for '${TUNNEL_NAME}'." >&2
 }
 
 upsert_dns_record() {
@@ -121,7 +136,7 @@ upsert_dns_record() {
   local target="${tunnel_id}.cfargotunnel.com"
   local list_response record_id body
 
-  list_response="$(cf_api GET "/zones/${CLOUDFLARE_ZONE_ID}/dns_records?name=${hostname}&per_page=100")"
+  list_response="$(cf_api GET "/zones/${CLOUDFLARE_ZONE_ID}/dns_records?name=${hostname}&per_page=100")" || return
   record_id="$(jq -r '.result[0].id // empty' <<< "$list_response")"
   body="$(
     jq -n \
@@ -132,23 +147,39 @@ upsert_dns_record() {
 
   if [[ -n "$record_id" ]]; then
     cf_api PUT "/zones/${CLOUDFLARE_ZONE_ID}/dns_records/${record_id}" "$body" >/dev/null
+    echo "Updated DNS record for ${hostname}." >&2
   else
     cf_api POST "/zones/${CLOUDFLARE_ZONE_ID}/dns_records" "$body" >/dev/null
+    echo "Created DNS record for ${hostname}." >&2
   fi
 }
 
 get_tunnel_token() {
   local tunnel_id="$1"
   local response
-  response="$(cf_api GET "/accounts/${CLOUDFLARE_ACCOUNT_ID}/cfd_tunnel/${tunnel_id}/token")"
-  jq -r '.result' <<< "$response"
+  response="$(cf_api GET "/accounts/${CLOUDFLARE_ACCOUNT_ID}/cfd_tunnel/${tunnel_id}/token")" || return
+  jq -er '
+    if (.result | type) == "string" then
+      .result
+    else
+      .result.token // .result.tunnel_token // empty
+    end
+  ' <<< "$response"
 }
 
-tunnel_id="$(find_tunnel_id)"
+verify_cloudflare_token || exit 1
+
+tunnel_token=""
+tunnel_id="$(find_tunnel_id)" || exit 1
 if [[ -n "$tunnel_id" ]]; then
   echo "Reusing Cloudflare Tunnel '${TUNNEL_NAME}' (${tunnel_id})." >&2
 else
-  tunnel_id="$(create_tunnel)"
+  create_output="$(create_tunnel)" || exit 1
+  IFS=$'\t' read -r tunnel_id tunnel_token <<< "$create_output"
+  if [[ -z "$tunnel_id" || "$tunnel_id" == "null" ]]; then
+    echo "Cloudflare Tunnel create response did not include a tunnel id." >&2
+    exit 1
+  fi
   echo "Created Cloudflare Tunnel '${TUNNEL_NAME}' (${tunnel_id})." >&2
 fi
 
@@ -159,7 +190,17 @@ for hostname in "${hostnames[@]}"; do
   upsert_dns_record "$hostname" "$tunnel_id"
 done
 
-tunnel_token="$(get_tunnel_token "$tunnel_id")"
+if [[ -z "$tunnel_token" || "$tunnel_token" == "null" ]]; then
+  tunnel_token="$(get_tunnel_token "$tunnel_id")" || exit 1
+  echo "Fetched Cloudflare Tunnel token from token endpoint." >&2
+else
+  echo "Using Cloudflare Tunnel token from create response." >&2
+fi
+if [[ -z "$tunnel_token" || "$tunnel_token" == "null" ]]; then
+  echo "Cloudflare Tunnel token response did not include TUNNEL_TOKEN." >&2
+  exit 1
+fi
+echo "Cloudflare Tunnel setup complete." >&2
 
 printf 'TUNNEL_ID=%s\n' "$tunnel_id"
 printf 'TUNNEL_TOKEN=%s\n' "$tunnel_token"
