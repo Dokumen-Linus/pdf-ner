@@ -1,6 +1,5 @@
 INSERT INTO public.templates (
   txt,
-  inserts,
   includes_project_description,
   includes_entity_type_definitions,
   includes_entity_type_example_values,
@@ -54,7 +53,7 @@ Extraction rules:
 - For non-unique fields, return an array of all distinct values you can identify. Return an empty array when no values are present.
 - Respect each field''s definition, examples, example finds, regex, required flag, and unique flag.
 - If a value conflicts with a regex, omit it unless the surrounding text clearly shows the intended valid value.
-', ARRAY['<PROJECT_DESCRIPTION>','<ENTITY_TYPES>','<DEFINITIONS>','<EXAMPLE_VALUES>','<EXAMPLE_FINDS>','<REGEX>','<IS_REQUIRED>','<IS_UNIQUE>'], true, true, true, true, true),
+', true, true, true, true, true),
 ('You are a structured data extraction system specializing in PDF document analysis. Your task is to identify and extract specific fields from the provided PDF text.
 
 Output requirements:
@@ -104,7 +103,7 @@ Extraction guidelines:
 - Non-unique: return an array of all distinct matches; use empty array [] when none found
 - Honor every constraint: definition, examples, example finds, regex, required, and unique flags
 - When a candidate value fails regex validation, exclude it unless the document context unambiguously indicates the correct intended value
-', ARRAY['<PROJECT_DESCRIPTION>','<ENTITY_TYPES>','<DEFINITIONS>','<EXAMPLE_VALUES>','<EXAMPLE_FINDS>','<REGEX>','<IS_REQUIRED>','<IS_UNIQUE>'], true, true, true, true, true),
+', true, true, true, true, true),
 ('You are an expert document parser. Analyze the PDF text in the user message and extract the specified fields into structured JSON.
 
 Rules:
@@ -153,4 +152,4 @@ How to extract:
 - If a field is non-unique: return all distinct values as an array; [] if none
 - Respect definition, examples, example finds, regex, required status, and uniqueness for every field
 - Skip values that violate regex unless the surrounding PDF text makes the intended value completely clear
-', ARRAY['<PROJECT_DESCRIPTION>','<ENTITY_TYPES>','<DEFINITIONS>','<EXAMPLE_VALUES>','<EXAMPLE_FINDS>','<REGEX>','<IS_REQUIRED>','<IS_UNIQUE>'], true, true, true, true, true);
+', true, true, true, true, true);

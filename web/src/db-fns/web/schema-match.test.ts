@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test"
 import { z } from "zod"
 
 import { CreateAnnotationSchema, UpdateAnnotationSchema } from "./annotations"
+import { CreateApplicationSchema } from "./applications"
 import { CreateEntityTypeSchema, UpdateEntityTypeSchema } from "./entity-types"
 import { CreatePdfSchema, UpdatePdfSchema } from "./pdfs"
 import { CreateProjectSchema, UpdateProjectSchema } from "./projects"
@@ -16,6 +17,7 @@ import type {
   NewDbWebPdf,
   NewProject,
   NewUser,
+  NewApplication,
   ProjectUpdate,
   UserUpdate,
 } from "../../db/types"
@@ -135,6 +137,17 @@ describe("Schema vs DB Type Matching", () => {
     type DbPayload = DbAnnotationUpdate
 
     const _zodToDb: DbPayload = {} as ZodPayload
+
+    expect(true).toBe(true)
+  })
+
+  // ** APPLICATIONS **
+  it("CreateApplicationSchema should match NewApplication", () => {
+    type ZodType = z.infer<typeof CreateApplicationSchema>
+    type DbType = NewApplication
+
+    // Zod output should be assignable to DB input
+    const _zodToDb: DbType = {} as ZodType
 
     expect(true).toBe(true)
   })

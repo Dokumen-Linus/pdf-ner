@@ -49,13 +49,12 @@ def generate_seed() -> str:
         escaped_txt = escape_sql_string(content)
         inserts_array = format_sql_array(inserts)
 
-        values_lines.append(f"('{escaped_txt}', {inserts_array}, true, true, true, true, true)")
+        values_lines.append(f"('{escaped_txt}', true, true, true, true, true)")
 
     values_sql = ",\n".join(values_lines)
 
     sql = f"""INSERT INTO public.templates (
   txt,
-  inserts,
   includes_project_description,
   includes_entity_type_definitions,
   includes_entity_type_example_values,
