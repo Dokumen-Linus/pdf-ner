@@ -2,15 +2,17 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-DEFAULT_APP_DIR="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
+DEFAULT_APP_DIR="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
 APP_DIR="${APP_DIR:-$DEFAULT_APP_DIR}"
 COMPOSE_FILE="${COMPOSE_FILE:-infra/docker-compose.yml}"
 ENV_FILE="${ENV_FILE:-infra/.env.prod}"
 LOG_LINES="${LOG_LINES:-120}"
 MAX_RESTARTS="${MAX_RESTARTS:-}"
-REQUIRED_SERVICES_TEXT="${REQUIRED_SERVICES:-nginx-proxy-manager redis api worker}"
-OPTIONAL_SERVICES_TEXT="${OPTIONAL_SERVICES:-web}"
-HOST_PORT_CHECKS_TEXT="${HOST_PORT_CHECKS:-nginx-proxy-manager:127.0.0.1:80 nginx-proxy-manager:127.0.0.1:81 nginx-proxy-manager:127.0.0.1:443 api:127.0.0.1:8000}"
+REQUIRED_SERVICES_TEXT="${REQUIRED_SERVICES:-redis api worker web}"
+OPTIONAL_SERVICES_TEXT="${OPTIONAL_SERVICES:-}"
+HOST_PORT_CHECKS_TEXT="${HOST_PORT_CHECKS:-web:127.0.0.1:3000 api:127.0.0.1:8000}"
+PUBLIC_HEALTH_BASE_URL="${PUBLIC_HEALTH_BASE_URL:-https://dokumenai.dev}"
+CHECK_PUBLIC_TUNNEL="${CHECK_PUBLIC_TUNNEL:-1}"
 CHECK_AWS_SECRETS="${CHECK_AWS_SECRETS:-0}"
 CHECK_SECRET_UNPACK="${CHECK_SECRET_UNPACK:-0}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
@@ -215,6 +217,21 @@ check_host_ports() {
   done
 }
 
+check_http() {
+  local label="$1"
+  local url="$2"
+  local expected_status="${3:-200}"
+  local status
+
+  status="$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 10 "$url" 2>/dev/null || true)"
+  if [[ "$status" == "$expected_status" ]]; then
+    printf '%-34s %-6s %s\n' "$label" "$status" "$url"
+  else
+    printf '%-34s %-6s %s\n' "$label" "${status:-fail}" "$url"
+    record_failure "${label} returned ${status:-no response}, expected ${expected_status}: ${url}"
+  fi
+}
+
 check_bootstrap_env() {
   echo
   echo "Bootstrap env checks:"
@@ -327,17 +344,45 @@ PY
 
 check_internal_services() {
   echo
-  echo "Informational internal probes:"
+  echo "Internal service probes:"
   if compose exec -T redis redis-cli ping | grep -qx PONG; then
     echo "redis ping: PONG"
   else
     echo "redis ping: failed"
+    record_failure "redis-cli ping did not return PONG"
   fi
 
   if compose exec -T worker python -m app.healthcheck --json; then
     echo "worker health command: passed"
   else
     echo "worker health command: failed"
+    record_failure "worker health command failed"
+  fi
+}
+
+check_http_health() {
+  echo
+  echo "HTTP health probes:"
+  printf '%-34s %-6s %s\n' "CHECK" "STATUS" "URL"
+  check_http "api healthz local" "http://127.0.0.1:8000/healthz"
+  check_http "api readyz local" "http://127.0.0.1:8000/readyz"
+  check_http "web healthz local" "http://127.0.0.1:3000/api/healthz"
+  check_http "web readyz local" "http://127.0.0.1:3000/api/readyz"
+
+  if [[ "$CHECK_PUBLIC_TUNNEL" == "1" ]]; then
+    check_http "tunnel healthz public" "${PUBLIC_HEALTH_BASE_URL%/}/api/healthz"
+    check_http "tunnel readyz public" "${PUBLIC_HEALTH_BASE_URL%/}/api/readyz"
+  fi
+}
+
+check_cloudflared_service() {
+  echo
+  echo "Cloudflare Tunnel service:"
+  if systemctl is-active --quiet cloudflared; then
+    echo "cloudflared.service: active"
+  else
+    echo "cloudflared.service: inactive"
+    record_failure "cloudflared.service is not active"
   fi
 }
 
@@ -347,6 +392,8 @@ check_aws_secrets
 check_secret_unpacking
 check_host_ports
 check_internal_services
+check_http_health
+check_cloudflared_service
 
 if (( ${#FAILURES[@]} > 0 )); then
   echo
