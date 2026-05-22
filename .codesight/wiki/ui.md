@@ -2,11 +2,12 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**76 components** (react)
+**78 components** (react)
 
 ## Components
 
 - **ColorPicker** — props: value, onChange — `web/src/components/custom/color-picker.tsx`
+- **ApplicationNotification** — props: name, email, phone, message — `web/src/components/emails/application-notification.tsx`
 - **ContactAutoReply** — props: name — `web/src/components/emails/contact-auto-reply.tsx`
 - **ContactNotification** — props: name, email, message — `web/src/components/emails/contact-notification.tsx`
 - **OrganizationInvitation** — props: invitedByName, organizationName, url — `web/src/components/emails/organization-invitation.tsx`
@@ -76,6 +77,7 @@
 - **Route** — `web/src/routes/_private/projects/index.tsx`
 - **Route** — `web/src/routes/_private.tsx`
 - **Route** — `web/src/routes/_public/about.tsx`
+- **Route** — `web/src/routes/_public/apply.tsx`
 - **Route** — `web/src/routes/_public/contact.tsx`
 - **Route** — `web/src/routes/_public/demo.tsx`
 - **Route** — `web/src/routes/_public/index.tsx`

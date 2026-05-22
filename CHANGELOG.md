@@ -134,6 +134,7 @@
 - Expose web access to prompt formation
 - *(web)* Infra info
 - *(db)* New insert templates seed generation script
+- Application form
 
 ### 🐛 Bug Fixes
 
@@ -707,6 +708,7 @@
 - *(web)* Improve dockerfile
 - *(db)* Remove old dockerignore
 - Add to dockerignores
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert

@@ -36,7 +36,7 @@ Read and edit these files when adding columns, creating migrations, or changing 
 - `web/src/db/schemas/web/projects.ts` — imported by **11** files
 - `web/src/db/schemas/workers/schema.ts` — imported by **10** files
 - `///application/schemas.py` — imported by **10** files
-- `web/src/db/schemas/web/schema.ts` — imported by **8** files
+- `web/src/db/schemas/web/schema.ts` — imported by **9** files
 - `web/src/db/schemas/web/users.ts` — imported by **7** files
 
 ---
