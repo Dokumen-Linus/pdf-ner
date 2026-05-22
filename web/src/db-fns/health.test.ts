@@ -4,9 +4,10 @@ type QueryResult = { rows: Array<{ exists: boolean }> }
 
 mock.module("@/env.server", () => ({
   env: {
+    ...process.env,
     API_KEY: "test-api-key",
     API_URL: "http://api.test",
-    WEB_DATABASE_URL: "postgres://unused",
+    WEB_DATABASE_URL: process.env.WEB_DATABASE_URL || "postgres://unused",
   },
 }))
 

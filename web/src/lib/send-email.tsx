@@ -1,5 +1,7 @@
-import { SendEmailCommand } from "@aws-sdk/client-ses"
+import { SendEmailCommand, SendRawEmailCommand } from "@aws-sdk/client-ses"
 import { render } from "@react-email/components"
+
+import ApplicationNotification from "../components/emails/application-notification"
 
 import ContactAutoReply, {
   subject as contactAutoReplySubject,
@@ -87,5 +89,58 @@ export async function sendEmail<K extends TemplateKey>(args: SendEmailArgs<K>): 
         Body: { Html: { Charset: "UTF-8", Data: html } },
       },
     }),
+  )
+}
+
+export async function sendApplicationEmail(args: {
+  name: string
+  email: string
+  phone?: string | null
+  message?: string | null
+  resume: {
+    filename: string
+    content: string // Base64 encoded PDF bytes
+  }
+}): Promise<void> {
+  const html = await render(
+    <ApplicationNotification
+      name={args.name}
+      email={args.email}
+      phone={args.phone}
+      message={args.message}
+    />
+  )
+
+  const boundary = "----=_Part_" + Math.random().toString(36).substring(2)
+  const mimeParts = [
+    `From: ${env.FROM_EMAIL}`,
+    `To: ${env.MY_EMAIL}`,
+    `Subject: New job application from ${args.name}`,
+    `MIME-Version: 1.0`,
+    `Content-Type: multipart/mixed; boundary="${boundary}"`,
+    ``,
+    `--${boundary}`,
+    `Content-Type: text/html; charset=UTF-8`,
+    `Content-Transfer-Encoding: 7bit`,
+    ``,
+    html,
+    ``,
+    `--${boundary}`,
+    `Content-Type: application/pdf; name="${args.resume.filename}"`,
+    `Content-Transfer-Encoding: base64`,
+    `Content-Disposition: attachment; filename="${args.resume.filename}"`,
+    ``,
+    args.resume.content,
+    ``,
+    `--${boundary}--`,
+  ]
+  const rawMessage = mimeParts.join("\r\n")
+
+  await sesClient.send(
+    new SendRawEmailCommand({
+      RawMessage: {
+        Data: new TextEncoder().encode(rawMessage),
+      },
+    })
   )
 }

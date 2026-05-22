@@ -35,6 +35,10 @@ export type User = InferSelectModel<typeof schema.users>
 export type NewUser = InferInsertModel<typeof schema.users>
 export type UserUpdate = Partial<Omit<User, "id" | "createdAt" | "updatedAt">>
 
+export type Application = InferSelectModel<typeof schema.applications>
+export type NewApplication = InferInsertModel<typeof schema.applications>
+export type ApplicationUpdate = Partial<Omit<Application, "id" | "createdAt">>
+
 export type Project = InferSelectModel<typeof schema.projects>
 export type NewProject = InferInsertModel<typeof schema.projects>
 export type ProjectUpdate = Partial<Omit<Project, "id" | "createdAt" | "updatedAt">>

@@ -23,6 +23,7 @@ import { Route as PublicPricingRouteImport } from './routes/_public/pricing'
 import { Route as PublicPlatformRouteImport } from './routes/_public/platform'
 import { Route as PublicDemoRouteImport } from './routes/_public/demo'
 import { Route as PublicContactRouteImport } from './routes/_public/contact'
+import { Route as PublicApplyRouteImport } from './routes/_public/apply'
 import { Route as PublicAboutRouteImport } from './routes/_public/about'
 import { Route as PrivateProfileRouteImport } from './routes/_private/profile'
 import { Route as PrivateBillingRouteImport } from './routes/_private/billing'
@@ -106,6 +107,11 @@ const PublicDemoRoute = PublicDemoRouteImport.update({
 const PublicContactRoute = PublicContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicApplyRoute = PublicApplyRouteImport.update({
+  id: '/apply',
+  path: '/apply',
   getParentRoute: () => PublicRoute,
 } as any)
 const PublicAboutRoute = PublicAboutRouteImport.update({
@@ -210,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof PrivateBillingRoute
   '/profile': typeof PrivateProfileRoute
   '/about': typeof PublicAboutRoute
+  '/apply': typeof PublicApplyRoute
   '/contact': typeof PublicContactRoute
   '/demo': typeof PublicDemoRoute
   '/platform': typeof PublicPlatformRoute
@@ -240,6 +247,7 @@ export interface FileRoutesByTo {
   '/billing': typeof PrivateBillingRoute
   '/profile': typeof PrivateProfileRoute
   '/about': typeof PublicAboutRoute
+  '/apply': typeof PublicApplyRoute
   '/contact': typeof PublicContactRoute
   '/demo': typeof PublicDemoRoute
   '/platform': typeof PublicPlatformRoute
@@ -273,6 +281,7 @@ export interface FileRoutesById {
   '/_private/billing': typeof PrivateBillingRoute
   '/_private/profile': typeof PrivateProfileRoute
   '/_public/about': typeof PublicAboutRoute
+  '/_public/apply': typeof PublicApplyRoute
   '/_public/contact': typeof PublicContactRoute
   '/_public/demo': typeof PublicDemoRoute
   '/_public/platform': typeof PublicPlatformRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/profile'
     | '/about'
+    | '/apply'
     | '/contact'
     | '/demo'
     | '/platform'
@@ -336,6 +346,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/profile'
     | '/about'
+    | '/apply'
     | '/contact'
     | '/demo'
     | '/platform'
@@ -368,6 +379,7 @@ export interface FileRouteTypes {
     | '/_private/billing'
     | '/_private/profile'
     | '/_public/about'
+    | '/_public/apply'
     | '/_public/contact'
     | '/_public/demo'
     | '/_public/platform'
@@ -502,6 +514,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof PublicContactRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/apply': {
+      id: '/_public/apply'
+      path: '/apply'
+      fullPath: '/apply'
+      preLoaderRoute: typeof PublicApplyRouteImport
       parentRoute: typeof PublicRoute
     }
     '/_public/about': {
@@ -677,6 +696,7 @@ const PrivateRouteWithChildren =
 
 interface PublicRouteChildren {
   PublicAboutRoute: typeof PublicAboutRoute
+  PublicApplyRoute: typeof PublicApplyRoute
   PublicContactRoute: typeof PublicContactRoute
   PublicDemoRoute: typeof PublicDemoRoute
   PublicPlatformRoute: typeof PublicPlatformRoute
@@ -686,6 +706,7 @@ interface PublicRouteChildren {
 
 const PublicRouteChildren: PublicRouteChildren = {
   PublicAboutRoute: PublicAboutRoute,
+  PublicApplyRoute: PublicApplyRoute,
   PublicContactRoute: PublicContactRoute,
   PublicDemoRoute: PublicDemoRoute,
   PublicPlatformRoute: PublicPlatformRoute,

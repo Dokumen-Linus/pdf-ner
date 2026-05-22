@@ -15,9 +15,10 @@ const dbChecks: Record<string, string> = {
 
 mock.module("@/env.server", () => ({
   env: {
+    ...process.env,
     API_URL: "http://api.test",
     HEALTHCHECK_TOKEN: "test-health-token",
-    WEB_DATABASE_URL: "postgres://unused",
+    WEB_DATABASE_URL: process.env.WEB_DATABASE_URL || "postgres://unused",
   },
 }))
 
