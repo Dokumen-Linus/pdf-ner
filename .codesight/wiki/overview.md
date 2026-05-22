@@ -47,17 +47,17 @@ Changes to these files have the widest blast radius across the codebase:
 
 - `API_KEY` — `api/tests/conftest.py`
 - `BASE_URL` — `web/src/integrations/sitemap.ts`
-- `COMPOSE_SERVICES` — `infra/init/.env.example`
 - `DATABASE_URL` — `web/tests/bun-test-setup/db-setup.ts`
 - `DEEPSEEK_RUNPOD_POD_ID` — `infra/runpod/.env.example`
 - `DEPLOYMENT` — `packages/otel_py/otel_py/config.py`
 - `DEV` — `web/src/client.tsx`
-- `GITHUB_DEPLOY_KEY_PATH` — `infra/init/.env.example`
 - `GPU_MEMORY_UTILIZATION` — `gpu/olm-ocr2/app.py`
 - `HF_TOKEN` — `infra/runpod/.env.example`
 - `MAX_MODEL_LEN` — `gpu/olm-ocr2/app.py`
 - `MAX_NEW_TOKENS` — `gpu/olm-ocr2/app.py`
-- _...23 more_
+- `MAX_TOKENS` — `gpu/deepseek-ocr/app.py`
+- `MODEL_NAME` — `gpu/deepseek-ocr/app.py`
+- _...18 more_
 
 ---
 _Back to [index.md](./index.md) · Generated 2026-05-22_

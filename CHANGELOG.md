@@ -403,6 +403,11 @@
 - *(web)* Copy current tanstack repo
 - *(llm)* Approve call_aws
 - Create cloudflare tunnels and waf skills
+- *(llm)* Terminate processes bullet in AGENTS.md
+- Research
+- *(ci)* Update runpod deploy docs
+- *(ci)* New aws setup docs
+- *(ci)* Deploy-rds docs
 
 ### ⚡ Performance
 
@@ -516,6 +521,7 @@
 - *(web)* Prettier and lint fix
 - Ruff
 - Prettier and lint:fix
+- Auto-format code [skip ci]
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
@@ -710,6 +716,14 @@
 - Add to dockerignores
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(web)* Gitignore
+- Working on aws setup
+- Remove bad draft
+- *(runpod)* Add ecr creation script
+- *(runpod)* Remove gh actions
+- *(aws)* Make ec2 gh deploy roles
+- Delete old deploy scripts
 
 ### ◀️ Revert
 
