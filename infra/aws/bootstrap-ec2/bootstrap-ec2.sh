@@ -15,38 +15,29 @@ ENV_FILE="${ENV_FILE:-infra/.env.prod}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
 
 if [[ -z "${TUNNEL_TOKEN:-}" ]]; then
-  echo "TUNNEL_TOKEN is required. Copy the remote-managed Cloudflare Tunnel install token from Cloudflare."
+  echo "TUNNEL_TOKEN is required. Run infra/cloudflare/setup-tunnel/setup-tunnel.sh after setup-waf and copy its TUNNEL_TOKEN output."
   exit 1
 fi
 
 install_packages() {
-  if command -v dnf >/dev/null 2>&1; then
-    sudo dnf update -y
-    command -v docker >/dev/null 2>&1 || sudo dnf install -y docker
-    command -v git >/dev/null 2>&1 || sudo dnf install -y git
-    command -v aws >/dev/null 2>&1 || sudo dnf install -y awscli
-    command -v jq >/dev/null 2>&1 || sudo dnf install -y jq
-    command -v curl >/dev/null 2>&1 || sudo dnf install -y curl-minimal
-    systemctl list-unit-files amazon-ssm-agent.service >/dev/null 2>&1 || sudo dnf install -y amazon-ssm-agent
-  elif command -v yum >/dev/null 2>&1; then
-    sudo yum update -y
-    command -v docker >/dev/null 2>&1 || sudo yum install -y docker
-    command -v git >/dev/null 2>&1 || sudo yum install -y git
-    command -v aws >/dev/null 2>&1 || sudo yum install -y awscli
-    command -v jq >/dev/null 2>&1 || sudo yum install -y jq
-    command -v curl >/dev/null 2>&1 || sudo yum install -y curl
-    systemctl list-unit-files amazon-ssm-agent.service >/dev/null 2>&1 || sudo yum install -y amazon-ssm-agent
-  elif command -v apt-get >/dev/null 2>&1; then
-    sudo apt-get update
-    command -v docker >/dev/null 2>&1 || sudo apt-get install -y docker.io docker-compose-plugin
-    command -v git >/dev/null 2>&1 || sudo apt-get install -y git
-    command -v aws >/dev/null 2>&1 || sudo apt-get install -y awscli
-    command -v jq >/dev/null 2>&1 || sudo apt-get install -y jq
-    command -v curl >/dev/null 2>&1 || sudo apt-get install -y curl ca-certificates
-  else
-    echo "Unsupported package manager; install Docker, Git, AWS CLI, jq, curl or curl-minimal, and cloudflared manually."
+  if ! command -v dnf >/dev/null 2>&1; then
+    echo "Unsupported host OS: this bootstrap script requires dnf, such as on Amazon Linux 2023."
     exit 1
   fi
+
+  sudo dnf update -y
+  sudo dnf install -y \
+    amazon-ssm-agent \
+    awscli \
+    curl-minimal \
+    docker \
+    docker-buildx-plugin \
+    docker-compose-plugin \
+    git \
+    jq
+
+  docker compose version >/dev/null
+  docker buildx version >/dev/null
 }
 
 install_cloudflared() {
@@ -62,16 +53,7 @@ install_cloudflared() {
     *) echo "Unsupported architecture for automatic cloudflared install: ${arch}"; exit 1 ;;
   esac
 
-  if command -v dnf >/dev/null 2>&1; then
-    sudo dnf install -y "$package_url"
-  elif command -v yum >/dev/null 2>&1; then
-    sudo yum install -y "$package_url"
-  else
-    local deb_url
-    deb_url="${package_url%.rpm}.deb"
-    curl -fsSL "$deb_url" -o /tmp/cloudflared.deb
-    sudo dpkg -i /tmp/cloudflared.deb
-  fi
+  sudo dnf install -y "$package_url"
 }
 
 sync_repo() {
@@ -120,4 +102,5 @@ else
 fi
 
 sudo systemctl is-active --quiet cloudflared
+"${SCRIPT_DIR}/verify-cloudflare-origin.sh"
 echo "EC2 runtime bootstrap complete. Redis is started and cloudflared.service is active."
