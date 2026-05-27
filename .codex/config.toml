@@ -38,12 +38,13 @@ approval_mode = "approve"
 [mcp_servers.runpod-docs]
 url = "https://docs.runpod.io/mcp"
 default_tools_approval_mode = "approve"
-[plugins."stripe@openai-curated"]
-enabled = true
 
 [mcp_servers.cloudflare-docs]
 url = "https://docs.mcp.cloudflare.com/mcp"
 default_tools_approval_mode = "approve"
 
 [plugins."github@openai-curated"]
+enabled = true
+
+[plugins."stripe@openai-curated"]
 enabled = true
