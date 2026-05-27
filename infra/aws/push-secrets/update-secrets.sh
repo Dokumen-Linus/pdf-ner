@@ -11,6 +11,20 @@ SECRET_DRAFT_DIR="${SECRET_DRAFT_DIR:-${SCRIPT_DIR}/local-secrets}"
 load_env_file "$LOCAL_ENV_FILE"
 configure_common_defaults
 DRY_RUN="${DRY_RUN:-0}"
+STAGE="${STAGE:-PROD}"
+
+case "${STAGE,,}" in
+  dev)
+    SECRET_STAGE="dev"
+    ;;
+  prod)
+    SECRET_STAGE="prod"
+    ;;
+  *)
+    echo "ERROR: STAGE must be DEV or PROD." >&2
+    exit 1
+    ;;
+esac
 
 validate_secret_file() {
   local file="$1"
@@ -45,19 +59,19 @@ if [ ! -d "$SECRET_DRAFT_DIR" ]; then
 fi
 
 FILES=(
-  prod-web.json
-  prod-email.json
-  prod-api.json
-  prod-workers.json
-  prod-runpod.json
+  "${SECRET_STAGE}-web.json"
+  "${SECRET_STAGE}-email.json"
+  "${SECRET_STAGE}-api.json"
+  "${SECRET_STAGE}-workers.json"
+  "${SECRET_STAGE}-runpod.json"
 )
 
 NAMES=(
-  prod/web
-  prod/email
-  prod/api
-  prod/workers
-  prod/runpod
+  "${SECRET_STAGE}/web"
+  "${SECRET_STAGE}/email"
+  "${SECRET_STAGE}/api"
+  "${SECRET_STAGE}/workers"
+  "${SECRET_STAGE}/runpod"
 )
 
 echo "Validating local secret drafts in: $SECRET_DRAFT_DIR"
