@@ -1,14 +1,6 @@
 import React, { useMemo } from "react"
-import { useReactTable, getCoreRowModel, flexRender, type ColumnDef } from "@tanstack/react-table"
-import {
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  FileText,
-  Percent,
-  Layers,
-  Sparkles,
-} from "lucide-react"
+import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
+import { AlertTriangle, CheckCircle2, FileText, Percent, XCircle } from "lucide-react"
 
 import "./accuracy-table.css"
 
