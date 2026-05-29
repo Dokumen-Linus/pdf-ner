@@ -14,9 +14,16 @@ Prod database instance: `dokuprod`
 
 ## GitHub Actions CI
 
-The deploy workflows in `.github/disabled-workflows/` build one Docker image, push it to
+The deploy workflows in `.github/workflows/` build Docker images, push them to
 ECR, then use AWS Systems Manager Run Command to tell the EC2 instance to pull
-and restart only that Compose service.
+and start or restart Compose services.
+
+Use `Deploy Stack` (`.github/workflows/deploy-stack.yml`) as the first app start
+path after EC2 bootstrap. It builds the `web`, `api`, and `workers` images,
+pushes them to ECR, starts `redis api worker web` on EC2 through SSM, and runs
+the EC2 health check. The `Deploy Web`, `Deploy API`, and `Deploy Workers`
+workflows are optional targeted redeploys after the stack has already been
+started.
 
 Required GitHub Actions secrets:
 
@@ -29,17 +36,26 @@ Required GitHub Actions variables:
 
 | Name | Used by | Example |
 | --- | --- | --- |
-| `AWS_REGION` | all deploy workflows | `us-east-1` |
 | `VITE_BASE_URL` | web build | `https://dokumenai.dev` |
 | `VITE_STRIPE_PUBLISHABLE_KEY` | web build | `<your Stripe publishable key>` |
+
+Recommended or optional GitHub Actions variables:
+
+| Name | Default | Used by |
+| --- | --- | --- |
+| `AWS_REGION` | `us-east-1` | all deploy workflows |
+| `WEB_ECR_REPOSITORY` | `dokumen-web` | web and stack deploys |
+| `API_ECR_REPOSITORY` | `dokumen-api` | API and stack deploys |
+| `WORKERS_ECR_REPOSITORY` | `dokumen-workers` | workers and stack deploys |
+| `EC2_APP_DIR` | `/opt/dokumen/pdf-ner` | all deploy workflows |
+| `EC2_DEPLOY_STATE_DIR` | `/opt/dokumen/deploy-state` | all deploy workflows |
 
 Create the GitHub values in the repository UI:
 
 1. Open the GitHub repository.
 2. Go to Settings -> Secrets and variables -> Actions.
 3. Add `AWS_GITHUB_DEPLOY_ROLE_ARN` and `EC2_INSTANCE_ID` under Secrets.
-4. Add `AWS_REGION`, `VITE_BASE_URL`, and
-   `VITE_STRIPE_PUBLISHABLE_KEY` under Variables.
+4. Add `VITE_BASE_URL` and `VITE_STRIPE_PUBLISHABLE_KEY` under Variables.
 5. Add the optional repository-name/path variables only if you want values
    different from the workflow defaults.
 
@@ -55,11 +71,8 @@ gh variable set VITE_STRIPE_PUBLISHABLE_KEY --body "<your Stripe publishable key
 gh variable set API_ECR_REPOSITORY --body "dokumen-api"
 gh variable set WEB_ECR_REPOSITORY --body "dokumen-web"
 gh variable set WORKERS_ECR_REPOSITORY --body "dokumen-workers"
-gh variable set GPU_DEEPSEEK_ECR_REPOSITORY --body "dokumen-deepseek-ocr"
-gh variable set GPU_OLM_OCR2_ECR_REPOSITORY --body "dokumen-olm-ocr2"
-gh variable set DEEPSEEK_RUNPOD_POD_ID --body "<fixed-deepseek-pod-id>"
-gh variable set OLM_OCR2_RUNPOD_POD_ID --body "<fixed-olm-pod-id>"
 gh variable set EC2_APP_DIR --body "/opt/dokumen/pdf-ner"
+gh variable set EC2_DEPLOY_STATE_DIR --body "/opt/dokumen/deploy-state"
 ```
 
 AWS setup required for GitHub Actions:
@@ -148,44 +161,30 @@ sets the selected service image to the new ECR image tag. This keeps
 `infra/docker-compose.yml` usable for manual local builds while CI/CD can deploy
 prebuilt images.
 
-## Nginx Proxy Manager - DEPRECATED
-
-Open:
-
-```text
-http://YOUR_ELASTIC_IP:81
-```
-
-Create proxy hosts:
-
-- `dokumenai.dev` -> `web:3000`.
-- `www.dokumenai.dev` -> `web:3000`.
-
-Request Let's Encrypt certificates from Nginx Proxy Manager. Use your real `FROM_EMAIL` or admin email for certificate registration.
-
-Do not expose Postgres, Redis, or the API publicly unless you intentionally add a public API route and security model.
-
 ## Cloudflare
 
-In Cloudflare DNS for `dokumenai.dev`, create:
+Create a Cloudflare API token before running the setup scripts. Scope it to the
+target account and zone with these permissions:
 
-| Type | Name | Content | Proxy |
-| --- | --- | --- | --- |
-| A | `@` | EC2 Elastic IP | Proxied |
-| A | `www` | EC2 Elastic IP | Proxied |
+- Account `Cloudflare Tunnel` Edit
+- Zone `DNS` Edit
+- Zone `WAF` Write
 
-For SSL/TLS:
+Setup flow:
 
-- Use `Full (strict)` after Nginx Proxy Manager has a valid Let's Encrypt certificate for the hostname.
-- Use `Full` only temporarily if the origin certificate is not yet trusted.
-- Do not use `Flexible` for this app because auth, billing, and payment flows require end-to-end HTTPS.
+1. Run `infra/cloudflare/setup-waf/setup-waf-free.sh` (Free plan) or
+   `infra/cloudflare/setup-waf/setup-waf-pro.sh` (Pro+ plan) to create or update
+   zone WAF rules. The default `WAF_MODE=monitor` observes traffic; use `enforce`
+   only when you are ready to block matching requests.
+2. Run `infra/cloudflare/setup-tunnel/setup-tunnel.sh` to create or update the
+   remote-managed Tunnel, remote ingress config, and proxied CNAME DNS records
+   for `PUBLIC_HOSTNAMES`.
+3. Copy the printed `TUNNEL_TOKEN` into the EC2 bootstrap environment and run
+   `infra/aws/bootstrap-ec2/bootstrap-ec2.sh`.
+4. Trigger GitHub Actions `Deploy Stack` to start the app.
 
-Recommended Cloudflare settings:
-
-- Enable Always Use HTTPS.
-- Keep WebSockets enabled.
-- Leave DNS TTL on Auto for proxied records.
-- If Let's Encrypt HTTP validation fails while proxied, temporarily switch the affected DNS records to DNS only, issue the certificate, then restore Proxied.
+The Cloudflare API token and `TUNNEL_TOKEN` are local/bootstrap inputs in the
+current flow. They are not GitHub Actions secrets.
 
 SES domain authentication is separate from app DNS. If you verify the whole sending domain in SES, AWS will provide DNS records for DKIM and domain verification. Add those exact records in Cloudflare. Keep SES verification and DKIM records DNS only.
 
