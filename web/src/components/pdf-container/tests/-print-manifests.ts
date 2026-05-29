@@ -5,7 +5,6 @@ import { writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
-
 import { AnnotationPluginPackage } from "../plugin-annotation-2"
 import { DocumentManagerPluginPackage } from "../plugin-document-manager-2"
 import { ExportPluginPackage } from "../plugin-export-2"
