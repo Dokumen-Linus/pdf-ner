@@ -2,19 +2,12 @@
 
 DEPLOY_AWS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_ROOT="$(cd "${DEPLOY_AWS_DIR}/../.." && pwd)"
+# shellcheck source=infra/shared/load-env-file.sh
+# shellcheck disable=SC1091
+. "${REPO_ROOT}/infra/shared/load-env-file.sh"
 EXAMPLE_SECRETS_DIR="${EXAMPLE_SECRETS_DIR:-${REPO_ROOT}/infra/example-secrets}"
 SECRET_DRAFT_DIR="${SECRET_DRAFT_DIR:-${DEPLOY_AWS_DIR}/local-secrets}"
 OUTPUT_DIR="${OUTPUT_DIR:-${DEPLOY_AWS_DIR}/outputs}"
-
-load_env_file() {
-  local env_file="$1"
-  if [ -f "$env_file" ]; then
-    set -a
-    # shellcheck disable=SC1090
-    . "$env_file"
-    set +a
-  fi
-}
 
 configure_common_defaults() {
   PROJECT_NAME="${PROJECT_NAME:-dokumen}"
