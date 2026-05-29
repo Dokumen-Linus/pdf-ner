@@ -2,11 +2,50 @@ import { EmbeddedTweet, TweetNotFound, TweetSkeleton, type TweetComponents } fro
 import { useTweet } from "react-tweet"
 
 /**
- * Wrapper around react-tweet's <Tweet> that normalizes the entities object
- * before rendering. The library's addEntities() crashes with
- * "entities is not iterable" when the Twitter syndication API omits
- * hashtags/user_mentions/symbols from the response.
+ * The Twitter syndication API now returns `"entities": {}` (empty object)
+ * for tweets without hashtags/mentions/urls/symbols. react-tweet v3.3.0's
+ * `addEntities()` does `for (const entity of entities)` on these undefined
+ * sub-arrays, crashing with "entities is not iterable".
+ *
+ * This wrapper normalizes the tweet (and its quoted_tweet) before handing
+ * it to `EmbeddedTweet`.
  */
+
+type TweetEntities = {
+  hashtags?: unknown[]
+  user_mentions?: unknown[]
+  urls?: unknown[]
+  symbols?: unknown[]
+  media?: unknown[]
+}
+
+function normalizeEntities(entities: unknown): TweetEntities {
+  if (!entities || typeof entities !== "object" || Array.isArray(entities)) {
+    return { hashtags: [], user_mentions: [], urls: [], symbols: [] }
+  }
+  const e = entities as TweetEntities
+  return {
+    ...e,
+    hashtags: e.hashtags ?? [],
+    user_mentions: e.user_mentions ?? [],
+    urls: e.urls ?? [],
+    symbols: e.symbols ?? [],
+  }
+}
+
+function normalizeTweet<T extends Record<string, unknown>>(tweet: T): T {
+  const normalized = {
+    ...tweet,
+    entities: normalizeEntities(tweet.entities),
+  }
+
+  if (tweet.quoted_tweet && typeof tweet.quoted_tweet === "object") {
+    normalized.quoted_tweet = normalizeTweet(tweet.quoted_tweet as Record<string, unknown>)
+  }
+
+  return normalized as T
+}
+
 export function SafeTweet({
   id,
   components,
@@ -22,14 +61,5 @@ export function SafeTweet({
     return <NotFound error={error} />
   }
 
-  // Normalize entities so addEntities() never receives undefined
-  if (data.entities && typeof data.entities === "object" && !Array.isArray(data.entities)) {
-    const e = data.entities as Record<string, unknown>
-    if (!e.hashtags) e.hashtags = []
-    if (!e.user_mentions) e.user_mentions = []
-    if (!e.symbols) e.symbols = []
-    if (!e.urls) e.urls = []
-  }
-
-  return <EmbeddedTweet tweet={data} components={components} />
+  return <EmbeddedTweet tweet={normalizeTweet(data)} components={components} />
 }
