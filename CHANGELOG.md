@@ -408,6 +408,7 @@
 - *(ci)* Update runpod deploy docs
 - *(ci)* New aws setup docs
 - *(ci)* Deploy-rds docs
+- *(ci)* Note nginx pm deprecated
 
 ### ⚡ Performance
 
@@ -476,6 +477,7 @@
 - *(api, wk)* Type cast uuids #172
 - *(web)* Remove unused components
 - *(web)* Remove unused deps
+- Replace lucide with local icons
 
 ### 🎨 Styling
 
@@ -566,6 +568,7 @@
 - *(api)* Unit tests
 - *(pkg)* More test coverage
 - *(web)* Fix -print-manifests
+- *(web)* Finish removing playwright
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -724,6 +727,12 @@
 - *(runpod)* Remove gh actions
 - *(aws)* Make ec2 gh deploy roles
 - Delete old deploy scripts
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(aws)* Bootstrap-ec2
+- *(net)* Migrate nginx proxy mgr to tunnels
+- Activate gh actions
+- Reset-admin-cidr
+- Declare .env file
 
 ### ◀️ Revert
 

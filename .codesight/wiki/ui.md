@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**78 components** (react)
+**79 components** (react)
 
 ## Components
 
@@ -14,6 +14,7 @@
 - **ResetPassword** — props: name, url — `web/src/components/emails/reset-password.tsx`
 - **VerifyEmail** — props: name, url — `web/src/components/emails/verify-email.tsx`
 - **EntityTable** — props: entityTypes — `web/src/components/entity-table/components/entity-table.tsx`
+- **ArrowLeftRightIcon** — props: className, size — `web/src/components/icons.tsx`
 - **NotFound** — `web/src/components/not-found.tsx`
 - **PDFContainerClient** — props: initalDocuments, allEntityTypes, author, exportName, canRotate — `web/src/components/pdf-container/pdf-container-client.tsx`
 - **PDFContainer** — props: initalDocuments, allEntityTypes, author, canRotate — `web/src/components/pdf-container/pdf-container.tsx`
