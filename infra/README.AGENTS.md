@@ -21,9 +21,16 @@ and start or restart Compose services.
 Use `Deploy Stack` (`.github/workflows/deploy-stack.yml`) as the first app start
 path after EC2 bootstrap. It builds the `web`, `api`, and `workers` images,
 pushes them to ECR, starts `redis api worker web` on EC2 through SSM, and runs
-the EC2 health check. The `Deploy Web`, `Deploy API`, and `Deploy Workers`
-workflows are optional targeted redeploys after the stack has already been
-started.
+the EC2 health check. It is manual-only; use the `Deploy Web`, `Deploy API`,
+and `Deploy Workers` workflows for targeted redeploys after the stack has
+already been started.
+
+- Trigger `Deploy Stack` manually with the GitHub CLI when bootstrapping or
+  intentionally redeploying the full app stack:
+
+```bash
+gh workflow run "Deploy Stack" --ref master
+```
 
 Required GitHub Actions secrets:
 

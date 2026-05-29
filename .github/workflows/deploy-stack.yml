@@ -2,20 +2,9 @@ name: Deploy Stack
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths:
-      - "api/**"
-      - "workers/**"
-      - "web/**"
-      - "packages/**"
-      - "infra/docker-compose.yml"
-      - "infra/aws/health/**"
-      - ".github/workflows/deploy-stack.yml"
 
 concurrency:
-  group: deploy-stack
+  group: production-deploy
   cancel-in-progress: false
 
 env:

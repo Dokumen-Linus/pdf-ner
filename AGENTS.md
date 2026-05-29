@@ -31,15 +31,16 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - `workers` Celery tasks app
 - `packages` Python utilities that could be used in api or workers
 - `db` PostgreSQL migration and seed scripts
-- `infra` resource setup, ci/cd, and prod env vars
+- `infra` resource setup and prod env vars
+- `.github` CI/CD workflows
 - `gpu` Runpod Serverless HTTP models
 
-### DB Invariants
+### db Invariants
 
 - The database is still pre-instantiation; modify existing create scripts directly instead of adding backward-compat SQL
 - Respect schema ownership: Better Auth writes only `auth`; `web`, `api`, and `workers` should write only their own schemas unless an exception is explicitly documented
 
-### Web Invariants
+### web Invariants
 
 - Never edit `src/routeTree.gen.ts`
 - Components and routes must not access the DB directly; use `src/db-fns/`
@@ -50,7 +51,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - Import env from `src/env.server.ts` or `src/env.client.ts` only
 - When extending PDF plugins, preserve the existing plugin folder structure and file naming patterns
 
-### API Invariants
+### api Invariants
 
 - No ORM
 - Only `repository.py` may execute SQL, using the passed `asyncpg` connection passed router -> service -> repository
@@ -65,7 +66,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - Do not pass `app.state` into services; expose explicit dependencies from `/core/dependencies.py`
 - No global variables; initialize shared state in lifespan/app state
 
-### Worker Invariants
+### workers Invariants
 
 - Keep Celery tasks thin; delegate immediately to application handlers
 - Domain layer must not import infrastructure
@@ -75,6 +76,10 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - SQL belongs in repository implementations backed by the asyncpg DB layer in `workers/app/shared/infrastructure/db.py`
 - `shared/` is a stable shared kernel, not a generic utils folder
 - `integrations/` should expose capability-focused adapters rather than raw SDK calls
+
+### .github Invariants
+
+- Check any modified workflows with `actionlint`
 
 ## Output Contract
 

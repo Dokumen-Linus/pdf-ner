@@ -9,11 +9,10 @@ on:
       - "api/**"
       - "packages/**"
       - "infra/docker-compose.yml"
-      - "infra/aws/health/**"
       - ".github/workflows/deploy-api.yml"
 
 concurrency:
-  group: deploy-api
+  group: production-deploy
   cancel-in-progress: false
 
 env:
