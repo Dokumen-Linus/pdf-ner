@@ -410,6 +410,7 @@
 - *(ci)* New aws setup docs
 - *(ci)* Deploy-rds docs
 - *(ci)* Note nginx pm deprecated
+- Tesseract skill
 
 ### ⚡ Performance
 
@@ -524,6 +525,7 @@
 - *(web)* Prettier and lint fix
 - Ruff
 - Prettier and lint:fix
+- Auto-format code [skip ci]
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
@@ -735,6 +737,7 @@
 - Activate gh actions
 - Reset-admin-cidr
 - Declare .env file
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
