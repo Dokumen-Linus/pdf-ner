@@ -308,6 +308,7 @@
 - *(wk)* Create ner_runs domain, update ner_workflows, and add to context_eng
 - *(db, wk)* Rename ocr_methods to extract_methods,  add text_extract workers domain
 - *(wk)* Move prompt formation from inserts to shared  domain
+- Consolidate styles
 
 ### 📚 Documentation
 
@@ -529,6 +530,7 @@
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
+- Auto-format code [skip ci]
 
 ### 🧪 Testing
 
@@ -733,6 +735,7 @@
 - Activate gh actions
 - Reset-admin-cidr
 - Declare .env file
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert
 
