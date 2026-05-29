@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { motion } from "motion/react"
-import { Tweet } from "react-tweet"
+import { SafeTweet } from "@/components/public-site/safe-tweet"
 
 import {
   Carousel,
@@ -438,12 +438,12 @@ function App() {
             <CarouselContent className="-ml-4">
               {[
                 "1628832338187636740",
-                "2042723870055239708",
-                "1617979122625712128",
-                "2043057246897148374",
+                // "2042723870055239708",
+                // "1617979122625712128",
+                // "2043057246897148374",
               ].map((id) => (
                 <CarouselItem key={id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                  <Tweet id={id} />
+                  <SafeTweet id={id} />
                 </CarouselItem>
               ))}
             </CarouselContent>
