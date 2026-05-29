@@ -20,17 +20,17 @@ type DiagramNode = {
 const requiredProviders: Provider[] = [
   {
     name: "AWS",
-    detail: "Infrastructure, application storage, SES, secrets, and deployment resources.",
+    detail: "VPC, EC2, ECR, RDS, ElastiCache, S3, SES, and Secrets Manager.",
     icon: "/icons/aws-color.svg",
   },
   {
     name: "Cloudflare",
-    detail: "DNS, edge protection, and WAF in front of the public application.",
+    detail: "DNS, SSL, DDoS, load balancing, rate limits, and WAF.",
     icon: "/icons/cloudflare-color.svg",
   },
   {
     name: "GitHub",
-    detail: "Source control and CI/CD automation via GitHub Actions.",
+    detail: "Source control and CI/CD through GitHub Actions.",
     icon: "/icons/github.svg",
   },
   {
@@ -52,18 +52,22 @@ type ServiceDetail = {
 
 const requiredServiceDetails: ServiceDetail[] = [
   { service: "Stripe", category: "Payments" },
+  {
+    service: "Cloudflare Networking",
+    category: "DNS, SSL, DDoS, load balancing, rate limits",
+  },
   { service: "Cloudflare WAF", category: "Edge security firewall" },
+  { service: "AWS VPC", category: "Full-stack networking" },
   { service: "GitHub", category: "Source control" },
-  { service: "GitHub Actions", category: "CI/CD automation" },
-  { service: "Amazon ECR", category: "Container registry" },
-  { service: "Amazon EC2", category: "CPU compute" },
-  { service: "Runpod.io", category: "GPU compute" },
-  { service: "Amazon RDS", category: "Managed database" },
-  { service: "Amazon ElastiCache", category: "Managed cache" },
-  { service: "Amazon S3", category: "PDF storage" },
-  { service: "Amazon SES", category: "Emails" },
-  { service: "Amazon VPC", category: "Networking" },
+  { service: "GitHub Actions", category: "CI/CD" },
+  { service: "AWS ECR", category: "Container image registries" },
   { service: "AWS Secrets Manager", category: "Secrets management" },
+  { service: "AWS EC2", category: "CPU compute" },
+  { service: "Runpod.io", category: "GPU compute" },
+  { service: "AWS RDS", category: "Managed database" },
+  { service: "AWS ElastiCache", category: "Managed cache" },
+  { service: "AWS S3", category: "PDF storage" },
+  { service: "AWS SES", category: "Emails" },
 ]
 
 type TechStackItem = {
@@ -73,7 +77,6 @@ type TechStackItem = {
 
 const techStackItems: TechStackItem[] = [
   { name: "Docker + Compose", category: "Container orchestration" },
-  { name: "Nginx Proxy Manager", category: "Reverse proxy & TLS termination" },
   { name: "PostgreSQL", category: "Database" },
   { name: "Redis", category: "Cache" },
   { name: "OpenTelemetry", category: "Observability" },
@@ -81,51 +84,52 @@ const techStackItems: TechStackItem[] = [
   { name: "Node.js", category: "Frontend runtime" },
   { name: "Bun.js", category: "Frontend package manager" },
   { name: "Tanstack React Start", category: "Web app framework" },
-  { name: "PDFium", category: "PDF engine (frontend & backend)" },
-  { name: "Python", category: "Backend language" },
-  { name: "Uvicorn", category: "Backend runtime & package manager" },
+  { name: "Cloudflare Tunnel", category: "HTTPS reverse proxy" },
+  { name: "PDFium", category: "PDF engine for frontend and backend" },
+  { name: "CPython", category: "Backend language" },
+  { name: "Uvicorn", category: "Backend runtime and package manager" },
   { name: "FastAPI", category: "API framework" },
   { name: "Celery", category: "Workers framework" },
 ]
 
 const optionalProviders: Provider[] = [
   {
-    name: "OpenAI",
-    detail: "Optional LLM provider for extraction and prompt workflows.",
-    icon: "/icons/openai.svg",
-  },
-  {
-    name: "Anthropic",
-    detail: "Optional LLM provider for model choice and extraction workflows.",
-    icon: "/icons/anthropic.svg",
-  },
-  {
     name: "Google",
-    detail: "Optional model and source integrations, including Drive and Gmail.",
+    detail: "Optional authentication, Google Deepmind inference, Drive, GCS, and Gmail.",
     icon: "/icons/google.svg",
   },
   {
     name: "Microsoft",
-    detail: "Optional source integrations, including OneDrive and Outlook Email.",
+    detail: "Optional authentication, OneDrive, Azure Blob, and Outlook integrations.",
     icon: "/icons/microsoft.svg",
+  },
+  {
+    name: "OpenAI",
+    detail: "Optional AI inference provider through Bring Your Own Key.",
+    icon: "/icons/openai.svg",
+  },
+  {
+    name: "Anthropic",
+    detail: "Optional AI inference provider through Bring Your Own Key.",
+    icon: "/icons/anthropic.svg",
   },
 ]
 
 const documentSources: Provider[] = [
+  {
+    name: "External AWS S3",
+    detail: "external_aws_s3",
+    icon: "/icons/aws-color.svg",
+  },
   {
     name: "Google Drive",
     detail: "google_drive",
     icon: "/icons/google-drive.svg",
   },
   {
-    name: "OneDrive",
-    detail: "onedrive",
-    icon: "/icons/onedrive.svg",
-  },
-  {
-    name: "Outlook Email",
-    detail: "outlook_email",
-    icon: "/icons/outlook.svg",
+    name: "Google Cloud Storage",
+    detail: "gcs",
+    icon: "/icons/google-cloud.svg",
   },
   {
     name: "Gmail",
@@ -133,9 +137,9 @@ const documentSources: Provider[] = [
     icon: "/icons/gmail.svg",
   },
   {
-    name: "AWS S3",
-    detail: "aws_s3",
-    icon: "/icons/aws-color.svg",
+    name: "Microsoft OneDrive",
+    detail: "microsoft_onedrive",
+    icon: "/icons/onedrive.svg",
   },
   {
     name: "Azure Blob Storage",
@@ -143,9 +147,9 @@ const documentSources: Provider[] = [
     icon: "/icons/azure-blob.svg",
   },
   {
-    name: "Google Cloud Storage",
-    detail: "gcs",
-    icon: "/icons/google-cloud.svg",
+    name: "Outlook",
+    detail: "outlook",
+    icon: "/icons/outlook.svg",
   },
 ]
 
@@ -155,11 +159,11 @@ const diagramGroups: Array<{ label: string; nodes: DiagramNode[] }> = [
     nodes: [
       {
         title: "Public web app",
-        body: "Routes, authenticated projects, labeling UI, billing, and demos.",
+        body: "Tanstack React Start app served by Node.js for public pages, auth, projects, billing, demos, and document UI.",
       },
       {
         title: "FastAPI",
-        body: "Upload, avatar, PDF utility, OCR, and extraction API boundaries.",
+        body: "Python API boundary for upload, avatar, PDF utility, OCR, extraction, telemetry, and health routes.",
       },
     ],
   },
@@ -168,24 +172,24 @@ const diagramGroups: Array<{ label: string; nodes: DiagramNode[] }> = [
     nodes: [
       {
         title: "Workers",
-        body: "Celery orchestration for watching sources, extracting text, and running entities.",
+        body: "Celery orchestration for document workflows, source watching, text extraction, and entity workflows.",
       },
       {
-        title: "GPU services",
-        body: "Runpod-hosted OCR and model workers for document-heavy workloads.",
+        title: "Runpod GPU services",
+        body: "Accelerated AI/ML inference and training workloads for document-heavy OCR and model serving.",
       },
     ],
   },
   {
-    label: "State",
+    label: "AWS state",
     nodes: [
       {
-        title: "PostgreSQL",
-        body: "Projects, billing records, prompts, PDFs, annotations, and source sync state.",
+        title: "PostgreSQL and Redis",
+        body: "RDS stores application data while ElastiCache provides managed cache capacity.",
       },
       {
-        title: "Object storage",
-        body: "PDFs, avatars, and generated document artifacts.",
+        title: "S3 and Secrets Manager",
+        body: "S3 stores PDFs while Secrets Manager keeps deployment and integration secrets out of application code.",
       },
     ],
   },
@@ -193,12 +197,12 @@ const diagramGroups: Array<{ label: string; nodes: DiagramNode[] }> = [
     label: "Edges",
     nodes: [
       {
-        title: "Document sources",
-        body: "Drive, OneDrive, email, S3, Azure Blob, and Google Cloud Storage.",
+        title: "Cloudflare",
+        body: "DNS, SSL, DDoS protection, load balancing, rate limits, WAF, and Tunnel in front of the app.",
       },
       {
-        title: "LLM providers",
-        body: "OpenAI, Anthropic, Google, or Microsoft when enabled by the project.",
+        title: "Optional integrations",
+        body: "Google, Microsoft, OpenAI, and Anthropic are optional for auth, AI inference, and source connectivity.",
       },
     ],
   },
@@ -214,7 +218,8 @@ function PlatformPage() {
               {m.platform_title()}
             </h1>
             <p className="max-w-2xl text-[16px] leading-[1.75] text-[#5C5E62]">
-              {m.platform_description()}
+              Dokumen connects document sources, AI inference, AWS storage, billing, and edge
+              security into one operating layer for turning PDFs into structured data.
             </p>
           </div>
 
@@ -291,7 +296,8 @@ function PlatformPage() {
               {m.platform_providers_title()}
             </h2>
             <p className="mb-8 text-[16px] leading-[1.75] text-[#5C5E62]">
-              {m.platform_providers_description()}
+              Dokumen relies on 5 required providers: Stripe, Cloudflare, GitHub, AWS, and Runpod.
+              Google, Microsoft, OpenAI, and Anthropic are optional integrations.
             </p>
             <Link
               to="/demo"
@@ -360,15 +366,17 @@ function PlatformPage() {
                     <tr className="border-b border-[#EEEEEE]">
                       <td className="py-2 pr-4 font-medium text-[#171A20]">PDF storage</td>
                       <td className="py-2 text-[#5C5E62]">
-                        Dokumen, S3, Google Drive, GCS, Gmail, OneDrive, Azure Blob, Outlook
+                        Dokumen, external AWS S3, Google Drive, GCS, Gmail, Microsoft OneDrive,
+                        Azure Blob, Outlook
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
               <p className="mt-4 text-[13px] leading-[1.55] text-[#5C5E62]">
-                Dokumen supports Bring Your Own Key (BYOK) for AI inference. Contact us to provide
-                keys for your organization.
+                Dokumen supports Bring Your Own Key (BYOK) for AI inference. The web app does not
+                yet allow users to upload keys, but you can contact us to provide keys for your
+                organization through a separate secure method.
               </p>
             </div>
           </div>
@@ -416,7 +424,9 @@ function PlatformPage() {
               {m.platform_sources_title()}
             </h2>
             <p className="text-[16px] leading-[1.75] text-[#5C5E62]">
-              {m.platform_sources_description()}
+              PDF storage can use Dokumen storage or optional external sources. External PDF storage
+              integrations are listed in the infrastructure knowledge base as planned but not yet
+              complete.
             </p>
           </div>
 
