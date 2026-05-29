@@ -12,12 +12,12 @@ import type {
   DbAnnotationUpdate,
   DbEntityTypeUpdate,
   DbWebPdfUpdate,
+  NewApplication,
   NewDbAnnotation,
   NewDbEntityType,
   NewDbWebPdf,
   NewProject,
   NewUser,
-  NewApplication,
   ProjectUpdate,
   UserUpdate,
 } from "../../db/types"

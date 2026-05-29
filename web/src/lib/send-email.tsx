@@ -2,7 +2,6 @@ import { SendEmailCommand, SendRawEmailCommand } from "@aws-sdk/client-ses"
 import { render } from "@react-email/components"
 
 import ApplicationNotification from "../components/emails/application-notification"
-
 import ContactAutoReply, {
   subject as contactAutoReplySubject,
 } from "../components/emails/contact-auto-reply"

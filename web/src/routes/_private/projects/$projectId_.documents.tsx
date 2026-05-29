@@ -2,6 +2,7 @@ import { useRef, useState } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import axios, { AxiosError } from "axios"
+
 import {
   CheckCircle2Icon,
   FileUp,
@@ -10,8 +11,7 @@ import {
   PlusIcon,
   RefreshCwIcon,
   UploadIcon,
-} from "lucide-react"
-
+} from "@/components/icons"
 import { ProjectTabs } from "@/components/project-tabs"
 import {
   AlertDialog,

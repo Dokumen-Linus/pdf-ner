@@ -2,6 +2,8 @@ import { useRef, useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { createFileRoute } from "@tanstack/react-router"
 import { createServerFn } from "@tanstack/react-start"
+import { z } from "zod"
+
 import {
   AlertCircle,
   Briefcase,
@@ -12,9 +14,7 @@ import {
   UploadCloud,
   User,
   X,
-} from "lucide-react"
-import { z } from "zod"
-
+} from "@/components/icons"
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,

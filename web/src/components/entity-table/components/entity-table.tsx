@@ -1,7 +1,7 @@
 import { FormEvent, startTransition, useEffect, useState } from "react"
 import { boundingRect, SearchAllPagesResult, uuidV4 } from "@embedpdf/models"
-import { Highlighter, LineSquiggle, Strikethrough, Underline } from "lucide-react"
 
+import { Highlighter, LineSquiggle, Strikethrough, Underline } from "@/components/icons"
 import {
   PdfTextMarkupAnnotationObject,
   Subtype,

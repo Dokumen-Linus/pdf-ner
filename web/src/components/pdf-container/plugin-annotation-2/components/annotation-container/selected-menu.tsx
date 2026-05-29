@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { Rect } from "@embedpdf/models"
-import { Trash2 } from "lucide-react"
 
+import { Trash2 } from "@/components/icons"
 import {
   Select,
   SelectContent,

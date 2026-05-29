@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router"
-import { LoaderCircleIcon, PlusIcon } from "lucide-react"
 import { z } from "zod"
 
+import { LoaderCircleIcon, PlusIcon } from "@/components/icons"
 import { Button } from "@/components/shadcn-ui/button"
 import {
   Card,

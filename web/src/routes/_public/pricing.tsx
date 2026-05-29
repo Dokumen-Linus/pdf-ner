@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { CheckIcon } from "lucide-react"
 
+import { CheckIcon } from "@/components/icons"
 import { getAllChatModels } from "@/db-fns/public/models"
 import { m } from "@/integrations/paraglide/messages.js"
 

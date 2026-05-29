@@ -1,5 +1,4 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { FilesIcon, LayoutDashboardIcon, SettingsIcon, TagIcon } from "lucide-react"
 import {
   Bar,
   BarChart,
@@ -10,6 +9,7 @@ import {
   YAxis,
 } from "recharts"
 
+import { FilesIcon, LayoutDashboardIcon, SettingsIcon, TagIcon } from "@/components/icons"
 import { ProjectTabs } from "@/components/project-tabs"
 import { Button } from "@/components/shadcn-ui/button"
 import {

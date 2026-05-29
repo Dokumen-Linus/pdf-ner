@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
-import { CheckCircle2Icon, Loader2Icon, PlayIcon, RotateCcwIcon, XCircleIcon } from "lucide-react"
 
 import {
   getOcrEvaluationStatus,
@@ -9,6 +8,7 @@ import {
   startOcrEvaluation,
   startPromptOptimization,
 } from "@/api-fns/engineering"
+import { CheckCircle2Icon, Loader2Icon, PlayIcon, RotateCcwIcon, XCircleIcon } from "@/components/icons"
 import { ProjectTabs } from "@/components/project-tabs"
 import { Button } from "@/components/shadcn-ui/button"
 import {
