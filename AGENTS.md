@@ -12,6 +12,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - Never read or edit .env files. Always add new env vars to the local `.env.example`
 - Never read or edit `research.md`, `LICENSE.md`, `CHANGELOG.md`, `DESIGN.md` or any `README.md` file except `README.AGENTS.md`
 - Never prompt the user to run more than one commands. Instead write them to `./tmp.sh` with explanation comments. If temp.sh doesn't exist, create it. If it does, append to it
+- Always run `bash -n` and `shellcheck` on any `.sh` scripts created. Always run `jq -n` individually on any `jq` lines added to scripts
 - Whenever a command or script starts a long-running process like localhost:3000 for web or a Docker image, terminate the process before responding
 
 ## Work Loop
