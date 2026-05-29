@@ -30,6 +30,8 @@ import { useZoomCapability } from "../plugin-zoom-2"
 
 import ToolbarToggleButton from "./toolbar-toggle-button"
 
+import "./toolbar-dev.css"
+
 import type { Dispatch, SetStateAction } from "react"
 import type { PdfTextMarkupAnnotationObject, Subtype } from "../plugin-annotation-2"
 
@@ -86,7 +88,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
     <div className="pdf-toolbar">
       <ToolbarToggleButton isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
 
-      <div className="pdf-toolbar-divider" />
+      <div className="divider" />
 
       {tools.map((tool) => (
         <button
@@ -104,18 +106,14 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
               })
             }
           }}
-          className={`pdf-tool-button ${
-            tool.subtype === annoState?.activeSubtype
-              ? "pdf-tool-button-active"
-              : "pdf-tool-button-secondary"
-          }`}
+          className={tool.subtype === annoState?.activeSubtype ? "active" : ""}
           title={tool.title}
         >
           <tool.icon size={18} />
         </button>
       ))}
 
-      <div className="pdf-toolbar-divider" />
+      <div className="divider" />
 
       <form className="flex items-center gap-2" onSubmit={handleSearchSubmit}>
         <Input
@@ -127,7 +125,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
         <button
           type="submit"
           disabled={!searchScope || searchState.loading}
-          className="pdf-tool-button pdf-tool-button-primary"
+          className="primary"
           title="Search PDF text"
         >
           <Search size={18} />
@@ -136,7 +134,6 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
           type="button"
           onClick={() => searchScope?.previousResult()}
           disabled={!searchScope || searchState.total === 0}
-          className="pdf-tool-button pdf-tool-button-secondary"
           title="Previous result"
         >
           <ChevronLeft size={18} />
@@ -145,7 +142,6 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
           type="button"
           onClick={() => searchScope?.nextResult()}
           disabled={!searchScope || searchState.total === 0}
-          className="pdf-tool-button pdf-tool-button-secondary"
           title="Next result"
         >
           <ChevronRight size={18} />
@@ -154,12 +150,12 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
           type="button"
           onClick={() => searchScope?.setShowAllResults(!searchState.showAllResults)}
           disabled={!searchScope || searchState.total === 0}
-          className="pdf-tool-button pdf-tool-button-secondary text-xs"
+          className="text-xs"
           title="Toggle all search highlights"
         >
           {searchState.showAllResults ? "All" : "One"}
         </button>
-        <div className="pdf-toolbar-count">
+        <div className="count">
           {searchState.loading
             ? "Searching..."
             : searchState.total > 0
@@ -168,12 +164,12 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
         </div>
       </form>
 
-      <div className="pdf-toolbar-divider" />
+      <div className="divider" />
 
       <button
         onClick={() => zoomCapability?.zoomOut()}
         disabled={!zoomCapability}
-        className="pdf-tool-button pdf-tool-button-primary"
+        className="primary"
         title={m.pdf_toolbar_zoom_out()}
       >
         <ZoomOut size={18} />
@@ -181,18 +177,17 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
       <button
         onClick={() => zoomCapability?.zoomIn()}
         disabled={!zoomCapability}
-        className="pdf-tool-button pdf-tool-button-primary"
+        className="primary"
         title={m.pdf_toolbar_zoom_in()}
       >
         <ZoomIn size={18} />
       </button>
 
-      <div className="pdf-toolbar-divider" />
+      <div className="divider" />
 
       <button
         onClick={() => annoCapability?.undo()}
         disabled={!annoState?.canUndo}
-        className="pdf-tool-button pdf-tool-button-secondary"
         title={m.pdf_toolbar_undo()}
       >
         <Undo2 size={18} />
@@ -200,19 +195,18 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
       <button
         onClick={() => annoCapability?.redo()}
         disabled={!annoState?.canRedo}
-        className="pdf-tool-button pdf-tool-button-secondary"
         title={m.pdf_toolbar_redo()}
       >
         <Redo2 size={18} />
       </button>
 
-      <div className="pdf-toolbar-divider" />
+      <div className="divider" />
       {canRotate && (
         <>
           <button
             onClick={() => rotateCapability?.rotateBackward()}
             disabled={!rotateCapability}
-            className="pdf-tool-button pdf-tool-button-primary"
+            className="primary"
             title={m.pdf_toolbar_rotate_ccw()}
           >
             <RotateCcw size={18} />
@@ -220,7 +214,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
           <button
             onClick={() => rotateCapability?.rotateForward()}
             disabled={!rotateCapability}
-            className="pdf-tool-button pdf-tool-button-primary"
+            className="primary"
             title={m.pdf_toolbar_rotate_cw()}
           >
             <RotateCw size={18} />
@@ -230,7 +224,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
       <button
         onClick={() => exportCapability?.download()}
         disabled={!exportCapability}
-        className="pdf-tool-button pdf-tool-button-success"
+        className="success"
         title={m.pdf_toolbar_download()}
       >
         <Download size={18} />
@@ -238,7 +232,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
       <button
         onClick={handleDelete}
         disabled={!annoState?.selectedUid}
-        className="pdf-tool-button pdf-tool-button-danger"
+        className="danger"
         title={m.pdf_toolbar_delete()}
       >
         <Trash2 size={18} />
@@ -255,7 +249,7 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
           const allAnnoUids = Object.keys(docState.byUid)
           annoCapability?.updateAnnotations(allAnnoUids.map((id: string) => ({ id, patch })))
         }}
-        className="pdf-tool-button pdf-tool-button-danger"
+        className="danger"
         title={m.pdf_toolbar_dev_red_highlights_tooltip()}
       >
         {m.pdf_toolbar_dev_red_highlights_button()}
@@ -265,3 +259,4 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
 }
 
 export default Toolbar
+

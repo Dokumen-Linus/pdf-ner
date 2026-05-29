@@ -1,0 +1,69 @@
+@reference "../../../styles.css";
+
+.pdf-toolbar {
+  @apply mt-4 mb-4 flex flex-wrap items-center gap-2 rounded-lg border bg-white p-2 shadow-sm;
+  border-color: var(--dokumen-cloud);
+}
+
+/* Vertical Divider */
+.pdf-toolbar .divider {
+  @apply h-6 w-px;
+  background: var(--dokumen-cloud);
+}
+
+/* General Tool Button */
+.pdf-toolbar button {
+  @apply rounded-md px-3 py-1 text-sm font-medium transition-colors disabled:cursor-not-allowed;
+}
+
+/* Secondary Button (Default for buttons in toolbar unless specified otherwise) */
+.pdf-toolbar button:not(.primary):not(.success):not(.danger):not(.active) {
+  @apply disabled:opacity-50;
+  background: var(--dokumen-light-ash);
+}
+
+.pdf-toolbar button:not(.primary):not(.success):not(.danger):not(.active):hover {
+  background: #e5e7eb;
+}
+
+/* Primary Button */
+.pdf-toolbar button.primary {
+  @apply text-white disabled:bg-gray-300;
+  background: #6b7280;
+}
+
+.pdf-toolbar button.primary:hover {
+  background: #4b5563;
+}
+
+/* Active State */
+.pdf-toolbar button.active {
+  @apply text-white;
+  background: var(--dokumen-blue);
+}
+
+/* Success Button */
+.pdf-toolbar button.success {
+  @apply text-white disabled:bg-green-300;
+  background: #22c55e;
+}
+
+.pdf-toolbar button.success:hover {
+  background: #16a34a;
+}
+
+/* Danger Button */
+.pdf-toolbar button.danger {
+  @apply text-white disabled:bg-red-300;
+  background: #ef4444;
+}
+
+.pdf-toolbar button.danger:hover {
+  background: #dc2626;
+}
+
+/* Search Count label */
+.pdf-toolbar .count {
+  @apply min-w-18 text-xs;
+  color: var(--dokumen-pewter);
+}

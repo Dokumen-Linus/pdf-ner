@@ -2,40 +2,42 @@ import { Link } from "@tanstack/react-router"
 
 import { m } from "../../integrations/paraglide/messages.js"
 
+import "./footer.css"
+
 export default function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="site-footer">
-      <div className="site-footer-inner">
-        <ul className="site-footer-list">
+    <footer>
+      <div>
+        <ul>
           <li>
-            <span className="site-footer-text">
+            <span>
               {m.footer_copyright({ year: String(currentYear) })}
             </span>
           </li>
           <li>
-            <Link to="/demo" className="site-footer-text">
+            <Link to="/demo">
               {m.footer_demo()}
             </Link>
           </li>
           <li>
-            <Link to="/about" className="site-footer-text">
+            <Link to="/about">
               {m.footer_about()}
             </Link>
           </li>
           <li>
-            <Link to="/platform" className="site-footer-text">
+            <Link to="/platform">
               {m.footer_platform()}
             </Link>
           </li>
           <li>
-            <Link to="/signin" className="site-footer-text">
+            <Link to="/signin">
               {m.footer_signin()}
             </Link>
           </li>
           <li>
-            <Link to="/signup" className="site-footer-text">
+            <Link to="/signup">
               {m.footer_signup()}
             </Link>
           </li>
@@ -44,3 +46,4 @@ export default function Footer() {
     </footer>
   )
 }
+

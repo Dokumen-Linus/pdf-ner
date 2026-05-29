@@ -7,6 +7,8 @@ import { Bot, MessageSquare, Send, Sparkles, User, X } from "@/components/icons"
 import { m } from "@/integrations/paraglide/messages.js"
 import { cn } from "@/lib/shadcn-ui/utils"
 
+import "./chatbot.css"
+
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
@@ -38,27 +40,26 @@ export default function Chatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="chatbot-panel"
+            className="panel"
           >
             {/* Header */}
-            <div className="chatbot-header">
-              <div className="chatbot-heading">
-                <Sparkles className="chatbot-accent-icon h-4 w-4" />
+            <header>
+              <h2>
+                <Sparkles className="h-4 w-4" />
                 <span>{m.chatbot_header_title()}</span>
-              </div>
+              </h2>
               <button
                 onClick={() => setIsOpen(false)}
-                className="chatbot-close-button"
                 aria-label={m.chatbot_aria_close()}
               >
                 <X className="h-4 w-4" />
               </button>
-            </div>
+            </header>
 
             {/* Messages */}
-            <div ref={scrollRef} className="chatbot-messages">
+            <div ref={scrollRef} className="messages">
               {messages.length === 0 ? (
-                <div className="chatbot-empty">
+                <div className="empty">
                   <Bot className="mb-3 h-10 w-10" />
                   <p className="text-[14px]">{m.chatbot_empty_state()}</p>
                 </div>
@@ -67,28 +68,18 @@ export default function Chatbot() {
                   <div
                     key={m.id}
                     className={cn(
-                      "chatbot-message-row",
-                      m.role === "user" ? "chatbot-message-row-user" : "",
+                      "row",
+                      m.role === "user" ? "user" : "",
                     )}
                   >
-                    <div
-                      className={cn(
-                        "chatbot-avatar",
-                        m.role === "user" ? "chatbot-avatar-user" : "chatbot-avatar-assistant",
-                      )}
-                    >
+                    <div className="avatar">
                       {m.role === "user" ? (
                         <User className="h-4 w-4" />
                       ) : (
                         <Bot className="h-4 w-4" />
                       )}
                     </div>
-                    <div
-                      className={cn(
-                        "chatbot-bubble",
-                        m.role === "user" ? "chatbot-bubble-user" : "chatbot-bubble-assistant",
-                      )}
-                    >
+                    <div className="bubble">
                       {m.parts.map((p, i) =>
                         p.type === "text" ? <span key={i}>{p.content}</span> : null,
                       )}
@@ -97,32 +88,30 @@ export default function Chatbot() {
                 ))
               )}
               {isLoading && (
-                <div className="chatbot-loading-row">
-                  <div className="chatbot-avatar chatbot-avatar-assistant">
+                <div className="row loading">
+                  <div className="avatar">
                     <Bot className="h-4 w-4" />
                   </div>
-                  <div className="chatbot-loading-bubble">
-                    <div className="chatbot-loading-dot" />
-                    <div className="chatbot-loading-dot" />
-                    <div className="chatbot-loading-dot" />
+                  <div className="bubble loading">
+                    <span />
+                    <span />
+                    <span />
                   </div>
                 </div>
               )}
             </div>
 
             {/* Input Form */}
-            <form onSubmit={onSubmit} className="chatbot-form">
+            <form onSubmit={onSubmit}>
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 type="text"
                 placeholder={m.chatbot_input_placeholder()}
-                className="chatbot-input"
               />
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="chatbot-send-button"
                 aria-label={m.chatbot_aria_send()}
               >
                 <Send className="ml-0.5 h-4 w-4" />
@@ -134,7 +123,7 @@ export default function Chatbot() {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="chatbot-toggle"
+        className="toggle"
         aria-label={m.chatbot_aria_toggle()}
       >
         {isOpen ? (
@@ -146,3 +135,4 @@ export default function Chatbot() {
     </div>
   )
 }
+

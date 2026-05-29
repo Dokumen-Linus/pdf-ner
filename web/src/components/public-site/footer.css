@@ -1,0 +1,25 @@
+@reference "../../styles.css";
+
+footer {
+  @apply w-full py-16;
+  background: var(--dokumen-carbon);
+}
+
+footer > div {
+  @apply mx-auto flex flex-col items-center px-6;
+  max-width: var(--dokumen-max-content);
+}
+
+footer ul {
+  @apply mb-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-4;
+}
+
+footer span,
+footer a {
+  @apply text-[12px] font-medium transition-colors;
+  color: var(--dokumen-pale-silver);
+}
+
+footer a:hover {
+  color: var(--dokumen-panel);
+}

@@ -1,0 +1,44 @@
+@reference "../../styles.css";
+
+.pdf-sidebar {
+  @apply h-full w-[172px] shrink-0 border-r;
+  background: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+/* Thumbnail button element */
+.pdf-sidebar button {
+  @apply absolute flex w-full cursor-pointer flex-col items-center px-2 text-left;
+}
+
+/* Thumbnail Frame wrapper */
+.pdf-sidebar .frame {
+  @apply overflow-hidden rounded-md border-2 transition-all;
+}
+
+.pdf-sidebar .frame.active {
+  @apply shadow-sm;
+  border-color: var(--dokumen-blue);
+}
+
+.pdf-sidebar .frame.idle {
+  border-color: #e5e7eb;
+}
+
+.pdf-sidebar .frame.idle:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+}
+
+/* Label text area */
+.pdf-sidebar .label {
+  @apply mt-1 flex items-center justify-center text-xs font-medium;
+}
+
+.pdf-sidebar .label span {
+  color: #6b7280;
+}
+
+.pdf-sidebar .label span.active {
+  color: var(--dokumen-blue);
+}

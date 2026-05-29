@@ -1,6 +1,8 @@
 import { useScroll } from "./plugin-scroll-2"
 import { ThumbImg, ThumbnailsPane } from "./plugin-thumbnail-2"
 
+import "./sidebar.css"
+
 interface SidebarProps {
   documentId: string
 }
@@ -18,7 +20,6 @@ export default function Sidebar({ documentId }: SidebarProps) {
             <button
               key={meta.pageIndex}
               type="button"
-              className="pdf-thumbnail-button"
               style={{
                 height: meta.wrapperHeight,
                 top: meta.top,
@@ -30,9 +31,7 @@ export default function Sidebar({ documentId }: SidebarProps) {
               }}
             >
               <div
-                className={`pdf-thumbnail-frame ${
-                  isActive ? "pdf-thumbnail-frame-active" : "pdf-thumbnail-frame-idle"
-                }`}
+                className={`frame ${isActive ? "active" : "idle"}`}
                 style={{
                   width: meta.width,
                   height: meta.height,
@@ -44,10 +43,8 @@ export default function Sidebar({ documentId }: SidebarProps) {
                   className="h-full w-full object-contain"
                 />
               </div>
-              <div className="pdf-thumbnail-label" style={{ height: meta.labelHeight }}>
-                <span
-                  className={isActive ? "pdf-thumbnail-label-active" : "pdf-thumbnail-label-idle"}
-                >
+              <div className="label" style={{ height: meta.labelHeight }}>
+                <span className={isActive ? "active" : ""}>
                   {meta.pageIndex + 1}
                 </span>
               </div>
@@ -58,3 +55,4 @@ export default function Sidebar({ documentId }: SidebarProps) {
     </aside>
   )
 }
+

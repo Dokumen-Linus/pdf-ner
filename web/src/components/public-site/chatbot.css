@@ -1,0 +1,127 @@
+@reference "../../styles.css";
+
+.chatbot-root {
+  @apply fixed right-6 bottom-6 z-50;
+}
+
+/* Chatbot toggle button */
+.chatbot-root > button.toggle {
+  @apply flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg shadow-black/20 transition-transform hover:scale-105 active:scale-95;
+  background: var(--dokumen-carbon);
+}
+
+.chatbot-root > button.toggle:hover {
+  background: #000;
+}
+
+/* Chatbot main panel */
+.chatbot-root .panel {
+  @apply absolute right-0 bottom-16 flex h-125 max-h-[calc(100vh-100px)] w-87.5 flex-col overflow-hidden border bg-white sm:w-100;
+  border-color: #e5e7eb;
+  border-radius: 16px;
+  box-shadow: var(--dokumen-overlay-shadow);
+}
+
+/* Header */
+.chatbot-root .panel header {
+  @apply flex items-center justify-between px-4 py-3;
+}
+
+.chatbot-root .panel header h2 {
+  @apply flex items-center gap-2 text-[15px] font-medium;
+}
+
+.chatbot-root .panel header h2 svg {
+  color: var(--dokumen-blue);
+}
+
+.chatbot-root .panel header button {
+  @apply rounded-md p-1 transition-colors hover:bg-white/10;
+}
+
+/* Messages area */
+.chatbot-root .panel .messages {
+  @apply flex flex-1 flex-col gap-4 overflow-y-auto p-4;
+  background: #f8f9fa;
+}
+
+.chatbot-root .panel .messages .empty {
+  @apply flex h-full flex-col items-center justify-center text-center opacity-60;
+}
+
+/* Message rows */
+.chatbot-root .panel .messages .row {
+  @apply flex max-w-[85%] gap-3;
+}
+
+.chatbot-root .panel .messages .row.user {
+  @apply ml-auto flex-row-reverse;
+}
+
+/* Avatars */
+.chatbot-root .panel .messages .avatar {
+  @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white;
+}
+
+.chatbot-root .panel .messages .row.user .avatar {
+  background: var(--dokumen-blue);
+}
+
+.chatbot-root .panel .messages .row:not(.user) .avatar {
+  background: #000;
+}
+
+/* Bubbles */
+.chatbot-root .panel .messages .bubble {
+  @apply rounded-xl px-4 py-2.5 text-[14px] leading-relaxed;
+}
+
+.chatbot-root .panel .messages .row.user .bubble {
+  @apply rounded-tr-sm text-white;
+  background: var(--dokumen-blue);
+}
+
+.chatbot-root .panel .messages .row:not(.user) .bubble {
+  @apply rounded-tl-sm border bg-white whitespace-pre-wrap shadow-sm;
+  border-color: #e5e7eb;
+  color: var(--dokumen-carbon);
+}
+
+/* Loading state */
+.chatbot-root .panel .messages .row.loading {
+  @apply flex max-w-[85%] animate-pulse gap-3;
+}
+
+.chatbot-root .panel .messages .bubble.loading {
+  @apply flex h-10.5 items-center gap-1.5 rounded-xl rounded-tl-sm border bg-white px-4 py-3;
+  border-color: #e5e7eb;
+}
+
+.chatbot-root .panel .messages .bubble.loading span {
+  @apply h-1.5 w-1.5 rounded-full bg-gray-400;
+}
+
+/* Input Form */
+.chatbot-root .panel form {
+  @apply flex gap-2 border-t bg-white p-3;
+  border-color: #e5e7eb;
+}
+
+.chatbot-root .panel form input {
+  @apply flex-1 rounded-lg border border-transparent px-4 py-2 text-[14px] transition-all outline-none;
+  background: var(--dokumen-light-ash);
+}
+
+.chatbot-root .panel form input:focus {
+  border-color: color-mix(in srgb, var(--dokumen-blue) 50%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--dokumen-blue) 20%, transparent);
+}
+
+.chatbot-root .panel form button {
+  @apply flex h-10 w-10 items-center justify-center rounded-lg text-white transition-colors disabled:opacity-50;
+  background: var(--dokumen-carbon);
+}
+
+.chatbot-root .panel form button:hover {
+  background: #000;
+}
