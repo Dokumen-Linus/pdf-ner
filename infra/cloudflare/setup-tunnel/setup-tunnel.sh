@@ -2,20 +2,14 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=infra/shared/load-env-file.sh
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/../../shared/load-env-file.sh"
 ENV_FILE_ARG="${1:-}"
 
-load_env_file() {
-  local env_file="$1"
-  if [ -f "$env_file" ]; then
-    set -a
-    # shellcheck disable=SC1090
-    . "$env_file"
-    set +a
-    echo "Loaded env file: ${env_file}" >&2
-  else
-    echo "Env file not found, continuing with current environment: ${env_file}" >&2
-  fi
-}
+# shellcheck source=infra/cloudflare/shared/cf-api.sh
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/../shared/cf-api.sh"
 
 load_env_file "${LOCAL_ENV_FILE:-${ENV_FILE_ARG:-${SCRIPT_DIR}/.env.local}}"
 
@@ -45,53 +39,6 @@ for command_name in curl jq; do
   fi
 done
 echo "Required local commands are available: curl jq." >&2
-
-cf_api() {
-  local method="$1"
-  local path="$2"
-  local body="${3:-}"
-  local response
-
-  if [[ -n "$body" ]]; then
-    response="$(
-      curl -sS \
-        --request "$method" \
-        --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-        --header "Content-Type: application/json" \
-        --data "$body" \
-        "${CF_API_BASE}${path}"
-    )"
-  else
-    response="$(
-      curl -sS \
-        --request "$method" \
-        --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-        "${CF_API_BASE}${path}"
-    )"
-  fi
-
-  if jq -e '.success == true' >/dev/null 2>&1 <<< "$response"; then
-    printf '%s\n' "$response"
-    return
-  fi
-
-  echo "Cloudflare API request failed: ${method} ${path}" >&2
-  jq -r '.errors[]? | "  - \(.message)"' <<< "$response" >&2
-  return 1
-}
-
-verify_cloudflare_token() {
-  if cf_api GET "/accounts/${CLOUDFLARE_ACCOUNT_ID}/tokens/verify" >/dev/null 2>&1; then
-    echo "Verified Cloudflare account API token." >&2
-    return
-  fi
-
-  if ! cf_api GET "/user/tokens/verify" >/dev/null; then
-    echo "Cloudflare API token verification failed against account and user token endpoints. Check CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in the loaded env file." >&2
-    return 1
-  fi
-  echo "Verified Cloudflare user API token." >&2
-}
 
 find_tunnel_id() {
   local response
