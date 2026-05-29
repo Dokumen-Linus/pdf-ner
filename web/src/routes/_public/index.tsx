@@ -42,9 +42,25 @@ function App() {
           <h1 className="mb-6 max-w-lg text-[40px] leading-[1.2] font-medium tracking-normal text-[#171A20]">
             {m.landing_hero_title()}
           </h1>
-          <p className="mb-10 max-w-md text-[14px] leading-[1.43] font-normal text-[#393C41]">
+          <p className="mb-6 max-w-md text-[14px] leading-[1.43] font-normal text-[#393C41]">
             {m.landing_hero_description()}
           </p>
+
+          {/* Trust badges from basics.md */}
+          <div className="mb-10 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D0D1D2] bg-white/60 px-3 py-1 text-[11px] font-medium text-[#393C41] shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-sm transition-all duration-300 hover:bg-white hover:text-[#171A20]">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              {m.landing_hero_badge_security()}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D0D1D2] bg-white/60 px-3 py-1 text-[11px] font-medium text-[#393C41] shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-sm transition-all duration-300 hover:bg-white hover:text-[#171A20]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#3E6AE1]" />
+              {m.landing_hero_badge_ocr()}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D0D1D2] bg-white/60 px-3 py-1 text-[11px] font-medium text-[#393C41] shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-sm transition-all duration-300 hover:bg-white hover:text-[#171A20]">
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+              {m.landing_hero_badge_storage()}
+            </span>
+          </div>
 
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <Link
