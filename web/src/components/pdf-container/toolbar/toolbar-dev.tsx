@@ -259,4 +259,3 @@ const Toolbar = ({ canRotate, isSidebarOpen, setIsSidebarOpen }: ToolbarProps) =
 }
 
 export default Toolbar
-

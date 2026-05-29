@@ -44,9 +44,7 @@ export default function Sidebar({ documentId }: SidebarProps) {
                 />
               </div>
               <div className="label" style={{ height: meta.labelHeight }}>
-                <span className={isActive ? "active" : ""}>
-                  {meta.pageIndex + 1}
-                </span>
+                <span className={isActive ? "active" : ""}>{meta.pageIndex + 1}</span>
               </div>
             </button>
           )
@@ -55,4 +53,3 @@ export default function Sidebar({ documentId }: SidebarProps) {
     </aside>
   )
 }
-

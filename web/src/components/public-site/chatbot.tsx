@@ -48,10 +48,7 @@ export default function Chatbot() {
                 <Sparkles className="h-4 w-4" />
                 <span>{m.chatbot_header_title()}</span>
               </h2>
-              <button
-                onClick={() => setIsOpen(false)}
-                aria-label={m.chatbot_aria_close()}
-              >
+              <button onClick={() => setIsOpen(false)} aria-label={m.chatbot_aria_close()}>
                 <X className="h-4 w-4" />
               </button>
             </header>
@@ -65,13 +62,7 @@ export default function Chatbot() {
                 </div>
               ) : (
                 messages.map((m) => (
-                  <div
-                    key={m.id}
-                    className={cn(
-                      "row",
-                      m.role === "user" ? "user" : "",
-                    )}
-                  >
+                  <div key={m.id} className={cn("row", m.role === "user" ? "user" : "")}>
                     <div className="avatar">
                       {m.role === "user" ? (
                         <User className="h-4 w-4" />
@@ -135,4 +126,3 @@ export default function Chatbot() {
     </div>
   )
 }
-

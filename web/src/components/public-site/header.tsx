@@ -129,7 +129,10 @@ export default function Header() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/signout" className="muted-link flex cursor-pointer items-center gap-2">
+                    <Link
+                      to="/signout"
+                      className="muted-link flex cursor-pointer items-center gap-2"
+                    >
                       <LogOutIcon size={14} />
                       {m.nav_signout()}
                     </Link>
@@ -138,12 +141,8 @@ export default function Header() {
               </DropdownMenu>
             ) : (
               <>
-                <Link to="/signin">
-                  {m.nav_signin()}
-                </Link>
-                <Link to="/signup">
-                  {m.nav_signup()}
-                </Link>
+                <Link to="/signin">{m.nav_signin()}</Link>
+                <Link to="/signup">{m.nav_signup()}</Link>
               </>
             )}
             <Popover>
@@ -202,10 +201,7 @@ export default function Header() {
               ))}
             </PopoverContent>
           </Popover>
-          <button
-            onClick={() => setIsOpen(false)}
-            aria-label={m.common_aria_close()}
-          >
+          <button onClick={() => setIsOpen(false)} aria-label={m.common_aria_close()}>
             <X size={20} />
           </button>
         </div>
@@ -263,4 +259,3 @@ export default function Header() {
     </>
   )
 }
-
