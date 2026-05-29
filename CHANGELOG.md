@@ -135,6 +135,7 @@
 - *(web)* Infra info
 - *(db)* New insert templates seed generation script
 - Application form
+- Accuracy-table
 
 ### 🐛 Bug Fixes
 
@@ -737,6 +738,7 @@
 - Activate gh actions
 - Reset-admin-cidr
 - Declare .env file
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 

@@ -2,10 +2,11 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**79 components** (react)
+**80 components** (react)
 
 ## Components
 
+- **AccuracyTable** — props: pdfs, id, filepath, hasLabels — `web/src/components/accuracy-table/accuracy-table.tsx`
 - **ColorPicker** — props: value, onChange — `web/src/components/custom/color-picker.tsx`
 - **ApplicationNotification** — props: name, email, phone, message — `web/src/components/emails/application-notification.tsx`
 - **ContactAutoReply** — props: name — `web/src/components/emails/contact-auto-reply.tsx`
