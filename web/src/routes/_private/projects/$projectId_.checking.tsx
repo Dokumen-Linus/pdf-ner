@@ -12,6 +12,8 @@ import {
 } from "@/components/shadcn-ui/card"
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
 import { getProjectById } from "@/db-fns/web/projects"
+import { getAccuracyDataByProjectId } from "@/db-fns/core"
+import { AccuracyTable } from "@/components/accuracy-table/accuracy-table"
 
 function CheckingSkeleton() {
   return (
@@ -21,7 +23,13 @@ function CheckingSkeleton() {
         <Skeleton className="h-5 w-64" />
       </div>
       <Skeleton className="h-10 w-full" />
-      <Skeleton className="h-64 rounded-xl" />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-24 rounded-xl" />
+      </div>
+      <Skeleton className="h-96 rounded-xl" />
     </div>
   )
 }
@@ -31,13 +39,16 @@ export const Route = createFileRoute("/_private/projects/$projectId_/checking")(
     try {
       const userId = context.session?.user?.id
       if (!userId) {
-        return { project: null, loadError: "Not authenticated" }
+        return { project: null, accuracyData: null, loadError: "Not authenticated" }
       }
       const project = await getProjectById({ data: { id: params.projectId } })
-      return { project, loadError: null as string | null }
+      const accuracyData = await getAccuracyDataByProjectId({
+        data: { projectId: params.projectId },
+      })
+      return { project, accuracyData, loadError: null as string | null }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      return { project: null, loadError: message }
+      return { project: null, accuracyData: null, loadError: message }
     }
   },
   pendingComponent: CheckingSkeleton,
@@ -45,7 +56,7 @@ export const Route = createFileRoute("/_private/projects/$projectId_/checking")(
 })
 
 function CheckingPage() {
-  const { project, loadError } = Route.useLoaderData()
+  const { project, accuracyData, loadError } = Route.useLoaderData()
   const { projectId } = Route.useParams()
 
   if (loadError || !project) {
@@ -82,20 +93,35 @@ function CheckingPage() {
 
       <ProjectTabs projectId={projectId} currentStep="checking" />
 
-      <Card className="border-dashed">
+      <Card>
         <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-          <ShieldCheckIcon className="text-muted-foreground h-6 w-6" aria-hidden="true" />
+          <ShieldCheckIcon className="text-indigo-600 h-6 w-6 dark:text-indigo-400 shrink-0" aria-hidden="true" />
           <div>
-            <CardTitle>Checking</CardTitle>
+            <CardTitle>Model Accuracy Dashboard</CardTitle>
             <CardDescription>
-              Verify extracted entities and reconcile disagreements across annotators.
+              Verify model prediction accuracy and reconcile disagreements against labeled ground truth.
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm">This step is not yet implemented.</p>
+          {accuracyData && accuracyData.pdfs.length > 0 ? (
+            <AccuracyTable
+              pdfs={accuracyData.pdfs}
+              entityValues={accuracyData.entityValues}
+              entityTypes={accuracyData.entityTypes}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed rounded-xl bg-muted/10">
+              <ShieldCheckIcon className="h-12 w-12 text-muted-foreground mb-4 opacity-75" />
+              <h3 className="font-semibold text-lg text-foreground">No Accuracy Data Available</h3>
+              <p className="text-sm text-muted-foreground max-w-md mt-2">
+                This project has no labelled PDFs with predictions yet. Make sure you fully label some PDFs and run a model extraction first.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
   )
 }
+
