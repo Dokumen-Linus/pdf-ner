@@ -81,11 +81,16 @@ cf_api() {
 }
 
 verify_cloudflare_token() {
+  if cf_api GET "/accounts/${CLOUDFLARE_ACCOUNT_ID}/tokens/verify" >/dev/null 2>&1; then
+    echo "Verified Cloudflare account API token." >&2
+    return
+  fi
+
   if ! cf_api GET "/user/tokens/verify" >/dev/null; then
-    echo "Cloudflare API token verification failed. Check CLOUDFLARE_API_TOKEN in the loaded env file." >&2
+    echo "Cloudflare API token verification failed against account and user token endpoints. Check CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in the loaded env file." >&2
     return 1
   fi
-  echo "Verified Cloudflare API token." >&2
+  echo "Verified Cloudflare user API token." >&2
 }
 
 find_tunnel_id() {
