@@ -25,10 +25,7 @@ export const getAccuracyDataByProjectId = createServerFn({ method: "GET" })
     // 3. Fetch all entity values (labels and predictions) for these PDFs
     let values: (typeof entityValues.$inferSelect)[] = []
     if (pdfIds.length > 0) {
-      values = await db
-        .select()
-        .from(entityValues)
-        .where(inArray(entityValues.pdfId, pdfIds))
+      values = await db.select().from(entityValues).where(inArray(entityValues.pdfId, pdfIds))
     }
 
     // 4. Fetch all entity types for this project

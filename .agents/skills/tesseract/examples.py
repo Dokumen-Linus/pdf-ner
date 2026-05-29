@@ -37,9 +37,7 @@ def image_to_text_with_config(image_path: str) -> str | None:
     """
     try:
         custom_config = r"--oem 3 --psm 6"
-        text = pytesseract.image_to_string(
-            Image.open(image_path), config=custom_config
-        )
+        text = pytesseract.image_to_string(Image.open(image_path), config=custom_config)
         logging.info(f"Extracted text from {image_path} with custom config")
         return text
     except Exception as e:
@@ -235,9 +233,7 @@ def get_multiple_outputs(image_path: str) -> tuple | None:
     Supported extensions: 'txt', 'pdf', 'hocr', 'box', 'tsv'.
     """
     try:
-        text, boxes = pytesseract.run_and_get_multiple_output(
-            image_path, extensions=["txt", "box"]
-        )
+        text, boxes = pytesseract.run_and_get_multiple_output(image_path, extensions=["txt", "box"])
         logging.info(f"Extracted multiple outputs from {image_path}")
         return text, boxes
     except Exception as e:

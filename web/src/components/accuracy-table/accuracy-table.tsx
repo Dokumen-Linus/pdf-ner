@@ -1,10 +1,5 @@
 import React, { useMemo } from "react"
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  type ColumnDef,
-} from "@tanstack/react-table"
+import { useReactTable, getCoreRowModel, flexRender, type ColumnDef } from "@tanstack/react-table"
 import {
   CheckCircle2,
   XCircle,
@@ -82,9 +77,7 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
       const latestNerRunId = sortedPredictions[0]?.nerRunId ?? null
 
       // Filter predictions to only the latest NER run
-      const latestPredictions = predictions.filter(
-        (val) => val.nerRunId === latestNerRunId,
-      )
+      const latestPredictions = predictions.filter((val) => val.nerRunId === latestNerRunId)
 
       // PDF filename extraction
       const pdfName = pdf.filepath.split("/").pop() || pdf.filepath
@@ -164,8 +157,7 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
       falseNegativesSum += row.numFalseNegatives
     })
 
-    const accuracyRate =
-      trueLabelsSum > 0 ? Math.round((correctSum / trueLabelsSum) * 100) : 100
+    const accuracyRate = trueLabelsSum > 0 ? Math.round((correctSum / trueLabelsSum) * 100) : 100
 
     return {
       trueLabelsSum,
@@ -184,11 +176,8 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
         header: "PDF Name",
         cell: (info) => (
           <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span
-              className="font-medium truncate max-w-[200px]"
-              title={info.getValue()}
-            >
+            <FileText className="text-muted-foreground h-4 w-4 shrink-0" />
+            <span className="max-w-[200px] truncate font-medium" title={info.getValue()}>
               {info.getValue()}
             </span>
           </div>
@@ -203,7 +192,7 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
         accessorKey: "numCorrect",
         header: "Predicted Correct",
         cell: (info) => (
-          <span className="inline-flex items-center gap-1.5 text-green-600 font-semibold dark:text-green-400">
+          <span className="inline-flex items-center gap-1.5 font-semibold text-green-600 dark:text-green-400">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
             {info.getValue()}
           </span>
@@ -213,7 +202,7 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
         accessorKey: "numIncorrect",
         header: "Predicted Incorrect",
         cell: (info) => (
-          <span className="inline-flex items-center gap-1.5 text-red-600 font-semibold dark:text-red-400">
+          <span className="inline-flex items-center gap-1.5 font-semibold text-red-600 dark:text-red-400">
             <XCircle className="h-4 w-4 shrink-0" />
             {info.getValue()}
           </span>
@@ -226,7 +215,7 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
         accessorKey: "numFalseNegatives",
         header: "False Negatives",
         cell: (info) => (
-          <span className="inline-flex items-center gap-1.5 text-amber-600 font-semibold dark:text-amber-400">
+          <span className="inline-flex items-center gap-1.5 font-semibold text-amber-600 dark:text-amber-400">
             <AlertTriangle className="h-4 w-4 shrink-0" />
             {info.getValue()}
           </span>
@@ -241,10 +230,10 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
         header: () => (
           <div className="flex items-center gap-2 py-0.5">
             <span
-              className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+              className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ backgroundColor: et.color }}
             />
-            <span className="font-bold text-foreground text-xs uppercase tracking-wider">
+            <span className="text-foreground text-xs font-bold tracking-wider uppercase">
               {et.name}
             </span>
           </div>
@@ -285,8 +274,7 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
             accessorFn: (row: RowType) => row.entityTypes[et.id]?.predictedValues || [],
             cell: (info: any) => {
               const preds = info.getValue() as string[]
-              const trueVals =
-                info.row.original.entityTypes[et.id]?.trueValues || []
+              const trueVals = info.row.original.entityTypes[et.id]?.trueValues || []
               if (preds.length === 0) {
                 return <span className="empty-cell-placeholder">—</span>
               }
@@ -296,11 +284,7 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
                     const isCorrect = trueVals.includes(p)
                     return (
                       <li key={idx} className="value-item">
-                        <span
-                          className={`value-badge ${
-                            isCorrect ? "match-correct" : "match-fn"
-                          }`}
-                        >
+                        <span className={`value-badge ${isCorrect ? "match-correct" : "match-fn"}`}>
                           {p}
                         </span>
                       </li>
@@ -325,29 +309,27 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
   })
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex w-full flex-col gap-6">
       {/* 6. Dashboard Widget Panel */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
-        <div className="flex items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm">
-          <div className="p-3 bg-primary/10 rounded-lg text-primary shrink-0">
+      <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="bg-card text-card-foreground flex items-center gap-4 rounded-xl border p-4 shadow-sm">
+          <div className="bg-primary/10 text-primary shrink-0 rounded-lg p-3">
             <FileText className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
               Labelled PDFs
             </p>
-            <h3 className="text-2xl font-bold tracking-tight">
-              {transformedData.length}
-            </h3>
+            <h3 className="text-2xl font-bold tracking-tight">{transformedData.length}</h3>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm">
-          <div className="p-3 bg-emerald-500/10 rounded-lg text-emerald-600 dark:text-emerald-400 shrink-0">
+        <div className="bg-card text-card-foreground flex items-center gap-4 rounded-xl border p-4 shadow-sm">
+          <div className="shrink-0 rounded-lg bg-emerald-500/10 p-3 text-emerald-600 dark:text-emerald-400">
             <CheckCircle2 className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
               Correct Predictions
             </p>
             <h3 className="text-2xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
@@ -356,12 +338,12 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm">
-          <div className="p-3 bg-red-500/10 rounded-lg text-red-600 dark:text-red-400 shrink-0">
+        <div className="bg-card text-card-foreground flex items-center gap-4 rounded-xl border p-4 shadow-sm">
+          <div className="shrink-0 rounded-lg bg-red-500/10 p-3 text-red-600 dark:text-red-400">
             <XCircle className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
               Incorrect / Missed
             </p>
             <h3 className="text-2xl font-bold tracking-tight text-red-600 dark:text-red-400">
@@ -370,19 +352,19 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-4 p-4 rounded-xl border bg-card text-card-foreground shadow-sm">
-          <div className="p-3 bg-indigo-500/10 rounded-lg text-indigo-600 dark:text-indigo-400 shrink-0">
+        <div className="bg-card text-card-foreground flex items-center gap-4 rounded-xl border p-4 shadow-sm">
+          <div className="shrink-0 rounded-lg bg-indigo-500/10 p-3 text-indigo-600 dark:text-indigo-400">
             <Percent className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
               Overall Accuracy Rate
             </p>
             <div className="flex items-baseline gap-1.5">
               <h3 className="text-2xl font-bold tracking-tight text-indigo-600 dark:text-indigo-400">
                 {totals.accuracyRate}%
               </h3>
-              <span className="text-[10px] text-muted-foreground font-medium">
+              <span className="text-muted-foreground text-[10px] font-medium">
                 ({totals.correctSum}/{totals.trueLabelsSum})
               </span>
             </div>
@@ -403,19 +385,14 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
                     <th
                       key={header.id}
                       colSpan={header.colSpan}
-                      className={`accuracy-table-th ${
-                        isFirstCol ? "sticky-col-left" : ""
-                      }`}
+                      className={`accuracy-table-th ${isFirstCol ? "sticky-col-left" : ""}`}
                       style={{
                         textAlign: isGroupHeader ? "center" : "left",
                       }}
                     >
                       {header.isPlaceholder
                         ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   )
                 })}
@@ -430,9 +407,7 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
                   return (
                     <td
                       key={cell.id}
-                      className={`accuracy-table-td ${
-                        isFirstCol ? "sticky-col-left" : ""
-                      }`}
+                      className={`accuracy-table-td ${isFirstCol ? "sticky-col-left" : ""}`}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
@@ -444,10 +419,10 @@ export const AccuracyTable: React.FC<AccuracyTableProps> = ({
           {/* Footer Sum Row */}
           <tfoot>
             <tr className="accuracy-table-footer-tr">
-              <td className="accuracy-table-td sticky-col-left font-bold text-foreground">
+              <td className="accuracy-table-td sticky-col-left text-foreground font-bold">
                 {transformedData.length} PDFs
               </td>
-              <td className="accuracy-table-td font-semibold text-foreground">
+              <td className="accuracy-table-td text-foreground font-semibold">
                 {totals.trueLabelsSum}
               </td>
               <td className="accuracy-table-td font-semibold text-green-600 dark:text-green-400">
