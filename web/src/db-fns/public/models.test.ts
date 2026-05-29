@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test"
 
 import {
   getAllChatModels,
+  getAllExtractMethods,
   getAvailableGoogleChatModels,
   getChatModelById,
   getChatModelsByHost,
@@ -50,3 +51,11 @@ describe.if(runTests)("public.chat_models", () => {
     )
   })
 })
+
+describe.if(runTests)("public.extract_methods", () => {
+  it("getAllExtractMethods returns an array", async () => {
+    const result = await getAllExtractMethods()
+    expect(Array.isArray(result)).toBe(true)
+  })
+})
+

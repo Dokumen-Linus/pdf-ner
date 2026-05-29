@@ -4,6 +4,7 @@ import { z } from "zod"
 
 import { db } from "@/db/client"
 import { chatModels } from "@/db/schemas/public/chat-models"
+import { extractMethods } from "@/db/schemas/public/extract-methods"
 
 export const getChatModelById = createServerFn({ method: "GET" })
   .inputValidator(z.object({ id: z.string() }))
@@ -45,3 +46,11 @@ export const getAvailableGoogleChatModels = createServerFn({ method: "GET" })
       .orderBy(desc(chatModels.releaseDate), desc(chatModels.availableDate), desc(chatModels.id))
     return modelsList
   })
+
+export const getAllExtractMethods = createServerFn({ method: "GET" })
+  .inputValidator(z.void())
+  .handler(async () => {
+    const methodsList = await db.select().from(extractMethods)
+    return methodsList
+  })
+
