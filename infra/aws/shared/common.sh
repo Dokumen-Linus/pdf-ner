@@ -1,22 +1,29 @@
 #!/usr/bin/env bash
 
-DEPLOY_AWS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-REPO_ROOT="$(cd "${DEPLOY_AWS_DIR}/../.." && pwd)"
+AWS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_ROOT="$(cd "${AWS_DIR}/../.." && pwd)"
 # shellcheck source=infra/shared/load-env-file.sh
 # shellcheck disable=SC1091
 . "${REPO_ROOT}/infra/shared/load-env-file.sh"
 EXAMPLE_SECRETS_DIR="${EXAMPLE_SECRETS_DIR:-${REPO_ROOT}/infra/example-secrets}"
-SECRET_DRAFT_DIR="${SECRET_DRAFT_DIR:-${DEPLOY_AWS_DIR}/local-secrets}"
-OUTPUT_DIR="${OUTPUT_DIR:-${DEPLOY_AWS_DIR}/outputs}"
+SECRET_DRAFT_DIR="${SECRET_DRAFT_DIR:-${AWS_DIR}/local-secrets}"
+OUTPUT_DIR="${OUTPUT_DIR:-${AWS_DIR}/outputs}"
 
 configure_common_defaults() {
   PROJECT_NAME="${PROJECT_NAME:-dokumen}"
   ENVIRONMENT="${ENVIRONMENT:-production}"
   AWS_REGION="${AWS_REGION:-us-east-1}"
   DOMAIN="${DOMAIN:-dokumenai.dev}"
-  OUTPUT_DIR="${OUTPUT_DIR:-${DEPLOY_AWS_DIR}/outputs}"
-  SECRET_DRAFT_DIR="${SECRET_DRAFT_DIR:-${DEPLOY_AWS_DIR}/secrets/local-secrets}"
+  OUTPUT_DIR="${OUTPUT_DIR:-${AWS_DIR}/outputs}"
   OUTPUT_DIR="$(absolute_repo_path "$OUTPUT_DIR")"
+  if [ "$(dirname "$OUTPUT_DIR")" = "${REPO_ROOT}/infra/deploy-aws" ] && [ "$(basename "$OUTPUT_DIR")" = "outputs" ]; then
+    OUTPUT_DIR="${AWS_DIR}/outputs"
+  fi
+  SECRET_DRAFT_DIR="${SECRET_DRAFT_DIR:-${AWS_DIR}/local-secrets}"
+  SECRET_DRAFT_DIR="$(absolute_repo_path "$SECRET_DRAFT_DIR")"
+  if [ "$(dirname "$SECRET_DRAFT_DIR")" = "${REPO_ROOT}/infra/deploy-aws" ] && [ "$(basename "$SECRET_DRAFT_DIR")" = "local-secrets" ]; then
+    SECRET_DRAFT_DIR="${AWS_DIR}/local-secrets"
+  fi
 }
 
 aws_region() {

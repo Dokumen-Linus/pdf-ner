@@ -1,0 +1,57 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ECRRepositoryBootstrapAndLogin",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:CreateRepository",
+        "ecr:DescribeRepositories",
+        "ecr:GetAuthorizationToken"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ECRPushAndReadAppImages",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:CompleteLayerUpload",
+        "ecr:DescribeImages",
+        "ecr:DescribeRepositories",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:InitiateLayerUpload",
+        "ecr:ListImages",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+      ],
+      "Resource": [
+        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/${WEB_ECR_REPOSITORY}",
+        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/${API_ECR_REPOSITORY}",
+        "arn:aws:ecr:${AWS_REGION}:${ACCOUNT_ID}:repository/${WORKERS_ECR_REPOSITORY}"
+      ]
+    },
+    {
+      "Sid": "SSMSendDeployCommand",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:SendCommand"
+      ],
+      "Resource": [
+        "arn:aws:ec2:${AWS_REGION}:${ACCOUNT_ID}:instance/${EC2_INSTANCE_ID}",
+        "arn:aws:ssm:${AWS_REGION}::document/AWS-RunShellScript"
+      ]
+    },
+    {
+      "Sid": "SSMReadDeployCommand",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetCommandInvocation",
+        "ssm:ListCommands",
+        "ssm:ListCommandInvocations"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

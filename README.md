@@ -205,18 +205,6 @@ sudo dpkg -i cloudflared.deb
 npm install -g @openai/codex
 ```
 
-## CI/CD
-
-[GitHub Actions](https://github.com/features/actions)
-
-- auto-docs: generate CHANGELOG.md and .codesight/wiki
-- auto-format: format code (Python with ruff, TypeScript with prettier and eslint)
-- commitlint: enforces commit pattern
-- deploy-api: deploy API to AWS
-- deploy-web: deploy web to AWS
-- deploy-workers: deploy workers to AWS
-- deploy-gpu-pods: deploy models to Runpod
-
 ### Documentation
 
 - CHANGELOG.md: auto-updated by [git-cliff](https://git-cliff.org/docs/) following [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/) format that catches new conventional commits
