@@ -48,6 +48,7 @@
       "Effect": "Allow",
       "Action": [
         "ssm:GetCommandInvocation",
+        "ssm:ListCommands",
         "ssm:ListCommandInvocations"
       ],
       "Resource": "*"
