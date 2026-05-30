@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { motion } from "motion/react"
-import { Tweet } from "react-tweet"
 
+import { SafeTweet } from "@/components/public-site/safe-tweet"
 import {
   Carousel,
   CarouselContent,
@@ -42,9 +42,25 @@ function App() {
           <h1 className="mb-6 max-w-lg text-[40px] leading-[1.2] font-medium tracking-normal text-[#171A20]">
             {m.landing_hero_title()}
           </h1>
-          <p className="mb-10 max-w-md text-[14px] leading-[1.43] font-normal text-[#393C41]">
+          <p className="mb-6 max-w-md text-[14px] leading-[1.43] font-normal text-[#393C41]">
             {m.landing_hero_description()}
           </p>
+
+          {/* Trust badges from basics.md */}
+          <div className="mb-10 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D0D1D2] bg-white/60 px-3 py-1 text-[11px] font-medium text-[#393C41] shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-sm transition-all duration-300 hover:bg-white hover:text-[#171A20]">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              {m.landing_hero_badge_security()}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D0D1D2] bg-white/60 px-3 py-1 text-[11px] font-medium text-[#393C41] shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-sm transition-all duration-300 hover:bg-white hover:text-[#171A20]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#3E6AE1]" />
+              {m.landing_hero_badge_ocr()}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D0D1D2] bg-white/60 px-3 py-1 text-[11px] font-medium text-[#393C41] shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-sm transition-all duration-300 hover:bg-white hover:text-[#171A20]">
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+              {m.landing_hero_badge_storage()}
+            </span>
+          </div>
 
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <Link
@@ -420,14 +436,9 @@ function App() {
             className="relative w-full"
           >
             <CarouselContent className="-ml-4">
-              {[
-                "1628832338187636740",
-                "2042723870055239708",
-                "1617979122625712128",
-                "2043057246897148374",
-              ].map((id) => (
+              {["1937902205765607626", "2040470801506541998", "2055422044477480966"].map((id) => (
                 <CarouselItem key={id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                  <Tweet id={id} />
+                  <SafeTweet id={id} />
                 </CarouselItem>
               ))}
             </CarouselContent>
