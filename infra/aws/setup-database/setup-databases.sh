@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=infra/deploy-aws/shared/common.sh
+# shellcheck source=infra/aws/shared/common.sh
 . "${SCRIPT_DIR}/../shared/common.sh"
 
 load_env_file "${LOCAL_ENV_FILE:-${SCRIPT_DIR}/.env.local}"
