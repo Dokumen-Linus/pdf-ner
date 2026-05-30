@@ -247,6 +247,11 @@
 - Use safetweet wrapper
 - Patch missing entities in quoted tweets
 - Migrate to local icons
+- Pricing page updates
+- *(ci)* Setup-tunnel
+- *(ci)* Setup-waf
+- *(web)* Update infra.md and platform.tsx
+- *(ci)* Output printing and remove sg for npm
 
 ### 💼 Other
 
@@ -317,6 +322,7 @@
 - *(db, wk)* Rename ocr_methods to extract_methods,  add text_extract workers domain
 - *(wk)* Move prompt formation from inserts to shared  domain
 - Consolidate styles
+- *(ci)* Use infra/shared scripts
 
 ### 📚 Documentation
 
@@ -419,6 +425,8 @@
 - *(ci)* Deploy-rds docs
 - *(ci)* Note nginx pm deprecated
 - Tesseract skill
+- *(llm)* Bash best practices
+- *(ci)* Update
 
 ### ⚡ Performance
 
@@ -533,6 +541,8 @@
 - *(web)* Prettier and lint fix
 - Ruff
 - Prettier and lint:fix
+- Auto-format code [skip ci]
+- Auto-format code [skip ci]
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
@@ -750,6 +760,17 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Dev secrets
+- Setup-waf
+- Modify bootstrap to assume dnf
+- Add-dev-db-cidr
+- Start-ec2
+- Support account or user token in setup-tunnel
+- Check for gh secrets
+- Move actions to concurrency group
+- *(net)* Rotate-tunnel-token
+- *(aws)* Boostrap-ec2 redo
 
 ### ◀️ Revert
 
@@ -767,3 +788,4 @@
 - *(api)* Remove llm_ner domain
 - *(api)* Return llm_ner domain
 - *(test)* Remove playwright
+- *(ci)* Delete one-off start-ec2 script
