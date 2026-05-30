@@ -427,6 +427,7 @@
 - Tesseract skill
 - *(llm)* Bash best practices
 - *(ci)* Update
+- *(ci)* Update docs
 
 ### ⚡ Performance
 
@@ -771,6 +772,15 @@
 - Move actions to concurrency group
 - *(net)* Rotate-tunnel-token
 - *(aws)* Boostrap-ec2 redo
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Update github actions imports
+- *(gh)* Push-secrets
+- Update healthcheck
+- Remove stray incorrect .gitignore
+- *(aws)* Fix outputs and secrets dirs
+- Update redis
+- *(aws)* Refactor setup-gh-actions-role to own dir
+- Unique image tags
 
 ### ◀️ Revert
 

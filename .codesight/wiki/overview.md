@@ -8,7 +8,7 @@
 
 ## Scale
 
-24 API routes · 3 database models · 81 UI components · 47 library files · 20 middleware layers · 141 environment variables
+24 API routes · 3 database models · 81 UI components · 47 library files · 20 middleware layers · 144 environment variables
 
 ## Subsystems
 
@@ -57,7 +57,7 @@ Changes to these files have the widest blast radius across the codebase:
 - `MAX_NEW_TOKENS` — `gpu/olm-ocr2/app.py`
 - `MAX_TOKENS` — `gpu/deepseek-ocr/app.py`
 - `MODEL_NAME` — `gpu/deepseek-ocr/app.py`
-- _...18 more_
+- _...16 more_
 
 ---
 _Back to [index.md](./index.md) · Generated 2026-05-30_
