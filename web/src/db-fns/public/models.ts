@@ -53,4 +53,3 @@ export const getAllExtractMethods = createServerFn({ method: "GET" })
     const methodsList = await db.select().from(extractMethods)
     return methodsList
   })
-

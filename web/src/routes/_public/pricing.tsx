@@ -157,10 +157,22 @@ function PricingPage() {
   ]
   const faqItems = [
     { q: m.pricing_faq_q1(), a: m.pricing_faq_a1() },
-    { q: "How are individual and organization accounts structured?", a: "An individual account supports a single user with the individual role. Organization accounts support one or more users with roles of admin, developer, or analyst (each org must have at least one admin). The base fee is $10/month for individual accounts, and $10 per user/month for organization accounts, in addition to metered model/extraction token usage." },
-    { q: "Can I upgrade my account later?", a: "Yes. An individual user can upgrade to an organization account instantly via their profile page. When you upgrade, your owned projects are transferred to a new Default team, your role changes to admin, and your next payment date and saved card details are copied over without modification." },
-    { q: "Why do you require card verification immediately on sign-up?", a: "We require adding a valid credit or debit card during sign-up to verify account validity via Stripe SetupIntents. However, you will not be charged anything at creation. Your first billing invoice is processed exactly one month after registration." },
-    { q: "How are payments processed?", a: "Payments are processed securely via direct integration with Stripe (SetupIntent, Customer, PaymentIntent, refund, disputes, etc.). This customized design allows us to bypass the standard 0.9% Stripe Billing surcharge completely, passing those savings directly to you in the form of lower metered rates." },
+    {
+      q: "How are individual and organization accounts structured?",
+      a: "An individual account supports a single user with the individual role. Organization accounts support one or more users with roles of admin, developer, or analyst (each org must have at least one admin). The base fee is $10/month for individual accounts, and $10 per user/month for organization accounts, in addition to metered model/extraction token usage.",
+    },
+    {
+      q: "Can I upgrade my account later?",
+      a: "Yes. An individual user can upgrade to an organization account instantly via their profile page. When you upgrade, your owned projects are transferred to a new Default team, your role changes to admin, and your next payment date and saved card details are copied over without modification.",
+    },
+    {
+      q: "Why do you require card verification immediately on sign-up?",
+      a: "We require adding a valid credit or debit card during sign-up to verify account validity via Stripe SetupIntents. However, you will not be charged anything at creation. Your first billing invoice is processed exactly one month after registration.",
+    },
+    {
+      q: "How are payments processed?",
+      a: "Payments are processed securely via direct integration with Stripe (SetupIntent, Customer, PaymentIntent, refund, disputes, etc.). This customized design allows us to bypass the standard 0.9% Stripe Billing surcharge completely, passing those savings directly to you in the form of lower metered rates.",
+    },
   ]
 
   return (
@@ -218,21 +230,20 @@ function PricingPage() {
             Flexible Plans
           </h2>
           <p className="mx-auto mb-16 max-w-lg text-center text-[16px] text-[#5C5E62]">
-            Choose the plan type that matches your work. All accounts are billed monthly with verified payment setup required immediately.
+            Choose the plan type that matches your work. All accounts are billed monthly with
+            verified payment setup required immediately.
           </p>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             {/* Individual Plan */}
             <div className="flex flex-col border border-[#EEEEEE] bg-white p-8">
               <div className="mb-6">
-                <p className="mb-2 text-[14px] font-medium text-[#3E6AE1] uppercase tracking-wider">
+                <p className="mb-2 text-[14px] font-medium tracking-wider text-[#3E6AE1] uppercase">
                   Individual Workspace
                 </p>
                 <p className="text-[40px] leading-none font-medium text-[#171A20]">
                   $10
-                  <span className="ml-1 text-[16px] font-normal text-[#5C5E62]">
-                    / month base
-                  </span>
+                  <span className="ml-1 text-[16px] font-normal text-[#5C5E62]">/ month base</span>
                 </p>
                 <p className="mt-2 text-[14px] text-[#5C5E62]">{m.pricing_plan_metered_note()}</p>
               </div>
@@ -240,7 +251,9 @@ function PricingPage() {
               <ul className="mb-8 flex-1 space-y-3 border-t border-[#EEEEEE] pt-6">
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
-                  <span className="text-[14px] text-[#393C41]">Single active user (role: <strong>individual</strong>)</span>
+                  <span className="text-[14px] text-[#393C41]">
+                    Single active user (role: <strong>individual</strong>)
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
@@ -260,15 +273,21 @@ function PricingPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
-                  <span className="text-[14px] text-[#393C41]">Stripe card verification required immediately at signup</span>
+                  <span className="text-[14px] text-[#393C41]">
+                    Stripe card verification required immediately at signup
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
-                  <span className="text-[14px] text-[#393C41]">Zero-dollar initial charge (first billing cycle is after 1 month)</span>
+                  <span className="text-[14px] text-[#393C41]">
+                    Zero-dollar initial charge (first billing cycle is after 1 month)
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
-                  <span className="text-[14px] text-[#393C41]">Instant one-click upgrade to Organization on profile page</span>
+                  <span className="text-[14px] text-[#393C41]">
+                    Instant one-click upgrade to Organization on profile page
+                  </span>
                 </li>
               </ul>
 
@@ -281,12 +300,12 @@ function PricingPage() {
             </div>
 
             {/* Organization Plan */}
-            <div className="flex flex-col border border-[#3E6AE1] bg-white p-8 relative shadow-lg">
-              <span className="absolute -top-3 right-6 bg-[#3E6AE1] px-3 py-0.5 text-[11px] font-medium uppercase tracking-wider text-white">
+            <div className="relative flex flex-col border border-[#3E6AE1] bg-white p-8 shadow-lg">
+              <span className="absolute -top-3 right-6 bg-[#3E6AE1] px-3 py-0.5 text-[11px] font-medium tracking-wider text-white uppercase">
                 Team Scale
               </span>
               <div className="mb-6">
-                <p className="mb-2 text-[14px] font-medium text-[#3E6AE1] uppercase tracking-wider">
+                <p className="mb-2 text-[14px] font-medium tracking-wider text-[#3E6AE1] uppercase">
                   Organization Account
                 </p>
                 <p className="text-[40px] leading-none font-medium text-[#171A20]">
@@ -301,31 +320,46 @@ function PricingPage() {
               <ul className="mb-8 flex-1 space-y-3 border-t border-[#EEEEEE] pt-6">
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
-                  <span className="text-[14px] text-[#393C41]">Multiple users with roles: <strong>admin</strong>, <strong>developer</strong>, <strong>analyst</strong></span>
+                  <span className="text-[14px] text-[#393C41]">
+                    Multiple users with roles: <strong>admin</strong>, <strong>developer</strong>,{" "}
+                    <strong>analyst</strong>
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
-                  <span className="text-[14px] text-[#393C41]">Requires at least one <strong>admin</strong> user in the workspace</span>
+                  <span className="text-[14px] text-[#393C41]">
+                    Requires at least one <strong>admin</strong> user in the workspace
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
-                  <span className="text-[14px] text-[#393C41]">Admin can invite new members to default/custom teams</span>
+                  <span className="text-[14px] text-[#393C41]">
+                    Admin can invite new members to default/custom teams
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
-                  <span className="text-[14px] text-[#393C41]">Billing scales automatically with the number of users (<code>n_users</code>)</span>
+                  <span className="text-[14px] text-[#393C41]">
+                    Billing scales automatically with the number of users (<code>n_users</code>)
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
-                  <span className="text-[14px] text-[#393C41]">Transferred owned projects are safe in Default team on upgrade</span>
+                  <span className="text-[14px] text-[#393C41]">
+                    Transferred owned projects are safe in Default team on upgrade
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
-                  <span className="text-[14px] text-[#393C41]">Bypass Stripe Billing fee overhead via direct secure integration</span>
+                  <span className="text-[14px] text-[#393C41]">
+                    Bypass Stripe Billing fee overhead via direct secure integration
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-[#3E6AE1]" />
-                  <span className="text-[14px] text-[#393C41]">Dedicated organization usage & cost breakdown dashboard</span>
+                  <span className="text-[14px] text-[#393C41]">
+                    Dedicated organization usage & cost breakdown dashboard
+                  </span>
                 </li>
               </ul>
 
@@ -338,7 +372,8 @@ function PricingPage() {
             </div>
           </div>
           <p className="mt-6 text-center text-[12px] text-[#8E8E8E]">
-            Stripe setup intent verification is required immediately on signup. No upfront charge is made.
+            Stripe setup intent verification is required immediately on signup. No upfront charge is
+            made.
           </p>
         </div>
       </section>
@@ -350,39 +385,52 @@ function PricingPage() {
             Granular Workspace Roles
           </h2>
           <p className="mx-auto mb-16 max-w-lg text-center text-[16px] text-[#5C5E62]">
-            All user roles are explicitly tracked in the database to guarantee security and compliance.
+            All user roles are explicitly tracked in the database to guarantee security and
+            compliance.
           </p>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="border border-[#EEEEEE] p-5 flex flex-col bg-white">
-              <span className="font-mono text-[11px] font-semibold uppercase text-[#3E6AE1] tracking-wider mb-2">Individual Account</span>
-              <h3 className="text-[16px] font-medium text-[#171A20] mb-2">Individual User</h3>
-              <p className="text-[13px] leading-[1.6] text-[#5C5E62] flex-1">
-                A single user with full admin capabilities for their standalone workspace. Can create projects, upload documents, run extractions, and manage billing.
+            <div className="flex flex-col border border-[#EEEEEE] bg-white p-5">
+              <span className="mb-2 font-mono text-[11px] font-semibold tracking-wider text-[#3E6AE1] uppercase">
+                Individual Account
+              </span>
+              <h3 className="mb-2 text-[16px] font-medium text-[#171A20]">Individual User</h3>
+              <p className="flex-1 text-[13px] leading-[1.6] text-[#5C5E62]">
+                A single user with full admin capabilities for their standalone workspace. Can
+                create projects, upload documents, run extractions, and manage billing.
               </p>
             </div>
 
-            <div className="border border-[#EEEEEE] p-5 flex flex-col bg-white">
-              <span className="font-mono text-[11px] font-semibold uppercase text-[#3E6AE1] tracking-wider mb-2">Organization Only</span>
-              <h3 className="text-[16px] font-medium text-[#171A20] mb-2">Workspace Admin</h3>
-              <p className="text-[13px] leading-[1.6] text-[#5C5E62] flex-1">
-                Manages organization members, invites users, sets team groupings (e.g. "Default" team), and manages the secure shared billing methods and payment options.
+            <div className="flex flex-col border border-[#EEEEEE] bg-white p-5">
+              <span className="mb-2 font-mono text-[11px] font-semibold tracking-wider text-[#3E6AE1] uppercase">
+                Organization Only
+              </span>
+              <h3 className="mb-2 text-[16px] font-medium text-[#171A20]">Workspace Admin</h3>
+              <p className="flex-1 text-[13px] leading-[1.6] text-[#5C5E62]">
+                Manages organization members, invites users, sets team groupings (e.g. "Default"
+                team), and manages the secure shared billing methods and payment options.
               </p>
             </div>
 
-            <div className="border border-[#EEEEEE] p-5 flex flex-col bg-white">
-              <span className="font-mono text-[11px] font-semibold uppercase text-[#3E6AE1] tracking-wider mb-2">Organization Only</span>
-              <h3 className="text-[16px] font-medium text-[#171A20] mb-2">Developer</h3>
-              <p className="text-[13px] leading-[1.6] text-[#5C5E62] flex-1">
-                Full technical workspace permissions. Developers create projects, upload PDFs, configure custom entity definitions, and invoke extraction workflows.
+            <div className="flex flex-col border border-[#EEEEEE] bg-white p-5">
+              <span className="mb-2 font-mono text-[11px] font-semibold tracking-wider text-[#3E6AE1] uppercase">
+                Organization Only
+              </span>
+              <h3 className="mb-2 text-[16px] font-medium text-[#171A20]">Developer</h3>
+              <p className="flex-1 text-[13px] leading-[1.6] text-[#5C5E62]">
+                Full technical workspace permissions. Developers create projects, upload PDFs,
+                configure custom entity definitions, and invoke extraction workflows.
               </p>
             </div>
 
-            <div className="border border-[#EEEEEE] p-5 flex flex-col bg-white">
-              <span className="font-mono text-[11px] font-semibold uppercase text-[#3E6AE1] tracking-wider mb-2">Organization Only</span>
-              <h3 className="text-[16px] font-medium text-[#171A20] mb-2">Analyst</h3>
-              <p className="text-[13px] leading-[1.6] text-[#5C5E62] flex-1">
-                Focuses entirely on labeling and reviewing PDF datasets. Analysts have read-only project permissions, helping keep human-in-the-loop validation active.
+            <div className="flex flex-col border border-[#EEEEEE] bg-white p-5">
+              <span className="mb-2 font-mono text-[11px] font-semibold tracking-wider text-[#3E6AE1] uppercase">
+                Organization Only
+              </span>
+              <h3 className="mb-2 text-[16px] font-medium text-[#171A20]">Analyst</h3>
+              <p className="flex-1 text-[13px] leading-[1.6] text-[#5C5E62]">
+                Focuses entirely on labeling and reviewing PDF datasets. Analysts have read-only
+                project permissions, helping keep human-in-the-loop validation active.
               </p>
             </div>
           </div>
@@ -447,7 +495,7 @@ function PricingPage() {
                               i < provider.models.length - 1 ? "border-b border-[#EEEEEE]" : ""
                             }
                           >
-                            <td className="px-4 py-3 font-mono text-[13px] text-[#171A20] font-medium">
+                            <td className="px-4 py-3 font-mono text-[13px] font-medium text-[#171A20]">
                               {model.displayName}
                             </td>
                             <td className="px-4 py-3 text-right text-[#393C41] tabular-nums">
@@ -480,7 +528,8 @@ function PricingPage() {
             Extraction & OCR Method Pricing
           </h2>
           <p className="mx-auto mb-16 max-w-lg text-center text-[16px] text-[#5C5E62]">
-            Rates for text extraction and OCR methods. Prices are metered per page or per second of processing time.
+            Rates for text extraction and OCR methods. Prices are metered per page or per second of
+            processing time.
           </p>
 
           {loadError || !extractMethods || extractMethods.length === 0 ? (
@@ -494,18 +543,12 @@ function PricingPage() {
               <table className="w-full text-[14px]">
                 <thead>
                   <tr className="border-b border-[#EEEEEE] bg-[#F4F4F4]">
-                    <th className="px-4 py-3 text-left font-medium text-[#171A20]">
-                      Method
-                    </th>
-                    <th className="px-4 py-3 text-left font-medium text-[#171A20]">
-                      Type
-                    </th>
+                    <th className="px-4 py-3 text-left font-medium text-[#171A20]">Method</th>
+                    <th className="px-4 py-3 text-left font-medium text-[#171A20]">Type</th>
                     <th className="px-4 py-3 text-right font-medium text-[#171A20]">
                       Per 1M Pages
                     </th>
-                    <th className="px-4 py-3 text-right font-medium text-[#171A20]">
-                      Per Second
-                    </th>
+                    <th className="px-4 py-3 text-right font-medium text-[#171A20]">Per Second</th>
                     <th className="px-4 py-3 text-right font-medium text-[#171A20]">
                       Release Date
                     </th>
@@ -515,14 +558,12 @@ function PricingPage() {
                   {extractMethods.map((method, i) => (
                     <tr
                       key={method.id}
-                      className={
-                        i < extractMethods.length - 1 ? "border-b border-[#EEEEEE]" : ""
-                      }
+                      className={i < extractMethods.length - 1 ? "border-b border-[#EEEEEE]" : ""}
                     >
-                      <td className="px-4 py-3 font-mono text-[13px] text-[#171A20] font-medium">
+                      <td className="px-4 py-3 font-mono text-[13px] font-medium text-[#171A20]">
                         {method.displayName}
                       </td>
-                      <td className="px-4 py-3 text-[#393C41] font-mono text-[13px]">
+                      <td className="px-4 py-3 font-mono text-[13px] text-[#393C41]">
                         {method.methodType}
                       </td>
                       <td className="px-4 py-3 text-right text-[#393C41] tabular-nums">

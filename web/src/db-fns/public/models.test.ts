@@ -58,4 +58,3 @@ describe.if(runTests)("public.extract_methods", () => {
     expect(Array.isArray(result)).toBe(true)
   })
 })
-
