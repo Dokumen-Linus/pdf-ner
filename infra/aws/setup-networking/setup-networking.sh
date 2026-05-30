@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=infra/deploy-aws/shared/common.sh
+# shellcheck source=infra/aws/shared/common.sh
 . "${SCRIPT_DIR}/../shared/common.sh"
 
 load_env_file "${LOCAL_ENV_FILE:-${SCRIPT_DIR}/.env.local}"
@@ -154,7 +154,6 @@ SG_ID="$(ensure_security_group "$SG_NAME" "Dokumen EC2 web and SSH access" "$VPC
 authorize_tcp_from_cidr "$SG_ID" 22 "$ADMIN_CIDR"
 authorize_tcp_from_cidr "$SG_ID" 80 0.0.0.0/0
 authorize_tcp_from_cidr "$SG_ID" 443 0.0.0.0/0
-authorize_tcp_from_cidr "$SG_ID" 81 "$ADMIN_CIDR"
 default_sg_id="$(get_security_group_id default "$VPC_ID")"
 if [ -n "$default_sg_id" ]; then
   revoke_default_security_group_ingress "$default_sg_id"
