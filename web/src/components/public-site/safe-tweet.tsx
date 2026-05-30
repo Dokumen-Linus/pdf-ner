@@ -33,17 +33,17 @@ function normalizeEntities(entities: unknown): TweetEntities {
   }
 }
 
-function normalizeTweet<T extends Record<string, unknown>>(tweet: T): T {
+function normalizeTweet(tweet: any): any {
   const normalized = {
     ...tweet,
     entities: normalizeEntities(tweet.entities),
   }
 
   if (tweet.quoted_tweet && typeof tweet.quoted_tweet === "object") {
-    normalized.quoted_tweet = normalizeTweet(tweet.quoted_tweet as Record<string, unknown>)
+    normalized.quoted_tweet = normalizeTweet(tweet.quoted_tweet)
   }
 
-  return normalized as T
+  return normalized
 }
 
 export function SafeTweet({ id, components }: { id: string; components?: TweetComponents }) {
