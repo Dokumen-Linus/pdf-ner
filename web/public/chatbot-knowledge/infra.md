@@ -11,18 +11,19 @@ Dokumen limits service providers and external APIs to reduce security risk and s
 | Service                                                                         | Category                                     |
 | ------------------------------------------------------------------------------- | -------------------------------------------- |
 | [Stripe](https://stripe.com)                                                    | Payments                                     |
-| [Cloudflare WAF](https://www.cloudflare.com/application-services/products/waf/) | Edge security firewall                       |
+| [Cloudflare Networking](https://www.cloudflare.com/products/)                   | DNS, SSL, DDoS, load balancing, rate limits  |
+| [Cloudflare WAF](https://www.cloudflare.com/products/waf/)                      | Edge security firewall                       |
+| [AWS VPC](https://aws.amazon.com/vpc/)                                          | Full-stack networking                        |
 | [GitHub](https://github.com)                                                    | Source control                               |
-| [GitHub Actions](https://github.com/features/actions)                           | CI/CD automation                             |
-| [Amazon ECR](https://aws.amazon.com/ecr/)                                       | Container registry                           |
-| [Amazon EC2](https://aws.amazon.com/ec2/)                                       | CPU compute                                  |
-| [Runpod.io](https://www.runpod.io)                                              | GPU compute                                  |
-| [Amazon RDS](https://aws.amazon.com/rds/)                                       | Managed database                             |
-| [Amazon ElastiCache](https://aws.amazon.com/elasticache/)                       | Managed cache                                |
-| [Amazon S3](https://aws.amazon.com/s3/)                                         | PDF storage                                  |
-| [Amazon SES](https://aws.amazon.com/ses/)                                       | Emails                                       |
-| [Amazon VPC](https://aws.amazon.com/vpc/)                                       | Networking                                   |
+| [GitHub Actions](https://github.com/features/actions)                           | CI/CD                                        |
+| [AWS ECR](https://aws.amazon.com/ecr/)                                          | Container image registries                   |
 | [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/)                  | Secrets management                           |
+| [AWS EC2](https://aws.amazon.com/ec2/)                                          | CPU compute                                  |
+| [Runpod.io](https://www.runpod.io)                                              | GPU compute                                  |
+| [AWS RDS](https://aws.amazon.com/rds/)                                          | Managed database                             |
+| [AWS ElastiCache](https://aws.amazon.com/elasticache/)                          | Managed cache                                |
+| [AWS S3](https://aws.amazon.com/s3/)                                            | PDF storage                                  |
+| [AWS SES](https://aws.amazon.com/ses/)                                          | Emails                                       |
 
 ### Optional Integrations
 
@@ -42,7 +43,6 @@ The Dokumen apps run on AWS EC2 and integrate the following tools and frameworks
 
 | Dependencies                                                                    | Category                                     |
 | [Docker](https://docker.com) + [Compose](https://docs.docker.com/compose/)      | Container orchestration                      |
-| [Nginx Proxy Manager](https://nginxproxymanager.com)                            | Reverse proxy & TLS termination              |
 | [PostgreSQL](https://www.postgresql.org)                                        | Database                                     |
 | [Redis](https://redis.io)                                                       | Cache                                        |
 | [OpenTelemetry](https://opentelemetry.io)                                       | Observability                                |
@@ -50,8 +50,9 @@ The Dokumen apps run on AWS EC2 and integrate the following tools and frameworks
 | [Node.js](https://nodejs.org)                                                   | Frontend runtime                             |
 | [Bun.js](https://bun.sh)                                                        | Frontend package manager                     |
 | [Tanstack React Start](https://tanstack.com/start/v1)                           | Web app framework                            |
+| [Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/)                  | HTTPS reverse proxy                          |
 | [PDFium](https://pdfium.googlesource.com/pdfium/)                               | PDF engine for frontend and backend          |
-| [Python](https://www.python.org)                                                | Backend language                             |
+| [CPython](https://www.python.org)                                               | Backend language                             |
 | [Uvicorn](https://www.uvicorn.org)                                              | Backend runtime and package manager          |
 | [FastAPI](https://fastapi.tiangolo.com)                                         | API framework                                |
 | [Celery](https://docs.celeryq.dev)                                              | Workers framework                            |

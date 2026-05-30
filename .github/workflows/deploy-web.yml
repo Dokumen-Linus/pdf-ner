@@ -8,11 +8,10 @@ on:
     paths:
       - "web/**"
       - "infra/docker-compose.yml"
-      - "infra/aws/health/**"
       - ".github/workflows/deploy-web.yml"
 
 concurrency:
-  group: deploy-web
+  group: production-deploy
   cancel-in-progress: false
 
 env:

@@ -2,20 +2,9 @@ name: Deploy Stack
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths:
-      - "api/**"
-      - "workers/**"
-      - "web/**"
-      - "packages/**"
-      - "infra/docker-compose.yml"
-      - "infra/aws/health/**"
-      - ".github/workflows/deploy-stack.yml"
 
 concurrency:
-  group: deploy-stack
+  group: production-deploy
   cancel-in-progress: false
 
 env:
@@ -37,6 +26,26 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Validate web build variables
+        env:
+          VITE_BASE_URL: ${{ vars.VITE_BASE_URL }}
+          VITE_STRIPE_PUBLISHABLE_KEY: ${{ vars.VITE_STRIPE_PUBLISHABLE_KEY }}
+        run: |
+          require_real_value() {
+            local name="$1"
+            local value="${!name:-}"
+
+            case "$value" in
+              ""|REPLACE_*|YOUR_*|TODO|TODO_*|CHANGE_ME|changeme|"<"*">")
+                echo "::error::${name} must be set to a real GitHub Actions repository variable."
+                exit 1
+                ;;
+            esac
+          }
+
+          require_real_value VITE_BASE_URL
+          require_real_value VITE_STRIPE_PUBLISHABLE_KEY
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4

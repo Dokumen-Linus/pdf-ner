@@ -34,6 +34,7 @@ setup_instance_profile
 setup_ec2_instance
 setup_github_actions_role
 
+ensure_output_dir
 EC2_ENV_FILE="${OUTPUT_DIR}/ec2-resources.env"
 EC2_REPORT_FILE="${OUTPUT_DIR}/ec2-report.txt"
 write_env_output "$EC2_ENV_FILE" \
@@ -42,28 +43,25 @@ write_env_output "$EC2_ENV_FILE" \
   EC2_ROLE_ARN EC2_RUNTIME_POLICY_ARN EC2_INSTANCE_PROFILE_NAME GITHUB_OIDC_PROVIDER_ARN GITHUB_ACTIONS_ROLE_ARN GITHUB_ACTIONS_POLICY_ARN \
   SUBNET_ID SG_ID AMI_ID INSTANCE_ID ALLOC_ID ELASTIC_IP KEY_NAME SSH_PUBKEY_PATH INSTANCE_TYPE
 
-cat > "$EC2_REPORT_FILE" <<EOF
-Dokumen AWS EC2 resources
-Generated: $(date -u '+%Y-%m-%dT%H:%M:%SZ')
-
-AWS_REGION=${AWS_REGION}
-PROJECT_NAME=${PROJECT_NAME}
-ACCOUNT_ID=${ACCOUNT_ID}
-
-ECR web repository: ${WEB_ECR_URI}
-ECR api repository: ${API_ECR_URI}
-ECR workers repository: ${WORKERS_ECR_URI}
-
-EC2 instance: ${INSTANCE_ID}
-Elastic IP: ${ELASTIC_IP}
-Security group: ${SG_ID}
-Instance profile: ${EC2_INSTANCE_PROFILE_NAME}
-Runtime role: ${EC2_ROLE_ARN}
-GitHub OIDC provider: ${GITHUB_OIDC_PROVIDER_ARN}
-GitHub Actions role: ${GITHUB_ACTIONS_ROLE_ARN}
-GitHub Actions policy: ${GITHUB_ACTIONS_POLICY_ARN}
-Avatar bucket expected at runtime: ${AVATARS_S3_BUCKET_NAME}
-EOF
+{
+  printf 'Dokumen AWS EC2 resources\n'
+  printf 'Generated: %s\n\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  printf 'AWS_REGION=%s\n' "$AWS_REGION"
+  printf 'PROJECT_NAME=%s\n' "$PROJECT_NAME"
+  printf 'ACCOUNT_ID=%s\n\n' "$ACCOUNT_ID"
+  printf 'ECR web repository: %s\n' "$WEB_ECR_URI"
+  printf 'ECR api repository: %s\n' "$API_ECR_URI"
+  printf 'ECR workers repository: %s\n\n' "$WORKERS_ECR_URI"
+  printf 'EC2 instance: %s\n' "$INSTANCE_ID"
+  printf 'Elastic IP: %s\n' "$ELASTIC_IP"
+  printf 'Security group: %s\n' "$SG_ID"
+  printf 'Instance profile: %s\n' "$EC2_INSTANCE_PROFILE_NAME"
+  printf 'Runtime role: %s\n' "$EC2_ROLE_ARN"
+  printf 'GitHub OIDC provider: %s\n' "$GITHUB_OIDC_PROVIDER_ARN"
+  printf 'GitHub Actions role: %s\n' "$GITHUB_ACTIONS_ROLE_ARN"
+  printf 'GitHub Actions policy: %s\n' "$GITHUB_ACTIONS_POLICY_ARN"
+  printf 'Avatar bucket expected at runtime: %s\n' "${AVATARS_S3_BUCKET_NAME:-}"
+} > "$EC2_REPORT_FILE"
 
 chmod 600 "$EC2_REPORT_FILE" 2>/dev/null || true
 echo "EC2 stack complete."
