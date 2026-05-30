@@ -46,13 +46,7 @@ function normalizeTweet<T extends Record<string, unknown>>(tweet: T): T {
   return normalized as T
 }
 
-export function SafeTweet({
-  id,
-  components,
-}: {
-  id: string
-  components?: TweetComponents
-}) {
+export function SafeTweet({ id, components }: { id: string; components?: TweetComponents }) {
   const { data, error, isLoading } = useTweet(id)
 
   if (isLoading) return <TweetSkeleton />
