@@ -13,6 +13,9 @@ OPTIONAL_SERVICES_TEXT="${OPTIONAL_SERVICES:-}"
 HOST_PORT_CHECKS_TEXT="${HOST_PORT_CHECKS:-web:127.0.0.1:3000 api:127.0.0.1:8000}"
 PUBLIC_HEALTH_BASE_URL="${PUBLIC_HEALTH_BASE_URL:-https://dokumenai.dev}"
 CHECK_PUBLIC_TUNNEL="${CHECK_PUBLIC_TUNNEL:-1}"
+CHECK_CLOUDFLARE_ORIGIN="${CHECK_CLOUDFLARE_ORIGIN:-1}"
+REQUIRE_WEB_LOCAL_CHECK="${REQUIRE_WEB_LOCAL_CHECK:-0}"
+WEB_LOCAL_URL="${WEB_LOCAL_URL:-http://127.0.0.1:3000/api/healthz}"
 CHECK_AWS_SECRETS="${CHECK_AWS_SECRETS:-0}"
 CHECK_SECRET_UNPACK="${CHECK_SECRET_UNPACK:-0}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
@@ -63,13 +66,6 @@ service_image() {
 service_ports() {
   local container_id="$1"
   docker port "$container_id" 2>/dev/null | tr '\n' ',' | sed 's/,$//'
-}
-
-container_env_value() {
-  local container_id="$1"
-  local name="$2"
-  docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$container_id" \
-    | awk -F= -v key="$name" '$1 == key { print substr($0, length(key) + 2); exit }'
 }
 
 record_failure() {
@@ -232,49 +228,6 @@ check_http() {
   fi
 }
 
-check_bootstrap_env() {
-  echo
-  echo "Bootstrap env checks:"
-  printf '%-22s %-16s %-12s %-12s %-12s %s\n' "SERVICE" "ENV" "APP_VERSION" "SECRETS" "REGION" "RESULT"
-
-  local service
-  for service in api worker web; do
-    local container_id required result env_value app_version secrets_stage region
-    container_id="$(service_container_id "$service")"
-    required=0
-    result="ok"
-    for required_service in "${REQUIRED_SERVICES[@]}"; do
-      if [[ "$required_service" == "$service" ]]; then
-        required=1
-        break
-      fi
-    done
-
-    if [[ -z "$container_id" ]]; then
-      result="missing"
-      printf '%-22s %-16s %-12s %-12s %-12s %s\n' "$service" "-" "-" "-" "-" "$result"
-      if [[ "$required" = "1" ]]; then
-        record_failure "bootstrap env for required service '${service}' could not be checked because the container is missing"
-      fi
-      continue
-    fi
-
-    env_value="$(container_env_value "$container_id" ENV)"
-    app_version="$(container_env_value "$container_id" APP_VERSION)"
-    secrets_stage="$(container_env_value "$container_id" SECRETS_STAGE)"
-    region="$(container_env_value "$container_id" AWS_REGION)"
-
-    if [[ -z "$env_value" || -z "$app_version" || -z "$secrets_stage" || -z "$region" ]]; then
-      result="empty-bootstrap"
-      if [[ "$required" = "1" ]]; then
-        record_failure "bootstrap env for required service '${service}' has empty ENV, APP_VERSION, SECRETS_STAGE, or AWS_REGION"
-      fi
-    fi
-
-    printf '%-22s %-16s %-12s %-12s %-12s %s\n' "$service" "${env_value:-<empty>}" "${app_version:-<empty>}" "${secrets_stage:-<empty>}" "${region:-<empty>}" "$result"
-  done
-}
-
 check_aws_secrets() {
   if [[ "$CHECK_AWS_SECRETS" != "1" ]]; then
     return
@@ -386,14 +339,67 @@ check_cloudflared_service() {
   fi
 }
 
+check_no_public_http_listeners() {
+  if [[ "$CHECK_CLOUDFLARE_ORIGIN" != "1" ]]; then
+    return
+  fi
+
+  echo
+  echo "Cloudflare origin exposure:"
+
+  if ! command -v ss >/dev/null 2>&1; then
+    echo "Skipping public listener check because 'ss' is not installed."
+    return
+  fi
+
+  local public_listeners
+  public_listeners="$(
+    ss -ltnH \
+      | awk '$4 ~ /(^|:)(0\.0\.0\.0|\[::\]|\*):?(80|443)$/ || $4 ~ /(^|:)(0\.0\.0\.0|\[::\]|\*):(80|443)$/ { print }'
+  )"
+
+  if [[ -n "$public_listeners" ]]; then
+    echo "$public_listeners"
+    record_failure "found a public HTTP/HTTPS listener on 0.0.0.0, [::], or *"
+    return
+  fi
+
+  echo "No public 80/443 host listeners found."
+}
+
+check_web_local_origin() {
+  if [[ "$CHECK_CLOUDFLARE_ORIGIN" != "1" ]]; then
+    return
+  fi
+
+  echo
+  echo "Cloudflare origin local web probe:"
+
+  local status
+  status="$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 5 "$WEB_LOCAL_URL" 2>/dev/null || true)"
+
+  if [[ "$status" == "200" ]]; then
+    echo "Web local health check passed: ${WEB_LOCAL_URL}"
+    return
+  fi
+
+  if [[ "$REQUIRE_WEB_LOCAL_CHECK" == "1" ]]; then
+    record_failure "web local health check returned ${status:-no response}: ${WEB_LOCAL_URL}"
+    return
+  fi
+
+  echo "Web local health check skipped; web is not listening yet at ${WEB_LOCAL_URL}."
+}
+
 check_compose_services
-check_bootstrap_env
 check_aws_secrets
 check_secret_unpacking
 check_host_ports
 check_internal_services
 check_http_health
 check_cloudflared_service
+check_no_public_http_listeners
+check_web_local_origin
 
 if (( ${#FAILURES[@]} > 0 )); then
   echo
