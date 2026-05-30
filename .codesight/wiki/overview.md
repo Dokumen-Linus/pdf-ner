@@ -8,7 +8,7 @@
 
 ## Scale
 
-24 API routes · 3 database models · 80 UI components · 47 library files · 20 middleware layers · 134 environment variables
+24 API routes · 3 database models · 81 UI components · 47 library files · 20 middleware layers · 134 environment variables
 
 ## Subsystems
 
@@ -28,7 +28,7 @@
 
 **Database:** drizzle, 3 models — see [database.md](./database.md)
 
-**UI:** 80 components (react) — see [ui.md](./ui.md)
+**UI:** 81 components (react) — see [ui.md](./ui.md)
 
 **Libraries:** 47 files — see [libraries.md](./libraries.md)
 
@@ -60,4 +60,4 @@ Changes to these files have the widest blast radius across the codebase:
 - _...18 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-05-29_
+_Back to [index.md](./index.md) · Generated 2026-05-30_

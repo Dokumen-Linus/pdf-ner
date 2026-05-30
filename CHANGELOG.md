@@ -136,6 +136,8 @@
 - *(db)* New insert templates seed generation script
 - Application form
 - Accuracy-table
+- Add old site content to hero
+- Add tweets relevant to basics.md
 
 ### 🐛 Bug Fixes
 
@@ -241,6 +243,10 @@
 - *(ci)* Remove old db dockerfile
 - *(ci)* Healthcheck
 - *(ci)* Continue fixing dockerfiles
+- Install missing icon dependency
+- Use safetweet wrapper
+- Patch missing entities in quoted tweets
+- Migrate to local icons
 
 ### 💼 Other
 
@@ -248,6 +254,7 @@
 - Removed invalid tsconfig rule
 - Add py scripts for file generation
 - Add nginx proxy manager
+- Reorder imports
 
 ### 🚜 Refactor
 
@@ -534,6 +541,7 @@
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
 - Auto-format code [skip ci]
+- Auto-format code [skip ci]
 
 ### 🧪 Testing
 
@@ -738,6 +746,7 @@
 - Activate gh actions
 - Reset-admin-cidr
 - Declare .env file
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
