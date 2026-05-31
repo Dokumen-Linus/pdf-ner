@@ -253,6 +253,7 @@
 - *(web)* Update infra.md and platform.tsx
 - *(ci)* Output printing and remove sg for npm
 - *(web)* Pass better auth secret
+- *(web)* Pg pool config allow different ssl modes
 
 ### 💼 Other
 
@@ -782,6 +783,7 @@
 - Update redis
 - *(aws)* Refactor setup-gh-actions-role to own dir
 - Unique image tags
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
 ### ◀️ Revert

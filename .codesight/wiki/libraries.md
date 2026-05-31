@@ -2,9 +2,9 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**47 library files** across 8 modules
+**48 library files** across 8 modules
 
-## Web (22 files)
+## Web (23 files)
 
 - `web/src/db-fns/web/annotations.ts` — LabelingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
 - `web/src/lib/auth-i18n.ts` — normalizeAuthLocale, detectAuthLocaleFromHeaders, getLocalizedAuthApiMessage, getAuthErrorPageCopy, getLocalizedAuthRedirectError, AuthLocale, …
@@ -21,6 +21,7 @@
 - `web/src/lib/observability/fetch.ts` — buildObservedHeaders, observedApiFetch
 - `web/src/lib/stripe.server.ts` — getStripe, STRIPE_API_VERSION
 - `web/src/api-fns/api-json-call.server.ts` — jsonCall
+- `web/src/db/pg-pool.ts` — pgPoolConfig
 - `web/src/db-fns/health.ts` — checkWebDatabase
 - `web/src/hooks/mouse-events/use-double-press-props.ts` — useDoublePressProps
 - `web/src/hooks/shadcn-ui/use-mobile.ts` — useIsMobile
