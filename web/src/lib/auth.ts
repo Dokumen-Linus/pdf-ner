@@ -208,6 +208,7 @@ async function deleteWebUserForAuthUser(authUserId: string) {
 
 export const auth = betterAuth({
   database: authDatabase,
+  secret: env.BETTER_AUTH_SECRET,
   trustedOrigins,
   socialProviders: {
     microsoft: {
