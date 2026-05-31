@@ -254,6 +254,7 @@
 - *(ci)* Output printing and remove sg for npm
 - *(web)* Pass better auth secret
 - *(web)* Pg pool config allow different ssl modes
+- *(web)* Pg pool config
 
 ### 💼 Other
 
@@ -783,6 +784,7 @@
 - Update redis
 - *(aws)* Refactor setup-gh-actions-role to own dir
 - Unique image tags
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 
