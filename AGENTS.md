@@ -9,10 +9,10 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - Do not delete code or comments you do not understand without approval
 - Prefer the simplest correct solution. Avoid abstractions unless clearly justified
 - If requirements or source files conflict, stop and surface the ambiguity
-- Never read or edit .env files. Always add new env vars to the local `.env.example`
+- Never read or edit .env files Always add new env vars to the local `.env.example`
 - Never read or edit `research.md`, `LICENSE.md`, `CHANGELOG.md`, `DESIGN.md` or any `README.md` file except `README.AGENTS.md`
 - Never prompt the user to run more than one commands. Instead write them to `./tmp.sh` with explanation comments. If temp.sh doesn't exist, create it. If it does, append to it
-- Always run `bash -n` and `shellcheck` on any `.sh` scripts created. Always run `jq -n` individually on any `jq` lines added to scripts
+- Always run `bash -n` and `shellcheck` on any `.sh` scripts created. Always test individual `jq` lines by separately running `jq -n`. Don't use `jq -n` or output to JSON in the actual `.sh` scripts the user is expected to run
 - Whenever a command or script starts a long-running process like localhost:3000 for web or a Docker image, terminate the process before responding
 
 ## Work Loop
@@ -37,7 +37,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 
 ### db Invariants
 
-- The database is still pre-instantiation; modify existing create scripts directly instead of adding backward-compat SQL
+- The database has been instantiated. All future `.sql` scripts must be prefixed with the timestamp in `YYYYMMDD_hhmmss` format (example: `20260601_123456_alter_web_pdfs.sql`) instead of the ordered numbers of pre-instantiation scripts. Scripts must have dbmate:up and dbmate:down
 - Respect schema ownership: Better Auth writes only `auth`; `web`, `api`, and `workers` should write only their own schemas unless an exception is explicitly documented
 
 ### web Invariants

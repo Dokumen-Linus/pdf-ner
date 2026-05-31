@@ -1,15 +1,9 @@
 # Database
 
-## Current Phase
-
-- Treat the schema as pre-production: modify existing create/setup SQL directly
-- Do not add backward-compatibility migrations for column/table changes
-
 ## Conventions
 
-- Keep SQL ordered in a way that leaves room for inserts where order matters
-- SQL migrations are the source of truth for database objects
-- Seeds insert data into objects defined by migrations
+- `db\migrations` are the source of truth for database objects
+- `db\seeds` insert data into objects defined by migrations
 - Generated schema dumps are reference artifacts, not creation inputs
 
 ## Schema Ownership
