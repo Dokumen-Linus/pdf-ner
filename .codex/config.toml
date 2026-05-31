@@ -24,6 +24,7 @@ shell_snapshot = true
 shell_tool = true
 
 [mcp_servers.aws_mcp]
+enabled = false # flip to true to use
 command = "uvx"
 args = [
   "mcp-proxy-for-aws@latest",
@@ -36,15 +37,17 @@ default_tools_approval_mode = "auto"
 approval_mode = "approve"
 
 [mcp_servers.runpod-docs]
+enabled = false # flip to true to use
 url = "https://docs.runpod.io/mcp"
 default_tools_approval_mode = "approve"
 
 [mcp_servers.cloudflare-docs]
+enabled = false # flip to true to use
 url = "https://docs.mcp.cloudflare.com/mcp"
 default_tools_approval_mode = "approve"
 
 [plugins."github@openai-curated"]
-enabled = true
+enabled = false # flip to true to use
 
 [plugins."stripe@openai-curated"]
-enabled = true
+enabled = false # flip to true to use
