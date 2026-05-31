@@ -1,5 +1,7 @@
-import { EmbeddedTweet, TweetNotFound, TweetSkeleton, type TweetComponents } from "react-tweet"
+import { EmbeddedTweet, type TweetComponents, TweetNotFound, TweetSkeleton } from "react-tweet"
 import { useTweet } from "react-tweet"
+
+import type { QuotedTweet, Tweet, TweetEntities } from "react-tweet/api"
 
 /**
  * The Twitter syndication API now returns `"entities": {}` (empty object)
@@ -11,19 +13,11 @@ import { useTweet } from "react-tweet"
  * it to `EmbeddedTweet`.
  */
 
-type TweetEntities = {
-  hashtags?: unknown[]
-  user_mentions?: unknown[]
-  urls?: unknown[]
-  symbols?: unknown[]
-  media?: unknown[]
-}
-
 function normalizeEntities(entities: unknown): TweetEntities {
   if (!entities || typeof entities !== "object" || Array.isArray(entities)) {
     return { hashtags: [], user_mentions: [], urls: [], symbols: [] }
   }
-  const e = entities as TweetEntities
+  const e = entities as Partial<TweetEntities>
   return {
     ...e,
     hashtags: e.hashtags ?? [],
@@ -33,17 +27,26 @@ function normalizeEntities(entities: unknown): TweetEntities {
   }
 }
 
-function normalizeTweet<T extends Record<string, unknown>>(tweet: T): T {
-  const normalized = {
+function normalizeQuotedTweet(tweet: QuotedTweet): QuotedTweet {
+  return {
     ...tweet,
     entities: normalizeEntities(tweet.entities),
   }
+}
 
-  if (tweet.quoted_tweet && typeof tweet.quoted_tweet === "object") {
-    normalized.quoted_tweet = normalizeTweet(tweet.quoted_tweet as Record<string, unknown>)
+function normalizeTweet(tweet: Tweet): Tweet {
+  if (!tweet.quoted_tweet) {
+    return {
+      ...tweet,
+      entities: normalizeEntities(tweet.entities),
+    }
   }
 
-  return normalized as T
+  return {
+    ...tweet,
+    entities: normalizeEntities(tweet.entities),
+    quoted_tweet: normalizeQuotedTweet(tweet.quoted_tweet),
+  }
 }
 
 export function SafeTweet({ id, components }: { id: string; components?: TweetComponents }) {
