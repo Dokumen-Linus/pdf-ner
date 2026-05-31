@@ -7,6 +7,8 @@
 - `docker-compose.yml`: main file to run the apps locally
 - `.env.prod.example`: example of `.env.prod` to define the public web client-side environment variables and environment variables for the CI flow
 
+`.env.prod` is reserved for this file. All other files in this repo should be `.env.production`, `.env.development` or `.env.local`.
+
 ## RDS Databases
 
 1. Resources created in `infra/aws/setup-database`
