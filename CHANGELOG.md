@@ -431,6 +431,7 @@
 - *(llm)* Bash best practices
 - *(ci)* Update
 - *(ci)* Update docs
+- *(db)* Mark db instantiated
 
 ### ⚡ Performance
 
@@ -500,6 +501,7 @@
 - *(web)* Remove unused components
 - *(web)* Remove unused deps
 - Replace lucide with local icons
+- *(web)* Remove unused env var
 
 ### 🎨 Styling
 
@@ -787,6 +789,13 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(llm)* Disable MCPs by default [skip ci]
+- Make test-deploy workflow [skip ci]
+- Continue testing deploy [skip ci]
+- Fix deploy workflows [skip ci]
+- Dev secrets
+- Dev cidrs
 
 ### ◀️ Revert
 

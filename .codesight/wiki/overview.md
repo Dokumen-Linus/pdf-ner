@@ -8,7 +8,7 @@
 
 ## Scale
 
-24 API routes · 3 database models · 81 UI components · 48 library files · 20 middleware layers · 144 environment variables
+24 API routes · 3 database models · 81 UI components · 48 library files · 20 middleware layers · 151 environment variables
 
 ## Subsystems
 
@@ -51,13 +51,13 @@ Changes to these files have the widest blast radius across the codebase:
 - `DEEPSEEK_RUNPOD_POD_ID` — `infra/runpod/.env.example`
 - `DEPLOYMENT` — `packages/otel_py/otel_py/config.py`
 - `DEV` — `web/src/client.tsx`
+- `DEV_SECRETS_IAM_ROLE_NAME` — `infra/aws/dev-cidrs/.env.example`
+- `DEV_SECRETS_IAM_USER_NAME` — `infra/aws/dev-cidrs/.env.example`
+- `ENV` — `web/src/env.server.ts`
 - `GPU_MEMORY_UTILIZATION` — `gpu/olm-ocr2/app.py`
 - `HF_TOKEN` — `infra/runpod/.env.example`
 - `MAX_MODEL_LEN` — `gpu/olm-ocr2/app.py`
-- `MAX_NEW_TOKENS` — `gpu/olm-ocr2/app.py`
-- `MAX_TOKENS` — `gpu/deepseek-ocr/app.py`
-- `MODEL_NAME` — `gpu/deepseek-ocr/app.py`
-- _...16 more_
+- _...20 more_
 
 ---
 _Back to [index.md](./index.md) · Generated 2026-05-31_
