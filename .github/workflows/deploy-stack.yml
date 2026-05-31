@@ -155,19 +155,19 @@ jobs:
 
           run_ssm_command \
             "Log in to ECR" \
-            "set -euo pipefail; aws ecr get-login-password --region '$AWS_REGION' | docker login --username AWS --password-stdin '$ECR_REGISTRY'"
+            "set -euo pipefail; aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"
 
           run_ssm_command \
             "Write Compose image override" \
-            "set -euo pipefail; STATE_DIR='$EC2_DEPLOY_STATE_DIR'; install -d -m 0755 \"\$STATE_DIR\" \"\$STATE_DIR/images\"; printf '%s\n' '$WEB_IMAGE' > \"\$STATE_DIR/images/web\"; printf '%s\n' '$API_IMAGE' > \"\$STATE_DIR/images/api\"; printf '%s\n' '$WORKER_IMAGE' > \"\$STATE_DIR/images/worker\"; { echo 'services:'; for service in web api worker; do image_file=\"\$STATE_DIR/images/\$service\"; echo \"  \$service:\"; printf '    image: %s\n' \"\$(cat \"\$image_file\")\"; done; } > \"\$STATE_DIR/docker-compose.images.yml\""
+            "set -euo pipefail; STATE_DIR=$EC2_DEPLOY_STATE_DIR; install -d -m 0755 \$STATE_DIR \$STATE_DIR/images; echo $WEB_IMAGE > \$STATE_DIR/images/web; echo $API_IMAGE > \$STATE_DIR/images/api; echo $WORKER_IMAGE > \$STATE_DIR/images/worker; echo services: > \$STATE_DIR/docker-compose.images.yml; echo \\ \\ web: >> \$STATE_DIR/docker-compose.images.yml; echo \\ \\ \\ \\ image: $WEB_IMAGE >> \$STATE_DIR/docker-compose.images.yml; echo \\ \\ api: >> \$STATE_DIR/docker-compose.images.yml; echo \\ \\ \\ \\ image: $API_IMAGE >> \$STATE_DIR/docker-compose.images.yml; echo \\ \\ worker: >> \$STATE_DIR/docker-compose.images.yml; echo \\ \\ \\ \\ image: $WORKER_IMAGE >> \$STATE_DIR/docker-compose.images.yml"
 
           run_ssm_command \
             "Pull stack images" \
-            "set -euo pipefail; cd '$EC2_APP_DIR'; docker compose -f infra/docker-compose.yml -f '$EC2_DEPLOY_STATE_DIR/docker-compose.images.yml' --env-file infra/.env.prod pull web api worker"
+            "set -euo pipefail; cd $EC2_APP_DIR; docker compose -f infra/docker-compose.yml -f $EC2_DEPLOY_STATE_DIR/docker-compose.images.yml --env-file infra/.env.prod pull web api worker"
 
           run_ssm_command \
             "Start stack services" \
-            "set -euo pipefail; cd '$EC2_APP_DIR'; docker compose -f infra/docker-compose.yml -f '$EC2_DEPLOY_STATE_DIR/docker-compose.images.yml' --env-file infra/.env.prod up -d --no-build redis api worker web"
+            "set -euo pipefail; cd $EC2_APP_DIR; docker compose -f infra/docker-compose.yml -f $EC2_DEPLOY_STATE_DIR/docker-compose.images.yml --env-file infra/.env.prod up -d --no-build redis api worker web"
 
           run_ssm_command \
             "Prune dangling images" \
