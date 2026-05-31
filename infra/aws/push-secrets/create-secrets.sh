@@ -6,12 +6,13 @@ LOCAL_ENV_FILE="${LOCAL_ENV_FILE:-${SCRIPT_DIR}/.env.local}"
 SECRET_DRAFT_DIR="${SECRET_DRAFT_DIR:-${SCRIPT_DIR}/local-secrets}"
 
 # shellcheck source=infra/aws/shared/common.sh
+# shellcheck disable=SC1091
 . "${SCRIPT_DIR}/../shared/common.sh"
 
 load_env_file "$LOCAL_ENV_FILE"
 configure_common_defaults
 DRY_RUN="${DRY_RUN:-0}"
-STAGE="${STAGE:-PROD}"
+STAGE="${STAGE:-${SECRET_STAGE:-${SECRETS_STAGE:-PROD}}}"
 
 case "${STAGE,,}" in
   dev)

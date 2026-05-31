@@ -1,0 +1,5 @@
+{
+  "SES_AWS_REGION": "us-east-1",
+  "SES_AWS_ENDPOINT_URL": null,
+  "FROM_EMAIL": "no-reply@localhost"
+}
