@@ -1,0 +1,480 @@
+#!/usr/bin/env bash
+
+DEV_CIDRS_BASE_POLICY_FILE="${DEV_CIDRS_BASE_POLICY_FILE:-${SCRIPT_DIR}/base-policy.json}"
+
+configure_dev_cidr_defaults() {
+  configure_common_defaults
+
+  RDS_PORT="${RDS_PORT:-5432}"
+  DEV_RDS_SG_NAME="${DEV_RDS_SG_NAME:-${PROJECT_NAME}-dev-rds-sg}"
+  DEV_CIDR="${DEV_CIDR:-}"
+  PREVIOUS_DEV_CIDR="${PREVIOUS_DEV_CIDR:-}"
+  DEV_IPV6_CIDR="${DEV_IPV6_CIDR:-}"
+  PREVIOUS_DEV_IPV6_CIDR="${PREVIOUS_DEV_IPV6_CIDR:-}"
+  DEV_SECRETS_POLICY_NAME="${DEV_SECRETS_POLICY_NAME:-${PROJECT_NAME}-dev-local-secrets-read}"
+}
+
+require_cidr() {
+  local name="$1"
+  local cidr="$2"
+  local ip octet first second third fourth
+
+  if [[ ! "$cidr" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[12][0-9]|3[0-2])$ ]]; then
+    echo "${name} must be an IPv4 CIDR block, for example 203.0.113.10/32" >&2
+    exit 1
+  fi
+
+  ip="${cidr%/*}"
+  IFS=. read -r first second third fourth <<< "$ip"
+  for octet in "$first" "$second" "$third" "$fourth"; do
+    if ((10#$octet > 255)); then
+      echo "${name} contains an invalid IPv4 octet: ${octet}" >&2
+      exit 1
+    fi
+  done
+}
+
+require_ipv6_cidr() {
+  local name="$1"
+  local cidr="$2"
+  local prefix
+
+  prefix="${cidr##*/}"
+  if [[ "$cidr" != */* ]] || [[ "$cidr" != *:* ]] || ! [[ "$prefix" =~ ^[0-9]+$ ]] || ((prefix > 128)); then
+    echo "${name} must be an IPv6 CIDR block, for example 2001:db8::1/128" >&2
+    exit 1
+  fi
+}
+
+validate_dev_cidr_inputs() {
+  : "${DEV_CIDR:?Set DEV_CIDR to the dev CIDR block to allow, for example 203.0.113.10/32}"
+
+  require_cidr DEV_CIDR "$DEV_CIDR"
+  if [ -n "$DEV_IPV6_CIDR" ]; then
+    require_ipv6_cidr DEV_IPV6_CIDR "$DEV_IPV6_CIDR"
+  fi
+}
+
+validate_dev_cidr_rotation_inputs() {
+  : "${PREVIOUS_DEV_CIDR:?Set PREVIOUS_DEV_CIDR to the old dev CIDR block to remove, for example 203.0.113.10/32}"
+  validate_dev_cidr_inputs
+  require_cidr PREVIOUS_DEV_CIDR "$PREVIOUS_DEV_CIDR"
+  if [ -n "$PREVIOUS_DEV_IPV6_CIDR" ]; then
+    require_ipv6_cidr PREVIOUS_DEV_IPV6_CIDR "$PREVIOUS_DEV_IPV6_CIDR"
+  fi
+}
+
+resolve_dev_rds_security_group_id() {
+  local group_id="${DEV_RDS_SG_ID:-}"
+
+  if [ -n "$group_id" ]; then
+    printf '%s' "$group_id"
+    return
+  fi
+
+  if [ -z "$DEV_RDS_SG_NAME" ] || [ -z "${DEV_VPC_ID:-}" ]; then
+    echo "Missing development RDS security group id. Set DEV_RDS_SG_ID, or set DEV_RDS_SG_NAME and DEV_VPC_ID." >&2
+    exit 1
+  fi
+
+  group_id="$(get_security_group_id "$DEV_RDS_SG_NAME" "$DEV_VPC_ID")"
+  if [ -z "$group_id" ]; then
+    echo "Could not find development RDS security group named ${DEV_RDS_SG_NAME} in ${DEV_VPC_ID}" >&2
+    exit 1
+  fi
+
+  printf '%s' "$group_id"
+}
+
+get_tcp_cidr_rule_id() {
+  local group_id="$1"
+  local port="$2"
+  local cidr="$3"
+
+  aws_region ec2 describe-security-group-rules \
+    --filters "Name=group-id,Values=${group_id}" \
+    --query "SecurityGroupRules[?IsEgress==\`false\` && IpProtocol==\`tcp\` && FromPort==\`${port}\` && ToPort==\`${port}\` && CidrIpv4=='${cidr}'].SecurityGroupRuleId | [0]" \
+    --output text 2>/dev/null | awk 'NF && $1 != "None" { print $1; exit }'
+}
+
+get_tcp_ipv6_cidr_rule_id() {
+  local group_id="$1"
+  local port="$2"
+  local cidr="$3"
+
+  aws_region ec2 describe-security-group-rules \
+    --filters "Name=group-id,Values=${group_id}" \
+    --query "SecurityGroupRules[?IsEgress==\`false\` && IpProtocol==\`tcp\` && FromPort==\`${port}\` && ToPort==\`${port}\` && CidrIpv6=='${cidr}'].SecurityGroupRuleId | [0]" \
+    --output text 2>/dev/null | awk 'NF && $1 != "None" { print $1; exit }'
+}
+
+get_tcp_cidr_rule_ids() {
+  local group_id="$1"
+  local port="$2"
+
+  aws_region ec2 describe-security-group-rules \
+    --filters "Name=group-id,Values=${group_id}" \
+    --query "SecurityGroupRules[?IsEgress==\`false\` && IpProtocol==\`tcp\` && FromPort==\`${port}\` && ToPort==\`${port}\` && (CidrIpv4!=\`null\` || CidrIpv6!=\`null\`)].SecurityGroupRuleId" \
+    --output text
+}
+
+authorize_dev_db_cidr() {
+  local group_id="$1"
+  local port="$2"
+  local cidr="$3"
+
+  if [ -n "$(get_tcp_cidr_rule_id "$group_id" "$port" "$cidr")" ]; then
+    echo "Development RDS ${group_id} already allows tcp/${port} from ${cidr}"
+    return
+  fi
+
+  aws_region ec2 authorize-security-group-ingress \
+    --group-id "$group_id" \
+    --protocol tcp \
+    --port "$port" \
+    --cidr "$cidr" >/dev/null
+  echo "Added development RDS ${group_id} tcp/${port} access from ${cidr}"
+}
+
+authorize_dev_db_ipv6_cidr() {
+  local group_id="$1"
+  local port="$2"
+  local cidr="$3"
+
+  if [ -z "$cidr" ]; then
+    return
+  fi
+
+  if [ -n "$(get_tcp_ipv6_cidr_rule_id "$group_id" "$port" "$cidr")" ]; then
+    echo "Development RDS ${group_id} already allows tcp/${port} from ${cidr}"
+    return
+  fi
+
+  aws_region ec2 authorize-security-group-ingress \
+    --group-id "$group_id" \
+    --ip-permissions "IpProtocol=tcp,FromPort=${port},ToPort=${port},Ipv6Ranges=[{CidrIpv6=${cidr}}]" >/dev/null
+  echo "Added development RDS ${group_id} tcp/${port} access from ${cidr}"
+}
+
+authorize_dev_db_cidrs() {
+  local group_id="$1"
+  local port="$2"
+
+  authorize_dev_db_cidr "$group_id" "$port" "$DEV_CIDR"
+  authorize_dev_db_ipv6_cidr "$group_id" "$port" "$DEV_IPV6_CIDR"
+}
+
+revoke_dev_db_cidr() {
+  local group_id="$1"
+  local port="$2"
+  local cidr="$3"
+  local rule_id
+
+  rule_id="$(get_tcp_cidr_rule_id "$group_id" "$port" "$cidr")"
+  if [ -z "$rule_id" ]; then
+    echo "Development RDS ${group_id} had no tcp/${port} access from ${cidr}"
+    return
+  fi
+
+  aws_region ec2 revoke-security-group-ingress \
+    --group-id "$group_id" \
+    --security-group-rule-ids "$rule_id" >/dev/null
+  echo "Removed development RDS ${group_id} tcp/${port} access from ${cidr}"
+}
+
+revoke_dev_db_ipv6_cidr() {
+  local group_id="$1"
+  local port="$2"
+  local cidr="$3"
+  local rule_id
+
+  if [ -z "$cidr" ]; then
+    return
+  fi
+
+  rule_id="$(get_tcp_ipv6_cidr_rule_id "$group_id" "$port" "$cidr")"
+  if [ -z "$rule_id" ]; then
+    echo "Development RDS ${group_id} had no tcp/${port} access from ${cidr}"
+    return
+  fi
+
+  aws_region ec2 revoke-security-group-ingress \
+    --group-id "$group_id" \
+    --security-group-rule-ids "$rule_id" >/dev/null
+  echo "Removed development RDS ${group_id} tcp/${port} access from ${cidr}"
+}
+
+rotate_dev_db_cidrs() {
+  local group_id="$1"
+  local port="$2"
+
+  revoke_dev_db_cidr "$group_id" "$port" "$PREVIOUS_DEV_CIDR"
+  revoke_dev_db_ipv6_cidr "$group_id" "$port" "$PREVIOUS_DEV_IPV6_CIDR"
+  authorize_dev_db_cidrs "$group_id" "$port"
+}
+
+clear_dev_db_cidrs() {
+  local group_id="$1"
+  local port="$2"
+  local rule_ids rule_id
+
+  rule_ids="$(get_tcp_cidr_rule_ids "$group_id" "$port")"
+  for rule_id in $rule_ids; do
+    aws_region ec2 revoke-security-group-ingress \
+      --group-id "$group_id" \
+      --security-group-rule-ids "$rule_id" >/dev/null
+  done
+
+  authorize_dev_db_cidrs "$group_id" "$port"
+  if [ -n "$DEV_IPV6_CIDR" ]; then
+    echo "Cleared development RDS ${group_id} tcp/${port} CIDRs; left required DEV_CIDR ${DEV_CIDR} and DEV_IPV6_CIDR ${DEV_IPV6_CIDR}"
+  else
+    echo "Cleared development RDS ${group_id} tcp/${port} CIDRs; left required DEV_CIDR ${DEV_CIDR}"
+  fi
+}
+
+dev_secret_resources_json() {
+  local account_id="$1"
+
+  printf '[\n'
+  printf '  "arn:aws:secretsmanager:%s:%s:secret:dev/web-*",\n' "$AWS_REGION" "$account_id"
+  printf '  "arn:aws:secretsmanager:%s:%s:secret:dev/email-*",\n' "$AWS_REGION" "$account_id"
+  printf '  "arn:aws:secretsmanager:%s:%s:secret:dev/api-*",\n' "$AWS_REGION" "$account_id"
+  printf '  "arn:aws:secretsmanager:%s:%s:secret:dev/workers-*",\n' "$AWS_REGION" "$account_id"
+  printf '  "arn:aws:secretsmanager:%s:%s:secret:dev/runpod-*"\n' "$AWS_REGION" "$account_id"
+  printf ']\n'
+}
+
+base_policy_document() {
+  local resources_json="$1"
+
+  jq -c \
+    --argjson resources "$resources_json" \
+    '.Statement[0].Resource = $resources' \
+    "$DEV_CIDRS_BASE_POLICY_FILE"
+}
+
+get_policy_arn() {
+  aws iam list-policies \
+    --scope Local \
+    --query "Policies[?PolicyName=='${DEV_SECRETS_POLICY_NAME}'].Arn | [0]" \
+    --output text | awk 'NF && $1 != "None" { print $1; exit }'
+}
+
+get_current_policy_document() {
+  local policy_arn="$1"
+  local version_id
+
+  version_id="$(aws iam get-policy \
+    --policy-arn "$policy_arn" \
+    --query 'Policy.DefaultVersionId' \
+    --output text)"
+
+  aws iam get-policy-version \
+    --policy-arn "$policy_arn" \
+    --version-id "$version_id" \
+    --query 'PolicyVersion.Document' \
+    --output json
+}
+
+policy_document_with_cidrs() {
+  local policy_document="$1"
+  local resources_json="$2"
+  local cidr="$3"
+  local ipv6_cidr="$4"
+
+  jq -c \
+    --arg cidr "$cidr" \
+    --arg ipv6_cidr "$ipv6_cidr" \
+    --argjson resources "$resources_json" \
+    '
+      .Statement[0].Resource = $resources
+      | .Statement[0].Condition.Bool["aws:SecureTransport"] = "true"
+      | .Statement[0].Condition.IpAddress["aws:SourceIp"] =
+        (
+          ([.Statement[0].Condition.IpAddress["aws:SourceIp"]] | flatten | map(select(. != null and . != "")))
+          + [$cidr]
+          + (if $ipv6_cidr == "" then [] else [$ipv6_cidr] end)
+          | unique
+        )
+    ' <<< "$policy_document"
+}
+
+policy_document_rotating_cidrs() {
+  local policy_document="$1"
+  local resources_json="$2"
+  local previous_cidr="$3"
+  local new_cidr="$4"
+  local previous_ipv6_cidr="$5"
+  local new_ipv6_cidr="$6"
+
+  jq -c \
+    --arg previous_cidr "$previous_cidr" \
+    --arg new_cidr "$new_cidr" \
+    --arg previous_ipv6_cidr "$previous_ipv6_cidr" \
+    --arg new_ipv6_cidr "$new_ipv6_cidr" \
+    --argjson resources "$resources_json" \
+    '
+      .Statement[0].Resource = $resources
+      | .Statement[0].Condition.Bool["aws:SecureTransport"] = "true"
+      | .Statement[0].Condition.IpAddress["aws:SourceIp"] =
+        (
+          ([.Statement[0].Condition.IpAddress["aws:SourceIp"]] | flatten | map(select(. != null and . != "" and . != $previous_cidr and . != $previous_ipv6_cidr)))
+          + [$new_cidr]
+          + (if $new_ipv6_cidr == "" then [] else [$new_ipv6_cidr] end)
+          | unique
+        )
+    ' <<< "$policy_document"
+}
+
+policy_document_with_only_cidrs() {
+  local policy_document="$1"
+  local resources_json="$2"
+  local cidr="$3"
+  local ipv6_cidr="$4"
+
+  jq -c \
+    --arg cidr "$cidr" \
+    --arg ipv6_cidr "$ipv6_cidr" \
+    --argjson resources "$resources_json" \
+    '
+      .Statement[0].Resource = $resources
+      | .Statement[0].Condition.Bool["aws:SecureTransport"] = "true"
+      | .Statement[0].Condition.IpAddress["aws:SourceIp"] =
+        ([$cidr] + (if $ipv6_cidr == "" then [] else [$ipv6_cidr] end) | unique)
+    ' <<< "$policy_document"
+}
+
+ensure_policy_version_limit() {
+  local policy_arn="$1"
+  local version_count oldest_non_default_version
+
+  version_count="$(aws iam list-policy-versions \
+    --policy-arn "$policy_arn" \
+    --query 'length(Versions)' \
+    --output text)"
+
+  if [ "$version_count" -lt 5 ]; then
+    return
+  fi
+
+  oldest_non_default_version="$(aws iam list-policy-versions \
+    --policy-arn "$policy_arn" \
+    --query "sort_by(Versions[?IsDefaultVersion==\`false\`], &CreateDate)[0].VersionId" \
+    --output text)"
+
+  if [ -n "$oldest_non_default_version" ] && [ "$oldest_non_default_version" != "None" ]; then
+    aws iam delete-policy-version \
+      --policy-arn "$policy_arn" \
+      --version-id "$oldest_non_default_version"
+  fi
+}
+
+write_dev_secrets_policy_version() {
+  local policy_document="$1"
+  local policy_arn tag_args
+  tag_args=("Key=Name,Value=${DEV_SECRETS_POLICY_NAME}" "Key=Project,Value=${PROJECT_NAME}" "Key=Environment,Value=${ENVIRONMENT}")
+
+  policy_arn="$(get_policy_arn)"
+  if [ -z "$policy_arn" ]; then
+    policy_arn="$(aws iam create-policy \
+      --policy-name "$DEV_SECRETS_POLICY_NAME" \
+      --policy-document "$policy_document" \
+      --tags "${tag_args[@]}" \
+      --query 'Policy.Arn' \
+      --output text)"
+  else
+    ensure_policy_version_limit "$policy_arn"
+    aws iam create-policy-version \
+      --policy-arn "$policy_arn" \
+      --policy-document "$policy_document" \
+      --set-as-default >/dev/null
+    aws iam tag-policy \
+      --policy-arn "$policy_arn" \
+      --tags "${tag_args[@]}" >/dev/null
+  fi
+
+  printf '%s' "$policy_arn"
+}
+
+attach_dev_secrets_policy_if_requested() {
+  local policy_arn="$1"
+
+  if [ -n "${DEV_SECRETS_IAM_USER_NAME:-}" ]; then
+    aws iam attach-user-policy \
+      --user-name "$DEV_SECRETS_IAM_USER_NAME" \
+      --policy-arn "$policy_arn"
+    echo "Attached development secrets read policy to IAM user ${DEV_SECRETS_IAM_USER_NAME}"
+  fi
+
+  if [ -n "${DEV_SECRETS_IAM_ROLE_NAME:-}" ]; then
+    aws iam attach-role-policy \
+      --role-name "$DEV_SECRETS_IAM_ROLE_NAME" \
+      --policy-arn "$policy_arn"
+    echo "Attached development secrets read policy to IAM role ${DEV_SECRETS_IAM_ROLE_NAME}"
+  fi
+
+  if [ -z "${DEV_SECRETS_IAM_USER_NAME:-}" ] && [ -z "${DEV_SECRETS_IAM_ROLE_NAME:-}" ]; then
+    echo "Set DEV_SECRETS_IAM_USER_NAME or DEV_SECRETS_IAM_ROLE_NAME to attach it automatically."
+  fi
+}
+
+load_dev_secrets_policy_context() {
+  local account_id policy_arn
+
+  account_id="$(aws sts get-caller-identity --query Account --output text)"
+  resources_json="$(dev_secret_resources_json "$account_id")"
+  policy_arn="$(get_policy_arn)"
+  if [ -z "$policy_arn" ]; then
+    current_document="$(base_policy_document "$resources_json")"
+  else
+    current_document="$(get_current_policy_document "$policy_arn")"
+  fi
+}
+
+add_dev_secrets_policy_cidrs() {
+  local current_document resources_json policy_arn updated_document
+
+  load_dev_secrets_policy_context
+  updated_document="$(policy_document_with_cidrs "$current_document" "$resources_json" "$DEV_CIDR" "$DEV_IPV6_CIDR")"
+  policy_arn="$(write_dev_secrets_policy_version "$updated_document")"
+  if [ -n "$DEV_IPV6_CIDR" ]; then
+    echo "Development secrets read policy allows ${DEV_CIDR} and ${DEV_IPV6_CIDR}: ${policy_arn}"
+  else
+    echo "Development secrets read policy allows ${DEV_CIDR}: ${policy_arn}"
+  fi
+  attach_dev_secrets_policy_if_requested "$policy_arn"
+}
+
+rotate_dev_secrets_policy_cidrs() {
+  local current_document resources_json policy_arn updated_document
+
+  load_dev_secrets_policy_context
+  updated_document="$(policy_document_rotating_cidrs "$current_document" "$resources_json" "$PREVIOUS_DEV_CIDR" "$DEV_CIDR" "$PREVIOUS_DEV_IPV6_CIDR" "$DEV_IPV6_CIDR")"
+  policy_arn="$(write_dev_secrets_policy_version "$updated_document")"
+  if [ -n "$DEV_IPV6_CIDR" ]; then
+    echo "Development secrets read policy replaced ${PREVIOUS_DEV_CIDR} with ${DEV_CIDR} and allows ${DEV_IPV6_CIDR}: ${policy_arn}"
+  else
+    echo "Development secrets read policy replaced ${PREVIOUS_DEV_CIDR} with ${DEV_CIDR}: ${policy_arn}"
+  fi
+  attach_dev_secrets_policy_if_requested "$policy_arn"
+}
+
+clear_dev_secrets_policy_cidrs() {
+  local current_document resources_json policy_arn updated_document
+
+  policy_arn="$(get_policy_arn)"
+  if [ -z "$policy_arn" ]; then
+    echo "ERROR: development secrets read policy does not exist: ${DEV_SECRETS_POLICY_NAME}" >&2
+    exit 1
+  fi
+
+  load_dev_secrets_policy_context
+  updated_document="$(policy_document_with_only_cidrs "$current_document" "$resources_json" "$DEV_CIDR" "$DEV_IPV6_CIDR")"
+  policy_arn="$(write_dev_secrets_policy_version "$updated_document")"
+  if [ -n "$DEV_IPV6_CIDR" ]; then
+    echo "Cleared development secrets policy CIDRs; left required DEV_CIDR ${DEV_CIDR} and DEV_IPV6_CIDR ${DEV_IPV6_CIDR}: ${policy_arn}"
+  else
+    echo "Cleared development secrets policy CIDRs; left required DEV_CIDR ${DEV_CIDR}: ${policy_arn}"
+  fi
+}
