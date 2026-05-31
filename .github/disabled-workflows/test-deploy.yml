@@ -108,7 +108,7 @@ jobs:
 
           run_ssm_command \
             "Start stack services" \
-            "set -euo pipefail; cd $EC2_APP_DIR; docker compose -f infra/docker-compose.yml -f $EC2_DEPLOY_STATE_DIR/docker-compose.images.yml --env-file infra/.env.prod up -d --no-build redis api worker web"
+            "set -euo pipefail; cd $EC2_APP_DIR; docker compose -f infra/docker-compose.yml -f $EC2_DEPLOY_STATE_DIR/docker-compose.images.yml --env-file infra/.env.prod up -d --no-build api worker web"
 
           run_ssm_command \
             "Prune dangling images" \
