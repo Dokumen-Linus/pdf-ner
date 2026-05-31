@@ -2,14 +2,18 @@ import type { PoolConfig } from "pg"
 
 export function pgPoolConfig(connectionString: string): PoolConfig {
   const url = new URL(connectionString)
-  const sslMode = url.searchParams.get("sslmode")
+  const sslMode = url.searchParams.get("sslmode")?.toLowerCase()
+
+  url.searchParams.delete("uselibpqcompat")
 
   if (sslMode === "disable") {
-    return { connectionString, ssl: false }
+    url.searchParams.delete("sslmode")
+    return { connectionString: url.toString(), ssl: false }
   }
 
   if (sslMode === "prefer" || sslMode === "require") {
-    return { connectionString, ssl: { rejectUnauthorized: false } }
+    url.searchParams.delete("sslmode")
+    return { connectionString: url.toString(), ssl: { rejectUnauthorized: false } }
   }
 
   return { connectionString }
