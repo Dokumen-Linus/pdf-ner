@@ -5,7 +5,7 @@ REPO_ROOT="$(cd "${AWS_DIR}/../.." && pwd)"
 # shellcheck source=infra/shared/load-env-file.sh
 # shellcheck disable=SC1091
 . "${REPO_ROOT}/infra/shared/load-env-file.sh"
-EXAMPLE_SECRETS_DIR="${EXAMPLE_SECRETS_DIR:-${REPO_ROOT}/infra/example-secrets}"
+EXAMPLE_SECRETS_DIR="${EXAMPLE_SECRETS_DIR:-${AWS_DIR}/push-secrets/example-secrets}"
 SECRET_DRAFT_DIR="${SECRET_DRAFT_DIR:-${AWS_DIR}/local-secrets}"
 OUTPUT_DIR="${OUTPUT_DIR:-${AWS_DIR}/outputs}"
 
@@ -591,7 +591,9 @@ absolute_repo_path() {
 ensure_secret_drafts() {
   local name source target
   mkdir -p "$SECRET_DRAFT_DIR"
-  for name in prod-web.json prod-email.json prod-api.json prod-workers.json prod-runpod.json; do
+  for name in \
+    prod-web.json prod-email.json prod-api.json prod-workers.json prod-runpod.json \
+    dev-web.json dev-email.json dev-api.json dev-workers.json dev-runpod.json; do
     source="${EXAMPLE_SECRETS_DIR}/${name}"
     target="$(draft_path "$name")"
     if [ ! -f "$target" ]; then
