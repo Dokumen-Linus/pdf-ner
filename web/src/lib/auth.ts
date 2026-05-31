@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm"
 import { Pool } from "pg"
 
 import { db } from "../db/client"
+import { pgPoolConfig } from "../db/pg-pool"
 import { authMembers } from "../db/schemas/auth"
 import { organizations, webTeams } from "../db/schemas/web"
 import { users } from "../db/schemas/web/users"
@@ -29,9 +30,7 @@ const trustedOrigins = [
   "http://127.0.0.1:3000",
 ].filter((origin): origin is string => Boolean(origin))
 
-const authDatabase = new Pool({
-  connectionString: env.AUTH_DATABASE_URL,
-})
+const authDatabase = new Pool(pgPoolConfig(env.AUTH_DATABASE_URL))
 
 const adminAc = defaultAc.newRole({
   organization: ["update"],
@@ -208,6 +207,7 @@ async function deleteWebUserForAuthUser(authUserId: string) {
 
 export const auth = betterAuth({
   database: authDatabase,
+  baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins,
   socialProviders: {

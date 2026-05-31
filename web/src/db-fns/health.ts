@@ -1,5 +1,6 @@
 import { Pool } from "pg"
 
+import { pgPoolConfig } from "@/db/pg-pool"
 import { env } from "@/env.server"
 
 const WEB_TABLES = "auth.user core.pdfs web.users web.projects web.pdfs workers.pdf_txts".split(" ")
@@ -11,7 +12,7 @@ type HealthPool = {
 }
 
 function getHealthPool(): Pool {
-  healthPool ??= new Pool({ connectionString: env.WEB_DATABASE_URL })
+  healthPool ??= new Pool(pgPoolConfig(env.WEB_DATABASE_URL))
   return healthPool
 }
 
