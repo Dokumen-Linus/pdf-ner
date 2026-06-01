@@ -8,10 +8,11 @@
 
 ## Scale
 
-24 API routes · 3 database models · 81 UI components · 48 library files · 20 middleware layers · 151 environment variables
+28 API routes · 3 database models · 82 UI components · 49 library files · 20 middleware layers · 163 environment variables
 
 ## Subsystems
 
+- **[Payments](./payments.md)** — 3 routes — touches: cache
 - **[Activate-prompt](./activate-prompt.md)** — 2 routes — touches: cache
 - **[Avatars](./avatars.md)** — 1 routes — touches: upload
 - **[Buckets](./buckets.md)** — 1 routes — touches: auth, upload
@@ -22,21 +23,22 @@
 - **[Ocr-evaluation](./ocr-evaluation.md)** — 3 routes — touches: cache
 - **[Optimize-prompt](./optimize-prompt.md)** — 2 routes — touches: cache
 - **[Pdfs](./pdfs.md)** — 2 routes — touches: auth, upload
+- **[Tasks](./tasks.md)** — 1 routes — touches: cache
 - **[Test_telemetry](./test_telemetry.md)** — 1 routes — touches: auth, cache
 - **[Text-extract](./text-extract.md)** — 2 routes — touches: cache
 - **[Infra](./infra.md)** — 5 routes — touches: auth, db, cache
 
 **Database:** drizzle, 3 models — see [database.md](./database.md)
 
-**UI:** 81 components (react) — see [ui.md](./ui.md)
+**UI:** 82 components (react) — see [ui.md](./ui.md)
 
-**Libraries:** 48 files — see [libraries.md](./libraries.md)
+**Libraries:** 49 files — see [libraries.md](./libraries.md)
 
 ## High-Impact Files
 
 Changes to these files have the widest blast radius across the codebase:
 
-- `//infrastructure.py` — imported by **16** files
+- `//infrastructure.py` — imported by **17** files
 - `/commands.py` — imported by **16** files
 - `//domain/entities.py` — imported by **15** files
 - `web/src/components/pdf-container/plugin-viewport-2/index.ts` — imported by **13** files
@@ -53,11 +55,11 @@ Changes to these files have the widest blast radius across the codebase:
 - `DEV` — `web/src/client.tsx`
 - `DEV_SECRETS_IAM_ROLE_NAME` — `infra/aws/dev-cidrs/.env.example`
 - `DEV_SECRETS_IAM_USER_NAME` — `infra/aws/dev-cidrs/.env.example`
+- `DEV_SSO_TARGET_ACCOUNT_ID` — `infra/aws/dev-sso-users/.env.example`
+- `DEV_SSO_USER_NAME` — `infra/aws/dev-sso-users/.env.example`
 - `ENV` — `web/src/env.server.ts`
-- `GPU_MEMORY_UTILIZATION` — `gpu/olm-ocr2/app.py`
-- `HF_TOKEN` — `infra/runpod/.env.example`
-- `MAX_MODEL_LEN` — `gpu/olm-ocr2/app.py`
-- _...20 more_
+- `FIRST_NAME` — `infra/aws/dev-sso-users/.env.example`
+- _...26 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-05-31_
+_Back to [index.md](./index.md) · Generated 2026-06-01_

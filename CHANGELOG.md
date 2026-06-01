@@ -138,6 +138,7 @@
 - Accuracy-table
 - Add old site content to hero
 - Add tweets relevant to basics.md
+- Uat billing
 
 ### 🐛 Bug Fixes
 
@@ -326,6 +327,7 @@
 - *(wk)* Move prompt formation from inserts to shared  domain
 - Consolidate styles
 - *(ci)* Use infra/shared scripts
+- Change .env.dev to .env.development
 
 ### 📚 Documentation
 
@@ -432,6 +434,9 @@
 - *(ci)* Update
 - *(ci)* Update docs
 - *(db)* Mark db instantiated
+- *(llm)* Clarify routeTree generation
+- *(web)* Node runtime
+- Aws dev profile
 
 ### ⚡ Performance
 
@@ -796,6 +801,10 @@
 - Fix deploy workflows [skip ci]
 - Dev secrets
 - Dev cidrs
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Dev-sso-users
+- *(aws)* Add ip v6 addresses
+- *(aws)* Remove IP restriction from dev secrets policy
 
 ### ◀️ Revert
 

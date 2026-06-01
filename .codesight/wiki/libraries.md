@@ -2,9 +2,9 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**48 library files** across 8 modules
+**49 library files** across 8 modules
 
-## Web (23 files)
+## Web (24 files)
 
 - `web/src/db-fns/web/annotations.ts` — LabelingLockLostError, CreateAnnotationSchema, createAnnotation, getAnnotationById, getAnnotationsByPdfId, getAnnotationsByPdfIds, …
 - `web/src/lib/auth-i18n.ts` — normalizeAuthLocale, detectAuthLocaleFromHeaders, getLocalizedAuthApiMessage, getAuthErrorPageCopy, getLocalizedAuthRedirectError, AuthLocale, …
@@ -16,6 +16,7 @@
 - `web/public/example-pdfs/federal-register/get_first_page.py` — extract_first_page, main
 - `web/src/api-fns/api-stream-proxy.server.ts` — streamProxy, StreamProxyOptions
 - `web/src/db/rect.ts` — toEmbedRect, toEmbedRects
+- `web/src/db-fns/web/billing.server.ts` — requireBillingAccountTarget, ensureStripeCustomer
 - `web/src/lib/auth-redirects.ts` — getPostVerificationRedirect, DEFAULT_POST_VERIFICATION_REDIRECT
 - `web/src/lib/observability/fetch.server.ts` — withObservedRequest, withObservedResponse
 - `web/src/lib/observability/fetch.ts` — buildObservedHeaders, observedApiFetch

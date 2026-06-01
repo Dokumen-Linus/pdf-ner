@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Component inventory and prop signatures extracted via AST. Read the source files before adding props or modifying component logic.
 
-**81 components** (react)
+**82 components** (react)
 
 ## Components
 
@@ -69,6 +69,7 @@
 - **Route** — `web/src/routes/_auth/signup.tsx`
 - **Route** — `web/src/routes/_auth.tsx`
 - **Route** — `web/src/routes/_private/billing.tsx`
+- **Route** — `web/src/routes/_private/dev/uat-stripe.tsx`
 - **Route** — `web/src/routes/_private/profile.tsx`
 - **Route** — `web/src/routes/_private/projects/$projectId.tsx`
 - **Route** — `web/src/routes/_private/projects/$projectId_.checking.tsx`
