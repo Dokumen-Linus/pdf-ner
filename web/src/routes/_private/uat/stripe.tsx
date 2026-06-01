@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/shadcn-ui
 import { Input } from "@/components/shadcn-ui/input"
 import { Label } from "@/components/shadcn-ui/label"
 
-export const Route = createFileRoute("/_private/dev/uat-stripe")({
+export const Route = createFileRoute("/_private/uat/stripe")({
   loader: async () => {
     const target = await loadUatBillingTarget()
     return { target }
