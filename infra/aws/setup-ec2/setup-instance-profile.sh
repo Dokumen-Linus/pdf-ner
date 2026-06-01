@@ -84,9 +84,11 @@ EOF
 )
 
   EC2_ROLE_ARN="$(ensure_role "$EC2_ROLE_NAME" "$trust_policy")"
+  export EC2_ROLE_ARN
   EC2_RUNTIME_POLICY_ARN="$(ensure_policy "$EC2_RUNTIME_POLICY_NAME" "$runtime_policy_document")"
   aws iam attach-role-policy --role-name "$EC2_ROLE_NAME" --policy-arn "$EC2_RUNTIME_POLICY_ARN"
   aws iam attach-role-policy --role-name "$EC2_ROLE_NAME" --policy-arn "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  aws iam attach-role-policy --role-name "$EC2_ROLE_NAME" --policy-arn "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   ensure_instance_profile "$EC2_ROLE_NAME" "$EC2_INSTANCE_PROFILE_NAME"
   sleep 30
 }
