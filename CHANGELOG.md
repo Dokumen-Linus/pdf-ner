@@ -328,6 +328,7 @@
 - Consolidate styles
 - *(ci)* Use infra/shared scripts
 - Change .env.dev to .env.development
+- *(web)* Move uat stripe page
 
 ### 📚 Documentation
 
@@ -805,6 +806,9 @@
 - Dev-sso-users
 - *(aws)* Add ip v6 addresses
 - *(aws)* Remove IP restriction from dev secrets policy
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(aws)* Ship logs from EC2 to CloudWatch #196
+- *(fix)* Set concurrency group to max queue
 
 ### ◀️ Revert
 
