@@ -2,30 +2,70 @@
 
 ## Setup
 
-1 Install [Node.js v24](https://nodejs.org/en/download/) and [Bun.js](https://bun.sh/)
-2 Clone repo and install dependencies:
+### Dependencies
 
-```cmd
-git clone https://github.com/optimalcharb/pdf-entity-labeling.git
+1. Install [Node.js v24](https://nodejs.org/en/download/), [Bun v2.3](https://bun.sh/), and [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html)
+2. Clone repo and install dependencies:
+
+```bash
+git clone https://github.com/dokumenai/pdf-entity-labeling.git
 ```
 
-```cmd
+```bash
 bun i
 ```
 
-3 Ensure .env is created following to .env.local.example
+### Development Setup
 
-### Running the web app
+1. Create .env.development following .env.development.example - only values to fill in are your email and Stripe publishable key
+2. Set password for your dokudev-{FIRST_NAME} user using the verification email
+3. Send your public IP v6 and v4 addresses to Charlie whenever you want to use the dev database inside the web app. You can see these with `curl ifconfig.me` and `curl ifconfig.me -v4`
+4. Create a profile named dokudev for your AWS CLI v2
 
-1 Start the database server
+```bash
+aws configure sso --profile dokudev
+```
 
-```cmd
+Enter the following when prompted:
+
+- SSO session name: dev0
+- SSO start URL: https://ssoins-7223d3355d0a5928.portal.us-east-1.app.aws
+- SSO region: us-east-1
+- SSO registration scopes: enter/return to leave default
+- Default client region: us-east-1
+- CLI default output format: json
+
+On the browser, login as dokudev-{FIRST_NAME} with the password you set. If prompted, setup 2FA using Duo mobile app.
+
+### Development Runs
+
+1. Refresh login if expired (12 hours since last login)
+
+```bash
+aws sso login --profile dokudev
+```
+
+2. Run the app with Node.js, not Bun
+
+```bash
+npm run dev
+```
+
+### Local Setup (deprecated)
+
+Create .env following .env.local.example
+
+### Local Runs (deprecated)
+
+1. Start a local database server
+
+```bash
 pg_ctl -D .\pgdata -l logfile start
 ```
 
-2 Run the app (currently with Node.js, later will migrate to Bun.js)
+2. Run the app with Node.js, not Bun
 
-```cmd
+```bash
 npm run dev
 ```
 
@@ -185,7 +225,7 @@ React components and .tsx files should not be in api-fns, db, db-fns, hooks, lib
 - Global state management: [Zustand](https://zustand.docs.pmnd.rs/guides/beginner-typescript)
 - Generic components: [shadcn/ui](https://ui.shadcn.com/) stored in components/shadcn-ui and config by components.json
 
-```cmd
+```bash
 npx shadcn@latest add --overwrite accordion alert-dialog alert aspect-ratio avatar badge breadcrumb button-group button calendar card carousel chart checkbox collapsible context-menu dropdown-menu empty field hover-card input-group input-otp input item kbd label menubar navigation-menu pagination popover progress radio-group resizable scroll-area select separator sheet sidebar skeleton slider sonner spinner switch table tabs textarea toggle-group toggle tooltip
 ```
 

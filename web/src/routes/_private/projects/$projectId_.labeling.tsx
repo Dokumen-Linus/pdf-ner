@@ -34,7 +34,7 @@ import { useLabelingLock } from "@/hooks/use-labeling-lock"
 
 import type { ErrorComponentProps } from "@tanstack/react-router"
 import type { EntityType } from "@/components/entity-table/entity-type"
-import type { CorePdf, LabeledEntitiesMap } from "@/db/types"
+import type { CorePdf, DbEntityType, LabeledEntitiesMap } from "@/db/types"
 
 const LabelingSearchSchema = z.object({
   pdfId: z.string().uuid().optional(),
@@ -153,7 +153,7 @@ function LabelingPage() {
   const { projectId } = Route.useParams()
   const entityTableTypes = useMemo<EntityType[]>(
     () =>
-      entityTypes.map((entityType) => ({
+      entityTypes.map((entityType: DbEntityType) => ({
         name: entityType.name,
         subtype: (entityType.subtype as EntityType["subtype"] | null) ?? "highlight",
         color: entityType.color ?? "#FFEB3B",

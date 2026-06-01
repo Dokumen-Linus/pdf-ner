@@ -407,8 +407,9 @@ function PricingPage() {
               </span>
               <h3 className="mb-2 text-[16px] font-medium text-[#171A20]">Workspace Admin</h3>
               <p className="flex-1 text-[13px] leading-[1.6] text-[#5C5E62]">
-                Manages organization members, invites users, sets team groupings (e.g. "Default"
-                team), and manages the secure shared billing methods and payment options.
+                Manages organization members, invites users, sets team groupings (e.g.
+                &quot;Default&quot; team), and manages the secure shared billing methods and payment
+                options.
               </p>
             </div>
 
@@ -459,7 +460,7 @@ function PricingPage() {
             </div>
           ) : (
             <div className="flex flex-col gap-8">
-              {providerGroups.map((provider) => (
+              {providerGroups.map((provider: ProviderGroup) => (
                 <div key={provider.host}>
                   <div className="mb-3 flex items-center gap-2">
                     <span
@@ -488,7 +489,7 @@ function PricingPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {provider.models.map((model, i) => (
+                        {provider.models.map((model: ChatModel, i: number) => (
                           <tr
                             key={model.id}
                             className={
@@ -555,7 +556,7 @@ function PricingPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {extractMethods.map((method, i) => (
+                  {extractMethods.map((method: ExtractMethod, i: number) => (
                     <tr
                       key={method.id}
                       className={i < extractMethods.length - 1 ? "border-b border-[#EEEEEE]" : ""}

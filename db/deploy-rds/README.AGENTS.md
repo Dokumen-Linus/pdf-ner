@@ -12,14 +12,14 @@ Create .env before running
 
 ```bash
 set -a
-source db/deploy-rds/.env.prod
+source db/deploy-rds/.env.production
 set +a
 bash db/deploy-rds/deploy_prod.sh
 ```
 
 ```bash
 set -a
-source db/deploy-rds/.env.dev
+source db/deploy-rds/.env.development
 set +a
 bash db/deploy-rds/deploy_dev.sh
 ```

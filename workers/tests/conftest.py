@@ -10,6 +10,9 @@ os.environ.setdefault("OPENAI_API_KEY", "test-key")
 os.environ.setdefault("GOOGLE_AI_API_KEY", "test-key")
 os.environ.setdefault("STRIPE_SECRET_KEY", "sk_test_dummy")
 os.environ.setdefault("ENV", "development")
+os.environ.setdefault("AWS_ACCESS_KEY_ID", "test")
+os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "test")
+os.environ.setdefault("AWS_EC2_METADATA_DISABLED", "true")
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages" / "pdfium_utils"))
 

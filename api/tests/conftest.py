@@ -27,6 +27,7 @@ from app.core.db import get_conn
 from app.core.dependencies import verify_api_key
 from app.core.exceptions import register_exception_handlers
 from app.domains.pdf_utils.router import router as pdf_utils_router
+from app.domains.uat_worker_dispatch.router import router as uat_worker_dispatch_router
 from app.domains.worker_dispatch.router import router as worker_dispatch_router
 
 _TEST_API_KEY: str = os.environ["API_KEY"]
@@ -84,6 +85,7 @@ async def async_client(
     # Mirror the real /api/v1 prefix and auth guard
     api_router = APIRouter(prefix="/api/v1", dependencies=[Depends(verify_api_key)])
     api_router.include_router(worker_dispatch_router)
+    api_router.include_router(uat_worker_dispatch_router)
     api_router.include_router(pdf_utils_router)
     app.include_router(api_router)
 

@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Load the local RDS deploy environment values after you update them for dev.
-ENV_FILE="${RDS_DEPLOY_ENV_FILE:-${SCRIPT_DIR}/.env.dev}"
+ENV_FILE="${RDS_DEPLOY_ENV_FILE:-${SCRIPT_DIR}/.env.development}"
 set -a
 source "$ENV_FILE"
 set +a

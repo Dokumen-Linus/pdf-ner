@@ -42,7 +42,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 
 ### web Invariants
 
-- Never edit `src/routeTree.gen.ts`
+- Must regenerate `src/routeTree.gen.ts` after adding or removing routes by calling `npm run dev`; never edit it. Do not importFileRoute() as never
 - Components and routes must not access the DB directly; use `src/db-fns/`
 - Web schema changes must stay aligned across `db/migrations/`, `src/db/schema/`, and `src/db-fns/`; keep `match-schemas.test.ts` passing
 - `db-fns` files should be named for the table they query, and should use `src/db/types.d.ts` types when practical
