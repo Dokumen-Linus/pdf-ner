@@ -258,7 +258,7 @@ function EntityTypesPage() {
     projectName: project?.name ?? null,
     projectDescription: project?.description ?? null,
     projectOrientation: project?.orientation ?? null,
-    entityTypeIds: entityTypes.map((entityType) => entityType.id),
+    entityTypeIds: entityTypes.map((entityType: DbEntityType) => entityType.id),
   })
 
   return (

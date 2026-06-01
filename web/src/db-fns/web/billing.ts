@@ -1,16 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
-import { getRequestHeaders } from "@tanstack/react-start/server"
-import { and, eq, inArray, isNull, sql } from "drizzle-orm"
 import { z } from "zod"
 
-import { db } from "@/db/client"
-import { authMembers, authOrganizations, authTeamMembers, authTeams } from "@/db/schemas/auth"
-import { organizations, projects, users, webTeams } from "@/db/schemas/web"
-import { auth } from "@/lib/auth"
-import { requireWorkspaceUser } from "@/lib/project-authorization.server"
-import { getStripe } from "@/lib/stripe.server"
-
-type AccountTarget =
+export type AccountTarget =
   | {
       type: "individual"
       userId: string
@@ -24,72 +15,9 @@ type AccountTarget =
       paymentMethodId: string | null
     }
 
-async function requireAccountTarget(): Promise<AccountTarget> {
-  const user = await requireWorkspaceUser()
-  const [row] = await db
-    .select({
-      id: users.id,
-      role: users.role,
-      organizationId: users.organizationId,
-      userStripeCustomerId: users.stripeCustomerId,
-      userStripePaymentMethodId: users.stripePaymentMethodId,
-      orgStripeCustomerId: organizations.stripeCustomerId,
-      orgStripePaymentMethodId: organizations.stripePaymentMethodId,
-    })
-    .from(users)
-    .leftJoin(organizations, eq(organizations.id, users.organizationId))
-    .where(eq(users.id, user.userId))
-    .limit(1)
-
-  if (!row) throw new Error("User profile not found")
-  if (
-    (row.role === "admin" || row.role === "developer" || row.role === "analyst") &&
-    row.organizationId
-  ) {
-    if (row.role !== "admin") throw new Error("Only admins can manage organization payment methods")
-    return {
-      type: "organization",
-      organizationId: row.organizationId,
-      customerId: row.orgStripeCustomerId,
-      paymentMethodId: row.orgStripePaymentMethodId,
-    }
-  }
-  return {
-    type: "individual",
-    userId: row.id,
-    customerId: row.userStripeCustomerId,
-    paymentMethodId: row.userStripePaymentMethodId,
-  }
-}
-
-async function ensureStripeCustomer(target: AccountTarget) {
-  if (target.customerId) return target.customerId
-  const stripe = getStripe()
-  const workspaceUser = await requireWorkspaceUser()
-  const customer = await stripe.customers.create({
-    email: workspaceUser.email,
-    metadata:
-      target.type === "individual"
-        ? { account_type: "individual", user_id: target.userId }
-        : { account_type: "organization", organization_id: target.organizationId },
-  })
-
-  if (target.type === "individual") {
-    await db
-      .update(users)
-      .set({ stripeCustomerId: customer.id, updatedAt: new Date() })
-      .where(eq(users.id, target.userId))
-  } else {
-    await db
-      .update(organizations)
-      .set({ stripeCustomerId: customer.id, updatedAt: new Date() })
-      .where(eq(organizations.id, target.organizationId))
-  }
-  return customer.id
-}
-
 export const getBillingAccount = createServerFn({ method: "GET" }).handler(async () => {
-  const target = await requireAccountTarget()
+  const { requireBillingAccountTarget } = await import("./billing.server")
+  const target = await requireBillingAccountTarget()
   if (!target.customerId) {
     return {
       type: target.type,
@@ -99,6 +27,7 @@ export const getBillingAccount = createServerFn({ method: "GET" }).handler(async
     }
   }
 
+  const { getStripe } = await import("@/lib/stripe.server")
   const methods = await getStripe().paymentMethods.list({
     customer: target.customerId,
     type: "card",
@@ -120,8 +49,10 @@ export const getBillingAccount = createServerFn({ method: "GET" }).handler(async
 })
 
 export const createSetupIntent = createServerFn({ method: "POST" }).handler(async () => {
-  const target = await requireAccountTarget()
+  const { ensureStripeCustomer, requireBillingAccountTarget } = await import("./billing.server")
+  const target = await requireBillingAccountTarget()
   const customerId = await ensureStripeCustomer(target)
+  const { getStripe } = await import("@/lib/stripe.server")
   const setupIntent = await getStripe().setupIntents.create({
     customer: customerId,
     usage: "off_session",
@@ -138,7 +69,14 @@ export const createSetupIntent = createServerFn({ method: "POST" }).handler(asyn
 export const confirmSetupIntent = createServerFn({ method: "POST" })
   .inputValidator(z.object({ setupIntentId: z.string().min(1) }))
   .handler(async ({ data }) => {
-    const target = await requireAccountTarget()
+    const { requireBillingAccountTarget } = await import("./billing.server")
+    const target = await requireBillingAccountTarget()
+    const [{ eq, sql }, { db }, { organizations, users }, { getStripe }] = await Promise.all([
+      import("drizzle-orm"),
+      import("@/db/client"),
+      import("@/db/schemas/web"),
+      import("@/lib/stripe.server"),
+    ])
     const setupIntent = await getStripe().setupIntents.retrieve(data.setupIntentId)
     if (setupIntent.status !== "succeeded") {
       throw new Error("Payment method setup has not succeeded")
@@ -189,7 +127,14 @@ export const confirmSetupIntent = createServerFn({ method: "POST" })
 export const setDefaultPaymentMethod = createServerFn({ method: "POST" })
   .inputValidator(z.object({ paymentMethodId: z.string().min(1) }))
   .handler(async ({ data }) => {
-    const target = await requireAccountTarget()
+    const { ensureStripeCustomer, requireBillingAccountTarget } = await import("./billing.server")
+    const target = await requireBillingAccountTarget()
+    const [{ eq }, { db }, { organizations, users }, { getStripe }] = await Promise.all([
+      import("drizzle-orm"),
+      import("@/db/client"),
+      import("@/db/schemas/web"),
+      import("@/lib/stripe.server"),
+    ])
     const customerId = await ensureStripeCustomer(target)
     const method = await getStripe().paymentMethods.retrieve(data.paymentMethodId)
     const methodCustomer =
@@ -222,7 +167,9 @@ export const setDefaultPaymentMethod = createServerFn({ method: "POST" })
 export const detachPaymentMethod = createServerFn({ method: "POST" })
   .inputValidator(z.object({ paymentMethodId: z.string().min(1) }))
   .handler(async ({ data }) => {
-    const target = await requireAccountTarget()
+    const { ensureStripeCustomer, requireBillingAccountTarget } = await import("./billing.server")
+    const target = await requireBillingAccountTarget()
+    const { getStripe } = await import("@/lib/stripe.server")
     const customerId = await ensureStripeCustomer(target)
     const methods = await getStripe().paymentMethods.list({ customer: customerId, type: "card" })
     if (methods.data.length <= 1) {
@@ -237,6 +184,19 @@ export const detachPaymentMethod = createServerFn({ method: "POST" })
 
 export const upgradeIndividualToOrganization = createServerFn({ method: "POST" }).handler(
   async () => {
+    const [
+      { and, eq, isNull },
+      { db },
+      { authMembers, authOrganizations, authTeamMembers, authTeams },
+      { organizations, projects, users, webTeams },
+      { requireWorkspaceUser },
+    ] = await Promise.all([
+      import("drizzle-orm"),
+      import("@/db/client"),
+      import("@/db/schemas/auth"),
+      import("@/db/schemas/web"),
+      import("@/lib/project-authorization.server"),
+    ])
     const workspaceUser = await requireWorkspaceUser()
     const [user] = await db.select().from(users).where(eq(users.id, workspaceUser.userId)).limit(1)
     if (!user) throw new Error("User profile not found")
@@ -329,6 +289,21 @@ export const inviteOrganizationUser = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
+    const [
+      { getRequestHeaders },
+      { and, eq, inArray },
+      { db },
+      { auth },
+      { users, webTeams },
+      { requireWorkspaceUser },
+    ] = await Promise.all([
+      import("@tanstack/react-start/server"),
+      import("drizzle-orm"),
+      import("@/db/client"),
+      import("@/lib/auth"),
+      import("@/db/schemas/web"),
+      import("@/lib/project-authorization.server"),
+    ])
     const workspaceUser = await requireWorkspaceUser()
     const [admin] = await db
       .select({ organizationId: users.organizationId, role: users.role })

@@ -35,6 +35,7 @@ import { Route as PrivateProjectsIndexRouteImport } from './routes/_private/proj
 import { Route as ApiReadyzDetailsRouteImport } from './routes/api/readyz/details'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as PrivateProjectsProjectIdRouteImport } from './routes/_private/projects/$projectId'
+import { Route as PrivateDevUatStripeRouteImport } from './routes/_private/dev/uat-stripe'
 import { Route as PrivateProjectsProjectIdLabelingRouteImport } from './routes/_private/projects/$projectId_.labeling'
 import { Route as PrivateProjectsProjectIdEntity_typesRouteImport } from './routes/_private/projects/$projectId_.entity_types'
 import { Route as PrivateProjectsProjectIdEngineeringRouteImport } from './routes/_private/projects/$projectId_.engineering'
@@ -170,6 +171,11 @@ const PrivateProjectsProjectIdRoute =
     path: '/projects/$projectId',
     getParentRoute: () => PrivateRoute,
   } as any)
+const PrivateDevUatStripeRoute = PrivateDevUatStripeRouteImport.update({
+  id: '/dev/uat-stripe',
+  path: '/dev/uat-stripe',
+  getParentRoute: () => PrivateRoute,
+} as any)
 const PrivateProjectsProjectIdLabelingRoute =
   PrivateProjectsProjectIdLabelingRouteImport.update({
     id: '/projects/$projectId_/labeling',
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/api/pdf-upload': typeof ApiPdfUploadRoute
   '/api/readyz': typeof ApiReadyzRouteWithChildren
   '/api/release-lock': typeof ApiReleaseLockRoute
+  '/dev/uat-stripe': typeof PrivateDevUatStripeRoute
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/readyz/details': typeof ApiReadyzDetailsRoute
@@ -258,6 +265,7 @@ export interface FileRoutesByTo {
   '/api/pdf-upload': typeof ApiPdfUploadRoute
   '/api/readyz': typeof ApiReadyzRouteWithChildren
   '/api/release-lock': typeof ApiReleaseLockRoute
+  '/dev/uat-stripe': typeof PrivateDevUatStripeRoute
   '/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/readyz/details': typeof ApiReadyzDetailsRoute
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/api/readyz': typeof ApiReadyzRouteWithChildren
   '/api/release-lock': typeof ApiReleaseLockRoute
   '/_public/': typeof PublicIndexRoute
+  '/_private/dev/uat-stripe': typeof PrivateDevUatStripeRoute
   '/_private/projects/$projectId': typeof PrivateProjectsProjectIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/readyz/details': typeof ApiReadyzDetailsRoute
@@ -326,6 +335,7 @@ export interface FileRouteTypes {
     | '/api/pdf-upload'
     | '/api/readyz'
     | '/api/release-lock'
+    | '/dev/uat-stripe'
     | '/projects/$projectId'
     | '/api/auth/$'
     | '/api/readyz/details'
@@ -357,6 +367,7 @@ export interface FileRouteTypes {
     | '/api/pdf-upload'
     | '/api/readyz'
     | '/api/release-lock'
+    | '/dev/uat-stripe'
     | '/projects/$projectId'
     | '/api/auth/$'
     | '/api/readyz/details'
@@ -391,6 +402,7 @@ export interface FileRouteTypes {
     | '/api/readyz'
     | '/api/release-lock'
     | '/_public/'
+    | '/_private/dev/uat-stripe'
     | '/_private/projects/$projectId'
     | '/api/auth/$'
     | '/api/readyz/details'
@@ -600,6 +612,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivateProjectsProjectIdRouteImport
       parentRoute: typeof PrivateRoute
     }
+    '/_private/dev/uat-stripe': {
+      id: '/_private/dev/uat-stripe'
+      path: '/dev/uat-stripe'
+      fullPath: '/dev/uat-stripe'
+      preLoaderRoute: typeof PrivateDevUatStripeRouteImport
+      parentRoute: typeof PrivateRoute
+    }
     '/_private/projects/$projectId_/labeling': {
       id: '/_private/projects/$projectId_/labeling'
       path: '/projects/$projectId/labeling'
@@ -664,6 +683,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 interface PrivateRouteChildren {
   PrivateBillingRoute: typeof PrivateBillingRoute
   PrivateProfileRoute: typeof PrivateProfileRoute
+  PrivateDevUatStripeRoute: typeof PrivateDevUatStripeRoute
   PrivateProjectsProjectIdRoute: typeof PrivateProjectsProjectIdRoute
   PrivateProjectsIndexRoute: typeof PrivateProjectsIndexRoute
   PrivateProjectsProjectIdCheckingRoute: typeof PrivateProjectsProjectIdCheckingRoute
@@ -677,6 +697,7 @@ interface PrivateRouteChildren {
 const PrivateRouteChildren: PrivateRouteChildren = {
   PrivateBillingRoute: PrivateBillingRoute,
   PrivateProfileRoute: PrivateProfileRoute,
+  PrivateDevUatStripeRoute: PrivateDevUatStripeRoute,
   PrivateProjectsProjectIdRoute: PrivateProjectsProjectIdRoute,
   PrivateProjectsIndexRoute: PrivateProjectsIndexRoute,
   PrivateProjectsProjectIdCheckingRoute: PrivateProjectsProjectIdCheckingRoute,

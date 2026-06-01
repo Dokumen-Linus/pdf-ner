@@ -15,6 +15,8 @@ import {
   setDefaultPaymentMethod,
 } from "@/db-fns/web/billing"
 
+type BillingPaymentMethod = Awaited<ReturnType<typeof getBillingAccount>>["paymentMethods"][number]
+
 const BillingSearchSchema = z.object({
   redirect: z.string().optional(),
 })
@@ -115,7 +117,7 @@ function BillingPage() {
           {account.paymentMethods.length === 0 ? (
             <p className="text-muted-foreground text-sm">Add a card before using the app.</p>
           ) : (
-            account.paymentMethods.map((method) => (
+            account.paymentMethods.map((method: BillingPaymentMethod) => (
               <div
                 key={method.id}
                 className="border-border/60 flex flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2"
