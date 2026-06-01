@@ -7,15 +7,7 @@
         "secretsmanager:GetSecretValue",
         "secretsmanager:DescribeSecret"
       ],
-      "Resource": [],
-      "Condition": {
-        "Bool": {
-          "aws:SecureTransport": "true"
-        },
-        "IpAddress": {
-          "aws:SourceIp": []
-        }
-      }
+      "Resource": []
     }
   ]
 }

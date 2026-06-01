@@ -17,5 +17,5 @@ DEV_RDS_SECURITY_GROUP_ID="$(resolve_dev_rds_security_group_id)"
 
 echo "Adding development CIDR access for ${PROJECT_NAME} in ${AWS_REGION}"
 authorize_dev_db_cidrs "$DEV_RDS_SECURITY_GROUP_ID" "$RDS_PORT"
-add_dev_secrets_policy_cidrs
+ensure_dev_secrets_policy
 echo "Development CIDR add complete."

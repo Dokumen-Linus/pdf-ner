@@ -16,8 +16,8 @@ resolve_identity_center_instance
 target_account_id="$(resolve_target_account_id)"
 
 echo "Configuring development Identity Center access for ${PROJECT_NAME} in ${AWS_REGION}"
-permission_set_arn="$(ensure_permission_set "$DEV_SSO_PERMISSION_SET_NAME")"
-require_permission_set_has_no_extra_access "$permission_set_arn" "$DEV_SECRETS_POLICY_NAME" "$DEV_WEB_API_POLICY_NAME"
+require_expected_local_iam_policies_exist
+permission_set_arn="$(ensure_clean_permission_set "$DEV_SSO_PERMISSION_SET_NAME" "$DEV_SECRETS_POLICY_NAME" "$DEV_WEB_API_POLICY_NAME")"
 ensure_customer_managed_policy_attached "$permission_set_arn" "$DEV_SECRETS_POLICY_NAME"
 ensure_customer_managed_policy_attached "$permission_set_arn" "$DEV_WEB_API_POLICY_NAME"
 

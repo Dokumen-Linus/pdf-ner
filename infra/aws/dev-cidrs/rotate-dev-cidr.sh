@@ -22,5 +22,5 @@ DEV_RDS_SECURITY_GROUP_ID="$(resolve_dev_rds_security_group_id)"
 
 echo "Rotating development CIDR access for ${PROJECT_NAME} in ${AWS_REGION}"
 rotate_dev_db_cidrs "$DEV_RDS_SECURITY_GROUP_ID" "$RDS_PORT"
-rotate_dev_secrets_policy_cidrs
+ensure_dev_secrets_policy
 echo "Development CIDR rotate complete."

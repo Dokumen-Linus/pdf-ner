@@ -261,90 +261,6 @@ get_policy_arn() {
     --output text | awk 'NF && $1 != "None" { print $1; exit }'
 }
 
-get_current_policy_document() {
-  local policy_arn="$1"
-  local version_id
-
-  version_id="$(aws iam get-policy \
-    --policy-arn "$policy_arn" \
-    --query 'Policy.DefaultVersionId' \
-    --output text)"
-
-  aws iam get-policy-version \
-    --policy-arn "$policy_arn" \
-    --version-id "$version_id" \
-    --query 'PolicyVersion.Document' \
-    --output json
-}
-
-policy_document_with_cidrs() {
-  local policy_document="$1"
-  local resources_json="$2"
-  local cidr="$3"
-  local ipv6_cidr="$4"
-
-  jq -c \
-    --arg cidr "$cidr" \
-    --arg ipv6_cidr "$ipv6_cidr" \
-    --argjson resources "$resources_json" \
-    '
-      .Statement[0].Resource = $resources
-      | .Statement[0].Condition.Bool["aws:SecureTransport"] = "true"
-      | .Statement[0].Condition.IpAddress["aws:SourceIp"] =
-        (
-          ([.Statement[0].Condition.IpAddress["aws:SourceIp"]] | flatten | map(select(. != null and . != "")))
-          + [$cidr]
-          + (if $ipv6_cidr == "" then [] else [$ipv6_cidr] end)
-          | unique
-        )
-    ' <<< "$policy_document"
-}
-
-policy_document_rotating_cidrs() {
-  local policy_document="$1"
-  local resources_json="$2"
-  local previous_cidr="$3"
-  local new_cidr="$4"
-  local previous_ipv6_cidr="$5"
-  local new_ipv6_cidr="$6"
-
-  jq -c \
-    --arg previous_cidr "$previous_cidr" \
-    --arg new_cidr "$new_cidr" \
-    --arg previous_ipv6_cidr "$previous_ipv6_cidr" \
-    --arg new_ipv6_cidr "$new_ipv6_cidr" \
-    --argjson resources "$resources_json" \
-    '
-      .Statement[0].Resource = $resources
-      | .Statement[0].Condition.Bool["aws:SecureTransport"] = "true"
-      | .Statement[0].Condition.IpAddress["aws:SourceIp"] =
-        (
-          ([.Statement[0].Condition.IpAddress["aws:SourceIp"]] | flatten | map(select(. != null and . != "" and . != $previous_cidr and . != $previous_ipv6_cidr)))
-          + [$new_cidr]
-          + (if $new_ipv6_cidr == "" then [] else [$new_ipv6_cidr] end)
-          | unique
-        )
-    ' <<< "$policy_document"
-}
-
-policy_document_with_only_cidrs() {
-  local policy_document="$1"
-  local resources_json="$2"
-  local cidr="$3"
-  local ipv6_cidr="$4"
-
-  jq -c \
-    --arg cidr "$cidr" \
-    --arg ipv6_cidr "$ipv6_cidr" \
-    --argjson resources "$resources_json" \
-    '
-      .Statement[0].Resource = $resources
-      | .Statement[0].Condition.Bool["aws:SecureTransport"] = "true"
-      | .Statement[0].Condition.IpAddress["aws:SourceIp"] =
-        ([$cidr] + (if $ipv6_cidr == "" then [] else [$ipv6_cidr] end) | unique)
-    ' <<< "$policy_document"
-}
-
 ensure_policy_version_limit() {
   local policy_arn="$1"
   local version_count oldest_non_default_version
@@ -368,6 +284,14 @@ ensure_policy_version_limit() {
       --policy-arn "$policy_arn" \
       --version-id "$oldest_non_default_version"
   fi
+}
+
+build_dev_secrets_policy_document() {
+  local account_id resources_json
+
+  account_id="$(aws sts get-caller-identity --query Account --output text)"
+  resources_json="$(dev_secret_resources_json "$account_id")"
+  base_policy_document "$resources_json"
 }
 
 write_dev_secrets_policy_version() {
@@ -419,62 +343,25 @@ attach_dev_secrets_policy_if_requested() {
   fi
 }
 
-load_dev_secrets_policy_context() {
-  local account_id policy_arn
+ensure_dev_secrets_policy() {
+  local policy_arn policy_document
 
-  account_id="$(aws sts get-caller-identity --query Account --output text)"
-  resources_json="$(dev_secret_resources_json "$account_id")"
-  policy_arn="$(get_policy_arn)"
-  if [ -z "$policy_arn" ]; then
-    current_document="$(base_policy_document "$resources_json")"
-  else
-    current_document="$(get_current_policy_document "$policy_arn")"
-  fi
-}
-
-add_dev_secrets_policy_cidrs() {
-  local current_document resources_json policy_arn updated_document
-
-  load_dev_secrets_policy_context
-  updated_document="$(policy_document_with_cidrs "$current_document" "$resources_json" "$DEV_CIDR" "$DEV_IPV6_CIDR")"
-  policy_arn="$(write_dev_secrets_policy_version "$updated_document")"
-  if [ -n "$DEV_IPV6_CIDR" ]; then
-    echo "Development secrets read policy allows ${DEV_CIDR} and ${DEV_IPV6_CIDR}: ${policy_arn}"
-  else
-    echo "Development secrets read policy allows ${DEV_CIDR}: ${policy_arn}"
-  fi
+  policy_document="$(build_dev_secrets_policy_document)"
+  policy_arn="$(write_dev_secrets_policy_version "$policy_document")"
+  echo "Development secrets read policy allows configured dev secret resources through IAM identity only: ${policy_arn}"
   attach_dev_secrets_policy_if_requested "$policy_arn"
 }
 
-rotate_dev_secrets_policy_cidrs() {
-  local current_document resources_json policy_arn updated_document
-
-  load_dev_secrets_policy_context
-  updated_document="$(policy_document_rotating_cidrs "$current_document" "$resources_json" "$PREVIOUS_DEV_CIDR" "$DEV_CIDR" "$PREVIOUS_DEV_IPV6_CIDR" "$DEV_IPV6_CIDR")"
-  policy_arn="$(write_dev_secrets_policy_version "$updated_document")"
-  if [ -n "$DEV_IPV6_CIDR" ]; then
-    echo "Development secrets read policy replaced ${PREVIOUS_DEV_CIDR} with ${DEV_CIDR} and allows ${DEV_IPV6_CIDR}: ${policy_arn}"
-  else
-    echo "Development secrets read policy replaced ${PREVIOUS_DEV_CIDR} with ${DEV_CIDR}: ${policy_arn}"
-  fi
-  attach_dev_secrets_policy_if_requested "$policy_arn"
-}
-
-clear_dev_secrets_policy_cidrs() {
-  local current_document resources_json policy_arn updated_document
-
+require_dev_secrets_policy_exists() {
+  local policy_arn
   policy_arn="$(get_policy_arn)"
   if [ -z "$policy_arn" ]; then
     echo "ERROR: development secrets read policy does not exist: ${DEV_SECRETS_POLICY_NAME}" >&2
     exit 1
   fi
+}
 
-  load_dev_secrets_policy_context
-  updated_document="$(policy_document_with_only_cidrs "$current_document" "$resources_json" "$DEV_CIDR" "$DEV_IPV6_CIDR")"
-  policy_arn="$(write_dev_secrets_policy_version "$updated_document")"
-  if [ -n "$DEV_IPV6_CIDR" ]; then
-    echo "Cleared development secrets policy CIDRs; left required DEV_CIDR ${DEV_CIDR} and DEV_IPV6_CIDR ${DEV_IPV6_CIDR}: ${policy_arn}"
-  else
-    echo "Cleared development secrets policy CIDRs; left required DEV_CIDR ${DEV_CIDR}: ${policy_arn}"
-  fi
+clear_dev_secrets_policy() {
+  require_dev_secrets_policy_exists
+  ensure_dev_secrets_policy
 }
