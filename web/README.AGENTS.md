@@ -1,6 +1,6 @@
 # Web
 
-**Required runtime**: Must run dev and build using `npm` and tests using `bun run test`
+**Required runtime**: Must run dev and build using `npm`, tests using `bun run test`, installs using `bun i`
 
 ## Architecture
 
