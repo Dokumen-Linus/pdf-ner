@@ -24,7 +24,7 @@ shell_snapshot = true
 shell_tool = true
 
 [mcp_servers.aws_mcp]
-enabled = false # flip to true to use
+enabled = true # flip to true to use
 command = "uvx"
 args = [
   "mcp-proxy-for-aws@latest",
