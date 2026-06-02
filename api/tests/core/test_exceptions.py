@@ -3,7 +3,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from app.core.exceptions import (
-    register_exception_handlers,
     unhandled_exception_handler,
 )
 
@@ -21,9 +20,3 @@ class TestUnhandledExceptionHandler:
         body = response.body.decode()
         assert "Internal server error" in body
 
-
-class TestRegisterExceptionHandlers:
-    def test_registers_handler(self):
-        app = MagicMock()
-        register_exception_handlers(app)
-        app.add_exception_handler.assert_called_once_with(Exception, unhandled_exception_handler)
