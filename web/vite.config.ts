@@ -15,7 +15,13 @@ const config = defineConfig({
       projects: ["./tsconfig.json"],
     }),
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart({
+      server: {
+        build: {
+          inlineCss: true,
+        },
+      },
+    }),
     nitro(),
     paraglideVitePlugin({
       project: "./project.inlang",
