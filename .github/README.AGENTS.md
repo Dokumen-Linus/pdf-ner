@@ -7,3 +7,4 @@
 - deploy-web: deploy web to AWS
 - deploy-workers: deploy workers to AWS
 - deploy-stack: build and deploy all three services (web + api + workers) at once; manual-only, intended for initial EC2 bootstrap
+- ec2-healthcheck: manual-only wait-then-run EC2 health check; deploy workflows must not call it automatically
