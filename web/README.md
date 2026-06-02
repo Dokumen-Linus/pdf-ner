@@ -18,7 +18,7 @@ bun i
 ### Development Setup
 
 1. Create .env.development following .env.development.example - only values to fill in are your email and Stripe publishable key
-2. Set password for your dokudev-{FIRST_NAME} user using the verification email
+2. Set up your AWS User. Your username is dokudev-{FIRST_NAME} (example: dokudev-charlie). Go to the reset password email and set a password. Set 2FA with Duo mobile if prompted.
 3. Send your public IP v6 and v4 addresses to Charlie whenever you want to use the dev database inside the web app. You can see these with `curl ifconfig.me` and `curl ifconfig.me -v4`
 4. Create a profile named dokudev for your AWS CLI v2
 
