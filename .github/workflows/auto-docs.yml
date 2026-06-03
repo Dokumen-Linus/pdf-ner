@@ -4,9 +4,6 @@ on:
   pull_request:
     branches: [ master ]
     types: [ closed ]
-  push:
-    tags:
-      - "v*"
 
 permissions:
   contents: write
@@ -15,6 +12,7 @@ permissions:
 jobs:
   changelog:
     name: Generate changelog
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,7 +21,11 @@ jobs:
           fetch-depth: 0
           ref: master
 
+      - name: Install git-cliff
+        uses: taiki-e/install-action@git-cliff
+
       - name: Generate changelog
+        id: generate_changelog
         uses: orhun/git-cliff-action@v4
         with:
           config: cliff.toml
@@ -35,14 +37,84 @@ jobs:
       - name: Generate wiki
         run: npx -y codesight --wiki
 
-      - name: Commit changelog
-        if: github.event_name == 'push' || github.event.pull_request.merged == true
+      - name: Compute release metadata
+        id: release_meta
         run: |
+          set -euo pipefail
+
+          latest_tag="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+          version="$(git-cliff --bumped-version)"
+          notes="$(git-cliff --unreleased --strip header)"
+          auto_release=true
+          skip_reason=""
+
+          if [ -n "$latest_tag" ] && [ "$version" = "$latest_tag" ]; then
+            auto_release=false
+            skip_reason="No version bump for unreleased changes."
+          elif [[ "$version" =~ ^v?[0-9]+\.0\.0$ ]]; then
+            auto_release=false
+            skip_reason="Major version bumps must be tagged manually."
+          fi
+
+          {
+            echo "latest_tag=$latest_tag"
+            echo "version=$version"
+            echo "auto_release=$auto_release"
+            echo "skip_reason=$skip_reason"
+            echo "notes<<EOF"
+            echo "$notes"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Commit changelog
+        id: commit_docs
+        run: |
+          set -euo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md .codesight/wiki/
-          if ! git diff --cached --quiet; then
-            git commit -m "chore(changelog): update CHANGELOG.md and .codesight/wiki [skip ci]"
-            git pull --rebase --autostash
-            git push
+
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+
+          git commit -m "chore(changelog): update CHANGELOG.md and .codesight/wiki [skip ci]"
+          git pull --rebase --autostash origin master
+          git push origin HEAD:master
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Explain skipped release
+        if: steps.commit_docs.outputs.changed == 'true' && steps.release_meta.outputs.auto_release != 'true'
+        run: echo "::notice::Skipping release creation. ${{ steps.release_meta.outputs.skip_reason }}"
+
+      - name: Create release
+        if: steps.commit_docs.outputs.changed == 'true' && steps.release_meta.outputs.auto_release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.release_meta.outputs.version }}
+          CLIFF_NOTES: ${{ steps.release_meta.outputs.notes }}
+          PREVIOUS_TAG: ${{ steps.release_meta.outputs.latest_tag }}
+          RELEASE_TARGET: ${{ steps.commit_docs.outputs.head_sha }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          {
+            echo "## Changes"
+            echo
+            printf '%s\n' "$CLIFF_NOTES"
+            if [ -n "$PREVIOUS_TAG" ]; then
+              echo
+              echo "---"
+              echo "**Full diff**: https://github.com/$REPOSITORY/compare/$PREVIOUS_TAG...$VERSION"
+            fi
+          } > release-notes.md
+
+          gh release create "$VERSION" \
+            --target "$RELEASE_TARGET" \
+            --title "$VERSION" \
+            --notes-file release-notes.md
