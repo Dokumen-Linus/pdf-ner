@@ -139,6 +139,7 @@
 - Add old site content to hero
 - Add tweets relevant to basics.md
 - Uat billing
+- *(web)* Allow dokumenai.dev accounts to skip payment info
 
 ### 🐛 Bug Fixes
 
@@ -329,6 +330,7 @@
 - *(ci)* Use infra/shared scripts
 - Change .env.dev to .env.development
 - *(web)* Move uat stripe page
+- *(ci)* Rename cloudwatch script
 
 ### 📚 Documentation
 
@@ -438,6 +440,12 @@
 - *(llm)* Clarify routeTree generation
 - *(web)* Node runtime
 - Aws dev profile
+- Delete pytesseract docs
+- Remove full pytesseract docs
+- *(web)* Dokudev profile setup
+- *(llm)* Emphasize push back, avoid bad tests in AGENTS.md
+- *(llm)* No var or file rereads
+- *(llm)* Fix jq misunderstanding
 
 ### ⚡ Performance
 
@@ -809,6 +817,11 @@
 - *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(aws)* Ship logs from EC2 to CloudWatch #196
 - *(fix)* Set concurrency group to max queue
+- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- *(gh)* Auto-docs trigger on new tag
+- *(gh)* Restart.yml
+- Make dirs if missing
+- Migrate redis to elasticache #201
 
 ### ◀️ Revert
 

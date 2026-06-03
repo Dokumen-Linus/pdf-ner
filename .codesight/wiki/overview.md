@@ -8,7 +8,7 @@
 
 ## Scale
 
-28 API routes · 3 database models · 82 UI components · 49 library files · 20 middleware layers · 166 environment variables
+28 API routes · 3 database models · 82 UI components · 49 library files · 20 middleware layers · 198 environment variables
 
 ## Subsystems
 
@@ -59,7 +59,7 @@ Changes to these files have the widest blast radius across the codebase:
 - `DEV_SSO_USER_NAME` — `infra/aws/dev-sso-users/.env.example`
 - `ENV` — `web/src/env.server.ts`
 - `FIRST_NAME` — `infra/aws/dev-sso-users/.env.example`
-- _...26 more_
+- _...27 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-06-01_
+_Back to [index.md](./index.md) · Generated 2026-06-03_
