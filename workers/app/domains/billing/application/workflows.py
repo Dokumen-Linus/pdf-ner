@@ -124,6 +124,10 @@ async def _charge_account(conn, *, account_type: str, row: Any) -> str:
         return "failed"
 
 
+async def charge_account_with_row(conn, *, account_type: str, row: Any) -> str:
+    return await _charge_account(conn, account_type=account_type, row=row)
+
+
 async def charge_due_accounts(*, limit: int = 100) -> dict[str, int]:
     pool = await get_pool()
     succeeded = 0

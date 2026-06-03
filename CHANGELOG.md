@@ -1,5 +1,10 @@
 ## [unreleased]
 
+### ⚡ Performance
+
+- Tanstack start css in-lining
+## [0.1.0] - 2026-06-03
+
 ### 🚀 Features
 
 - Plugin-zoom with local hammer
@@ -10,9 +15,7 @@
 - Add export btn
 - Add zoom btns, replace btn text with icons
 - *(toolbar)* Add undo/redo buttons via history capability
-- [**breaking**] Annotation table and convert toolbar to zustand hooks
 - In progress thumbnail-sidebar, update embedpdf
-- [**breaking**] Change from annotation store to plugin store, and sync entire anno state
 - Add capabilities, remove selectors, rename state.pages to state.byPage
 - Setup for annotationmenu prompt
 - Init working annotation-menu
@@ -64,7 +67,6 @@
 - *(db)* Seed for standard entity types
 - *(web)* Cookies management and example with sidebar
 - *(all)* Inital billing and usage tracking
-- [**breaking**] Pdf storage
 - *(web)* Auto-create S3 bucket on project creation and add PDF upload page
 - *(web)* Add mehul code in temp dir
 - *(web)* Integrate mehul project pages
@@ -138,6 +140,8 @@
 - Accuracy-table
 - Add old site content to hero
 - Add tweets relevant to basics.md
+- Uat billing
+- *(web)* Allow dokumenai.dev accounts to skip payment info
 
 ### 🐛 Bug Fixes
 
@@ -247,16 +251,16 @@
 - Use safetweet wrapper
 - Patch missing entities in quoted tweets
 - Migrate to local icons
+- Pricing page updates
+- *(ci)* Setup-tunnel
+- *(ci)* Setup-waf
+- *(web)* Update infra.md and platform.tsx
+- *(ci)* Output printing and remove sg for npm
+- *(web)* Pass better auth secret
+- *(web)* Pg pool config allow different ssl modes
+- *(web)* Pg pool config
 
-### 💼 Other
-
-- Run npm i
-- Removed invalid tsconfig rule
-- Add py scripts for file generation
-- Add nginx proxy manager
-- Reorder imports
-
-### 🚜 Refactor
+### 🚜 Refactoring
 
 - Add shadcn-ui to tsconfig exclude
 - Add shadcn-ui and hammer to eslint ignores
@@ -317,6 +321,10 @@
 - *(db, wk)* Rename ocr_methods to extract_methods,  add text_extract workers domain
 - *(wk)* Move prompt formation from inserts to shared  domain
 - Consolidate styles
+- *(ci)* Use infra/shared scripts
+- Change .env.dev to .env.development
+- *(web)* Move uat stripe page
+- *(ci)* Rename cloudwatch script
 
 ### 📚 Documentation
 
@@ -419,12 +427,24 @@
 - *(ci)* Deploy-rds docs
 - *(ci)* Note nginx pm deprecated
 - Tesseract skill
+- *(llm)* Bash best practices
+- *(ci)* Update
+- *(ci)* Update docs
+- *(db)* Mark db instantiated
+- *(llm)* Clarify routeTree generation
+- *(web)* Node runtime
+- Aws dev profile
+- Delete pytesseract docs
+- Remove full pytesseract docs
+- *(web)* Dokudev profile setup
+- *(llm)* Emphasize push back, avoid bad tests in AGENTS.md
+- *(llm)* No var or file rereads
+- *(llm)* Fix jq misunderstanding
 
 ### ⚡ Performance
 
 - Convert plugin-zoom to typescript
 - Start core rebuild
-- [**breaking**] Pdf container using npm packages and local annotation and wasm
 - Remove handlers and patching
 - Remove vertex, resize, draggable
 - Remove ability to add tools to state
@@ -446,11 +466,9 @@
 - Move to plugin-loader-2
 - Add destroy to plugin anno
 - Move to plugin-scroll-2
-- [**breaking**] Replace annotation tools with activeSubtype, activeColor, etc
 - Add subtype validation to reducer
 - Add usePluginCapabilities
 - Change from consumer usage of PdfAnnotationSubtype enum to type Subtype
-- [**breaking**] Migrate to tanstack start from next.js
 - Move from plugin-loader-2 to @embedpdf
 - #5 make plugin-search-2
 - Move to plugin-search-2
@@ -488,60 +506,7 @@
 - *(web)* Remove unused components
 - *(web)* Remove unused deps
 - Replace lucide with local icons
-
-### 🎨 Styling
-
-- Fix typo in template comment, also remove some exports
-- Apply prettier
-- Change comments
-- Run prettier
-- Change eslint config to add bun and exclude .js
-- Change prettier import ordering
-- Apply new prettier
-- Edit anno manifest
-- Apply prettier that git mirror and vscode unapplied
-- Migrate to new vscode extension for prettier
-- Apply prettier
-- Return to old prettier vscode extension
-- Apply prettier for tanstack
-- Sql and python formatting and ruff linting
-- Copy to backend/ruff.toml
-- Remove broken sql formatter, add api schema
-- Ruff config
-- Python ruff
-- Put prettier and eslint config in root repo dir to allow formatting from root dir and frontend dir
-- Edit eslint config
-- *(api)* Ruff
-- *(ci)* Gitignore
-- Ruff
-- *(api)* Fix ruff isort in pyrpoject
-- *(web)* Apply prettier
-- *(web)* Fix .prettierignore
-- *(api)* Ruff
-- *(api)* Ruff
-- *(web)* Prettier header.tsx
-- *(web)* Add paraglide to eslint ignores
-- *(web)* Fix lint errors
-- *(web)* Add tanstack eslint plugin
-- Ruff
-- *(web)* Prettier
-- *(web)* Prettier
-- *(web)* Move import order from prettier to eslint to work with VSCode extension
-- *(web)* Add public assets to use later
-- Apply formatters
-- *(web)* Add to restricted imports
-- *(web)* Prettier and lint fix
-- Ruff
-- Prettier and lint:fix
-- Auto-format code [skip ci]
-- Auto-format code [skip ci]
-- Auto-format code [skip ci]
-- Auto-format code [skip ci]
-- Auto-format code [skip ci]
-- Auto-format code [skip ci]
-- Auto-format code [skip ci]
-- Auto-format code [skip ci]
-- Auto-format code [skip ci]
+- *(web)* Remove unused env var
 
 ### 🧪 Testing
 
@@ -582,12 +547,11 @@
 - *(pkg)* More test coverage
 - *(web)* Fix -print-manifests
 - *(web)* Finish removing playwright
+- Remove restated tests
 
-### ⚙️ Miscellaneous Tasks
+### ⚙️ CI/CD
 
-- *(release)* 1.0.0 [skip ci]
 - Semantic release workflow stops if no version bump
-- *(release)* 1.0.1 [skip ci]
 - Remove npm req
 - Disable semantic release
 - Active semantic release
@@ -598,141 +562,51 @@
 - Claude stuff shouldn't be in gitignore
 - Fix husky by moving dir
 - Monorepo commitlint and settings.json
-- Update claude
 - *(api)* Add logging to llm_ner
-- Update skills
 - Update gitignore
 - Add pytest and ruff cache to gitignore
 - *(web)* Make_full_package_json
-- *(web)* Update tanstack
-- *(web)* Add tanstack intent skills
-- *(claude)* Add hooks
-- *(claude)* Setup
-- *(claude)* Add runpod skills
-- *(claude)* Add logs to gitignore
-- Update vscode settings and extensions
-- Kilo.json
-- [**breaking**] Docker setup
-- *(llm)* Remove skills
-- *(llm)* CLAUDE.md
 - Setup git-cliff
-- *(llm)* Add skills
 - Update commitlint
-- *(llm)* Add AST wiki, MCPs, and read-wiki behavior
-- *(llm)* Add MCP to claude and add hooks
 - Add wiki generation to auto-docs.yml
 - Add commitlint
 - Fix commitlint.yml
 - Fix .commitlintrc.json
-- Bump tanstack ai
-- Remove community tanstack skill
 - Update actions/checkout to v6
-- *(llm)* Add tanstack-ai skill
-- *(llm)* Remove .agents/skills
 - Fix auto-docs.yml by giving PR read permissions
 - Add skill copies to gitignore
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add gitignore to llm_shared lib
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(llm)* Skills update
-- *(skills)* Remove angular, vue, svelte content
-- *(skills)* Copy_tanstack_skills.py
-- *(skills)* Remove vercel web design
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(llm)* Allow claude git cmds
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Remove @claude from github.com
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add runpod ocr env vars to infra, api, workers
 - Fix generate_env_example.py to dynamically create from 4 truth sources
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add to gitignore
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Add auto-format.yml action
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(gpu)* Runpod deployment scripts first draft #140
 - Init-deployer-policy
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(llm)* Codex hooks
-- *(web)* Update bun
 - Lock package versions in auto-format.yml
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Move auto-format.yml to bun
-- Vscode and kilo settings
 - Move from AWS keys to EC2 profile
-- *(llm)* Kilo settings
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Remove eslint from auto-format
-- Vscode settings
-- *(llm)* Opencode settings
 - Add sitemap to web gitignore
-- *(llm)* Opencode settings
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Remove eslint from auto-format
-- Vscode settings
-- *(llm)* Opencode settings
 - Add sitemap to web gitignore
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(fix)* Pull before push in auto-docs and auto-format actions
 - *(fix)* Only pull if changes made
 - *(fix)* Autostash when rebasing auto-docs.yml
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(db)* Deployment scripts
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- Documentation and script for dependencies
 - New deployment scripts
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- Lock node version in quickstart
-- *(db)* Delete outdate bat
 - *(aws)* Init deploy scripts
 - *(db)* Rds deploy scripts
 - *(gpu)* Init runpod deployment
 - *(aws)* Continue init deploy
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Move in-progress actions to disabled-workflows
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Dockerignore
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(web)* Continue fixing web build
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - Continue deploy scripts
 - *(web)* Improve dockerfile
 - *(db)* Remove old dockerignore
 - Add to dockerignores
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(web)* Gitignore
 - Working on aws setup
 - Remove bad draft
@@ -740,16 +614,47 @@
 - *(runpod)* Remove gh actions
 - *(aws)* Make ec2 gh deploy roles
 - Delete old deploy scripts
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
 - *(aws)* Bootstrap-ec2
 - *(net)* Migrate nginx proxy mgr to tunnels
 - Activate gh actions
 - Reset-admin-cidr
 - Declare .env file
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
-- *(changelog)* Update CHANGELOG.md and .codesight/wiki [skip ci]
+- Dev secrets
+- Setup-waf
+- Modify bootstrap to assume dnf
+- Add-dev-db-cidr
+- Start-ec2
+- Support account or user token in setup-tunnel
+- Check for gh secrets
+- Move actions to concurrency group
+- *(net)* Rotate-tunnel-token
+- *(aws)* Boostrap-ec2 redo
+- Update github actions imports
+- *(gh)* Push-secrets
+- Update healthcheck
+- Remove stray incorrect .gitignore
+- *(aws)* Fix outputs and secrets dirs
+- Update redis
+- *(aws)* Refactor setup-gh-actions-role to own dir
+- Unique image tags
+- Make test-deploy workflow [skip ci]
+- Continue testing deploy [skip ci]
+- Fix deploy workflows [skip ci]
+- Dev secrets
+- Dev cidrs
+- Dev-sso-users
+- *(aws)* Add ip v6 addresses
+- *(aws)* Remove IP restriction from dev secrets policy
+- *(aws)* Ship logs from EC2 to CloudWatch #196
+- *(fix)* Set concurrency group to max queue
+- *(gh)* Auto-docs trigger on new tag
+- *(gh)* Restart.yml
+- Make dirs if missing
+- Migrate redis to elasticache #201
+- *(fix)* Quote-safe ssm commands [skip ci]
+- *(fix)* Ec2 healthcheck action [skip ci]
+- Fix health .env.example
+- *(gh)* Add version tags from auto-docs git-cliff [skip ci]
 
 ### ◀️ Revert
 
@@ -767,3 +672,4 @@
 - *(api)* Remove llm_ner domain
 - *(api)* Return llm_ner domain
 - *(test)* Remove playwright
+- *(ci)* Delete one-off start-ec2 script

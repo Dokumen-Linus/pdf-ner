@@ -8,7 +8,7 @@
 
 On Windows (dev):
 
-```cmd
+```bash
 uv venv .venv
 powershell .\.venv\Scripts\activate
 uv pip install .
@@ -17,7 +17,7 @@ uv pip install -e ".[dev]"
 
 On Mac (dev):
 
-```cmd
+```bash
 uv venv .venv
 source .venv/bin/activate
 uv pip install .
@@ -28,13 +28,13 @@ Later, activate your existing environment with just the second command.
 
 Pre-prod:
 
-```cmd
+```bash
 uv pip compile pyproject.toml -o uv.lock
 ```
 
 On prod Linux (add to Dockerfile):
 
-```cmd
+```bash
 uv venv .venv
 source .venv/bin/activate
 uv pip sync uv.lock
@@ -48,7 +48,7 @@ Using v3.13 until most libraries have upgraded to 3.14 (currently I have "python
 
 1 Start the database server
 
-```cmd
+```bash
 pg_ctl -D .\pgdata -l logfile start
 ```
 
@@ -56,19 +56,19 @@ pg_ctl -D .\pgdata -l logfile start
 
 Windows:
 
-```cmd
+```bash
 powershell .\.venv\Scripts\activate
 ```
 
 Mac:
 
-```cmd
+```bash
 source .venv/bin/activate
 ```
 
 3 Run the app as a module (not a script)
 
-```cmd
+```bash
 uvicorn app.main:app --reload
 ```
 
@@ -151,7 +151,7 @@ Each domain may have the following files:
 
 Test dependencies are installed with the dev extras:
 
-```cmd
+```bash
 uv pip install -e ".[dev]"
 ```
 
@@ -161,25 +161,25 @@ This installs pytest, pytest-anyio, and httpx for testing.
 
 From the `api/` directory with the virtual environment activated:
 
-```cmd
+```bash
 pytest
 ```
 
 Run with verbose output:
 
-```cmd
+```bash
 pytest -v
 ```
 
 Run a specific test file:
 
-```cmd
+```bash
 pytest tests/domains/test_llm_ner.py
 ```
 
 Run a specific test class or function:
 
-```cmd
+```bash
 pytest tests/domains/test_llm_ner.py::TestBuildPrompt
 pytest tests/domains/test_llm_ner.py::TestBuildPrompt::test_interpolates_all_placeholders
 ```

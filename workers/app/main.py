@@ -36,6 +36,7 @@ app.autodiscover_tasks(
         "app.domains.source_listeners",
         "app.domains.source_watchers",
         "app.domains.text_extract",
+        "app.domains.uat_billing",
     ]
 )
 

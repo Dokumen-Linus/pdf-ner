@@ -1,5 +1,4 @@
 {
-  "DATABASE_URL": "postgres://web_user:REPLACE_ME@dokumen-prod.cluster-REPLACE_ME.us-east-1.rds.amazonaws.com:5432/dokumen?sslmode=require",
   "AUTH_DATABASE_URL": "postgres://auth_role:REPLACE_ME@dokumen-prod.cluster-REPLACE_ME.us-east-1.rds.amazonaws.com:5432/dokumen?sslmode=require",
   "WEB_DATABASE_URL": "postgres://web_user:REPLACE_ME@dokumen-prod.cluster-REPLACE_ME.us-east-1.rds.amazonaws.com:5432/dokumen?sslmode=require",
   "BASE_URL": "https://dokumenai.dev",

@@ -46,15 +46,32 @@ async function loadStageGroups(groups: Array<"web" | "email">): Promise<SecretRe
   return values
 }
 
+function isProductionMode(): boolean {
+  const appEnv = process.env.ENV?.toLowerCase()
+  if (appEnv) return appEnv === "production"
+
+  const nodeEnv = process.env.NODE_ENV?.toLowerCase()
+  if (nodeEnv) return nodeEnv === "production"
+
+  return process.env.SECRETS_STAGE === "prod"
+}
+
+async function loadRuntimeSecrets(): Promise<SecretRecord> {
+  const values = await loadStageGroups(["web", "email"])
+  if (!isProductionMode()) {
+    delete values.MY_EMAIL
+  }
+  return values
+}
+
 const runtimeEnv = {
   ...process.env,
-  ...(await loadStageGroups(["web", "email"])),
+  ...(await loadRuntimeSecrets()),
 }
 
 export const env = createEnv({
   isServer: true,
   server: {
-    DATABASE_URL: z.string(),
     AUTH_DATABASE_URL: z.string(),
     WEB_DATABASE_URL: z.string(),
     BASE_URL: z.url(),

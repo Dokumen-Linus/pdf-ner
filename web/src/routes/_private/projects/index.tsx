@@ -128,7 +128,7 @@ function ProjectsPage() {
   const [createError, setCreateError] = useState<string | null>(null)
   const [isCreatingProject, setIsCreatingProject] = useState(false)
 
-  const selectedTeam = teams.find((team) => team.id === selectedTeamId) ?? null
+  const selectedTeam = teams.find((team: ProjectTeam) => team.id === selectedTeamId) ?? null
   const scopeLabel = selectedTeam
     ? selectedTeam.name
     : organization
@@ -232,7 +232,7 @@ function ProjectsPage() {
                     <SelectValue placeholder="Choose a team" />
                   </SelectTrigger>
                   <SelectContent>
-                    {teams.map((team) => (
+                    {teams.map((team: ProjectTeam) => (
                       <SelectItem key={team.id} value={team.id}>
                         {team.name}
                       </SelectItem>

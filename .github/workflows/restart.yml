@@ -1,0 +1,116 @@
+name: Restart EC2 Services
+
+on:
+  workflow_dispatch:
+    inputs:
+      services:
+        description: "Compose service or service group to restart"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - web
+          - api
+          - worker
+          - api-worker
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  EC2_APP_DIR: ${{ vars.EC2_APP_DIR || '/opt/dokumen/pdf-ner' }}
+  EC2_DEPLOY_STATE_DIR: ${{ vars.EC2_DEPLOY_STATE_DIR || '/opt/dokumen/deploy-state' }}
+
+jobs:
+  restart:
+    name: Restart EC2 Services
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Restart selected services on EC2
+        env:
+          EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+          TARGET_SERVICES: ${{ inputs.services }}
+        run: |
+          case "$TARGET_SERVICES" in
+            all)
+              services="api worker web"
+              ;;
+            api-worker)
+              services="api worker"
+              ;;
+            web|api|worker)
+              services="$TARGET_SERVICES"
+              ;;
+            *)
+              echo "::error::Unsupported services input: ${TARGET_SERVICES}"
+              exit 1
+              ;;
+          esac
+
+          run_ssm_command() {
+            local label="$1"
+            local remote_command="$2"
+            local encoded_command
+            local command_id
+            local wait_status
+
+            encoded_command="$(printf '%s' "$remote_command" | base64 -w 0)"
+
+            echo "::group::${label}"
+            command_id="$(aws ssm send-command \
+              --instance-ids "$EC2_INSTANCE_ID" \
+              --document-name "AWS-RunShellScript" \
+              --comment "Restart EC2 services ${{ github.sha }}: ${label}" \
+              --parameters "commands=printf %s $encoded_command | base64 -d | bash" \
+              --query "Command.CommandId" \
+              --output text)"
+            echo "SSM command id: ${command_id}"
+
+            set +e
+            aws ssm wait command-executed \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID"
+            wait_status=$?
+            set -e
+
+            echo "Status:"
+            aws ssm get-command-invocation \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query "Status" \
+              --output text
+            echo "Stdout:"
+            aws ssm get-command-invocation \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query "StandardOutputContent" \
+              --output text
+            echo "Stderr:"
+            aws ssm get-command-invocation \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query "StandardErrorContent" \
+              --output text
+            echo "::endgroup::"
+
+            if (( wait_status != 0 )); then
+              exit "$wait_status"
+            fi
+          }
+
+          run_ssm_command \
+            "Restart ${TARGET_SERVICES} service(s)" \
+            "set -euo pipefail; cd $EC2_APP_DIR; if test -f $EC2_DEPLOY_STATE_DIR/docker-compose.images.yml; then docker compose -f infra/docker-compose.yml -f $EC2_DEPLOY_STATE_DIR/docker-compose.images.yml --env-file infra/.env.prod restart $services; else docker compose -f infra/docker-compose.yml --env-file infra/.env.prod restart $services; fi"

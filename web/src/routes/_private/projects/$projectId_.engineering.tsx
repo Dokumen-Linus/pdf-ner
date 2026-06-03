@@ -118,7 +118,9 @@ function EngineeringPage() {
   const [maxPagesPerPdf, setMaxPagesPerPdf] = useState(3)
   const [ocrMaxCostUsd, setOcrMaxCostUsd] = useState(0.5)
   const fallbackJudgeModel = googleModels[0]?.id ?? ""
-  const selectedJudgeModel = googleModels.some((model) => model.id === judgeModel)
+  const selectedJudgeModel = googleModels.some(
+    (model: (typeof googleModels)[number]) => model.id === judgeModel,
+  )
     ? judgeModel
     : fallbackJudgeModel
 
@@ -393,7 +395,7 @@ function EngineeringPage() {
                     <SelectValue placeholder="Choose a Gemini model" />
                   </SelectTrigger>
                   <SelectContent>
-                    {googleModels.map((model) => (
+                    {googleModels.map((model: (typeof googleModels)[number]) => (
                       <SelectItem key={model.id} value={model.id}>
                         {model.displayName}
                       </SelectItem>

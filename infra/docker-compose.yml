@@ -32,21 +32,6 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  redis:
-    image: redis:7-alpine
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    volumes:
-      - redis_data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
-    networks:
-      - backend
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
   api:
     build:
       context: ..
@@ -55,9 +40,6 @@ services:
       - "127.0.0.1:8000:8000"
     environment:
       <<: *app-bootstrap-env
-    depends_on:
-      redis:
-        condition: service_healthy
     networks:
       - backend
       - frontend
@@ -69,9 +51,6 @@ services:
       dockerfile: workers/Dockerfile
     environment:
       <<: *app-bootstrap-env
-    depends_on:
-      redis:
-        condition: service_healthy
     networks:
       - backend
       - egress
@@ -104,4 +83,3 @@ networks:
 
 volumes:
   postgres_data:
-  redis_data:

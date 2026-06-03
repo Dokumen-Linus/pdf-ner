@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=infra/deploy-aws/shared/common.sh
+# shellcheck source=infra/aws/shared/common.sh
 . "${SCRIPT_DIR}/../shared/common.sh"
 
 load_env_file "${LOCAL_ENV_FILE:-${SCRIPT_DIR}/.env.local}"
@@ -107,11 +107,14 @@ ensure_postgres_rds_instance \
 DEV_RDS_HOST="$(get_rds_endpoint "$DEV_RDS_IDENTIFIER")"
 
 ensure_secret_drafts
-set_secret_draft_value prod-web.json DATABASE_URL "$(postgres_url web_user "$WEB_USER_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
 set_secret_draft_value prod-web.json WEB_DATABASE_URL "$(postgres_url web_user "$WEB_USER_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
 set_secret_draft_value prod-web.json AUTH_DATABASE_URL "$(postgres_url auth_role "$AUTH_ROLE_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
 set_secret_draft_value prod-api.json API_DATABASE_URL "$(postgres_url api_user "$API_USER_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
 set_secret_draft_value prod-workers.json WORKERS_DATABASE_URL "$(postgres_url workers_user "$WORKERS_USER_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value dev-web.json WEB_DATABASE_URL "$(postgres_url web_user "$WEB_USER_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value dev-web.json AUTH_DATABASE_URL "$(postgres_url auth_role "$AUTH_ROLE_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value dev-api.json API_DATABASE_URL "$(postgres_url api_user "$API_USER_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value dev-workers.json WORKERS_DATABASE_URL "$(postgres_url workers_user "$WORKERS_USER_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
 
 DATABASE_ENV_FILE="${OUTPUT_DIR}/database-resources.env"
 DATABASE_REPORT_FILE="${OUTPUT_DIR}/database-report.txt"
@@ -139,7 +142,7 @@ Development RDS endpoint: ${DEV_RDS_HOST}
 Development VPC: ${DEV_VPC_ID}
 Development RDS security group: ${DEV_RDS_SG_ID}
 
-Secret drafts updated with production DB URLs only:
+Secret drafts updated with production and development DB URLs:
 ${SECRET_DRAFT_DIR}
 
 This script creates RDS instances only. Postgres databases, roles, schemas, migrations, and tables are handled separately.

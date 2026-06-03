@@ -240,7 +240,7 @@ function ProfilePage() {
     userId: user?.id ?? null,
     userAvatarUrl: user?.avatarUrl ?? null,
     organizationId: organization?.id ?? null,
-    teamIds: teams.map((team) => team.id),
+    teamIds: teams.map((team: ProfileTeams[number]) => team.id),
   })
 
   return (

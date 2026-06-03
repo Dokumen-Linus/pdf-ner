@@ -1,8 +1,6 @@
 # Dokumen Database
 
-**Development Phase**: The database has NOT been instantiated. Do not create new .sql to insert columns, modify the create_table.sql scripts directly. Do not create any backwards compatability.
-
-**Naming Conventions**: any alphabetical order, leave room to insert things where order might matter
+**Continuous Development Phase**: The database has been instantiated. All future `.sql` scripts must be prefixed with the timestamp in `YYYYMMDD_hhmmss` format (example: `20260601_123456_alter_web_pdfs.sql`) instead of the ordered numbers of pre-instantiation scripts. Scripts must have dbmate:up and dbmate:down.
 
 ## Quickstart
 
@@ -12,7 +10,7 @@
 
 Windows
 
-```cmd
+```bash
 powershell Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 irm get.scoop.sh | iex
 scoop install dbmate
@@ -20,20 +18,20 @@ scoop install dbmate
 
 Mac
 
-```cmd
+```bash
 brew install dbmate
 ```
 
 Linux (prod)
 
-```cmd
+```bash
 sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
 sudo chmod +x /usr/local/bin/dbmate
 ```
 
 3 Follow Creation/Migration Instructions for Windows Command Prompt:
 
-```cmd
+```bash
 initdb -D .\pgdata
 pg_ctl -D .\pgdata -l logfile start
 createdb dokumen
@@ -45,7 +43,7 @@ for %f in (db\seeds\*.sql) do echo Executing %f && psql -d dokumen -f "%f"
 
 Mac:
 
-```cmd
+```bash
 initdb -D ./pgdata
 pg_ctl -D ./pgdata -l logfile start
 createdb dokumen

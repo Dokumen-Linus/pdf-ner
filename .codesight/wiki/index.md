@@ -1,6 +1,6 @@
 # pdf-ner — Wiki
 
-_Generated 2026-05-30 — re-run `npx codesight --wiki` if the codebase has changed._
+_Generated 2026-06-03 — re-run `npx codesight --wiki` if the codebase has changed._
 
 Structural map compiled from source code via AST. No LLM — deterministic, 200ms.
 
@@ -10,6 +10,7 @@ Structural map compiled from source code via AST. No LLM — deterministic, 200m
 
 - [Overview](./overview.md)
 - [Database](./database.md)
+- [Payments](./payments.md)
 - [Activate-prompt](./activate-prompt.md)
 - [Avatars](./avatars.md)
 - [Buckets](./buckets.md)
@@ -20,6 +21,7 @@ Structural map compiled from source code via AST. No LLM — deterministic, 200m
 - [Ocr-evaluation](./ocr-evaluation.md)
 - [Optimize-prompt](./optimize-prompt.md)
 - [Pdfs](./pdfs.md)
+- [Tasks](./tasks.md)
 - [Test_telemetry](./test_telemetry.md)
 - [Text-extract](./text-extract.md)
 - [Infra](./infra.md)
@@ -28,10 +30,10 @@ Structural map compiled from source code via AST. No LLM — deterministic, 200m
 
 ## Quick Stats
 
-- Routes: **24**
+- Routes: **28**
 - Models: **3**
-- Components: **81**
-- Env vars: **30** required, **104** with defaults
+- Components: **82**
+- Env vars: **39** required, **159** with defaults
 
 ## How to Use
 
@@ -58,4 +60,4 @@ These exist in your codebase but are **not** reflected in wiki articles:
 When in doubt, search the source. The wiki is a starting point, not a complete inventory.
 
 ---
-_Last compiled: 2026-05-30 · 18 articles · [codesight](https://github.com/Houseofmvps/codesight)_
+_Last compiled: 2026-06-03 · 20 articles · [codesight](https://github.com/Houseofmvps/codesight)_

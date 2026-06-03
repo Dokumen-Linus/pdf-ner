@@ -8,11 +8,10 @@ on:
     paths:
       - "web/**"
       - "infra/docker-compose.yml"
-      - "infra/aws/health/**"
       - ".github/workflows/deploy-web.yml"
 
 concurrency:
-  group: deploy-web
+  group: production-deploy
   cancel-in-progress: false
 
 env:
@@ -20,6 +19,7 @@ env:
   ECR_REPOSITORY: ${{ vars.WEB_ECR_REPOSITORY || 'dokumen-web' }}
   EC2_APP_DIR: ${{ vars.EC2_APP_DIR || '/opt/dokumen/pdf-ner' }}
   EC2_DEPLOY_STATE_DIR: ${{ vars.EC2_DEPLOY_STATE_DIR || '/opt/dokumen/deploy-state' }}
+  IMAGE_TAG: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
 
 jobs:
   deploy:
@@ -31,29 +31,20 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_GITHUB_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Ensure ECR repository exists
-        run: |
-          aws ecr describe-repositories --repository-names "$ECR_REPOSITORY" >/dev/null 2>&1 \
-            || aws ecr create-repository \
-              --repository-name "$ECR_REPOSITORY" \
-              --encryption-configuration encryptionType=AES256 \
-              --image-scanning-configuration scanOnPush=true \
-              >/dev/null
 
       - name: Log in to ECR
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push web image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: web
           file: web/Dockerfile
@@ -61,54 +52,82 @@ jobs:
           build-args: |
             VITE_BASE_URL=${{ vars.VITE_BASE_URL }}
             VITE_STRIPE_PUBLISHABLE_KEY=${{ vars.VITE_STRIPE_PUBLISHABLE_KEY }}
-          tags: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          tags: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
       - name: Deploy web on EC2
         env:
-          IMAGE: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          IMAGE: ${{ steps.ecr-login.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+          SERVICE: web
         run: |
-          jq -n \
-            --arg region "$AWS_REGION" \
-            --arg app_dir "$EC2_APP_DIR" \
-            --arg state_dir "$EC2_DEPLOY_STATE_DIR" \
-            --arg image "$IMAGE" \
-            --arg registry "${{ steps.ecr-login.outputs.registry }}" \
-            --arg service "web" \
-            --arg sha "${{ github.sha }}" \
-            '{
-              commands: [
-                "set -euo pipefail",
-                "cd \($app_dir)",
-                "git fetch origin master",
-                "git checkout --detach \($sha)",
-                "aws ecr get-login-password --region \($region) | docker login --username AWS --password-stdin \($registry)",
-                "STATE_DIR=\($state_dir)",
-                "IMAGE=\($image)",
-                "SERVICE=\($service)",
-                "install -d -m 0755 \"$STATE_DIR/images\"",
-                "printf '\''%s\\n'\'' \"$IMAGE\" > \"$STATE_DIR/images/$SERVICE\"",
-                "{ echo '\''services:'\''; for service in web api worker; do image_file=\"$STATE_DIR/images/$service\"; if [ -s \"$image_file\" ]; then echo \"  $service:\"; printf '\''    image: %s\\n'\'' \"$(cat \"$image_file\")\"; fi; done; } > \"$STATE_DIR/docker-compose.images.yml\"",
-                "docker compose -f infra/docker-compose.yml -f \"$STATE_DIR/docker-compose.images.yml\" --env-file infra/.env.prod pull \"$SERVICE\"",
-                "docker compose -f infra/docker-compose.yml -f \"$STATE_DIR/docker-compose.images.yml\" --env-file infra/.env.prod up -d --no-build --no-deps \"$SERVICE\"",
-                "bash infra/aws/health/ec2-healthcheck.sh",
-                "docker image prune -f"
-              ]
-            }' > ssm-commands.json
+          run_ssm_command() {
+            local label="$1"
+            local remote_command="$2"
+            local encoded_command
+            local command_id
+            local wait_status
 
-          COMMAND_ID=$(aws ssm send-command \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
-            --document-name "AWS-RunShellScript" \
-            --comment "Deploy web ${{ github.sha }}" \
-            --parameters file://ssm-commands.json \
-            --query "Command.CommandId" \
-            --output text)
+            encoded_command="$(printf '%s' "$remote_command" | base64 -w 0)"
 
-          aws ssm wait command-executed \
-            --command-id "$COMMAND_ID" \
-            --instance-id "${{ secrets.EC2_INSTANCE_ID }}"
+            echo "::group::${label}"
+            command_id="$(aws ssm send-command \
+              --instance-ids "$EC2_INSTANCE_ID" \
+              --document-name "AWS-RunShellScript" \
+              --comment "Deploy web ${{ github.sha }}: ${label}" \
+              --parameters "commands=printf %s $encoded_command | base64 -d | bash" \
+              --query "Command.CommandId" \
+              --output text)"
+            echo "SSM command id: ${command_id}"
 
-          aws ssm get-command-invocation \
-            --command-id "$COMMAND_ID" \
-            --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
-            --query "{Status:Status,StandardOutput:StandardOutputContent,StandardError:StandardErrorContent}" \
-            --output json
+            set +e
+            aws ssm wait command-executed \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID"
+            wait_status=$?
+            set -e
+
+            echo "Status:"
+            aws ssm get-command-invocation \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query "Status" \
+              --output text
+            echo "Stdout:"
+            aws ssm get-command-invocation \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query "StandardOutputContent" \
+              --output text
+            echo "Stderr:"
+            aws ssm get-command-invocation \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query "StandardErrorContent" \
+              --output text
+            echo "::endgroup::"
+
+            if (( wait_status != 0 )); then
+              exit "$wait_status"
+            fi
+          }
+
+          run_ssm_command \
+            "Log in to ECR" \
+            "set -euo pipefail; aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"
+
+          run_ssm_command \
+            "Write Compose image override" \
+            "set -euo pipefail; STATE_DIR=$EC2_DEPLOY_STATE_DIR; SERVICE=$SERVICE; IMAGE=$IMAGE; install -d -m 0755 \$STATE_DIR \$STATE_DIR/images; echo \$IMAGE > \$STATE_DIR/images/\$SERVICE; echo services: > \$STATE_DIR/docker-compose.images.yml; if test -s \$STATE_DIR/images/web; then image=\$(cat \$STATE_DIR/images/web); echo \\ \\ web: >> \$STATE_DIR/docker-compose.images.yml; echo \\ \\ \\ \\ image: \$image >> \$STATE_DIR/docker-compose.images.yml; fi; if test -s \$STATE_DIR/images/api; then image=\$(cat \$STATE_DIR/images/api); echo \\ \\ api: >> \$STATE_DIR/docker-compose.images.yml; echo \\ \\ \\ \\ image: \$image >> \$STATE_DIR/docker-compose.images.yml; fi; if test -s \$STATE_DIR/images/worker; then image=\$(cat \$STATE_DIR/images/worker); echo \\ \\ worker: >> \$STATE_DIR/docker-compose.images.yml; echo \\ \\ \\ \\ image: \$image >> \$STATE_DIR/docker-compose.images.yml; fi"
+
+          run_ssm_command \
+            "Pull web image" \
+            "set -euo pipefail; cd $EC2_APP_DIR; docker compose -f infra/docker-compose.yml -f $EC2_DEPLOY_STATE_DIR/docker-compose.images.yml --env-file infra/.env.prod pull web"
+
+          run_ssm_command \
+            "Start web service" \
+            "set -euo pipefail; cd $EC2_APP_DIR; docker compose -f infra/docker-compose.yml -f $EC2_DEPLOY_STATE_DIR/docker-compose.images.yml --env-file infra/.env.prod up -d --no-build --no-deps web"
+
+          run_ssm_command \
+            "Prune dangling images" \
+            "set -euo pipefail; docker image prune -f"

@@ -15,10 +15,32 @@ const getServerSession = createServerFn({ method: "GET" }).handler(async () => {
   return auth.api.getSession({ headers })
 })
 
+function getEmailDomain(email: string): string | null {
+  const normalized = email.trim().toLowerCase()
+  const atIndex = normalized.lastIndexOf("@")
+  if (atIndex < 0 || atIndex === normalized.length - 1) return null
+  return normalized.slice(atIndex + 1)
+}
+
+function isVerifiedInternalEmail(
+  user: { email?: string | null; emailVerified?: boolean | null },
+  internalEmail: string,
+): boolean {
+  if (!user.emailVerified || !user.email) return false
+  const domain = getEmailDomain(internalEmail)
+  if (!domain) return false
+  return user.email.trim().toLowerCase().endsWith(`@${domain}`)
+}
+
 const getPaymentGate = createServerFn({ method: "GET" }).handler(async () => {
   const { eq } = await import("drizzle-orm")
   const { db } = await import("@/db/client")
   const { organizations, users } = await import("@/db/schemas/web")
+  const { env } = await import("@/env.server")
+  const session = await getServerSession()
+  if (session?.user && isVerifiedInternalEmail(session.user, env.MY_EMAIL)) {
+    return { ready: true }
+  }
   const { requireWorkspaceUser } = await import("@/lib/project-authorization.server")
   const user = await requireWorkspaceUser()
   if (user.accountRole === "individual") {

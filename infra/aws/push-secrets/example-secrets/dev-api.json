@@ -1,0 +1,14 @@
+{
+  "API_DATABASE_URL": "postgres://api_user:REPLACE_ME@dokumen-dev.REPLACE_ME.us-east-1.rds.amazonaws.com:5432/dokumen?sslmode=require",
+  "REDIS_URL": "redis://localhost:6379/0",
+  "API_KEY": "REPLACE_WITH_SHARED_WEB_TO_API_KEY",
+  "HEALTHCHECK_TOKEN": "REPLACE_WITH_SHARED_HEALTHCHECK_TOKEN",
+  "CORS_ORIGINS": ["http://localhost:3000"],
+  "ALLOWED_HOSTS": ["localhost", "127.0.0.1"],
+  "ANTHROPIC_API_KEY": "REPLACE_ME",
+  "OPENAI_API_KEY": "REPLACE_ME",
+  "GOOGLE_AI_API_KEY": "REPLACE_ME",
+  "AVATARS_S3_BUCKET_NAME": "REPLACE_WITH_DEV_AVATAR_BUCKET_NAME",
+  "AVATARS_AWS_REGION": "us-east-1",
+  "AVATARS_AWS_ENDPOINT_URL": null
+}

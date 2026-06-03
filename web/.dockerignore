@@ -19,6 +19,7 @@ node_modules/
 .output/
 .vite/
 dist/
+dist-ssr/
 
 .env
 .env.*

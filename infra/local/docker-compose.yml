@@ -1,0 +1,107 @@
+x-app-bootstrap-env: &app-bootstrap-env
+  ENV: ${ENV:-production}
+  APP_VERSION: ${APP_VERSION:-0.0.0}
+  SECRETS_STAGE: ${SECRETS_STAGE:-prod}
+  AWS_REGION: ${AWS_REGION:-us-east-1}
+
+services:
+  db:
+    profiles:
+      - local-db
+    build:
+      context: ../../db
+    environment:
+      POSTGRES_DB: dokumen
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      # Role passwords — injected into db/init/01_roles.sh
+      OWNER_ROLE_PASSWORD: ${OWNER_ROLE_PASSWORD:-}
+      AUTH_ROLE_PASSWORD: ${AUTH_ROLE_PASSWORD:-}
+      WEB_USER_PASSWORD: ${WEB_USER_PASSWORD:-}
+      API_USER_PASSWORD: ${API_USER_PASSWORD:-}
+      WORKERS_USER_PASSWORD: ${WORKERS_USER_PASSWORD:-}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dokumen"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  redis:
+    image: redis:8-alpine
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - redis_data:/data
+      - ../redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../..
+      dockerfile: api/Dockerfile
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      <<: *app-bootstrap-env
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ../..
+      dockerfile: workers/Dockerfile
+    environment:
+      <<: *app-bootstrap-env
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - backend
+      - egress
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ../../web
+      args:
+        # Baked into the client bundle at build time
+        VITE_BASE_URL: ${VITE_BASE_URL}
+        VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      <<: *app-bootstrap-env
+    networks:
+      - backend
+      - frontend
+    restart: unless-stopped
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true
+  egress:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
