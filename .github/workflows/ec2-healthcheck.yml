@@ -2,11 +2,6 @@ name: EC2 Healthcheck
 
 on:
   workflow_dispatch:
-    inputs:
-      wait_seconds:
-        description: Seconds to wait before running the health check
-        required: false
-        default: "120"
 
 concurrency:
   group: production-healthcheck
@@ -16,7 +11,6 @@ env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
   EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
   EC2_APP_DIR: ${{ vars.EC2_APP_DIR || '/opt/dokumen/pdf-ner' }}
-  WAIT_SECONDS: ${{ inputs.wait_seconds || '120' }}
 
 jobs:
   healthcheck:
@@ -35,18 +29,14 @@ jobs:
 
       - name: Run healthcheck on EC2
         run: |
-          case "$WAIT_SECONDS" in
-            ""|*[!0-9]*)
-              echo "::error::wait_seconds must be a non-negative integer."
-              exit 1
-              ;;
-          esac
+          REMOTE_COMMAND="set -euo pipefail; cd $EC2_APP_DIR; bash infra/aws/health/ec2-healthcheck.sh"
+          ENCODED_COMMAND="$(printf '%s' "$REMOTE_COMMAND" | base64 -w 0)"
 
           COMMAND_ID="$(aws ssm send-command \
             --instance-ids "$EC2_INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
-            --comment "Run EC2 healthcheck after ${WAIT_SECONDS}s wait" \
-            --parameters "commands=set -euo pipefail; sleep $WAIT_SECONDS; cd $EC2_APP_DIR; bash infra/aws/health/ec2-healthcheck.sh" \
+            --comment "Run EC2 healthcheck" \
+            --parameters "commands=printf %s $ENCODED_COMMAND | base64 -d | bash" \
             --query "Command.CommandId" \
             --output text)"
 
