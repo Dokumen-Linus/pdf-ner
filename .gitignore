@@ -3,6 +3,8 @@
 .env.production
 .env.development
 infra/.env.prod
+
+# deprecated dirs, but still hold old secrets
 infra/data
 infra/init
 

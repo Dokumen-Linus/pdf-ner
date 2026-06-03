@@ -10,7 +10,7 @@ class FakeSecretsClient:
                 "SecretString": json.dumps(
                     {
                         "API_DATABASE_URL": "postgres://api-secret/db",
-                        "REDIS_URL": "redis://api-secret/0",
+                        "REDIS_URL": "rediss://:token@example.cache.amazonaws.com:6379/0?ssl_cert_reqs=required",
                         "API_KEY": "api-secret",
                         "CORS_ORIGINS": ["https://app.example"],
                         "ALLOWED_HOSTS": ["app.example"],
@@ -47,6 +47,8 @@ def test_api_settings_load_from_aws_secrets(monkeypatch):
     settings = config.get_settings()
 
     assert settings.API_DATABASE_URL == "postgres://api-secret/db"
+    assert settings.REDIS_URL.startswith("rediss://")
+    assert "ssl_cert_reqs=required" in settings.REDIS_URL
     assert settings.OCR_RUNPOD_HTTP_TOKEN == "runpod-secret"
     assert settings.OCR_MODEL == "olm-ocr2"
 

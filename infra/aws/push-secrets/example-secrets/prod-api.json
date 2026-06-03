@@ -1,6 +1,6 @@
 {
   "API_DATABASE_URL": "postgres://api_user:REPLACE_ME@dokumen-prod.cluster-REPLACE_ME.us-east-1.rds.amazonaws.com:5432/dokumen?sslmode=require",
-  "REDIS_URL": "redis://redis:6379/0",
+  "REDIS_URL": "rediss://:REPLACE_WITH_ELASTICACHE_AUTH_TOKEN@dokumen-redis.REPLACE_ME.use1.cache.amazonaws.com:6379/0?ssl_cert_reqs=required",
   "API_KEY": "REPLACE_WITH_SHARED_WEB_TO_API_KEY",
   "HEALTHCHECK_TOKEN": "REPLACE_WITH_SHARED_HEALTHCHECK_TOKEN",
   "CORS_ORIGINS": ["https://dokumenai.dev"],

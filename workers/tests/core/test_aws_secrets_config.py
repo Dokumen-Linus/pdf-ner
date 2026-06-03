@@ -10,7 +10,7 @@ class FakeSecretsClient:
                 "SecretString": json.dumps(
                     {
                         "WORKERS_DATABASE_URL": "postgres://workers-secret/db",
-                        "REDIS_URL": "redis://workers-secret/0",
+                        "REDIS_URL": "rediss://:token@example.cache.amazonaws.com:6379/0?ssl_cert_reqs=required",
                         "ANTHROPIC_API_KEY": "anthropic-secret",
                         "OPENAI_API_KEY": "openai-secret",
                         "GOOGLE_AI_API_KEY": "google-secret",
@@ -44,6 +44,8 @@ def test_worker_settings_load_from_aws_secrets(monkeypatch):
     settings = config.get_settings()
 
     assert settings.WORKERS_DATABASE_URL == "postgres://workers-secret/db"
+    assert settings.REDIS_URL.startswith("rediss://")
+    assert "ssl_cert_reqs=required" in settings.REDIS_URL
     assert settings.STRIPE_SECRET_KEY == "stripe-secret"
     assert settings.OCR_RUNPOD_HTTP_TOKEN == "runpod-secret"
 
