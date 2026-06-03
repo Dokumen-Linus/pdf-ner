@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Updates an already-bootstrapped Dokumen EC2 instance to ship Docker and host logs
-# to CloudWatch Logs using infra/aws/bootstrap-ec2/setup-cloudwatch-logs.sh.
+# to CloudWatch Logs using infra/aws/bootstrap-ec2/start-cloudwatch.sh.
 #
 # Defaults are chosen for the current repo. Override any of these if needed:
 #   AWS_REGION=us-east-1
@@ -20,8 +20,8 @@ SSH_PRIVATE_KEY_PATH="${SSH_PRIVATE_KEY_PATH:-${HOME}/.ssh/dokumen-ec2}"
 SSH_USER="${SSH_USER:-ec2-user}"
 CLOUDWATCH_LOG_GROUP_PREFIX="${CLOUDWATCH_LOG_GROUP_PREFIX:-/dokumen/production/ec2}"
 CLOUDWATCH_LOG_RETENTION_DAYS="${CLOUDWATCH_LOG_RETENTION_DAYS:-14}"
-LOCAL_SETUP_SCRIPT="${LOCAL_SETUP_SCRIPT:-infra/aws/bootstrap-ec2/setup-cloudwatch-logs.sh}"
-REMOTE_SETUP_SCRIPT="${REMOTE_SETUP_SCRIPT:-/tmp/setup-cloudwatch-logs.sh}"
+LOCAL_SETUP_SCRIPT="${LOCAL_SETUP_SCRIPT:-infra/aws/bootstrap-ec2/start-cloudwatch.sh}"
+REMOTE_SETUP_SCRIPT="${REMOTE_SETUP_SCRIPT:-/tmp/start-cloudwatch.sh}"
 
 require_cmd() {
   local name="$1"
