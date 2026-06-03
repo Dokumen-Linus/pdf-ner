@@ -14,6 +14,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - Never prompt the user to run more than one commands. Instead write them to `./tmp.sh` with explanation comments. If temp.sh doesn't exist, create it. If it does, append to it
 - Always run `bash -n` and `shellcheck` on any `.sh` scripts created. `.sh` scripts may use `jq` but should not output .json files. If a long JSON is required, make a .json file separately and reference it
 - Whenever a test command or script starts a long-running process like localhost:3000 for web or creates long-living files like a Docker image, terminate the process or delete the files before responding
+- Defer to prefixing the following command with `rtk` to clean the output (example: `rtx git diff`): ls, find, grep, diff, git diff, git status, ruff check, curl, wget
 
 ## Work Loop
 

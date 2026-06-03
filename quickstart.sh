@@ -28,6 +28,7 @@ set -uo pipefail
 # - Docker Credential Helpers
 # - OpenSSH (optional)
 # - Tesseract OCR
+# - Rust Token Killer (rtk)
 # - Google Chrome
 # - Codex CLI
 # - OpenCode CLI
@@ -574,6 +575,27 @@ EOF
     rustc --version || return
 }
 
+install_rtk() {
+    if command_exists rtk; then
+        echo "rtk already installed at $(command -v rtk)"
+        return 0
+    fi
+
+    curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh || return
+
+    export PATH="$HOME/.rtk/bin:$PATH"
+
+    if ! grep -q '.rtk/bin' "$HOME/.bashrc"; then
+        cat <<'EOF' >> "$HOME/.bashrc"
+
+# Rust Token Killer
+export PATH="$HOME/.rtk/bin:$PATH"
+EOF
+    fi
+
+    rtk --version || return
+}
+
 install_scc() {
     if command_exists scc; then
         echo "scc already installed at $(command -v scc)"
@@ -685,6 +707,7 @@ print_executable_checks() {
         opencode \
         go \
         rustc \
+        rtk \
         scc \
         actionlint \
         shellcheck \
@@ -737,6 +760,7 @@ print_versions() {
     opencode --version || true
     go version || true
     rustc --version || true
+    rtk --version || true
     scc --version || true
     actionlint --version || true
     shellcheck --version || true
@@ -763,6 +787,7 @@ run_step "Installing GitHub CLI" install_github_cli
 run_step "Installing ShellCheck" install_shellcheck
 run_step "Installing Go" install_go
 run_step "Installing Rust" install_rust
+run_step "Installing Rust Token Killer" install_rtk
 run_step "Installing scc" install_scc
 run_step "Installing actionlint" install_actionlint
 run_step "Installing cloudflared" install_cloudflared

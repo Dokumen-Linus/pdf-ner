@@ -228,7 +228,15 @@ sudo dpkg -i cloudflared.deb
 
 - [Codex](https://github.com/openai/codex)
 - [OpenCode](https://opencode.ai)
+- [Rust Token Killer](https://github.com/rtk-ai/rtk) - helper CLI
 
 ```bash
+# Codex
 npm install -g @openai/codex
+
+# OpenCode
+npm i -g opencode-ai
+
+# Rust Token Killer
+curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
 ```
