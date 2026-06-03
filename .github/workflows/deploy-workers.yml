@@ -13,7 +13,6 @@ on:
 
 concurrency:
   group: production-deploy
-  queue: max
   cancel-in-progress: false
 
 env:
@@ -63,15 +62,18 @@ jobs:
           run_ssm_command() {
             local label="$1"
             local remote_command="$2"
+            local encoded_command
             local command_id
             local wait_status
+
+            encoded_command="$(printf '%s' "$remote_command" | base64 -w 0)"
 
             echo "::group::${label}"
             command_id="$(aws ssm send-command \
               --instance-ids "$EC2_INSTANCE_ID" \
               --document-name "AWS-RunShellScript" \
               --comment "Deploy workers ${{ github.sha }}: ${label}" \
-              --parameters "commands=$remote_command" \
+              --parameters "commands=printf %s $encoded_command | base64 -d | bash" \
               --query "Command.CommandId" \
               --output text)"
             echo "SSM command id: ${command_id}"
