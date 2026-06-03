@@ -76,6 +76,15 @@ describe("billing status enum invariant", () => {
     expect(privateRoute).not.toContain('billingStatus !== "past_due"')
   })
 
+  it("exempts verified users from the MY_EMAIL domain without hardcoding the domain", async () => {
+    const privateRoute = await readRepoFile("web/src/routes/_private.tsx")
+
+    expect(privateRoute).toContain("env.MY_EMAIL")
+    expect(privateRoute).toContain("emailVerified")
+    expect(privateRoute).toContain("endsWith(`@${domain}`)")
+    expect(privateRoute).not.toContain("@dokumenai.dev")
+  })
+
   it("activates billing without resetting existing billing anchors", async () => {
     const billingSource = await readRepoFile("web/src/db-fns/web/billing.ts")
 

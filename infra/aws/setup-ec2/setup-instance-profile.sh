@@ -47,6 +47,13 @@ setup_instance_profile() {
     {
       "Effect": "Allow",
       "Action": [
+        "elasticache:DescribeReplicationGroups"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "ses:SendEmail",
         "ses:SendRawEmail"
       ],

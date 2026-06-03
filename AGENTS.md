@@ -7,12 +7,12 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - Never disable, hide, or bypass failing tests, lint, or type checks
 - Touch only requested scope
 - Do not delete code or comments you do not understand without approval
-- Prefer the simplest correct solution. Avoid abstractions unless clearly justified
+- Prefer the simplest correct code. Avoid abstractions unless clearly justified
 - If requirements or source files conflict, stop and surface the ambiguity
 - Never read or edit .env files Always add new env vars to the local `.env.example`
 - Never read or edit `research.md`, `LICENSE.md`, `CHANGELOG.md`, `DESIGN.md` or any `README.md` file except `README.AGENTS.md`
 - Never prompt the user to run more than one commands. Instead write them to `./tmp.sh` with explanation comments. If temp.sh doesn't exist, create it. If it does, append to it
-- Always run `bash -n` and `shellcheck` on any `.sh` scripts created. Always test individual `jq` lines by separately running `jq -n`. Don't use `jq -n` or output to JSON in the actual `.sh` scripts the user is expected to run
+- Always run `bash -n` and `shellcheck` on any `.sh` scripts created. `.sh` scripts may use `jq` but should not output .json files. If a long JSON is required, make a .json file separately and reference it
 - Whenever a test command or script starts a long-running process like localhost:3000 for web or creates long-living files like a Docker image, terminate the process or delete the files before responding
 
 ## Work Loop
@@ -20,9 +20,11 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - Read `.codesight/wiki/index.md`, `overview.md`, the relevant domain article, any relevant `README.AGENTS.md`, and the actual source files listed there before editing
 - Before non-trivial work, state assumptions explicitly
 - For multi-step work, give a short plan
+- Do not reread files before editing unless an edit fails due to a change
 - For non-trivial logic, define success with tests, implement, then optimize if needed
-- Push back on approaches with clear downsides
+- Do not add tests that simply restate the implementation
 - If your changes create dead code, list it and ask before removing it
+- *Push back on unnecessary requests and instructions with clear downsides*
 
 ## Dokumen AI Monorepo Map
 
@@ -50,6 +52,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - FastAPI calls belong in `src/api-fns/` or `src/routes/api/`, following the existing server-call wrappers
 - Import env from `src/env.server.ts` or `src/env.client.ts` only
 - When extending PDF plugins, preserve the existing plugin folder structure and file naming patterns
+- Prefer `const` over `let` and never use `var`
 
 ### api Invariants
 

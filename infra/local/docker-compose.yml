@@ -9,7 +9,7 @@ services:
     profiles:
       - local-db
     build:
-      context: ../db
+      context: ../../db
     environment:
       POSTGRES_DB: dokumen
       POSTGRES_USER: postgres
@@ -32,14 +32,32 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  redis:
+    image: redis:8-alpine
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - redis_data:/data
+      - ../redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   api:
     build:
-      context: ..
+      context: ../..
       dockerfile: api/Dockerfile
     ports:
       - "127.0.0.1:8000:8000"
     environment:
       <<: *app-bootstrap-env
+    depends_on:
+      redis:
+        condition: service_healthy
     networks:
       - backend
       - frontend
@@ -47,10 +65,13 @@ services:
 
   worker:
     build:
-      context: ..
+      context: ../..
       dockerfile: workers/Dockerfile
     environment:
       <<: *app-bootstrap-env
+    depends_on:
+      redis:
+        condition: service_healthy
     networks:
       - backend
       - egress
@@ -58,7 +79,7 @@ services:
 
   web:
     build:
-      context: ../web
+      context: ../../web
       args:
         # Baked into the client bundle at build time
         VITE_BASE_URL: ${VITE_BASE_URL}
@@ -83,3 +104,4 @@ networks:
 
 volumes:
   postgres_data:
+  redis_data:

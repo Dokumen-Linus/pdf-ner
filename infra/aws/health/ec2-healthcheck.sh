@@ -8,7 +8,7 @@ COMPOSE_FILE="${COMPOSE_FILE:-infra/docker-compose.yml}"
 ENV_FILE="${ENV_FILE:-infra/.env.prod}"
 LOG_LINES="${LOG_LINES:-120}"
 MAX_RESTARTS="${MAX_RESTARTS:-}"
-REQUIRED_SERVICES_TEXT="${REQUIRED_SERVICES:-redis api worker web}"
+REQUIRED_SERVICES_TEXT="${REQUIRED_SERVICES:-api worker web}"
 OPTIONAL_SERVICES_TEXT="${OPTIONAL_SERVICES:-}"
 HOST_PORT_CHECKS_TEXT="${HOST_PORT_CHECKS:-web:127.0.0.1:3000 api:127.0.0.1:8000}"
 PUBLIC_HEALTH_BASE_URL="${PUBLIC_HEALTH_BASE_URL:-https://dokumenai.dev}"
@@ -20,6 +20,8 @@ CHECK_AWS_SECRETS="${CHECK_AWS_SECRETS:-0}"
 CHECK_SECRET_UNPACK="${CHECK_SECRET_UNPACK:-0}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
 AWS_SECRET_NAMES_TEXT="${AWS_SECRET_NAMES:-prod/web prod/email prod/api prod/workers prod/runpod}"
+CHECK_ELASTICACHE="${CHECK_ELASTICACHE:-1}"
+ELASTICACHE_REPLICATION_GROUP_ID="${ELASTICACHE_REPLICATION_GROUP_ID:-dokumen-redis}"
 read -r -a REQUIRED_SERVICES <<< "$REQUIRED_SERVICES_TEXT"
 read -r -a OPTIONAL_SERVICES <<< "$OPTIONAL_SERVICES_TEXT"
 read -r -a HOST_PORT_CHECKS <<< "$HOST_PORT_CHECKS_TEXT"
@@ -295,16 +297,59 @@ PY
   fi
 }
 
+check_elasticache() {
+  if [[ "$CHECK_ELASTICACHE" != "1" ]]; then
+    return
+  fi
+
+  echo
+  echo "ElastiCache checks:"
+  printf '%-28s %s\n' "FIELD" "RESULT"
+
+  if ! command -v aws >/dev/null 2>&1; then
+    printf '%-28s %s\n' "aws cli" "missing"
+    record_failure "aws cli is required for ElastiCache health checks"
+    return
+  fi
+
+  if ! command -v jq >/dev/null 2>&1; then
+    printf '%-28s %s\n' "jq" "missing"
+    record_failure "jq is required for ElastiCache health checks"
+    return
+  fi
+
+  local details status snapshot_retention transit auth at_rest
+  if ! details="$(aws --region "$AWS_REGION" elasticache describe-replication-groups \
+    --replication-group-id "$ELASTICACHE_REPLICATION_GROUP_ID" \
+    --output json 2>/dev/null)"; then
+    printf '%-28s %s\n' "replication group" "missing-or-inaccessible"
+    record_failure "ElastiCache replication group '${ELASTICACHE_REPLICATION_GROUP_ID}' is missing or inaccessible in ${AWS_REGION}"
+    return
+  fi
+
+  status="$(jq -r '.ReplicationGroups[0].Status // ""' <<< "$details")"
+  snapshot_retention="$(jq -r '.ReplicationGroups[0].SnapshotRetentionLimit // 0' <<< "$details")"
+  transit="$(jq -r '.ReplicationGroups[0].TransitEncryptionEnabled // false' <<< "$details")"
+  auth="$(jq -r '.ReplicationGroups[0].AuthTokenEnabled // false' <<< "$details")"
+  at_rest="$(jq -r '.ReplicationGroups[0].AtRestEncryptionEnabled // false' <<< "$details")"
+
+  printf '%-28s %s\n' "replication group" "$ELASTICACHE_REPLICATION_GROUP_ID"
+  printf '%-28s %s\n' "status" "$status"
+  printf '%-28s %s\n' "transit encryption" "$transit"
+  printf '%-28s %s\n' "auth token" "$auth"
+  printf '%-28s %s\n' "at-rest encryption" "$at_rest"
+  printf '%-28s %s\n' "snapshot retention days" "$snapshot_retention"
+
+  [[ "$status" == "available" ]] || record_failure "ElastiCache replication group '${ELASTICACHE_REPLICATION_GROUP_ID}' status is ${status}, expected available"
+  [[ "$transit" == "true" ]] || record_failure "ElastiCache replication group '${ELASTICACHE_REPLICATION_GROUP_ID}' does not have transit encryption enabled"
+  [[ "$auth" == "true" ]] || record_failure "ElastiCache replication group '${ELASTICACHE_REPLICATION_GROUP_ID}' does not have AUTH enabled"
+  [[ "$at_rest" == "true" ]] || record_failure "ElastiCache replication group '${ELASTICACHE_REPLICATION_GROUP_ID}' does not have at-rest encryption enabled"
+  (( snapshot_retention > 0 )) || record_failure "ElastiCache replication group '${ELASTICACHE_REPLICATION_GROUP_ID}' has automatic snapshots disabled"
+}
+
 check_internal_services() {
   echo
   echo "Internal service probes:"
-  if compose exec -T redis redis-cli ping | grep -qx PONG; then
-    echo "redis ping: PONG"
-  else
-    echo "redis ping: failed"
-    record_failure "redis-cli ping did not return PONG"
-  fi
-
   if compose exec -T worker python -m app.healthcheck --json; then
     echo "worker health command: passed"
   else
@@ -394,6 +439,7 @@ check_web_local_origin() {
 check_compose_services
 check_aws_secrets
 check_secret_unpacking
+check_elasticache
 check_host_ports
 check_internal_services
 check_http_health

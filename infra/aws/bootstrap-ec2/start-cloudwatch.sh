@@ -35,7 +35,6 @@ require_dnf() {
 install_packages() {
   sudo dnf install -y \
     amazon-cloudwatch-agent \
-    jq \
     rsyslog
 }
 
@@ -168,6 +167,7 @@ verify_cloudwatch_agent() {
 
 require_dnf
 require_cmd sudo
+require_cmd jq
 validate_retention_days
 install_packages
 enable_rsyslog
