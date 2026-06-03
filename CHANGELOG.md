@@ -1,5 +1,10 @@
 ## [unreleased]
 
+### ⚡ Performance
+
+- Tanstack start css in-lining
+## [0.1.0] - 2026-06-03
+
 ### 🚀 Features
 
 - Plugin-zoom with local hammer
