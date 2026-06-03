@@ -1,9 +1,9 @@
 ---
-name: tanstack-tanstack-devtools-event-client
+name: tanstack-devtools-event-client
 description: Create typed EventClient for a library. Define event maps with typed payloads, pluginId auto-prepend namespacing, emit()/on()/onAll()/onAllPluginEvents() API. Connection lifecycle (5 retries, 300ms), event queuing, enabled/disabled state, SSR fallbacks, singleton pattern. Unique pluginId requirement to avoid event collisions.
 ---
 
-# tanstack-tanstack-devtools-event-client
+# tanstack-devtools-event-client
 
 Typed event emitter/listener that connects application code to TanStack Devtools panels. Framework-agnostic. Works in React, Vue, Solid, Preact, and vanilla JS.
 
@@ -277,6 +277,6 @@ When `enabled` is `false`, `emit()` returns immediately (no event creation, no q
 
 ## See Also
 
-- `tanstack-tanstack-devtools-instrumentation` -- after creating a client, instrument library code with strategic emissions
+- `tanstack-devtools-instrumentation` -- after creating a client, instrument library code with strategic emissions
 - `devtools-plugin-panel` -- the client emits events, the panel listens using the same event map
-- `tanstack-tanstack-devtools-bidirectional` -- two-way communication between panel and application using the same EventClient
+- `tanstack-devtools-bidirectional` -- two-way communication between panel and application using the same EventClient

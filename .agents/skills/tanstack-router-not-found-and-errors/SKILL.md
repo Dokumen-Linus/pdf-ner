@@ -424,4 +424,4 @@ function ErrorFallback({ error }: { error: Error; reset: () => void }) {
 ## Cross-References
 
 - **tanstack-router-data-loading** — `notFound()` thrown in loaders interacts with error boundaries and loader data availability. `errorComponent` retry requires `router.invalidate()`.
-- **tanstack-router/type-safety** — `notFoundComponent` data is typed as `unknown`; validate before use.
+- **tanstack-router-type-safety** — `notFoundComponent` data is typed as `unknown`; validate before use.

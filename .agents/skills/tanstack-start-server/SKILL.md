@@ -35,7 +35,7 @@ With asset URL transforms (CDN):
 ```ts
 export default createStartHandler({
   handler: defaultStreamHandler,
-  transformAssetUrls: 'https://cdn.example.com',
+  transformAssets: 'https://cdn.example.com',
 })
 ```
 
@@ -251,6 +251,6 @@ Session cookies should use `secure: true` in production. The default cookie opti
 
 ## Cross-References
 
-- [tanstack-tanstack-start-server-functions](../tanstack-start-server-functions/SKILL.md) — creating server functions that use these utilities
-- [tanstack-tanstack-start-middleware](../tanstack-start-middleware/SKILL.md) — request middleware
-- [tanstack-tanstack-start-server-routes](../tanstack-start-server-routes/SKILL.md) — server route handlers
+- [tanstack-start-core-server-functions](../tanstack-start-server-functions/SKILL.md) — creating server functions that use these utilities
+- [tanstack-start-core-middleware](../tanstack-start-middleware/SKILL.md) — request middleware
+- [tanstack-start-core-server-routes](../tanstack-start-server-routes/SKILL.md) — server route handlers

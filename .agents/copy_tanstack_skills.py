@@ -1,6 +1,4 @@
-import os
 from pathlib import Path
-import posixpath
 import re
 import shutil
 
@@ -8,12 +6,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 NODE_MODULES = PROJECT_ROOT / "web" / "node_modules" / "@tanstack"
 SKILLS_DIR = PROJECT_ROOT / ".agents" / "skills"
 
-SKIP_FOLDERS = {"lifecycle", "virtual-file-routes", "router-plugin"}
-
-NAME_LINE_PATTERN = re.compile(r"^(name:\s*)(\S+)(\s*)$")
-REQUIRES_INLINE_PATTERN = re.compile(r"^(requires:\s*)(\S+)(\s*)$")
-REQUIRES_ITEM_PATTERN = re.compile(r"^(\s*-\s*)(\S+)(\s*)$")
-MARKDOWN_LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+SKILL\.md)\)")
+SKIP_FOLDERS = {
+    "lifecycle",
+    "virtual-file-routes",
+    "router-plugin",
+}
 
 
 def find_tanstack_packages_with_skills():
@@ -39,68 +36,27 @@ def get_dest_skill_name(skill_dir_name: str) -> str:
     return f"tanstack-{skill_dir_name}"
 
 
-def prefix_skill_name(skill_name: str) -> str:
-    root, sep, remainder = skill_name.partition("/")
-    if root.startswith("tanstack-"):
-        return skill_name
-    return f"tanstack-{root}{sep}{remainder}"
-
-
 def iter_skill_markdown_files(skill_dirs: list[Path]):
     for skill_dir in skill_dirs:
         yield from sorted(skill_dir.rglob("SKILL.md"))
 
 
-def read_skill_name(skill_md: Path) -> str | None:
-    content = skill_md.read_text(encoding="utf-8")
+def read_skill_name(skill_md: Path, content: str | None = None) -> str | None:
+    if content is None:
+        content = skill_md.read_text(encoding="utf-8")
     match = re.search(r"^name:\s*(\S+)\s*$", content, re.MULTILINE)
-    if match:
-        return match.group(1)
-    return None
-
-
-def build_skill_index(copied_skill_dirs: list[Path]):
-    skill_name_mapping = {}
-    skill_paths = {}
-
-    for skill_md in iter_skill_markdown_files(copied_skill_dirs):
-        source_name = read_skill_name(skill_md)
-        if not source_name:
-            continue
-
-        skill_name_mapping[source_name] = prefix_skill_name(source_name)
-        skill_paths[source_name] = skill_md
-
-    return skill_name_mapping, skill_paths
-
-
-def resolve_linked_skill_name(current_skill_name: str, link_target: str) -> str | None:
-    normalized_target = link_target.replace("\\", "/").split("#", 1)[0].split("?", 1)[0]
-    if not normalized_target.endswith("SKILL.md"):
-        return None
-
-    if "/skills/" in normalized_target:
-        after_skills = normalized_target.split("/skills/", 1)[1]
-        return after_skills[: -len("/SKILL.md")]
-
-    target_without_file = normalized_target[: -len("/SKILL.md")]
-    return posixpath.normpath(posixpath.join(current_skill_name, target_without_file))
-
-
-def to_markdown_relative_path(source_file: Path, target_file: Path) -> str:
-    return os.path.relpath(target_file, source_file.parent).replace("\\", "/")
+    return match.group(1) if match else None
 
 
 def replace_markdown_links(
     line: str,
-    current_skill_name: str,
     skill_name_mapping: dict[str, str],
-    skill_paths: dict[str, Path],
 ) -> str:
+    pattern = re.compile(r"\[([^\]]+)\]\(([^)]+SKILL\.md)\)")
+
     def replacer(match: re.Match[str]) -> str:
         label = match.group(1)
         target = match.group(2)
-        # Strip /SKILL.md from label if present
         old_label = label
         if old_label.endswith("/SKILL.md"):
             old_label = old_label[: -len("/SKILL.md")]
@@ -112,7 +68,7 @@ def replace_markdown_links(
         new_target = f"../{new_label_base}/SKILL.md"
         return f"[{new_label}]({new_target})"
 
-    return MARKDOWN_LINK_PATTERN.sub(replacer, line)
+    return pattern.sub(replacer, line)
 
 
 def replace_safe_markdown_mentions(line: str, skill_name_mapping: dict[str, str]) -> str:
@@ -146,15 +102,18 @@ def replace_safe_markdown_mentions(line: str, skill_name_mapping: dict[str, str]
 def rewrite_skill_markdown(
     skill_md: Path,
     skill_name_mapping: dict[str, str],
-    skill_paths: dict[str, Path],
 ) -> bool:
-    source_skill_name = read_skill_name(skill_md)
+    content = skill_md.read_text(encoding="utf-8")
+    source_skill_name = read_skill_name(skill_md, content)
     if not source_skill_name:
         return False
 
-    content = skill_md.read_text(encoding="utf-8")
     has_trailing_newline = content.endswith("\n")
     lines = content.splitlines()
+
+    name_line_pat = re.compile(r"^(name:\s*)(\S+)(\s*)$")
+    requires_inline_pat = re.compile(r"^(requires:\s*)(\S+)(\s*)$")
+    requires_item_pat = re.compile(r"^(\s*-\s*)(\S+)(\s*)$")
 
     updated_lines = []
     in_frontmatter = False
@@ -181,13 +140,13 @@ def rewrite_skill_markdown(
             continue
 
         if in_frontmatter:
-            name_match = NAME_LINE_PATTERN.match(line)
+            name_match = name_line_pat.match(line)
             if name_match:
                 prefix, value, suffix = name_match.groups()
                 updated_lines.append(f"{prefix}{skill_name_mapping.get(value, value)}{suffix}")
                 continue
 
-            requires_inline_match = REQUIRES_INLINE_PATTERN.match(line)
+            requires_inline_match = requires_inline_pat.match(line)
             if requires_inline_match:
                 prefix, value, suffix = requires_inline_match.groups()
                 updated_lines.append(f"{prefix}{skill_name_mapping.get(value, value)}{suffix}")
@@ -199,7 +158,7 @@ def rewrite_skill_markdown(
                 continue
 
             if in_requires_block:
-                requires_item_match = REQUIRES_ITEM_PATTERN.match(line)
+                requires_item_match = requires_item_pat.match(line)
                 if requires_item_match:
                     prefix, value, suffix = requires_item_match.groups()
                     updated_lines.append(f"{prefix}{skill_name_mapping.get(value, value)}{suffix}")
@@ -216,9 +175,7 @@ def rewrite_skill_markdown(
 
         updated_line = replace_markdown_links(
             line=line,
-            current_skill_name=source_skill_name,
             skill_name_mapping=skill_name_mapping,
-            skill_paths=skill_paths,
         )
         updated_line = replace_safe_markdown_mentions(updated_line, skill_name_mapping)
         updated_lines.append(updated_line)
@@ -235,24 +192,26 @@ def rewrite_skill_markdown(
 
 
 def flatten_and_modify_skills(copied_skill_dirs: list[Path], old_to_new_mapping: dict):
-    skill_paths = {}  # old_name -> new_md_path
-    skill_name_mapping = {}  # old_name -> new_name
+    skill_paths = {}
+    skill_name_mapping = {}
 
     print("\nFlattening and modifying SKILL.md files...")
     for skill_md in iter_skill_markdown_files(copied_skill_dirs):
-        # Skip skills originally in router-core/auth-and-guards and router-core/ssr
         if "auth-and-guards" in str(skill_md) or "ssr" in str(skill_md):
             print(f"  Skipping {skill_md.relative_to(PROJECT_ROOT)}")
             continue
-        content = skill_md.read_text(encoding="utf-8")
-        match = re.search(r"^name:\s*(\S+)\s*$", content, re.MULTILINE)
-        if not match:
-            continue
-        old_name = match.group(1)
-        new_name = "tanstack-" + re.sub(r"[_/\\]", "-", old_name)
-        old_to_new_mapping[old_name] = new_name  # initial, will update later
 
-        # Find frontmatter
+        content = skill_md.read_text(encoding="utf-8")
+        old_name = read_skill_name(skill_md, content)
+        if not old_name:
+            continue
+
+        base = re.sub(r"[_/\\]", "-", old_name)
+        new_name = f"tanstack-{base}"
+        while new_name.startswith("tanstack-tanstack-"):
+            new_name = new_name.removeprefix("tanstack-")
+        old_to_new_mapping[old_name] = new_name
+
         frontmatter_match = re.search(r"^---\n(.*?)\n---", content, re.DOTALL)
         if not frontmatter_match:
             continue
@@ -271,7 +230,6 @@ def flatten_and_modify_skills(copied_skill_dirs: list[Path], old_to_new_mapping:
                 has_name = True
                 i += 1
             elif stripped.startswith("description:"):
-                # collect description lines
                 desc_lines = [line]
                 i += 1
                 while i < len(lines) and lines[i].strip() and not re.match(r"^\w+:", lines[i]):
@@ -280,15 +238,15 @@ def flatten_and_modify_skills(copied_skill_dirs: list[Path], old_to_new_mapping:
                 new_front_lines.extend(desc_lines)
                 has_desc = True
             else:
-                i += 1  # skip other lines
+                i += 1
         if not has_name or not has_desc:
             continue
+
         new_frontmatter = "\n".join(new_front_lines)
         new_content = re.sub(
             r"^---\n.*?\n---", f"---\n{new_frontmatter}\n---", content, flags=re.DOTALL
         )
 
-        # Create new dir and write
         new_dir = SKILLS_DIR / new_name
         new_dir.mkdir(exist_ok=True)
         new_md = new_dir / "SKILL.md"
@@ -300,25 +258,21 @@ def flatten_and_modify_skills(copied_skill_dirs: list[Path], old_to_new_mapping:
             f"  Moved and modified {skill_md.relative_to(PROJECT_ROOT)} -> {new_md.relative_to(PROJECT_ROOT)}"
         )
 
-    # Update skill_paths to use new names as keys
     skill_paths = {skill_name_mapping[old]: path for old, path in skill_paths.items()}
 
-    # Remove old copied dirs, but keep main dirs with SKILL.md
     for d in copied_skill_dirs:
         if d.exists():
             skill_md = d / "SKILL.md"
             if skill_md.exists():
-                # main dir, remove all subdirs
                 for sub in d.iterdir():
                     if sub.is_dir():
                         shutil.rmtree(sub)
             else:
                 shutil.rmtree(d)
 
-    # Rewrite links in the new files
     print("\nRewriting links in flattened SKILL.md files...")
     for new_name, md_path in skill_paths.items():
-        if rewrite_skill_markdown(md_path, skill_name_mapping, skill_paths):
+        if rewrite_skill_markdown(md_path, skill_name_mapping):
             print(f"  Rewrote {md_path.relative_to(PROJECT_ROOT)}")
 
 
@@ -335,7 +289,6 @@ def rename_and_update(old_to_new_mapping):
             renamed[d.name] = new_name
             print(f"  Renamed {d.name} -> {new_name}")
 
-    # Update name in SKILL.md
     for md in SKILLS_DIR.glob("**/SKILL.md"):
         content = md.read_text(encoding="utf-8")
         updated = re.sub(
@@ -348,12 +301,10 @@ def rename_and_update(old_to_new_mapping):
             md.write_text(updated, encoding="utf-8")
             print(f"  Updated name in {md.relative_to(PROJECT_ROOT)}")
 
-    # Update the old_to_new_mapping for renamed dirs
     for old_hier, initial_new in old_to_new_mapping.items():
         if initial_new in renamed:
             old_to_new_mapping[old_hier] = renamed[initial_new]
 
-    # Update links
     for md in SKILLS_DIR.glob("**/SKILL.md"):
         content = md.read_text(encoding="utf-8")
         updated = content
@@ -367,11 +318,16 @@ def rename_and_update(old_to_new_mapping):
 
 def replace_old_names_in_content(old_to_new_mapping):
     print("\nReplacing old hierarchical names in SKILL.md content...")
+
     for md in SKILLS_DIR.glob("**/SKILL.md"):
         content = md.read_text(encoding="utf-8")
         updated = content
-        for old, new in old_to_new_mapping.items():
-            updated = updated.replace(old, new)
+        for old, new in sorted(old_to_new_mapping.items(), key=lambda x: -len(x[0])):
+            updated = re.sub(
+                rf"(?<!tanstack-){re.escape(old)}",
+                lambda _: new,
+                updated,
+            )
         if updated != content:
             md.write_text(updated, encoding="utf-8")
             print(f"  Replaced in {md.relative_to(PROJECT_ROOT)}")
@@ -410,7 +366,16 @@ def copy_skills_folder(package_name: str, source_skills: Path) -> list[Path]:
     return copied_skill_dirs
 
 
+def clear_existing_tanstack_skills():
+    for d in SKILLS_DIR.iterdir():
+        if d.is_dir() and d.name.startswith("tanstack-"):
+            print(f"Removing existing: {d}")
+            shutil.rmtree(d)
+
+
 def main():
+    clear_existing_tanstack_skills()
+
     print("Finding TanStack packages with skills folders...")
     packages = find_tanstack_packages_with_skills()
 

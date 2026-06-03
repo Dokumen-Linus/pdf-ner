@@ -47,6 +47,15 @@ export default defineConfig({
 
 Deploy: `npx wrangler login && pnpm run deploy`
 
+> **Worker env is per-request.** Cloudflare Workers inject env vars at request time. `process.env.X` at module scope evaluates to `undefined` even on the server. The Cloudflare-canonical way to read env (including from module scope) is the `cloudflare:workers` env binding:
+>
+> ```ts
+> import { env } from 'cloudflare:workers'
+> const apiHost = env.API_HOST
+> ```
+>
+> Or read `process.env.X` per-request inside `.handler()` / middleware `.server()`. See [Cloudflare's environment-variables docs](https://developers.cloudflare.com/workers/configuration/environment-variables/) and [tanstack-start-core-execution-model](../tanstack-start-execution-model/SKILL.md).
+
 ### Netlify
 
 ```bash
@@ -292,5 +301,5 @@ const childRoute = createFileRoute('/dashboard/stats')({
 
 ## Cross-References
 
-- [tanstack-tanstack-start-server-routes](../tanstack-start-server-routes/SKILL.md) — API endpoints for sitemaps, robots.txt
-- [tanstack-tanstack-start-execution-model](../tanstack-start-execution-model/SKILL.md) — SSR affects where code runs
+- [tanstack-start-core-server-routes](../tanstack-start-server-routes/SKILL.md) — API endpoints for sitemaps, robots.txt
+- [tanstack-start-core-execution-model](../tanstack-start-execution-model/SKILL.md) — SSR affects where code runs

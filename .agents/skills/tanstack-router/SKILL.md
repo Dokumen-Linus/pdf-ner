@@ -57,7 +57,7 @@ Need custom 404 or error handling?
   → tanstack-router-not-found-and-errors
 
 Having TypeScript issues or performance problems?
-  → tanstack-router/type-safety
+  → tanstack-router-type-safety
 
 Need server-side rendering?
   → tanstack-router/ssr

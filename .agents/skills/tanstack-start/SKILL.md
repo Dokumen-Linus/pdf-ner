@@ -17,13 +17,14 @@ TanStack Start is a full-stack React framework built on TanStack Router and Vite
 
 ## Sub-Skills
 
-| Task                                         | Sub-Skill                                                           |
-| -------------------------------------------- | ------------------------------------------------------------------- |
-| Type-safe RPCs, data fetching, mutations     | [tanstack-start-server-functions/SKILL.md](../tanstack-start-server-functions/SKILL.md) |
-| Request/function middleware, context, auth   | [tanstack-start-middleware/SKILL.md](../tanstack-start-middleware/SKILL.md)             |
-| Isomorphic execution, environment boundaries | [tanstack-start-execution-model/SKILL.md](../tanstack-start-execution-model/SKILL.md)   |
-| REST API endpoints alongside app routes      | [tanstack-start-server-routes/SKILL.md](../tanstack-start-server-routes/SKILL.md)       |
-| Hosting, SSR modes, prerendering, SEO        | [tanstack-start-deployment/SKILL.md](../tanstack-start-deployment/SKILL.md)             |
+| Task                                             | Sub-Skill                                                                       |
+| ------------------------------------------------ | ------------------------------------------------------------------------------- |
+| Type-safe RPCs, data fetching, mutations         | [tanstack-start-server-functions/SKILL.md](../tanstack-start-server-functions/SKILL.md)             |
+| Request/function middleware, context, auth       | [tanstack-start-middleware/SKILL.md](../tanstack-start-middleware/SKILL.md)                         |
+| Server-side auth: sessions, cookies, OAuth, CSRF | [tanstack-start-auth-server-primitives/SKILL.md](../tanstack-start-auth-server-primitives/SKILL.md) |
+| Isomorphic execution, environment boundaries     | [tanstack-start-execution-model/SKILL.md](../tanstack-start-execution-model/SKILL.md)               |
+| REST API endpoints alongside app routes          | [tanstack-start-server-routes/SKILL.md](../tanstack-start-server-routes/SKILL.md)                   |
+| Hosting, SSR modes, prerendering, SEO            | [tanstack-start-deployment/SKILL.md](../tanstack-start-deployment/SKILL.md)                         |
 
 ## Quick Decision Tree
 
@@ -33,6 +34,9 @@ Need to run code exclusively on the server (DB, secrets)?
 
 Need auth checks, logging, or shared logic across server functions?
   → tanstack-start-middleware
+
+Need to add login, sessions, OAuth, CSRF, password reset?
+  → tanstack-start-auth-server-primitives
 
 Need to understand where code runs (server vs client)?
   → tanstack-start-execution-model

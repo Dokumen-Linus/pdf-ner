@@ -21,9 +21,9 @@ Always import from the framework package on the client — never from
 | Need to...                                        | Read                                        |
 | ------------------------------------------------- | ------------------------------------------- |
 | Build a chat UI with streaming                    | tanstack-ai-chat-experience/SKILL.md            |
-| Add tool calling (server, client, or both)        | tanstack-ai/tool-calling/SKILL.md               |
+| Add tool calling (server, client, or both)        | tanstack-ai-tool-calling/SKILL.md               |
 | Generate images, video, speech, or transcriptions | tanstack-ai-media-generation/SKILL.md           |
-| Get typed JSON responses from the LLM             | tanstack-ai/structured-outputs/SKILL.md         |
+| Get typed JSON responses from the LLM             | tanstack-ai-structured-outputs/SKILL.md         |
 | Choose and configure a provider adapter           | tanstack-ai-adapter-configuration/SKILL.md      |
 | Implement AG-UI streaming protocol server-side    | tanstack-ai-ag-ui-protocol/SKILL.md             |
 | Add analytics, logging, or lifecycle hooks        | tanstack-ai-middleware/SKILL.md                 |
@@ -33,9 +33,9 @@ Always import from the framework package on the client — never from
 ## Quick Decision Tree
 
 - Setting up a chatbot? → tanstack-ai-chat-experience
-- Adding function calling? → tanstack-ai/tool-calling
+- Adding function calling? → tanstack-ai-tool-calling
 - Generating media (images, audio, video)? → tanstack-ai-media-generation
-- Need structured JSON output? → tanstack-ai/structured-outputs
+- Need structured JSON output? → tanstack-ai-structured-outputs
 - Choosing/configuring a provider? → tanstack-ai-adapter-configuration
 - Building a server-only AG-UI backend? → tanstack-ai-ag-ui-protocol
 - Adding analytics or post-stream events? → tanstack-ai-middleware

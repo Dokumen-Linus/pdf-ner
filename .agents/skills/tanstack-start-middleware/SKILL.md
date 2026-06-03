@@ -13,7 +13,7 @@ description: >-
 Middleware customizes the behavior of server functions and server routes. It is composable — middleware can depend on other middleware to form a chain.
 
 > **CRITICAL**: TypeScript enforces method order: `middleware()` → `inputValidator()` → `client()` → `server()`. Wrong order causes type errors.
-> **CRITICAL**: Client context sent via `sendContext` is NOT validated by default. If you send dynamic user-generated data, validate it in server-side middleware before use.
+> **CRITICAL**: Validating the _shape_ of `sendContext` (e.g. `z.string().uuid().parse(...)`) is NOT authorization. A parsed identifier is a well-formed identifier, not an authorized one. Always re-check access against the session principal before using a client-sent ID as a query key, filter, or path parameter.
 
 ## Two Types of Middleware
 
@@ -233,7 +233,11 @@ const authMiddleware = createMiddleware().server(async ({ next, request }) => {
   if (!session) throw new Error('Unauthorized')
   return next({ context: { session } })
 })
+```
 
+> **Attach `authMiddleware` to every `createServerFn` that needs auth.** Server functions are RPC endpoints — a route `beforeLoad` does NOT protect the RPC, only the route's UI. Pair every protected route with handler-level enforcement here. See [tanstack-router/auth-and-guards](../tanstack-router/auth-and-guards/SKILL.md) and [tanstack-start-core-auth-server-primitives](../tanstack-start-auth-server-primitives/SKILL.md).
+
+```tsx
 type Permissions = Record<string, string[]>
 
 function authorizationMiddleware(permissions: Permissions) {
@@ -291,22 +295,49 @@ Fetch precedence (highest to lowest): call site → later middleware → earlier
 
 ## Common Mistakes
 
-### 1. HIGH: Trusting client sendContext without validation
+### 1. CRITICAL: Trusting client sendContext — shape check is not access check
+
+`sendContext` from a client middleware arrives on the server as untrusted client input. Most agents stop after parsing the shape with Zod and assume the value is safe. It isn't: a parsed UUID is _some_ workspace, not the requesting user's workspace. Without a membership check against the session principal, you've built a tenant-walking endpoint.
+
+**Layer 1 — WRONG (no validation):**
 
 ```tsx
-// WRONG — client can send arbitrary data
 .server(async ({ next, context }) => {
+  // SQL-injectable AND tenant-walkable
   await db.query(`SELECT * FROM workspace_${context.workspaceId}`)
   return next()
 })
+```
 
-// CORRECT — validate before use
+**Layer 2 — STILL WRONG (shape only):**
+
+```tsx
 .server(async ({ next, context }) => {
+  // Looks safe, isn't. UUID is well-formed but the user may not be a member.
   const workspaceId = z.string().uuid().parse(context.workspaceId)
   await db.query('SELECT * FROM workspaces WHERE id = $1', [workspaceId])
   return next()
 })
 ```
+
+**Layer 3 — CORRECT (shape AND access):**
+
+```tsx
+.middleware([authMiddleware]) // session loaded from cookie, NOT from sendContext
+.server(async ({ next, context }) => {
+  const workspaceId = z.string().uuid().parse(context.workspaceId)
+  // Verify the session principal can access this workspace.
+  const member = await db.memberships.find({
+    userId: context.session.userId,
+    workspaceId,
+  })
+  if (!member) throw new Error('Not a member of this workspace')
+  await db.query('SELECT * FROM workspaces WHERE id = $1', [workspaceId])
+  return next({ context: { workspaceId } })
+})
+```
+
+The session itself must come from a server-trusted source (the cookie + DB lookup in `authMiddleware`), never from `sendContext` — anything the client can send, the client can lie about. See [tanstack-start-core-auth-server-primitives](../tanstack-start-auth-server-primitives/SKILL.md).
 
 ### 2. MEDIUM: Confusing request vs server function middleware
 
@@ -353,5 +384,7 @@ createMiddleware({ type: 'function' })
 
 ## Cross-References
 
-- [tanstack-tanstack-start-server-functions](../tanstack-start-server-functions/SKILL.md) — what middleware wraps
-- [tanstack-tanstack-start-server-routes](../tanstack-start-server-routes/SKILL.md) — middleware on API endpoints
+- [tanstack-start-core-server-functions](../tanstack-start-server-functions/SKILL.md) — what middleware wraps
+- [tanstack-start-core-server-routes](../tanstack-start-server-routes/SKILL.md) — middleware on API endpoints
+- [tanstack-start-core-auth-server-primitives](../tanstack-start-auth-server-primitives/SKILL.md) — building the `authMiddleware` factory itself: session cookie reads, OAuth state, CSRF
+- [tanstack-router/auth-and-guards](../tanstack-router/auth-and-guards/SKILL.md) — routing-side guards (route `beforeLoad` does NOT protect server functions; pair guards with `authMiddleware` on every protected RPC)

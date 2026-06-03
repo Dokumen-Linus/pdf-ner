@@ -269,4 +269,4 @@ lose type safety. If model names come from user input or config files, use
 ## Cross-References
 
 - See also: `tanstack-ai-chat-experience/SKILL.md` -- Adapter choice affects chat setup
-- See also: `tanstack-ai/structured-outputs/SKILL.md` -- `outputSchema` handles provider differences transparently
+- See also: `tanstack-ai-structured-outputs/SKILL.md` -- `outputSchema` handles provider differences transparently

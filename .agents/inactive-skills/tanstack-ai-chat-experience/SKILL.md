@@ -492,6 +492,6 @@ If not handled, the UI appears to hang with no feedback.
 
 ## Cross-References
 
-- See also: **tanstack-ai/tool-calling/SKILL.md** -- Most chats include tools
+- See also: **tanstack-ai-tool-calling/SKILL.md** -- Most chats include tools
 - See also: **tanstack-ai-adapter-configuration/SKILL.md** -- Adapter choice affects available features
 - See also: **tanstack-ai-middleware/SKILL.md** -- Use middleware for analytics and lifecycle events

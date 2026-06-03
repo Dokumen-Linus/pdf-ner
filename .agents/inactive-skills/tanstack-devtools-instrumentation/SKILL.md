@@ -1,11 +1,11 @@
 ---
-name: tanstack-tanstack-devtools-instrumentation
+name: tanstack-devtools-instrumentation
 description: Analyze library codebase for critical architecture and debugging points, add strategic event emissions. Identify middleware boundaries, state transitions, lifecycle hooks. Consolidate events (1 not 15), debounce high-frequency updates, DRY shared payload fields, guard emit() for production. Transparent server/client event bridging.
 ---
 
-# tanstack-tanstack-devtools-instrumentation
+# tanstack-devtools-instrumentation
 
-> **Prerequisite:** Read the `tanstack-tanstack-devtools-event-client` skill first for EventClient creation, event maps, and `emit()`/`on()` API.
+> **Prerequisite:** Read the `tanstack-devtools-event-client` skill first for EventClient creation, event maps, and `emit()`/`on()` API.
 
 Strategic placement of `emit()` calls inside a library to send high-value diagnostic data to TanStack Devtools panels. Maximum insight with minimum noise.
 

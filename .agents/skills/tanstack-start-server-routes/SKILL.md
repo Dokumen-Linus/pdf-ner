@@ -269,5 +269,5 @@ const body = await request.json()
 
 ## Cross-References
 
-- [tanstack-tanstack-start-middleware](../tanstack-start-middleware/SKILL.md) — middleware for server routes
-- [tanstack-tanstack-start-server-functions](../tanstack-start-server-functions/SKILL.md) — alternative for RPC-style calls
+- [tanstack-start-core-middleware](../tanstack-start-middleware/SKILL.md) — middleware for server routes
+- [tanstack-start-core-server-functions](../tanstack-start-server-functions/SKILL.md) — alternative for RPC-style calls

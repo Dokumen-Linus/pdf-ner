@@ -1,5 +1,5 @@
 ---
-name: tanstack-tanstack-react-start
+name: tanstack-react-start
 description: >-
   React bindings for TanStack Start: createStart, StartClient,
   StartServer, React-specific imports, re-exports from
@@ -9,9 +9,11 @@ description: >-
 
 # React Start (`@tanstack/tanstack-react-start`)
 
-This skill builds on tanstack-start. Read [tanstack-tanstack-start](../tanstack-start/SKILL.md) first for foundational concepts.
+This skill builds on tanstack-start. Read [tanstack-start-core](../tanstack-start/SKILL.md) first for foundational concepts.
 
 This skill covers the React-specific bindings, setup, and patterns for TanStack Start.
+
+For React Server Components patterns, see [tanstack-react-start-server-components](../tanstack-react-start-server-components/SKILL.md).
 
 > **CRITICAL**: All code is ISOMORPHIC by default. Loaders run on BOTH server and client. Use `createServerFn` for server-only logic.
 
@@ -271,6 +273,6 @@ Without `<Scripts />` in the root route's `<body>`, client JavaScript doesn't lo
 
 ## Cross-References
 
-- [tanstack-tanstack-start](../tanstack-start/SKILL.md) — core Start concepts
-- [tanstack-tanstack-router](../tanstack-router/SKILL.md) — routing fundamentals
+- [tanstack-start-core](../tanstack-start/SKILL.md) — core Start concepts
+- [tanstack-router-core](../tanstack-router/SKILL.md) — routing fundamentals
 - [react-router](../react-router/SKILL.md) — React Router hooks and components

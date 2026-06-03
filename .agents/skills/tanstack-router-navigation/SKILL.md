@@ -433,4 +433,4 @@ When you pass `search` as a plain object, it replaces all search params. Use the
 ## Cross-References
 
 - See also: **tanstack-router-search-params/SKILL.md** — Link `search` prop interacts with search param validation
-- See also: **tanstack-router/type-safety/SKILL.md** — `from` narrowing improves type inference on Link
+- See also: **tanstack-router-type-safety/SKILL.md** — `from` narrowing improves type inference on Link
