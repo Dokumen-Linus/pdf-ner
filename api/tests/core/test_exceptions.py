@@ -19,4 +19,3 @@ class TestUnhandledExceptionHandler:
         assert response.status_code == 500
         body = response.body.decode()
         assert "Internal server error" in body
-
