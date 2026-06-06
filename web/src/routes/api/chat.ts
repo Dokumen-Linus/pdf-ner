@@ -5,6 +5,7 @@ import { chat, toServerSentEventsResponse } from "@tanstack/ai"
 import { createOpenaiChat } from "@tanstack/ai-openai"
 import { createFileRoute } from "@tanstack/react-router"
 
+import { monitorRouteHandler } from "@/db-fns/web/monitoring"
 import { env } from "@/env.server"
 
 async function getChatbotKnowledge() {
@@ -31,22 +32,29 @@ async function getChatbotKnowledge() {
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        try {
-          const { messages } = await request.json()
+      POST: monitorRouteHandler<{ request: Request }, Response>(
+        {
+          eventName: "web.chat.respond",
+          getMetadata: ({ request }) => ({ contentType: request.headers.get("content-type") }),
+          operationType: "read",
+          routeOrPath: "/api/chat",
+        },
+        async ({ request }) => {
+          try {
+            const { messages } = await request.json()
 
-          if (!env.OPENAI_API_KEY) {
-            return new Response("Missing OPENAI_API_KEY", { status: 500 })
-          }
+            if (!env.OPENAI_API_KEY) {
+              return new Response("Missing OPENAI_API_KEY", { status: 500 })
+            }
 
-          const knowledge = await getChatbotKnowledge()
-          let finalMessages = messages
+            const knowledge = await getChatbotKnowledge()
+            let finalMessages = messages
 
-          if (knowledge) {
-            finalMessages = [
-              {
-                role: "system",
-                content: `You are a helpful assistant on the Dokumen website.
+            if (knowledge) {
+              finalMessages = [
+                {
+                  role: "system",
+                  content: `You are a helpful assistant on the Dokumen website.
                 Use the following knowledge to answer questions whenever relevant.
                 Do not make up information, and if you are unsure be clear about that.
                 Do not answer questions that do not relate to Dokumen.
@@ -56,22 +64,23 @@ export const Route = createFileRoute("/api/chat")({
                 <knowledge>
                 :\n${knowledge}
                 </knowledge>`,
-              },
-              ...messages,
-            ]
+                },
+                ...messages,
+              ]
+            }
+
+            const stream = chat({
+              adapter: createOpenaiChat("gpt-5-nano", env.OPENAI_API_KEY),
+              messages: finalMessages,
+            })
+
+            return toServerSentEventsResponse(stream)
+          } catch (error) {
+            console.error("Chat API error:", error)
+            return new Response("Internal Server Error", { status: 500 })
           }
-
-          const stream = chat({
-            adapter: createOpenaiChat("gpt-5-nano", env.OPENAI_API_KEY),
-            messages: finalMessages,
-          })
-
-          return toServerSentEventsResponse(stream)
-        } catch (error) {
-          console.error("Chat API error:", error)
-          return new Response("Internal Server Error", { status: 500 })
-        }
-      },
+        },
+      ),
     },
   },
 })

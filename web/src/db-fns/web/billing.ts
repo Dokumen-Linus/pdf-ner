@@ -1,5 +1,6 @@
-import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
+
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 
 export type AccountTarget =
   | {
@@ -15,7 +16,7 @@ export type AccountTarget =
       paymentMethodId: string | null
     }
 
-export const getBillingAccount = createServerFn({ method: "GET" }).handler(async () => {
+export const getBillingAccount = createMonitoredDbFn({ eventName: "web.billing.get_account", method: "GET" }).handler(async () => {
   const { requireBillingAccountTarget } = await import("./billing.server")
   const target = await requireBillingAccountTarget()
   if (!target.customerId) {
@@ -48,7 +49,7 @@ export const getBillingAccount = createServerFn({ method: "GET" }).handler(async
   }
 })
 
-export const createSetupIntent = createServerFn({ method: "POST" }).handler(async () => {
+export const createSetupIntent = createMonitoredDbFn({ eventName: "web.billing.create_setup_intent", method: "POST" }).handler(async () => {
   const { ensureStripeCustomer, requireBillingAccountTarget } = await import("./billing.server")
   const target = await requireBillingAccountTarget()
   const customerId = await ensureStripeCustomer(target)
@@ -66,7 +67,7 @@ export const createSetupIntent = createServerFn({ method: "POST" }).handler(asyn
   return { clientSecret: setupIntent.client_secret }
 })
 
-export const confirmSetupIntent = createServerFn({ method: "POST" })
+export const confirmSetupIntent = createMonitoredDbFn({ eventName: "web.billing.confirm_setup_intent", method: "POST" })
   .inputValidator(z.object({ setupIntentId: z.string().min(1) }))
   .handler(async ({ data }) => {
     const { requireBillingAccountTarget } = await import("./billing.server")
@@ -124,7 +125,7 @@ export const confirmSetupIntent = createServerFn({ method: "POST" })
     return { success: true }
   })
 
-export const setDefaultPaymentMethod = createServerFn({ method: "POST" })
+export const setDefaultPaymentMethod = createMonitoredDbFn({ eventName: "web.billing.set_default_payment_method", method: "POST" })
   .inputValidator(z.object({ paymentMethodId: z.string().min(1) }))
   .handler(async ({ data }) => {
     const { ensureStripeCustomer, requireBillingAccountTarget } = await import("./billing.server")
@@ -164,7 +165,7 @@ export const setDefaultPaymentMethod = createServerFn({ method: "POST" })
     return { success: true }
   })
 
-export const detachPaymentMethod = createServerFn({ method: "POST" })
+export const detachPaymentMethod = createMonitoredDbFn({ eventName: "web.billing.detach_payment_method", method: "POST" })
   .inputValidator(z.object({ paymentMethodId: z.string().min(1) }))
   .handler(async ({ data }) => {
     const { ensureStripeCustomer, requireBillingAccountTarget } = await import("./billing.server")
@@ -182,7 +183,7 @@ export const detachPaymentMethod = createServerFn({ method: "POST" })
     return { success: true }
   })
 
-export const upgradeIndividualToOrganization = createServerFn({ method: "POST" }).handler(
+export const upgradeIndividualToOrganization = createMonitoredDbFn({ eventName: "web.billing.upgrade_individual_to_organization", method: "POST" }).handler(
   async () => {
     const [
       { and, eq, isNull },
@@ -280,7 +281,7 @@ export const upgradeIndividualToOrganization = createServerFn({ method: "POST" }
   },
 )
 
-export const inviteOrganizationUser = createServerFn({ method: "POST" })
+export const inviteOrganizationUser = createMonitoredDbFn({ eventName: "web.billing.invite_organization_user", method: "POST" })
   .inputValidator(
     z.object({
       email: z.email(),

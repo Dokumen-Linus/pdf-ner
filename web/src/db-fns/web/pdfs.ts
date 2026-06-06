@@ -1,10 +1,10 @@
-import { createServerFn } from "@tanstack/react-start"
 import { and, eq, isNull, or, sql } from "drizzle-orm"
 import { z } from "zod"
 
 import { db } from "@/db/client"
 import { pdfs } from "@/db/schemas/web/pdfs"
 import { users } from "@/db/schemas/web/users"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 import {
   requirePdfAccess,
   requirePdfOwnership,
@@ -24,7 +24,7 @@ export const CreatePdfSchema = z.object({
   lockedAt: z.date().nullable().optional(),
 })
 
-export const createPdf = createServerFn({ method: "POST" })
+export const createPdf = createMonitoredDbFn({ eventName: "web.pdf.create", method: "POST" })
   .inputValidator(CreatePdfSchema)
   .handler(async ({ data }) => {
     const [pdf] = await db.insert(pdfs).values(data).returning({ id: pdfs.id })
@@ -32,7 +32,7 @@ export const createPdf = createServerFn({ method: "POST" })
   })
 
 // ** READ **
-export const getPdfById = createServerFn({ method: "GET" })
+export const getPdfById = createMonitoredDbFn({ eventName: "web.pdf.get_by_id", method: "GET" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     await requirePdfAccess(data.id, "label")
@@ -49,7 +49,7 @@ export const UpdatePdfSchema = CreatePdfSchema.partial().extend({
   id: z.string(),
 })
 
-export const updatePdf = createServerFn({ method: "POST" })
+export const updatePdf = createMonitoredDbFn({ eventName: "web.pdf.update", method: "POST" })
   .inputValidator(UpdatePdfSchema)
   .handler(async ({ data }) => {
     const { id, ...updateData } = data
@@ -61,7 +61,7 @@ export const updatePdf = createServerFn({ method: "POST" })
   })
 
 // ** DELETE **
-export const deletePdf = createServerFn({ method: "POST" })
+export const deletePdf = createMonitoredDbFn({ eventName: "web.pdf.delete", method: "POST" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const pdf = await db.delete(pdfs).where(eq(pdfs.id, data.id))
@@ -81,7 +81,7 @@ export const UpsertPdfLabelsSchema = z.object({
   uploadedBy: z.string().optional(),
 })
 
-export const upsertPdfLabels = createServerFn({ method: "POST" })
+export const upsertPdfLabels = createMonitoredDbFn({ eventName: "web.pdf.upsert_pdf_labels", method: "POST" })
   .inputValidator(UpsertPdfLabelsSchema)
   .handler(async ({ data }) => {
     const userId = await requireUserId()
@@ -113,7 +113,7 @@ async function requireAuthorizedPdfUser(pdfId: string, claimedUserId?: string): 
   return userId
 }
 
-export const acquireLabelingLock = createServerFn({ method: "POST" })
+export const acquireLabelingLock = createMonitoredDbFn({ eventName: "web.pdf.lock.acquire", method: "POST" })
   .inputValidator(AcquireLockSchema)
   .handler(async ({ data }) => {
     const userId = await requireAuthorizedPdfUser(data.pdfId, data.userId)
@@ -181,7 +181,7 @@ export const HeartbeatLockSchema = z.object({
   userId: z.string().optional(),
 })
 
-export const heartbeatLabelingLock = createServerFn({ method: "POST" })
+export const heartbeatLabelingLock = createMonitoredDbFn({ eventName: "web.pdf.lock.heartbeat", method: "POST" })
   .inputValidator(HeartbeatLockSchema)
   .handler(async ({ data }) => {
     const userId = await requireAuthorizedPdfUser(data.pdfId, data.userId)
@@ -200,7 +200,7 @@ export const ReleaseLockSchema = z.object({
   userId: z.string().optional(),
 })
 
-export const releaseLabelingLock = createServerFn({ method: "POST" })
+export const releaseLabelingLock = createMonitoredDbFn({ eventName: "web.pdf.lock.release", method: "POST" })
   .inputValidator(ReleaseLockSchema)
   .handler(async ({ data }) => {
     const userId = await requireAuthorizedPdfUser(data.pdfId, data.userId)

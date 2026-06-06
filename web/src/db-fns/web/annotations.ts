@@ -1,4 +1,3 @@
-import { createServerFn } from "@tanstack/react-start"
 import { and, eq, inArray, sql } from "drizzle-orm"
 import { z } from "zod"
 
@@ -8,6 +7,7 @@ import { corePdfs } from "@/db/schemas/core/pdfs"
 import { annotations } from "@/db/schemas/web/annotations"
 import { entityTypes } from "@/db/schemas/web/entity-types"
 import { pdfs } from "@/db/schemas/web/pdfs"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 import {
   requirePdfAccess,
   requirePdfOwnership,
@@ -53,7 +53,7 @@ export const CreateAnnotationSchema = z.object({
   blendMode: z.string().optional(),
 })
 
-export const createAnnotation = createServerFn({ method: "POST" })
+export const createAnnotation = createMonitoredDbFn({ eventName: "web.annotation.create", method: "POST" })
   .inputValidator(CreateAnnotationSchema)
   .handler(async ({ data }) => {
     const [annotation] = await db.insert(annotations).values(data).returning({ id: annotations.id })
@@ -61,7 +61,7 @@ export const createAnnotation = createServerFn({ method: "POST" })
   })
 
 // ** READ **
-export const getAnnotationById = createServerFn({ method: "GET" })
+export const getAnnotationById = createMonitoredDbFn({ eventName: "web.annotation.get_by_id", method: "GET" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const annotation = await db.select().from(annotations).where(eq(annotations.id, data.id))
@@ -71,7 +71,7 @@ export const getAnnotationById = createServerFn({ method: "GET" })
     return annotation[0]
   })
 
-export const getAnnotationsByPdfId = createServerFn({ method: "GET" })
+export const getAnnotationsByPdfId = createMonitoredDbFn({ eventName: "web.annotation.get_annotations_by_pdf_id", method: "GET" })
   .inputValidator(z.object({ pdfId: z.string() }))
   .handler(async ({ data }) => {
     await requirePdfAccess(data.pdfId, "label")
@@ -82,7 +82,7 @@ export const getAnnotationsByPdfId = createServerFn({ method: "GET" })
     return pdfAnnotations
   })
 
-export const getAnnotationsByPdfIds = createServerFn({ method: "GET" })
+export const getAnnotationsByPdfIds = createMonitoredDbFn({ eventName: "web.annotation.get_annotations_by_pdf_ids", method: "GET" })
   .inputValidator(z.object({ pdfIds: z.array(z.string()) }))
   .handler(async ({ data }) => {
     if (data.pdfIds.length === 0) return []
@@ -97,7 +97,7 @@ export const getAnnotationsByPdfIds = createServerFn({ method: "GET" })
       .where(inArray(annotations.pdfId, data.pdfIds))
   })
 
-export const getAnnotationsBySubtype = createServerFn({ method: "GET" })
+export const getAnnotationsBySubtype = createMonitoredDbFn({ eventName: "web.annotation.get_annotations_by_subtype", method: "GET" })
   .inputValidator(z.object({ subtype: z.string() }))
   .handler(async ({ data }) => {
     const subtypeAnnotations = await db
@@ -113,7 +113,7 @@ export const UpdateAnnotationSchema = CreateAnnotationSchema.partial().extend({
   id: z.string(),
 })
 
-export const updateAnnotation = createServerFn({ method: "POST" })
+export const updateAnnotation = createMonitoredDbFn({ eventName: "web.annotation.update", method: "POST" })
   .inputValidator(UpdateAnnotationSchema)
   .handler(async ({ data }) => {
     const { id, ...updateData } = data
@@ -128,7 +128,7 @@ export const updateAnnotation = createServerFn({ method: "POST" })
   })
 
 // ** DELETE **
-export const deleteAnnotation = createServerFn({ method: "POST" })
+export const deleteAnnotation = createMonitoredDbFn({ eventName: "web.annotation.delete", method: "POST" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const annotation = await db.delete(annotations).where(eq(annotations.id, data.id))
@@ -166,7 +166,7 @@ export class LabelingLockLostError extends Error {
   }
 }
 
-export const saveAnnotationsByPdfId = createServerFn({ method: "POST" })
+export const saveAnnotationsByPdfId = createMonitoredDbFn({ eventName: "web.annotation.save_annotations_by_pdf_id", method: "POST" })
   .inputValidator(SaveAnnotationsSchema)
   .handler(async ({ data }) => {
     const userId = await requireUserId()

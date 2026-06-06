@@ -85,6 +85,19 @@ describe("billing status enum invariant", () => {
     expect(privateRoute).not.toContain("@dokumenai.dev")
   })
 
+  it("allows web private loaders to read Better Auth organization membership tables", async () => {
+    const grantSql = await readRepoFile(
+      "db/migrations/20260603_012157_grant_web_user_auth_membership_reads.sql",
+    )
+
+    expect(grantSql).toContain("GRANT SELECT ON TABLE")
+    expect(grantSql).toContain("auth.organization")
+    expect(grantSql).toContain("auth.member")
+    expect(grantSql).toContain("auth.team")
+    expect(grantSql).toContain('auth."teamMember"')
+    expect(grantSql).toContain("TO web_user")
+  })
+
   it("activates billing without resetting existing billing anchors", async () => {
     const billingSource = await readRepoFile("web/src/db-fns/web/billing.ts")
 

@@ -1,11 +1,11 @@
-import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 
+import { createMonitoredApiFn } from "@/db-fns/web/monitoring"
 import { requireProjectPermission } from "@/lib/role-authorization.server"
 
 import { jsonCall } from "./api-json-call.server"
 
-export const startPromptOptimization = createServerFn({ method: "POST" })
+export const startPromptOptimization = createMonitoredApiFn({ eventName: "api.worker_dispatch.optimize_prompt", method: "POST" })
   .inputValidator(
     z.object({
       projectId: z.string().uuid(),
@@ -29,7 +29,7 @@ export const startPromptOptimization = createServerFn({ method: "POST" })
     }) as Promise<{ task_id: string }>
   })
 
-export const getOptimizationStatus = createServerFn({ method: "GET" })
+export const getOptimizationStatus = createMonitoredApiFn({ eventName: "api.worker_dispatch.get_optimization_status", method: "GET" })
   .inputValidator(
     z.object({
       taskId: z.string().min(1),
@@ -67,7 +67,7 @@ export const getOptimizationStatus = createServerFn({ method: "GET" })
     return res
   })
 
-export const activatePrompt = createServerFn({ method: "POST" })
+export const activatePrompt = createMonitoredApiFn({ eventName: "api.worker_dispatch.activate_prompt", method: "POST" })
   .inputValidator(
     z.object({
       projectId: z.string().uuid(),
@@ -87,7 +87,7 @@ export const activatePrompt = createServerFn({ method: "POST" })
     }) as Promise<{ task_id: string }>
   })
 
-export const startOcrEvaluation = createServerFn({ method: "POST" })
+export const startOcrEvaluation = createMonitoredApiFn({ eventName: "api.worker_dispatch.start_ocr_evaluation", method: "POST" })
   .inputValidator(
     z.object({
       projectId: z.string().uuid(),
@@ -113,7 +113,7 @@ export const startOcrEvaluation = createServerFn({ method: "POST" })
     }) as Promise<{ task_id: string }>
   })
 
-export const getOcrEvaluationStatus = createServerFn({ method: "GET" })
+export const getOcrEvaluationStatus = createMonitoredApiFn({ eventName: "api.worker_dispatch.get_ocr_evaluation_status", method: "GET" })
   .inputValidator(
     z.object({
       taskId: z.string().min(1),

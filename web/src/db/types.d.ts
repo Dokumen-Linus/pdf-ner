@@ -55,6 +55,9 @@ export type DbAnnotation = InferSelectModel<typeof schema.annotations>
 export type NewDbAnnotation = InferInsertModel<typeof schema.annotations>
 export type DbAnnotationUpdate = Partial<Omit<DbAnnotation, "id" | "createdAt" | "updatedAt">>
 
+export type MonitoringEvent = InferSelectModel<typeof schema.monitoringEvents>
+export type NewMonitoringEvent = InferInsertModel<typeof schema.monitoringEvents>
+
 // public - read only
 export type StdEntityType = InferSelectModel<typeof schema.stdEntityTypes>
 export type Template = InferSelectModel<typeof schema.templates>
