@@ -1,4 +1,4 @@
-## [unreleased]
+## [0.2.0] - 2026-06-06
 
 ### 🚀 Features
 
@@ -18,6 +18,10 @@
 
 - *(db)* Deploy-rds docs
 - Rollback
+
+### ⚡ Performance
+
+- Update tanstack/ai and new SSE middleware
 
 ### ⚙️ CI/CD
 
