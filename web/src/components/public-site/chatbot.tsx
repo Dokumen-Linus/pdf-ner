@@ -12,7 +12,7 @@ import "./chatbot.css"
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState("")
-  const { messages, sendMessage, isLoading } = useChat({
+  const { messages, sendMessage, isLoading, error } = useChat({
     connection: fetchServerSentEvents("/api/chat"),
   })
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -87,6 +87,16 @@ export default function Chatbot() {
                     <span />
                     <span />
                     <span />
+                  </div>
+                </div>
+              )}
+              {error && !isLoading && (
+                <div className="row">
+                  <div className="avatar">
+                    <Bot className="h-4 w-4" />
+                  </div>
+                  <div className="bubble">
+                    <span>{error.message}</span>
                   </div>
                 </div>
               )}
