@@ -1,11 +1,11 @@
-import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
 
 import { db } from "@/db/client"
 import { stdEntityTypes } from "@/db/schemas/public/std-entity-types"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 
-export const getStdEntityTypeById = createServerFn({ method: "GET" })
+export const getStdEntityTypeById = createMonitoredDbFn({ eventName: "web.public.std_entity_type.get_by_id", method: "GET" })
   .inputValidator(z.object({ id: z.number() }))
   .handler(async ({ data }) => {
     const [stdEntityType] = await db
@@ -19,7 +19,7 @@ export const getStdEntityTypeById = createServerFn({ method: "GET" })
     return stdEntityType
   })
 
-export const getStdEntityTypeByShortName = createServerFn({ method: "GET" })
+export const getStdEntityTypeByShortName = createMonitoredDbFn({ eventName: "web.public.std_entity_type.get_by_short_name", method: "GET" })
   .inputValidator(z.object({ shortName: z.string() }))
   .handler(async ({ data }) => {
     const [stdEntityType] = await db
@@ -33,14 +33,14 @@ export const getStdEntityTypeByShortName = createServerFn({ method: "GET" })
     return stdEntityType
   })
 
-export const getAllStdEntityTypes = createServerFn({ method: "GET" })
+export const getAllStdEntityTypes = createMonitoredDbFn({ eventName: "web.public.std_entity_type.get_all_std_entity_types", method: "GET" })
   .inputValidator(z.void())
   .handler(async () => {
     const stdEntityTypesList = await db.select().from(stdEntityTypes)
     return stdEntityTypesList
   })
 
-export const getStdEntityTypesByDatatype = createServerFn({ method: "GET" })
+export const getStdEntityTypesByDatatype = createMonitoredDbFn({ eventName: "web.public.std_entity_type.get_std_entity_types_by_datatype", method: "GET" })
   .inputValidator(z.object({ datatype: z.string() }))
   .handler(async ({ data }) => {
     const stdEntityTypesList = await db
@@ -50,7 +50,7 @@ export const getStdEntityTypesByDatatype = createServerFn({ method: "GET" })
     return stdEntityTypesList
   })
 
-export const getStdEntityTypesByCategory = createServerFn({ method: "GET" })
+export const getStdEntityTypesByCategory = createMonitoredDbFn({ eventName: "web.public.std_entity_type.get_std_entity_types_by_category", method: "GET" })
   .inputValidator(z.object({ category: z.string() }))
   .handler(async ({ data }) => {
     const stdEntityTypesList = await db

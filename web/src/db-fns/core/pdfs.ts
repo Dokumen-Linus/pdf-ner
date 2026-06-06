@@ -1,13 +1,13 @@
-import { createServerFn } from "@tanstack/react-start"
 import { count, desc, eq, inArray } from "drizzle-orm"
 import { z } from "zod"
 
 import { db } from "@/db/client"
 import { corePdfs } from "@/db/schemas/core/pdfs"
 import { pdfTxts } from "@/db/schemas/workers/pdf-txts"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 import { requireProjectAccess } from "@/lib/project-authorization.server"
 
-export const getCorePdfById = createServerFn({ method: "GET" })
+export const getCorePdfById = createMonitoredDbFn({ eventName: "web.core.pdf.get_core_pdf_by_id", method: "GET" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const [pdf] = await db.select().from(corePdfs).where(eq(corePdfs.id, data.id)).limit(1)
@@ -17,13 +17,13 @@ export const getCorePdfById = createServerFn({ method: "GET" })
     return pdf
   })
 
-export const getAllCorePdfs = createServerFn({ method: "GET" })
+export const getAllCorePdfs = createMonitoredDbFn({ eventName: "web.core.pdf.get_all_core_pdfs", method: "GET" })
   .inputValidator(z.void())
   .handler(async () => {
     return db.select().from(corePdfs)
   })
 
-export const getCorePdfIdsByProjectId = createServerFn({ method: "GET" })
+export const getCorePdfIdsByProjectId = createMonitoredDbFn({ eventName: "web.core.pdf.get_core_pdf_ids_by_project_id", method: "GET" })
   .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")
@@ -33,7 +33,7 @@ export const getCorePdfIdsByProjectId = createServerFn({ method: "GET" })
       .where(eq(corePdfs.projectId, data.projectId))
   })
 
-export const getCorePdfsCountByProjectId = createServerFn({ method: "GET" })
+export const getCorePdfsCountByProjectId = createMonitoredDbFn({ eventName: "web.core.pdf.get_core_pdfs_count_by_project_id", method: "GET" })
   .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")
@@ -44,14 +44,14 @@ export const getCorePdfsCountByProjectId = createServerFn({ method: "GET" })
     return result?.count ?? 0
   })
 
-export const getCorePdfsByProjectId = createServerFn({ method: "GET" })
+export const getCorePdfsByProjectId = createMonitoredDbFn({ eventName: "web.core.pdf.get_core_pdfs_by_project_id", method: "GET" })
   .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")
     return db.select().from(corePdfs).where(eq(corePdfs.projectId, data.projectId))
   })
 
-export const getCorePdfsWithLatestTxtByProjectId = createServerFn({ method: "GET" })
+export const getCorePdfsWithLatestTxtByProjectId = createMonitoredDbFn({ eventName: "web.core.pdf.get_core_pdfs_with_latest_txt_by_project_id", method: "GET" })
   .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")

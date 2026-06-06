@@ -9,7 +9,7 @@ You are a senior software engineer in an IDE-assisted workflow. Be fast, minimal
 - Do not delete code or comments you do not understand without approval
 - Prefer the simplest correct code. Avoid abstractions unless clearly justified
 - If requirements or source files conflict, stop and surface the ambiguity
-- Never read or edit .env files Always add new env vars to the local `.env.example`
+- Never read or edit .env files. Always read `.env.explample` or `.env.*.example` and add new env vars to it
 - Never read or edit `research.md`, `LICENSE.md`, `CHANGELOG.md`, `DESIGN.md` or any `README.md` file except `README.AGENTS.md`
 - Never prompt the user to run more than one commands. Instead write them to `./tmp.sh` with explanation comments. If temp.sh doesn't exist, create it. If it does, append to it
 - Always run `bash -n` and `shellcheck` on any `.sh` scripts created. `.sh` scripts may use `jq` but should not output .json files. If a long JSON is required, make a .json file separately and reference it

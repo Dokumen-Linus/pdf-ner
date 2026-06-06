@@ -1,5 +1,6 @@
-import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
+
+import { createMonitoredApiFn } from "@/db-fns/web/monitoring"
 
 import type { AccountTarget } from "@/db-fns/web/billing-target"
 
@@ -73,7 +74,7 @@ function assertStatusBelongsToTarget(status: UatTaskStatus, target: AccountTarge
   }
 }
 
-export const loadUatBillingTarget = createServerFn({ method: "GET" }).handler(async () => {
+export const loadUatBillingTarget = createMonitoredApiFn({ eventName: "api.uat_billing.load_uat_billing_target", method: "GET" }).handler(async () => {
   const { requireBillingAccountTarget } = await import("@/db-fns/web/billing.server")
   const target = await requireBillingAccountTarget()
   return {
@@ -85,7 +86,7 @@ export const loadUatBillingTarget = createServerFn({ method: "GET" }).handler(as
   }
 })
 
-export const createDirectTestPayment = createServerFn({ method: "POST" })
+export const createDirectTestPayment = createMonitoredApiFn({ eventName: "api.uat_billing.create_direct_test_payment", method: "POST" })
   .inputValidator(z.object({ amountCents: z.number().int().min(50).max(50000).default(100) }))
   .handler(async ({ data }) => {
     await assertTestStripeMode()
@@ -100,7 +101,7 @@ export const createDirectTestPayment = createServerFn({ method: "POST" })
     }) as Promise<UatTaskResponse>
   })
 
-export const chargeCurrentBillingCycle = createServerFn({ method: "POST" }).handler(async () => {
+export const chargeCurrentBillingCycle = createMonitoredApiFn({ eventName: "api.uat_billing.charge_current_billing_cycle", method: "POST" }).handler(async () => {
   await assertTestStripeMode()
   const target = await requireUatBillingTarget()
   return callWorkerApi("/api/v1/uat-worker-dispatch/billing/current-cycle", {
@@ -110,7 +111,7 @@ export const chargeCurrentBillingCycle = createServerFn({ method: "POST" }).hand
   }) as Promise<UatTaskResponse>
 })
 
-export const runDueAccountBillingSweep = createServerFn({ method: "POST" })
+export const runDueAccountBillingSweep = createMonitoredApiFn({ eventName: "api.uat_billing.run_due_account_billing_sweep", method: "POST" })
   .inputValidator(z.object({ limit: z.number().int().min(1).max(500).default(100) }))
   .handler(async ({ data }) => {
     await assertTestStripeMode()
@@ -122,7 +123,7 @@ export const runDueAccountBillingSweep = createServerFn({ method: "POST" })
     }) as Promise<UatTaskResponse>
   })
 
-export const getUatBillingTaskStatus = createServerFn({ method: "GET" })
+export const getUatBillingTaskStatus = createMonitoredApiFn({ eventName: "api.uat_billing.get_task_status", method: "GET" })
   .inputValidator(z.object({ taskId: z.string().min(1) }))
   .handler(async ({ data }) => {
     const target = await requireUatBillingTarget()

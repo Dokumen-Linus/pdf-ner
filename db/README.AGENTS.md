@@ -3,6 +3,7 @@
 ## Conventions
 
 - `db\migrations` are the source of truth for database objects
+- Post-instantiation dbmate migration filenames must use a unique numeric version before the first underscore; prefer `YYYYMMDDhhmmss_description.sql`
 - `db\seeds` insert data into objects defined by migrations
 - Generated schema dumps are reference artifacts, not creation inputs
 

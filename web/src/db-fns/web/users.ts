@@ -1,9 +1,9 @@
-import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
 
 import { db } from "@/db/client"
 import { users } from "@/db/schemas/web/users"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 
 // ** CREATE **
 export const CreateUserSchema = z.object({
@@ -18,7 +18,7 @@ export const CreateUserSchema = z.object({
   avatarUrl: z.string().nullable().optional(),
 })
 
-export const createUser = createServerFn({ method: "POST" })
+export const createUser = createMonitoredDbFn({ eventName: "web.user.create", method: "POST" })
   .inputValidator(CreateUserSchema)
   .handler(async ({ data }) => {
     try {
@@ -34,7 +34,7 @@ export const createUser = createServerFn({ method: "POST" })
   })
 
 // ** READ **
-export const getUserById = createServerFn({ method: "GET" })
+export const getUserById = createMonitoredDbFn({ eventName: "web.user.get_by_id", method: "GET" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const [user] = await db.select().from(users).where(eq(users.id, data.id)).limit(1)
@@ -44,7 +44,7 @@ export const getUserById = createServerFn({ method: "GET" })
     return user
   })
 
-export const getUserByEmail = createServerFn({ method: "GET" })
+export const getUserByEmail = createMonitoredDbFn({ eventName: "web.user.get_by_email", method: "GET" })
   .inputValidator(z.object({ email: z.email() }))
   .handler(async ({ data }) => {
     const [user] = await db.select().from(users).where(eq(users.email, data.email)).limit(1)
@@ -54,7 +54,7 @@ export const getUserByEmail = createServerFn({ method: "GET" })
     return user
   })
 
-export const getUserByAuthUserId = createServerFn({ method: "GET" })
+export const getUserByAuthUserId = createMonitoredDbFn({ eventName: "web.user.get_by_auth_user_id", method: "GET" })
   .inputValidator(z.object({ authUserId: z.string() }))
   .handler(async ({ data }) => {
     const [user] = await db.select().from(users).where(eq(users.id, data.authUserId)).limit(1)
@@ -72,7 +72,7 @@ export const UpdateUserSchema = CreateUserSchema.partial().extend({
   id: z.string(),
 })
 
-export const updateUser = createServerFn({ method: "POST" })
+export const updateUser = createMonitoredDbFn({ eventName: "web.user.update", method: "POST" })
   .inputValidator(UpdateUserSchema)
   .handler(async ({ data }) => {
     const { id, ...updateData } = data
@@ -87,7 +87,7 @@ export const UpdateUserByAuthUserIdSchema = CreateUserSchema.partial().extend({
   authUserId: z.string(),
 })
 
-export const updateUserByAuthUserId = createServerFn({ method: "POST" })
+export const updateUserByAuthUserId = createMonitoredDbFn({ eventName: "web.user.update_user_by_auth_user_id", method: "POST" })
   .inputValidator(UpdateUserByAuthUserIdSchema)
   .handler(async ({ data }) => {
     const { authUserId, ...updateData } = data
@@ -99,7 +99,7 @@ export const updateUserByAuthUserId = createServerFn({ method: "POST" })
   })
 
 // ** DELETE **
-export const deleteUser = createServerFn({ method: "POST" })
+export const deleteUser = createMonitoredDbFn({ eventName: "web.user.delete", method: "POST" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const user = await db.delete(users).where(eq(users.id, data.id))
@@ -109,7 +109,7 @@ export const deleteUser = createServerFn({ method: "POST" })
     return { success: true }
   })
 
-export const deleteUserByEmail = createServerFn({ method: "POST" })
+export const deleteUserByEmail = createMonitoredDbFn({ eventName: "web.user.delete_user_by_email", method: "POST" })
   .inputValidator(z.object({ email: z.email() }))
   .handler(async ({ data }) => {
     const user = await db.delete(users).where(eq(users.email, data.email))

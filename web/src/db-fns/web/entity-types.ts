@@ -1,9 +1,9 @@
-import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
 
 import { db } from "@/db/client"
 import { entityTypes } from "@/db/schemas/web/entity-types"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 import { requireProjectAccess } from "@/lib/project-authorization.server"
 import { requirePermission } from "@/lib/role-authorization.server"
 
@@ -30,7 +30,7 @@ export const CreateEntityTypeSchema = z.object({
   opacity: z.number().optional(),
 })
 
-export const createEntityType = createServerFn({ method: "POST" })
+export const createEntityType = createMonitoredDbFn({ eventName: "web.entity_type.create", method: "POST" })
   .inputValidator(CreateEntityTypeSchema)
   .handler(async ({ data }) => {
     const access = await requireProjectAccess(data.projectId, "manage")
@@ -40,7 +40,7 @@ export const createEntityType = createServerFn({ method: "POST" })
   })
 
 // ** READ **
-export const getEntityTypeById = createServerFn({ method: "GET" })
+export const getEntityTypeById = createMonitoredDbFn({ eventName: "web.entity_type.get_by_id", method: "GET" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const entityType = await db.select().from(entityTypes).where(eq(entityTypes.id, data.id))
@@ -50,7 +50,7 @@ export const getEntityTypeById = createServerFn({ method: "GET" })
     return entityType[0]
   })
 
-export const getEntityTypesByProjectId = createServerFn({ method: "GET" })
+export const getEntityTypesByProjectId = createMonitoredDbFn({ eventName: "web.entity_type.get_entity_types_by_project_id", method: "GET" })
   .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.projectId, "label")
@@ -67,7 +67,7 @@ export const UpdateEntityTypeSchema = CreateEntityTypeSchema.partial().extend({
   id: z.string(),
 })
 
-export const updateEntityType = createServerFn({ method: "POST" })
+export const updateEntityType = createMonitoredDbFn({ eventName: "web.entity_type.update", method: "POST" })
   .inputValidator(UpdateEntityTypeSchema)
   .handler(async ({ data }) => {
     const { id, ...updateData } = data
@@ -92,7 +92,7 @@ export const updateEntityType = createServerFn({ method: "POST" })
   })
 
 // ** DELETE **
-export const deleteEntityType = createServerFn({ method: "POST" })
+export const deleteEntityType = createMonitoredDbFn({ eventName: "web.entity_type.delete", method: "POST" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const [existing] = await db

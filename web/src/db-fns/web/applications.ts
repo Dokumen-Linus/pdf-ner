@@ -1,9 +1,9 @@
-import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
 import { db } from "@/db/client"
 import { applications } from "@/db/schemas/web/applications"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 
 // ** CREATE SCHEMA **
 export const CreateApplicationSchema = z.object({
@@ -13,7 +13,7 @@ export const CreateApplicationSchema = z.object({
   message: z.string().trim().max(5000).nullable().optional(),
 })
 
-export const createApplication = createServerFn({ method: "POST" })
+export const createApplication = createMonitoredDbFn({ eventName: "web.application.create", method: "POST" })
   .inputValidator(CreateApplicationSchema)
   .handler(async ({ data }) => {
     try {
@@ -29,7 +29,7 @@ export const createApplication = createServerFn({ method: "POST" })
   })
 
 // ** READ BY ID **
-export const getApplicationById = createServerFn({ method: "GET" })
+export const getApplicationById = createMonitoredDbFn({ eventName: "web.application.get_by_id", method: "GET" })
   .inputValidator(z.object({ id: z.number() }))
   .handler(async ({ data }) => {
     const [app] = await db.select().from(applications).where(eq(applications.id, data.id)).limit(1)
@@ -40,7 +40,7 @@ export const getApplicationById = createServerFn({ method: "GET" })
   })
 
 // ** DELETE BY ID **
-export const deleteApplication = createServerFn({ method: "POST" })
+export const deleteApplication = createMonitoredDbFn({ eventName: "web.application.delete", method: "POST" })
   .inputValidator(z.object({ id: z.number() }))
   .handler(async ({ data }) => {
     const result = await db.delete(applications).where(eq(applications.id, data.id))

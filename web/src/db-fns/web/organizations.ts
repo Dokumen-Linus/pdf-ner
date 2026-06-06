@@ -1,4 +1,3 @@
-import { createServerFn } from "@tanstack/react-start"
 import { getRequestHeaders } from "@tanstack/react-start/server"
 import { and, eq } from "drizzle-orm"
 import { z } from "zod"
@@ -6,6 +5,7 @@ import { z } from "zod"
 import { db } from "@/db/client"
 import { authMembers, authOrganizations, authTeams } from "@/db/schemas/auth"
 import { organizations, webTeams } from "@/db/schemas/web"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 import { auth } from "@/lib/auth"
 
 async function requireUserId(): Promise<string> {
@@ -17,7 +17,7 @@ async function requireUserId(): Promise<string> {
   return session.user.id
 }
 
-export const getCurrentUserOrganization = createServerFn({ method: "GET" }).handler(async () => {
+export const getCurrentUserOrganization = createMonitoredDbFn({ eventName: "web.organization.get_current_user", method: "GET" }).handler(async () => {
   const userId = await requireUserId()
 
   const [row] = await db
@@ -39,7 +39,7 @@ export const getCurrentUserOrganization = createServerFn({ method: "GET" }).hand
   }
 })
 
-export const getCurrentUserTeamsByOrganization = createServerFn({ method: "GET" })
+export const getCurrentUserTeamsByOrganization = createMonitoredDbFn({ eventName: "web.organization.get_current_user_teams_by", method: "GET" })
   .inputValidator(z.object({ organizationId: z.string() }))
   .handler(async ({ data }) => {
     const userId = await requireUserId()

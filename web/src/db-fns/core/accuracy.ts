@@ -1,4 +1,3 @@
-import { createServerFn } from "@tanstack/react-start"
 import { and, eq, inArray } from "drizzle-orm"
 import { z } from "zod"
 
@@ -6,9 +5,10 @@ import { db } from "@/db/client"
 import { entityValues } from "@/db/schemas/core/entity-values"
 import { corePdfs } from "@/db/schemas/core/pdfs"
 import { entityTypes } from "@/db/schemas/web/entity-types"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 import { requireProjectAccess } from "@/lib/project-authorization.server"
 
-export const getAccuracyDataByProjectId = createServerFn({ method: "GET" })
+export const getAccuracyDataByProjectId = createMonitoredDbFn({ eventName: "web.core.accuracy.get_data_by_project_id", method: "GET" })
   .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     // 1. Authenticate user access to the project

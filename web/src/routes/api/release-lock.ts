@@ -8,12 +8,13 @@
 
 import { createFileRoute } from "@tanstack/react-router"
 
+import { monitorRouteHandler } from "@/db-fns/web/monitoring"
 import { releaseLabelingLock } from "@/db-fns/web/pdfs"
 import { requireUserId } from "@/lib/project-authorization.server"
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-export async function releaseLockHandler({ request }: { request: Request }): Promise<Response> {
+async function releaseLockHandlerImpl({ request }: { request: Request }): Promise<Response> {
   try {
     const body = (await request.json()) as { pdfId?: unknown; userId?: unknown }
     if (typeof body.pdfId !== "string" || !UUID_RE.test(body.pdfId)) {
@@ -37,6 +38,16 @@ export async function releaseLockHandler({ request }: { request: Request }): Pro
     return Response.json({ detail }, { status })
   }
 }
+
+export const releaseLockHandler = monitorRouteHandler<{ request: Request }, Response>(
+  {
+    eventName: "web.pdf.lock.release_beacon",
+    getMetadata: ({ request }) => ({ contentType: request.headers.get("content-type") }),
+    operationType: "mutation",
+    routeOrPath: "/api/release-lock",
+  },
+  releaseLockHandlerImpl,
+)
 
 export const Route = createFileRoute("/api/release-lock")({
   server: {

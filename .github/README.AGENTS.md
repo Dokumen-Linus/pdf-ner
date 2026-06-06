@@ -8,6 +8,7 @@
 - deploy-workers: deploy workers to AWS
 - deploy-stack: [1] build all app images [2] deploy all images to the EC2 [3] start the Compose services
 - ec2-healthcheck: manual-only wait-then-run EC2 health check; deploy workflows must not call it automatically
+- rollback-deploy: manual-only rollback to previously recorded ECR image refs
 - restart: restart the Compose services with the existing images
 - test-deploy: test steps [2] and [3] of deploy-stack
 
@@ -18,6 +19,10 @@
 ```bash
 gh workflow run "Deploy Stack" --ref master
 ```
+
+## Manual Rollback
+
+`rollback-deploy.yml` re-deploys previously recorded ECR image refs from the EC2 deploy state directory. It supports `stack`, `web`, `api`, and `worker` scopes and requires the `confirm` input to be exactly `rollback`.
 
 Required GitHub Actions secrets:
 
