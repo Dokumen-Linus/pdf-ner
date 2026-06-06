@@ -118,6 +118,52 @@ get_tcp_cidr_rule_ids() {
     --output text
 }
 
+get_tcp_ipv4_cidrs() {
+  local group_id="$1"
+  local port="$2"
+
+  aws_region ec2 describe-security-group-rules \
+    --filters "Name=group-id,Values=${group_id}" \
+    --query "SecurityGroupRules[?IsEgress==\`false\` && IpProtocol==\`tcp\` && FromPort==\`${port}\` && ToPort==\`${port}\` && CidrIpv4!=\`null\`].CidrIpv4" \
+    --output text | tr '\t' '\n' | awk 'NF { print }'
+}
+
+get_tcp_ipv6_cidrs() {
+  local group_id="$1"
+  local port="$2"
+
+  aws_region ec2 describe-security-group-rules \
+    --filters "Name=group-id,Values=${group_id}" \
+    --query "SecurityGroupRules[?IsEgress==\`false\` && IpProtocol==\`tcp\` && FromPort==\`${port}\` && ToPort==\`${port}\` && CidrIpv6!=\`null\`].CidrIpv6" \
+    --output text | tr '\t' '\n' | awk 'NF { print }'
+}
+
+print_cidr_list() {
+  local label="$1"
+  local cidrs="$2"
+
+  echo "${label}:"
+  if [ -z "$cidrs" ]; then
+    echo "  (none)"
+    return
+  fi
+
+  printf '%s\n' "$cidrs" | sort -u | sed 's/^/  /'
+}
+
+show_dev_db_allowed_cidrs() {
+  local group_id="$1"
+  local port="$2"
+  local ipv4_cidrs ipv6_cidrs
+
+  ipv4_cidrs="$(get_tcp_ipv4_cidrs "$group_id" "$port")"
+  ipv6_cidrs="$(get_tcp_ipv6_cidrs "$group_id" "$port")"
+
+  echo "Development RDS ${group_id} tcp/${port} allowed CIDRs"
+  print_cidr_list "IPv4" "$ipv4_cidrs"
+  print_cidr_list "IPv6" "$ipv6_cidrs"
+}
+
 authorize_dev_db_cidr() {
   local group_id="$1"
   local port="$2"
