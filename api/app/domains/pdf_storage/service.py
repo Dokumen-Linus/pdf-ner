@@ -11,6 +11,13 @@ from fastapi import HTTPException, Request
 from app.domains.pdf_storage import repository
 from app.domains.pdf_storage.schemas import CreateBucketRequest
 from app.domains.shared.repository import fetch_bucket_by_id
+from app.domains.shared.schemas import MonitoringEventInput
+from app.domains.shared.service import (
+    error_fields,
+    record_monitoring_event,
+    request_context,
+    safe_upload_metadata,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -164,6 +171,7 @@ def _build_s3_client(bucket: asyncpg.Record):
 
 
 _PRESIGNED_URL_TTL_SECONDS = 3600  # 1 hour — balances cache-friendliness with security
+PRESIGNED_URL_TTL_SECONDS = _PRESIGNED_URL_TTL_SECONDS
 
 
 async def generate_pdf_get_url(conn: asyncpg.Connection, pdf_id: UUID, user_id: str) -> dict:
@@ -251,16 +259,45 @@ async def upload_pdf_stream(
     upload_id = init["UploadId"]
 
     async def _abort_and_rollback():
+        rollback_error: ClientError | None = None
         try:
             await anyio.to_thread.run_sync(
                 lambda: s3.abort_multipart_upload(
                     Bucket=bucket_name, Key=filepath, UploadId=upload_id
                 )
             )
-        except ClientError:
+        except ClientError as exc:
             # Best-effort abort; orphaned parts expire per bucket lifecycle.
+            rollback_error = exc
             logger.exception("Failed to abort S3 multipart upload %s", upload_id)
         await repository.delete_pdf(conn, pdf_id)
+        metadata = {
+            **safe_upload_metadata(request, filename=filename),
+            "bucket_id": str(bucket_id),
+            "project_id": str(project_id),
+            "pdf_id": str(pdf_id),
+            "filepath": filepath,
+            "rollback_action": "delete_pdf_and_abort_multipart",
+            "abort_succeeded": rollback_error is None,
+        }
+        await record_monitoring_event(
+            conn,
+            MonitoringEventInput(
+                event_name="api.storage.pdf.upload.rollback",
+                event_kind="storage",
+                operation_type="mutation",
+                source="api.pdf_storage",
+                status="failure" if rollback_error else "success",
+                actor_user_id=uploaded_by_user_id,
+                project_id=project_id,
+                resource_type="pdf",
+                resource_id=str(pdf_id),
+                metadata=metadata,
+                raw_error_payload=metadata if rollback_error else None,
+                **request_context(request),
+                **(error_fields(rollback_error) if rollback_error else {}),
+            ),
+        )
 
     parts: list[dict] = []
     part_number = 1
