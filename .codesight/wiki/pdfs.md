@@ -6,9 +6,9 @@ The Pdfs subsystem handles **2 routes** and touches: auth.
 
 ## Routes
 
-- `GET` `/api/v1/pdfs/{pdf_id}/url` params(pdf_id) → in: UUID [auth, upload]
+- `GET` `/api/v1/pdfs/{pdf_id}/url` params(pdf_id) [auth, upload]
   `api/app/domains/pdf_storage/router.py`
-- `POST` `/api/v1/pdfs` → in: CreateBucketRequest [auth, upload]
+- `POST` `/api/v1/pdfs` [auth, upload]
   `api/app/domains/pdf_storage/router.py`
 
 ## Source Files

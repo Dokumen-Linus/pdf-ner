@@ -1,4 +1,3 @@
-import { createServerFn } from "@tanstack/react-start"
 import { getRequestHeaders } from "@tanstack/react-start/server"
 import { and, eq, or } from "drizzle-orm"
 import { z } from "zod"
@@ -6,6 +5,7 @@ import { z } from "zod"
 import { db } from "@/db/client"
 import { authMembers, authTeamMembers, authTeams } from "@/db/schemas/auth"
 import { webTeams } from "@/db/schemas/web"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 import { auth } from "@/lib/auth"
 import { requireWorkspaceUser } from "@/lib/project-authorization.server"
 
@@ -20,7 +20,7 @@ export const CreateTeamSchema = z.object({
   organizationId: z.string().uuid(),
 })
 
-export const createTeam = createServerFn({ method: "POST" })
+export const createTeam = createMonitoredDbFn({ eventName: "web.team.create", method: "POST" })
   .inputValidator(CreateTeamSchema)
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
@@ -41,7 +41,7 @@ export const createTeam = createServerFn({ method: "POST" })
     }
   })
 
-export const getCurrentUserTeamsByOrganizationId = createServerFn({ method: "GET" })
+export const getCurrentUserTeamsByOrganizationId = createMonitoredDbFn({ eventName: "web.team.get_current_user_teams_by_organization_id", method: "GET" })
   .inputValidator(z.object({ organizationId: z.string().uuid() }))
   .handler(async ({ data }) => {
     const workspaceUser = await requireWorkspaceUser()
@@ -68,7 +68,7 @@ export const getCurrentUserTeamsByOrganizationId = createServerFn({ method: "GET
     }))
   })
 
-export const getTeamById = createServerFn({ method: "GET" })
+export const getTeamById = createMonitoredDbFn({ eventName: "web.team.get_by_id", method: "GET" })
   .inputValidator(z.object({ id: z.string().uuid() }))
   .handler(async ({ data }) => {
     const workspaceUser = await requireWorkspaceUser()
@@ -97,7 +97,7 @@ export const getTeamById = createServerFn({ method: "GET" })
     }
   })
 
-export const updateTeam = createServerFn({ method: "POST" })
+export const updateTeam = createMonitoredDbFn({ eventName: "web.team.update", method: "POST" })
   .inputValidator(
     z.object({ id: z.string().uuid(), description: z.string().nullable().optional() }),
   )

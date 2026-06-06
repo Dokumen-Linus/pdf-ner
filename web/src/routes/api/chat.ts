@@ -11,6 +11,7 @@ import { contentGuardMiddleware } from "@tanstack/ai/middlewares"
 import { createOpenaiChat } from "@tanstack/ai-openai"
 import { createFileRoute } from "@tanstack/react-router"
 
+import { monitorRouteHandler } from "@/db-fns/web/monitoring"
 import { env } from "@/env.server"
 
 const CHAT_MODEL = "gpt-5-nano"
@@ -138,12 +139,13 @@ export const Route = createFileRoute("/api/chat")({
             threadId: chatParams.threadId,
           })
 
-          return toServerSentEventsResponse(stream)
-        } catch (error) {
-          console.error("Chat API error:", error)
-          return new Response("Internal Server Error", { status: 500 })
-        }
-      },
+            return toServerSentEventsResponse(stream)
+          } catch (error) {
+            console.error("Chat API error:", error)
+            return new Response("Internal Server Error", { status: 500 })
+          }
+        },
+      ),
     },
   },
 })

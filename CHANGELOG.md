@@ -1,3 +1,29 @@
+## [unreleased]
+
+### 🚀 Features
+
+- *(web)* Monitoring
+- *(api)* Monitoring
+- *(wk)* Monitoring
+
+### 🐛 Bug Fixes
+
+- *(web)* Remove platform dead space
+
+### 🚜 Refactoring
+
+- *(db)* Move sql from .sh to .sql
+
+### 📚 Documentation
+
+- *(db)* Deploy-rds docs
+- Rollback
+
+### ⚙️ CI/CD
+
+- ECR image rollback
+- *(aws)* Show-dev-cidr
+- *(db)* Modify-rds scripts
 ## [0.1.1] - 2026-06-03
 
 ### ⚡ Performance

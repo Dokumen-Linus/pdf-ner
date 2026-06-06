@@ -1,0 +1,240 @@
+name: Rollback Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: Service scope to roll back
+        required: true
+        default: stack
+        type: choice
+        options:
+          - stack
+          - web
+          - api
+          - worker
+      confirm:
+        description: Type rollback to confirm
+        required: true
+        type: string
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  EC2_APP_DIR: ${{ vars.EC2_APP_DIR || '/opt/dokumen/pdf-ner' }}
+  EC2_DEPLOY_STATE_DIR: ${{ vars.EC2_DEPLOY_STATE_DIR || '/opt/dokumen/deploy-state' }}
+  SCOPE: ${{ inputs.scope }}
+
+jobs:
+  rollback:
+    name: Roll Back Existing ECR Images
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Validate confirmation
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          if [[ "$CONFIRM" != "rollback" ]]; then
+            echo "::error::confirm must equal 'rollback'."
+            exit 1
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Roll back on EC2
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+        run: |
+          run_ssm_command() {
+            local label="$1"
+            local remote_command="$2"
+            local encoded_command
+            local command_id
+            local wait_status
+
+            encoded_command="$(printf '%s' "$remote_command" | base64 -w 0)"
+
+            echo "::group::${label}"
+            command_id="$(aws ssm send-command \
+              --instance-ids "$EC2_INSTANCE_ID" \
+              --document-name "AWS-RunShellScript" \
+              --comment "Rollback deploy ${{ github.run_id }}: ${label}" \
+              --parameters "commands=printf %s $encoded_command | base64 -d | bash" \
+              --query "Command.CommandId" \
+              --output text)"
+            echo "SSM command id: ${command_id}"
+
+            set +e
+            aws ssm wait command-executed \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID"
+            wait_status=$?
+            set -e
+
+            echo "Status:"
+            aws ssm get-command-invocation \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query "Status" \
+              --output text
+            echo "Stdout:"
+            aws ssm get-command-invocation \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query "StandardOutputContent" \
+              --output text
+            echo "Stderr:"
+            aws ssm get-command-invocation \
+              --command-id "$command_id" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query "StandardErrorContent" \
+              --output text
+            echo "::endgroup::"
+
+            if (( wait_status != 0 )); then
+              exit "$wait_status"
+            fi
+          }
+
+          run_ssm_command \
+            "Log in to ECR" \
+            "set -euo pipefail; aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY"
+
+          remote_script="$(cat <<'REMOTE'
+          set -euo pipefail
+
+          require_file() {
+            local path="$1"
+            local message="$2"
+
+            if ! test -s "$path"; then
+              echo "ERROR: ${message}: ${path}" >&2
+              exit 1
+            fi
+          }
+
+          snapshot_current() {
+            local snapshot
+
+            install -d -m 0755 \
+              "$STATE_DIR" \
+              "$STATE_DIR/images" \
+              "$STATE_DIR/rollback/services" \
+              "$STATE_DIR/rollback/snapshots"
+
+            snapshot="$STATE_DIR/rollback/snapshots/$(date -u +%Y%m%d_%H%M%S)_rollback_${SCOPE}.env"
+            : > "$snapshot"
+
+            if test -s "$STATE_DIR/images/web"; then
+              printf 'WEB_IMAGE=%s\n' "$(cat "$STATE_DIR/images/web")" >> "$snapshot"
+            fi
+            if test -s "$STATE_DIR/images/api"; then
+              printf 'API_IMAGE=%s\n' "$(cat "$STATE_DIR/images/api")" >> "$snapshot"
+            fi
+            if test -s "$STATE_DIR/images/worker"; then
+              printf 'WORKER_IMAGE=%s\n' "$(cat "$STATE_DIR/images/worker")" >> "$snapshot"
+            fi
+
+            cp "$snapshot" "$STATE_DIR/rollback/latest.env"
+            echo "Pre-rollback snapshot: $snapshot"
+          }
+
+          render_compose_override() {
+            local service
+            local image
+
+            echo "services:" > "$STATE_DIR/docker-compose.images.yml"
+            for service in web api worker; do
+              if test -s "$STATE_DIR/images/$service"; then
+                image="$(cat "$STATE_DIR/images/$service")"
+                printf '  %s:\n    image: %s\n' "$service" "$image" >> "$STATE_DIR/docker-compose.images.yml"
+              fi
+            done
+          }
+
+          case "$SCOPE" in
+            stack|web|api|worker)
+              ;;
+            *)
+              echo "ERROR: unsupported rollback scope: $SCOPE" >&2
+              exit 1
+              ;;
+          esac
+
+          if [[ "$SCOPE" == "stack" ]]; then
+            require_file "$STATE_DIR/rollback/latest.env" "missing full-stack rollback snapshot"
+
+            # shellcheck disable=SC1090
+            . "$STATE_DIR/rollback/latest.env"
+
+            : "${WEB_IMAGE:?latest rollback snapshot is missing WEB_IMAGE}"
+            : "${API_IMAGE:?latest rollback snapshot is missing API_IMAGE}"
+            : "${WORKER_IMAGE:?latest rollback snapshot is missing WORKER_IMAGE}"
+
+            snapshot_current
+
+            for service in web api worker; do
+              if test -s "$STATE_DIR/images/$service"; then
+                cp "$STATE_DIR/images/$service" "$STATE_DIR/rollback/services/$service.previous"
+              fi
+            done
+
+            printf '%s\n' "$WEB_IMAGE" > "$STATE_DIR/images/web"
+            printf '%s\n' "$API_IMAGE" > "$STATE_DIR/images/api"
+            printf '%s\n' "$WORKER_IMAGE" > "$STATE_DIR/images/worker"
+            render_compose_override
+
+            cd "$EC2_APP_DIR"
+            docker compose -f infra/docker-compose.yml -f "$STATE_DIR/docker-compose.images.yml" --env-file infra/.env.prod pull web api worker
+            docker compose -f infra/docker-compose.yml -f "$STATE_DIR/docker-compose.images.yml" --env-file infra/.env.prod up -d --no-build api worker web
+          else
+            previous_file="$STATE_DIR/rollback/services/$SCOPE.previous"
+            require_file "$previous_file" "missing service rollback image"
+
+            target_image="$(cat "$previous_file")"
+            current_image=""
+            if test -s "$STATE_DIR/images/$SCOPE"; then
+              current_image="$(cat "$STATE_DIR/images/$SCOPE")"
+            fi
+
+            snapshot_current
+
+            if [[ -n "$current_image" && "$current_image" != "$target_image" ]]; then
+              printf '%s\n' "$current_image" > "$previous_file"
+            fi
+
+            printf '%s\n' "$target_image" > "$STATE_DIR/images/$SCOPE"
+            render_compose_override
+
+            cd "$EC2_APP_DIR"
+            docker compose -f infra/docker-compose.yml -f "$STATE_DIR/docker-compose.images.yml" --env-file infra/.env.prod pull "$SCOPE"
+            docker compose -f infra/docker-compose.yml -f "$STATE_DIR/docker-compose.images.yml" --env-file infra/.env.prod up -d --no-build --no-deps "$SCOPE"
+          fi
+          REMOTE
+          )"
+
+          run_ssm_command \
+            "Roll back ${SCOPE}" \
+            "STATE_DIR=$EC2_DEPLOY_STATE_DIR
+          EC2_APP_DIR=$EC2_APP_DIR
+          SCOPE=$SCOPE
+          ${remote_script}"
+
+          run_ssm_command \
+            "Prune dangling images" \
+            "set -euo pipefail; docker image prune -f"

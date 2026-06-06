@@ -8,20 +8,13 @@
 
 ## How to Run
 
-Create .env before running
+Create .env file, load env vars, and run:
 
 ```bash
 set -a
-source db/deploy-rds/.env.production
+source db/deploy-rds/.env.production # or .env.development
 set +a
-bash db/deploy-rds/deploy_prod.sh
-```
-
-```bash
-set -a
-source db/deploy-rds/.env.development
-set +a
-bash db/deploy-rds/deploy_dev.sh
+bash db/deploy-rds/run_all.sh
 ```
 
 ## Script Order

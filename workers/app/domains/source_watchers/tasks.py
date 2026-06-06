@@ -17,7 +17,7 @@ def dispatch_due_watchers_task(limit: int = 100) -> dict:
 def poll_source_connection_task(self, connection_id: str) -> dict:
     cmd = PollSourceConnection(connection_id=UUID(connection_id))
     try:
-        return anyio.run(handle_poll_source_connection, cmd)
+        return anyio.run(handle_poll_source_connection, cmd, self)
     except (LookupError, ValueError):
         raise
     except Exception as exc:

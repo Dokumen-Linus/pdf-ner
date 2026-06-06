@@ -1,11 +1,11 @@
-import { createServerFn } from "@tanstack/react-start"
 import { eq } from "drizzle-orm/sql"
 import { z } from "zod"
 
 import { db } from "@/db/client"
 import { prompts } from "@/db/schemas/core/prompts"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 
-export const getPromptById = createServerFn({ method: "GET" })
+export const getPromptById = createMonitoredDbFn({ eventName: "web.api.prompt.get_by_id", method: "GET" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const [prompt] = await db.select().from(prompts).where(eq(prompts.id, data.id)).limit(1)
@@ -15,14 +15,14 @@ export const getPromptById = createServerFn({ method: "GET" })
     return prompt
   })
 
-export const getPromptsByProjectId = createServerFn({ method: "GET" })
+export const getPromptsByProjectId = createMonitoredDbFn({ eventName: "web.api.prompt.get_prompts_by_project_id", method: "GET" })
   .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     const promptsList = await db.select().from(prompts).where(eq(prompts.projectId, data.projectId))
     return promptsList
   })
 
-export const getPromptsByTemplateId = createServerFn({ method: "GET" })
+export const getPromptsByTemplateId = createMonitoredDbFn({ eventName: "web.api.prompt.get_prompts_by_template_id", method: "GET" })
   .inputValidator(z.object({ templateId: z.number() }))
   .handler(async ({ data }) => {
     const promptsList = await db
@@ -32,7 +32,7 @@ export const getPromptsByTemplateId = createServerFn({ method: "GET" })
     return promptsList
   })
 
-export const getAllPrompts = createServerFn({ method: "GET" })
+export const getAllPrompts = createMonitoredDbFn({ eventName: "web.api.prompt.get_all_prompts", method: "GET" })
   .inputValidator(z.void())
   .handler(async () => {
     const promptsList = await db.select().from(prompts)

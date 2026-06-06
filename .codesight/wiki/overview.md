@@ -8,7 +8,7 @@
 
 ## Scale
 
-28 API routes · 3 database models · 82 UI components · 49 library files · 20 middleware layers · 198 environment variables
+28 API routes · 3 database models · 82 UI components · 50 library files · 20 middleware layers · 203 environment variables
 
 ## Subsystems
 
@@ -32,18 +32,18 @@
 
 **UI:** 82 components (react) — see [ui.md](./ui.md)
 
-**Libraries:** 49 files — see [libraries.md](./libraries.md)
+**Libraries:** 50 files — see [libraries.md](./libraries.md)
 
 ## High-Impact Files
 
 Changes to these files have the widest blast radius across the codebase:
 
 - `//infrastructure.py` — imported by **17** files
-- `/commands.py` — imported by **16** files
+- `/commands.py` — imported by **17** files
 - `//domain/entities.py` — imported by **15** files
 - `web/src/components/pdf-container/plugin-viewport-2/index.ts` — imported by **13** files
 - `web/src/components/pdf-container/plugin-annotation-2/lib/types.ts` — imported by **12** files
-- `web/src/db/schemas/web/projects.ts` — imported by **11** files
+- `web/src/db/schemas/web/projects.ts` — imported by **12** files
 
 ## Required Environment Variables
 
@@ -62,4 +62,4 @@ Changes to these files have the widest blast radius across the codebase:
 - _...27 more_
 
 ---
-_Back to [index.md](./index.md) · Generated 2026-06-03_
+_Back to [index.md](./index.md) · Generated 2026-06-06_

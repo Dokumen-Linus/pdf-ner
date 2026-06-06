@@ -6,6 +6,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 
 import { streamProxy } from "@/api-fns/api-stream-proxy.server"
+import { monitorRouteHandler, requestMetadata } from "@/db-fns/web/monitoring"
 import { updateUser } from "@/db-fns/web/users"
 import { requireUserId } from "@/lib/project-authorization.server"
 
@@ -17,7 +18,7 @@ function errorStatus(message: string): number {
   return 500
 }
 
-export async function avatarUploadHandler({ request }: { request: Request }): Promise<Response> {
+async function avatarUploadHandlerImpl({ request }: { request: Request }): Promise<Response> {
   try {
     const contentType = (request.headers.get("content-type") ?? "")
       .split(";")[0]
@@ -76,6 +77,17 @@ export async function avatarUploadHandler({ request }: { request: Request }): Pr
     return Response.json({ detail }, { status: errorStatus(detail) })
   }
 }
+
+export const avatarUploadHandler = monitorRouteHandler<{ request: Request }, Response>(
+  {
+    eventName: "web.user.avatar_upload",
+    getMetadata: ({ request }) => requestMetadata(request),
+    getRawErrorPayload: ({ request }) => requestMetadata(request),
+    operationType: "mutation",
+    routeOrPath: "/api/avatar-upload",
+  },
+  avatarUploadHandlerImpl,
+)
 
 export const Route = createFileRoute("/api/avatar-upload")({
   server: {

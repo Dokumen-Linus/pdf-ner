@@ -1,6 +1,6 @@
-import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 
+import { createMonitoredApiFn } from "@/db-fns/web/monitoring"
 import { env } from "@/env.server"
 import { requirePdfAccess } from "@/lib/project-authorization.server"
 
@@ -10,7 +10,7 @@ import { jsonCall } from "./api-json-call.server"
 // AbortIncompleteMultipartUpload lifecycle rule (orphan-parts safety net).
 // It can be false on MinIO/custom endpoints that don't implement the API —
 // the bucket itself is still usable.
-export const createBucket = createServerFn({ method: "POST" })
+export const createBucket = createMonitoredApiFn({ eventName: "api.storage.create_bucket", method: "POST" })
   .inputValidator(z.object({ name: z.string() }))
   .handler(
     async ({ data }): Promise<{ bucket_id: string; name: string; lifecycle_applied: boolean }> => {
@@ -29,7 +29,7 @@ export const createBucket = createServerFn({ method: "POST" })
 // Presigned GET URL for a stored PDF. The API signs with its runtime AWS role
 // so the browser never sees AWS credentials.
 // TTL is fixed server-side at 1 hour.
-export const getPdfPresignedUrl = createServerFn({ method: "GET" })
+export const getPdfPresignedUrl = createMonitoredApiFn({ eventName: "api.storage.get_pdf_presigned_url", method: "GET" })
   .inputValidator(z.object({ pdfId: z.string().uuid() }))
   .handler(async ({ data }) => {
     const access = await requirePdfAccess(data.pdfId, "label")

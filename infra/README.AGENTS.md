@@ -22,4 +22,5 @@ Prod database instance: `dokuprod`
 
 - Docker images may only be built by workflows, not bash scripts
 - The `deploy-*.yml` Actions build Docker images, push them to ECR, and use AWS Systems Manager Run Command to tell the EC2 instance to pull and start/restart Compose services
+- `rollback-deploy.yml` is manual-only and re-deploys the previous ECR image refs recorded under the EC2 deploy state directory
 - Refer to `.github/README.AGENTS.md` for workflow-specific details

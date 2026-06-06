@@ -1,4 +1,3 @@
-import { createServerFn } from "@tanstack/react-start"
 import { and, desc, eq, isNotNull, or } from "drizzle-orm/sql"
 import { z } from "zod"
 
@@ -7,6 +6,7 @@ import { db } from "@/db/client"
 import { authMembers, authTeamMembers, authTeams } from "@/db/schemas/auth"
 import { projects } from "@/db/schemas/web/projects"
 import { users } from "@/db/schemas/web/users"
+import { createMonitoredDbFn } from "@/db-fns/web/monitoring"
 import {
   getProjectAccessForCurrentUser,
   requireProjectAccess,
@@ -32,7 +32,7 @@ export const CreateProjectSchema = z.object({
   activeChatModel: z.string().min(1).optional(),
 })
 
-export const createProject = createServerFn({ method: "POST" })
+export const createProject = createMonitoredDbFn({ eventName: "web.project.create", method: "POST" })
   .inputValidator(CreateProjectSchema)
   .handler(async ({ data }) => {
     const workspaceUser = await requireWorkspaceUser()
@@ -115,7 +115,7 @@ export const createProject = createServerFn({ method: "POST" })
   })
 
 // ** READ **
-export const getProjectById = createServerFn({ method: "GET" })
+export const getProjectById = createMonitoredDbFn({ eventName: "web.project.get_by_id", method: "GET" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     await requireProjectAccess(data.id, "read")
@@ -126,7 +126,7 @@ export const getProjectById = createServerFn({ method: "GET" })
     return project[0]
   })
 
-export const getProjectByName = createServerFn({ method: "GET" })
+export const getProjectByName = createMonitoredDbFn({ eventName: "web.project.get_by_name", method: "GET" })
   .inputValidator(z.object({ name: z.string() }))
   .handler(async ({ data }) => {
     const project = await db.select().from(projects).where(eq(projects.name, data.name))
@@ -136,7 +136,7 @@ export const getProjectByName = createServerFn({ method: "GET" })
     return project[0]
   })
 
-export const getProjectsByOwnerId = createServerFn({ method: "GET" })
+export const getProjectsByOwnerId = createMonitoredDbFn({ eventName: "web.project.get_projects_by_owner_id", method: "GET" })
   .inputValidator(z.object({ ownerId: z.string() }))
   .handler(async ({ data }) => {
     const workspaceUser = await requireWorkspaceUser()
@@ -150,7 +150,7 @@ export const getProjectsByOwnerId = createServerFn({ method: "GET" })
     return userProjects
   })
 
-export const getAccessibleProjects = createServerFn({ method: "GET" })
+export const getAccessibleProjects = createMonitoredDbFn({ eventName: "web.project.get_accessible_projects", method: "GET" })
   .inputValidator(z.void())
   .handler(async () => {
     const workspaceUser = await requireWorkspaceUser()
@@ -204,7 +204,7 @@ export const getAccessibleProjects = createServerFn({ method: "GET" })
       .orderBy(desc(projects.updatedAt), desc(projects.createdAt))
   })
 
-export const getCurrentProjectAccess = createServerFn({ method: "GET" })
+export const getCurrentProjectAccess = createMonitoredDbFn({ eventName: "web.project.get_current_project_access", method: "GET" })
   .inputValidator(z.object({ projectId: z.string() }))
   .handler(async ({ data }) => {
     const access = await getProjectAccessForCurrentUser(data.projectId)
@@ -223,7 +223,7 @@ export const getCurrentProjectAccess = createServerFn({ method: "GET" })
     }
   })
 
-export const getProjectsByTeamId = createServerFn({ method: "GET" })
+export const getProjectsByTeamId = createMonitoredDbFn({ eventName: "web.project.get_projects_by_team_id", method: "GET" })
   .inputValidator(z.object({ teamId: z.string() }))
   .handler(async ({ data }) => {
     const workspaceUser = await requireWorkspaceUser()
@@ -269,7 +269,7 @@ export const UpdateProjectSchema = CreateProjectSchema.partial().extend({
   id: z.string(),
 })
 
-export const updateProject = createServerFn({ method: "POST" })
+export const updateProject = createMonitoredDbFn({ eventName: "web.project.update", method: "POST" })
   .inputValidator(UpdateProjectSchema)
   .handler(async ({ data }) => {
     const access = await requireProjectAccess(data.id, "manage")
@@ -283,7 +283,7 @@ export const updateProject = createServerFn({ method: "POST" })
   })
 
 // ** DELETE **
-export const deleteProject = createServerFn({ method: "POST" })
+export const deleteProject = createMonitoredDbFn({ eventName: "web.project.delete", method: "POST" })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
     const access = await requireProjectAccess(data.id, "manage")

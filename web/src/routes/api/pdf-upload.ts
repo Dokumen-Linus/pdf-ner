@@ -11,6 +11,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 
 import { streamProxy } from "@/api-fns/api-stream-proxy.server"
+import { monitorRouteHandler, requestMetadata } from "@/db-fns/web/monitoring"
 import { requireProjectPermission } from "@/lib/role-authorization.server"
 
 const MAX_BYTES = 50 * 1024 * 1024 // 50 MB, matches FastAPI and client cap.
@@ -27,7 +28,7 @@ function errorStatus(message: string): number {
  * Exported for unit tests. The Route below wires it into the TanStack Start
  * server handler; tests invoke this directly with a synthetic Request.
  */
-export async function uploadHandler({ request }: { request: Request }): Promise<Response> {
+async function uploadHandlerImpl({ request }: { request: Request }): Promise<Response> {
   try {
     const url = new URL(request.url)
     const projectId = url.searchParams.get("project_id")
@@ -87,6 +88,17 @@ export async function uploadHandler({ request }: { request: Request }): Promise<
     return Response.json({ detail }, { status: errorStatus(detail) })
   }
 }
+
+export const uploadHandler = monitorRouteHandler<{ request: Request }, Response>(
+  {
+    eventName: "web.pdf.upload",
+    getMetadata: ({ request }) => requestMetadata(request),
+    getRawErrorPayload: ({ request }) => requestMetadata(request),
+    operationType: "mutation",
+    routeOrPath: "/api/pdf-upload",
+  },
+  uploadHandlerImpl,
+)
 
 export const Route = createFileRoute("/api/pdf-upload")({
   server: {

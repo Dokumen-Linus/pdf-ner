@@ -12,10 +12,12 @@ import type {
   DbAnnotationUpdate,
   DbEntityTypeUpdate,
   DbWebPdfUpdate,
+  MonitoringEvent,
   NewApplication,
   NewDbAnnotation,
   NewDbEntityType,
   NewDbWebPdf,
+  NewMonitoringEvent,
   NewProject,
   NewUser,
   ProjectUpdate,
@@ -139,6 +141,23 @@ describe("Schema vs DB Type Matching", () => {
     const _zodToDb: DbPayload = {} as ZodPayload
 
     expect(true).toBe(true)
+  })
+
+  // ** MONITORING EVENTS **
+  it("MonitoringEvent insert shape should match selected rows", () => {
+    const _insert: NewMonitoringEvent = {
+      eventName: "web.project.create",
+      eventKind: "db_fn",
+      operationType: "mutation",
+      source: "web/src/db-fns",
+      status: "success",
+      severity: "info",
+      metadata: {},
+    }
+    const _selected: MonitoringEvent = {} as MonitoringEvent
+
+    expect(_insert.eventName).toBe("web.project.create")
+    expect(_selected).toBeDefined()
   })
 
   // ** APPLICATIONS **

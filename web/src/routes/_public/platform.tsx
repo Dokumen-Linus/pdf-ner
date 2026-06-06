@@ -290,8 +290,8 @@ function PlatformPage() {
       </section>
 
       <section className="border-t border-[#EEEEEE] bg-[#F9FAFB] px-6 py-24">
-        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[0.85fr_1.15fr]">
-          <div>
+        <div className="mx-auto grid max-w-6xl gap-10">
+          <div className="max-w-2xl">
             <h2 className="mb-4 text-[32px] font-medium text-[#171A20]">
               {m.platform_providers_title()}
             </h2>
