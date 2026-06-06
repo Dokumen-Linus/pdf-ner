@@ -6,7 +6,7 @@ The Buckets subsystem handles **1 routes** and touches: auth.
 
 ## Routes
 
-- `POST` `/api/v1/buckets` → in: CreateBucketRequest [auth, upload]
+- `POST` `/api/v1/buckets` [auth, upload]
   `api/app/domains/pdf_storage/router.py`
 
 ## Source Files
