@@ -21,7 +21,7 @@ from .application.handlers import (
 @app.task(bind=True, name="source_listeners.create_listener", max_retries=2)
 def create_listener_task(self, connection_id: str) -> dict:
     try:
-        return anyio.run(handle_create_listener, CreateListener(UUID(connection_id)))
+        return anyio.run(handle_create_listener, CreateListener(UUID(connection_id)), self)
     except (LookupError, ValueError):
         raise
     except Exception as exc:
@@ -31,7 +31,11 @@ def create_listener_task(self, connection_id: str) -> dict:
 @app.task(bind=True, name="source_listeners.renew_listener", max_retries=2)
 def renew_listener_task(self, listener_subscription_id: str) -> dict:
     try:
-        return anyio.run(handle_renew_listener, RenewListener(UUID(listener_subscription_id)))
+        return anyio.run(
+            handle_renew_listener,
+            RenewListener(UUID(listener_subscription_id)),
+            self,
+        )
     except (LookupError, ValueError):
         raise
     except Exception as exc:
@@ -41,7 +45,11 @@ def renew_listener_task(self, listener_subscription_id: str) -> dict:
 @app.task(bind=True, name="source_listeners.disable_listener", max_retries=2)
 def disable_listener_task(self, listener_subscription_id: str) -> dict:
     try:
-        return anyio.run(handle_disable_listener, DisableListener(UUID(listener_subscription_id)))
+        return anyio.run(
+            handle_disable_listener,
+            DisableListener(UUID(listener_subscription_id)),
+            self,
+        )
     except (LookupError, ValueError):
         raise
     except Exception as exc:
@@ -58,6 +66,7 @@ def handle_listener_event_task(
         return anyio.run(
             handle_listener_event,
             HandleListenerEvent(UUID(listener_subscription_id), event_payload),
+            self,
         )
     except (LookupError, ValueError):
         raise
