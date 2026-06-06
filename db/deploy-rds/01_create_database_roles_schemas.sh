@@ -29,6 +29,8 @@ WHERE NOT EXISTS (
 )\gexec
 EOSQL
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 echo "Creating roles, schemas, and grants in ${RDS_DB}..."
 psql -v ON_ERROR_STOP=1 \
   --host "$RDS_HOST" \
@@ -39,83 +41,5 @@ psql -v ON_ERROR_STOP=1 \
   --set=AUTH_ROLE_PASSWORD="$AUTH_ROLE_PASSWORD" \
   --set=WEB_USER_PASSWORD="$WEB_USER_PASSWORD" \
   --set=API_USER_PASSWORD="$API_USER_PASSWORD" \
-  --set=WORKERS_USER_PASSWORD="$WORKERS_USER_PASSWORD" <<'EOSQL'
-SELECT format('CREATE ROLE owner_role LOGIN PASSWORD %L', :'OWNER_ROLE_PASSWORD')
-WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'owner_role')\gexec
-SELECT format('ALTER ROLE owner_role LOGIN PASSWORD %L', :'OWNER_ROLE_PASSWORD')\gexec
-
-SELECT format('CREATE ROLE auth_role LOGIN PASSWORD %L', :'AUTH_ROLE_PASSWORD')
-WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'auth_role')\gexec
-SELECT format('ALTER ROLE auth_role LOGIN PASSWORD %L', :'AUTH_ROLE_PASSWORD')\gexec
-
-SELECT format('CREATE ROLE web_user LOGIN PASSWORD %L', :'WEB_USER_PASSWORD')
-WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'web_user')\gexec
-SELECT format('ALTER ROLE web_user LOGIN PASSWORD %L', :'WEB_USER_PASSWORD')\gexec
-
-SELECT format('CREATE ROLE api_user LOGIN PASSWORD %L', :'API_USER_PASSWORD')
-WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'api_user')\gexec
-SELECT format('ALTER ROLE api_user LOGIN PASSWORD %L', :'API_USER_PASSWORD')\gexec
-
-SELECT format('CREATE ROLE workers_user LOGIN PASSWORD %L', :'WORKERS_USER_PASSWORD')
-WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'workers_user')\gexec
-SELECT format('ALTER ROLE workers_user LOGIN PASSWORD %L', :'WORKERS_USER_PASSWORD')\gexec
-
--- RDS admin roles are not true superusers. The deploy connection must be a
--- member of schema-owning roles before CREATE/ALTER SCHEMA ... OWNER runs.
-GRANT owner_role TO CURRENT_USER;
-GRANT auth_role TO CURRENT_USER;
-
-CREATE SCHEMA IF NOT EXISTS auth AUTHORIZATION auth_role;
-CREATE SCHEMA IF NOT EXISTS core AUTHORIZATION owner_role;
-CREATE SCHEMA IF NOT EXISTS web AUTHORIZATION owner_role;
-CREATE SCHEMA IF NOT EXISTS api AUTHORIZATION owner_role;
-CREATE SCHEMA IF NOT EXISTS workers AUTHORIZATION owner_role;
-
-ALTER SCHEMA auth OWNER TO auth_role;
-ALTER SCHEMA core OWNER TO owner_role;
-ALTER SCHEMA web OWNER TO owner_role;
-ALTER SCHEMA api OWNER TO owner_role;
-ALTER SCHEMA workers OWNER TO owner_role;
-
-GRANT USAGE, CREATE ON SCHEMA public TO owner_role;
-GRANT USAGE ON SCHEMA auth TO owner_role;
-GRANT USAGE ON SCHEMA auth TO web_user;
-GRANT USAGE ON SCHEMA core TO web_user, api_user, workers_user;
-GRANT USAGE ON SCHEMA public TO web_user, api_user, workers_user;
-GRANT USAGE ON SCHEMA web TO web_user, api_user, workers_user;
-GRANT USAGE ON SCHEMA api TO web_user, api_user, workers_user;
-GRANT USAGE ON SCHEMA workers TO web_user, api_user, workers_user;
-
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA public
-    GRANT SELECT ON TABLES TO web_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA public
-    GRANT SELECT ON TABLES TO api_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA public
-    GRANT SELECT ON TABLES TO workers_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA core
-    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO web_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA core
-    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO api_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA core
-    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO workers_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA web
-    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO web_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA web
-    GRANT SELECT ON TABLES TO api_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA web
-    GRANT SELECT ON TABLES TO workers_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA api
-    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO api_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA api
-    GRANT SELECT ON TABLES TO web_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA api
-    GRANT SELECT ON TABLES TO workers_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA workers
-    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO workers_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA workers
-    GRANT SELECT ON TABLES TO web_user;
-ALTER DEFAULT PRIVILEGES FOR ROLE owner_role IN SCHEMA workers
-    GRANT SELECT ON TABLES TO api_user;
-
-ALTER ROLE auth_role SET search_path = auth;
-EOSQL
+  --set=WORKERS_USER_PASSWORD="$WORKERS_USER_PASSWORD" \
+  -f "$SCRIPT_DIR/roles_schemas.sql"
