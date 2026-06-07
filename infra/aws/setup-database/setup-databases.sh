@@ -9,8 +9,8 @@ load_env_file "${LOCAL_ENV_FILE:-${SCRIPT_DIR}/.env.local}"
 configure_common_defaults
 
 declare VPC_ID
-declare PRIVATE_SUBNET_ID
-declare PRIVATE_SUBNET_2_ID
+declare PROD_PRIVATE_SUBNET_ID
+declare PROD_PRIVATE_SUBNET_2_ID
 declare SG_ID
 declare PROD_RDS_IDENTIFIER
 declare PROD_RDS_SUBNET_GROUP_NAME
@@ -34,14 +34,18 @@ declare RDS_MASTER_USERNAME
 declare RDS_BACKUP_RETENTION_DAYS
 declare RDS_DELETION_PROTECTION
 declare RDS_PORT
-declare AUTH_ROLE_PASSWORD
-declare WEB_USER_PASSWORD
-declare API_USER_PASSWORD
-declare WORKERS_USER_PASSWORD
+declare PROD_AUTH_USER_PASSWORD
+declare PROD_WEB_USER_PASSWORD
+declare PROD_API_USER_PASSWORD
+declare PROD_WORKERS_USER_PASSWORD
+declare DEV_AUTH_USER_PASSWORD
+declare DEV_WEB_USER_PASSWORD
+declare DEV_API_USER_PASSWORD
+declare DEV_WORKERS_USER_PASSWORD
 
 : "${VPC_ID}"
-: "${PRIVATE_SUBNET_ID}"
-: "${PRIVATE_SUBNET_2_ID}"
+: "${PROD_PRIVATE_SUBNET_ID}"
+: "${PROD_PRIVATE_SUBNET_2_ID}"
 : "${SG_ID}"
 : "${PROD_RDS_IDENTIFIER}"
 : "${PROD_RDS_SUBNET_GROUP_NAME}"
@@ -65,10 +69,14 @@ declare WORKERS_USER_PASSWORD
 : "${RDS_BACKUP_RETENTION_DAYS}"
 : "${RDS_DELETION_PROTECTION}"
 : "${RDS_PORT}"
-: "${AUTH_ROLE_PASSWORD}"
-: "${WEB_USER_PASSWORD}"
-: "${API_USER_PASSWORD}"
-: "${WORKERS_USER_PASSWORD}"
+: "${PROD_AUTH_USER_PASSWORD}"
+: "${PROD_WEB_USER_PASSWORD}"
+: "${PROD_API_USER_PASSWORD}"
+: "${PROD_WORKERS_USER_PASSWORD}"
+: "${DEV_AUTH_USER_PASSWORD}"
+: "${DEV_WEB_USER_PASSWORD}"
+: "${DEV_API_USER_PASSWORD}"
+: "${DEV_WORKERS_USER_PASSWORD}"
 
 echo "Setting up RDS instances for ${PROJECT_NAME} in ${AWS_REGION}"
 ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
@@ -79,7 +87,8 @@ authorize_tcp_from_cidr "$RDS_SG_ID" "$RDS_PORT" "$ADMIN_CIDR"
 ensure_db_subnet_group \
   "$PROD_RDS_SUBNET_GROUP_NAME" \
   "Dokumen production RDS private subnets" \
-  "$PRIVATE_SUBNET_ID" "$PRIVATE_SUBNET_2_ID"
+  production \
+  "$PROD_PRIVATE_SUBNET_ID" "$PROD_PRIVATE_SUBNET_2_ID"
 ensure_postgres_rds_instance \
   "$PROD_RDS_IDENTIFIER" \
   "$PROD_RDS_SUBNET_GROUP_NAME" \
@@ -87,7 +96,8 @@ ensure_postgres_rds_instance \
   "$PROD_RDS_MASTER_PASSWORD" \
   false \
   "$(bool_flag "$RDS_DELETION_PROTECTION")" \
-  "$(bool_flag "$PROD_RDS_MULTI_AZ")"
+  "$(bool_flag "$PROD_RDS_MULTI_AZ")" \
+  production
 PROD_RDS_HOST="$(get_rds_endpoint "$PROD_RDS_IDENTIFIER")"
 
 DEV_RDS_SG_ID="$(ensure_security_group "$DEV_RDS_SG_NAME" "Dokumen development Postgres" "$DEV_VPC_ID")"
@@ -95,6 +105,7 @@ authorize_tcp_from_cidr "$DEV_RDS_SG_ID" "$RDS_PORT" "$ADMIN_CIDR"
 ensure_db_subnet_group \
   "$DEV_RDS_SUBNET_GROUP_NAME" \
   "Dokumen development RDS public subnets" \
+  development \
   "$DEV_SUBNET_1_ID" "$DEV_SUBNET_2_ID"
 ensure_postgres_rds_instance \
   "$DEV_RDS_IDENTIFIER" \
@@ -103,24 +114,25 @@ ensure_postgres_rds_instance \
   "$DEV_RDS_MASTER_PASSWORD" \
   true \
   "$(bool_flag "$RDS_DELETION_PROTECTION")" \
-  false
+  false \
+  development
 DEV_RDS_HOST="$(get_rds_endpoint "$DEV_RDS_IDENTIFIER")"
 
 ensure_secret_drafts
-set_secret_draft_value prod-web.json WEB_DATABASE_URL "$(postgres_url web_user "$WEB_USER_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
-set_secret_draft_value prod-web.json AUTH_DATABASE_URL "$(postgres_url auth_role "$AUTH_ROLE_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
-set_secret_draft_value prod-api.json API_DATABASE_URL "$(postgres_url api_user "$API_USER_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
-set_secret_draft_value prod-workers.json WORKERS_DATABASE_URL "$(postgres_url workers_user "$WORKERS_USER_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
-set_secret_draft_value dev-web.json WEB_DATABASE_URL "$(postgres_url web_user "$WEB_USER_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
-set_secret_draft_value dev-web.json AUTH_DATABASE_URL "$(postgres_url auth_role "$AUTH_ROLE_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
-set_secret_draft_value dev-api.json API_DATABASE_URL "$(postgres_url api_user "$API_USER_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
-set_secret_draft_value dev-workers.json WORKERS_DATABASE_URL "$(postgres_url workers_user "$WORKERS_USER_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value prod-web.json WEB_DATABASE_URL "$(postgres_url web_user "$PROD_WEB_USER_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value prod-web.json AUTH_DATABASE_URL "$(postgres_url auth_user "$PROD_AUTH_USER_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value prod-api.json API_DATABASE_URL "$(postgres_url api_user "$PROD_API_USER_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value prod-workers.json WORKERS_DATABASE_URL "$(postgres_url workers_user "$PROD_WORKERS_USER_PASSWORD" "$PROD_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value dev-web.json WEB_DATABASE_URL "$(postgres_url web_user "$DEV_WEB_USER_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value dev-web.json AUTH_DATABASE_URL "$(postgres_url auth_user "$DEV_AUTH_USER_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value dev-api.json API_DATABASE_URL "$(postgres_url api_user "$DEV_API_USER_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
+set_secret_draft_value dev-workers.json WORKERS_DATABASE_URL "$(postgres_url workers_user "$DEV_WORKERS_USER_PASSWORD" "$DEV_RDS_HOST" "$RDS_DB_NAME")"
 
 DATABASE_ENV_FILE="${OUTPUT_DIR}/database-resources.env"
 DATABASE_REPORT_FILE="${OUTPUT_DIR}/database-report.txt"
 write_env_output "$DATABASE_ENV_FILE" \
   AWS_REGION PROJECT_NAME ACCOUNT_ID ADMIN_CIDR \
-  VPC_ID PRIVATE_SUBNET_ID PRIVATE_SUBNET_2_ID SG_ID RDS_SG_ID PROD_RDS_HOST \
+  VPC_ID PROD_PRIVATE_SUBNET_ID PROD_PRIVATE_SUBNET_2_ID SG_ID RDS_SG_ID PROD_RDS_HOST \
   DEV_VPC_ID DEV_SUBNET_1_ID DEV_SUBNET_2_ID DEV_RDS_SG_ID DEV_RDS_HOST \
   PROD_RDS_IDENTIFIER DEV_RDS_IDENTIFIER RDS_ENGINE RDS_ENGINE_VERSION RDS_INSTANCE_CLASS RDS_PORT RDS_DB_NAME SECRET_DRAFT_DIR
 
