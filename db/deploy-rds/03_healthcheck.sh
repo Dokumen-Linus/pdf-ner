@@ -5,7 +5,7 @@ set -euo pipefail
 : "${RDS_ADMIN_USER:?RDS_ADMIN_USER is required}"
 : "${PGPASSWORD:?PGPASSWORD must contain the RDS admin password}"
 : "${OWNER_ROLE_PASSWORD:?OWNER_ROLE_PASSWORD is required}"
-: "${AUTH_ROLE_PASSWORD:?AUTH_ROLE_PASSWORD is required}"
+: "${AUTH_USER_PASSWORD:?AUTH_USER_PASSWORD is required}"
 : "${WEB_USER_PASSWORD:?WEB_USER_PASSWORD is required}"
 : "${API_USER_PASSWORD:?API_USER_PASSWORD is required}"
 : "${WORKERS_USER_PASSWORD:?WORKERS_USER_PASSWORD is required}"
@@ -48,7 +48,7 @@ password_for_role() {
   local role="$1"
   case "$role" in
     owner_role) printf '%s' "$OWNER_ROLE_PASSWORD" ;;
-    auth_role) printf '%s' "$AUTH_ROLE_PASSWORD" ;;
+    auth_user) printf '%s' "$AUTH_USER_PASSWORD" ;;
     web_user) printf '%s' "$WEB_USER_PASSWORD" ;;
     api_user) printf '%s' "$API_USER_PASSWORD" ;;
     workers_user) printf '%s' "$WORKERS_USER_PASSWORD" ;;
@@ -94,7 +94,7 @@ fi
 
 echo "Checking direct password connections for app roles..."
 
-check_table "auth_role" "auth.\"user\""
+check_table "auth_user" "auth.\"user\""
 
 check_table "web_user" "auth.\"user\""
 check_table "web_user" "web.users"

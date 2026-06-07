@@ -464,9 +464,10 @@ ensure_instance_profile_attached() {
 ensure_db_subnet_group() {
   local subnet_group_name="$1"
   local description="$2"
+  local environment="${3:-$ENVIRONMENT}"
   local subnet_group_arn tag_args
-  shift 2
-  tag_args=("Key=Name,Value=${subnet_group_name}" "Key=Project,Value=${PROJECT_NAME}" "Key=Environment,Value=${ENVIRONMENT}")
+  shift 3
+  tag_args=("Key=Name,Value=${subnet_group_name}" "Key=Project,Value=${PROJECT_NAME}" "Key=Environment,Value=${environment}")
 
   if aws_region rds describe-db-subnet-groups \
     --db-subnet-group-name "$subnet_group_name" >/dev/null 2>&1; then
@@ -497,8 +498,9 @@ ensure_postgres_rds_instance() {
   local publicly_accessible="$5"
   local deletion_protection="$6"
   local multi_az="$7"
+  local environment="${8:-$ENVIRONMENT}"
   local public_flag deletion_flag multi_az_flag db_instance_arn tag_args
-  tag_args=("Key=Name,Value=${db_identifier}" "Key=Project,Value=${PROJECT_NAME}" "Key=Environment,Value=${ENVIRONMENT}")
+  tag_args=("Key=Name,Value=${db_identifier}" "Key=Project,Value=${PROJECT_NAME}" "Key=Environment,Value=${environment}")
 
   if [ "$publicly_accessible" = "true" ]; then
     public_flag="--publicly-accessible"

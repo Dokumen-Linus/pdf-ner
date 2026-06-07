@@ -3,58 +3,71 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-COMPOSE_FILE="${REPO_ROOT}/infra/docker-compose.yml"
+PGDATA_DIR="${REPO_ROOT}/pgdata"
+LOGFILE="${REPO_ROOT}/logfile"
 
-export POSTGRES_USER="${POSTGRES_USER:-postgres}"
+export POSTGRES_USER="${POSTGRES_USER:-$(id -un)}"
 export POSTGRES_DB="${POSTGRES_DB:-dokumen}"
-export POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-dokumen}"
 export OWNER_ROLE_PASSWORD="${OWNER_ROLE_PASSWORD:-owner_pw}"
-export AUTH_ROLE_PASSWORD="${AUTH_ROLE_PASSWORD:-auth_pw}"
+export AUTH_USER_PASSWORD="${AUTH_USER_PASSWORD:-auth_pw}"
 export WEB_USER_PASSWORD="${WEB_USER_PASSWORD:-web_pw}"
 export API_USER_PASSWORD="${API_USER_PASSWORD:-api_pw}"
 export WORKERS_USER_PASSWORD="${WORKERS_USER_PASSWORD:-workers_pw}"
+export PGHOST="${PGDATA_DIR}"
+export PGPORT="${PGPORT:-5432}"
 
-if ! command -v docker >/dev/null 2>&1; then
-  echo "ERROR: docker is required to run the local database." >&2
+if ! command -v initdb >/dev/null 2>&1; then
+  echo "ERROR: initdb is required to initialize ${PGDATA_DIR}." >&2
   exit 1
 fi
 
-echo "Starting local PostgreSQL container..."
-echo "Using ${COMPOSE_FILE}"
-
-docker compose -f "${COMPOSE_FILE}" --profile local-db up -d --build db
-
-container_id="$(docker compose -f "${COMPOSE_FILE}" --profile local-db ps -q db)"
-if [[ -z "${container_id}" ]]; then
-  echo "ERROR: db container was not created." >&2
+if ! command -v pg_ctl >/dev/null 2>&1; then
+  echo "ERROR: pg_ctl is required to run the local database." >&2
   exit 1
 fi
 
-echo "Waiting for local PostgreSQL healthcheck..."
-for _ in {1..60}; do
-  status="$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}unknown{{end}}' "${container_id}")"
-  if [[ "${status}" == "healthy" ]]; then
-    smoke_result="$(docker exec "${container_id}" psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" -Atc "SELECT to_regclass('auth.user') IS NOT NULL AND to_regclass('web.users') IS NOT NULL AND to_regclass('core.prompts') IS NOT NULL AND to_regclass('public.chat_models') IS NOT NULL AND to_regclass('public.std_entity_types') IS NOT NULL;")"
-    if [[ "${smoke_result}" != "t" ]]; then
-      echo "ERROR: local PostgreSQL is healthy, but expected app tables are missing. Recent logs:" >&2
-      docker logs --tail 120 "${container_id}" >&2
-      exit 1
-    fi
-    echo "Local PostgreSQL is healthy."
-    echo "Schema smoke check passed."
-    echo "Database: ${POSTGRES_DB}"
-    echo "Admin user: ${POSTGRES_USER}"
-    echo "Port: container-only unless you publish it in infra/docker-compose.yml"
-    exit 0
-  fi
-  if [[ "${status}" == "unhealthy" ]]; then
-    echo "ERROR: local PostgreSQL became unhealthy. Recent logs:" >&2
-    docker logs --tail 80 "${container_id}" >&2
-    exit 1
-  fi
-  sleep 2
-done
+if ! command -v createdb >/dev/null 2>&1; then
+  echo "ERROR: createdb is required to create ${POSTGRES_DB}." >&2
+  exit 1
+fi
 
-echo "ERROR: timed out waiting for local PostgreSQL to become healthy. Recent logs:" >&2
-docker logs --tail 80 "${container_id}" >&2
-exit 1
+if ! command -v psql >/dev/null 2>&1; then
+  echo "ERROR: psql is required to prepare ${POSTGRES_DB}." >&2
+  exit 1
+fi
+
+if [[ ! -f "${PGDATA_DIR}/PG_VERSION" ]]; then
+  echo "Initializing local PostgreSQL data directory at ${PGDATA_DIR}..."
+  initdb -D "${PGDATA_DIR}"
+fi
+
+if pg_ctl -D "${PGDATA_DIR}" status >/dev/null 2>&1; then
+  echo "Local PostgreSQL is already running from ${PGDATA_DIR}."
+else
+  echo "Starting local PostgreSQL from ${PGDATA_DIR}..."
+  pg_ctl -D "${PGDATA_DIR}" -l "${LOGFILE}" -o "-k ${PGHOST} -p ${PGPORT} -h ''" -w start
+fi
+
+echo "Ensuring database ${POSTGRES_DB} exists..."
+psql_args=(
+  --host "${PGHOST}"
+  --port "${PGPORT}"
+  --username "${POSTGRES_USER}"
+)
+
+if ! psql -v ON_ERROR_STOP=1 \
+  "${psql_args[@]}" \
+  --dbname postgres \
+  --tuples-only \
+  --no-align \
+  --set=POSTGRES_DB="${POSTGRES_DB}" \
+  --command "SELECT 1 FROM pg_database WHERE datname = :'POSTGRES_DB'" | grep -qx 1; then
+  createdb \
+    "${psql_args[@]}" \
+    "${POSTGRES_DB}"
+fi
+
+bash "${SCRIPT_DIR}/01_roles.sh"
+bash "${SCRIPT_DIR}/02_migrate.sh"
+
+echo "Local database ${POSTGRES_DB} is ready."

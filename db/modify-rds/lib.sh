@@ -144,7 +144,8 @@ configure_prod_remote_defaults() {
   AWS_REGION="${AWS_REGION:-us-east-1}"
   INSTANCE_NAME="${INSTANCE_NAME:-${PROJECT_NAME}-ec2}"
   EC2_INSTANCE_ID="${EC2_INSTANCE_ID:-${INSTANCE_ID:-}}"
-  EC2_APP_DIR="${EC2_APP_DIR:-/opt/dokumen/pdf-ner}"
+  PROD_LOCAL_RDS_PORT="${PROD_LOCAL_RDS_PORT:-15432}"
+  PORT_FORWARD_READY_TIMEOUT_SECONDS="${PORT_FORWARD_READY_TIMEOUT_SECONDS:-30}"
   USE_SSH_FALLBACK="${USE_SSH_FALLBACK:-0}"
   SSH_PRIVATE_KEY_PATH="${SSH_PRIVATE_KEY_PATH:-${HOME}/.ssh/dokumen-ec2}"
   SSH_USER="${SSH_USER:-ec2-user}"
@@ -172,78 +173,6 @@ resolve_prod_instance_id() {
   fi
 }
 
-shell_quote() {
-  printf '%q' "$1"
-}
-
-remote_env_prefix() {
-  printf 'RDS_HOST=%s RDS_PORT=%s RDS_DB=%s RDS_ADMIN_USER=%s PGPASSWORD=%s PGSSLMODE=%s' \
-    "$(shell_quote "$RDS_HOST")" \
-    "$(shell_quote "$RDS_PORT")" \
-    "$(shell_quote "$RDS_DB")" \
-    "$(shell_quote "$RDS_ADMIN_USER")" \
-    "$(shell_quote "$PGPASSWORD")" \
-    "$(shell_quote "$PGSSLMODE")"
-}
-
-run_prod_ssm_command() {
-  local label="$1"
-  local remote_command="$2"
-  local command_id encoded_command send_status wait_status wrapped_command
-
-  echo "Running on production EC2 through SSM: ${label}"
-  remote_command=$'set -euo pipefail\n'"$remote_command"
-  encoded_command="$(printf '%s' "$remote_command" | base64 | tr -d '\n')"
-  wrapped_command="printf %s ${encoded_command} | base64 --decode | bash -s"
-
-  set +e
-  command_id="$(
-    aws_region ssm send-command \
-      --instance-ids "$EC2_INSTANCE_ID" \
-      --document-name "AWS-RunShellScript" \
-      --comment "modify-rds: ${label}" \
-      --parameters "commands=${wrapped_command}" \
-      --query "Command.CommandId" \
-      --output text
-  )"
-  send_status=$?
-  set -e
-
-  if [ "$send_status" -ne 0 ]; then
-    return "$send_status"
-  fi
-
-  echo "SSM command id: ${command_id}"
-
-  set +e
-  aws_region ssm wait command-executed \
-    --command-id "$command_id" \
-    --instance-id "$EC2_INSTANCE_ID"
-  wait_status=$?
-  set -e
-
-  echo "SSM status:"
-  aws_region ssm get-command-invocation \
-    --command-id "$command_id" \
-    --instance-id "$EC2_INSTANCE_ID" \
-    --query "Status" \
-    --output text
-  echo "SSM stdout:"
-  aws_region ssm get-command-invocation \
-    --command-id "$command_id" \
-    --instance-id "$EC2_INSTANCE_ID" \
-    --query "StandardOutputContent" \
-    --output text
-  echo "SSM stderr:"
-  aws_region ssm get-command-invocation \
-    --command-id "$command_id" \
-    --instance-id "$EC2_INSTANCE_ID" \
-    --query "StandardErrorContent" \
-    --output text
-
-  return "$wait_status"
-}
-
 resolve_prod_public_ip() {
   aws_region ec2 describe-instances \
     --instance-ids "$EC2_INSTANCE_ID" \
@@ -251,8 +180,59 @@ resolve_prod_public_ip() {
     --output text
 }
 
-run_prod_ssh_command() {
-  local remote_command="$1"
+wait_for_local_port_forward() {
+  local label="$1"
+  local started_pid="$2"
+  local log_file="$3"
+  local elapsed_seconds=0
+
+  while [ "$elapsed_seconds" -lt "$PORT_FORWARD_READY_TIMEOUT_SECONDS" ]; do
+    if nc -z 127.0.0.1 "$PROD_LOCAL_RDS_PORT" >/dev/null 2>&1; then
+      echo "${label} is listening on 127.0.0.1:${PROD_LOCAL_RDS_PORT}"
+      return 0
+    fi
+
+    if ! kill -0 "$started_pid" >/dev/null 2>&1; then
+      echo "${label} exited before the local port opened." >&2
+      sed -n '1,120p' "$log_file" >&2
+      return 1
+    fi
+
+    sleep 1
+    elapsed_seconds=$((elapsed_seconds + 1))
+  done
+
+  echo "${label} did not open 127.0.0.1:${PROD_LOCAL_RDS_PORT} within ${PORT_FORWARD_READY_TIMEOUT_SECONDS}s." >&2
+  sed -n '1,120p' "$log_file" >&2
+  return 1
+}
+
+stop_prod_port_forward() {
+  if [ -n "${PORT_FORWARD_PID:-}" ] && kill -0 "$PORT_FORWARD_PID" >/dev/null 2>&1; then
+    kill "$PORT_FORWARD_PID" >/dev/null 2>&1 || true
+    wait "$PORT_FORWARD_PID" >/dev/null 2>&1 || true
+  fi
+
+  if [ -n "${PORT_FORWARD_LOG:-}" ]; then
+    rm -f "$PORT_FORWARD_LOG"
+  fi
+}
+
+start_prod_ssm_port_forward() {
+  PORT_FORWARD_LOG="$(mktemp)"
+  echo "Opening SSM port forward through ${EC2_INSTANCE_ID}: 127.0.0.1:${PROD_LOCAL_RDS_PORT} -> ${RDS_HOST}:${RDS_PORT}"
+
+  aws_region ssm start-session \
+    --target "$EC2_INSTANCE_ID" \
+    --document-name AWS-StartPortForwardingSessionToRemoteHost \
+    --parameters "host=${RDS_HOST},portNumber=${RDS_PORT},localPortNumber=${PROD_LOCAL_RDS_PORT}" \
+    >"$PORT_FORWARD_LOG" 2>&1 &
+  PORT_FORWARD_PID=$!
+
+  wait_for_local_port_forward "SSM port forward" "$PORT_FORWARD_PID" "$PORT_FORWARD_LOG"
+}
+
+start_prod_ssh_port_forward() {
   local public_ip ssh_target
 
   public_ip="$(resolve_prod_public_ip)"
@@ -262,27 +242,38 @@ run_prod_ssh_command() {
   fi
 
   ssh_target="${SSH_USER}@${public_ip}"
+  PORT_FORWARD_LOG="$(mktemp)"
+  echo "Opening SSH port forward through ${ssh_target}: 127.0.0.1:${PROD_LOCAL_RDS_PORT} -> ${RDS_HOST}:${RDS_PORT}"
   ssh \
+    -N \
+    -L "${PROD_LOCAL_RDS_PORT}:${RDS_HOST}:${RDS_PORT}" \
     -i "$SSH_PRIVATE_KEY_PATH" \
     -o StrictHostKeyChecking=accept-new \
     "$ssh_target" \
-    "set -euo pipefail; ${remote_command}"
+    >"$PORT_FORWARD_LOG" 2>&1 &
+  PORT_FORWARD_PID=$!
+
+  wait_for_local_port_forward "SSH port forward" "$PORT_FORWARD_PID" "$PORT_FORWARD_LOG"
 }
 
-run_prod_remote_or_fallback() {
-  local label="$1"
-  local remote_command="$2"
+start_prod_port_forward() {
+  trap stop_prod_port_forward EXIT
 
-  if run_prod_ssm_command "$label" "$remote_command"; then
+  if start_prod_ssm_port_forward; then
+    RDS_HOST=127.0.0.1
+    RDS_PORT="$PROD_LOCAL_RDS_PORT"
     return
   fi
 
   if [ "$USE_SSH_FALLBACK" = "1" ]; then
-    echo "SSM ${label} failed; retrying through explicit SSH fallback."
-    run_prod_ssh_command "$remote_command"
+    echo "SSM port forwarding failed; retrying through explicit SSH fallback."
+    stop_prod_port_forward
+    start_prod_ssh_port_forward
+    RDS_HOST=127.0.0.1
+    RDS_PORT="$PROD_LOCAL_RDS_PORT"
     return
   fi
 
-  echo "SSM ${label} failed. Set USE_SSH_FALLBACK=1 only if SSM is unavailable and SSH is necessary." >&2
+  echo "SSM port forwarding failed. Set USE_SSH_FALLBACK=1 only if SSM is unavailable and SSH is necessary." >&2
   exit 1
 }

@@ -62,6 +62,9 @@ Other:
 
 ```bash
 sudo apt install -y build-essential postgresql postgresql-contrib redis-server tesseract-ocr
+
+# PostgreSQL tools (psql, pg_ctl, pg_dump, initdb) are found under /usr/lib/postgresql/*/bin/
+
 # Docker Desktop: see https://docs.docker.com/engine/install/ubuntu/
 ```
 
@@ -201,6 +204,7 @@ Recommended to not install (run on GitHub Actions only):
 ### Integrations
 
 - [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html)
+- [AWS Session Manager plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
 - [runpodctl](https://github.com/runpod/runpodctl)
 - [Stripe CLI](https://docs.stripe.com/stripe-cli)
 - [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
@@ -209,6 +213,13 @@ Recommended to not install (run on GitHub Actions only):
 # AWS CLI v2
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip && sudo ./aws/install && rm -rf awscliv2.zip aws/
+
+# AWS Session Manager plugin
+curl -fsSL "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o "session-manager-plugin.deb"
+sudo dpkg -i session-manager-plugin.deb
+sudo ln -sf /usr/local/sessionmanagerplugin/bin/session-manager-plugin /usr/local/bin/session-manager-plugin
+echo 'export PATH="/usr/local/sessionmanagerplugin/bin:$PATH"' >> ~/.bashrc
+session-manager-plugin --version
 
 # runpodctl
 curl -fsSL -o runpodctl https://github.com/runpod/runpodctl/releases/latest/download/runpodctl-linux-amd64

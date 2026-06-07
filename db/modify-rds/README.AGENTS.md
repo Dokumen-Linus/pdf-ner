@@ -49,7 +49,7 @@ RDS_DEPLOY_ENV_FILE=db/modify-rds/.env.development bash db/modify-rds/run-new-se
 
 The selected env file must define:
 
-- `RDS_HOST`: PostgreSQL host. For production, use the private RDS endpoint; production scripts run from EC2 through SSM so private DNS resolves inside the VPC
+- `RDS_HOST`: PostgreSQL host. For production, use the private RDS endpoint; production scripts tunnel to it through EC2 and then run local `psql`/`dbmate`
 - `RDS_ADMIN_USER`: deploy/admin PostgreSQL user that can `SET ROLE owner_role`
 - `PGPASSWORD`: password for `RDS_ADMIN_USER`
 
@@ -66,7 +66,8 @@ Production env vars:
 - `ENVIRONMENT`: tag environment; defaults to `production`
 - `INSTANCE_NAME`: EC2 Name tag to resolve when `EC2_INSTANCE_ID` is not set; defaults to `dokumen-ec2`
 - `EC2_INSTANCE_ID`: optional explicit production EC2 instance id
-- `EC2_APP_DIR`: production app directory on EC2; defaults to `/opt/dokumen/pdf-ner`
+- `PROD_LOCAL_RDS_PORT`: local port for production RDS forwarding; defaults to `15432`
+- `PORT_FORWARD_READY_TIMEOUT_SECONDS`: seconds to wait for the local forwarded port; defaults to `30`
 - `USE_SSH_FALLBACK`: set to `1` only when SSM is unavailable and SSH is necessary
 - `SSH_PRIVATE_KEY_PATH`: private key path for SSH fallback
 - `SSH_USER`: SSH username for fallback; defaults to `ec2-user`
@@ -75,7 +76,7 @@ Production env vars:
 
 ## Migration Behavior
 
-- Verifies `dbmate` is installed for dev, or on EC2 for prod
+- Verifies local `dbmate` is installed
 - Refuses to run if any migration filenames share the same numeric version prefix before the first underscore
 - Verifies the selected database already exists by connecting to `RDS_DB`
 - Refuses to run unless `public.schema_migrations` already exists and has at least one applied migration
@@ -84,7 +85,7 @@ Production env vars:
 - Does not execute arbitrary SQL files
 - Does not run Better Auth setup, seed SQL, or health checks
 
-The dev migration script runs locally against public dev RDS. The prod migration script sends the local `db/migrations` directory to EC2 and runs `dbmate up` there so private production RDS DNS and routing work inside the VPC.
+The dev migration script runs locally against public dev RDS. The prod migration script opens an SSM port forward through EC2, falling back to SSH only when `USE_SSH_FALLBACK=1`, then runs local `dbmate up` against `127.0.0.1:${PROD_LOCAL_RDS_PORT}`. The production EC2 host does not need `psql` or `dbmate` installed.
 
 `dbmate up` reads the full `db/migrations` directory, but it only applies migrations that are not already recorded in `public.schema_migrations`.
 
@@ -102,4 +103,4 @@ Seed behavior:
 - Does not run dbmate migrations
 - Does not run Better Auth setup or health checks
 
-The dev seed script runs locally. The prod seed script sends the selected local seed SQL file to EC2 and runs `psql` there.
+The dev seed script runs locally. The prod seed script opens the same production tunnel and runs local `psql` against `127.0.0.1:${PROD_LOCAL_RDS_PORT}`.
