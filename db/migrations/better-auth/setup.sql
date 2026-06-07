@@ -45,5 +45,5 @@ create index "auth_invitation_organizationId_idx" on "auth"."invitation" ("organ
 
 create index "auth_invitation_email_idx" on "auth"."invitation" ("email");
 
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA auth TO auth_role;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA auth TO auth_user;
 GRANT REFERENCES ON ALL TABLES IN SCHEMA auth TO owner_role;

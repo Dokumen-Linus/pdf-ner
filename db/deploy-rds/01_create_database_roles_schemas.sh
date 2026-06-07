@@ -5,10 +5,10 @@ set -euo pipefail
 : "${RDS_ADMIN_USER:?RDS_ADMIN_USER is required}"
 : "${PGPASSWORD:?PGPASSWORD must contain the RDS admin password}"
 : "${OWNER_ROLE_PASSWORD:?OWNER_ROLE_PASSWORD is required}"
-: "${AUTH_ROLE_PASSWORD:?AUTH_ROLE_PASSWORD is required}"
 : "${WEB_USER_PASSWORD:?WEB_USER_PASSWORD is required}"
 : "${API_USER_PASSWORD:?API_USER_PASSWORD is required}"
 : "${WORKERS_USER_PASSWORD:?WORKERS_USER_PASSWORD is required}"
+: "${AUTH_USER_PASSWORD:?AUTH_USER_PASSWORD is required}"
 
 RDS_PORT="${RDS_PORT:-5432}"
 RDS_DB="${RDS_DB:-dokumen}"
@@ -38,8 +38,8 @@ psql -v ON_ERROR_STOP=1 \
   --username "$RDS_ADMIN_USER" \
   --dbname "$RDS_DB" \
   --set=OWNER_ROLE_PASSWORD="$OWNER_ROLE_PASSWORD" \
-  --set=AUTH_ROLE_PASSWORD="$AUTH_ROLE_PASSWORD" \
   --set=WEB_USER_PASSWORD="$WEB_USER_PASSWORD" \
   --set=API_USER_PASSWORD="$API_USER_PASSWORD" \
   --set=WORKERS_USER_PASSWORD="$WORKERS_USER_PASSWORD" \
-  -f "$SCRIPT_DIR/roles_schemas.sql"
+  --set=AUTH_USER_PASSWORD="$AUTH_USER_PASSWORD" \
+  -f "$SCRIPT_DIR/../bootstrap.sql"

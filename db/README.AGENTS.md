@@ -9,9 +9,8 @@
 
 ## Schema Ownership
 
-- App schemas are owned by their corresponding app
-- `public` is maintainer-controlled seed/reference data and should not be written by apps
-- Better Auth writes only to `auth`
-- Web writes only to `web` except documented exceptions to write to `core`
-- API writes only to `api` except documented exceptions to write to `core`
-- Workers write only to `workers` except documented exceptions to write to `core`
+- PUBLIC schema is maintainer-controlled seed/reference data and should not be written by apps
+- Better Auth writes only to AUTH
+- Web writes only to WEB except documented exceptions to write to CORE
+- API writes only to API except documented exceptions to write to CORE
+- Workers write only to WORKERS except documented exceptions to write to CORE
