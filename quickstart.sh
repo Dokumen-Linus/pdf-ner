@@ -80,11 +80,50 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-install_ubuntu_packages() {
-    sudo apt update || return
-    sudo apt upgrade -y || return
+apt_get() {
+    sudo env \
+        DEBIAN_FRONTEND=noninteractive \
+        NEEDRESTART_MODE=a \
+        UCF_FORCE_CONFFOLD=1 \
+        apt-get \
+        -o Dpkg::Options::=--force-confdef \
+        -o Dpkg::Options::=--force-confold \
+        "$@"
+}
 
-    sudo apt install -y \
+apt_update() {
+    apt_get update
+}
+
+apt_upgrade() {
+    apt_get upgrade -y
+}
+
+apt_install() {
+    apt_get install -y "$@"
+}
+
+apt_fix_install() {
+    apt_get install -f -y
+}
+
+dpkg_install() {
+    sudo env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a \
+        dpkg --force-confdef --force-confold -i "$@"
+}
+
+systemctl_action() {
+    local action="$1"
+    local unit="$2"
+
+    timeout 30 sudo systemctl --no-pager "$action" "$unit"
+}
+
+install_ubuntu_packages() {
+    apt_update || return
+    apt_upgrade || return
+
+    apt_install \
         apt-transport-https \
         build-essential \
         ca-certificates \
@@ -225,8 +264,8 @@ configure_postgresql() {
         done
     fi
 
-    sudo systemctl enable postgresql || return
-    sudo systemctl start postgresql || return
+    systemctl_action enable postgresql || return
+    systemctl_action start postgresql || return
 
     psql --version || return
     pg_ctl --version || return
@@ -235,8 +274,8 @@ configure_postgresql() {
 }
 
 configure_redis() {
-    sudo systemctl enable redis-server || return
-    sudo systemctl start redis-server || return
+    systemctl_action enable redis-server || return
+    systemctl_action start redis-server || return
 
     redis-server --version || return
     redis-cli ping || return
@@ -248,9 +287,10 @@ install_nodejs() {
         return 0
     fi
 
-    curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - || return
-    sudo apt update || return
-    sudo apt install -y nodejs || return
+    curl -fsSL https://deb.nodesource.com/setup_24.x \
+    | sudo -E env DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a bash - || return
+    apt_update || return
+    apt_install nodejs || return
 
     node --version || return
     npm --version || return
@@ -344,19 +384,19 @@ install_vscode() {
 https://packages.microsoft.com/repos/code stable main" \
     | sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null || return
 
-    sudo apt update || return
-    sudo apt install -y code || return
+    apt_update || return
+    apt_install code || return
 
     code --version || return
 }
 
 configure_openssh() {
-    sudo systemctl enable ssh || return
-    sudo systemctl start ssh || return
+    systemctl_action enable ssh 2>/dev/null || true
+    systemctl_action start ssh 2>/dev/null || true
 
     ssh -V || return
-    ssh-keygen -h >/dev/null 2>&1 || true
-    scp -V || true
+    command_exists ssh-keygen || return
+    command_exists scp || return
 }
 
 verify_cpp_toolchain() {
@@ -378,27 +418,30 @@ install_docker() {
     sudo install -m 0755 -d /etc/apt/keyrings || return
 
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-    | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg || return
+    | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/docker.gpg || return
 
     sudo chmod a+r /etc/apt/keyrings/docker.gpg || return
+
+    local ubuntu_codename
+    ubuntu_codename="$(lsb_release -cs)" || return
 
     echo \
       "deb [arch=$(dpkg --print-architecture) \
       signed-by=/etc/apt/keyrings/docker.gpg] \
       https://download.docker.com/linux/ubuntu \
-      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+      $ubuntu_codename stable" \
     | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null || return
 
-    sudo apt update || return
-    sudo apt install -y \
+    apt_update || return
+    apt_install \
         docker-ce \
         docker-ce-cli \
         containerd.io \
         docker-buildx-plugin \
         docker-compose-plugin || return
 
-    sudo systemctl enable docker || return
-    sudo systemctl start docker || return
+    systemctl_action enable docker || return
+    systemctl_action start docker || return
     sudo usermod -aG docker "$USER" || return
 
     docker --version || return
@@ -422,8 +465,8 @@ signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] \
 https://cli.github.com/packages stable main" \
     | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null || return
 
-    sudo apt update || return
-    sudo apt install -y gh || return
+    apt_update || return
+    apt_install gh || return
 
     gh --version || return
 }
@@ -441,7 +484,7 @@ install_cloudflared() {
         cd "$tmp_dir" || exit
         wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb \
             -O cloudflared.deb || exit
-        sudo dpkg -i cloudflared.deb || sudo apt-get install -f -y || exit
+        dpkg_install cloudflared.deb || apt_fix_install || exit
     ) || return
 
     rm -rf "$tmp_dir"
@@ -476,15 +519,15 @@ install_stripe_cli() {
     fi
 
     curl -fsSL https://packages.stripe.dev/api/security/keypair/stripe-cli-gpg/public \
-    | sudo gpg --dearmor -o /usr/share/keyrings/stripe.gpg || return
+    | sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/stripe.gpg || return
 
     echo \
 "deb [signed-by=/usr/share/keyrings/stripe.gpg] \
 https://packages.stripe.dev/stripe-cli-deb stable main" \
     | sudo tee /etc/apt/sources.list.d/stripe.list > /dev/null || return
 
-    sudo apt update || return
-    sudo apt install -y stripe || return
+    apt_update || return
+    apt_install stripe || return
 
     stripe version || return
 }
@@ -499,7 +542,7 @@ install_shellcheck() {
         return 0
     fi
 
-    sudo apt install -y shellcheck || return
+    apt_install shellcheck || return
     shellcheck --version || return
 }
 
@@ -509,7 +552,7 @@ install_docker_credential_helpers() {
         return 0
     fi
 
-    sudo apt install -y golang-docker-credential-helpers || return
+    apt_install golang-docker-credential-helpers || return
 
     mkdir -p "$HOME/.docker"
     cat > "$HOME/.docker/config.json" <<'EOF'
@@ -656,7 +699,7 @@ install_google_chrome() {
         cd "$tmp_dir" || exit
         wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
             -O google-chrome-stable_current_amd64.deb || exit
-        sudo apt install -y ./google-chrome-stable_current_amd64.deb || exit
+        apt_install ./google-chrome-stable_current_amd64.deb || exit
     ) || return
 
     rm -rf "$tmp_dir"
