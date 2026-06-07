@@ -1,3 +1,29 @@
+## [unreleased]
+
+### 🐛 Bug Fixes
+
+- *(db)* Roles
+- *(db)* Modify-rds logic for prod
+- Deploy-rds using ssm for prod
+
+### 🚜 Refactoring
+
+- *(db)* Renumber init migrations
+- Setup-database renamed to setup-rds
+
+### 📚 Documentation
+
+- Add pg_dump, initdb to quickstart
+- Prevent quickstart from hanging
+- Update deploy-rds docs
+
+### ⚡ Performance
+
+- *(db)* Separate dev and prod passwords
+
+### ⚙️ CI/CD
+
+- Add draft-secrets to gitignore
 ## [0.2.0] - 2026-06-06
 
 ### 🚀 Features

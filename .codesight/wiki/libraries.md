@@ -2,7 +2,7 @@
 
 > **Navigation aid.** Library inventory extracted via AST. Read the source files listed here before modifying exported functions.
 
-**50 library files** across 8 modules
+**49 library files** across 8 modules
 
 ## Web (25 files)
 
@@ -57,17 +57,16 @@
 - `gpu/deepseek-ocr/app.py` — lifespan, ping, ocr
 - `gpu/olm-ocr2/app.py` — lifespan, ping, ocr
 
-## Db (3 files)
-
-- `db/seeds/gen_insert_templates.py` — extract_inserts, escape_sql_string, format_sql_array, read_template, generate_seed, main
-- `db/seeds/update_template_seed.py` — extract_inserts, escape_sql_string, format_sql_array, make_seed_for_template
-- `db/generate_roles_sh.py` — env_var_for_role, transform, main
-
 ## Pdfium_utils (3 files)
 
 - `packages/pdfium_utils/pdfium_utils/annotate.py` — normalize_hex_color, parse_hex_color, extract_text_by_page, extract_text, create_text_markup_annotations, TextMarkupAnnotationRequest, …
 - `packages/pdfium_utils/pdfium_utils/search_and_annotate.py` — highlight_phrases, PhraseHighlightResult
 - `packages/pdfium_utils/pdfium_utils/search.py` — find_text_objects
+
+## Db (2 files)
+
+- `db/seeds/gen_insert_templates.py` — extract_inserts, escape_sql_string, format_sql_array, read_template, generate_seed, main
+- `db/seeds/update_template_seed.py` — extract_inserts, escape_sql_string, format_sql_array, make_seed_for_template
 
 ## Llm_providers (2 files)
 
