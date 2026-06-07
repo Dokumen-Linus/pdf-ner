@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=infra/aws/shared/common.sh
+# shellcheck disable=SC1091
 . "${SCRIPT_DIR}/../shared/common.sh"
 
 load_env_file "${LOCAL_ENV_FILE:-${SCRIPT_DIR}/.env.local}"
@@ -10,7 +11,6 @@ configure_common_defaults
 
 RDS_PORT="${RDS_PORT:-5432}"
 SG_NAME="${SG_NAME:-${PROJECT_NAME}-ec2}"
-PROD_RDS_SG_NAME="${PROD_RDS_SG_NAME:-${PROJECT_NAME}-prod-rds-sg}"
 DEV_RDS_SG_NAME="${DEV_RDS_SG_NAME:-${PROJECT_NAME}-dev-rds-sg}"
 
 : "${ADMIN_CIDR:?Set ADMIN_CIDR to the new admin CIDR block, for example 203.0.113.10/32}"
@@ -100,11 +100,9 @@ reset_admin_tcp_port() {
 require_cidr "$ADMIN_CIDR"
 
 EC2_SG_ID="$(resolve_security_group_id "EC2" "${SG_ID:-}" "$SG_NAME" "${VPC_ID:-}")"
-PROD_RDS_SECURITY_GROUP_ID="$(resolve_security_group_id "production RDS" "${RDS_SG_ID:-}" "$PROD_RDS_SG_NAME" "${VPC_ID:-}")"
 DEV_RDS_SECURITY_GROUP_ID="$(resolve_security_group_id "development RDS" "${DEV_RDS_SG_ID:-}" "$DEV_RDS_SG_NAME" "${DEV_VPC_ID:-}")"
 
 echo "Resetting admin CIDR access for ${PROJECT_NAME} in ${AWS_REGION}"
 reset_admin_tcp_port "EC2 SSH" "$EC2_SG_ID" 22
-reset_admin_tcp_port "production RDS" "$PROD_RDS_SECURITY_GROUP_ID" "$RDS_PORT"
 reset_admin_tcp_port "development RDS" "$DEV_RDS_SECURITY_GROUP_ID" "$RDS_PORT"
 echo "Admin CIDR reset complete."
