@@ -214,11 +214,15 @@ install_aws_cli() {
 }
 
 configure_postgresql() {
-    local pg_ctl_path
-    pg_ctl_path="$(find /usr/lib/postgresql -name pg_ctl | head -n 1)" || return
+    local pg_bin
+    pg_bin="$(find /usr/lib/postgresql -maxdepth 2 -name bin -type d | head -n 1)" || return
 
-    if [ -n "$pg_ctl_path" ]; then
-        sudo ln -sf "$pg_ctl_path" /usr/local/bin/pg_ctl || return
+    if [ -n "$pg_bin" ]; then
+        for tool in pg_ctl psql pg_dump initdb; do
+            if [ -f "$pg_bin/$tool" ]; then
+                sudo ln -sf "$pg_bin/$tool" /usr/local/bin/"$tool" || return
+            fi
+        done
     fi
 
     sudo systemctl enable postgresql || return
@@ -226,6 +230,8 @@ configure_postgresql() {
 
     psql --version || return
     pg_ctl --version || return
+    pg_dump --version || return
+    initdb --version || return
 }
 
 configure_redis() {
@@ -676,6 +682,8 @@ print_executable_checks() {
         aws \
         psql \
         pg_ctl \
+        pg_dump \
+        initdb \
         redis-server \
         redis-cli \
         node \
@@ -735,6 +743,8 @@ print_versions() {
     aws --version || true
     psql --version || true
     pg_ctl --version || true
+    pg_dump --version || true
+    initdb --version || true
     redis-server --version || true
     redis-cli --version || true
     node --version || true

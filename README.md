@@ -62,6 +62,9 @@ Other:
 
 ```bash
 sudo apt install -y build-essential postgresql postgresql-contrib redis-server tesseract-ocr
+
+# PostgreSQL tools (psql, pg_ctl, pg_dump, initdb) are found under /usr/lib/postgresql/*/bin/
+
 # Docker Desktop: see https://docs.docker.com/engine/install/ubuntu/
 ```
 
