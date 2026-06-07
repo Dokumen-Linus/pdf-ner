@@ -10,14 +10,6 @@
 
 `.env.prod` is reserved for this file. All other files in this repo should be `.env.production`, `.env.development` or `.env.local`.
 
-## RDS Databases
-
-1. Resources created in `infra/aws/setup-database`
-2. Database initialization in `db/deploy-rds`
-
-Dev database instance: `dokudev`
-Prod database instance: `dokuprod`
-
 ## GitHub Actions CI
 
 - Docker images may only be built by workflows, not bash scripts
