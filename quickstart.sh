@@ -9,6 +9,7 @@ set -uo pipefail
 # - CPython 3.13 via pyenv (NOT conda)
 # - C and C++ toolchains
 # - AWS CLI v2
+# - AWS Session Manager plugin
 # - PostgreSQL (including pg_ctl + psql)
 # - dbmate
 # - VS Code
@@ -250,6 +251,44 @@ install_aws_cli() {
 
     rm -rf "$tmp_dir"
     aws --version || return
+}
+
+install_session_manager_plugin() {
+    if command_exists session-manager-plugin; then
+        echo "Session Manager plugin already installed at $(command -v session-manager-plugin)"
+        return 0
+    fi
+
+    local tmp_dir
+    tmp_dir="$(mktemp -d)"
+
+    (
+        cd "$tmp_dir" || exit
+        curl -fsSL \
+            "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" \
+            -o "session-manager-plugin.deb" || exit
+        dpkg_install session-manager-plugin.deb || apt_fix_install || exit
+    ) || return
+
+    rm -rf "$tmp_dir"
+
+    if ! command_exists session-manager-plugin \
+        && [ -x /usr/local/sessionmanagerplugin/bin/session-manager-plugin ]; then
+        sudo ln -sf \
+            /usr/local/sessionmanagerplugin/bin/session-manager-plugin \
+            /usr/local/bin/session-manager-plugin || return
+    fi
+
+    if ! grep -q '/usr/local/sessionmanagerplugin/bin' "$HOME/.bashrc"; then
+        cat <<'EOF' >> "$HOME/.bashrc"
+
+# AWS Session Manager plugin
+export PATH="/usr/local/sessionmanagerplugin/bin:$PATH"
+EOF
+    fi
+
+    export PATH="/usr/local/sessionmanagerplugin/bin:$PATH"
+    session-manager-plugin --version || return
 }
 
 configure_postgresql() {
@@ -723,6 +762,7 @@ print_executable_checks() {
         depcheck \
         codesight \
         aws \
+        session-manager-plugin \
         psql \
         pg_ctl \
         pg_dump \
@@ -784,6 +824,7 @@ print_versions() {
     depcheck --version || true
     codesight --version || true
     aws --version || true
+    session-manager-plugin --version || true
     psql --version || true
     pg_ctl --version || true
     pg_dump --version || true
@@ -825,6 +866,7 @@ run_step "Installing pyenv" install_pyenv
 run_step "Installing CPython 3.13" install_python
 run_step "Installing global Python packages" install_python_packages
 run_step "Installing AWS CLI v2" install_aws_cli
+run_step "Installing AWS Session Manager plugin" install_session_manager_plugin
 run_step "Configuring PostgreSQL" configure_postgresql
 run_step "Configuring Redis" configure_redis
 run_step "Installing Node.js" install_nodejs
