@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import platform
 from pathlib import Path
 import re
 import shutil
@@ -9,6 +10,26 @@ import subprocess
 import sys
 import tempfile
 from typing import Any
+
+
+def get_os() -> str:
+    """Return the current operating system: 'linux', 'macos', or 'windows'."""
+    system = platform.system()
+    if system == "Linux":
+        return "linux"
+    if system == "Darwin":
+        return "macos"
+    if system == "Windows":
+        return "windows"
+    # Fallback for compatibility with unexpected values
+    lowered = system.lower()
+    if lowered.startswith("linux"):
+        return "linux"
+    if lowered.startswith("darwin") or lowered.startswith("mac"):
+        return "macos"
+    if lowered.startswith("win"):
+        return "windows"
+    return lowered
 
 PATCH_FILE_RE = re.compile(r"^\*\*\* (?:Add|Update|Delete) File: (.+)$", re.MULTILINE)
 MOVE_FILE_RE = re.compile(r"^\*\*\* Move to: (.+)$", re.MULTILINE)
@@ -28,8 +49,30 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def shell_command(command: list[str]) -> list[str]:
+    """Wrap a command for the current OS shell when necessary.
+
+    On Windows, subprocess.run with a list works for executables found via PATH,
+    but some tools (e.g. bun, bunx) may be shell scripts. This helper returns a
+    shell-compatible invocation when running on Windows.
+    """
+    if get_os() == "windows":
+        # Use cmd /c so that .cmd / .bat wrappers resolve correctly
+        return ["cmd", "/c", *command]
+    return command
+
+
 def executable(name: str) -> str:
-    return shutil.which(name) or name
+    resolved = shutil.which(name)
+    if resolved is not None:
+        return resolved
+    # On Windows, try common executable extensions if the bare name wasn't found
+    if get_os() == "windows":
+        for ext in (".exe", ".cmd", ".bat", ".ps1"):
+            resolved = shutil.which(name + ext)
+            if resolved is not None:
+                return resolved
+    return name
 
 
 def load_payload() -> dict[str, Any]:
@@ -116,12 +159,8 @@ def state_key(payload: dict[str, Any]) -> str:
 
 def state_path(payload: dict[str, Any]) -> Path:
     root_hash = hashlib.sha256(str(repo_root()).encode("utf-8")).hexdigest()[:16]
-    return (
-        Path(tempfile.gettempdir())
-        / "codex-pdf-ner-hooks"
-        / root_hash
-        / f"{state_key(payload)}.json"
-    )
+    base = Path(tempfile.gettempdir())
+    return base / "codex-pdf-ner-hooks" / root_hash / f"{state_key(payload)}.json"
 
 
 def load_recorded_paths(payload: dict[str, Any]) -> list[Path]:

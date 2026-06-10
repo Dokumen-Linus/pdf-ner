@@ -1,16 +1,19 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 import subprocess
 
 from _hook_files import (
     command_failure_context,
     emit_post_tool_context,
     executable,
+    get_os,
     load_payload,
     paths_from_payload,
     record_paths,
     repo_root,
+    shell_command,
 )
 
 WEB_FORMAT_SUFFIXES = {".js", ".jsx", ".ts", ".tsx"}
@@ -18,7 +21,7 @@ WEB_FORMAT_SUFFIXES = {".js", ".jsx", ".ts", ".tsx"}
 
 def run(command: list[str], cwd: Path, name: str) -> str | None:
     result = subprocess.run(
-        command,
+        shell_command(command),
         cwd=cwd,
         text=True,
         stdout=subprocess.PIPE,
@@ -56,14 +59,21 @@ def main() -> int:
     ]
 
     if python_files:
-        failure = run([executable("ruff"), "format", *map(str, python_files)], root, "ruff format")
+        # On Windows, prefer 'py -m ruff' if available; fallback to 'ruff'
+        if get_os() == "windows" and shutil.which("py"):
+            ruff_cmd = ["py", "-m", "ruff", "format", *map(str, python_files)]
+        else:
+            ruff_cmd = [executable("ruff"), "format", *map(str, python_files)]
+        failure = run(ruff_cmd, root, "ruff format")
         if failure:
             failures.append(failure)
 
     relative_web_files = web_relative(web_files, web_root)
     if relative_web_files:
+        # On Windows, bun/bunx may be .cmd scripts; shell_command handles that
+        bunx = executable("bunx")
         failure = run(
-            [executable("bunx"), "prettier", "--write", *relative_web_files],
+            [bunx, "prettier", "--write", *relative_web_files],
             web_root,
             "prettier",
         )
@@ -71,7 +81,7 @@ def main() -> int:
             failures.append(failure)
 
         failure = run(
-            [executable("bunx"), "eslint", "--fix", *relative_web_files],
+            [bunx, "eslint", "--fix", *relative_web_files],
             web_root,
             "eslint",
         )

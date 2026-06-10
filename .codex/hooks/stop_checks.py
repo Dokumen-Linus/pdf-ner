@@ -9,9 +9,11 @@ from _hook_files import (
     command_failure_context,
     emit_stop_block,
     executable,
+    get_os,
     load_payload,
     load_recorded_paths,
     repo_root,
+    shell_command,
 )
 
 WEB_TEST_SUFFIXES = {".js", ".jsx", ".ts", ".tsx"}
@@ -20,7 +22,7 @@ WEB_TYPECHECK_SUFFIXES = {".ts", ".tsx"}
 
 def run(command: list[str], cwd: Path, name: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        command,
+        shell_command(command),
         cwd=cwd,
         text=True,
         stdout=subprocess.PIPE,
@@ -32,6 +34,9 @@ def run(command: list[str], cwd: Path, name: str) -> subprocess.CompletedProcess
 def python_test_command(project_root: Path) -> list[str]:
     if (project_root / "uv.lock").exists() and shutil.which("uv"):
         return [executable("uv"), "run", "--locked", "--group", "dev", "pytest"]
+    # On Windows, prefer 'py -m pytest' if available; fallback to 'pytest'
+    if get_os() == "windows" and shutil.which("py"):
+        return ["py", "-m", "pytest"]
     return [executable("pytest")]
 
 
@@ -116,9 +121,12 @@ def main() -> int:
     ]
     typecheck_files = [path for path in web_files if path.suffix in WEB_TYPECHECK_SUFFIXES]
     edited_typecheck_names = web_relative(typecheck_files, web_root)
+    bunx = executable("bunx")
+    bun = executable("bun")
+
     if edited_typecheck_names:
         result = run(
-            [executable("bunx"), "tsc", "--noEmit", "--pretty", "false"],
+            [bunx, "tsc", "--noEmit", "--pretty", "false"],
             web_root,
             "bunx tsc",
         )
@@ -126,7 +134,7 @@ def main() -> int:
             failures.append(typecheck_failure_context(result, edited_typecheck_names))
 
     if web_files:
-        result = run([executable("bun"), "test"], web_root, "bun test")
+        result = run([bun, "test"], web_root, "bun test")
         if result.returncode != 0:
             failures.append(command_failure_context("bun test", result))
 
